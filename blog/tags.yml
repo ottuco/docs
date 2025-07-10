@@ -1,0 +1,39 @@
+api:
+  label: API
+  permalink: /api
+
+sdk:
+  label: SDK
+  permalink: /sdk
+
+payments:
+  label: Payments
+  permalink: /payments
+
+security:
+  label: Security
+  permalink: /security
+
+integration:
+  label: Integration
+  permalink: /integration
+
+tutorial:
+  label: Tutorial
+  permalink: /tutorial
+
+announcement:
+  label: Announcement
+  permalink: /announcement
+
+release:
+  label: Release
+  permalink: /release
+
+developer:
+  label: Developer
+  permalink: /developer
+
+business:
+  label: Business
+  permalink: /business

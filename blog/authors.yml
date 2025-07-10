@@ -1,0 +1,17 @@
+ottu_team:
+  name: Ottu Team
+  title: Ottu Engineering Team
+  url: https://ottu.com/team
+  image_url: https://github.com/ottu.png
+
+dev_team:
+  name: Developer Relations
+  title: Developer Relations Team
+  url: https://github.com/ottu
+  image_url: https://github.com/ottu.png
+
+product_team:
+  name: Product Team
+  title: Product Management Team
+  url: https://ottu.com/about
+  image_url: https://github.com/ottu.png
