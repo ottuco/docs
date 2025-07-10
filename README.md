@@ -1,17 +1,17 @@
-# Website
+# Ottu Documentation
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+This documentation site is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
 
 ## Installation
 
 ```bash
-yarn
+npm install
 ```
 
 ## Local Development
 
 ```bash
-yarn start
+npm start
 ```
 
 This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
@@ -19,23 +19,52 @@ This command starts a local development server and opens up a browser window. Mo
 ## Build
 
 ```bash
-yarn build
+npm run build
 ```
 
 This command generates static content into the `build` directory and can be served using any static contents hosting service.
 
+## Type Checking
+
+```bash
+npm run typecheck
+```
+
+## Serve Production Build
+
+```bash
+npm run serve
+```
+
 ## Deployment
 
-Using SSH:
+This project uses GitHub Actions for automated deployment to GitHub Pages. The deployment happens automatically:
+
+- **Production**: Deployments from the `main` branch go to the main site
+- **Preview**: Deployments from other branches create preview environments
+
+### Manual Deployment (if needed)
 
 ```bash
-USE_SSH=true yarn deploy
+npm run deploy
 ```
 
-Not using SSH:
+## Contributing
 
-```bash
-GIT_USER=<Your GitHub username> yarn deploy
+1. Create a new branch for your changes
+2. Make your edits to the documentation
+3. Test locally with `npm start`
+4. Create a pull request
+5. Preview will be automatically generated for your branch
+
+## Project Structure
+
 ```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+docs/
+├── overview/          # About Ottu, Architecture, Changelog
+├── quick-start/       # Developer & Merchant quick start guides
+├── developers/        # API documentation and developer guides
+├── business/          # Dashboard and business user guides
+├── glossary/          # Payment terminology and concepts
+└── resources/         # Support, tools, and additional resources
+```

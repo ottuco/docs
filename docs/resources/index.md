@@ -55,9 +55,9 @@ Your comprehensive guide to Ottu resources, tools, and support channels.
 ## Business Resources
 
 ### Getting Started Guides
-- **[Merchant Onboarding](../quick-start/merchants)**: Complete setup guide
+- **Merchant Onboarding**: Complete setup guide
 - **Payment Gateway Setup**: Gateway configuration
-- **[Dashboard Tutorial](../business/dashboard-tour)**: Navigate the dashboard
+- **Dashboard Tutorial**: Navigate the dashboard
 - **First Payment**: Create your first payment
 
 ### Templates & Assets
@@ -150,7 +150,7 @@ Your comprehensive guide to Ottu resources, tools, and support channels.
 - **[Performance Metrics](https://status.ottu.com/metrics)**: System performance data
 
 ### Updates & Announcements
-- **[Changelog](../overview/changelog)**: Feature updates and improvements
+- **Changelog**: Feature updates and improvements
 - **[Developer Blog](https://blog.ottu.com/developers)**: Technical articles
 - **[Product Updates](https://blog.ottu.com/product)**: New features and changes
 - **[Security Bulletins](https://blog.ottu.com/security)**: Security updates
