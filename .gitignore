@@ -28,3 +28,5 @@ yarn-error.log*
 # Claude AI local settings
 .claude/local
 .claude/local.*
+.claude/settings.local.json
+CLAUDE.md

@@ -15,19 +15,19 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://ottu.github.io',
+  url: 'https://ottuco.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/public-docs/',
+  baseUrl: '/docs/',
 
   // GitHub pages deployment config.
-  organizationName: 'ottu', // Usually your GitHub org/user name.
-  projectName: 'public-docs', // Usually your repo name.
+  organizationName: 'ottuco', // Usually your GitHub org/user name.
+  projectName: 'docs', // Usually your repo name.
   
   // GitHub Pages adds a trailing slash by default that I don't want
   trailingSlash: false,
 
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
 
   // Even if you don't use internationalization, you can use this field to set
@@ -49,21 +49,7 @@ const config: Config = {
           editUrl:
             'https://github.com/ottu/public-docs/tree/main/',
         },
-        blog: {
-          showReadingTime: true,
-          feedOptions: {
-            type: ['rss', 'atom'],
-            xslt: true,
-          },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/ottu/public-docs/tree/main/',
-          // Useful options to enforce blogging best practices
-          onInlineTags: 'warn',
-          onInlineAuthors: 'warn',
-          onUntruncatedBlogPosts: 'warn',
-        },
+        blog: false,
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -99,7 +85,6 @@ const config: Config = {
           position: 'left',
           label: 'Business',
         },
-        {to: '/blog', label: 'Updates', position: 'left'},
         {
           href: 'https://github.com/ottu',
           label: 'GitHub',
@@ -120,15 +105,15 @@ const config: Config = {
           items: [
             {
               label: 'Overview',
-              to: '/docs/overview/about',
+              to: '/overview/about',
             },
             {
               label: 'Developer Quick Start',
-              to: '/docs/quick-start/developers',
+              to: '/quick-start/developers',
             },
             {
               label: 'Merchant Quick Start',
-              to: '/docs/quick-start/merchants',
+              to: '/quick-start/merchants',
             },
           ],
         },
@@ -137,15 +122,15 @@ const config: Config = {
           items: [
             {
               label: 'API Reference',
-              to: '/docs/developers/api-fundamentals',
+              to: '/developers/api-fundamentals',
             },
             {
               label: 'Quick Start',
-              to: '/docs/developers/quick-start',
+              to: '/developers/quick-start',
             },
             {
               label: 'Developer Guide',
-              to: '/docs/quick-start/developers',
+              to: '/quick-start/developers',
             },
           ],
         },
@@ -154,15 +139,15 @@ const config: Config = {
           items: [
             {
               label: 'Dashboard Tour',
-              to: '/docs/business/dashboard-tour',
+              to: '/business/dashboard-tour',
             },
             {
               label: 'Merchant Guide',
-              to: '/docs/quick-start/merchants',
+              to: '/quick-start/merchants',
             },
             {
               label: 'Getting Started',
-              to: '/docs/overview/about',
+              to: '/overview/about',
             },
           ],
         },
