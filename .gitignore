@@ -29,4 +29,3 @@ yarn-error.log*
 .claude/local
 .claude/local.*
 .claude/settings.local.json
-CLAUDE.md
