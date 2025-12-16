@@ -8,23 +8,16 @@ const config: Config = {
   title: 'Ottu Documentation',
   tagline: 'Payment processing made simple',
   favicon: 'img/favicon.ico',
-
+  
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
   },
 
-  // Set the production url of your site here
-  url: 'https://ottuco.github.io',
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/docs/',
+  // Production URL (docs.ottu.net)
+  url: 'https://docs.ottu.net',
+  baseUrl: '/',
 
-  // GitHub pages deployment config.
-  organizationName: 'ottuco', // Usually your GitHub org/user name.
-  projectName: 'docs', // Usually your repo name.
-  
-  // GitHub Pages adds a trailing slash by default that I don't want
   trailingSlash: false,
 
   onBrokenLinks: 'warn',
@@ -57,6 +50,27 @@ const config: Config = {
     ],
   ],
 
+  plugins: [
+    [
+      'docusaurus-plugin-openapi-docs',
+      {
+        id: "api",
+        docsPluginId: "classic",
+        config: {
+          ottu: {
+            specPath: "static/api/ottu-openapi.yaml",
+            outputDir: "docs/api",
+            sidebarOptions: {
+              groupPathsBy: "tag",
+            },
+          },
+        },
+      },
+    ],
+  ],
+
+  themes: ["docusaurus-theme-openapi-docs"],
+
   themeConfig: {
     // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
@@ -84,6 +98,12 @@ const config: Config = {
           sidebarId: 'businessSidebar',
           position: 'left',
           label: 'Business',
+        },
+        {
+          type: 'docSidebar',
+          sidebarId: 'apiSidebar',
+          position: 'left',
+          label: 'API Reference',
         },
         {
           href: 'https://github.com/ottu',

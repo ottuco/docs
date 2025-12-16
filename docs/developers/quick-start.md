@@ -26,6 +26,251 @@ Ottu provides a comprehensive payment API that handles:
 
 ## Integration Options
 
+### 🔧 Try It Live - Interactive API Testing
+
+#### Option 1: Custom React Component
+
+import ApiPlayground from '@site/src/components/ApiPlayground';
+
+<ApiPlayground
+  endpoint="/v1/payments"
+  method="POST"
+  title="Create Payment - Custom Component"
+  description="Try creating a payment directly from this documentation with our custom React component."
+  defaultPayload={{
+    amount: 2500,
+    currency: "USD",
+    description: "Test payment from docs",
+    customer: {
+      email: "customer@example.com",
+      name: "John Doe"
+    },
+    success_url: "https://yoursite.com/success",
+    cancel_url: "https://yoursite.com/cancel"
+  }}
+/>
+
+#### Option 2: Mini API Explorer
+
+Interactive API testing interface - try it directly here:
+
+import MiniApiExplorer from '@site/src/components/MiniApiExplorer';
+
+<MiniApiExplorer />
+
+#### Option 3: Code Examples in Multiple Languages
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs>
+  <TabItem value="node" label="Node.js" default>
+
+```javascript
+const response = await fetch('https://api.sandbox.ottu.com/v1/payments', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer sk_test_your_secret_key',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    amount: 2500,
+    currency: 'USD',
+    description: 'Test payment',
+    customer: {
+      email: 'customer@example.com',
+      name: 'John Doe'
+    },
+    success_url: 'https://yoursite.com/success',
+    cancel_url: 'https://yoursite.com/cancel'
+  })
+});
+
+const payment = await response.json();
+console.log('Payment URL:', payment.payment_url);
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+import requests
+
+response = requests.post(
+    'https://api.sandbox.ottu.com/v1/payments',
+    headers={
+        'Authorization': 'Bearer sk_test_your_secret_key',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'amount': 2500,
+        'currency': 'USD',
+        'description': 'Test payment',
+        'customer': {
+            'email': 'customer@example.com',
+            'name': 'John Doe'
+        },
+        'success_url': 'https://yoursite.com/success',
+        'cancel_url': 'https://yoursite.com/cancel'
+    }
+)
+
+payment = response.json()
+print(f"Payment URL: {payment['payment_url']}")
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php
+
+$data = [
+    'amount' => 2500,
+    'currency' => 'USD',
+    'description' => 'Test payment',
+    'customer' => [
+        'email' => 'customer@example.com',
+        'name' => 'John Doe'
+    ],
+    'success_url' => 'https://yoursite.com/success',
+    'cancel_url' => 'https://yoursite.com/cancel'
+];
+
+$ch = curl_init('https://api.sandbox.ottu.com/v1/payments');
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer sk_test_your_secret_key',
+    'Content-Type: application/json'
+]);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$response = curl_exec($ch);
+$payment = json_decode($response, true);
+
+echo "Payment URL: " . $payment['payment_url'];
+curl_close($ch);
+?>
+```
+
+  </TabItem>
+  <TabItem value="curl" label="cURL">
+
+```bash
+curl -X POST https://api.sandbox.ottu.com/v1/payments \
+  -H "Authorization: Bearer sk_test_your_secret_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 2500,
+    "currency": "USD",
+    "description": "Test payment",
+    "customer": {
+      "email": "customer@example.com",
+      "name": "John Doe"
+    },
+    "success_url": "https://yoursite.com/success",
+    "cancel_url": "https://yoursite.com/cancel"
+  }'
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+require 'net/http'
+require 'json'
+
+uri = URI('https://api.sandbox.ottu.com/v1/payments')
+http = Net::HTTP.new(uri.host, uri.port)
+http.use_ssl = true
+
+request = Net::HTTP::Post.new(uri)
+request['Authorization'] = 'Bearer sk_test_your_secret_key'
+request['Content-Type'] = 'application/json'
+request.body = {
+  amount: 2500,
+  currency: 'USD',
+  description: 'Test payment',
+  customer: {
+    email: 'customer@example.com',
+    name: 'John Doe'
+  },
+  success_url: 'https://yoursite.com/success',
+  cancel_url: 'https://yoursite.com/cancel'
+}.to_json
+
+response = http.request(request)
+payment = JSON.parse(response.body)
+puts "Payment URL: #{payment['payment_url']}"
+```
+
+  </TabItem>
+  <TabItem value="go" label="Go">
+
+```go
+package main
+
+import (
+    "bytes"
+    "encoding/json"
+    "fmt"
+    "io/ioutil"
+    "net/http"
+)
+
+type PaymentRequest struct {
+    Amount     int      `json:"amount"`
+    Currency   string   `json:"currency"`
+    Description string  `json:"description"`
+    Customer   Customer `json:"customer"`
+    SuccessURL string   `json:"success_url"`
+    CancelURL  string   `json:"cancel_url"`
+}
+
+type Customer struct {
+    Email string `json:"email"`
+    Name  string `json:"name"`
+}
+
+type PaymentResponse struct {
+    PaymentURL string `json:"payment_url"`
+}
+
+func main() {
+    payment := PaymentRequest{
+        Amount:      2500,
+        Currency:    "USD",
+        Description: "Test payment",
+        Customer: Customer{
+            Email: "customer@example.com",
+            Name:  "John Doe",
+        },
+        SuccessURL: "https://yoursite.com/success",
+        CancelURL:  "https://yoursite.com/cancel",
+    }
+
+    jsonData, _ := json.Marshal(payment)
+    
+    req, _ := http.NewRequest("POST", "https://api.sandbox.ottu.com/v1/payments", bytes.NewBuffer(jsonData))
+    req.Header.Set("Authorization", "Bearer sk_test_your_secret_key")
+    req.Header.Set("Content-Type", "application/json")
+
+    client := &http.Client{}
+    resp, _ := client.Do(req)
+    defer resp.Body.Close()
+
+    body, _ := ioutil.ReadAll(resp.Body)
+    var result PaymentResponse
+    json.Unmarshal(body, &result)
+    
+    fmt.Printf("Payment URL: %s\n", result.PaymentURL)
+}
+```
+
+  </TabItem>
+</Tabs>
+
 ### 1. Server-Side Integration (Recommended)
 Best for: Full control, custom payment flows, server-side validation
 
@@ -265,5 +510,18 @@ ngrok http 3000
 - **Email**: dev-support@ottu.com
 - **Chat**: Available in dashboard
 - **Phone**: For enterprise customers
+
+## 📚 Complete API Documentation
+
+For full interactive API documentation with Swagger UI, including all endpoints, request/response schemas, and live testing:
+
+**[🚀 View Full API Documentation](/docs/api/ottu)**
+
+This includes:
+- All available endpoints
+- Complete request/response schemas  
+- Interactive testing for every endpoint
+- Authentication examples
+- Error handling details
 
 Ready to start building? Check out our [API Fundamentals](./api-fundamentals) guide for detailed implementation instructions.
