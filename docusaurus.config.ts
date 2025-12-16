@@ -50,26 +50,6 @@ const config: Config = {
     ],
   ],
 
-  plugins: [
-    [
-      'docusaurus-plugin-openapi-docs',
-      {
-        id: "api",
-        docsPluginId: "classic",
-        config: {
-          ottu: {
-            specPath: "static/api/ottu-openapi.yaml",
-            outputDir: "docs/api",
-            sidebarOptions: {
-              groupPathsBy: "tag",
-            },
-          },
-        },
-      },
-    ],
-  ],
-
-  themes: ["docusaurus-theme-openapi-docs"],
 
   themeConfig: {
     // Replace with your project's social card
@@ -98,12 +78,6 @@ const config: Config = {
           sidebarId: 'businessSidebar',
           position: 'left',
           label: 'Business',
-        },
-        {
-          type: 'docSidebar',
-          sidebarId: 'apiSidebar',
-          position: 'left',
-          label: 'API Reference',
         },
         {
           href: 'https://github.com/ottu',
