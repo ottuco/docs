@@ -26,39 +26,7 @@ Ottu provides a comprehensive payment API that handles:
 
 ## Integration Options
 
-### 🔧 Try It Live - Interactive API Testing
-
-#### Option 1: Custom React Component
-
-import ApiPlayground from '@site/src/components/ApiPlayground';
-
-<ApiPlayground
-  endpoint="/v1/payments"
-  method="POST"
-  title="Create Payment - Custom Component"
-  description="Try creating a payment directly from this documentation with our custom React component."
-  defaultPayload={{
-    amount: 2500,
-    currency: "USD",
-    description: "Test payment from docs",
-    customer: {
-      email: "customer@example.com",
-      name: "John Doe"
-    },
-    success_url: "https://yoursite.com/success",
-    cancel_url: "https://yoursite.com/cancel"
-  }}
-/>
-
-#### Option 2: Mini API Explorer
-
-Interactive API testing interface - try it directly here:
-
-import MiniApiExplorer from '@site/src/components/MiniApiExplorer';
-
-<MiniApiExplorer />
-
-#### Option 3: Code Examples in Multiple Languages
+### 🔧 Code Examples in Multiple Languages
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
