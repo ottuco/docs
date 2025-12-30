@@ -8,26 +8,40 @@ import Heading from '@theme/Heading';
 
 import styles from './index.module.css';
 
+
+
+const heroImageUrl = '/img/ottu_home_page.png';
+
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
   return (
     <header className={clsx('hero hero--primary', styles.heroBanner)}>
       <div className="container">
-        <Heading as="h1" className="hero__title">
-          {siteConfig.title}
-        </Heading>
-        <p className="hero__subtitle">{siteConfig.tagline}</p>
-        <div className={styles.buttons}>
-          <Link
-            className="button button--secondary button--lg margin-right--md"
-            to="/docs/quick-start/developers">
-            Developer Quick Start 🚀
-          </Link>
-          <Link
-            className="button button--outline button--lg"
-            to="/docs/quick-start/merchants">
-            Merchant Quick Start 💼
-          </Link>
+        <div className={styles.heroContent}>
+          <div className={styles.heroText}>
+            <Heading as="h1" className="hero__title">
+              {siteConfig.title}
+            </Heading>
+            <p className="hero__subtitle">{siteConfig.tagline}</p>
+            <div className={styles.buttons}>
+              <Link
+                className="button button--secondary button--lg margin-right--md"
+                to="/docs/quick-start/developers">
+                Developer Quick Start 🚀
+              </Link>
+              <Link
+                className="button button--outline button--lg"
+                to="/docs/quick-start/merchants">
+                Merchant Quick Start 💼
+              </Link>
+            </div>
+          </div>
+          <div className={styles.heroImageWrapper}>
+            <img
+              className={styles.heroImage}
+              src={heroImageUrl}
+              alt="Illustration of Ottu's payment platform" />
+          </div>
         </div>
       </div>
     </header>
