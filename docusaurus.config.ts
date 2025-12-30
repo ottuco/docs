@@ -7,7 +7,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'Ottu Documentation',
   tagline: 'Payment processing made simple',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/ottu_logo.avif',
   
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -58,7 +58,7 @@ const config: Config = {
       title: 'Ottu',
       logo: {
         alt: 'Ottu Logo',
-        src: 'img/logo.svg',
+        src: 'img/ottu_logo.avif',
       },
       items: [
         {
