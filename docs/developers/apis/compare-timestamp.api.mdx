@@ -1,0 +1,71 @@
+---
+id: compare-timestamp
+title: "Retrieve `created` value of first txn"
+description: "Retrieve the `PaymentTransaction.created` value of the first instance. This API is being called by Satellite."
+sidebar_label: "Retrieve `created` value of first txn"
+hide_title: true
+hide_table_of_contents: true
+api: eJzVVdtu20YQ/ZXFPLUARUpOX8o3p00NOyhiRApSQBHsITkS1ya5m92hIoXgvwfDiypLdZEmQIHoRUtydubM5ZxpwFhyyNpU1xnEkJrSoqM71iV5xtJCABn51GkrNhDDW2KnaUuKc1L3t7gvqeKFw8pjKiZh6giZsnu1xaImZdad5Vo7z0pXnrFKKVSLXHt1eXuttFcJ6WqjUiwKylSyV3NkKgrNFEIAFh2WxOQ8xMsGtGDICTNyEECFJUEMlzXnxunPXR4QgE9zKhHiBnhvxcCz09Wmy2WNdcEQw0tCR07R/iZPrsIwhPY008GCzSNVio1KSFlntjqjTK2NU1hzThXrtAsrWB19rLWjDGJ2NbXBM3D/mszJbXVKk+vfvxKt7y+E4iHMaHuO9jXt08Lgo3KERflNeFcBMG6kznBogfQIVgF4Smuned81YT5/c3fzfnEndYd4uZKbjrw1lScviVxMp/KXmoqpYjmitcUQOXrwgrg5T9wkD5QyBIBZpsUUi1snA8q689u2AdAOS1v0YX7rR02O3bB1Mcd3cDG9mE2mv06mM2jld1oxqeEv09l3AbXH8CAjRl2cd1Ji/13r5Wgn9dZciOEVVeR0+so54/4k73FD8CzkFz8W5DaAkjg30pMNdRBQ5gaiJEKro+0ssnVSaJ+TiwYBig4CFAlDyG1HAahdIZRitj6OIo9VlphdaJjrsCKG9mhW51KDPk2Z2JfoddqP7CFb8TNSUJ4TsZEqPx3x5+07jYBgOPxhXInC15v3C/GS/JeQD5/4+6J1SnXiAq1+TXsIvk44n7ZuIf4mCXrKTsRDfdKcq3E+lHW01jv1ob/xoe+5rtamAzLMyxvmulOTAKSZfYhZOA2nZ4EPpm0A1ngusZvpAfRhA92fr5p+zfDuLJkjwvzvK2xoBdOOI1ugriSvbo6bgQpLSET1rJbizIQhIyEgGHeyODraykLF3HiWy00jTXrniraV1x9rciLUqwC26DQmUv/lqg3G/guPMu3lQwbxGgtP/1Kun94Off5ZfcuS+cfsH2l/vggHDReVawaLyzQly0ffzrROCH+Ql6tXC6njUwqcsKbLfmRHtT/y3TS9RTfFbQsjzI5X0K7atv0Cv/MnEQ==
+sidebar_class_name: "get api-method"
+info_path: docs/developers/apis/ottu-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Retrieve `created` value of first txn"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/b/api/v1/publisher/compare/timestamp/"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Retrieve the `PaymentTransaction.created` value of the first instance. This API is being called by Satellite.
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"in":"header","name":"Authorization","schema":{"type":"string","default":"Bearer eyJhbG..."},"description":"Bearer token to be provided for authentication.","required":true},{"in":"header","name":"X-Service-ID","schema":{"type":"string","default":"service.name.dev"},"description":"Keycloak realm to be provided for authentication.","required":true}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"content":{"application/json":{"schema":{"type":"object","additionalProperties":{}},"examples":{"Created":{"value":{"created":"2021-09-01"}}}}},"description":""},"401":{"content":{"application/json":{"schema":{"type":"object","properties":{"detail":{"type":"string"}},"required":["detail"],"title":"GenericErrorMessage"}}},"description":""},"403":{"content":{"application/json":{"schema":{"type":"object","properties":{"detail":{"type":"string"}},"required":["detail"],"title":"GenericErrorMessage"}}},"description":""}}}
+>
+  
+</StatusCodes>
+
+
+      

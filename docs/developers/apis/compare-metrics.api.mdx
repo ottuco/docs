@@ -1,0 +1,71 @@
+---
+id: compare-metrics
+title: "Retrieve metrics for txn comparison"
+description: "Retrieve metrics for txn comparison which is done by by comparing metrics from ES. This API is being called by Satellite."
+sidebar_label: "Retrieve metrics for txn comparison"
+hide_title: true
+hide_table_of_contents: true
+api: eJzVVm1r20gQ/ivLfLqCIsVNOTh9S7lcSEppqX204JowksbRJpJ2uzty7BP672VWcuLYl5K2H0qNwZI1L8+8PM+qA2PJIWvTXBSQQm5qi46uamKncw8RFORzp61YQAof5H9akRoN1NI4xetGDY7am0bdlTovlfaqMA2pbCPf8XFz/eDoTK3OprGaldqr0/cX4pGRmORYVVSI2xSZqkozxRCBRYc1MTkP6bwDLXhKwoIcRNBgTZDCaculcfq/UBFE4POSaoS0A95YMfAsKEJdS2wrhhReEzpyijaXZXYexzH0+1WPFmxuqVFsVEbKOrPSBRWhAdhySQ3rPKQVrI6+tNpRASm7lvroCbifjqbkVjqno4u/n4nWDw6xRIgLWh2ifUObvDJ4qxxhVf8Q3kUEjNfSZ7gfgcwIFhF4yluneROGMJ2+u7r8OLuSvkM6X4inI29N48lLIS+Pj+UnNw1Tw3KJ1lZj5uTGC+LusHCT3VDOEAEWhRZTrN47WVXWIW7fR0BrrG01pHk77mvawQqrlkJOR8hSUgdYm1ayTybxnycR5MPdy16WSj+y+OvVw+OTPnz2+ysdf/WTZdndYqAgRl0dzl1yP0xmvrWT6WiuxPCcGnI6P3POuLfkPV4TPAl58vtBPvm9IPcR1MSlESm9pgABhRiQZAlanawmiW2zSvuSXDJqbTIqYiICQG611bfWVaIYzNanSeKxKTKzjg1zGzfE0O9QcSodGIoUQr5Gr/OBkfe1Spytwsh9JjbS48cMfto+SCBE48U/xtUocnT5cSZRsu9JeXPHP5ctCPFeCLT6DW0get658HhwM4l3lKGnYk8b1Z3mUm23Q1lHS71WnwePz8PEdbM0Aci4Le+Y2yCWEcgwhxST+Dg+Pkh8bypKZDzXGDZ6BP2Mw3Y/4g5ZfulZPQ6Fac2JrVA3UmHY6G6kxBwykXerpU0TYcqWGBBtX0Mg0Gl8ERFClsazuHadDOtfV/W9/P2lJSfn0SKCFTqNmcxhvuij7R4Inwrt5UEB6RIrT99o3B8fxnm/UD9ylv5v7be0OTzvx6NKtK4bLU7znCzvPDtQPCH+vcicn82ki4+psMeeUP2WJc1mJ3bXDRZhm/setjADv6Bf9H3/FdCpebU=
+sidebar_class_name: "get api-method"
+info_path: docs/developers/apis/ottu-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Retrieve metrics for txn comparison"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/b/api/v1/publisher/compare/metrics/"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Retrieve metrics for txn comparison which is done by by comparing metrics from ES. This API is being called by Satellite.
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"in":"header","name":"Authorization","schema":{"type":"string","default":"Bearer eyJhbG..."},"description":"Bearer token to be provided for authentication.","required":true},{"in":"header","name":"X-Service-ID","schema":{"type":"string","default":"service.name.dev"},"description":"Keycloak realm to be provided for authentication.","required":true}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"content":{"application/json":{"schema":{"type":"object","additionalProperties":{}},"examples":{"Metrics":{"value":{"created":{"amount":11.63,"count":2},"paid":{"amount":94,"count":23}}}}}},"description":""},"400":{"content":{"application/json":{"schema":{"type":"object","properties":{"detail":{"type":"string"}},"required":["detail"],"title":"GenericErrorMessage"}}},"description":""},"401":{"content":{"application/json":{"schema":{"type":"object","properties":{"detail":{"type":"string"}},"required":["detail"],"title":"GenericErrorMessage"}}},"description":""},"403":{"content":{"application/json":{"schema":{"type":"object","properties":{"detail":{"type":"string"}},"required":["detail"],"title":"GenericErrorMessage"}}},"description":""}}}
+>
+  
+</StatusCodes>
+
+
+      

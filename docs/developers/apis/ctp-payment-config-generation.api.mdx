@@ -1,0 +1,83 @@
+---
+id: ctp-payment-config-generation
+title: "Submit Doku"
+description: "This endpoint initializes the doku payment flow by provisioning the required SDK configuration for the frontend to launch the appropriate checkout widget."
+sidebar_label: "Submit Doku"
+hide_title: true
+hide_table_of_contents: true
+api: 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
+sidebar_class_name: "post api-method"
+info_path: docs/developers/apis/ottu-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Submit Doku"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/b/checkout/api/sdk/v1/doku_sdk/submit/{session_id}/{pg_code}/"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+This endpoint initializes the doku payment flow by provisioning the required SDK configuration for the frontend to launch the appropriate checkout widget. 
+It is used at the beginning of the payment journey to fetch the necessary JS SDK URLs,
+capture tokens, form attributes, and other metadata specific to the payment provider.
+**Flow Summary**:
+1. **Validate Inputs**: The `pg_code` and `session_id` are validated via the serializer.
+2. **Locate Transaction**: Retrieves the payment transaction using the `session_id`.
+3. **Setup Context**: Resolves the merchant identity and loads configuration.
+4. **Provision SDK**: Calls the payment gateway's `get_vendor_sdk_config()` to receive SDK metadata.
+5. **Respond**: Returns the configuration as a unified structure to be consumed by the frontend.
+**Typical Use Case**:
+- Used by the frontend to prepare a Click to Pay UI (e.g., DOKU, CSUC).
+- Useful requires an initial context/token.
+
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"in":"path","name":"pg_code","schema":{"type":"string"},"required":true},{"in":"path","name":"session_id","schema":{"type":"string"},"required":true}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"content":{"application/json":{"schema":{"type":"object","description":"Serializer for provisioning Click to Pay configuration.\n\nThis is used before actual payment to provide configuration to the frontend.","properties":{"pg_code":{"type":"string","description":"Payment Gateway code selected for Click to Pay."},"session_id":{"type":"string","description":"Session ID used to identify the transaction."}},"required":["pg_code","session_id"],"title":"SubmitClickToPay"}},"application/x-www-form-urlencoded":{"schema":{"type":"object","description":"Serializer for provisioning Click to Pay configuration.\n\nThis is used before actual payment to provide configuration to the frontend.","properties":{"pg_code":{"type":"string","description":"Payment Gateway code selected for Click to Pay."},"session_id":{"type":"string","description":"Session ID used to identify the transaction."}},"required":["pg_code","session_id"],"title":"SubmitClickToPay"}},"multipart/form-data":{"schema":{"type":"object","description":"Serializer for provisioning Click to Pay configuration.\n\nThis is used before actual payment to provide configuration to the frontend.","properties":{"pg_code":{"type":"string","description":"Payment Gateway code selected for Click to Pay."},"session_id":{"type":"string","description":"Session ID used to identify the transaction."}},"required":["pg_code","session_id"],"title":"SubmitClickToPay"}}},"required":true}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"content":{"application/json":{"schema":{"oneOf":[{"type":"object","properties":{"js_sdk_src":{"type":"string","format":"uri","description":"URL of doku JavaScript SDK required to initiate the payment flow for more info please review these docshttps://developers.doku.com/accept-payment/doku-checkout/integration-guide/frontend-integration"},"payment_url":{"type":"string","format":"uri","description":"Payment URL needed to initialize doku payment iframe."},"reference_number":{"type":"string","description":"The reference number associated with the payment."},"ws_url":{"type":"string","format":"uri","description":"The WebSocket URL for real-time communication during callback process."}},"required":["js_sdk_src","payment_url","reference_number","ws_url"],"title":"DokuSDKResponse"}],"title":"ClickToPaySubmitSuccessResponse"}}},"description":""},"400":{"content":{"application/json":{"schema":{"oneOf":[{"type":"object","properties":{"field_name":{"type":"array","items":{"type":"string","default":"This field is required."}}},"title":"FieldErrors"}],"title":"ClickToPaySubmitFailureResponse"}}},"description":""},"401":{"content":{"application/json":{"schema":{"type":"object","properties":{"detail":{"type":"string"}},"required":["detail"],"title":"GenericErrorMessage"}}},"description":""}}}
+>
+  
+</StatusCodes>
+
+
+      
