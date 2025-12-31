@@ -3,8 +3,8 @@ import React, { ReactNode } from "react";
 import Markdown from "@theme/Markdown";
 import clsx from "clsx";
 
-import { guard } from "../../markdown/utils";
-
+import { guard } from "docusaurus-theme-openapi-docs/lib/markdown/utils";
+WW
 export interface Props {
   children?: ReactNode;
   collapsible?: boolean;
