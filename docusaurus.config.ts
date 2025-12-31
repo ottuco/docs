@@ -37,10 +37,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/ottu/public-docs/tree/main/',
+          docItemComponent: "@theme/ApiItem",
         },
         blog: false,
         theme: {
@@ -170,6 +167,28 @@ const config: Config = {
       darkTheme: prismThemes.dracula,
     },
   } satisfies Preset.ThemeConfig,
+
+  plugins: [
+    [
+      "docusaurus-plugin-openapi-docs",
+      {
+        id: "api",
+        docsPluginId: "classic",
+        config: {
+          ottuApi: {
+            specPath: "static/Ottu_API.yaml",
+            outputDir: "docs/developers/apis",
+            sidebarOptions: {
+              groupPathsBy: "tag",
+            },
+            downloadUrl: 'https://example.com/ottu_api.yaml',
+          },
+        },
+      },
+    ],
+  ],
+
+  themes: ["docusaurus-theme-openapi-docs"],
 };
 
 export default config;
