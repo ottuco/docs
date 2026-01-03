@@ -1,10 +1,57 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
 
 import Markdown from "@theme/Markdown";
 import clsx from "clsx";
 
 import { guard } from "docusaurus-theme-openapi-docs/lib/markdown/utils";
-WW
+
+
+const slugify = (value?: string) => {
+  if (!value) return undefined;
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gi, "-")
+    .replace(/^-+|-+$/g, "");
+};
+
+function buildFieldAnchorId(schemaName: any, name?: string) {
+  const schemaPart = Array.isArray(schemaName)
+  ? schemaName.join("-")
+  : schemaName ?? "schema";
+
+  const fieldPart = name ?? "field";
+
+  return slugify(`${schemaPart}-${fieldPart}`);
+}
+
+function scrollToAnchorWithOffset(id: string) {
+    console.log('--------------------------------')
+    console.log('here scrollToAnchorWithOffset is called.')
+    console.log(id)
+    console.log('--------------------------------')
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  const nav = getComputedStyle(document.documentElement)
+    .getPropertyValue("--ifm-navbar-height")
+    .trim();
+
+  const navPx = nav.endsWith("px") ? parseFloat(nav) : 0;
+  const extra = 80; // tweak if you want (px)
+
+  const top = el.getBoundingClientRect().top + window.scrollY - navPx - extra;
+   window.scrollTo({ top, behavior: "smooth"});
+
+  // Ensure hash is set even if it's already the same
+  if (window.location.hash !== `#${id}`) {
+    window.history.replaceState(null, "", `#${id}`);
+  } else {
+    // same hash case: still force replace to avoid “no-op” in some routers
+    window.history.replaceState(null, "", `#${id}`);
+  }
+}
+
 export interface Props {
   children?: ReactNode;
   collapsible?: boolean;
@@ -52,6 +99,23 @@ export default function SchemaItem(props: Props) {
     schemaName,
     schema,
   } = props;
+  
+  const fieldAnchorId = buildFieldAnchorId(schemaName, name);
+  useEffect(() => {
+    console.log('--------------------------------')
+    console.log('here useEffect is called.')
+    console.log(fieldAnchorId)
+    console.log('--------------------------------')
+    // Fix "open in new tab / paste link" offset after hydration
+    if (typeof window === "undefined") return;
+    if (window.location.hash === `#${fieldAnchorId}`) {
+      // wait for layout to settle
+      requestAnimationFrame(() => {
+        setTimeout(() => scrollToAnchorWithOffset(fieldAnchorId), 0);
+      });
+    }
+  }, [fieldAnchorId]);
+
   let deprecated;
   let schemaDescription;
   let defaultValue: string | undefined;
@@ -188,7 +252,12 @@ export default function SchemaItem(props: Props) {
             "openapi-schema__strikethrough": deprecated,
           })}
         >
-          {name}
+          <a
+          id={fieldAnchorId}
+          href={`#${fieldAnchorId}`}
+          >
+            #{name}
+          </a>
         </strong>
         <span className="openapi-schema__name">
           {Array.isArray(schemaName) ? schemaName.join(" | ") : schemaName}
