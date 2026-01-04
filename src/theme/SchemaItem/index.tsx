@@ -17,8 +17,8 @@ const slugify = (value?: string) => {
 
 function buildFieldAnchorId(schemaName: any, name?: string) {
   const schemaPart = Array.isArray(schemaName)
-  ? schemaName.join("-")
-  : schemaName ?? "schema";
+    ? schemaName.join("-")
+    : schemaName ?? "schema";
 
   const fieldPart = name ?? "field";
 
@@ -255,6 +255,12 @@ export default function SchemaItem(props: Props) {
           <a
           id={fieldAnchorId}
           href={`#${fieldAnchorId}`}
+          onClick={(event) => {
+            event.preventDefault();
+            if (fieldAnchorId) {
+              scrollToAnchorWithOffset(fieldAnchorId);
+            }
+          }}
           >
             #{name}
           </a>
