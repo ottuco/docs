@@ -16,6 +16,14 @@ npm start
 
 This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
 
+## Generate API Docs
+
+```bash
+npx docusaurus gen-api-docs all
+```
+
+This command generated the documentation files in `docs/developers/apis/`for Ottu APIs from `static/Ottu_API.yaml`.
+
 ## Build
 
 ```bash
