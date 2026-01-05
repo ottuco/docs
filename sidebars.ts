@@ -49,6 +49,7 @@ const sidebars: SidebarsConfig = {
       label: 'Getting Started',
       items: [
         'developers/quick-start',
+        'developers/api-fundamentals',
         {
           type: 'category',
           label: 'APIs',
