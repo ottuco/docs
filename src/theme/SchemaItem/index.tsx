@@ -26,10 +26,6 @@ function buildFieldAnchorId(schemaName: any, name?: string) {
 }
 
 function scrollToAnchorWithOffset(id: string) {
-    console.log('--------------------------------')
-    console.log('here scrollToAnchorWithOffset is called.')
-    console.log(id)
-    console.log('--------------------------------')
   const el = document.getElementById(id);
   if (!el) return;
 
@@ -102,10 +98,6 @@ export default function SchemaItem(props: Props) {
   
   const fieldAnchorId = buildFieldAnchorId(schemaName, name);
   useEffect(() => {
-    console.log('--------------------------------')
-    console.log('here useEffect is called.')
-    console.log(fieldAnchorId)
-    console.log('--------------------------------')
     // Fix "open in new tab / paste link" offset after hydration
     if (typeof window === "undefined") return;
     if (window.location.hash === `#${fieldAnchorId}`) {
