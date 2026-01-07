@@ -6,27 +6,106 @@
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
-  --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  /* Brand primary (Ottu orange) */
+  --ifm-color-primary: #f57d2d;
+  --ifm-color-primary-dark: #dc7028;
+  --ifm-color-primary-darker: #d06a26;
+  --ifm-color-primary-darkest: #ab571f;
+  --ifm-color-primary-light: #f6904c;
+  --ifm-color-primary-lighter: #f8a46c;
+  --ifm-color-primary-lightest: #fabf97;
+
+  /* Backgrounds */
+  --ifm-background-color: #0f1117; /* main page bg */
+  --ifm-background-surface-color: #171a21; /* cards, panels */
+
+  /* Text */
+  --ifm-font-color-base: #e5e7eb;
+  --ifm-heading-color: #ffffff;
+
+  /* Navbar */
+  --ifm-navbar-background-color: #0b0d12;
+  --ifm-navbar-shadow: none;
+
+  /* Footer */
+  --ifm-footer-background-color: #0b0d12;
+
+  /* Links */
+  --ifm-link-color: #f57d2d;
+  --ifm-link-hover-color: #f8a46c;
+
+  /* Borders */
+  --ifm-global-border-color: #262a34;
+
+  /* Code */
+  --ifm-code-background: #111827;
+  --ifm-code-color: #f8fafc;
+
+  /* Sidebar */
+  --ifm-menu-color-background-active: #171a21;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
-[data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+/* ================================
+   DARK MODE (forced consistency)
+   ================================ */
+[data-theme="dark"] {
+  --ifm-background-color: #0f1117;
+  --ifm-background-surface-color: #171a21;
+
+  --ifm-font-color-base: #e5e7eb;
+  --ifm-heading-color: #ffffff;
+
+  --ifm-navbar-background-color: #0b0d12;
+  --ifm-footer-background-color: #0b0d12;
+
+  --ifm-link-color: #f57d2d;
+  --ifm-link-hover-color: #fabf97;
+
+  --ifm-code-background: #020617;
+}
+
+.alert--note {
+  --ifm-alert-background-color: #151821;
+  --ifm-alert-border-color: #6b7280;
+  color: #e5e7eb;
+}
+
+.alert--info {
+  --ifm-alert-background-color: #0f1f2e;
+  --ifm-alert-border-color: #1983bc;
+  color: #e5e7eb;
+}
+
+.alert--tip {
+  --ifm-alert-background-color: #102026;
+  --ifm-alert-border-color: #22c55e;
+  color: #e5e7eb;
+}
+
+.alert--warning {
+  --ifm-alert-background-color: #241a0f;
+  --ifm-alert-border-color: #f57d2d;
+  color: #fef3c7;
+}
+
+.alert--danger {
+  --ifm-alert-background-color: #2a1113;
+  --ifm-alert-border-color: #ed2833;
+  color: #fee2e2;
+}
+
+.alert {
+  border-left-width: 6px;
+}
+
+.alert__title {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.alert code {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
 }
 
 /* Make the OpenAPI right panel sticky on desktop */
