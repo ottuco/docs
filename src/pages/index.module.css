@@ -3,6 +3,14 @@
  * and scoped locally.
  */
 
+html {
+  scroll-behavior: smooth;
+}
+
+:target {
+  scroll-margin-top: 70px; /* height of navbar */
+}
+
 .heroBanner {
   padding: 4rem 0;
   text-align: center;
