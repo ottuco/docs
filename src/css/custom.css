@@ -64,6 +64,14 @@
   --ifm-code-background: #020617;
 }
 
+.markdown a {
+  color: #f57d2d;
+}
+
+.markdown a:hover {
+  color: #f8a46c;
+}
+
 .alert--note {
   --ifm-alert-background-color: #151821;
   --ifm-alert-border-color: #6b7280;
