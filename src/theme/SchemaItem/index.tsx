@@ -1,10 +1,10 @@
-import React, { ReactNode, useEffect } from "react";
+import type { WrapperProps } from "@docusaurus/types";
+import useLayoutEffect from "@docusaurus/useIsomorphicLayoutEffect";
+import SchemaItem from "@theme-original/SchemaItem";
+import type SchemaItemType from "@theme/SchemaItem";
+import { useMemo, useRef, type ReactNode } from "react";
 
-import Markdown from "@theme/Markdown";
-import clsx from "clsx";
-
-import { guard } from "docusaurus-theme-openapi-docs/lib/markdown/utils";
-
+type Props = WrapperProps<typeof SchemaItemType>;
 
 const slugify = (value?: string) => {
   if (!value) return undefined;
@@ -25,261 +25,42 @@ function buildFieldAnchorId(schemaName: any, name?: string) {
   return slugify(`${schemaPart}-${fieldPart}`);
 }
 
-function scrollToAnchorWithOffset(id: string) {
-  const el = document.getElementById(id);
-  if (!el) return;
+export default function SchemaItemWrapper(props: Props): ReactNode {
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const nav = getComputedStyle(document.documentElement)
-    .getPropertyValue("--ifm-navbar-height")
-    .trim();
-
-  const navPx = nav.endsWith("px") ? parseFloat(nav) : 0;
-  const extra = 80; // tweak if you want (px)
-
-  const top = el.getBoundingClientRect().top + window.scrollY - navPx - extra;
-   window.scrollTo({ top, behavior: "smooth"});
-
-  // Ensure hash is set even if it's already the same
-  if (window.location.hash !== `#${id}`) {
-    window.history.replaceState(null, "", `#${id}`);
-  } else {
-    // same hash case: still force replace to avoid “no-op” in some routers
-    window.history.replaceState(null, "", `#${id}`);
-  }
-}
-
-export interface Props {
-  children?: ReactNode;
-  collapsible?: boolean;
-  name?: string;
-  qualifierMessage?: string | undefined;
-  required?: boolean;
-  schemaName?: string;
-  // TODO should probably be typed
-  schema?: any;
-  discriminator?: boolean;
-}
-
-const transformEnumDescriptions = (
-  enumDescriptions?: Record<string, string>
-) => {
-  if (enumDescriptions) {
-    return Object.entries(enumDescriptions);
-  }
-
-  return [];
-};
-
-const getEnumDescriptionMarkdown = (enumDescriptions?: [string, string][]) => {
-  if (enumDescriptions?.length) {
-    return `| Enum Value | Description |
-| ---- | ----- |
-${enumDescriptions
-  .map((desc) => {
-    return `| ${desc[0]} | ${desc[1]} | `.replaceAll("\n", "<br/>");
-  })
-  .join("\n")}
-    `;
-  }
-
-  return "";
-};
-
-export default function SchemaItem(props: Props) {
-  const {
-    children: collapsibleSchemaContent,
-    collapsible,
-    name,
-    qualifierMessage,
-    required,
-    schemaName,
-    schema,
-  } = props;
-  
-  const fieldAnchorId = buildFieldAnchorId(schemaName, name);
-  useEffect(() => {
-    // Fix "open in new tab / paste link" offset after hydration
-    if (typeof window === "undefined") return;
-    if (window.location.hash === `#${fieldAnchorId}`) {
-      // wait for layout to settle
-      requestAnimationFrame(() => {
-        setTimeout(() => scrollToAnchorWithOffset(fieldAnchorId), 0);
-      });
-    }
-  }, [fieldAnchorId]);
-
-  let deprecated;
-  let schemaDescription;
-  let defaultValue: string | undefined;
-  let example: string | undefined;
-  let nullable;
-  let enumDescriptions: [string, string][] = [];
-  let constValue: string | undefined;
-
-  if (schema) {
-    deprecated = schema.deprecated;
-    schemaDescription = schema.description;
-    enumDescriptions = transformEnumDescriptions(schema["x-enumDescriptions"]);
-    defaultValue = schema.default;
-    example = schema.example;
-    nullable =
-      schema.nullable ||
-      (Array.isArray(schema.type) && schema.type.includes("null")); // support JSON Schema nullable
-    constValue = schema.const;
-  }
-
-  const renderRequired = guard(
-    Array.isArray(required) ? required.includes(name) : required,
-    () => <span className="openapi-schema__required">required</span>
+  const fieldAnchorId = useMemo(
+    () => buildFieldAnchorId(props.schemaName, props.name),
+    [props.schemaName, props.name]
   );
 
-  const renderDeprecated = guard(deprecated, () => (
-    <span className="openapi-schema__deprecated">deprecated</span>
-  ));
+  useLayoutEffect(() => {
+    if (
+      props.collapsible ||
+      !containerRef.current ||
+      typeof window === "undefined" ||
+      typeof document === "undefined"
+    )
+      return;
 
-  const renderNullable = guard(nullable, () => (
-    <span className="openapi-schema__nullable">nullable</span>
-  ));
+    const currentElement = containerRef.current.querySelector(
+      ".openapi-schema__property"
+    );
+    if (!currentElement) return;
 
-  const renderEnumDescriptions = guard(
-    getEnumDescriptionMarkdown(enumDescriptions),
-    (value) => {
-      return (
-        <div style={{ marginTop: ".5rem" }}>
-          <Markdown>{value}</Markdown>
-        </div>
-      );
-    }
-  );
+    const anchor = document.createElement("a");
+    anchor.href = `#${fieldAnchorId}`;
+    anchor.classList.add("hash-link");
 
-  const renderSchemaDescription = guard(schemaDescription, (description) => (
-    <>
-      <Markdown>{description}</Markdown>
-    </>
-  ));
+    currentElement.id = fieldAnchorId;
+    currentElement.appendChild(anchor);
 
-  const renderQualifierMessage = guard(qualifierMessage, (message) => (
-    <>
-      <Markdown>{message}</Markdown>
-    </>
-  ));
-
-  function renderDefaultValue() {
-    if (defaultValue !== undefined) {
-      if (typeof defaultValue === "string") {
-        return (
-          <div>
-            <strong>Default value: </strong>
-            <span>
-              <code>{defaultValue}</code>
-            </span>
-          </div>
-        );
-      }
-      return (
-        <div>
-          <strong>Default value: </strong>
-          <span>
-            <code>{JSON.stringify(defaultValue)}</code>
-          </span>
-        </div>
-      );
-    }
-    return undefined;
-  }
-
-  function renderExample() {
-    if (example !== undefined) {
-      if (typeof example === "string") {
-        return (
-          <div>
-            <strong>Example: </strong>
-            <span>
-              <code>{example}</code>
-            </span>
-          </div>
-        );
-      }
-      return (
-        <div>
-          <strong>Example: </strong>
-          <span>
-            <code>{JSON.stringify(example)}</code>
-          </span>
-        </div>
-      );
-    }
-    return undefined;
-  }
-
-  function renderConstValue() {
-    if (constValue !== undefined) {
-      if (typeof constValue === "string") {
-        return (
-          <div>
-            <strong>Constant value: </strong>
-            <span>
-              <code>{constValue}</code>
-            </span>
-          </div>
-        );
-      }
-      return (
-        <div>
-          <strong>Constant value: </strong>
-          <span>
-            <code>{JSON.stringify(constValue)}</code>
-          </span>
-        </div>
-      );
-    }
-    return undefined;
-  }
-
-  const schemaContent = (
-    <div>
-      <span className="openapi-schema__container">
-        <strong
-          className={clsx("openapi-schema__property", {
-            "openapi-schema__strikethrough": deprecated,
-          })}
-        >
-          <a
-          id={fieldAnchorId}
-          href={`#${fieldAnchorId}`}
-          onClick={(event) => {
-            event.preventDefault();
-            if (fieldAnchorId) {
-              scrollToAnchorWithOffset(fieldAnchorId);
-            }
-          }}
-          >
-            #{name}
-          </a>
-        </strong>
-        <span className="openapi-schema__name">
-          {Array.isArray(schemaName) ? schemaName.join(" | ") : schemaName}
-        </span>
-        {(nullable || required || deprecated) && (
-          <span className="openapi-schema__divider"></span>
-        )}
-        {renderNullable}
-        {renderRequired}
-        {renderDeprecated}
-      </span>
-      {renderSchemaDescription}
-      {renderEnumDescriptions}
-      {renderQualifierMessage}
-      {renderConstValue()}
-      {renderDefaultValue()}
-      {renderExample()}
-      {collapsibleSchemaContent ?? collapsibleSchemaContent}
-    </div>
-  );
+    const hash = window.location.hash.slice(1); // Remove the # prefix
+    if (hash === fieldAnchorId) anchor.click();
+  }, [props.collapsible, fieldAnchorId]);
 
   return (
-    <div className="openapi-schema__list-item">
-      {collapsible ? collapsibleSchemaContent : schemaContent}
+    <div ref={containerRef}>
+      <SchemaItem {...props} />
     </div>
   );
 }
