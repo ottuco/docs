@@ -7,7 +7,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'Ottu Documentation',
   tagline: 'Payment processing made simple',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/ottu_logo.avif',
   
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -37,10 +37,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/ottu/public-docs/tree/main/',
+          docItemComponent: "@theme/ApiItem",
         },
         blog: false,
         theme: {
@@ -58,7 +55,7 @@ const config: Config = {
       title: 'Ottu',
       logo: {
         alt: 'Ottu Logo',
-        src: 'img/logo.svg',
+        src: 'img/ottu_logo.avif',
       },
       items: [
         {
@@ -170,6 +167,28 @@ const config: Config = {
       darkTheme: prismThemes.dracula,
     },
   } satisfies Preset.ThemeConfig,
+
+  plugins: [
+    [
+      "docusaurus-plugin-openapi-docs",
+      {
+        id: "api",
+        docsPluginId: "classic",
+        config: {
+          ottuApi: {
+            specPath: "static/Ottu_API.yaml",
+            outputDir: "docs/developers/apis",
+            sidebarOptions: {
+              groupPathsBy: "tag",
+            },
+            downloadUrl: 'https://example.com/ottu_api.yaml',
+          },
+        },
+      },
+    ],
+  ],
+
+  themes: ["docusaurus-theme-openapi-docs"],
 };
 
 export default config;

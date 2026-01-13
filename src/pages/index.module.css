@@ -3,6 +3,14 @@
  * and scoped locally.
  */
 
+html {
+  scroll-behavior: smooth;
+}
+
+:target {
+  scroll-margin-top: 70px; /* height of navbar */
+}
+
 .heroBanner {
   padding: 4rem 0;
   text-align: center;
@@ -10,14 +18,52 @@
   overflow: hidden;
 }
 
+.heroContent {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.heroText {
+  text-align: left;
+}
+
+.heroImageWrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.heroImage {
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 1.25rem;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.16);
+}
+
 @media screen and (max-width: 996px) {
   .heroBanner {
     padding: 2rem;
+  }
+
+  .heroText {
+    text-align: center;
   }
 }
 
 .buttons {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 1rem;
+}
+
+@media screen and (max-width: 996px) {
+  .buttons {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
 }

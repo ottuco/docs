@@ -1,0 +1,71 @@
+---
+id: delete-user-cards
+title: "Delete a saved card for the customer."
+description: "This endpoint allows you to delete a customer's saved card from the system. Provide the unique card identifier to remove the card from the customer's saved cards list. This action can help maintain up-to-date card information and ensure that customers do not accidentally use expired or unwanted cards for payments."
+sidebar_label: "Delete a saved card for the customer."
+hide_title: true
+hide_table_of_contents: true
+api: eJztV0tvGzcQ/isDXtoCG8lx04tuaeIESZvYqG3k4Ag2tTvyMuGSNGdWsiLsfy+G+5Bs2QacoEUN9KQVdzjzzTfPXSsfMGo23r0r1EQVaJHxvCaM57mOBalMFUh5NEFk1ESdlIYAXRG8cQzaWr8kWPka2EN7GzTkNbGvMP5EQHqBBYgumEdfAZcItCLGagRH0S9MgemsduaqxlbQFOjYzA1G0Rqx8otW6KaaO60QWEM8goRT54Iacu2gRBug0saxNg7q8Iz9s0Jzb9HNfawSD6BdAeiojmJT82CGoPDgPIPO84RQW7uCmhDwOpiIBfgItVtqxwOWuY8Q9KpCxzRSmQo66goZI6nJ2VoZYfSqxrhSmXK6QjVRvblzU6hMUV5ipdVkrXgV5DVxNO5SNbfjcsrGmm9YtIxxNLjADoQm8rnRgmppuAQNFDA3c5MPvkFNxl0KqyYOodgAGQn2iFe1uKkmHGtssg5+0Fxu0LP/iu4B3LvpNIQ+Xd0B24c9g95+IjUJJ39T/AaO4ZQkbIZgoW1SCoR5HdGuIESfIxFw1I7a1KCRMHmPZ7cCkxx5REReld4Twgx5iejggrQrZv76IiXYRYi+qBOGixEco8WcoZO4I4R5xERJch2J4ah1GN5qxqVewYd3rymTBNzoFTVz5LyEiNp2impCyXawRkrqBhE7PEwzxfpSMlWdEkZ4lRrCNFOJUcOrlMPHx4fnv2sy+cuaSzU5mwp/s9sHIvX+08n5cDYVcxS8IyQhc3/vhfzk3jE6lkcdgjV5qsnxFxJK1xvym0zhta6CbW9/9K82F1PkWxmqq0rHlZqojx56kaZpdoK1/TpTL/b2HgNGeYeH88RGlxN+9gVzloKP0mDZtDDnBm1x3ubTIKtj1JJmhrGiuytmrmvLffNNSsDQUBAjlRxiw1buvZH3BzH6SEqofxhSgayNvSOdb9TFWS833dh5iw6jyZOlD0ikL1E1W+8lXXoYu4S3ND9/FM3/qif3Qf716UF+VGX9JyA//+1pQW4yVSGXfrNDpWEvvU6NZ+Mws+PF/lha8HidRlczllGCcdGvAnW0aqJK5kCT8bibBCPPXI8cciqsvu0ei9+ta7ea7+Ch6OlnlfxP/ViYvdmH75dHHTGqrHt4k5YjNVHvP52IltljTH5Z8o9ZS4TdUqGD+QNT15QAlKiLpKAb1SLso/mW8mV35xB9z2ZaRqGuuZRls02tduUYFo0QcW6u4XN743MbZ1kVE5AuRw6Za3h59E5lSoLZmng+2hvt7RgeRJtMBU9c6ZTHHejX/fa8vTLLvN9adUe3dW4Vyf+r+Q+t5l1iMV7zOFhtnEQpVeW6q+QzNZOqnlkJ9b7KlChSmZr0S6+0jtITi+h6LQl2Gm3TyHG7S0qhF4b0zErHmWtL+EA8f/6rS8Rf4J/f7u90/yuudr5Iuu1Kpd3iu5x5eovxA+R0XwUbVqbyJxqh5fvjfZ/Nvvu51bbNAUvKw2baZH1HFADtu5d5joG3bu1MVEE+DLHXB38enByoTOmbfbft6t0E2N54b0JK2d+OCPl0kA7XNAPOujvaXk/vvX+kiZY+Flv3Q3ckrjbN3zDn3Mc=
+sidebar_class_name: "delete api-method"
+info_path: docs/developers/apis/ottu-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Delete a saved card for the customer."}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"delete"}
+  path={"/b/pbl/v2/card/{token}/"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+This endpoint allows you to delete a customer's saved card from the system. Provide the unique card identifier to remove the card from the customer's saved cards list. This action can help maintain up-to-date card information and ensure that customers do not accidentally use expired or unwanted cards for payments.
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"in":"query","name":"customer_id","schema":{"type":"string"},"description":"Utilized to retrieve cards associated with a specific customer using their unique customer_id..","required":true},{"in":"path","name":"token","schema":{"type":"string","description":"The unique token associated with the card, required for tokenized card payments. Use this value to securely process transactions."},"required":true},{"in":"query","name":"type","schema":{"type":"string"},"description":"Choose between `sandbox` and `production`. Select sandbox to retrieve cards created for test Payment Gateway MIDs, or production to fetch real cards used in live transactions.","required":true}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"204":{"content":{"application/json":{"schema":{},"examples":{"NoContent":{"value":{},"summary":"No Content"}}}},"description":"No Content"},"400":{"content":{"application/json":{"schema":{"oneOf":[{"type":"object","properties":{"field_name":{"type":"array","items":{"type":"string","default":"This field is required."}}},"title":"FieldErrors"},{"type":"object","properties":{"detail":{"type":"string"}},"required":["detail"],"title":"GenericErrorMessage"}],"title":"CardErrors"}}},"description":""},"401":{"content":{"application/json":{"schema":{"type":"object","properties":{"detail":{"type":"string"}},"required":["detail"],"title":"GenericErrorMessage"}}},"description":""},"403":{"content":{"application/json":{"schema":{"type":"object","properties":{"detail":{"type":"string"}},"required":["detail"],"title":"GenericErrorMessage"}}},"description":""},"404":{"content":{"application/json":{"schema":{"type":"object","properties":{"detail":{"type":"string"}},"required":["detail"],"title":"GenericErrorMessage"}}},"description":""},"415":{"content":{"application/json":{"schema":{"type":"object","properties":{"detail":{"type":"string"}},"required":["detail"],"title":"GenericErrorMessage"}}},"description":""}}}
+>
+  
+</StatusCodes>
+
+
+      
