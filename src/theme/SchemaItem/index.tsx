@@ -2,10 +2,9 @@ import type { WrapperProps } from "@docusaurus/types";
 import useLayoutEffect from "@docusaurus/useIsomorphicLayoutEffect";
 import { useLocation } from "@docusaurus/router";
 import SchemaItem from "@theme-original/SchemaItem";
-import type SchemaItemType from "@theme/SchemaItem";
 import { useMemo, useRef, type ReactNode } from "react";
 
-type Props = WrapperProps<typeof SchemaItemType>;
+type Props = WrapperProps<typeof SchemaItem>;
 
 const slugify = (value?: string) => {
   if (!value) return undefined;
