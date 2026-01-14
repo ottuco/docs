@@ -5322,6 +5322,8 @@ components:
             </ul>
         billing_address:
           $ref: "#/components/schemas/Address"
+          description: |-
+            An object to save customer registered address data into payment transaction.
         card_acceptance_criteria:
           allOf:
             - $ref: "#/components/schemas/CardAcceptanceCriteria"
@@ -5604,6 +5606,7 @@ components:
           maxLength: 2000
         SeparatorField:
           description: |-
+            This field is a dev components to separate the field exists in the old docs and others (We can check the fields below it to add them if they are helpful)
             ------------------------------------------------------------------------------------
             ------------------------------------------------------------------------------------
             ------------------------------------------------------------------------------------
@@ -5708,19 +5711,18 @@ components:
             - $ref: "#/components/schemas/CheckoutSDK"
           readOnly: true
           default: false
-          description:
-            A JSON object containing preloaded data required to initialize
-            the checkout interface.This includes essential details such as customer
-            information, available payment methods.and specific transaction details,
-            all formatted according to the Checkout SDK's initialization specifications.This
-            field streamlines the checkout process by providing necessary information
-            upfront.enhancing user experience and efficiency.
+          description: |-
+            It is a JSON object containing preloaded data necessary for initializing the [Checkout SDK](checkout-sdk/). This data encompasses vital details such as customer information, available payment methods, and specific transaction details, all formatted according to the `Checkout SDK`'s initialization specifications. By offering essential information upfront, this feature streamlines the [checkout process](checkout-sdk/#ottu-checkout-sdk-flow), contributing to an improved user experience and increased efficiency.
+
+            **Presence Conditions:**
+
+            * It will be included in the response solely when the [include\_sdk\_setup\_preload](checkout-api.md#include_sdk_setup_preload-bool-optional) parameter is set to `true`.
         session_id:
           type: string
           readOnly: true
-          description:
-            A unique identifier for each payment transaction, used to maintain
-            the session state during the payment process.
+          description: |-
+            A unique identifier for each payment transaction, used to maintain the session state during the payment process. It can be used to perform subsequent operations, like retrieve, acknowledge, refund, capture, and cancellation.
+            Max length: 128.
         settled_pg_code:
           type: string
           readOnly: true
@@ -5789,28 +5791,346 @@ components:
 
         Also uses request data from other serializers to save into PaymentTransaction db table:
       properties:
+        agreement:
+          allOf:
+            - $ref: "#/components/schemas/Agreement"
+          description: |-
+            It denotes a pre-arranged contractual agreement with the paying customer, enabling the secure retention and future use of their payment details for specific purposes. These agreements encompass various payment arrangements, including recurring service payments like mobile subscriptions, installment payments for purchases, one-time charges such as account reloads, or compliance with industry practices like penalty fees for missed appointments.
+            See the request parameter [agreement](checkout-api.md#agreement-object-optional) for more information.
+
+            **Presence condition:**
+
+            * This parameter should be included when the [payment\_type](checkout-api.md#payment_type-string-mandatory) is set to `auto_debit`. On the other hand, it must not be sent when the [payment\_type](checkout-api.md#payment_type-string-optional) is designated as `one_off`. Importantly, this isn't restricted to just the initial transaction but should be consistently present in all following transactions associated with the `auto_debit` payment type.
+
+            :::info
+
+            In certain agreement types, the condition state becomes a required element. For further details on which parameters are mandatory for recurring agreements, please refer [here](auto-debit.md#importance-for-merchants).
+
+            :::
         amount:
           type: string
           format: decimal
-          description:
-            Represents the total amount of the payment transaction, which
-            includes the cost of the purchased items or services but excludes any
-            additional fees or charges
+          description: |-
+            Payment transaction total amount. The merchant should always check if the amount he receives from Ottu is the same amount of the order, to avoid user changing the cart amount in between.
+            See the request parameter [amount](checkout-api.md#amount-string-required) for more information.
+        attachment:
+          type: string
+          format: uri
+          description: |-
+            Attachment retrieval URL.
+            See the request parameter [attachment](checkout-api.md#attachment-stringoptional) for more information.
+
+            **Presence condition:**
+
+            * The attachment should be uploaded using [attachment](checkout-api.md#attachment-stringoptional) request parameter.
+        attachment_short_url:
+          type: string
+          format: uri
+          readOnly: true
+          description: |-
+            A short attachment retrieval URL.
+            Max length: 200.
+
+            **Presence condition:**
+
+            * [shortify\_attachment\_url](checkout-api.md#shortify_attachment_url-bool-optional) request parameter should be "true" in order to generate it.
+        billing_address:
+          $ref: "#/components/schemas/Address"
+          description: |-
+            Customer’s registered address data.
+            See the request parameter [billing\_address](checkout-api.md#billing_address-object-optional) for more information.
+
+            **Presence condition:**
+
+            * Any child parameter provided with the [billing\_address](checkout-api.md#billing_address-object-optional) object in the request payload will be populated in the response as [billing\_address](checkout-api.md#billing_address-object-conditional) child parameter.
+        card_acceptance_criteria:
+          allOf:
+            - $ref: "#/components/schemas/CardAcceptanceCriteria"
+          description: |-
+            It outlines the rules for a card's payment eligibility.
+            See the request parameter [card\_acceptance\_criteria](checkout-api.md#card_acceptance_criteria-object-optional) for more information.
+
+            **Presence condition:**
+
+            * Any child parameter provided with the [card\_acceptance\_criteria](checkout-api.md#card_acceptance_criteria-object-optional) object in the request payload will be populated in the response as [card\_acceptance\_criteria](checkout-api.md#card_acceptance_criteria-object-optional) child parameter.
+        checkout_page_url:
+          type: string
+          format: uri
+          readOnly: true
+          description: The hosted Ottu checkout page URL for this transaction. Use this link to redirect the customer to the frontend checkout experience.
+          maxLength: 2000
+        checkout_short_url:
+          type: string
+          format: uri
+          readOnly: true
+          description: |-
+            Short checkout url.
+
+            **Presence condition:**
+
+            * [shortify\_checkout\_url](checkout-api.md#shortify_checkout_url-bool-optional) request parameter should be set to "true" in order to generate it.
+        checkout_url:
+          type: string
+          format: uri
+          readOnly: true
+          description: |-
+            URL that directs the customer to the Ottu Checkout Page where they can see the payment details and available payment methods for the transaction. If you need to share the payment link over SMS or WhatsApp, use [checkout\_short\_url](checkout-api.md#checkout_short_url-string-conditional) instead.
         currency_code:
           type: string
-          description:
-            The specified currency represents the denomination of the transaction.Nevertheless,
-            it doesn't necessarily mandate payment in this exact currency.Due to potential
-            currency conversions or exchanges, the final charge may be in a different
-            currency.
+          description: |-
+            The code of the currency used in the transaction.
+            See the request parameter [currency\_code](checkout-api.md#currency_code-string-required) for more information.
+        customer_birthdate:
+          type: string
+          format: date
+          title: Customer Date of Birth
+          description: |-
+            Customer's date of birth. For more information, please refer to [customer\_birthdate](checkout-api.md#customer_birthdate).
+
+            **Presence condition:**
+
+            * [customer\_birthdate](checkout-api.md#customer_birthdate) request parameter should be provided.
+        customer_email:
+          type: string
+          format: email
+          description: |-
+            Customer’s email address.
+            See the request parameter [customer\_email](checkout-api.md#customer_email-string-optional) for more information.
+
+            **Presence condition:**
+
+            * [customer\_email](checkout-api.md#customer_email-string-optional) request parameter should be provided.
+          maxLength: 128
+        customer_first_name:
+          type: string
+          description: |-
+            Customer’s first name.
+            See the request parameter [customer\_first\_name](checkout-api.md#customer_first_name-string-optional) for more information.
+
+            **Presence condition:**
+
+            * [customer\_first\_name](checkout-api.md#customer_first_name-string-optional) request parameter should be provided.
+          maxLength: 64
+        customer_id:
+          type: string
+          description: |-
+            It is a unique identifier assigned to a customer. This identifier can be used to distinguish one customer from another and can be utilized for tracking purposes or to retrieve specific customer information from the API.
+            See the request parameter [customer\_id](checkout-api.md#customer_id-string-optional) for more information.
+
+            **Presence condition:**
+
+            * [customer\_id](checkout-api.md#customer_id-string-optional) request parameter should be provided.
+          maxLength: 64
+        customer_last_name:
+          type: string
+          description: |-
+            Customer’s last name.
+            See the request parameter [customer\_last\_name](checkout-api.md#customer_last_name-string-optional) for more information.
+
+            **Presence condition:**
+
+            * [customer\_last\_name](checkout-api.md#customer_last_name-string-optional) request parameter should be provided.
+          maxLength: 64
+        customer_phone:
+          type: string
+          description: |-
+            Customer's phone number.
+            See the request parameter [customer\_phone](checkout-api.md#customer_phone-string-optional) for more information.
+
+            **Presence condition:**
+
+            * [customer\_phone](checkout-api.md#customer_phone-string-optional) request parameter should be provided.
+          maxLength: 16
+        due_datetime:
+          type: string
+          format: date-time
+          title: Due date and time
+          description: |-
+            It specifies the deadline for payment. It has no effect on changing the transaction state, and the transaction can be paid even after due\_datetime.
+            See the request parameter [due\_datetime](checkout-api.md#due_datetime-string-date-time-optional) for more information.
+        email_recipients:
+          type: array
+          items:
+            type: string
+            format: email
+          description: |-
+            This is a list of internal email recipients, who will receive notifications sent to the customer about their payment.
+            See the request parameter [email\_recipients](checkout-api.md#email_recipients-array-of-strings-optional) for more information.
+
+            **Presence condition:**
+
+            * [email\_recipients](checkout-api.md#email_recipients-array-of-strings-optional) should be provided in the request payload.
+        expiration_time:
+          type: string
+          description: |-
+            It refers to the specific point in time after which the transaction cannot be paid anymore, and its state changes accordingly.
+            See the request parameter [expiration\_time](checkout-api.md#expiration_time-string-optional) for more information.
+        extra:
+          allOf:
+            - $ref: "#/components/schemas/ExtraInner"
+          description: |-
+            It represents additional data fields that can be dynamically added to the response using the extra request parameter.
+            See the request parameter [extra](checkout-api.md#extra-object-optional) for more information.
+
+            **Presence condition:**
+
+            * Any child parameter provided with the [extra](checkout-api.md#extra-object-optional) object in the request payload will be populated in the response as [extra](checkout-api.md#extra-object-conditional) object child parameter.
+        initiator_id:
+          type: integer
+          title: initiator
+          description: |-
+            The user who initiated the creation of this payment transaction, if available. This field is optional and may be used to track who created the payment transaction.
+            Max length: 11.
+
+            **Presence condition:**
+
+            * It is present only when [Basic Authentication](authentication.md#basic-authentication) is used, because [API-Key](authentication.md#private-key-api-key) Authentication is not associated with any user.
+        language:
+          enum:
+            - en
+            - ar
+          type: string
+          x-spec-enum-id: ac1757d67890d125
+          default: en
+          description: |-
+            It represents the language code that is utilized for all communication related to payment transactions with the customer, including payment page, receipt, invoice, email, and SMS.
+            For more details check the request parameter [language](checkout-api.md#language-string-optional)
+        notifications:
+          allOf:
+            - $ref: "#/components/schemas/Notifications"
+          title: Notification settings
+          description: |-
+            It represents the notification settings for this payment transaction which have been received and processed.
+            See the request [notifications](checkout-api.md#notifications-object-optional) for more information.
+
+            **Presence condition:**
+
+            * Any child parameter provided with the [notifications](checkout-api.md#notifications-object-optional) object in the request payload will be populated in the response as [notifications](checkout-api.md#notifications-object-conditional) child parameter.
+        operation:
+          type: string
+          readOnly: true
+          description: |-
+            Specifies the type of operation to be performed by the payment gateway. If set to 'purchase', the payment source will be directly charged. If set to 'authorize', the payment source will only be authorized and the actual charge will be made at a later time.
+            Max length: 16.
+        order_no:
+          type: string
+          description: |-
+            It is a unique identifier assigned to the payment transaction, which is primarily used for tracking purposes. The identifier can be set by the merchant or the system.
+            See the request parameter [order\_no](checkout-api.md#order_no-string-optional) for information.
+
+            **Presence condition:**
+
+            * [order\_no](checkout-api.md#order_no-string-optional) request parameter should be included in the request payload.
+          maxLength: 128
+        payment_methods:
+          allOf:
+            - $ref: "#/components/schemas/PaymentMethodsForRedirect"
+          readOnly: true
+          description: |-
+            An array containing all the payment methods derived from the [pg\_codes](checkout-api.md#pg_codes-array-required) input. Each object in the array contains information about a single payment gateway, including its icon and the [redirect\_url](checkout-api.md#redirect_url-string-optional) that will redirect the customer to the payment gateway's payment page.
         pg_codes:
           type: array
           items:
             type: string
           title: Gateway
-          description:
-            The list of payment gateway codes from which a customer can
-            select to perform the payment or authorization.
+          description: |-
+            The options of the payment gateway codes included in the request payload to enable customers to make payments.
+            See the request parameter [pg\_codes](checkout-api.md#pg_codes-array-required) for more information.
+        payment_type:
+          enum:
+            - one_off
+            - auto_debit
+            - save_card
+          type: string
+          x-spec-enum-id: b2ae60f7918918e7
+          default: one_off
+          description: |-
+            It presents options such as `one_off` for one-time payments without future obligations and `auto_debit` for automated deductions, encompassing recurring subscriptions, installment payments, or unscheduled debits. For further details on the Auto Debit API and payment\_type please refer to [Auto-Debit API](auto-debit.md).
+            Default value: "`one_off`".
+            See the request parameter [payment\_type](checkout-api.md#payment_type-string-optional) for more information.
+        product_type:
+          type: string
+          description: |-
+            The nature of the purchased product or service, which can be employed for the purpose of keeping track and generating reports.
+            See the request parameter [product\_type](checkout-api.md#product_type-string-optional) for more information.
+
+            **Presence condition:**
+
+            * [product\_type](checkout-api.md#product_type-string-optional) request parameter should be included in the request payload.
+          maxLength: 128
+        qr_code_url:
+          type: string
+          format: uri
+          readOnly: true
+          description: |-
+            A QR code that, when scanned, redirects to the checkout page for this payment. This QR code may be displayed on invoices, receipts, or other documents to allow customers to easily access the checkout page and make a payment.
+
+            **Presence condition:**
+
+            * The request parameter [generate\_qr\_code](checkout-api.md#generate_qr_code-bool-optional) should be set to `true`.
+        redirect_url:
+          type: string
+          format: uri
+          description: |-
+            It represents the URL where the customer will be redirected after the payment stage is complete.
+            See the request parameter [redirect\_url](checkout-api.md#redirect_url-string-optional) more information.
+
+            **Presence condition:**
+
+            * The request parameter [redirect\_url](checkout-api.md#redirect_url-string-optional) should be provided.
+          maxLength: 2000
+        sdk_setup_preload_payload:
+          allOf:
+            - $ref: "#/components/schemas/CheckoutSDK"
+          readOnly: true
+          default: false
+          description: |-
+            It is a JSON object containing preloaded data necessary for initializing the [Checkout SDK](checkout-sdk/). This data encompasses vital details such as customer information, available payment methods, and specific transaction details, all formatted according to the `Checkout SDK`'s initialization specifications. By offering essential information upfront, this feature streamlines the [checkout process](checkout-sdk/#ottu-checkout-sdk-flow), contributing to an improved user experience and increased efficiency.
+
+            :::info
+
+            It must be passed to the `Checkout SDK` constructor without any modifications.
+
+            :::
+
+            **Presence Conditions:**
+
+            * It will be included in the response solely when the [include\_sdk\_setup\_preload](checkout-api.md#include_sdk_setup_preload-bool-optional) parameter is set to `true`.
+        session_id:
+          type: string
+          readOnly: true
+          description: |-
+            A unique identifier for each payment transaction, used to maintain the session state during the payment process. It can be used to perform subsequent operations, like retrieve, acknowledge, refund, capture, and cancellation.
+            Max length: 128.
+        shipping_address:
+          $ref: "#/components/schemas/ShippingAddress"
+          description: |-
+            Shipping location data of the customer.
+            See the request parameter [shipping\_address](checkout-api.md#shipping_address-object-optional) for more information.
+
+            **Presence condition:**
+
+            * The child objects of the [shipping\_address](checkout-api.md#shipping_address-object-optional) parameter provided in the request object will be populated as child objects of the [shipping\_address](checkout-api.md#shipping_address-object-conditional) parameter in the response object.
+        state:
+          enum:
+            - created
+            - pending
+            - attempted
+            - authorized
+            - paid
+            - failed
+            - canceled
+            - expired
+            - invalided
+            - refunded
+            - cod
+          type: string
+          x-spec-enum-id: caee163196dbc11f
+          readOnly: true
+          description: |-
+            The current state of the payment transaction, it helps to understand the progress of the payment.
+            Enum: `created`, `pending`, `attempted`, `authorized`, `paid`, `failed`, `canceled`, `expired`, `invalided`, `refunded`, `cod`.
+            See [payment transaction state](../user-guide/payment-tracking/#payment-transaction-state-and-payment-attempt-state) for more information.
         type:
           enum:
             - e_commerce
@@ -5818,53 +6138,55 @@ components:
           type: string
           x-spec-enum-id: ad398830c7970f0a
           description: |-
-            The type of the payment transaction. This field represents the purpose of the payment and can be one of several pre-defined choices.
-
-            * `e_commerce` - Ecommerce
-            * `payment_request` - Payment Request
-        billing_address:
-          $ref: "#/components/schemas/Address"
-        shipping_address:
-          $ref: "#/components/schemas/ShippingAddress"
-        agreement:
-          allOf:
-            - $ref: "#/components/schemas/Agreement"
-          description:
-            "An established contractual arrangement with the payer, which
-            authorizes you to securely store and subsequently utilize their payment
-            information for specific purposes. This could encompass arrangements like
-            recurring payments for services such as mobile subscriptions, installment-based
-            payments for purchases, arrangements for ad-hoc charges like account top-ups,
-            or for standard industry practices like penalty charges for missed appointments.
-            \n\nNote: If your intention is solely to store payment details for transactions
-            initiated by the payer in the future, then this parameter group should
-            not be used."
-        attachment:
-          type: string
-          format: uri
-          description:
-            "A writable field that accepts an attachment file to be included
-            in email notifications sent to the customer regarding their payment, and
-            also be available for download on the checkout page. This field may be
-            used to provide the customer with additional information or documentation
-            related to their purchase. The value of this field should be a file object.
-            Upon successful submission, the API will return the URL for downloading
-            the attached file. "
-        attachment_short_url:
-          type: string
-          format: uri
-          readOnly: true
-          description:
-            A short URL that links to the attachment associated with this
-            payment. This URL may be included in email/sms notifications sent to the
-            customer regarding their payment or displayed on the checkout page to
-            allow the customer to easily access the attachment.
+            The type of the payment transaction.
+            See the request parameter [type](checkout-api.md#type-string-required) for more information.
         attachment_upload_url:
           type: string
-          description:
-            A writable field that accepts an attachment that has already
-            been uploaded to the server.
+          description: |-
+            A field in the response that contains the URL of an attachment that has already been uploaded to the server.
+
+            **Presence condition:**
+
+            * The request parameter [attachment\_upload\_url](checkout-api.md#attachment_upload_url-string-optional) should be included in the request payload.
           pattern: (?:pdf|jpeg|png|doc|docx|jpg|xls|xlsx|txt)$
+        vendor_name:
+          type: string
+          description: |-
+            It represents the name of the merchant or vendor associated with a payment transaction.
+            For more information see [vendor\_name](checkout-api.md#vendor_name-string-optional).
+
+            **Presence condition:**
+
+            * The request parameter [vendor\_name](checkout-api.md#vendor_name-string-optional) should be included in the request payload.
+          maxLength: 64
+        webhook_url:
+          type: string
+          format: uri
+          description: |-
+            It contains the URL where the payment result will be sent via a POST request after the customer has completed the payment session. The payment result will be included in the request body.
+            See Webhook [Payment Notification](webhooks/payment-notification.md).
+
+            **Presence condition:**
+
+            * The request parameter [webhook\_url](checkout-api.md#webhook_url-string-optional) should be provided.
+          maxLength: 2000
+        SeparatorField:
+          description: |-
+            This field is a dev components to separate the field exists in the old docs and others (We can check the fields below it to add them if they are helpful)
+            ------------------------------------------------------------------------------------
+            ------------------------------------------------------------------------------------
+            ------------------------------------------------------------------------------------
+            ------------------------------------------------------------------------------------
+            ------------------------------------------------------------------------------------
+            ------------------------------------------------------------------------------------
+            ------------------------------------------------------------------------------------
+            ------------------------------------------------------------------------------------
+            ------------------------------------------------------------------------------------
+            ------------------------------------------------------------------------------------
+            ------------------------------------------------------------------------------------
+            ------------------------------------------------------------------------------------
+            ------------------------------------------------------------------------------------
+            ------------------------------------------------------------------------------------
         billing:
           type: string
           readOnly: true
@@ -5873,80 +6195,6 @@ components:
             display and raw values for processing. Contains both the total transaction
             amount and any applicable fees with their respective currency codes and
             labels.
-        checkout_page_url:
-          type: string
-          format: uri
-          readOnly: true
-          description: Frontend Checkout Url.
-          maxLength: 2000
-        checkout_short_url:
-          type: string
-          format: uri
-          readOnly: true
-          description:
-            A short URL link that, when opened, redirects to the checkout
-            page for this payment. This URL may be shared with the customer to allow
-            them to easily access and complete the payment. This field is only available
-            if the `shortify_checkout_url` field is set to True.
-        checkout_url:
-          type: string
-          format: uri
-          readOnly: true
-          description:
-            URL that directs the customer to the Ottu Checkout Page where
-            they can see the payment details and available payment methods for the
-            transaction. If you need to share the payment link over SMS or WhatsApp,
-            use `checkout_short_url` instead.
-        customer_birthdate:
-          type: string
-          format: date
-          title: Customer Date of Birth
-          description:
-            Customer's date of birth in YYYY-MM-DD format.This field can
-            be used for age verification or compliance purposes during payment processing.
-        customer_email:
-          type: string
-          format: email
-          description:
-            The email address of the customer that is used to send payment
-            notifications and receipts, and can be used for fraud prevention. This
-            field is mandatory and is always sent to the payment gateway. It may also
-            be included in the invoice, receipt, email, and displayed on the payment
-            page.
-          maxLength: 128
-        customer_first_name:
-          type: string
-          description:
-            The first name of the recipient of the payment. This field
-            is used for various communications such as the invoice, receipt, email,
-            SMS, or displayed on the payment page. It may also be sent to the payment
-            gateway if necessary.
-          maxLength: 64
-        customer_id:
-          type: string
-          description:
-            The customer ID is a unique identifier for the customer within
-            the merchant's system. It is also used as a merchant identifier for the
-            customer and plays a critical role in tokenization. All the customer's
-            cards will be associated with this ID.
-          maxLength: 64
-        customer_last_name:
-          type: string
-          description:
-            The last name of the recipient of the payment. This field is
-            used for various communications such as the invoice, receipt, email, SMS,
-            or displayed on the payment page. It may also be sent to the payment gateway
-            if necessary.
-          maxLength: 64
-        customer_phone:
-          type: string
-          description:
-            Customer phone number associated with the payment. This might
-            be sent to the payment gateway and depending on the gateway, it may trigger
-            a click to pay process on the payment page. The phone number will also
-            be included in the invoice, receipt, email, and displayed on the payment
-            page.
-          maxLength: 16
         customer_phone_2:
           type: string
           title: Customer additional phone
@@ -5955,37 +6203,6 @@ components:
             can be updated by the customer on the payment page or in the Checkout
             SDK.
           maxLength: 16
-        due_datetime:
-          type: string
-          format: date-time
-          title: Due date and time
-          description:
-            The date and time by which the payment is due. This field may
-            be used to help remind the customer to complete the payment before the
-            due date.
-        email_recipients:
-          type: array
-          items:
-            type: string
-            format: email
-          description:
-            A comma-separated list of email addresses for internal recipients
-            who will receive customer emails. These recipients will be included in
-            email notifications sent to the customer regarding their payment.
-        expiration_time:
-          type: string
-          description:
-            If defined, any payment transactions created more than the
-            specified period of time ago will be invalidated or expired if the customer
-            attempts to complete them. By default, this expiration period is set to
-            24 hours from the time of transaction creation. This feature helps ensure
-            that payment transactions are processed promptly.
-        extra:
-          allOf:
-            - $ref: "#/components/schemas/ExtraInner"
-          description:
-            The extra information for the payment details, which the merchant
-            has sent it in key value form.
         generate_qr_code:
           type: boolean
           writeOnly: true
@@ -6003,92 +6220,8 @@ components:
             payload in the API response. This payload is only generated and added
             when this parameter is explicitly set to true. By default, it is false
             and the 'sdk_setup_preload_payload' payload will not be included.
-        initiator_id:
-          type: integer
-          title: initiator
-          description:
-            The user who initiated the creation of this payment transaction,
-            if available. This field is optional and may be used to track who created
-            the payment transaction. Note that if the payment transaction was using
-            API Key auth initiator_id can be set to any value that corresponds to
-            an existing ACTIVE user in the system
-        language:
-          enum:
-            - en
-            - ar
-          type: string
-          x-spec-enum-id: ac1757d67890d125
-          default: en
-          description: |-
-            This field specifies the language to be used for communication with the customer, including the payment page, receipt, invoice, email, SMS, and any other communications related to the payment transaction.
-
-            * `en` - English
-            * `ar` - Arabic
-        notifications:
-          allOf:
-            - $ref: "#/components/schemas/Notifications"
-          title: Notification settings
-          description:
-            A JSON field that contains the notification settings for this
-            payment transaction, including SMS and email notifications, as well as
-            the events for which they will be sent (e.g., 'created', 'paid', 'refund',
-            'canceled', etc.). This field may be used to configure and customize the
-            notifications sent to customers and internal recipients throughout the
-            payment process.
-        operation:
-          type: string
-          readOnly: true
-          description:
-            Specifies the type of operation to be performed by the payment
-            gateway. If set to `purchase`, the payment source will be directly charged.
-            If set to `authorize`, the payment source will only be authorized and
-            the actual charge will be made at a later time.
-        order_no:
-          type: string
-          description:
-            The unique identifier assigned to this payment transaction.
-            It is used for tracking purposes and is set by the merchant or the system.
-          maxLength: 128
         payment_instrument:
           $ref: "#/components/schemas/PaymentInstrument"
-        payment_methods:
-          allOf:
-            - $ref: "#/components/schemas/PaymentMethodsForRedirect"
-          readOnly: true
-          description:
-            An array containing all the payment methods derived from the
-            `pg_codes` input. Each object in the array contains information about
-            a single payment gateway, including its icon and the `redirect_url` that
-            will redirect the customer to the payment gateway's payment page.
-        payment_type:
-          enum:
-            - one_off
-            - auto_debit
-            - save_card
-          type: string
-          x-spec-enum-id: b2ae60f7918918e7
-          default: one_off
-          description:
-            "Type of payment. Choose `one_off` for payments that occur
-            only once without future commitments. Choose `auto_debit` for payments
-            that are automatically deducted, such as recurring subscriptions, installments,
-            or unscheduled auto-debits. \n\nChoose `save_card` if you want to perform
-            a card tokenization operation.\n\nNOTE: If `auto_debit` is selected: \n1.
-            `agreement` and `customer_id` parameters will also be mandatory. \n2.
-            Only PG codes supporting tokenization can be selected. \nAs a side effect,
-            the card used for the payment will be associated with the supplied `agreement.id`.
-            This card will be locked, preventing the customer from deleting it from
-            the system until an alternate card is chosen for auto-debit payments.\n\nNOTE:
-            If `save_card` is selected: \n1. The amount must be zero for the save
-            card operation. \n2. The selected MID(pg_code) must support tokenization
-            to enable the save card operation. \n3. Please note that the save card
-            operation is considered successful without any funds being charged.\n4.
-            Once a card is created, Ottu will send a webhook containing the card details
-            to the merchant's webhook URL.\n5. When the transaction type is `save_card`,
-            all previously saved cards returned in the sdk_preload_payload should
-            be hidden since the user is saving a new card and does not need to select
-            from existing ones.\n\n* `one_off` - One Off\n* `auto_debit` - Auto Debit\n*
-            `save_card` - Save Card"
         preload_checkout_page:
           type: boolean
           writeOnly: true
@@ -6099,48 +6232,6 @@ components:
             page after creation. Ignored on updates (PATCH/PUT) - cache is automatically
             invalidated on any update. The cache expires based on the transaction's
             expiration time (max 1 hour).
-        product_type:
-          type: string
-          description:
-            The type of product or service being purchased. This field
-            may be used for tracking and reporting purposes.
-          maxLength: 128
-        qr_code_url:
-          type: string
-          format: uri
-          readOnly: true
-          description:
-            A QR code that, when scanned, redirects to the checkout page
-            for this payment. This QR code may be displayed on invoices, receipts,
-            or other documents to allow customers to easily access the checkout page
-            and make a payment. This parameter is only present when `generate_qr_code`
-            is set to true.
-        redirect_url:
-          type: string
-          format: uri
-          description:
-            The URL where the customer will be redirected after the payment
-            stage only if the webhook URL returns a success status. `order_no`, `reference_number`
-            and `session_id` will be appended to the redirect URL as query parameters.
-          maxLength: 2000
-        sdk_setup_preload_payload:
-          allOf:
-            - $ref: "#/components/schemas/CheckoutSDK"
-          readOnly: true
-          default: false
-          description:
-            A JSON object containing preloaded data required to initialize
-            the checkout interface.This includes essential details such as customer
-            information, available payment methods.and specific transaction details,
-            all formatted according to the Checkout SDK's initialization specifications.This
-            field streamlines the checkout process by providing necessary information
-            upfront.enhancing user experience and efficiency.
-        session_id:
-          type: string
-          readOnly: true
-          description:
-            A unique identifier for each payment transaction, used to maintain
-            the session state during the payment process.
         settled_pg_code:
           type: string
           readOnly: true
@@ -6166,55 +6257,11 @@ components:
             If set to True, the checkout URL will be shortened using a
             URL shortener service. This should be used when sharing the payment URL
             via SMS or WhatsApp.
-        state:
-          enum:
-            - created
-            - pending
-            - attempted
-            - authorized
-            - paid
-            - failed
-            - canceled
-            - expired
-            - invalided
-            - refunded
-            - cod
-          type: string
-          x-spec-enum-id: caee163196dbc11f
-          readOnly: true
-          description: |-
-            The current state of the payment transaction, it helps to understand the progress of the payment.
-
-            * `created` - Created
-            * `pending` - Pending
-            * `attempted` - Attempted
-            * `authorized` - Authorized
-            * `paid` - Paid
-            * `failed` - Failed
-            * `canceled` - Canceled
-            * `expired` - Expired
-            * `invalided` - Invalided
-            * `refunded` - Refunded
-            * `cod` - Cash on Delivery
         unit_code:
           type: string
           writeOnly: true
           title: Unit
           description: The slug of the unit to be used for the transaction.
-        vendor_name:
-          type: string
-          description:
-            The name of the vendor or merchant associated with this payment.
-            This field may be used for accounting and reporting purposes.
-          maxLength: 64
-        webhook_url:
-          type: string
-          format: uri
-          description:
-            "URL where the payment result will be sent via a POST request
-            after the customer has completed the payment session. The payment result
-            will be included in the request body. "
-          maxLength: 2000
       required:
         - amount
         - attachment_short_url
