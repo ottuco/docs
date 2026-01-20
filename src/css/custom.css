@@ -150,6 +150,22 @@
   background-color: rgba(255, 255, 255, 0.08);
 }
 
+/* Improve ApiExplorer code tab icon contrast in dark mode */
+[data-theme="dark"] .openapi-tabs__code-item--http,
+[data-theme="dark"] .openapi-tabs__code-item--shell,
+[data-theme="dark"] .openapi-tabs__code-item--rust {
+  color: #e5e7eb;
+}
+
+[data-theme="dark"] .openapi-tabs__code-item--http::after,
+[data-theme="dark"] .openapi-tabs__code-item--shell::after {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32' fill='none' stroke='%23e5e7eb'><path d='M12 22L8 16L12 10M20 22L24 16L20 10' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+}
+
+[data-theme="dark"] .openapi-tabs__code-item--rust::after {
+  filter: brightness(0) invert(1) saturate(1.1);
+}
+
 /* Make the OpenAPI right panel sticky on desktop */
 @media (min-width: 997px) {
   .openapi-right-panel__container {
