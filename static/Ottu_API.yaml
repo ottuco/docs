@@ -29,7 +29,8 @@ paths:
       tags:
         - Satellite API
       security:
-        - SSO_JWT_Auth: []
+        - basicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -90,7 +91,8 @@ paths:
       tags:
         - Satellite API
       security:
-        - SSO_JWT_Auth: []
+        - basicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -183,8 +185,8 @@ paths:
       tags:
         - Unified UI
       security:
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
+        - basicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -209,8 +211,8 @@ paths:
       tags:
         - Unified UI
       security:
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
+        - basicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -239,8 +241,8 @@ paths:
       tags:
         - Unified UI
       security:
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
+        - basicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -283,11 +285,8 @@ paths:
               $ref: "#/components/schemas/ABAPayWay"
         required: true
       security:
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
-        - tokenAuth: []
         - basicAuth: []
-        - SSO_BasicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -327,7 +326,8 @@ paths:
               $ref: "#/components/schemas/PayApplePay"
         required: true
       security:
-        - Api-Key Authentication: []
+        - basicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -367,7 +367,8 @@ paths:
               $ref: "#/components/schemas/PayApplePay"
         required: true
       security:
-        - Api-Key Authentication: []
+        - basicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -414,8 +415,8 @@ paths:
               $ref: "#/components/schemas/SDKCancelOperation"
         required: true
       security:
-        - SSO_BasicAuth: []
         - basicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -458,8 +459,8 @@ paths:
       tags:
         - Checkout SDK
       security:
-        - SSO_BasicAuth: []
         - basicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -569,11 +570,8 @@ paths:
               $ref: "#/components/schemas/CSUCPayment"
         required: true
       security:
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
-        - tokenAuth: []
         - basicAuth: []
-        - SSO_BasicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -656,11 +654,8 @@ paths:
               $ref: "#/components/schemas/SubmitClickToPay"
         required: true
       security:
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
-        - tokenAuth: []
         - basicAuth: []
-        - SSO_BasicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -724,11 +719,8 @@ paths:
               $ref: "#/components/schemas/SubmitClickToPay"
         required: true
       security:
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
-        - tokenAuth: []
         - basicAuth: []
-        - SSO_BasicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -770,7 +762,8 @@ paths:
               $ref: "#/components/schemas/PayGooglePay"
         required: true
       security:
-        - Api-Key Authentication: []
+        - basicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -819,11 +812,8 @@ paths:
               $ref: "#/components/schemas/PGCodeValidation"
         required: true
       security:
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
-        - tokenAuth: []
         - basicAuth: []
-        - SSO_BasicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -862,8 +852,8 @@ paths:
       tags:
         - Checkout SDK
       security:
-        - SSO_BasicAuth: []
         - basicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -914,11 +904,8 @@ paths:
               $ref: "#/components/schemas/SubmitSMSPaymentPaymentRequest"
         required: true
       security:
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
-        - tokenAuth: []
         - basicAuth: []
-        - SSO_BasicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -955,11 +942,8 @@ paths:
             schema:
               $ref: "#/components/schemas/SMSPaymentAuthorizePayment"
       security:
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
-        - tokenAuth: []
         - basicAuth: []
-        - SSO_BasicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1014,11 +998,8 @@ paths:
               $ref: "#/components/schemas/SubmitToken"
         required: true
       security:
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
-        - tokenAuth: []
         - basicAuth: []
-        - SSO_BasicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1067,11 +1048,8 @@ paths:
               $ref: "#/components/schemas/CheckoutSubmit"
         required: true
       security:
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
-        - tokenAuth: []
         - basicAuth: []
-        - SSO_BasicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1122,11 +1100,8 @@ paths:
               $ref: "#/components/schemas/SubmitSMSPaymentPaymentRequest"
         required: true
       security:
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
-        - tokenAuth: []
         - basicAuth: []
-        - SSO_BasicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1163,11 +1138,8 @@ paths:
             schema:
               $ref: "#/components/schemas/SMSPaymentAuthorizePayment"
       security:
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
-        - tokenAuth: []
         - basicAuth: []
-        - SSO_BasicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1215,10 +1187,8 @@ paths:
               $ref: "#/components/schemas/CheckoutPOSTRequest"
         required: true
       security:
-        - SSO_BasicAuth: []
         - basicAuth: []
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
+        - tokenAuth: []
       responses:
         "201":
           content:
@@ -1286,10 +1256,8 @@ paths:
               $ref: "#/components/schemas/AttachmentUpload"
         required: true
       security:
-        - SSO_BasicAuth: []
         - basicAuth: []
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1331,10 +1299,8 @@ paths:
               $ref: "#/components/schemas/InvoicePOSTRequest"
         required: true
       security:
-        - SSO_BasicAuth: []
         - basicAuth: []
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
+        - tokenAuth: []
       responses:
         "201":
           content:
@@ -1362,12 +1328,8 @@ paths:
       tags:
         - Ottu PG
       security:
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
-        - tokenAuth: []
         - basicAuth: []
-        - SSO_BasicAuth: []
-        - {}
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1407,9 +1369,8 @@ paths:
               $ref: "#/components/schemas/AutoDebit"
         required: true
       security:
-        - SSO_BasicAuth: []
         - basicAuth: []
-        - SSO_JWT_Auth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1470,9 +1431,8 @@ paths:
               $ref: "#/components/schemas/UserCards"
         required: true
       security:
-        - SSO_BasicAuth: []
         - basicAuth: []
-        - SSO_JWT_Auth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1555,9 +1515,8 @@ paths:
       tags:
         - User Cards
       security:
-        - SSO_BasicAuth: []
         - basicAuth: []
-        - SSO_JWT_Auth: []
+        - tokenAuth: []
       responses:
         "204":
           content:
@@ -1624,8 +1583,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - SSO_BasicAuth: []
-        - SSO_JWT_Auth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1700,9 +1658,8 @@ paths:
             schema:
               $ref: "#/components/schemas/Inquiry"
       security:
-        - SSO_BasicAuth: []
         - basicAuth: []
-        - SSO_JWT_Auth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1800,11 +1757,8 @@ paths:
               $ref: "#/components/schemas/MessageNotification"
         required: true
       security:
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
-        - tokenAuth: []
         - basicAuth: []
-        - SSO_BasicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1924,11 +1878,8 @@ paths:
               $ref: "#/components/schemas/ChannelSpecificNotification"
         required: true
       security:
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
-        - tokenAuth: []
         - basicAuth: []
-        - SSO_BasicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -2041,9 +1992,8 @@ paths:
               $ref: "#/components/schemas/Operation"
         required: true
       security:
-        - SSO_BasicAuth: []
         - basicAuth: []
-        - SSO_JWT_Auth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -2098,9 +2048,8 @@ paths:
               $ref: "#/components/schemas/PaymentMethodsRequest"
         required: true
       security:
-        - SSO_BasicAuth: []
         - basicAuth: []
-        - SSO_JWT_Auth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -2146,7 +2095,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - SSO_BasicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -2198,9 +2147,8 @@ paths:
               $ref: "#/components/schemas/AutoDebit"
         required: true
       security:
-        - SSO_BasicAuth: []
         - basicAuth: []
-        - SSO_JWT_Auth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -2246,8 +2194,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - SSO_BasicAuth: []
-        - SSO_JWT_Auth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -2294,7 +2241,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - SSO_BasicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -2399,11 +2346,8 @@ paths:
               $ref: "#/components/schemas/Notification"
         required: true
       security:
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
-        - tokenAuth: []
         - basicAuth: []
-        - SSO_BasicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -2467,9 +2411,8 @@ paths:
               $ref: "#/components/schemas/URLShortener"
         required: true
       security:
-        - SSO_BasicAuth: []
-        - SSO_JWT_Auth: []
-        - jwtAuth: []
+        - basicAuth: []
+        - tokenAuth: []
       responses:
         "200":
           content:
@@ -15450,20 +15393,9 @@ components:
         - customer_id
         - type
   securitySchemes:
-    SSO_BasicAuth:
-      type: http
-      scheme: basic
-    SSO_JWT_Auth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
     basicAuth:
       type: http
       scheme: basic
-    jwtAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
     tokenAuth:
       type: apiKey
       in: header
