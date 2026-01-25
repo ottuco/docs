@@ -75,6 +75,39 @@
   margin-top: 1.25px;
   font-family: var(--ifm-font-family-monospace);
   transition: 300ms;
+  position: relative;
+
+  // Hash-link anchor styling for JSON field deep linking
+  .hash-link {
+    position: absolute;
+    left: -1.5rem;
+    opacity: 0;
+    color: var(--ifm-color-primary);
+    text-decoration: none;
+    font-size: 1.2em;
+    font-weight: normal;
+    transition: opacity 0.2s;
+    user-select: none;
+
+    &:hover {
+      opacity: 1;
+      text-decoration: none;
+    }
+
+    &::before {
+      content: "#";
+    }
+  }
+
+  // Show hash-link on hover of the property
+  &:hover .hash-link {
+    opacity: 0.6;
+  }
+
+  // Ensure proper spacing when hash-link is present
+  &[id] {
+    scroll-margin-top: calc(var(--ifm-navbar-height) + 1rem);
+  }
 }
 
 .openapi-schema__divider {

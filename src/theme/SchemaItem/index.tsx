@@ -76,13 +76,15 @@ export default function SchemaItemWrapper(props: Props): ReactNode {
   );
 
   useLayoutEffect(() => {
+    // Run for all SchemaItems (including collapsible ones),
+    // as long as we're in a browser and the container exists.
     if (
-      props.collapsible ||
       !containerRef.current ||
       typeof window === "undefined" ||
       typeof document === "undefined"
-    )
+    ) {
       return;
+    }
 
     // ✅ Ignore SchemaItems rendered inside the API caller / ApiExplorer
     if (isInsideApiExplorer(containerRef.current)) return;
@@ -112,7 +114,21 @@ export default function SchemaItemWrapper(props: Props): ReactNode {
     if (!anchor) {
       anchor = document.createElement("a");
       anchor.classList.add("hash-link");
-      currentElement.appendChild(anchor);
+      anchor.setAttribute("aria-label", `Anchor link to ${props.name || "field"}`);
+      anchor.setAttribute("title", "Direct link to this field");
+      
+      // Prevent click from propagating to parent elements that handle expand/collapse
+      anchor.addEventListener("click", (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        // Update URL hash without scrolling (browser will handle smooth scroll)
+        window.history.pushState(null, "", `#${fieldAnchorId}`);
+        // Manually scroll to the element
+        currentElement.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      
+      // Insert at the beginning so it appears before the property content
+      currentElement.insertBefore(anchor, currentElement.firstChild);
     }
 
     anchor.href = `#${fieldAnchorId}`;
@@ -120,7 +136,7 @@ export default function SchemaItemWrapper(props: Props): ReactNode {
     // If page loaded with that hash, trigger the scroll behavior
     const hash = window.location.hash.slice(1);
     if (hash === fieldAnchorId) anchor.click();
-  }, [props.collapsible, baseId, pathname]);
+  }, [baseId, pathname]);
 
   return (
     <div ref={containerRef}>

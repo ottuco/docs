@@ -72,6 +72,15 @@
   color: var(--ifm-link-hover-color);
 }
 
+/* Keep anchor targets below the fixed navbar */
+html {
+  scroll-padding-top: calc(var(--ifm-navbar-height) + 1rem);
+}
+
+:target {
+  scroll-margin-top: calc(var(--ifm-navbar-height) + 1rem);
+}
+
 [data-theme="light"] .alert--note {
   --ifm-alert-background-color: #f7f7f7;
   --ifm-alert-border-color: #d9d9d9;
