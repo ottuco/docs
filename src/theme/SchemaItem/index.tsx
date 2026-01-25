@@ -70,11 +70,6 @@ export default function SchemaItemWrapper(props: Props): ReactNode {
 
   const { pathname } = useLocation();
 
-  const baseId = useMemo(
-    () => buildFieldAnchorBaseId(props.schemaName, props.name),
-    [props.schemaName, props.name]
-  );
-
   useLayoutEffect(() => {
     // Run for all SchemaItems (including collapsible ones),
     // as long as we're in a browser and the container exists.
@@ -92,16 +87,24 @@ export default function SchemaItemWrapper(props: Props): ReactNode {
     // Reset counters per page route
     resetCountersIfRouteChanged(pathname);
 
+    const currentElement = containerRef.current.querySelector(
+      ".openapi-schema__property"
+    ) as HTMLElement | null;
+    if (!currentElement) return;
+
+    // Prefer explicit prop name; fall back to the rendered name when missing.
+    const renderedName =
+      currentElement.textContent?.trim() || undefined;
+    const baseId = buildFieldAnchorBaseId(
+      props.schemaName,
+      props.name ?? renderedName
+    );
+
     // Allocate a unique ID once per component instance
     if (!assignedIdRef.current) {
       assignedIdRef.current = allocateUniqueId(baseId);
     }
     const fieldAnchorId = assignedIdRef.current;
-
-    const currentElement = containerRef.current.querySelector(
-      ".openapi-schema__property"
-    ) as HTMLElement | null;
-    if (!currentElement) return;
 
     // Set element ID (target for deep link)
     currentElement.id = fieldAnchorId;
@@ -136,7 +139,7 @@ export default function SchemaItemWrapper(props: Props): ReactNode {
     // If page loaded with that hash, trigger the scroll behavior
     const hash = window.location.hash.slice(1);
     if (hash === fieldAnchorId) anchor.click();
-  }, [baseId, pathname]);
+  }, [props.schemaName, props.name, pathname]);
 
   return (
     <div ref={containerRef}>
