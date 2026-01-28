@@ -1232,6 +1232,155 @@ paths:
               schema:
                 $ref: "#/components/schemas/GenericErrorMessage"
           description: ""
+  /b/checkout/v1/pymt-txn/{session_id}:
+    get:
+      operationId: retrieve_payment_transaction_checkout
+      description: Retrieve a payment transaction using its session ID.
+      summary: Retrieve a Payment Transaction
+      parameters:
+        - in: path
+          name: session_id
+          schema:
+            type: string
+            description:
+              A unique identifier for each payment transaction, used to maintain
+              the session state during the payment process.
+          required: true
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+          description: Private API key to be provided in the format `Api-Key <key>`.
+          required: true
+      tags:
+        - Checkout API
+      security:
+        - basicAuth: []
+        - tokenAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+          description: ""
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientErrors"
+          description: ""
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ""
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ""
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ""
+        "415":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ""
+        "423":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ""
+    patch:
+      operationId: update_payment_transaction_checkout
+      description: Update an existing payment transaction using its session ID.
+      summary: Update a Payment Transaction
+      parameters:
+        - in: path
+          name: session_id
+          schema:
+            type: string
+            description:
+              A unique identifier for each payment transaction, used to maintain
+              the session state during the payment process.
+          required: true
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+          description: Private API key to be provided in the format `Api-Key <key>`.
+          required: true
+      tags:
+        - Checkout API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutPOSTRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/CheckoutPOSTRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/CheckoutPOSTRequest"
+        required: true
+      security:
+        - basicAuth: []
+        - tokenAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+          description: ""
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientErrors"
+          description: ""
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ""
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ""
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ""
+        "415":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ""
+        "423":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ""
   /b/checkout/v1/upload-attachment/:
     post:
       operationId: upload_attachment
