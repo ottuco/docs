@@ -74,7 +74,7 @@ export default function InlineApiItem({
       (apiObject as any)?.responses ?? []
     )) {
       if (statusRegex.test(code)) {
-        acceptArray.push(Object.keys((content as any).content ?? {}));
+        acceptArray.push(...Object.keys((content as any).content ?? {}));
       }
     }
     acceptArray = acceptArray.flat();
