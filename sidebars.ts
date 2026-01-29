@@ -50,6 +50,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'developers/quick-start',
         'developers/api-fundamentals',
+        'developers/checkout-api',
         {
           type: 'category',
           label: 'APIs',
