@@ -23,13 +23,18 @@ import Heading from "@theme/Heading";
   as={"h1"}
   className={"openapi__heading"}
   children={"Submit ABAPayWay"}
-></Heading>
+>
+</Heading>
 
 <MethodEndpoint
   method={"post"}
   path={"/b/checkout/api/sdk/v1/aba/submit/"}
   context={"endpoint"}
-></MethodEndpoint>
+>
+  
+</MethodEndpoint>
+
+
 
 Submits the selected ABA PayWay sub-option and returns the required payload and target URL for initiating the payment process via form submission. The request must include a valid `session_id`, `pg_code` and a `sub_option`.
 
@@ -38,366 +43,29 @@ Submits the selected ABA PayWay sub-option and returns the required payload and 
   as={"h2"}
   className={"openapi-tabs__heading"}
   children={"Request"}
-></Heading>
+>
+</Heading>
 
-<ParamsDetails parameters={undefined}></ParamsDetails>
+<ParamsDetails
+  parameters={undefined}
+>
+  
+</ParamsDetails>
 
 <RequestSchema
   title={"Body"}
-  body={{
-    content: {
-      "application/json": {
-        schema: {
-          type: "object",
-          description:
-            "Serializer for handling base implementation of ABA PayWay.",
-          properties: {
-            session_id: {
-              type: "string",
-              description:
-                "A unique identifier for each payment transaction, used to maintain the session state during the payment process.",
-            },
-            pg_code: {
-              type: "string",
-              description:
-                "PG code of payment gateway which a customer selected to perform the payment or authorization.",
-            },
-            sub_option: {
-              type: "string",
-              description:
-                "Represent the sub-option of the payment method selected by the user from the available options provided by the PG.",
-            },
-          },
-          required: ["pg_code", "session_id", "sub_option"],
-          title: "ABAPayWay",
-        },
-      },
-      "application/x-www-form-urlencoded": {
-        schema: {
-          type: "object",
-          description:
-            "Serializer for handling base implementation of ABA PayWay.",
-          properties: {
-            session_id: {
-              type: "string",
-              description:
-                "A unique identifier for each payment transaction, used to maintain the session state during the payment process.",
-            },
-            pg_code: {
-              type: "string",
-              description:
-                "PG code of payment gateway which a customer selected to perform the payment or authorization.",
-            },
-            sub_option: {
-              type: "string",
-              description:
-                "Represent the sub-option of the payment method selected by the user from the available options provided by the PG.",
-            },
-          },
-          required: ["pg_code", "session_id", "sub_option"],
-          title: "ABAPayWay",
-        },
-      },
-      "multipart/form-data": {
-        schema: {
-          type: "object",
-          description:
-            "Serializer for handling base implementation of ABA PayWay.",
-          properties: {
-            session_id: {
-              type: "string",
-              description:
-                "A unique identifier for each payment transaction, used to maintain the session state during the payment process.",
-            },
-            pg_code: {
-              type: "string",
-              description:
-                "PG code of payment gateway which a customer selected to perform the payment or authorization.",
-            },
-            sub_option: {
-              type: "string",
-              description:
-                "Represent the sub-option of the payment method selected by the user from the available options provided by the PG.",
-            },
-          },
-          required: ["pg_code", "session_id", "sub_option"],
-          title: "ABAPayWay",
-        },
-      },
-    },
-    required: true,
-  }}
-></RequestSchema>
+  body={{"content":{"application/json":{"schema":{"type":"object","description":"Serializer for handling base implementation of ABA PayWay.","properties":{"session_id":{"type":"string","description":"A unique identifier for each payment transaction, used to maintain the session state during the payment process."},"pg_code":{"type":"string","description":"PG code of payment gateway which a customer selected to perform the payment or authorization."},"sub_option":{"type":"string","description":"Represent the sub-option of the payment method selected by the user from the available options provided by the PG."}},"required":["pg_code","session_id","sub_option"],"title":"ABAPayWay"}},"application/x-www-form-urlencoded":{"schema":{"type":"object","description":"Serializer for handling base implementation of ABA PayWay.","properties":{"session_id":{"type":"string","description":"A unique identifier for each payment transaction, used to maintain the session state during the payment process."},"pg_code":{"type":"string","description":"PG code of payment gateway which a customer selected to perform the payment or authorization."},"sub_option":{"type":"string","description":"Represent the sub-option of the payment method selected by the user from the available options provided by the PG."}},"required":["pg_code","session_id","sub_option"],"title":"ABAPayWay"}},"multipart/form-data":{"schema":{"type":"object","description":"Serializer for handling base implementation of ABA PayWay.","properties":{"session_id":{"type":"string","description":"A unique identifier for each payment transaction, used to maintain the session state during the payment process."},"pg_code":{"type":"string","description":"PG code of payment gateway which a customer selected to perform the payment or authorization."},"sub_option":{"type":"string","description":"Represent the sub-option of the payment method selected by the user from the available options provided by the PG."}},"required":["pg_code","session_id","sub_option"],"title":"ABAPayWay"}}},"required":true}}
+>
+  
+</RequestSchema>
 
 <StatusCodes
   id={undefined}
   label={undefined}
-  responses={{
-    "200": {
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            description:
-              "Callback payload to be forwarder directly to `successCallback` SDK method.",
-            properties: {
-              message: {
-                type: "string",
-                readOnly: true,
-                description:
-                  "A concise description detailing the outcome of the operation. Suitable for presenting to the end-user if needed.",
-              },
-              form_of_payment: {
-                enum: ["aba_payway"],
-                type: "string",
-                description: "* `aba_payway` - ABA PayWay",
-                "x-spec-enum-id": "589d7f78e5da99b5",
-                readOnly: true,
-                default: "aba_payway",
-              },
-              challenge_occurred: {
-                type: "boolean",
-                default: false,
-                description:
-                  "This flag indicates if an additional verification, such as 3DS, OTP, PIN, etc., was initiated during the payment process. Use this flag in cancelCallback and errorCallback to control the presentation of error messages, especially for on-site payments undergoing a challenge flow. For example, after a failed 3DS verification, it's useful to show a custom popup informing the user of the payment failure. However, it's crucial to note that not all on-site failed payments need custom error messaging. In cases like GooglePay or ApplePay, error messages are inherently handled by the Payment Sheet, which remains open for the user to retry, making this distinction vital.",
-              },
-              session_id: {
-                type: "string",
-                description:
-                  "A unique identifier for each payment transaction, used to maintain the session state during the payment process.",
-              },
-              status: {
-                type: "string",
-                readOnly: true,
-                default: "success",
-                description:
-                  "The payment is successful. `successCallback` must be triggered.",
-              },
-              order_no: {
-                type: "string",
-                description:
-                  "The unique identifier assigned to this payment transaction. It is used for tracking purposes and is set by the merchant or the system.",
-              },
-              reference_number: {
-                type: "string",
-                description:
-                  "This is a unique value associated with each payment attempt made by a customer. It serves as the unique identifier for the payment when sent to the Payment Gateway (PG). It can be used to identify a specific payment attempt within one session, allowing for multiple reference numbers per session_id.",
-              },
-              form_url: {
-                type: "string",
-                format: "uri",
-                description: "The URL to which the SDK should POST to.",
-              },
-              js_sdk_src: {
-                type: "string",
-                format: "uri",
-                description:
-                  "The URL of the JavaScript SDK to be loaded for the payment process.",
-              },
-              form_data: {
-                allOf: [
-                  {
-                    type: "object",
-                    properties: {
-                      req_time: {
-                        type: "string",
-                        description:
-                          "Request timestamp in the format YYYYMMDDHHMMSS.",
-                      },
-                      merchant_id: {
-                        type: "string",
-                        description: "Unique identifier for the merchant.",
-                      },
-                      tran_id: {
-                        type: "string",
-                        description: "Unique transaction identifier.",
-                      },
-                      amount: {
-                        type: "string",
-                        description:
-                          "Transaction amount as a string, e.g., '10.73'.",
-                      },
-                      firstname: {
-                        type: "string",
-                        description: "Customer's first name.",
-                      },
-                      lastname: {
-                        type: "string",
-                        description: "Customer's last name.",
-                      },
-                      email: {
-                        type: "string",
-                        format: "email",
-                        description: "Customer's email address.",
-                      },
-                      phone: {
-                        type: "string",
-                        description:
-                          "Customer's phone number in international format.",
-                      },
-                      type: {
-                        type: "string",
-                        description:
-                          "Type of transaction: `purchase` or `pre-auth`.",
-                      },
-                      payment_option: {
-                        type: "string",
-                        description: "Selected ABA PayWay payment option.",
-                      },
-                      return_url: {
-                        type: "string",
-                        format: "uri",
-                        description:
-                          "Webhook URL to post **only** the success response.",
-                      },
-                      currency: {
-                        type: "string",
-                        description: "Currency code, e.g., 'USD' or 'KHR'.",
-                      },
-                      lifetime: {
-                        type: "integer",
-                        description:
-                          "Lifetime of the payment session in minutes.",
-                      },
-                      view_type: {
-                        type: "string",
-                        description:
-                          "View type for the payment interface: `popup`.",
-                      },
-                      payment_gate: {
-                        type: "integer",
-                        description:
-                          "Payment gate identifier, usually 0 for ABA PayWay to use their checkout.",
-                      },
-                      hash: {
-                        type: "string",
-                        description:
-                          "Security hash for ABA PayWay to validate the payload.",
-                      },
-                    },
-                    required: [
-                      "amount",
-                      "currency",
-                      "email",
-                      "firstname",
-                      "hash",
-                      "lastname",
-                      "lifetime",
-                      "merchant_id",
-                      "payment_gate",
-                      "payment_option",
-                      "phone",
-                      "req_time",
-                      "return_url",
-                      "tran_id",
-                      "type",
-                      "view_type",
-                    ],
-                    title: "ABAPayWayFormData",
-                  },
-                ],
-                description:
-                  "The form data to be submitted for the payment process.",
-              },
-              ws_url: {
-                type: "string",
-                format: "uri",
-                description:
-                  "WebSocket URL for real-time updates during the payment process.",
-              },
-            },
-            required: [
-              "form_data",
-              "form_of_payment",
-              "form_url",
-              "js_sdk_src",
-              "message",
-              "order_no",
-              "reference_number",
-              "session_id",
-              "status",
-              "ws_url",
-            ],
-            title: "ABAPayWaySubmitSDKSuccessCallback",
-          },
-        },
-      },
-      description: "",
-    },
-    "400": {
-      content: {
-        "application/json": {
-          schema: {
-            oneOf: [
-              {
-                type: "object",
-                properties: {
-                  message: {
-                    type: "string",
-                    readOnly: true,
-                    description:
-                      "A concise description detailing the outcome of the operation. Suitable for presenting to the end-user if needed.",
-                  },
-                  form_of_payment: {
-                    enum: ["aba_payway"],
-                    type: "string",
-                    "x-spec-enum-id": "589d7f78e5da99b5",
-                    readOnly: true,
-                    default: "aba_payway",
-                    description:
-                      "Indicates the form of payment used to process the transaction. This can be one of several options, including `apple_pay`, `google_pay`, `samsung_pay`, `token_pay`, `stc_pay`, `urpay`, or `redirect`.It's important to note that the `redirect` option is only present in the `errorCallback`. In other scenarios, especially with `cancelCallback` and `successCallback`, it's absent. This is because, in the redirect flow, the customer is redirected to a different page where actions like payment cancellation or confirmation occur, not on the page where the SDK is displayed.\n\n* `aba_payway` - ABA PayWay",
-                  },
-                  challenge_occurred: {
-                    type: "boolean",
-                    default: false,
-                    description:
-                      "This flag indicates if an additional verification, such as 3DS, OTP, PIN, etc., was initiated during the payment process. Use this flag in cancelCallback and errorCallback to control the presentation of error messages, especially for on-site payments undergoing a challenge flow. For example, after a failed 3DS verification, it's useful to show a custom popup informing the user of the payment failure. However, it's crucial to note that not all on-site failed payments need custom error messaging. In cases like GooglePay or ApplePay, error messages are inherently handled by the Payment Sheet, which remains open for the user to retry, making this distinction vital.",
-                  },
-                  session_id: { type: "string" },
-                  order_no: {
-                    type: "string",
-                    description:
-                      "The unique identifier assigned to this payment transaction. It is used for tracking purposes and is set by the merchant or the system.",
-                  },
-                  reference_number: {
-                    type: "string",
-                    description: "The reference number.",
-                  },
-                  status: {
-                    type: "string",
-                    readOnly: true,
-                    default: "error",
-                    description:
-                      "The payment is errored. `errorCallback` must be triggered.",
-                  },
-                },
-                required: [
-                  "form_of_payment",
-                  "message",
-                  "session_id",
-                  "status",
-                ],
-                title: "ABAPayWaySubmitSDKErrorCallback",
-              },
-            ],
-            title: "ABAPayWayFailureResponse",
-          },
-        },
-      },
-      description: "",
-    },
-    "401": {
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            properties: { detail: { type: "string" } },
-            required: ["detail"],
-            title: "GenericErrorMessage",
-          },
-        },
-      },
-      description: "",
-    },
-  }}
-></StatusCodes>
+  responses={{"200":{"content":{"application/json":{"schema":{"type":"object","description":"Callback payload to be forwarder directly to `successCallback` SDK method.","properties":{"message":{"type":"string","readOnly":true,"description":"A concise description detailing the outcome of the operation. Suitable for presenting to the end-user if needed."},"form_of_payment":{"enum":["aba_payway"],"type":"string","description":"* `aba_payway` - ABA PayWay","x-spec-enum-id":"589d7f78e5da99b5","readOnly":true,"default":"aba_payway"},"challenge_occurred":{"type":"boolean","default":false,"description":"This flag indicates if an additional verification, such as 3DS, OTP, PIN, etc., was initiated during the payment process. Use this flag in cancelCallback and errorCallback to control the presentation of error messages, especially for on-site payments undergoing a challenge flow. For example, after a failed 3DS verification, it's useful to show a custom popup informing the user of the payment failure. However, it's crucial to note that not all on-site failed payments need custom error messaging. In cases like GooglePay or ApplePay, error messages are inherently handled by the Payment Sheet, which remains open for the user to retry, making this distinction vital."},"session_id":{"type":"string","description":"A unique identifier for each payment transaction, used to maintain the session state during the payment process."},"status":{"type":"string","readOnly":true,"default":"success","description":"The payment is successful. `successCallback` must be triggered."},"order_no":{"type":"string","description":"The unique identifier assigned to this payment transaction. It is used for tracking purposes and is set by the merchant or the system."},"reference_number":{"type":"string","description":"This is a unique value associated with each payment attempt made by a customer. It serves as the unique identifier for the payment when sent to the Payment Gateway (PG). It can be used to identify a specific payment attempt within one session, allowing for multiple reference numbers per session_id."},"form_url":{"type":"string","format":"uri","description":"The URL to which the SDK should POST to."},"js_sdk_src":{"type":"string","format":"uri","description":"The URL of the JavaScript SDK to be loaded for the payment process."},"form_data":{"allOf":[{"type":"object","properties":{"req_time":{"type":"string","description":"Request timestamp in the format YYYYMMDDHHMMSS."},"merchant_id":{"type":"string","description":"Unique identifier for the merchant."},"tran_id":{"type":"string","description":"Unique transaction identifier."},"amount":{"type":"string","description":"Transaction amount as a string, e.g., '10.73'."},"firstname":{"type":"string","description":"Customer's first name."},"lastname":{"type":"string","description":"Customer's last name."},"email":{"type":"string","format":"email","description":"Customer's email address."},"phone":{"type":"string","description":"Customer's phone number in international format."},"type":{"type":"string","description":"Type of transaction: `purchase` or `pre-auth`."},"payment_option":{"type":"string","description":"Selected ABA PayWay payment option."},"return_url":{"type":"string","format":"uri","description":"Webhook URL to post **only** the success response."},"currency":{"type":"string","description":"Currency code, e.g., 'USD' or 'KHR'."},"lifetime":{"type":"integer","description":"Lifetime of the payment session in minutes."},"view_type":{"type":"string","description":"View type for the payment interface: `popup`."},"payment_gate":{"type":"integer","description":"Payment gate identifier, usually 0 for ABA PayWay to use their checkout."},"hash":{"type":"string","description":"Security hash for ABA PayWay to validate the payload."}},"required":["amount","currency","email","firstname","hash","lastname","lifetime","merchant_id","payment_gate","payment_option","phone","req_time","return_url","tran_id","type","view_type"],"title":"ABAPayWayFormData"}],"description":"The form data to be submitted for the payment process."},"ws_url":{"type":"string","format":"uri","description":"WebSocket URL for real-time updates during the payment process."}},"required":["form_data","form_of_payment","form_url","js_sdk_src","message","order_no","reference_number","session_id","status","ws_url"],"title":"ABAPayWaySubmitSDKSuccessCallback"}}},"description":""},"400":{"content":{"application/json":{"schema":{"oneOf":[{"type":"object","properties":{"message":{"type":"string","readOnly":true,"description":"A concise description detailing the outcome of the operation. Suitable for presenting to the end-user if needed."},"form_of_payment":{"enum":["aba_payway"],"type":"string","x-spec-enum-id":"589d7f78e5da99b5","readOnly":true,"default":"aba_payway","description":"Indicates the form of payment used to process the transaction. This can be one of several options, including `apple_pay`, `google_pay`, `samsung_pay`, `token_pay`, `stc_pay`, `urpay`, or `redirect`.It's important to note that the `redirect` option is only present in the `errorCallback`. In other scenarios, especially with `cancelCallback` and `successCallback`, it's absent. This is because, in the redirect flow, the customer is redirected to a different page where actions like payment cancellation or confirmation occur, not on the page where the SDK is displayed.\n\n* `aba_payway` - ABA PayWay"},"challenge_occurred":{"type":"boolean","default":false,"description":"This flag indicates if an additional verification, such as 3DS, OTP, PIN, etc., was initiated during the payment process. Use this flag in cancelCallback and errorCallback to control the presentation of error messages, especially for on-site payments undergoing a challenge flow. For example, after a failed 3DS verification, it's useful to show a custom popup informing the user of the payment failure. However, it's crucial to note that not all on-site failed payments need custom error messaging. In cases like GooglePay or ApplePay, error messages are inherently handled by the Payment Sheet, which remains open for the user to retry, making this distinction vital."},"session_id":{"type":"string"},"order_no":{"type":"string","description":"The unique identifier assigned to this payment transaction. It is used for tracking purposes and is set by the merchant or the system."},"reference_number":{"type":"string","description":"The reference number."},"status":{"type":"string","readOnly":true,"default":"error","description":"The payment is errored. `errorCallback` must be triggered."}},"required":["form_of_payment","message","session_id","status"],"title":"ABAPayWaySubmitSDKErrorCallback"}],"title":"ABAPayWayFailureResponse"}}},"description":""},"401":{"content":{"application/json":{"schema":{"type":"object","properties":{"detail":{"type":"string"}},"required":["detail"],"title":"GenericErrorMessage"}}},"description":""}}}
+>
+  
+</StatusCodes>
+
+
+      

@@ -45,6 +45,10 @@
   --ifm-menu-color-background-active: #f7f7f7;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* ================================
    DARK MODE (forced consistency)
    ================================ */
