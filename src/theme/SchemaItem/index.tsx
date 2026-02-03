@@ -1,8 +1,13 @@
-import { ReactNode } from "react";
+import { ReactNode, useMemo, useRef } from "react";
 
 import Markdown from "@theme/Markdown";
 import clsx from "clsx";
 
+import { mdiLinkVariant } from "@mdi/js";
+import Icon from "@mdi/react";
+
+import useLayoutEffect from "@docusaurus/useIsomorphicLayoutEffect";
+import { getFragmentId } from "@site/src/utils";
 import { guard } from "docusaurus-theme-openapi-docs/lib/markdown/utils";
 
 export interface Props {
@@ -42,7 +47,9 @@ ${enumDescriptions
   return "";
 };
 
-export default function SchemaItem(props: Props) {
+export default function SchemaItem(
+  props: Props & { schemaType?: string; parentSchemaName?: string },
+) {
   const {
     children: collapsibleSchemaContent,
     collapsible,
@@ -180,9 +187,31 @@ export default function SchemaItem(props: Props) {
     return undefined;
   }
 
+  const anchorRef = useRef<HTMLAnchorElement>(null);
+  
+  const id = useMemo(
+    () => getFragmentId(props.schemaType, props.parentSchemaName, props.name),
+    [props.schemaType, props.parentSchemaName, props.name],
+  );
+
+  useLayoutEffect(() => {
+    const hash = typeof window !== "undefined" ? window.location.hash : "";
+    if (hash === `#${id}`) {
+      anchorRef.current?.click();
+    }
+  }, [id]);
+
   const schemaContent = (
     <div>
-      <span className="openapi-schema__container">
+      <span id={id} className="openapi-schema__container">
+        <a ref={anchorRef} href={`#${id}`}>
+          <Icon
+            path={mdiLinkVariant}
+            size={0.75}
+            style={{ display: "inline-block", verticalAlign: "middle" }}
+          />
+        </a>
+        &nbsp;
         <strong
           className={clsx("openapi-schema__property", {
             "openapi-schema__strikethrough": deprecated,

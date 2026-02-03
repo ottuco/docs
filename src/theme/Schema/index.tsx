@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useMemo, useRef } from "react";
 
+import { mdiLinkVariant } from "@mdi/js";
+import Icon from "@mdi/react";
 import { ClosingArrayBracket, OpeningArrayBracket } from "@theme/ArrayBrackets";
 import Details from "@theme/Details";
 import DiscriminatorTabs from "@theme/DiscriminatorTabs";
@@ -8,6 +10,8 @@ import SchemaItem from "@theme/SchemaItem";
 import SchemaTabs from "@theme/SchemaTabs";
 import TabItem from "@theme/TabItem";
 // eslint-disable-next-line import/no-extraneous-dependencies
+import useLayoutEffect from "@docusaurus/useIsomorphicLayoutEffect";
+import { getFragmentId } from "@site/src/utils";
 import { merge } from "allof-merge";
 import clsx from "clsx";
 import {
@@ -47,6 +51,8 @@ const MarkdownWrapper: React.FC<MarkdownProps> = ({ text }) => {
 };
 
 interface SummaryProps {
+  parentSchemaName?: string;
+  schemaType: string;
   name: string;
   schemaName: string | undefined;
   schema: {
@@ -57,6 +63,8 @@ interface SummaryProps {
 }
 
 const Summary: React.FC<SummaryProps> = ({
+  parentSchemaName,
+  schemaType,
   name,
   schemaName,
   schema,
@@ -68,9 +76,31 @@ const Summary: React.FC<SummaryProps> = ({
     ? required.includes(name)
     : required === true;
 
+  const anchorRef = useRef<HTMLAnchorElement>(null);
+
+  const id = useMemo(
+    () => getFragmentId(schemaType, parentSchemaName, name),
+    [schemaType, parentSchemaName, name],
+  );
+
+  useLayoutEffect(() => {
+    const hash = typeof window !== "undefined" ? window.location.hash : "";
+    if (hash === `#${id}`) {
+      anchorRef.current?.click();
+    }
+  }, [id]);
+
   return (
     <summary>
-      <span className="openapi-schema__container">
+      <span id={id} className="openapi-schema__container">
+        <a ref={anchorRef} href={`#${id}`} onClick={(e) => e.stopPropagation()}>
+          <Icon
+            path={mdiLinkVariant}
+            size={0.75}
+            style={{ display: "inline-block", verticalAlign: "middle" }}
+          />
+        </a>
+        &nbsp;
         <strong
           className={clsx("openapi-schema__property", {
             "openapi-schema__strikethrough": deprecated,
@@ -96,11 +126,16 @@ const Summary: React.FC<SummaryProps> = ({
 
 // Common props interface
 interface SchemaProps {
+  parentSchemaName?: string;
   schema: SchemaObject;
   schemaType: "request" | "response";
 }
 
-const AnyOneOf: React.FC<SchemaProps> = ({ schema, schemaType }) => {
+const AnyOneOf: React.FC<SchemaProps> = ({
+  parentSchemaName,
+  schema,
+  schemaType,
+}) => {
   const type = schema.oneOf ? "oneOf" : "anyOf";
   return (
     <>
@@ -149,7 +184,11 @@ const AnyOneOf: React.FC<SchemaProps> = ({ schema, schemaType }) => {
 
               {/* Handle actual object types with properties or nested schemas */}
               {anyOneSchema.type === "object" && anyOneSchema.properties && (
-                <Properties schema={anyOneSchema} schemaType={schemaType} />
+                <Properties
+                  parentSchemaName={parentSchemaName}
+                  schema={anyOneSchema}
+                  schemaType={schemaType}
+                />
               )}
               {anyOneSchema.allOf && (
                 <SchemaNode schema={anyOneSchema} schemaType={schemaType} />
@@ -171,7 +210,11 @@ const AnyOneOf: React.FC<SchemaProps> = ({ schema, schemaType }) => {
   );
 };
 
-const Properties: React.FC<SchemaProps> = ({ schema, schemaType }) => {
+const Properties: React.FC<SchemaProps> = ({
+  parentSchemaName,
+  schema,
+  schemaType,
+}) => {
   const discriminator = schema.discriminator;
   if (discriminator && !discriminator.mapping) {
     const anyOneOf = schema.oneOf ?? schema.anyOf ?? {};
@@ -205,6 +248,7 @@ const Properties: React.FC<SchemaProps> = ({ schema, schemaType }) => {
       {Object.entries(schema.properties as {}).map(
         ([key, val]: [string, any]) => (
           <SchemaEdge
+            parentSchemaName={parentSchemaName}
             key={key}
             name={key}
             schema={val}
@@ -462,18 +506,27 @@ const AdditionalProperties: React.FC<SchemaProps> = ({
 };
 
 const SchemaNodeDetails: React.FC<SchemaEdgeProps> = ({
+  parentSchemaName,
   name,
   schemaName,
   schema,
   required,
   schemaType,
 }) => {
+  const prefix = getFragmentId(schemaType, parentSchemaName, name);
+  const hash =
+    typeof window !== "undefined" ? window.location.hash?.slice(1) : "";
+  const isOpen = hash === prefix || hash.startsWith(prefix + "-");
+
   return (
     <SchemaItem collapsible={true}>
       <Details
+        open={isOpen}
         className="openapi-markdown__details"
         summary={
           <Summary
+            parentSchemaName={parentSchemaName}
+            schemaType={schemaType}
             name={name}
             schemaName={schemaName}
             schema={schema}
@@ -486,7 +539,11 @@ const SchemaNodeDetails: React.FC<SchemaEdgeProps> = ({
           {getQualifierMessage(schema) && (
             <MarkdownWrapper text={getQualifierMessage(schema)} />
           )}
-          <SchemaNode schema={schema} schemaType={schemaType} />
+          <SchemaNode
+            parentSchemaName={getFragmentId(parentSchemaName, name)}
+            schema={schema}
+            schemaType={schemaType}
+          />
         </div>
       </Details>
     </SchemaItem>
@@ -574,6 +631,7 @@ const Items: React.FC<{
 };
 
 interface SchemaEdgeProps {
+  parentSchemaName?: string;
   name: string;
   schemaName?: string;
   schema: SchemaObject;
@@ -584,6 +642,7 @@ interface SchemaEdgeProps {
 }
 
 const SchemaEdge: React.FC<SchemaEdgeProps> = ({
+  parentSchemaName,
   name,
   schema,
   required,
@@ -616,6 +675,7 @@ const SchemaEdge: React.FC<SchemaEdgeProps> = ({
     // return <AnyOneOf schema={schema} schemaType={schemaType} />;
     return (
       <SchemaNodeDetails
+        parentSchemaName={parentSchemaName}
         name={name}
         schemaName={schemaName}
         schemaType={schemaType}
@@ -629,6 +689,7 @@ const SchemaEdge: React.FC<SchemaEdgeProps> = ({
   if (schema.properties) {
     return (
       <SchemaNodeDetails
+        parentSchemaName={parentSchemaName}
         name={name}
         schemaName={schemaName}
         schemaType={schemaType}
@@ -642,6 +703,7 @@ const SchemaEdge: React.FC<SchemaEdgeProps> = ({
   if (schema.additionalProperties) {
     return (
       <SchemaNodeDetails
+        parentSchemaName={parentSchemaName}
         name={name}
         schemaName={schemaName}
         schemaType={schemaType}
@@ -655,6 +717,7 @@ const SchemaEdge: React.FC<SchemaEdgeProps> = ({
   if (schema.items?.properties) {
     return (
       <SchemaNodeDetails
+        parentSchemaName={parentSchemaName}
         name={name}
         schemaName={schemaName}
         required={required}
@@ -668,6 +731,7 @@ const SchemaEdge: React.FC<SchemaEdgeProps> = ({
   if (schema.items?.anyOf || schema.items?.oneOf) {
     return (
       <SchemaNodeDetails
+        parentSchemaName={parentSchemaName}
         name={name}
         schemaName={schemaName}
         required={required}
@@ -688,6 +752,8 @@ const SchemaEdge: React.FC<SchemaEdgeProps> = ({
     ) {
       return (
         <SchemaItem
+          parentSchemaName={parentSchemaName}
+          schemaType={schemaType}
           collapsible={false}
           name={name}
           required={
@@ -715,6 +781,7 @@ const SchemaEdge: React.FC<SchemaEdgeProps> = ({
     if (mergedSchemas.oneOf || mergedSchemas.anyOf) {
       return (
         <SchemaNodeDetails
+          parentSchemaName={parentSchemaName}
           name={name}
           schemaName={mergedSchemaName}
           required={
@@ -732,6 +799,7 @@ const SchemaEdge: React.FC<SchemaEdgeProps> = ({
     if (mergedSchemas.properties !== undefined) {
       return (
         <SchemaNodeDetails
+          parentSchemaName={parentSchemaName}
           name={name}
           schemaName={mergedSchemaName}
           required={
@@ -747,22 +815,27 @@ const SchemaEdge: React.FC<SchemaEdgeProps> = ({
     }
 
     if (mergedSchemas.items?.properties) {
-      <SchemaNodeDetails
-        name={name}
-        schemaName={mergedSchemaName}
-        required={
-          Array.isArray(mergedSchemas.required)
-            ? mergedSchemas.required.includes(name)
-            : mergedSchemas.required
-        }
-        nullable={mergedSchemas.nullable}
-        schema={mergedSchemas}
-        schemaType={schemaType}
-      />;
+      return (
+        <SchemaNodeDetails
+          parentSchemaName={parentSchemaName}
+          name={name}
+          schemaName={mergedSchemaName}
+          required={
+            Array.isArray(mergedSchemas.required)
+              ? mergedSchemas.required.includes(name)
+              : mergedSchemas.required
+          }
+          nullable={mergedSchemas.nullable}
+          schema={mergedSchemas}
+          schemaType={schemaType}
+        />
+      );
     }
 
     return (
       <SchemaItem
+        parentSchemaName={parentSchemaName}
+        schemaType={schemaType}
         collapsible={false}
         name={name}
         required={Array.isArray(required) ? required.includes(name) : required}
@@ -777,6 +850,8 @@ const SchemaEdge: React.FC<SchemaEdgeProps> = ({
 
   return (
     <SchemaItem
+      parentSchemaName={parentSchemaName}
+      schemaType={schemaType}
       collapsible={false}
       name={name}
       required={Array.isArray(required) ? required.includes(name) : required}
@@ -792,13 +867,30 @@ const SchemaEdge: React.FC<SchemaEdgeProps> = ({
 function renderChildren(
   schema: SchemaObject,
   schemaType: "request" | "response",
+  parentSchemaName?: string,
 ) {
   return (
     <>
-      {schema.oneOf && <AnyOneOf schema={schema} schemaType={schemaType} />}
-      {schema.anyOf && <AnyOneOf schema={schema} schemaType={schemaType} />}
+      {schema.oneOf && (
+        <AnyOneOf
+          parentSchemaName={parentSchemaName}
+          schema={schema}
+          schemaType={schemaType}
+        />
+      )}
+      {schema.anyOf && (
+        <AnyOneOf
+          parentSchemaName={parentSchemaName}
+          schema={schema}
+          schemaType={schemaType}
+        />
+      )}
       {schema.properties && (
-        <Properties schema={schema} schemaType={schemaType} />
+        <Properties
+          parentSchemaName={parentSchemaName}
+          schema={schema}
+          schemaType={schemaType}
+        />
       )}
       {schema.additionalProperties && (
         <AdditionalProperties schema={schema} schemaType={schemaType} />
@@ -808,7 +900,11 @@ function renderChildren(
   );
 }
 
-const SchemaNode: React.FC<SchemaProps> = ({ schema, schemaType }) => {
+const SchemaNode: React.FC<SchemaProps> = ({
+  parentSchemaName,
+  schema,
+  schemaType,
+}) => {
   if (
     (schemaType === "request" && schema.readOnly) ||
     (schemaType === "response" && schema.writeOnly)
@@ -841,13 +937,25 @@ const SchemaNode: React.FC<SchemaProps> = ({ schema, schemaType }) => {
     return (
       <div>
         {mergedSchemas.oneOf && (
-          <AnyOneOf schema={mergedSchemas} schemaType={schemaType} />
+          <AnyOneOf
+            parentSchemaName={parentSchemaName}
+            schema={mergedSchemas}
+            schemaType={schemaType}
+          />
         )}
         {mergedSchemas.anyOf && (
-          <AnyOneOf schema={mergedSchemas} schemaType={schemaType} />
+          <AnyOneOf
+            parentSchemaName={parentSchemaName}
+            schema={mergedSchemas}
+            schemaType={schemaType}
+          />
         )}
         {mergedSchemas.properties && (
-          <Properties schema={mergedSchemas} schemaType={schemaType} />
+          <Properties
+            parentSchemaName={parentSchemaName}
+            schema={mergedSchemas}
+            schemaType={schemaType}
+          />
         )}
         {mergedSchemas.items && (
           <Items schema={mergedSchemas} schemaType={schemaType} />
@@ -881,7 +989,7 @@ const SchemaNode: React.FC<SchemaProps> = ({ schema, schemaType }) => {
     );
   }
 
-  return renderChildren(schema, schemaType);
+  return renderChildren(schema, schemaType, parentSchemaName);
 };
 
 export default SchemaNode;
