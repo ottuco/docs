@@ -45,6 +45,10 @@
   --ifm-menu-color-background-active: #f7f7f7;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* ================================
    DARK MODE (forced consistency)
    ================================ */
@@ -70,6 +74,15 @@
 
 .markdown a:hover {
   color: var(--ifm-link-hover-color);
+}
+
+/* Keep anchor targets below the fixed navbar */
+html {
+  scroll-padding-top: calc(var(--ifm-navbar-height));
+}
+
+:target {
+  scroll-margin-top: calc(var(--ifm-navbar-height));
 }
 
 [data-theme="light"] .alert--note {

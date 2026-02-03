@@ -1,130 +1,254 @@
-import type { WrapperProps } from "@docusaurus/types";
+import { ReactNode, useMemo, useRef } from "react";
+
+import Markdown from "@theme/Markdown";
+import clsx from "clsx";
+
+import { mdiLinkVariant } from "@mdi/js";
+import Icon from "@mdi/react";
+
 import useLayoutEffect from "@docusaurus/useIsomorphicLayoutEffect";
-import { useLocation } from "@docusaurus/router";
-import SchemaItem from "@theme-original/SchemaItem";
-import { useMemo, useRef, type ReactNode } from "react";
+import { getFragmentId } from "@site/src/utils";
+import { guard } from "docusaurus-theme-openapi-docs/lib/markdown/utils";
 
-type Props = WrapperProps<typeof SchemaItem>;
+export interface Props {
+  children?: ReactNode;
+  collapsible?: boolean;
+  name?: string;
+  qualifierMessage?: string | undefined;
+  required?: boolean;
+  schemaName?: string;
+  // TODO should probably be typed
+  schema?: any;
+  discriminator?: boolean;
+}
 
-const slugify = (value?: string) => {
-  if (!value) return undefined;
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/gi, "-")
-    .replace(/^-+|-+$/g, "");
+const transformEnumDescriptions = (
+  enumDescriptions?: Record<string, string>,
+) => {
+  if (enumDescriptions) {
+    return Object.entries(enumDescriptions);
+  }
+
+  return [];
 };
 
-function buildFieldAnchorBaseId(schemaName: any, name?: string) {
-  const schemaPart = Array.isArray(schemaName)
-    ? schemaName.join("-")
-    : schemaName ?? "schema";
-
-  const fieldPart = name ?? "field";
-
-  return slugify(`${schemaPart}-${fieldPart}`) ?? "field";
-}
-
-/**
- * Unique-id allocator (per page):
- * baseId, baseId-1, baseId-2, ...
- */
-let lastPathname: string | null = null;
-let idCounters = new Map<string, number>();
-
-function resetCountersIfRouteChanged(pathname: string) {
-  if (lastPathname !== pathname) {
-    lastPathname = pathname;
-    idCounters = new Map();
+const getEnumDescriptionMarkdown = (enumDescriptions?: [string, string][]) => {
+  if (enumDescriptions?.length) {
+    return `| Enum Value | Description |
+| ---- | ----- |
+${enumDescriptions
+  .map((desc) => {
+    return `| ${desc[0]} | ${desc[1]} | `.replaceAll("\n", "<br/>");
+  })
+  .join("\n")}
+    `;
   }
-}
 
-function allocateUniqueId(baseId: string) {
-  const current = idCounters.get(baseId) ?? 0;
-  idCounters.set(baseId, current + 1);
+  return "";
+};
 
-  // First occurrence gets baseId (no suffix)
-  if (current === 0) return baseId;
+export default function SchemaItem(
+  props: Props & { schemaType?: string; parentSchemaName?: string },
+) {
+  const {
+    children: collapsibleSchemaContent,
+    collapsible,
+    name,
+    qualifierMessage,
+    required,
+    schemaName,
+    schema,
+  } = props;
+  let deprecated;
+  let schemaDescription;
+  let defaultValue: string | undefined;
+  let example: string | undefined;
+  let nullable;
+  let enumDescriptions: [string, string][] = [];
+  let constValue: string | undefined;
 
-  // Subsequent occurrences get -1, -2, ...
-  return `${baseId}-${current}`;
-}
+  if (schema) {
+    deprecated = schema.deprecated;
+    schemaDescription = schema.description;
+    enumDescriptions = transformEnumDescriptions(schema["x-enumDescriptions"]);
+    defaultValue = schema.default;
+    example = schema.example;
+    nullable =
+      schema.nullable ||
+      (Array.isArray(schema.type) && schema.type.includes("null")); // support JSON Schema nullable
+    constValue = schema.const;
+  }
 
-/**
- * Skip anchors inside the API caller (ApiExplorer / Try It Out).
- * That UI uses "openapi-explorer__..." class names. :contentReference[oaicite:1]{index=1}
- */
-function isInsideApiExplorer(el: HTMLElement) {
-  // Matches .openapi-explorer or any ancestor whose class contains "openapi-explorer"
-  return Boolean(
-    el.closest?.('[class*="openapi-explorer"]') ||
-      el.closest?.(".openapi-explorer")
+  const renderRequired = guard(
+    Array.isArray(required) ? required.includes(name) : required,
+    () => <span className="openapi-schema__required">required</span>,
   );
-}
 
-export default function SchemaItemWrapper(props: Props): ReactNode {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const renderDeprecated = guard(deprecated, () => (
+    <span className="openapi-schema__deprecated">deprecated</span>
+  ));
 
-  // Keep the allocated ID stable for this specific SchemaItem instance
-  const assignedIdRef = useRef<string | null>(null);
+  const renderNullable = guard(nullable, () => (
+    <span className="openapi-schema__nullable">nullable</span>
+  ));
 
-  const { pathname } = useLocation();
+  const renderEnumDescriptions = guard(
+    getEnumDescriptionMarkdown(enumDescriptions),
+    (value) => {
+      return (
+        <div style={{ marginTop: ".5rem" }}>
+          <Markdown>{value}</Markdown>
+        </div>
+      );
+    },
+  );
 
-  const baseId = useMemo(
-    () => buildFieldAnchorBaseId(props.schemaName, props.name),
-    [props.schemaName, props.name]
+  const renderSchemaDescription = guard(schemaDescription, (description) => (
+    <>
+      <Markdown>{description}</Markdown>
+    </>
+  ));
+
+  const renderQualifierMessage = guard(qualifierMessage, (message) => (
+    <>
+      <Markdown>{message}</Markdown>
+    </>
+  ));
+
+  function renderDefaultValue() {
+    if (defaultValue !== undefined) {
+      if (typeof defaultValue === "string") {
+        return (
+          <div>
+            <strong>Default value: </strong>
+            <span>
+              <code>{defaultValue}</code>
+            </span>
+          </div>
+        );
+      }
+      return (
+        <div>
+          <strong>Default value: </strong>
+          <span>
+            <code>{JSON.stringify(defaultValue)}</code>
+          </span>
+        </div>
+      );
+    }
+    return undefined;
+  }
+
+  function renderExample() {
+    if (example !== undefined) {
+      if (typeof example === "string") {
+        return (
+          <div>
+            <strong>Example: </strong>
+            <span>
+              <code>{example}</code>
+            </span>
+          </div>
+        );
+      }
+      return (
+        <div>
+          <strong>Example: </strong>
+          <span>
+            <code>{JSON.stringify(example)}</code>
+          </span>
+        </div>
+      );
+    }
+    return undefined;
+  }
+
+  function renderConstValue() {
+    if (constValue !== undefined) {
+      if (typeof constValue === "string") {
+        return (
+          <div>
+            <strong>Constant value: </strong>
+            <span>
+              <code>{constValue}</code>
+            </span>
+          </div>
+        );
+      }
+      return (
+        <div>
+          <strong>Constant value: </strong>
+          <span>
+            <code>{JSON.stringify(constValue)}</code>
+          </span>
+        </div>
+      );
+    }
+    return undefined;
+  }
+
+  const anchorRef = useRef<HTMLAnchorElement>(null);
+
+  const id = useMemo(
+    () => getFragmentId(props.schemaType, props.parentSchemaName, props.name),
+    [props.schemaType, props.parentSchemaName, props.name],
   );
 
   useLayoutEffect(() => {
-    if (
-      props.collapsible ||
-      !containerRef.current ||
-      typeof window === "undefined" ||
-      typeof document === "undefined"
-    )
-      return;
-
-    // ✅ Ignore SchemaItems rendered inside the API caller / ApiExplorer
-    if (isInsideApiExplorer(containerRef.current)) return;
-
-    // Reset counters per page route
-    resetCountersIfRouteChanged(pathname);
-
-    // Allocate a unique ID once per component instance
-    if (!assignedIdRef.current) {
-      assignedIdRef.current = allocateUniqueId(baseId);
+    const hash = typeof window !== "undefined" ? window.location.hash : "";
+    if (hash === `#${id}`) {
+      anchorRef.current?.click();
     }
-    const fieldAnchorId = assignedIdRef.current;
+  }, [id]);
 
-    const currentElement = containerRef.current.querySelector(
-      ".openapi-schema__property"
-    ) as HTMLElement | null;
-    if (!currentElement) return;
-
-    // Set element ID (target for deep link)
-    currentElement.id = fieldAnchorId;
-
-    // Ensure we only append one hash-link
-    let anchor = currentElement.querySelector(
-      "a.hash-link"
-    ) as HTMLAnchorElement | null;
-
-    if (!anchor) {
-      anchor = document.createElement("a");
-      anchor.classList.add("hash-link");
-      currentElement.appendChild(anchor);
-    }
-
-    anchor.href = `#${fieldAnchorId}`;
-
-    // If page loaded with that hash, trigger the scroll behavior
-    const hash = window.location.hash.slice(1);
-    if (hash === fieldAnchorId) anchor.click();
-  }, [props.collapsible, baseId, pathname]);
+  const schemaContent = (
+    <div>
+      <span id={id} className="openapi-schema__container">
+        <a
+          ref={anchorRef}
+          href={`#${id}`}
+          onClick={() => {
+            const url = `${window.location.origin}${window.location.pathname}#${id}`;
+            navigator.clipboard.writeText(url);
+          }}
+        >
+          <Icon
+            path={mdiLinkVariant}
+            size={0.75}
+            style={{ display: "inline-block", verticalAlign: "middle" }}
+          />
+        </a>
+        &nbsp;
+        <strong
+          className={clsx("openapi-schema__property", {
+            "openapi-schema__strikethrough": deprecated,
+          })}
+        >
+          {name}
+        </strong>
+        <span className="openapi-schema__name">
+          {Array.isArray(schemaName) ? schemaName.join(" | ") : schemaName}
+        </span>
+        {(nullable || required || deprecated) && (
+          <span className="openapi-schema__divider"></span>
+        )}
+        {renderNullable}
+        {renderRequired}
+        {renderDeprecated}
+      </span>
+      {renderSchemaDescription}
+      {renderEnumDescriptions}
+      {renderQualifierMessage}
+      {renderConstValue()}
+      {renderDefaultValue()}
+      {renderExample()}
+      {collapsibleSchemaContent ?? collapsibleSchemaContent}
+    </div>
+  );
 
   return (
-    <div ref={containerRef}>
-      <SchemaItem {...props} />
+    <div className="openapi-schema__list-item">
+      {collapsible ? collapsibleSchemaContent : schemaContent}
     </div>
   );
 }

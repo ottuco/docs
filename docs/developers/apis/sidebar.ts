@@ -180,6 +180,18 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
+          id: "developers/apis/retrieve-payment-transaction-checkout",
+          label: "Retrieve Payment Transaction",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/apis/update-payment-transaction-checkout",
+          label: "Update Payment Transaction",
+          className: "api-method patch",
+        },
+        {
+          type: "doc",
           id: "developers/apis/upload-attachment",
           label: "Attachment Upload",
           className: "api-method post",

@@ -12,7 +12,7 @@ type FeatureItem = {
 const FeatureList: FeatureItem[] = [
   {
     title: 'Developer-Friendly APIs',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    Svg: require('@site/static/img/ottu-api.svg').default,
     description: (
       <>
         RESTful APIs, comprehensive SDKs, and detailed documentation make integration
@@ -22,7 +22,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Multi-Gateway Support',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    Svg: require('@site/static/img/ottu-gateway.svg').default,
     description: (
       <>
         Connect to multiple payment gateways through a single integration. 
@@ -32,7 +32,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Global Scale',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    Svg: require('@site/static/img/ottu-global.svg').default,
     description: (
       <>
         Accept payments in 100+ currencies with local payment methods worldwide.
