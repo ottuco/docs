@@ -2,13 +2,16 @@ import React, { useMemo, useRef } from "react";
 
 import { mdiLinkVariant } from "@mdi/js";
 import Icon from "@mdi/react";
-import { ClosingArrayBracket, OpeningArrayBracket } from "@theme/ArrayBrackets";
+import SchemaItem from "@site/src/theme/SchemaItem";
 import Details from "@theme/Details";
-import DiscriminatorTabs from "@theme/DiscriminatorTabs";
-import Markdown from "@theme/Markdown";
-import SchemaItem from "@theme/SchemaItem";
-import SchemaTabs from "@theme/SchemaTabs";
 import TabItem from "@theme/TabItem";
+import {
+  ClosingArrayBracket,
+  OpeningArrayBracket,
+} from "docusaurus-theme-openapi-docs/lib/theme/ArrayBrackets";
+import DiscriminatorTabs from "docusaurus-theme-openapi-docs/lib/theme/DiscriminatorTabs";
+import Markdown from "docusaurus-theme-openapi-docs/lib/theme/Markdown";
+import SchemaTabs from "docusaurus-theme-openapi-docs/lib/theme/SchemaTabs";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import useLayoutEffect from "@docusaurus/useIsomorphicLayoutEffect";
 import { getFragmentId } from "@site/src/utils";
@@ -150,6 +153,7 @@ const AnyOneOf: React.FC<SchemaProps> = ({
       <span className="badge badge--info" style={{ marginBottom: "1rem" }}>
         {type}
       </span>
+      {/* @ts-expect-error upstream SchemaTabsProps type chain is broken */}
       <SchemaTabs>
         {schema[type]?.map((anyOneSchema: any, index: number) => {
           const label = anyOneSchema.title || anyOneSchema.type;

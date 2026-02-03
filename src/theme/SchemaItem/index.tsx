@@ -1,7 +1,7 @@
 import { ReactNode, useMemo, useRef } from "react";
 
-import Markdown from "@theme/Markdown";
 import clsx from "clsx";
+import Markdown from "docusaurus-theme-openapi-docs/lib/theme/Markdown";
 
 import { mdiLinkVariant } from "@mdi/js";
 import Icon from "@mdi/react";
@@ -20,6 +20,8 @@ export interface Props {
   // TODO should probably be typed
   schema?: any;
   discriminator?: boolean;
+  parentSchemaName?: string;
+  schemaType?: string;
 }
 
 const transformEnumDescriptions = (
@@ -47,9 +49,7 @@ ${enumDescriptions
   return "";
 };
 
-export default function SchemaItem(
-  props: Props & { schemaType?: string; parentSchemaName?: string },
-) {
+export default function SchemaItem(props: Props) {
   const {
     children: collapsibleSchemaContent,
     collapsible,
