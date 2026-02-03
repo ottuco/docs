@@ -93,7 +93,15 @@ const Summary: React.FC<SummaryProps> = ({
   return (
     <summary>
       <span id={id} className="openapi-schema__container">
-        <a ref={anchorRef} href={`#${id}`} onClick={(e) => e.stopPropagation()}>
+        <a
+          ref={anchorRef}
+          href={`#${id}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            const url = `${window.location.origin}${window.location.pathname}#${id}`;
+            navigator.clipboard.writeText(url);
+          }}
+        >
           <Icon
             path={mdiLinkVariant}
             size={0.75}

@@ -188,7 +188,7 @@ export default function SchemaItem(
   }
 
   const anchorRef = useRef<HTMLAnchorElement>(null);
-  
+
   const id = useMemo(
     () => getFragmentId(props.schemaType, props.parentSchemaName, props.name),
     [props.schemaType, props.parentSchemaName, props.name],
@@ -204,7 +204,14 @@ export default function SchemaItem(
   const schemaContent = (
     <div>
       <span id={id} className="openapi-schema__container">
-        <a ref={anchorRef} href={`#${id}`}>
+        <a
+          ref={anchorRef}
+          href={`#${id}`}
+          onClick={() => {
+            const url = `${window.location.origin}${window.location.pathname}#${id}`;
+            navigator.clipboard.writeText(url);
+          }}
+        >
           <Icon
             path={mdiLinkVariant}
             size={0.75}
