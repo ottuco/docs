@@ -23,6 +23,7 @@ paths:
         - Satellite API
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -77,6 +78,7 @@ paths:
         - Satellite API
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -170,6 +172,7 @@ paths:
         - Unified UI
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -195,6 +198,7 @@ paths:
         - Unified UI
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -224,6 +228,7 @@ paths:
         - Unified UI
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -267,6 +272,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -307,6 +313,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -347,6 +354,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -394,6 +402,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -437,6 +446,7 @@ paths:
         - Checkout SDK
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -547,6 +557,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -630,6 +641,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -694,6 +706,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -736,6 +749,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -785,6 +799,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -824,6 +839,7 @@ paths:
         - Checkout SDK
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -875,6 +891,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -912,6 +929,7 @@ paths:
               $ref: "#/components/schemas/SMSPaymentAuthorizePayment"
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -967,6 +985,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1016,6 +1035,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1067,6 +1087,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1104,6 +1125,7 @@ paths:
               $ref: "#/components/schemas/SMSPaymentAuthorizePayment"
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1145,6 +1167,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "201":
           content:
@@ -1205,6 +1228,7 @@ paths:
       security:
         - SSO_BasicAuth: []
         - basicAuth: []
+        - apiKeyAuth: []
         - SSO_JWT_Auth: []
       responses:
         "200":
@@ -1258,6 +1282,7 @@ paths:
       security:
         - SSO_BasicAuth: []
         - basicAuth: []
+        - apiKeyAuth: []
         - SSO_JWT_Auth: []
       responses:
         "200":
@@ -1308,6 +1333,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1343,6 +1369,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "201":
           content:
@@ -1371,6 +1398,7 @@ paths:
         - Ottu PG
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1404,6 +1432,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1458,6 +1487,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1541,6 +1571,7 @@ paths:
         - User Cards
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "204":
           content:
@@ -1607,6 +1638,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1675,6 +1707,7 @@ paths:
               $ref: "#/components/schemas/Inquiry"
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1766,6 +1799,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1879,6 +1913,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1985,6 +2020,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -2040,6 +2076,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -2085,6 +2122,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -2130,6 +2168,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -2175,6 +2214,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -2221,6 +2261,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -2319,6 +2360,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -2376,6 +2418,7 @@ paths:
         required: true
       security:
         - basicAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -16707,5 +16750,10 @@ components:
     basicAuth:
       type: http
       scheme: basic
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: API key authentication with required prefix "Api-Key"
 servers:
   - url: https://sandbox.ottu.net
