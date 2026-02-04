@@ -167,6 +167,8 @@ const AnyOneOf: React.FC<SchemaProps> = ({
               {/* Handle primitive types directly */}
               {(isPrimitive(anyOneSchema) || anyOneSchema.const) && (
                 <SchemaItem
+                  parentSchemaName={parentSchemaName}
+                  schemaType={schemaType}
                   collapsible={false}
                   name={undefined}
                   schemaName={anyOneSchema.type}
@@ -184,6 +186,8 @@ const AnyOneOf: React.FC<SchemaProps> = ({
                 !anyOneSchema.oneOf &&
                 !anyOneSchema.anyOf && (
                   <SchemaItem
+                    parentSchemaName={parentSchemaName}
+                    schemaType={schemaType}
                     collapsible={false}
                     name={undefined}
                     schemaName={anyOneSchema.type}
@@ -203,16 +207,32 @@ const AnyOneOf: React.FC<SchemaProps> = ({
                 />
               )}
               {anyOneSchema.allOf && (
-                <SchemaNode schema={anyOneSchema} schemaType={schemaType} />
+                <SchemaNode
+                  parentSchemaName={parentSchemaName}
+                  schema={anyOneSchema}
+                  schemaType={schemaType}
+                />
               )}
               {anyOneSchema.oneOf && (
-                <SchemaNode schema={anyOneSchema} schemaType={schemaType} />
+                <SchemaNode
+                  parentSchemaName={parentSchemaName}
+                  schema={anyOneSchema}
+                  schemaType={schemaType}
+                />
               )}
               {anyOneSchema.anyOf && (
-                <SchemaNode schema={anyOneSchema} schemaType={schemaType} />
+                <SchemaNode
+                  parentSchemaName={parentSchemaName}
+                  schema={anyOneSchema}
+                  schemaType={schemaType}
+                />
               )}
               {anyOneSchema.items && (
-                <Items schema={anyOneSchema} schemaType={schemaType} />
+                <Items
+                  parentSchemaName={parentSchemaName}
+                  schema={anyOneSchema}
+                  schemaType={schemaType}
+                />
               )}
             </TabItem>
           );
@@ -245,6 +265,8 @@ const Properties: React.FC<SchemaProps> = ({
   if (Object.keys(schema.properties as {}).length === 0) {
     return (
       <SchemaItem
+        parentSchemaName={parentSchemaName}
+        schemaType={schemaType}
         collapsible={false}
         name=""
         required={false}
@@ -279,6 +301,7 @@ const Properties: React.FC<SchemaProps> = ({
 };
 
 const PropertyDiscriminator: React.FC<SchemaEdgeProps> = ({
+  parentSchemaName,
   name,
   schemaName,
   schema,
@@ -323,6 +346,7 @@ const PropertyDiscriminator: React.FC<SchemaEdgeProps> = ({
                 value={`${index}-item-discriminator`}
               >
                 <SchemaNode
+                  parentSchemaName={parentSchemaName}
                   schema={discriminator.mapping[key]}
                   schemaType={schemaType}
                 />
@@ -336,6 +360,7 @@ const PropertyDiscriminator: React.FC<SchemaEdgeProps> = ({
           ([key, val]: [string, any]) =>
             key !== discriminator.propertyName && (
               <SchemaEdge
+                parentSchemaName={parentSchemaName}
                 key={key}
                 name={key}
                 schema={val}
@@ -354,12 +379,14 @@ const PropertyDiscriminator: React.FC<SchemaEdgeProps> = ({
 };
 
 interface DiscriminatorNodeProps {
+  parentSchemaName?: string;
   discriminator: any;
   schema: SchemaObject;
   schemaType: "request" | "response";
 }
 
 const DiscriminatorNode: React.FC<DiscriminatorNodeProps> = ({
+  parentSchemaName,
   discriminator,
   schema,
   schemaType,
@@ -429,6 +456,7 @@ const DiscriminatorNode: React.FC<DiscriminatorNodeProps> = ({
   // Default case for discriminator without oneOf/anyOf/allOf
   return (
     <PropertyDiscriminator
+      parentSchemaName={parentSchemaName}
       name={name}
       schemaName={schemaName}
       schema={schema}
@@ -444,6 +472,7 @@ const DiscriminatorNode: React.FC<DiscriminatorNodeProps> = ({
 };
 
 const AdditionalProperties: React.FC<SchemaProps> = ({
+  parentSchemaName,
   schema,
   schemaType,
 }) => {
@@ -455,6 +484,8 @@ const AdditionalProperties: React.FC<SchemaProps> = ({
   if (additionalProperties === true || isEmpty(additionalProperties)) {
     return (
       <SchemaItem
+        parentSchemaName={parentSchemaName}
+        schemaType={schemaType}
         name="property name*"
         required={false}
         schemaName="any"
@@ -480,6 +511,7 @@ const AdditionalProperties: React.FC<SchemaProps> = ({
     const required = schema.required || false;
     return (
       <SchemaNodeDetails
+        parentSchemaName={parentSchemaName}
         name="property name*"
         schemaName={title}
         required={required}
@@ -501,6 +533,8 @@ const AdditionalProperties: React.FC<SchemaProps> = ({
     const schemaName = getSchemaName(additionalProperties);
     return (
       <SchemaItem
+        parentSchemaName={parentSchemaName}
+        schemaType={schemaType}
         name="property name*"
         required={false}
         schemaName={schemaName}
@@ -563,9 +597,10 @@ const SchemaNodeDetails: React.FC<SchemaEdgeProps> = ({
 };
 
 const Items: React.FC<{
+  parentSchemaName?: string;
   schema: any;
   schemaType: "request" | "response";
-}> = ({ schema, schemaType }) => {
+}> = ({ parentSchemaName, schema, schemaType }) => {
   // Process schema.items to handle allOf merging
   let itemsSchema = schema.items;
   if (schema.items?.allOf) {
@@ -582,13 +617,25 @@ const Items: React.FC<{
       <>
         <OpeningArrayBracket />
         {hasOneOfAnyOf && (
-          <AnyOneOf schema={itemsSchema} schemaType={schemaType} />
+          <AnyOneOf
+            parentSchemaName={parentSchemaName}
+            schema={itemsSchema}
+            schemaType={schemaType}
+          />
         )}
         {hasProperties && (
-          <Properties schema={itemsSchema} schemaType={schemaType} />
+          <Properties
+            parentSchemaName={parentSchemaName}
+            schema={itemsSchema}
+            schemaType={schemaType}
+          />
         )}
         {hasAdditionalProperties && (
-          <AdditionalProperties schema={itemsSchema} schemaType={schemaType} />
+          <AdditionalProperties
+            parentSchemaName={parentSchemaName}
+            schema={itemsSchema}
+            schemaType={schemaType}
+          />
         )}
         <ClosingArrayBracket />
       </>
@@ -607,6 +654,8 @@ const Items: React.FC<{
       <div style={{ marginLeft: ".5rem" }}>
         <OpeningArrayBracket />
         <SchemaItem
+          parentSchemaName={parentSchemaName}
+          schemaType={schemaType}
           collapsible={false}
           name="" // No name for array items
           schemaName={getSchemaName(itemsSchema)}
@@ -626,6 +675,7 @@ const Items: React.FC<{
       <OpeningArrayBracket />
       {Object.entries(itemsSchema || {}).map(([key, val]: [string, any]) => (
         <SchemaEdge
+          parentSchemaName={parentSchemaName}
           key={key}
           name={key}
           schema={val}
@@ -673,6 +723,7 @@ const SchemaEdge: React.FC<SchemaEdgeProps> = ({
   if (discriminator && discriminator.propertyName === name) {
     return (
       <PropertyDiscriminator
+        parentSchemaName={parentSchemaName}
         name={name}
         schemaName={schemaName}
         schema={schema}
@@ -905,9 +956,19 @@ function renderChildren(
         />
       )}
       {schema.additionalProperties && (
-        <AdditionalProperties schema={schema} schemaType={schemaType} />
+        <AdditionalProperties
+          parentSchemaName={parentSchemaName}
+          schema={schema}
+          schemaType={schemaType}
+        />
       )}
-      {schema.items && <Items schema={schema} schemaType={schemaType} />}
+      {schema.items && (
+        <Items
+          parentSchemaName={parentSchemaName}
+          schema={schema}
+          schemaType={schemaType}
+        />
+      )}
     </>
   );
 }
@@ -928,6 +989,7 @@ const SchemaNode: React.FC<SchemaProps> = ({
     const { discriminator } = schema;
     return (
       <DiscriminatorNode
+        parentSchemaName={parentSchemaName}
         discriminator={discriminator}
         schema={schema}
         schemaType={schemaType}
@@ -970,7 +1032,11 @@ const SchemaNode: React.FC<SchemaProps> = ({
           />
         )}
         {mergedSchemas.items && (
-          <Items schema={mergedSchemas} schemaType={schemaType} />
+          <Items
+            parentSchemaName={parentSchemaName}
+            schema={mergedSchemas}
+            schemaType={schemaType}
+          />
         )}
       </div>
     );
@@ -989,6 +1055,8 @@ const SchemaNode: React.FC<SchemaProps> = ({
     const schemaName = getSchemaName(schema);
     return (
       <SchemaItem
+        parentSchemaName={parentSchemaName}
+        schemaType={schemaType}
         collapsible={false}
         name={schema.type}
         required={Boolean(schema.required)}

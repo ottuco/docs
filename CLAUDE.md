@@ -123,12 +123,18 @@ For a schema like `response > payment > details > amount`, the generated IDs are
 
 ### Key Architectural Decisions
 
-**`parentSchemaName` prop accumulation**: The `parentSchemaName` prop carries the accumulated path through the recursive component tree. Each nesting level concatenates its own name before passing it down:
+**`parentSchemaName` prop accumulation**: The `parentSchemaName` prop carries the accumulated path through the recursive component tree. Each nesting level concatenates its own name before passing it down. **Every** component that renders children must forward `parentSchemaName`:
 
-- `SchemaNode` receives `parentSchemaName` and passes it through `renderChildren` to `Properties` and `AnyOneOf`
+- `SchemaNode` receives `parentSchemaName` and passes it to `DiscriminatorNode`, `AnyOneOf`, `Properties`, `AdditionalProperties`, `Items`, `SchemaItem`, and through `renderChildren`
+- `renderChildren` forwards it to `AnyOneOf`, `Properties`, `AdditionalProperties`, and `Items`
+- `AnyOneOf` passes it to `Properties`, `SchemaNode`, `Items`, and `SchemaItem`
 - `Properties` passes it to each `SchemaEdge`
-- `SchemaEdge` passes it to `SchemaNodeDetails` or `SchemaItem`
-- `SchemaNodeDetails` accumulates via `getFragmentId(parentSchemaName, name)` before passing to its child `SchemaNode`
+- `SchemaEdge` passes it to `SchemaNodeDetails`, `SchemaItem`, or `PropertyDiscriminator`
+- `SchemaNodeDetails` **accumulates** via `getFragmentId(parentSchemaName, name)` before passing to its child `SchemaNode` — this is the only place the path grows
+- `DiscriminatorNode` passes it to `PropertyDiscriminator`
+- `PropertyDiscriminator` passes it to `SchemaNode` and `SchemaEdge`
+- `AdditionalProperties` passes it to `SchemaNodeDetails` and `SchemaItem`
+- `Items` passes it to `AnyOneOf`, `Properties`, `AdditionalProperties`, `SchemaEdge`, and `SchemaItem`
 
 **Auto-opening ancestor collapsibles**: `SchemaNodeDetails` checks if the URL hash starts with its own prefix (`getFragmentId(schemaType, parentSchemaName, name)`). If it does, the `<Details>` element renders with `open={true}`, ensuring all ancestors of a deep-linked property are expanded on page load.
 
