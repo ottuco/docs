@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect } from "react";
 import { translate } from "@docusaurus/Translate";
 import FormItem from "@theme/ApiExplorer/FormItem";
 import FormSelect from "@theme/ApiExplorer/FormSelect";
@@ -7,14 +7,9 @@ import { useTypedDispatch, useTypedSelector } from "@theme/ApiItem/hooks";
 import { OPENAPI_AUTH } from "@theme/translationIds";
 import { setAuthData, setSelectedAuth } from "@theme/ApiExplorer/Authorization/slice";
 
-function normalizeApiKey(input: string, headerName?: string) {
-  const value = input.trim();
-  if (!value) return value;
-  if (headerName === "Authorization" && !/^Api-Key\\s+/i.test(value)) {
-    return `Api-Key ${value}`;
-  }
-  return value;
-}
+const DEFAULT_USERNAME = "demo_user";
+const DEFAULT_PASSWORD = "WY4Q9I1d5kHH3nJ";
+const DEFAULT_API_KEY = "GYj5Na8H.29g9hqNjm11nORQMa2WiZwIBQQ49MdAL";
 
 export default function Authorization(): React.JSX.Element | null {
   const data = useTypedSelector((state) => state.auth.data);
@@ -28,6 +23,42 @@ export default function Authorization(): React.JSX.Element | null {
 
   const selectedAuth = options[selected];
   const optionKeys = Object.keys(options);
+
+  useEffect(() => {
+    selectedAuth.forEach((a) => {
+      if (a.type === "http" && a.scheme === "basic") {
+        if (!data[a.key]?.username) {
+          dispatch(
+            setAuthData({
+              scheme: a.key,
+              key: "username",
+              value: DEFAULT_USERNAME,
+            })
+          );
+        }
+        if (!data[a.key]?.password) {
+          dispatch(
+            setAuthData({
+              scheme: a.key,
+              key: "password",
+              value: DEFAULT_PASSWORD,
+            })
+          );
+        }
+      }
+      if (a.type === "apiKey") {
+        if (!data[a.key]?.apiKey) {
+          dispatch(
+            setAuthData({
+              scheme: a.key,
+              key: "apiKey",
+              value: DEFAULT_API_KEY,
+            })
+          );
+        }
+      }
+    });
+  }, [selected, selectedAuth, data, dispatch]);
 
   return (
     <div>
@@ -125,7 +156,7 @@ export default function Authorization(): React.JSX.Element | null {
                     id: OPENAPI_AUTH.USERNAME,
                     message: "Username",
                   })}
-                  value={data[a.key].username ?? ""}
+                value={data[a.key].username ?? ""}
                   onChange={(e) => {
                     const value = e.target.value;
                     dispatch(
@@ -150,7 +181,7 @@ export default function Authorization(): React.JSX.Element | null {
                     message: "Password",
                   })}
                   password
-                  value={data[a.key].password ?? ""}
+                value={data[a.key].password ?? ""}
                   onChange={(e) => {
                     const value = e.target.value;
                     dispatch(
