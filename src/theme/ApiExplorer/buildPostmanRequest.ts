@@ -6,16 +6,10 @@ type AuthState = {
   data?: Record<string, any>;
 };
 
-export default function buildPostmanRequestWithAuth(
-  postman: any,
-  opts: {
-    auth?: AuthState;
-    [key: string]: any;
-  }
-) {
-  const request = buildPostmanRequest(postman, opts);
+export default function buildPostmanRequestWithAuth(postman: any, opts: any) {
+  const request = buildPostmanRequest(postman, opts as any);
 
-  const auth = opts.auth;
+  const auth: AuthState | undefined = opts?.auth;
   if (!auth || !auth.selected || !auth.options || !auth.data) {
     return request;
   }
