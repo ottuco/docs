@@ -13,13 +13,6 @@ paths:
       summary: Retrieve metrics for txn comparison
       parameters:
         - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Bearer eyJhbG...
-          description: Bearer token to be provided for authentication.
-          required: true
-        - in: header
           name: X-Service-ID
           schema:
             type: string
@@ -30,7 +23,6 @@ paths:
         - Satellite API
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -75,13 +67,6 @@ paths:
       summary: Retrieve `created` value of first txn
       parameters:
         - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Bearer eyJhbG...
-          description: Bearer token to be provided for authentication.
-          required: true
-        - in: header
           name: X-Service-ID
           schema:
             type: string
@@ -92,7 +77,6 @@ paths:
         - Satellite API
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -186,7 +170,6 @@ paths:
         - Unified UI
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -212,7 +195,6 @@ paths:
         - Unified UI
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -242,7 +224,6 @@ paths:
         - Unified UI
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -286,7 +267,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -327,7 +307,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -368,7 +347,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -416,7 +394,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -460,7 +437,6 @@ paths:
         - Checkout SDK
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -571,7 +547,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -655,7 +630,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -720,7 +694,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -763,7 +736,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -813,7 +785,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -853,7 +824,6 @@ paths:
         - Checkout SDK
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -905,7 +875,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -943,7 +912,6 @@ paths:
               $ref: "#/components/schemas/SMSPaymentAuthorizePayment"
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -999,7 +967,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1049,7 +1016,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1101,7 +1067,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1139,7 +1104,6 @@ paths:
               $ref: "#/components/schemas/SMSPaymentAuthorizePayment"
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1165,13 +1129,6 @@ paths:
       description: The objective of the  POST request is to facilitate the creation of payment transactions and the subsequent generation of payment links, each of which is associated with a unique session ID. These links can be effortlessly shared with customers through a range of communication channels, including email, WhatsApp, and SMS. Additionally, it is possible to incorporate the customer's billing and shipping information into the transaction. Moreover, users of this API have the ability to include diverse forms of data and information within the body request.
       summary: Create a new Payment Transaction
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
       tags:
         - Checkout API
       requestBody:
@@ -1188,7 +1145,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "201":
           content:
@@ -1238,13 +1194,6 @@ paths:
       description: Retrieve an existing Payment Transaction by session_id
       summary: Retrieve Payment Transaction
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
         - in: path
           name: session_id
           schema:
@@ -1287,13 +1236,6 @@ paths:
       description: Update an existing Payment Transaction
       summary: Update Payment Transaction
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
         - in: path
           name: session_id
           schema:
@@ -1356,13 +1298,6 @@ paths:
         is provided and shorify if `shortify_attachment_url` is true.
       summary: Attachment Upload
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
       tags:
         - Checkout API
       requestBody:
@@ -1373,7 +1308,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1393,13 +1327,6 @@ paths:
       description: Create a new Invoice
       summary: Create a new Invoice
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
       tags:
         - Invoice API
       requestBody:
@@ -1416,7 +1343,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "201":
           content:
@@ -1445,7 +1371,6 @@ paths:
         - Ottu PG
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1463,13 +1388,6 @@ paths:
         **NOTE** Optional fields may not be represented in response body.\n        "
       summary: Native Payment API(Auto Debit)
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
       tags:
         - Payment Operations
       requestBody:
@@ -1486,7 +1404,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1525,13 +1442,6 @@ paths:
         select from existing ones."
       summary: Retrieve a list of saved cards for the customer.
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
       tags:
         - User Cards
       requestBody:
@@ -1548,7 +1458,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1632,7 +1541,6 @@ paths:
         - User Cards
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "204":
           content:
@@ -1699,7 +1607,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1753,13 +1660,6 @@ paths:
         at least one of the identifiers (`session_id` or `order_no`)."
       summary: Check Status-Inquiry
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
       tags:
         - Payment Operations
       requestBody:
@@ -1775,7 +1675,6 @@ paths:
               $ref: "#/components/schemas/Inquiry"
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1832,13 +1731,6 @@ paths:
         operation's result (`success` indicates a successful operation).\n\n"
       summary: Message Notifications
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
       tags:
         - Payment Notifications
       requestBody:
@@ -1874,7 +1766,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -1918,13 +1809,6 @@ paths:
 
       summary: Channel Specific Notifications
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
         - in: path
           name: channel
           schema:
@@ -1995,7 +1879,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -2043,13 +1926,6 @@ paths:
 
       summary: Operations
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
         - in: header
           name: Tracking-Key
           schema:
@@ -2109,7 +1985,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -2165,7 +2040,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -2211,7 +2085,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -2241,13 +2114,6 @@ paths:
         **NOTE** Optional fields may not be represented in response body.\n        "
       summary: Native Payment API(Auto Debit)
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
       tags:
         - Payment Operations
       requestBody:
@@ -2264,7 +2130,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -2310,7 +2175,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -2357,7 +2221,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -2393,13 +2256,6 @@ paths:
 
       summary: Notifications
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
       tags:
         - Communication Notifications
       requestBody:
@@ -2463,7 +2319,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -2505,13 +2360,6 @@ paths:
         includes a valid private API key in the headers to authenticate the request.
       summary: Shorten a URL using Ottu's core URL shortening service.
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Bearer eyJhbG...
-          description: Bearer token to be provided for authentication.
-          required: true
       tags:
         - Utilities
       requestBody:
@@ -2528,7 +2376,6 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
       responses:
         "200":
           content:
@@ -16860,10 +16707,5 @@ components:
     basicAuth:
       type: http
       scheme: basic
-    tokenAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: Token-based authentication with required prefix "Token"
 servers:
   - url: https://sandbox.ottu.net
