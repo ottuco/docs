@@ -13,13 +13,6 @@ paths:
       summary: Retrieve metrics for txn comparison
       parameters:
         - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Bearer eyJhbG...
-          description: Bearer token to be provided for authentication.
-          required: true
-        - in: header
           name: X-Service-ID
           schema:
             type: string
@@ -30,7 +23,7 @@ paths:
         - Satellite API
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -75,13 +68,6 @@ paths:
       summary: Retrieve `created` value of first txn
       parameters:
         - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Bearer eyJhbG...
-          description: Bearer token to be provided for authentication.
-          required: true
-        - in: header
           name: X-Service-ID
           schema:
             type: string
@@ -92,7 +78,7 @@ paths:
         - Satellite API
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -186,7 +172,7 @@ paths:
         - Unified UI
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -212,7 +198,7 @@ paths:
         - Unified UI
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -242,7 +228,7 @@ paths:
         - Unified UI
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -286,7 +272,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -327,7 +313,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -368,7 +354,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -416,7 +402,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -460,7 +446,7 @@ paths:
         - Checkout SDK
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -571,7 +557,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -655,7 +641,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -720,7 +706,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -763,7 +749,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -813,7 +799,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -853,7 +839,7 @@ paths:
         - Checkout SDK
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -905,7 +891,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -943,7 +929,7 @@ paths:
               $ref: "#/components/schemas/SMSPaymentAuthorizePayment"
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -999,7 +985,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1049,7 +1035,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1101,7 +1087,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1139,7 +1125,7 @@ paths:
               $ref: "#/components/schemas/SMSPaymentAuthorizePayment"
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1165,13 +1151,6 @@ paths:
       description: The objective of the  POST request is to facilitate the creation of payment transactions and the subsequent generation of payment links, each of which is associated with a unique session ID. These links can be effortlessly shared with customers through a range of communication channels, including email, WhatsApp, and SMS. Additionally, it is possible to incorporate the customer's billing and shipping information into the transaction. Moreover, users of this API have the ability to include diverse forms of data and information within the body request.
       summary: Create a new Payment Transaction
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
       tags:
         - Checkout API
       requestBody:
@@ -1179,6 +1158,38 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/CheckoutPOSTRequest"
+            examples:
+              Default:
+                value:
+                  type: payment_request
+                  pg_codes:
+                    - knet
+                  amount: "10"
+                  currency_code: KWD
+                  customer_first_name: Test
+                  customer_last_name: test
+                  customer_id: "23"
+                  language: en
+                  customer_birthdate: "1992-10-20"
+                  webhook_url: https://postapp.knpay.net/disclose_ok/
+                  redirect_url: http://postapp.knpay.net/redirected/
+                  include_sdk_setup_preload: true
+                  card_acceptance_criteria:
+                    min_expiry_time: 30
+                  order_no: "{{order_no}}"
+                  shortify_checkout_url: true
+                  customer_address_country: kw
+                  billing_address:
+                    line1: test
+                    city: test
+                    country: KW
+                  payment_type: one_off
+                  product_type: test
+                  extra:
+                    invoice_id: test
+                    full_name: Test
+                    remarks: Test
+                    policy_no: Test
           application/x-www-form-urlencoded:
             schema:
               $ref: "#/components/schemas/CheckoutPOSTRequest"
@@ -1188,7 +1199,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "201":
           content:
@@ -1238,13 +1249,6 @@ paths:
       description: Retrieve an existing Payment Transaction by session_id
       summary: Retrieve Payment Transaction
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
         - in: path
           name: session_id
           schema:
@@ -1256,6 +1260,7 @@ paths:
       security:
         - SSO_BasicAuth: []
         - basicAuth: []
+        - apiKeyAuth: []
         - SSO_JWT_Auth: []
       responses:
         "200":
@@ -1287,13 +1292,6 @@ paths:
       description: Update an existing Payment Transaction
       summary: Update Payment Transaction
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
         - in: path
           name: session_id
           schema:
@@ -1316,6 +1314,7 @@ paths:
       security:
         - SSO_BasicAuth: []
         - basicAuth: []
+        - apiKeyAuth: []
         - SSO_JWT_Auth: []
       responses:
         "200":
@@ -1356,13 +1355,6 @@ paths:
         is provided and shorify if `shortify_attachment_url` is true.
       summary: Attachment Upload
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
       tags:
         - Checkout API
       requestBody:
@@ -1373,7 +1365,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1393,13 +1385,6 @@ paths:
       description: Create a new Invoice
       summary: Create a new Invoice
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
       tags:
         - Invoice API
       requestBody:
@@ -1416,7 +1401,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "201":
           content:
@@ -1445,7 +1430,7 @@ paths:
         - Ottu PG
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1463,13 +1448,6 @@ paths:
         **NOTE** Optional fields may not be represented in response body.\n        "
       summary: Native Payment API(Auto Debit)
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
       tags:
         - Payment Operations
       requestBody:
@@ -1486,7 +1464,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1525,13 +1503,6 @@ paths:
         select from existing ones."
       summary: Retrieve a list of saved cards for the customer.
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
       tags:
         - User Cards
       requestBody:
@@ -1548,7 +1519,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1632,7 +1603,7 @@ paths:
         - User Cards
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "204":
           content:
@@ -1699,7 +1670,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1753,13 +1724,6 @@ paths:
         at least one of the identifiers (`session_id` or `order_no`)."
       summary: Check Status-Inquiry
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
       tags:
         - Payment Operations
       requestBody:
@@ -1775,7 +1739,7 @@ paths:
               $ref: "#/components/schemas/Inquiry"
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1832,13 +1796,6 @@ paths:
         operation's result (`success` indicates a successful operation).\n\n"
       summary: Message Notifications
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
       tags:
         - Payment Notifications
       requestBody:
@@ -1874,7 +1831,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -1918,13 +1875,6 @@ paths:
 
       summary: Channel Specific Notifications
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
         - in: path
           name: channel
           schema:
@@ -1995,7 +1945,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -2043,13 +1993,6 @@ paths:
 
       summary: Operations
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
         - in: header
           name: Tracking-Key
           schema:
@@ -2109,7 +2052,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -2165,7 +2108,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -2211,7 +2154,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -2241,13 +2184,6 @@ paths:
         **NOTE** Optional fields may not be represented in response body.\n        "
       summary: Native Payment API(Auto Debit)
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
       tags:
         - Payment Operations
       requestBody:
@@ -2264,7 +2200,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -2310,7 +2246,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -2357,7 +2293,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -2393,13 +2329,6 @@ paths:
 
       summary: Notifications
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-          description: Private API key to be provided in the format `Api-Key <key>`.
-          required: true
       tags:
         - Communication Notifications
       requestBody:
@@ -2463,7 +2392,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -2505,13 +2434,6 @@ paths:
         includes a valid private API key in the headers to authenticate the request.
       summary: Shorten a URL using Ottu's core URL shortening service.
       parameters:
-        - in: header
-          name: Authorization
-          schema:
-            type: string
-            default: Bearer eyJhbG...
-          description: Bearer token to be provided for authentication.
-          required: true
       tags:
         - Utilities
       requestBody:
@@ -2528,7 +2450,7 @@ paths:
         required: true
       security:
         - basicAuth: []
-        - tokenAuth: []
+        - apiKeyAuth: []
       responses:
         "200":
           content:
@@ -6695,6 +6617,36 @@ components:
         Serializer to work with PaymentTransaction instances.
 
         Also uses request data from other serializers to save into PaymentTransaction db table:
+      example:
+        type: payment_request
+        pg_codes:
+          - knet
+        amount: "10"
+        currency_code: KWD
+        customer_first_name: Test
+        customer_last_name: test
+        customer_id: "23"
+        language: en
+        customer_birthdate: "1992-10-20"
+        webhook_url: https://postapp.knpay.net/disclose_ok/
+        redirect_url: http://postapp.knpay.net/redirected/
+        include_sdk_setup_preload: true
+        card_acceptance_criteria:
+          min_expiry_time: 30
+        order_no: "{{order_no}}"
+        shortify_checkout_url: true
+        customer_address_country: kw
+        billing_address:
+          line1: test
+          city: test
+          country: KW
+        payment_type: one_off
+        product_type: test
+        extra:
+          invoice_id: test
+          full_name: Test
+          remarks: Test
+          policy_no: Test
       properties:
         agreement:
           allOf:
@@ -7011,169 +6963,6 @@ components:
             It should be provided by merchant.
             See Webhook [Payment Notification](webhooks/payment-notification.md).
           maxLength: 2000
-        SeparatorField:
-          description: |-
-            This field is a dev components to separate the field exists in the old docs and others (We can check the fields below it to add them if they are helpful)
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-        attachment_short_url:
-          type: string
-          format: uri
-          readOnly: true
-          description:
-            A short URL that links to the attachment associated with this
-            payment. This URL may be included in email/sms notifications sent to the
-            customer regarding their payment or displayed on the checkout page to
-            allow the customer to easily access the attachment.
-        billing:
-          type: string
-          readOnly: true
-          description:
-            Detailed billing information including formatted amounts for
-            display and raw values for processing. Contains both the total transaction
-            amount and any applicable fees with their respective currency codes and
-            labels.
-        checkout_page_url:
-          type: string
-          format: uri
-          readOnly: true
-          description: Frontend Checkout Url.
-          maxLength: 2000
-        checkout_short_url:
-          type: string
-          format: uri
-          readOnly: true
-          description:
-            A short URL link that, when opened, redirects to the checkout
-            page for this payment. This URL may be shared with the customer to allow
-            them to easily access and complete the payment. This field is only available
-            if the `shortify_checkout_url` field is set to True.
-        checkout_url:
-          type: string
-          format: uri
-          readOnly: true
-          description:
-            URL that directs the customer to the Ottu Checkout Page where
-            they can see the payment details and available payment methods for the
-            transaction. If you need to share the payment link over SMS or WhatsApp,
-            use `checkout_short_url` instead.
-        customer_phone_2:
-          type: string
-          title: Customer additional phone
-          description:
-            The customer's additional phone number, if any. This field
-            can be updated by the customer on the payment page or in the Checkout
-            SDK.
-          maxLength: 16
-        initiator_id:
-          type: integer
-          title: initiator
-          description:
-            The user who initiated the creation of this payment transaction,
-            if available. This field is optional and may be used to track who created
-            the payment transaction. Note that if the payment transaction was using
-            API Key auth initiator_id can be set to any value that corresponds to
-            an existing ACTIVE user in the system
-        operation:
-          type: string
-          readOnly: true
-          description:
-            Specifies the type of operation to be performed by the payment
-            gateway. If set to `purchase`, the payment source will be directly charged.
-            If set to `authorize`, the payment source will only be authorized and
-            the actual charge will be made at a later time.
-        payment_methods:
-          allOf:
-            - $ref: "#/components/schemas/PaymentMethodsForRedirect"
-          readOnly: true
-          description:
-            An array containing all the payment methods derived from the
-            `pg_codes` input. Each object in the array contains information about
-            a single payment gateway, including its icon and the `redirect_url` that
-            will redirect the customer to the payment gateway's payment page.
-        qr_code_url:
-          type: string
-          format: uri
-          readOnly: true
-          description:
-            A QR code that, when scanned, redirects to the checkout page
-            for this payment. This QR code may be displayed on invoices, receipts,
-            or other documents to allow customers to easily access the checkout page
-            and make a payment. This parameter is only present when `generate_qr_code`
-            is set to true.
-        sdk_setup_preload_payload:
-          allOf:
-            - $ref: "#/components/schemas/CheckoutSDK"
-          readOnly: true
-          default: false
-          description: |-
-            It is a JSON object containing preloaded data necessary for initializing the [Checkout SDK](checkout-sdk/). This data encompasses vital details such as customer information, available payment methods, and specific transaction details, all formatted according to the `Checkout SDK`'s initialization specifications. By offering essential information upfront, this feature streamlines the [checkout process](checkout-sdk/#ottu-checkout-sdk-flow), contributing to an improved user experience and increased efficiency.
-
-            **Presence Conditions:**
-
-            * It will be included in the response solely when the [include\_sdk\_setup\_preload](checkout-api.md#include_sdk_setup_preload-bool-optional) parameter is set to `true`.
-        session_id:
-          type: string
-          readOnly: true
-          description: |-
-            A unique identifier for each payment transaction, used to maintain the session state during the payment process. It can be used to perform subsequent operations, like retrieve, acknowledge, refund, capture, and cancellation.
-            Max length: 128.
-        settled_pg_code:
-          type: string
-          readOnly: true
-          title: Final Payment Gateway
-          description:
-            The code of the payment gateway used for completing the transaction.
-            This field indicates the specific gateway that processed and settled the
-            payment, providing clarity on which payment service was ultimately utilized
-            for this transaction.
-        state:
-          enum:
-            - created
-            - pending
-            - attempted
-            - authorized
-            - paid
-            - failed
-            - canceled
-            - expired
-            - invalided
-            - refunded
-            - cod
-          type: string
-          x-spec-enum-id: caee163196dbc11f
-          readOnly: true
-          description: |-
-            The current state of the payment transaction, it helps to understand the progress of the payment.
-
-            * `created` - Created
-            * `pending` - Pending
-            * `attempted` - Attempted
-            * `authorized` - Authorized
-            * `paid` - Paid
-            * `failed` - Failed
-            * `canceled` - Canceled
-            * `expired` - Expired
-            * `invalided` - Invalided
-            * `refunded` - Refunded
-            * `cod` - Cash on Delivery
-        unit_code:
-          type: string
-          writeOnly: true
-          title: Unit
-          description: The slug of the unit to be used for the transaction.
       required:
         - amount
         - attachment_short_url
@@ -7577,98 +7366,6 @@ components:
 
             * The request parameter [webhook\_url](checkout-api.md#webhook_url-string-optional) should be provided.
           maxLength: 2000
-        SeparatorField:
-          description: |-
-            This field is a dev components to separate the field exists in the old docs and others (We can check the fields below it to add them if they are helpful)
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-            ------------------------------------------------------------------------------------
-        billing:
-          type: string
-          readOnly: true
-          description:
-            Detailed billing information including formatted amounts for
-            display and raw values for processing. Contains both the total transaction
-            amount and any applicable fees with their respective currency codes and
-            labels.
-        customer_phone_2:
-          type: string
-          title: Customer additional phone
-          description:
-            The customer's additional phone number, if any. This field
-            can be updated by the customer on the payment page or in the Checkout
-            SDK.
-          maxLength: 16
-        generate_qr_code:
-          type: boolean
-          writeOnly: true
-          default: false
-          description:
-            If set to true, the `qr_code_url` field will be present in
-            the response. Upon scanning it, the customer will be redirected to the
-            checkout_url, which is the Ottu Checkout page.
-        include_sdk_setup_preload:
-          type: boolean
-          writeOnly: true
-          default: false
-          description:
-            Set this to true to include the 'sdk_setup_preload_payload'
-            payload in the API response. This payload is only generated and added
-            when this parameter is explicitly set to true. By default, it is false
-            and the 'sdk_setup_preload_payload' payload will not be included.
-        payment_instrument:
-          $ref: "#/components/schemas/PaymentInstrument"
-        preload_checkout_page:
-          type: boolean
-          writeOnly: true
-          default: false
-          description:
-            Pre-populate checkout page cache on transaction creation (POST
-            only). Improves performance when clients immediately poll for the checkout
-            page after creation. Ignored on updates (PATCH/PUT) - cache is automatically
-            invalidated on any update. The cache expires based on the transaction's
-            expiration time (max 1 hour).
-        settled_pg_code:
-          type: string
-          readOnly: true
-          title: Final Payment Gateway
-          description:
-            The code of the payment gateway used for completing the transaction.
-            This field indicates the specific gateway that processed and settled the
-            payment, providing clarity on which payment service was ultimately utilized
-            for this transaction.
-        shortify_attachment_url:
-          type: boolean
-          writeOnly: true
-          default: false
-          description:
-            If set to True, the URL of the uploaded attachment will be
-            shortened using a URL shortener service. This should be used when sharing
-            the attachment URL via SMS or WhatsApp.
-        shortify_checkout_url:
-          type: boolean
-          writeOnly: true
-          default: false
-          description:
-            If set to True, the checkout URL will be shortened using a
-            URL shortener service. This should be used when sharing the payment URL
-            via SMS or WhatsApp.
-        unit_code:
-          type: string
-          writeOnly: true
-          title: Unit
-          description: The slug of the unit to be used for the transaction.
       required:
         - amount
         - attachment_short_url
@@ -16860,10 +16557,10 @@ components:
     basicAuth:
       type: http
       scheme: basic
-    tokenAuth:
+    apiKeyAuth:
       type: apiKey
       in: header
       name: Authorization
-      description: Token-based authentication with required prefix "Token"
+      description: API key authentication with required prefix "Api-Key"
 servers:
   - url: https://sandbox.ottu.net
