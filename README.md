@@ -76,3 +76,4 @@ docs/
 ├── glossary/          # Payment terminology and concepts
 └── resources/         # Support, tools, and additional resources
 ```
+
