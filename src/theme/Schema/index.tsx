@@ -148,13 +148,25 @@ const AnyOneOf: React.FC<SchemaProps> = ({
   schemaType,
 }) => {
   const type = schema.oneOf ? "oneOf" : "anyOf";
+
+  // Find which tab should be selected based on the URL hash
+  const hash =
+    typeof window !== "undefined" ? window.location.hash?.slice(1) : "";
+  const defaultIndex = schema[type]?.findIndex((anyOneSchema: any) => {
+    const label = anyOneSchema.title || anyOneSchema.type;
+    const prefix = getFragmentId(schemaType, parentSchemaName, label);
+    return hash === prefix || hash.startsWith(prefix + "-");
+  });
+  const defaultValue =
+    defaultIndex >= 0 ? `${defaultIndex}-item-properties` : undefined;
+
   return (
     <>
       <span className="badge badge--info" style={{ marginBottom: "1rem" }}>
         {type}
       </span>
       {/* @ts-expect-error upstream SchemaTabsProps type chain is broken */}
-      <SchemaTabs>
+      <SchemaTabs defaultValue={defaultValue}>
         {schema[type]?.map((anyOneSchema: any, index: number) => {
           const label = anyOneSchema.title || anyOneSchema.type;
           return (
@@ -201,35 +213,35 @@ const AnyOneOf: React.FC<SchemaProps> = ({
               {/* Handle actual object types with properties or nested schemas */}
               {anyOneSchema.type === "object" && anyOneSchema.properties && (
                 <Properties
-                  parentSchemaName={parentSchemaName}
+                  parentSchemaName={getFragmentId(parentSchemaName, label)}
                   schema={anyOneSchema}
                   schemaType={schemaType}
                 />
               )}
               {anyOneSchema.allOf && (
                 <SchemaNode
-                  parentSchemaName={parentSchemaName}
+                  parentSchemaName={getFragmentId(parentSchemaName, label)}
                   schema={anyOneSchema}
                   schemaType={schemaType}
                 />
               )}
               {anyOneSchema.oneOf && (
                 <SchemaNode
-                  parentSchemaName={parentSchemaName}
+                  parentSchemaName={getFragmentId(parentSchemaName, label)}
                   schema={anyOneSchema}
                   schemaType={schemaType}
                 />
               )}
               {anyOneSchema.anyOf && (
                 <SchemaNode
-                  parentSchemaName={parentSchemaName}
+                  parentSchemaName={getFragmentId(parentSchemaName, label)}
                   schema={anyOneSchema}
                   schemaType={schemaType}
                 />
               )}
               {anyOneSchema.items && (
                 <Items
-                  parentSchemaName={parentSchemaName}
+                  parentSchemaName={getFragmentId(parentSchemaName, label)}
                   schema={anyOneSchema}
                   schemaType={schemaType}
                 />

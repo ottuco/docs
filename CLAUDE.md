@@ -121,6 +121,12 @@ For a schema like `response > payment > details > amount`, the generated IDs are
 - `response-payment-details` (collapsible header for `details`)
 - `response-payment-details-amount` (leaf property `amount`)
 
+For a oneOf/anyOf schema like `response > payment > [CreditCard] > card_number`, the IDs include the variant label:
+
+- `response-payment` (collapsible header for `payment`)
+- `response-payment-CreditCard-card_number` (leaf inside the CreditCard variant)
+- `response-payment-BankTransfer-iban` (leaf inside the BankTransfer variant)
+
 ### Key Architectural Decisions
 
 **`parentSchemaName` prop accumulation**: The `parentSchemaName` prop carries the accumulated path through the recursive component tree. Each nesting level concatenates its own name before passing it down. **Every** component that renders children must forward `parentSchemaName`:
@@ -136,9 +142,16 @@ For a schema like `response > payment > details > amount`, the generated IDs are
 - `AdditionalProperties` passes it to `SchemaNodeDetails` and `SchemaItem`
 - `Items` passes it to `AnyOneOf`, `Properties`, `AdditionalProperties`, `SchemaEdge`, and `SchemaItem`
 
+**Path accumulation happens in two places**:
+
+1. **`SchemaNodeDetails`**: accumulates via `getFragmentId(parentSchemaName, name)` — grows the path when entering a collapsible nested object property.
+2. **`AnyOneOf`**: accumulates via `getFragmentId(parentSchemaName, label)` — grows the path when entering a specific oneOf/anyOf variant tab. The `label` is derived from `variant.title || variant.type`. Without this, all variants' children would share identical IDs, making deep links ambiguous.
+
 **Auto-opening ancestor collapsibles**: `SchemaNodeDetails` checks if the URL hash starts with its own prefix (`getFragmentId(schemaType, parentSchemaName, name)`). If it does, the `<Details>` element renders with `open={true}`, ensuring all ancestors of a deep-linked property are expanded on page load.
 
-**SSR safety**: `window.location.hash` is accessed in `SchemaNodeDetails` render body (for the `isOpen` check), so it is guarded with `typeof window !== "undefined"`. The `useLayoutEffect` hooks in `Summary` and `SchemaItem` use Docusaurus's `useIsomorphicLayoutEffect` which is SSR-safe.
+**Auto-selecting oneOf/anyOf tabs**: `AnyOneOf` computes a `defaultValue` for `SchemaTabs` by checking which variant's prefix matches the URL hash. It uses prefix matching (`hash.startsWith(prefix + "-")`) rather than splitting the hash by `-`, which avoids false matches when labels contain dashes.
+
+**SSR safety**: `window.location.hash` is accessed in `SchemaNodeDetails` and `AnyOneOf` render bodies, so it is guarded with `typeof window !== "undefined"`. The `useLayoutEffect` hooks in `Summary` and `SchemaItem` use Docusaurus's `useIsomorphicLayoutEffect` which is SSR-safe.
 
 ### Component Rendering Flow
 
@@ -173,5 +186,6 @@ When making changes to the schema rendering:
 
 - Always pass `parentSchemaName` through any new rendering path to maintain deep linking.
 - Any new component that renders child `SchemaNode`, `SchemaEdge`, or `SchemaItem` must forward `parentSchemaName`.
+- If adding a new tabbed component (like oneOf/anyOf), include the tab label in `parentSchemaName` via `getFragmentId(parentSchemaName, label)` to disambiguate variants. Also compute a `defaultValue` for auto-tab-selection using prefix matching against the URL hash.
 - Test with deeply nested schemas (3+ levels) to verify IDs accumulate correctly.
 - Run `npm run build` to verify SSR does not crash on `window` access.
