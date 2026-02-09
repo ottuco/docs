@@ -1158,38 +1158,6 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/CheckoutPOSTRequest"
-            examples:
-              Default:
-                value:
-                  type: payment_request
-                  pg_codes:
-                    - knet
-                  amount: "10"
-                  currency_code: KWD
-                  customer_first_name: Test
-                  customer_last_name: test
-                  customer_id: "23"
-                  language: en
-                  customer_birthdate: "1992-10-20"
-                  webhook_url: https://postapp.knpay.net/disclose_ok/
-                  redirect_url: http://postapp.knpay.net/redirected/
-                  include_sdk_setup_preload: true
-                  card_acceptance_criteria:
-                    min_expiry_time: 30
-                  order_no: "{{order_no}}"
-                  shortify_checkout_url: true
-                  customer_address_country: kw
-                  billing_address:
-                    line1: test
-                    city: test
-                    country: KW
-                  payment_type: one_off
-                  product_type: test
-                  extra:
-                    invoice_id: test
-                    full_name: Test
-                    remarks: Test
-                    policy_no: Test
           application/x-www-form-urlencoded:
             schema:
               $ref: "#/components/schemas/CheckoutPOSTRequest"
@@ -6633,7 +6601,6 @@ components:
         include_sdk_setup_preload: true
         card_acceptance_criteria:
           min_expiry_time: 30
-        order_no: "{{order_no}}"
         shortify_checkout_url: true
         customer_address_country: kw
         billing_address:
