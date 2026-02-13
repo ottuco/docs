@@ -26,3 +26,8 @@ declare module "@theme/ApiExplorer/Authorization/slice" {
   export const setAuthData: any;
   export const setSelectedAuth: any;
 }
+
+declare module "@theme-original/ApiExplorer/Response" {
+  const Response: any;
+  export default Response;
+}
