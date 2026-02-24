@@ -46,11 +46,62 @@ const sidebars: SidebarsConfig = {
   developerSidebar: [
     {
       type: 'category',
-      label: 'Getting Started',
+      label: 'Developers',
       items: [
-        'developers/quick-start',
-        'developers/api-fundamentals',
-        'developers/checkout-api',
+        {type: 'doc', id: 'developers/index', label: 'Developer Home'},
+        {
+          type: 'category',
+          label: 'Getting Started',
+          items: [
+            {type: 'doc', id: 'developers/getting-started/index', label: 'Quickstart'},
+            {type: 'doc', id: 'developers/getting-started/authentication', label: 'Authentication'},
+            {type: 'doc', id: 'developers/getting-started/api-fundamentals', label: 'API Fundamentals'},
+            {type: 'doc', id: 'developers/getting-started/sandbox', label: 'Sandbox & Test Cards'},
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Payments',
+          items: [
+            {type: 'doc', id: 'developers/payments/index', label: 'Overview'},
+            {type: 'doc', id: 'developers/payments/checkout-api', label: 'Checkout API'},
+            {type: 'doc', id: 'developers/payments/payment-methods', label: 'Payment Methods'},
+            {type: 'doc', id: 'developers/payments/native-payments', label: 'Native Payments'},
+            {type: 'doc', id: 'developers/payments/checkout-sdk', label: 'Checkout SDK'},
+          ],
+        },
+        {type: 'doc', id: 'developers/operations/index', label: 'Operations'},
+        {
+          type: 'category',
+          label: 'Cards & Tokenization',
+          items: [
+            {type: 'doc', id: 'developers/cards-and-tokens/index', label: 'Overview'},
+            {type: 'doc', id: 'developers/cards-and-tokens/user-cards', label: 'User Cards'},
+            {type: 'doc', id: 'developers/cards-and-tokens/recurring-payments', label: 'Recurring Payments'},
+          ],
+        },
+        {type: 'doc', id: 'developers/invoices/index', label: 'Invoices'},
+        {
+          type: 'category',
+          label: 'Webhooks & Events',
+          items: [
+            {type: 'doc', id: 'developers/webhooks-and-events/index', label: 'Overview & Setup'},
+            {type: 'doc', id: 'developers/webhooks-and-events/payment-events', label: 'Payment Events'},
+            {type: 'doc', id: 'developers/webhooks-and-events/operation-events', label: 'Operation Events'},
+            {type: 'doc', id: 'developers/webhooks-and-events/verify-signatures', label: 'Verify Signatures'},
+          ],
+        },
+        {type: 'doc', id: 'developers/notifications/index', label: 'Notifications'},
+        {type: 'doc', id: 'developers/reports/index', label: 'Reports'},
+        {
+          type: 'category',
+          label: 'Reference',
+          items: [
+            {type: 'doc', id: 'developers/reference/error-codes', label: 'Error Codes'},
+            {type: 'doc', id: 'developers/reference/payment-states', label: 'Payment States'},
+            {type: 'doc', id: 'developers/reference/glossary', label: 'Glossary'},
+          ],
+        },
       ],
     },
   ],

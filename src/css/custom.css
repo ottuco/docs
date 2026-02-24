@@ -76,6 +76,100 @@ html {
   color: var(--ifm-link-hover-color);
 }
 
+/* Make doc section headings match link color */
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+  color: var(--ifm-link-color);
+}
+
+/* Table cells: align content to top */
+.markdown table td,
+.markdown table th {
+  vertical-align: top;
+}
+
+/* Checkout SDK: align Payment Options Display Mode images like old docs */
+.checkout-sdk-image-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.checkout-sdk-image-row figure {
+  margin: 0;
+  flex: 1 1 240px;
+  max-width: 320px;
+}
+
+.checkout-sdk-image-row img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.checkout-sdk-figure {
+  margin: 0 0 12px 0;
+  max-width: 420px;
+}
+
+.checkout-sdk-figure img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Stepper (old docs style) */
+.stepper {
+  counter-reset: step;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stepper-item {
+  position: relative;
+  padding: 0 0 18px 36px;
+}
+
+.stepper-item::before {
+  counter-increment: step;
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--ifm-color-primary);
+  color: white;
+  font-weight: 700;
+  font-size: 12px;
+  display: grid;
+  place-items: center;
+}
+
+.stepper-item::after {
+  content: "";
+  position: absolute;
+  left: 11px;
+  top: 26px;
+  width: 2px;
+  height: calc(100% - 26px);
+  background: var(--ifm-color-emphasis-300);
+}
+
+.stepper-item:last-child::after {
+  display: none;
+}
+
+.stepper-sublist {
+  list-style: decimal;
+  margin: 6px 0 0 18px;
+  padding-left: 16px;
+}
+
 /* Keep anchor targets below the fixed navbar */
 html {
   scroll-padding-top: calc(var(--ifm-navbar-height));

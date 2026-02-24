@@ -24,26 +24,46 @@ import Translate from "@docusaurus/Translate";
   as={"h1"}
   className={"openapi__heading"}
   children={"Create a new Payment Transaction"}
-></Heading>
+>
+</Heading>
 
 <MethodEndpoint
   method={"post"}
   path={"/b/checkout/v1/pymt-txn/"}
   context={"endpoint"}
-></MethodEndpoint>
+>
+  
+</MethodEndpoint>
 
-The objective of the POST request is to facilitate the creation of payment transactions and the subsequent generation of payment links, each of which is associated with a unique session ID. These links can be effortlessly shared with customers through a range of communication channels, including email, WhatsApp, and SMS. Additionally, it is possible to incorporate the customer's billing and shipping information into the transaction. Moreover, users of this API have the ability to include diverse forms of data and information within the body request.
 
-<Heading id={"request"} as={"h2"} className={"openapi-tabs__heading"}>
+
+The objective of the  POST request is to facilitate the creation of payment transactions and the subsequent generation of payment links, each of which is associated with a unique session ID. These links can be effortlessly shared with customers through a range of communication channels, including email, WhatsApp, and SMS. Additionally, it is possible to incorporate the customer's billing and shipping information into the transaction. Moreover, users of this API have the ability to include diverse forms of data and information within the body request.
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+>
   <Translate id="theme.openapi.request.title">Request</Translate>
 </Heading>
 
-<ParamsDetails parameters={null}></ParamsDetails>
+<ParamsDetails
+  parameters={null}
+>
+  
+</ParamsDetails>
 
 <RequestSchema
   {...require("./create-payment-transaction-checkout.RequestSchema.json")}
-></RequestSchema>
+>
+  
+</RequestSchema>
 
 <StatusCodes
   {...require("./create-payment-transaction-checkout.StatusCodes.json")}
-></StatusCodes>
+>
+  
+</StatusCodes>
+
+
+      
