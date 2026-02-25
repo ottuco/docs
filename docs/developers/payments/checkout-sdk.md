@@ -1739,7 +1739,7 @@ To migrate from an older version to the latest version, please refer to the [Ins
 
 #### 3 How can I customize the appearance of the checkout page using themes?
 
-The SDK offers various predefined [themes ](#theme-object)that merchants can use to easily change the checkout page’s appearance. Themes such as [dark theme](#dark-theme), [minimal theme](#minimal-theme), hide headers, and hide amount are available. Each theme is predefined by specific `css` classes with unique properties.
+The SDK offers various predefined [themes ](#theme-object)that merchants can use to easily change the checkout page’s appearance. Themes such as [dark theme](./checkout-sdk), [minimal theme](./checkout-sdk), hide headers, and hide amount are available. Each theme is predefined by specific `css` classes with unique properties.
 
 #### 4 Can I customize the appearance beyond the provided themes?
 
@@ -1775,7 +1775,7 @@ Merchants can utilize the [beforePayment](#windowsbeforepayment-hook) hook. This
 
 **In conclusion**, this documentation serves as your comprehensive guide to our Web SDK. Here's a quick recap of the key points covered: Information about the fundamental **Checkout SDK**, the backbone of seamless web-based transactions. Practical [demonstrations ](#demo)have provided valuable insights into effective SDK integration. Detailed descriptions of [functions ](#functions)and methods have equipped you to harness the SDK's full potential. Explaining the essential role of [callbacks](#callbacks) in event handling. A rich array of **examples** has guided you through real-world SDK feature implementations. Exploring [Apple Pay](#apple-pay)**,** [Google Pay](#google-pay)**,** and even KNET-Apple Pay for efficient, secure payments.
 
-As you conclude your journey through this documentation, consider exploring the next section: [**Checkout SDK - iOS**](ios/).&#x20;
+As you conclude your journey through this documentation, consider exploring the next section: [**Checkout SDK - iOS**](#ios).&#x20;
 
 ---
 
@@ -2811,7 +2811,7 @@ For a complete list of supported properties, refer to the [Apple Pay](https://de
 
 ## Android
 
-The [Checkout SDK](../) from Ottu is a Kotlin-based library designed to streamline the integration of an Ottu-powered [checkout process](../#ottu-checkout-sdk-flow) into Android applications. This SDK allows for complete customization of the checkout experience, including both appearance and functionality, as well as the selection of accepted payment methods.
+The [Checkout SDK](../) from Ottu is a Kotlin-based library designed to streamline the integration of an Ottu-powered [checkout process](../) into Android applications. This SDK allows for complete customization of the checkout experience, including both appearance and functionality, as well as the selection of accepted payment methods.
 
 To integrate the Checkout SDK, it must be incorporated into the Android application and initialized with the following parameters:
 
@@ -3140,7 +3140,7 @@ The SDK supports UI customization to match the device theme—light or dark. Thi
 
 ## Functions
 
-Currently, the SDK offers a single [function ](functions.md#checkout.init)that serves as the entry point for the merchant's application. It also includes [callbacks](functions.md#callbacks) that must be managed by the parent app, which are detailed in the following [section](functions.md#callbacks).
+Currently, the SDK offers a single [function ](./checkout-sdk)that serves as the entry point for the merchant's application. It also includes [callbacks](#callbacks) that must be managed by the parent app, which are detailed in the following [section](#callbacks).
 
 ### **Checkout.init**
 
@@ -3171,17 +3171,17 @@ Make sure to use the public key and avoid using the private key. The [API privat
 
 The `session_id` serves as the unique identifier for the payment transaction linked to the checkout process.
 
-This identifier is automatically generated at the creation of the payment transaction. For additional details on how to utilize the `session_id` parameter in the [Checkout AP](./checkout-api)I, refer to the [session_id](/broken/pages/3x6ec6ghiDMkqAeOlBDy#session_id) section.&#x20;
+This identifier is automatically generated at the creation of the payment transaction. For additional details on how to utilize the `session_id` parameter in the [Checkout AP](./checkout-api)I, refer to the [session_id](./checkout-api) section.&#x20;
 
 #### **formsOfPayment** _<span style={{ color: "blue" }}>`array`</span>_ _<span style={{ color: "blue" }}>`optional`</span>_
 
-The `formsOfPayment` parameter allows customization of the payment methods displayed in the [checkout process](../#ottu-checkout-sdk-flow). By default, all forms of payment are enabled.
+The `formsOfPayment` parameter allows customization of the payment methods displayed in the [checkout process](../). By default, all forms of payment are enabled.
 
 **Available Options for** `formsOfPayment`
 
 - **`cardOnsite`**: A direct payment method (onsite checkout) where cardholder data (CHD) is entered directly in the SDK. If 3DS authentication is required, a payment provider is involved.
-- `tokenPay`: Uses [tokenization](../../tokenization.md) to securely store and process customers' payment information.
-- `redirect`: Redirects customers to an external [payment gateway](../../../user-guide/payment-gateway.md#payment-gateway-features-summary) or a third-party payment processor to complete the transaction.
+- `tokenPay`: Uses [tokenization](../cards-and-tokens) to securely store and process customers' payment information.
+- `redirect`: Redirects customers to an external [payment gateway](https://docs.ottu.com/user-guide/payment-gateway#payment-gateway-features-summary) or a third-party payment processor to complete the transaction.
 - `stcPay`: Requires customers to enter their mobile number and authenticate with an OTP sent to their device to complete the payment.
 - `flexMethods`: Allows payments to be split into multiple installments. These methods, also known as BNPL (Buy Now, Pay Later), support providers such as Tabby and Tamara.
 
@@ -3195,17 +3195,17 @@ If this object is provided, the SDK will not need to retrieve transaction detail
 
 The `Theme` class object is used for UI customization, allowing modifications to background colors, text colors, and fonts for various components.
 
-All fields in the `Theme` class are optional. If a theme is not specified, the default UI settings will be applied. For more details, refer to the [Customization Theme](functions.md#customization-theme) section.
+All fields in the `Theme` class are optional. If a theme is not specified, the default UI settings will be applied. For more details, refer to the [Customization Theme](#customization-theme) section.
 
 #### **displaySettings** _<span style={{ color: "blue" }}>`object`</span>_ _<span style={{ color: "blue" }}>`optional`</span>_
 
 The `PaymentOptionsDisplaySettings` struct is used to configure how payment options are displayed.&#x20;
 
-More details can be found in the [Payment Options Display Mode](functions.md#payment-options-display-mode) section.
+More details can be found in the [Payment Options Display Mode](#payment-options-display-mode) section.
 
 #### **successCallback, errorCallback and successCallback** _<span style={{ color: "blue" }}>`Uint`</span>_ _<span style={{ color: "red" }}>`required`</span>_
 
-Callback functions are used to retrieve the payment status and must be provided directly to the Checkout initialization function. For more details, refer to the [Callbacks](functions.md#callbacks) section.
+Callback functions are used to retrieve the payment status and must be provided directly to the Checkout initialization function. For more details, refer to the [Callbacks](#callbacks) section.
 
 ### Payment Options Display Mode <a href="#payment-options-display-mode" id="payment-options-display-mode"></a>
 
@@ -3259,7 +3259,7 @@ These parameters are passed to the `Checkout.init` builder class via the followi
 .displaySettings(displaySettings)
 ```
 
-To view the full function call, please refer to the [Ottu SDK - Android | Example](functions.md#example) chapter in the documentation.
+To view the full function call, please refer to the [Ottu SDK - Android | Example](#example) chapter in the documentation.
 
 ---
 
@@ -3393,7 +3393,7 @@ These are optional instances of the `Appearance` class, which enable UI customiz
 
 The `Appearance` class serves as the core inner class of `CheckoutTheme`, containing objects that define various UI components.
 
-The component names within `Appearance` largely correspond to those described [here](customization-theme.md#properties-description).
+The component names within `Appearance` largely correspond to those described [here](./checkout-sdk).
 
 <iframe
   title="Ottu SDK Components Documentation"
@@ -3419,67 +3419,67 @@ If a property is not specified, the default value (as defined in the Figma desig
 
 | Property Name   |                            Description                            |              Data Type              |
 | --------------- | :---------------------------------------------------------------: | :---------------------------------: |
-| `mainTitleText` |                 Font and color for all “Captions”                 | [Text](customization-theme.md#text) |
-| `titleText`     |          Font and color for payment options in the list           | [Text](customization-theme.md#text) |
-| `subtitleText`  | Font and color for payment options details (like expiration date) | [Text](customization-theme.md#text) |
+| `mainTitleText` |                 Font and color for all “Captions”                 | [Text](#text) |
+| `titleText`     |          Font and color for payment options in the list           | [Text](#text) |
+| `subtitleText`  | Font and color for payment options details (like expiration date) | [Text](#text) |
 
 #### **Fees**
 
 | Property Name      |                          Description                           |              Data Type              |
 | ------------------ | :------------------------------------------------------------: | :---------------------------------: |
-| `feesTitleText`    |    Font and color of fees value in the payment options list    | [Text](customization-theme.md#text) |
-| `feesSubtitleText` | Font and color of fees description in the payment options list | [Text](customization-theme.md#text) |
+| `feesTitleText`    |    Font and color of fees value in the payment options list    | [Text](#text) |
+| `feesSubtitleText` | Font and color of fees description in the payment options list | [Text](#text) |
 
 #### **Data**
 
 | Property Name   |                       Description                        |              Data Type              |
 | --------------- | :------------------------------------------------------: | :---------------------------------: |
-| `dataLabelText` | Font and color of payment details fields (like “Amount”) | [Text](customization-theme.md#text) |
-| `dataValueText` |         Font and color of payment details values         | [Text](customization-theme.md#text) |
+| `dataLabelText` | Font and color of payment details fields (like “Amount”) | [Text](#text) |
+| `dataValueText` |         Font and color of payment details values         | [Text](#text) |
 
 #### **Other**
 
 | Property Name                   |                          Description                           |              Data Type              |
 | ------------------------------- | :------------------------------------------------------------: | :---------------------------------: |
-| `errorMessageText`              |        Font and color of error message text in pop-ups         | [Text](customization-theme.md#text) |
-| `selectPaymentMethodHeaderText` | The text of "Select Payment Method" in the bottom sheet header | [Text](customization-theme.md#text) |
+| `errorMessageText`              |        Font and color of error message text in pop-ups         | [Text](#text) |
+| `selectPaymentMethodHeaderText` | The text of "Select Payment Method" in the bottom sheet header | [Text](#text) |
 
 #### **Text Fields**
 
 | Property Name    |                             Description                              |                   Data Type                   |
 | ---------------- | :------------------------------------------------------------------: | :-------------------------------------------: |
-| `inputTextField` | Font and color of text in any input field (including disabled state) | [TextField](customization-theme.md#textfield) |
+| `inputTextField` | Font and color of text in any input field (including disabled state) | [TextField](#textfield) |
 
 #### **Colors**
 
 | Property Name                              |                      Description                       |               Data Type               |
 | ------------------------------------------ | :----------------------------------------------------: | :-----------------------------------: |
-| `sdkbackgroundColor`                       |     The main background of the SDK view component      | [Color](customization-theme.md#color) |
-| `modalBackgroundColor`                     |           The background of any modal window           | [Color](customization-theme.md#color) |
-| `paymentItemBackgroundColor`               |   The background of an item in payment options list    | [Color](customization-theme.md#color) |
-| `selectorIconColor`                        |          The color of the icon of the payment          | [Color](customization-theme.md#color) |
-| `savePhoneNumberIconColor`                 | The color of “Diskette” button for saving phone number | [Color](customization-theme.md#color) |
-| `selectPaymentMethodHeaderBackgroundColor` |   The background of an item in payment options list    | [Color](customization-theme.md#color) |
+| `sdkbackgroundColor`                       |     The main background of the SDK view component      | [Color](#color) |
+| `modalBackgroundColor`                     |           The background of any modal window           | [Color](#color) |
+| `paymentItemBackgroundColor`               |   The background of an item in payment options list    | [Color](#color) |
+| `selectorIconColor`                        |          The color of the icon of the payment          | [Color](#color) |
+| `savePhoneNumberIconColor`                 | The color of “Diskette” button for saving phone number | [Color](#color) |
+| `selectPaymentMethodHeaderBackgroundColor` |   The background of an item in payment options list    | [Color](#color) |
 
 #### **Buttons**
 
 | Property Name    |                            Description                            |                     Data Type                     |
 | ---------------- | :---------------------------------------------------------------: | :-----------------------------------------------: |
-| `button`         |          Background, text color and font for any button           |      [Button](customization-theme.md#button)      |
-| `backButton`     |               Color of the “Back” navigation button               | [RippleColor](customization-theme.md#ripplecolor) |
-| `selectorButton` | Background, text color and font for payment item selection button |      [Button](customization-theme.md#button)      |
+| `button`         |          Background, text color and font for any button           |      [Button](#button)      |
+| `backButton`     |               Color of the “Back” navigation button               | [RippleColor](#ripplecolor) |
+| `selectorButton` | Background, text color and font for payment item selection button |      [Button](#button)      |
 
 #### **Switch**
 
 | Property Name |                                        Description                                        |                 Data Type                 |
 | ------------- | :---------------------------------------------------------------------------------------: | :---------------------------------------: |
-| `switch`      | Colors of the switch background and its toggle in different states (on, off and disabled) | [Switch](customization-theme.md#switch-1) |
+| `switch`      | Colors of the switch background and its toggle in different states (on, off and disabled) | [Switch](#switch-1) |
 
 #### **Margins**
 
 | Property Name |                      Description                      |                  Data Type                  |
 | ------------- | :---------------------------------------------------: | :-----------------------------------------: |
-| margins       | Top, left, bottom and right margins between component | [Margins](customization-theme.md#margins-1) |
+| margins       | Top, left, bottom and right margins between component | [Margins](#margins-1) |
 
 ### Data Types Description <a href="#data-types-description" id="data-types-description"></a>
 
@@ -3502,26 +3502,26 @@ If a property is not specified, the default value (as defined in the Figma desig
 
 | Property Name |       Description        |               Data Type               |
 | ------------- | :----------------------: | :-----------------------------------: |
-| `textColor`   | Main color integer value | [Color](customization-theme.md#color) |
+| `textColor`   | Main color integer value | [Color](#color) |
 | `fontType`    |     Font resource ID     |                  Int                  |
 
 #### **TextField**
 
 | Property Name  | Description                    |               Data Type               |
 | :------------: | ------------------------------ | :-----------------------------------: |
-|  `background`  | Background color integer value | [Color](customization-theme.md#color) |
-| `primaryColor` | Text color                     | [Color](customization-theme.md#color) |
-| `focusedColor` | Selected text color            | [Color](customization-theme.md#color) |
-|     `text`     | Text value                     |  [Text](customization-theme.md#text)  |
-|    `error`     | Text value                     |  [Text](customization-theme.md#text)  |
+|  `background`  | Background color integer value | [Color](#color) |
+| `primaryColor` | Text color                     | [Color](#color) |
+| `focusedColor` | Selected text color            | [Color](#color) |
+|     `text`     | Text value                     |  [Text](#text)  |
+|    `error`     | Text value                     |  [Text](#text)  |
 
 #### Button
 
 | Property Name |       Description       |                     Data Type                     |
 | ------------- | :---------------------: | :-----------------------------------------------: |
-| `rippleColor` | Button background color | [RippleColor](customization-theme.md#ripplecolor) |
+| `rippleColor` | Button background color | [RippleColor](#ripplecolor) |
 | `fontType`    |   Button text font ID   |                        Int                        |
-| `textColor`   |    Button text color    |       [Color](customization-theme.md#color)       |
+| `textColor`   |    Button text color    |       [Color](#color)       |
 
 #### Switch
 
@@ -3589,7 +3589,7 @@ return CheckoutTheme(
 
 Once the STC Pay integration between Ottu and STC Pay has been completed, the necessary checks are automatically handled by the Checkout SDK to ensure the seamless display of the STC Pay button.
 
-Upon initialization of the Checkout SDK with the [session_id](payment-gateway-compliance-and-information.md#sessionid-string-required) and payment gateway codes ([pg_codes](./checkout-api#pg_codes-array-required)), the following condition is automatically verified:
+Upon initialization of the Checkout SDK with the [session_id](./checkout-api) and payment gateway codes ([pg_codes](./checkout-api)), the following condition is automatically verified:
 
 - The `session_id` and pg_codes provided during SDK initialization must be linked to the STC Pay Payment Service. This verification ensures that the STC Pay option is made available for selection as a payment method.
 
@@ -3663,7 +3663,7 @@ The SDK is designed to protect sensitive data by restricting screen capture func
 
 ## FAQ
 
-#### 1 [What forms of payments are supported by the SDK?](faq.md#id-1.-what-forms-of-payments-are-supported-by-the-sdk) <a href="#id-1.-what-forms-of-payments-are-supported-by-the-sdk" id="id-1.-what-forms-of-payments-are-supported-by-the-sdk"></a>
+#### 1 [What forms of payments are supported by the SDK?](./checkout-sdk) <a href="#id-1.-what-forms-of-payments-are-supported-by-the-sdk" id="id-1.-what-forms-of-payments-are-supported-by-the-sdk"></a>
 
 The SDK accommodates various payment forms including`tokenPay`, `redirect`, `StcPay` and `cardOnsite`.&#x20;
 
@@ -3671,36 +3671,36 @@ Merchants have the flexibility to showcase specific methods based on their requi
 
 For instance, if you wish to exclusively display the STC Pay button, you can achieve this by setting `formsOfPayment` = `[StcPay]`, which will result in only the STC Pay button being displayed. This approach is applicable to other payment methods as well.
 
-#### 2 [What are the minimum system requirements for the SDK integration?](faq.md#id-2.-what-are-the-minimum-system-requirements-for-the-sdk-integration) <a href="#id-2.-what-are-the-minimum-system-requirements-for-the-sdk-integration" id="id-2.-what-are-the-minimum-system-requirements-for-the-sdk-integration"></a>
+#### 2 [What are the minimum system requirements for the SDK integration?](./checkout-sdk) <a href="#id-2.-what-are-the-minimum-system-requirements-for-the-sdk-integration" id="id-2.-what-are-the-minimum-system-requirements-for-the-sdk-integration"></a>
 
 It is required to have a device running Android 8 or higher (Android API level 26 or higher).
 
-#### 3 [Can I customize the appearance beyond the provided themes?](faq.md#id-3.-can-i-customize-the-appearance-beyond-the-provided-themes) <a href="#id-3.-can-i-customize-the-appearance-beyond-the-provided-themes" id="id-3.-can-i-customize-the-appearance-beyond-the-provided-themes"></a>
+#### 3 [Can I customize the appearance beyond the provided themes?](./checkout-sdk) <a href="#id-3.-can-i-customize-the-appearance-beyond-the-provided-themes" id="id-3.-can-i-customize-the-appearance-beyond-the-provided-themes"></a>
 
-Yes, check the [Customization theme](faq.md#customization-theme) section.
+Yes, check the [Customization theme](#customization-theme) section.
 
 ---
 
 ## Flutter
 
-The Checkout SDK is a Flutter framework (library) developed by Ottu, designed to seamlessly integrate an Ottu-powered [checkout process](../#ottu-checkout-sdk-flow) into Flutter applications for both iOS and Android platforms. This framework functions as a wrapper over the corresponding native SDKs, ensuring a smooth and efficient payment experience.
+The Checkout SDK is a Flutter framework (library) developed by Ottu, designed to seamlessly integrate an Ottu-powered [checkout process](../) into Flutter applications for both iOS and Android platforms. This framework functions as a wrapper over the corresponding native SDKs, ensuring a smooth and efficient payment experience.
 
 With the Checkout SDK, both the visual appearance and the forms of payment available during the checkout process can be fully customized to meet specific requirements.
 
 To integrate the Checkout SDK, the library must be added to the Flutter application and initialized with the following parameters:
 
-- [merchant_id](../web.md#merchant_id-string)
-- [session_id](./checkout-api#session_id-string-mandatory)
+- [merchant_id](#merchant_id-string)
+- [session_id](./checkout-api)
 - [API key](../getting-started/authentication#public-key)
 
-Additionally, optional configurations such as the [forms of payment](./#formsofpayment-array-optional) to be accepted and the [theme](./#customization-theme) styling for the checkout interface can be specified.
+Additionally, optional configurations such as the [forms of payment](./checkout-sdk) to be accepted and the [theme](./checkout-sdk) styling for the checkout interface can be specified.
 
 ---
 
 ## Quick Start
 
 This guide explains how to integrate the **Ottu Checkout SDK** into a Flutter application from scratch.\
-It walks you through[ project setup](quick-start.md#project-setup), SDK installation, and configuration steps for both [Android](quick-start.md#android-integration) and [iOS](quick-start.md#ios-integration), ensuring a smooth and efficient checkout experience within your Flutter app.
+It walks you through[ project setup](./checkout-sdk), SDK installation, and configuration steps for both [Android](#android-sdk-configuration) and [iOS](#ios-sdk-configuration), ensuring a smooth and efficient checkout experience within your Flutter app.
 
 ### **Video Tutorial: Flutter SDK Integration**
 
@@ -3716,7 +3716,7 @@ This video walks you through the complete Flutter SDK integration process. Follo
 
 ### Video Tutorial: Releasing Your Android Application
 
-In this video, we'll walk you through the complete process of preparing and releasing your Android application. You'll learn how to verify your **build.gradle.kts** configuration, set up and update **ProGuard rules**, and resolve missing rule issues to ensure a smooth release build. Follow along step by step as we guide you through the commands and configuration updates needed to successfully generate your release APK. For further information, please refer to[ Releasing Your APP](quick-start.md#releasing-your-app) section.
+In this video, we'll walk you through the complete process of preparing and releasing your Android application. You'll learn how to verify your **build.gradle.kts** configuration, set up and update **ProGuard rules**, and resolve missing rule issues to ensure a smooth release build. Follow along step by step as we guide you through the commands and configuration updates needed to successfully generate your release APK. For further information, please refer to[ Releasing Your APP](#releasing-your-app) section.
 
 <iframe
   title="Flutter Video"
@@ -4215,7 +4215,7 @@ To ensure consistency, the current device language should be taken into account 
 
 The SDK supports automatic UI adjustments based on the device's theme settings (light or dark mode).
 
-The appropriate theme is applied during [SDK initialization](sdk-configuration.md#sdk-initialization), aligning with the device's configuration. Similar to language settings, no manual adjustments are required within the application.
+The appropriate theme is applied during [SDK initialization](#sdk-configuration), aligning with the device's configuration. Similar to language settings, no manual adjustments are required within the application.
 
 ---
 
@@ -4223,11 +4223,11 @@ The appropriate theme is applied during [SDK initialization](sdk-configuration.m
 
 ### SDK Initialization
 
-The Checkout SDK is initialized using the `CheckoutArguments` class, which includes the [properties](functions.md#properties) listed below.
+The Checkout SDK is initialized using the `CheckoutArguments` class, which includes the [properties](#properties) listed below.
 
 To initialize the SDK, an instance of `CheckoutArguments` must be passed as an argument to the `OttuCheckoutWidget` object.
 
-For a detailed implementation example, refer to the [Example](functions.md#example) section.
+For a detailed implementation example, refer to the [Example](#example) section.
 
 ### **Properties**
 
@@ -4252,17 +4252,17 @@ Ensure that only the **public key** is used. The [private key](../getting-starte
 
 It is a unique identifier for the payment transaction associated with the checkout process.
 
-This identifier is automatically generated when a payment transaction is created. For further details on how to use the `session_id` parameter in the [Checkout API](./checkout-api), refer to the [session_id](/broken/pages/3x6ec6ghiDMkqAeOlBDy#session_id) documentation.
+This identifier is automatically generated when a payment transaction is created. For further details on how to use the `session_id` parameter in the [Checkout API](./checkout-api), refer to the [session_id](./checkout-api) documentation.
 
 #### **formsOfPayment** _<span style={{ color: "blue" }}>`array`</span>_ _<span style={{ color: "blue" }}>**`optional`**</span>_
 
-The `formsOfPayment` parameter is used to customize the forms of payment displayed in the [checkout process](../#ottu-checkout-sdk-flow). By default, all forms of payment are enabled.
+The `formsOfPayment` parameter is used to customize the forms of payment displayed in the [checkout process](../). By default, all forms of payment are enabled.
 
 **Available options for formsOfPayment:**
 
 - `applePay`: The Apple Pay payment method is supported, allowing purchases to be made using Apple Pay-enabled devices.
 - `cardOnsite`: A direct (onsite) payment method, where customers are required to enter their card details directly within the SDK.
-- `tokenPay`: A method utilizing [tokenization](../../tokenization.md), ensuring that customer payment information is securely stored and processed.
+- `tokenPay`: A method utilizing [tokenization](../cards-and-tokens), ensuring that customer payment information is securely stored and processed.
 - `redirect`: A payment method where customers are redirected to an external payment gateway or a third-party processor to complete the transaction.
 - `stcPay`: A method where customers enter their mobile number and authenticate using an OTP sent to their mobile device.
 
@@ -4274,15 +4274,15 @@ It is used to store transaction details. If provided, transaction details will n
 
 A Theme class object is used for UI customization. All fields are optional and may include values for background colors, text colors, and fonts for various UI components.
 
-For more details, refer to [Android Customization Theme](../android/#customization-theme).
+For more details, refer to [Android Customization Theme](#customization-theme).
 
 #### **paymentOptionsDisplaySettings** _<span style={{ color: "blue" }}>`object`</span>_ _<span style={{ color: "blue" }}>**`optional`**</span>_
 
-The `PaymentOptionsDisplaySettings` object accepts a `PaymentOptionsDisplaySettings` configuration, which defines how payment options are presented to the user during checkout. For more details, refer to the [Payment Options Display Mode](functions.md#payment-options-display-mode) section.
+The `PaymentOptionsDisplaySettings` object accepts a `PaymentOptionsDisplaySettings` configuration, which defines how payment options are presented to the user during checkout. For more details, refer to the [Payment Options Display Mode](#payment-options-display-mode) section.
 
 #### **successCallback, errorCallback, and successCallback** _<span style={{ color: "blue" }}>`unit`</span>_ _<span style={{ color: "red" }}>**`required`**</span>_
 
-Callback functions are used to retrieve the payment status. These must be provided directly to the Checkout initialization function. For more information, please check [here](functions.md#callbacks).
+Callback functions are used to retrieve the payment status. These must be provided directly to the Checkout initialization function. For more information, please check [here](#callbacks).
 
 ### Payment Options Display Mode
 
@@ -4300,7 +4300,7 @@ The SDK provides flexible customization for how payment options are displayed. I
 Passing `0` will cause the SDK to throw an exception. This exception must be caught and handled by the parent application.
 :::
 
-- **`defaultSelectedPgCode`**: Specifies a payment gateway [(PG) code](/broken/pages/OCLTqphKqkbEMATf9pam#pg_codes) to be pre-selected by default.
+- **`defaultSelectedPgCode`**: Specifies a payment gateway [(PG) code](./checkout-api) to be pre-selected by default.
   - This field accepts a PG code to auto-select a specific payment option.
   - If the SDK finds a payment method matching the provided PG code, it will be selected by default.
   - If no match is found, no option is selected.
@@ -4389,7 +4389,7 @@ and passed to `Checkout.init` via the following object:
 displaySettings:paymentOptionsDisplaySettings
 ```
 
-To see the full function call, please refer the code snippet in the [Ottu SDK - Flutter | Example](functions.md#example) section.
+To see the full function call, please refer the code snippet in the [Ottu SDK - Flutter | Example](#example) section.
 
 ---
 
@@ -4397,8 +4397,8 @@ To see the full function call, please refer the code snippet in the [Ottu SDK - 
 
 The callbacks are handled by the native frameworks. Please see the links here:
 
-- [Android Callbacks](../android/#callbacks)
-- [iOS Callbacks](../ios/#callbacks)
+- [Android Callbacks](#callbacks)
+- [iOS Callbacks](#callbacks)
 
 It is not necessary to modify anything for the callbacks, as they are managed by the native SDK.
 
@@ -4712,67 +4712,67 @@ If a property is not set, the default value (as specified in the Figma design [h
 
 | Property Name   |                            Description                            |              Data Type              |
 | --------------- | :---------------------------------------------------------------: | :---------------------------------: |
-| `mainTitleText` |                 Font and color for all “Captions”                 | [Text](customization-theme.md#text) |
-| `titleText`     |          Font and color for payment options in the list           | [Text](customization-theme.md#text) |
-| `subtitleText`  | Font and color for payment options details (like expiration date) | [Text](customization-theme.md#text) |
+| `mainTitleText` |                 Font and color for all “Captions”                 | [Text](#text) |
+| `titleText`     |          Font and color for payment options in the list           | [Text](#text) |
+| `subtitleText`  | Font and color for payment options details (like expiration date) | [Text](#text) |
 
 #### **Fees**
 
 | Property Name      |                          Description                           |              Data Type              |
 | ------------------ | :------------------------------------------------------------: | :---------------------------------: |
-| `feesTitleText`    |    Font and color of fees value in the payment options list    | [Text](customization-theme.md#text) |
-| `feesSubtitleText` | Font and color of fees description in the payment options list | [Text](customization-theme.md#text) |
+| `feesTitleText`    |    Font and color of fees value in the payment options list    | [Text](#text) |
+| `feesSubtitleText` | Font and color of fees description in the payment options list | [Text](#text) |
 
 #### **Data**
 
 | Property Name   |                       Description                        |              Data Type              |
 | --------------- | :------------------------------------------------------: | :---------------------------------: |
-| `dataLabelText` | Font and color of payment details fields (like “Amount”) | [Text](customization-theme.md#text) |
-| `dataValueText` |         Font and color of payment details values         | [Text](customization-theme.md#text) |
+| `dataLabelText` | Font and color of payment details fields (like “Amount”) | [Text](#text) |
+| `dataValueText` |         Font and color of payment details values         | [Text](#text) |
 
 #### **Other**
 
 | Property Name                   |                          Description                           |              Data Type              |
 | ------------------------------- | :------------------------------------------------------------: | :---------------------------------: |
-| `errorMessageText`              |        Font and color of error message text in pop-ups         | [Text](customization-theme.md#text) |
-| `selectPaymentMethodHeaderText` | The text of "Select Payment Method" in the bottom sheet header | [Text](customization-theme.md#text) |
+| `errorMessageText`              |        Font and color of error message text in pop-ups         | [Text](#text) |
+| `selectPaymentMethodHeaderText` | The text of "Select Payment Method" in the bottom sheet header | [Text](#text) |
 
 #### **Text Fields**
 
 | Property Name    |                             Description                              |                   Data Type                   |
 | ---------------- | :------------------------------------------------------------------: | :-------------------------------------------: |
-| `inputTextField` | Font and color of text in any input field (including disabled state) | [TextField](customization-theme.md#textfield) |
+| `inputTextField` | Font and color of text in any input field (including disabled state) | [TextField](#textfield) |
 
 #### **Colors**
 
 | Property Name                              |                      Description                       |               Data Type               |
 | ------------------------------------------ | :----------------------------------------------------: | :-----------------------------------: |
-| `sdkbackgroundColor`                       |     The main background of the SDK view component      | [Color](customization-theme.md#color) |
-| `modalBackgroundColor`                     |           The background of any modal window           | [Color](customization-theme.md#color) |
-| `paymentItemBackgroundColor`               |   The background of an item in payment options list    | [Color](customization-theme.md#color) |
-| `selectorIconColor`                        |          The color of the icon of the payment          | [Color](customization-theme.md#color) |
-| `savePhoneNumberIconColor`                 | The color of “Diskette” button for saving phone number | [Color](customization-theme.md#color) |
-| `selectPaymentMethodHeaderBackgroundColor` |   The background of an item in payment options list    | [Color](customization-theme.md#color) |
+| `sdkbackgroundColor`                       |     The main background of the SDK view component      | [Color](#color) |
+| `modalBackgroundColor`                     |           The background of any modal window           | [Color](#color) |
+| `paymentItemBackgroundColor`               |   The background of an item in payment options list    | [Color](#color) |
+| `selectorIconColor`                        |          The color of the icon of the payment          | [Color](#color) |
+| `savePhoneNumberIconColor`                 | The color of “Diskette” button for saving phone number | [Color](#color) |
+| `selectPaymentMethodHeaderBackgroundColor` |   The background of an item in payment options list    | [Color](#color) |
 
 #### **Buttons**
 
 | Property Name    |                            Description                            |                     Data Type                     |
 | ---------------- | :---------------------------------------------------------------: | :-----------------------------------------------: |
-| `button`         |          Background, text color and font for any button           |      [Button](customization-theme.md#button)      |
-| `backButton`     |               Color of the “Back” navigation button               | [RippleColor](customization-theme.md#ripplecolor) |
-| `selectorButton` | Background, text color and font for payment item selection button |      [Button](customization-theme.md#button)      |
+| `button`         |          Background, text color and font for any button           |      [Button](#button)      |
+| `backButton`     |               Color of the “Back” navigation button               | [RippleColor](#ripplecolor) |
+| `selectorButton` | Background, text color and font for payment item selection button |      [Button](#button)      |
 
 #### **Switch**
 
 | Property Name |                                        Description                                        |                 Data Type                 |
 | ------------- | :---------------------------------------------------------------------------------------: | :---------------------------------------: |
-| `switch`      | Colors of the switch background and its toggle in different states (on, off and disabled) | [Switch](customization-theme.md#switch-1) |
+| `switch`      | Colors of the switch background and its toggle in different states (on, off and disabled) | [Switch](#switch-1) |
 
 #### **Margins**
 
 | Property Name |                      Description                      |                Data Type                |
 | ------------- | :---------------------------------------------------: | :-------------------------------------: |
-| margins       | Top, left, bottom and right margins between component | [Margin](customization-theme.md#margin) |
+| margins       | Top, left, bottom and right margins between component | [Margin](#margin) |
 
 ### Data Types Description <a href="#data-types-description" id="data-types-description"></a>
 
@@ -4795,26 +4795,26 @@ If a property is not set, the default value (as specified in the Figma design [h
 
 | Property Name |       Description        |               Data Type               |
 | ------------- | :----------------------: | :-----------------------------------: |
-| `textColor`   | Main color integer value | [Color](customization-theme.md#color) |
+| `textColor`   | Main color integer value | [Color](#color) |
 | `fontType`    |     Font resource ID     |                  Int                  |
 
 #### **TextField**
 
 | Property Name  | Description                    |               Data Type               |
 | :------------: | ------------------------------ | :-----------------------------------: |
-|  `background`  | Background color integer value | [Color](customization-theme.md#color) |
-| `primaryColor` | Text color                     | [Color](customization-theme.md#color) |
-| `focusedColor` | Selected text color            | [Color](customization-theme.md#color) |
-|     `text`     | Text value                     |  [Text](customization-theme.md#text)  |
-|    `error`     | Text value                     |  [Text](customization-theme.md#text)  |
+|  `background`  | Background color integer value | [Color](#color) |
+| `primaryColor` | Text color                     | [Color](#color) |
+| `focusedColor` | Selected text color            | [Color](#color) |
+|     `text`     | Text value                     |  [Text](#text)  |
+|    `error`     | Text value                     |  [Text](#text)  |
 
 #### Button
 
 | Property Name |       Description       |                     Data Type                     |
 | ------------- | :---------------------: | :-----------------------------------------------: |
-| `rippleColor` | Button background color | [RippleColor](customization-theme.md#ripplecolor) |
+| `rippleColor` | Button background color | [RippleColor](#ripplecolor) |
 | `fontType`    |   Button text font ID   |                        Int                        |
-| `textColor`   |    Button text color    |       [Color](customization-theme.md#color)       |
+| `textColor`   |    Button text color    |       [Color](#color)       |
 
 #### Switch
 
@@ -4857,7 +4857,7 @@ final checkoutTheme = ch.CheckoutTheme(
 
 If the STC Pay integration between Ottu and STC Pay has been completed, the Checkout SDK will automatically handle the necessary checks to display the STC Pay button seamlessly.
 
-When the Checkout SDK is initialized with the [session_id](./checkout-api#session_id-string-mandatory) and payment gateway codes ([pg_codes](./checkout-api#pg_codes-array-required)), the SDK will verify the following conditions:
+When the Checkout SDK is initialized with the [session_id](./checkout-api) and payment gateway codes ([pg_codes](./checkout-api)), the SDK will verify the following conditions:
 
 - The `session_id` and `pg_codes` provided during initialization must be associated with the STC Pay Payment Service. This ensures that the STC Pay option is available for the customer.
 - In the Android SDK, the STC Pay button is displayed regardless of whether the customer has entered a mobile number while creating the transaction.
@@ -4977,9 +4977,9 @@ The **Flutter SDK** does **not** perform **rooting** or **jailbreak detection** 
 
 For more details, refer to the following links:
 
-[Android ](../android/#rooting-detection)
+[Android ](#rooting-detection)
 
-[iOS](../ios/#jailbreak-detection)
+[iOS](./checkout-sdk)
 
 #### Screen Capture Prevention
 
@@ -4987,9 +4987,9 @@ The SDK includes mechanisms to prevent screen capturing (such as screenshots and
 
 Since the implementation differs between the two platforms, please refer to the respective native documentation for more details.
 
-[Android](../android/#screen-capture-prevention)&#x20;
+[Android](#screen-capture-prevention)&#x20;
 
-[iOS](../ios/#screen-capture-prevention)
+[iOS](#screen-capture-prevention)
 
 ---
 
@@ -5104,9 +5104,9 @@ Follow these steps to prepare and release your Android app properly:
 
 ## FAQ
 
-### 1 [**What forms of payment are supported by the SDK?**](faq.md#what-forms-of-payment-are-supported-by-the-sdk)
+### 1 [**What forms of payment are supported by the SDK?**](./checkout-sdk)
 
-The SDK supports the following [forms of payment](faq.md#formsofpayment-array-optional):
+The SDK supports the following [forms of payment](#formsofpayment-array-optional):
 
 - `tokenPay`
 - `redirect`
@@ -5124,13 +5124,13 @@ formsOfPayment = ["stcPay"]
 
 This ensures that only the **STC Pay** button is shown. The same approach applies to other payment methods.
 
-### 2 [**What are the minimum system requirements for SDK integration?**](faq.md#what-are-the-minimum-system-requirements-for-sdk-integration)
+### 2 [**What are the minimum system requirements for SDK integration?**](./checkout-sdk)
 
 The SDK requires a device running:
 
 - **Android 8** or higher (**API level 26** or higher)
 - **iOS 14** or higher
 
-### 3 [**Can I customize the appearance beyond the provided themes?**](faq.md#can-i-customize-the-appearance-beyond-the-provided-themes)
+### 3 [**Can I customize the appearance beyond the provided themes?**](./checkout-sdk)
 
-Yes, customization is supported. For more details, refer to the [Customization Theme](faq.md#customization-theme) section.
+Yes, customization is supported. For more details, refer to the [Customization Theme](#customization-theme) section.

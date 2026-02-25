@@ -3,17 +3,17 @@ import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 # Payment Methods
 
 In the intricate realm of online transactions, a versatile payment experience is essential. \
-The `Payment Methods API` streamlines this process, allowing for effortless automation. by simply integrating with specified operation, [customer_id](checkout-api.md#customer_id-string-optional), [currencies](checkout-api.md#currency_code-string-required), [payment gateway names](../user-guide/payment-gateway.md) and desired [payment plugins](../user-guide/plugins/), merchant can harness the full power of Ottu's payment automation, all while keeping his existing environment intact. no extra effort, just seamless integration.
+The `Payment Methods API` streamlines this process, allowing for effortless automation. by simply integrating with specified operation, [customer_id](./checkout-api), [currencies](./checkout-api), [payment gateway names](https://docs.ottu.com/user-guide/payment-gateway) and desired [payment plugins](https://docs.ottu.com/user-guide/plugins/), merchant can harness the full power of Ottu's payment automation, all while keeping his existing environment intact. no extra effort, just seamless integration.
 
 ## [Setup](payment-methods.md#setup)
 
 #### [Enabling the Plugin](payment-methods.md#enabling-the-plugin)
 
-Ensure the relevant plugin ([E-Commerce](../user-guide/plugins/#e-commerce) or [Payment Request](../user-guide/plugins/#bulk-payment-request)) is activated in the Admin Panel under the Plugin Config section. For detailed activation steps, refer to the [Plugin Activation Guide](../user-guide/plugins/#adding-or-removing-plugins).
+Ensure the relevant plugin ([E-Commerce](https://docs.ottu.com/user-guide/plugins/#e-commerce) or [Payment Request](https://docs.ottu.com/user-guide/plugins/#bulk-payment-request)) is activated in the Admin Panel under the Plugin Config section. For detailed activation steps, refer to the [Plugin Activation Guide](https://docs.ottu.com/user-guide/plugins/#adding-or-removing-plugins).
 
 #### [Activating Payment Gateway Codes](payment-methods.md#activating-payment-gateway-codes)
 
-Activate the [payment gateway](../user-guide/payment-gateway.md) ([pg_codes](checkout-api.md#pg_codes-array-required)) you intend to use. Ensure all desired `pg_codes` are set to ‘`active`’ status in your configuration.
+Activate the [payment gateway](https://docs.ottu.com/user-guide/payment-gateway) ([pg_codes](./checkout-api)) you intend to use. Ensure all desired `pg_codes` are set to ‘`active`’ status in your configuration.
 
 #### [Understanding the `type` Filter](payment-methods.md#understanding-the-type-filter)
 
@@ -43,8 +43,8 @@ While these packages offer substantial speed and convenience benefits, understan
 
 **Supported Methods**
 
-- [Private API Key](authentication.md#private-key-api-key)
-- [Basic Authentication](authentication.md#basic-authentication)
+- [Private API Key](../getting-started/authentication.md#private-key-api-key)
+- [Basic Authentication](../getting-started/authentication.md#basic-authentication)
 
 For detailed information on authentication procedures, please refer to the [Authentication documentation](payment-methods.md#authentication).
 
@@ -60,7 +60,7 @@ Ensuring the right level of access is crucial for maintaining the security and i
 #### BasicAuth
 
 - **Privileges:** `BasicAuth` is user-centric, meaning it’s tied to a specific user profile. Access to payment methods can be restricted based on the user’s assigned permissions.
-- **Setting Permissions:** To grant a user access to a specific payment method, assign the permission: "**Can use pg_code**". Here, the [pg_code](checkout-api.md#pg_codes-array-required) represents the unique code of the [payment gateway](../user-guide/payment-gateway.md) or merchant ID (`MID`).\
+- **Setting Permissions:** To grant a user access to a specific payment method, assign the permission: "**Can use pg_code**". Here, the [pg_code](./checkout-api) represents the unique code of the [payment gateway](https://docs.ottu.com/user-guide/payment-gateway) or merchant ID (`MID`).\
   For instance, if you want to grant a user access to a payment gateway with the code ‘`credit-card`’, you would assign them the permission “**Can use Credit Card**”.
 - **Usage:** Since `BasicAuth` is user-specific, it’s suitable for scenarios where you want to provide selective access to different payment methods based on user roles or responsibilities.
 
@@ -70,10 +70,10 @@ The `Payment Methods API` is designed to streamline and automate the end-to-end 
 
 ### [Purpose of the Payment Methods API](payment-methods.md#purpose-of-the-payment-methods-api)
 
-1. **Automation and Flexibility:** This API serves as a foundation for other Ottu APIs, providing the necessary data to facilitate seamless transactions. By using this API, you can ensure that your integration remains current, even when there are changes in the [payment gateway](../user-guide/payment-gateway.md) configurations.
+1. **Automation and Flexibility:** This API serves as a foundation for other Ottu APIs, providing the necessary data to facilitate seamless transactions. By using this API, you can ensure that your integration remains current, even when there are changes in the [payment gateway](https://docs.ottu.com/user-guide/payment-gateway) configurations.
 2. **Caching for Efficiency:** Given that the data from the `Payment Methods API` doesn’t change frequently, it’s recommended to cache the response for 24 hours. This approach enhances performance and reduces unnecessary API calls. However, ensure you have a mechanism to clear the cache when immediate updates are required.
-3. **Tailored Customer Experience:** With various filters available, you can customize the payment methods presented to the customer. For instance, if you’re setting up a customer for recurring payments, you can filter out payment methods that don’t support [tokenization ](tokenization.md)using the `tokenizable`=`true` filter.
-4. **Versatility:** The `Payment Methods API` isn’t just a prerequisite for the [Checkout API](checkout-api.md). It’s also essential for other APIs, such as the [User Cards API](user-cards.md).
+3. **Tailored Customer Experience:** With various filters available, you can customize the payment methods presented to the customer. For instance, if you’re setting up a customer for recurring payments, you can filter out payment methods that don’t support [tokenization ](../cards-and-tokens/)using the `tokenizable`=`true` filter.
+4. **Versatility:** The `Payment Methods API` isn’t just a prerequisite for the [Checkout API](./checkout-api). It’s also essential for other APIs, such as the [User Cards API](../cards-and-tokens/user-cards).
 
 ### [Usage Scenarios](payment-methods.md#usage-scenarios)
 
@@ -108,7 +108,7 @@ The `Payment Methods API` provides a wealth of information about each available 
 
 #### Key insights you can glean from the API response include
 
-- **Capabilities:** Understand what each payment method is capable of. This includes operations like [refunds](operations.md#refund), [voids](operations.md#void), and [captures](operations.md#capture).
+- **Capabilities:** Understand what each payment method is capable of. This includes operations like [refunds](../operations/refund), [voids](../operations/void), and [captures](../operations/capture).
 - **Wallet Integrations:** Determine which payment methods support popular digital wallets like Apple Pay and Google Pay.
 - **Supported Currencies:** Identify the currencies each payment method can handle. This is crucial for businesses operating in multi-currency environments.
 - **And More:** The API provides a plethora of other details that can be instrumental in tailoring the payment experience for your customers.
@@ -133,7 +133,7 @@ An e-commerce merchants aim to simplify and accelerate the checkout process for 
 
 2.  #### Invoke the Checkout API
 
-    Using the payment methods gleaned from the above step, you then call the [Checkout API](checkout-api.md). Here, you ensure the chosen payment method is passed to this API call. \
+    Using the payment methods gleaned from the above step, you then call the [Checkout API](./checkout-api). Here, you ensure the chosen payment method is passed to this API call. \
     For example, if the `Payment Methods API` returned '`PG001`' as an available payment method code, you would incorporate this code into the `Checkout API` call.
 
 3.  #### Outcome
@@ -153,7 +153,7 @@ An e-commerce merchants aim to simplify and accelerate the checkout process for 
 
 ### [**Use Cases Examples**](payment-methods.md#use-cases-examples)
 
-#### [**Use Case 1:** Expanding Payment Options ](payment-methods.md#use-case-1-expanding-payment-options)
+#### [**Use Case 1:** Expanding Payment Options ](./payment-methods)
 
 **Scenario:**&#x20;
 
@@ -167,7 +167,7 @@ A merchant aims to provide a diverse array of payment options to accommodate an 
 
 2.  #### Using the API's Filters
 
-    Utilize filters such as [customer_id](checkout-api.md#customer_id-string-optional), [currency](checkout-api.md#currency_code-string-required), and [plugin](../user-guide/plugins/), the merchant selects and integrates desired payment methods into their platform in our case merchant should use plugin filter to get only e_commerce payment methods.
+    Utilize filters such as [customer_id](./checkout-api), [currency](./checkout-api), and [plugin](https://docs.ottu.com/user-guide/plugins/), the merchant selects and integrates desired payment methods into their platform in our case merchant should use plugin filter to get only e_commerce payment methods.
 
 3.  #### Expanding Payment Choices
 
@@ -202,7 +202,7 @@ An online subscription service wants to offer their customers the option to have
 1.  #### Tokenization Filter
 
     The merchant uses the `Payment Methods API` with the \``tokenizable`\` flag enabled.\
-    The API filters and returns only the [payment gateways](../user-guide/payment-gateway.md) (`pg_codes`) that support the tokenization feature.
+    The API filters and returns only the [payment gateways](https://docs.ottu.com/user-guide/payment-gateway) (`pg_codes`) that support the tokenization feature.
 
 2.  #### Incorporating Tokenization Gateways into Checkout Process
 
@@ -220,7 +220,7 @@ The chosen payment method is now set to automatically debit the subscription amo
 
 **Scenario:**&#x20;
 
-An e-commerce platform offers customers the convenience of saving their card details for faster checkout in future transactions. To maintain trust and enhance the user experience, the platform wishes to ensure that subsequent charges using saved cards are only done on those cards which are [tokenization](tokenization.md) enabled by the customer.
+An e-commerce platform offers customers the convenience of saving their card details for faster checkout in future transactions. To maintain trust and enhance the user experience, the platform wishes to ensure that subsequent charges using saved cards are only done on those cards which are [tokenization](../cards-and-tokens/) enabled by the customer.
 
 **Steps:**
 
@@ -230,11 +230,11 @@ An e-commerce platform offers customers the convenience of saving their card det
 
 2.  #### Passing Tokenization `pg_codes` to `User Cards API`
 
-    The retrieved tokenization `pg_codes` are then passed to the [User Cards API](user-cards.md#fetch-cards). The `User Cards API` filters and returns only those saved cards that are enabled for [tokenization](tokenization.md) by the customers.
+    The retrieved tokenization `pg_codes` are then passed to the [User Cards API](../cards-and-tokens/user-cards#fetch-cards). The `User Cards API` filters and returns only those saved cards that are enabled for [tokenization](../cards-and-tokens/) by the customers.
 
 3.  #### Subsequent Transactions
 
-    For [subsequent transactions](auto-debit.md#subsequent-payments-1), the system only charges the customer's cards that are both saved and have tokenization enabled.
+    For [subsequent transactions](../cards-and-tokens/recurring-payments), the system only charges the customer's cards that are both saved and have tokenization enabled.
 
 Customers are assured that only their approved and tokenization enabled cards will be charged, ensuring transparency and trust.
 
@@ -268,13 +268,13 @@ By adhering to these best practices, you’ll ensure efficient API usage, mainta
 
 ## [FAQ](payment-methods.md#faq)
 
-#### :digit_one: [What is the main purpose of the Payment Methods API?](payment-methods.md#what-is-the-main-purpose-of-the-payment-methods-api)
+#### :digit_one: [What is the main purpose of the Payment Methods API?](./payment-methods)
 
 The `Payment Methods API` is designed to streamline the process of online transactions by offering an effortless automation system for payments.
 
-#### :digit_two: [Do I need to make changes to my existing environment when integrating with the Payment Methods API?](payment-methods.md#do-i-need-to-make-changes-to-my-existing-environment-when-integrating-with-the-payment-methods-api)
+#### :digit_two: [Do I need to make changes to my existing environment when integrating with the Payment Methods API?](./payment-methods)
 
-No, the `Payment Methods API` allows for a seamless integration without requiring changes to your current environment. You only need to integrate with specific operation, [customer_id](checkout-api.md#customer_id-string-optional), [currencies](checkout-api.md#currency_code-string-required), and desired payment [plugins](../user-guide/plugins/).
+No, the `Payment Methods API` allows for a seamless integration without requiring changes to your current environment. You only need to integrate with specific operation, [customer_id](./checkout-api), [currencies](./checkout-api), and desired payment [plugins](https://docs.ottu.com/user-guide/plugins/).
 
 **Conclusion**
 

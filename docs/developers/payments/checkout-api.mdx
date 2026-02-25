@@ -6,57 +6,57 @@ hide_table_of_contents: true
 
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 
-Ottu provides a comprehensive collection of APIs that offer a seamless and efficient way to test payments and enable merchants to accept and process transactions instantly. The Checkout API is the cornerstone of any payment initiation, whether it's [API-based](checkout-api.md) or [SDK-based](checkout-sdk/).
+Ottu provides a comprehensive collection of APIs that offer a seamless and efficient way to test payments and enable merchants to accept and process transactions instantly. The Checkout API is the cornerstone of any payment initiation, whether it's [API-based](./checkout-api) or [SDK-based](./checkout-sdk).
 
-## [Best Practices and Guidelines](checkout-api.md#best-practices-and-guidelines)
+## [Best Practices and Guidelines](./checkout-api)
 
-In order to ensure optimal transaction success tracking and minimize the number of required payment transactions, merchants should [create](checkout-api.md#create-payment-transaction) a Payment Transaction as soon as the amount is known. This typically occurs when a customer adds their first item to their cart. Following this, any changes to the total amount should be updated using the [Checkout API PATCH](checkout-api.md#update) method.
+In order to ensure optimal transaction success tracking and minimize the number of required payment transactions, merchants should [create](./checkout-api) a Payment Transaction as soon as the amount is known. This typically occurs when a customer adds their first item to their cart. Following this, any changes to the total amount should be updated using the [Checkout API PATCH](./checkout-api) method.
 
 By updating the same payment transaction, rather than creating a new one for each payment attempt, merchants can more effectively trace customer interactions with their cart. This is particularly useful for events such as insufficient funds, where a customer may remove an item from their cart and successfully complete a transaction on their next attempt. Tracking and analyzing such events can help merchants make data-driven decisions for future improvements.
 
-## [Permissions](checkout-api.md#permissions)
+## [Permissions](./checkout-api)
 
-Permissions are managed using [Basic Authentication](authentication.md#basic-authentication) and [API-Key](authentication.md#private-key-api-key). \
-Specifically, Basic Authentication is used to grant permissions for creating, updating, and reading data, as well as using allowed [PG codes](checkout-api.md#pg_codes-list-required) when [creating ](checkout-api.md#create-payment-transaction)or [updating](checkout-api.md#update) payment transactions.
+Permissions are managed using [Basic Authentication](../getting-started/authentication.md#basic-authentication) and [API-Key](../getting-started/authentication.md#private-key-api-key). \
+Specifically, Basic Authentication is used to grant permissions for creating, updating, and reading data, as well as using allowed [PG codes](./checkout-api) when [creating ](./checkout-api)or [updating](./checkout-api) payment transactions.
 
 It is important to ensure that the appropriate level of permissions is assigned to each user or application using the APIs. This can help to prevent unauthorized access or modification of sensitive data. Additionally, it is recommended to rotate API-Keys on a regular basis and to use secure password storage practices when using Basic Authentication.
 
-Ottu Checkout API supports different levels of permissions for the Payment Request and E-Commerce plugins. The permissions depend on the [authentication ](authentication.md)method being used.
+Ottu Checkout API supports different levels of permissions for the Payment Request and E-Commerce plugins. The permissions depend on the [authentication ](../getting-started/authentication.md)method being used.
 
-### [API Key](checkout-api.md#api-key)
+### [API Key](./checkout-api)
 
-When using the [API-Key](authentication.md#private-key-api-key), all permissions are granted by default, as the API-Key is considered to have admin permissions. See [How to Generate API Keys](../user-guide/configuration/how-to-get-api-keys.md)
+When using the [API-Key](../getting-started/authentication.md#private-key-api-key), all permissions are granted by default, as the API-Key is considered to have admin permissions. See [How to Generate API Keys](https://docs.ottu.com/user-guide/configuration/how-to-get-api-keys)
 
-### [Basic Authentication](checkout-api.md#basic-authentication)
+### [Basic Authentication](./checkout-api)
 
-For [Basic Authentication](authentication.md#basic-authentication), permissions are granted as follows:
+For [Basic Authentication](../getting-started/authentication.md#basic-authentication), permissions are granted as follows:
 
-#### [Create](checkout-api.md#create)
+#### [Create](./checkout-api)
 
-- To create a transaction, the user needs specific permission depending on the [plugin](../user-guide/plugins/) being used:
-  - "**Can add payment requests**" for the [Payment Request](../user-guide/plugins/#payment-request) plugin
-  - "**Can add e-commerce payments**" for the [E-Commerce](../user-guide/plugins/#e-commerce) plugin
-- Permission to use the payment gateway [code](checkout-api.md#pg_codes-array-required) is also required: "**Can use `pg_code`**"
+- To create a transaction, the user needs specific permission depending on the [plugin](https://docs.ottu.com/user-guide/plugins/) being used:
+  - "**Can add payment requests**" for the [Payment Request](https://docs.ottu.com/user-guide/plugins/#payment-request) plugin
+  - "**Can add e-commerce payments**" for the [E-Commerce](https://docs.ottu.com/user-guide/plugins/#e-commerce) plugin
+- Permission to use the payment gateway [code](./checkout-api) is also required: "**Can use `pg_code`**"
 
-#### [Update](checkout-api.md#update)
+#### [Update](./checkout-api)
 
 - To update a transaction, the user needs specific permission depending on the plugin being used:
-  - "**Can change payment requests**" for the [Payment Request](../user-guide/plugins/#payment-request) plugin
-  - "**Can change e-commerce payments**" for the [E-Commerce](../user-guide/plugins/#e-commerce) plugin
-- Permission to use the payment gateway [code](checkout-api.md#pg_codes-array-required) is also required: **"Can use `pg_code`**"
+  - "**Can change payment requests**" for the [Payment Request](https://docs.ottu.com/user-guide/plugins/#payment-request) plugin
+  - "**Can change e-commerce payments**" for the [E-Commerce](https://docs.ottu.com/user-guide/plugins/#e-commerce) plugin
+- Permission to use the payment gateway [code](./checkout-api) is also required: **"Can use `pg_code`**"
 
 :::info
 
-The PUT operation cannot be used if the user does not have permission to use the previously defined payment gateway [code](checkout-api.md#pg_codes-array-required) on the transaction. For [PATCH](checkout-api.md#update-payment-transaction), updates can be performed as long as the payment gateway codes are not updated.
+The PUT operation cannot be used if the user does not have permission to use the previously defined payment gateway [code](./checkout-api) on the transaction. For [PATCH](./checkout-api), updates can be performed as long as the payment gateway codes are not updated.
 
 :::
 
-#### [View](checkout-api.md#view)
+#### [View](./checkout-api)
 
-- By default, if a user has either the "**Can add**" or "**Can change**" permission, they can [fetch](checkout-api.md#retrieve) transactions from the API.
+- By default, if a user has either the "**Can add**" or "**Can change**" permission, they can [fetch](./checkout-api) transactions from the API.
 - For more granular control, the following view permissions can be used:
-  - "**Can view e-commerce payments**" for the [E-Commerce](../user-guide/plugins/#e-commerce) plugin
-  - "**Can view payment requests**" for the [Payment Request](../user-guide/plugins/#payment-request) plugin
+  - "**Can view e-commerce payments**" for the [E-Commerce](https://docs.ottu.com/user-guide/plugins/#e-commerce) plugin
+  - "**Can view payment requests**" for the [Payment Request](https://docs.ottu.com/user-guide/plugins/#payment-request) plugin
 
 ---
 
@@ -72,21 +72,21 @@ The PUT operation cannot be used if the user does not have permission to use the
 
 ---
 
-## [One-Step Checkout](checkout-api.md#one-step-checkout)
+## [One-Step Checkout](./checkout-api)
 
-One-Step Checkout combines the [Checkout API](checkout-api.md) and the [Native Payment API ](native-payment-api.md)into a single backend request.\
-Instead of creating a session first and then calling a separate payment endpoint, you can perform both actions in one step by including the [payment_instrument](checkout-api.md#payment_instrument) parameter.
+One-Step Checkout combines the [Checkout API](./checkout-api) and the [Native Payment API ](./native-payments)into a single backend request.\
+Instead of creating a session first and then calling a separate payment endpoint, you can perform both actions in one step by including the [payment_instrument](./checkout-api) parameter.
 
 This flow is ideal when you want to immediately process a payment as it’s created, for example:
 
 - A “Buy Now” button on a product page that charges the customer right away.
-- A subsequent [auto-debit](auto-debit.md) payment using a stored token.
-- A wallet-based purchase (Apple Pay / Google Pay) where you already have the payment payload on the server and don’t use [Checkout SDK.](checkout-sdk/)
+- A subsequent [auto-debit](../cards-and-tokens/recurring-payments.md) payment using a stored token.
+- A wallet-based purchase (Apple Pay / Google Pay) where you already have the payment payload on the server and don’t use [Checkout SDK.](./checkout-sdk)
 - Instant, server-triggered payments that must both create and execute the payment in real time.
 
 By using `payment_instrument,` Ottu automatically creates the session, validates the configuration, and processes the payment through the selected gateway — returning a unified response that includes both the session and transaction details.
 
-### [When to Use](checkout-api.md#when-to-use)
+### [When to Use](./checkout-api)
 
 Use One-Step Checkout when you:
 
@@ -95,24 +95,24 @@ Use One-Step Checkout when you:
 - Are performing a recurring or auto-debit payment using a stored token.
 - Already have the payment credentials (wallet payload or token) and don’t need the SDK-based collection flow.
 
-### [Supported Instruments](checkout-api.md#supported-instruments)
+### [Supported Instruments](./checkout-api)
 
-| instrument_type | Description                             | Typical Use Case                                             |
-| :-------------: | --------------------------------------- | ------------------------------------------------------------ |
-|   `apple_pay`   | Apple Pay digital wallet                | Apple Pay supported devices                                  |
-|  `google_pay`   | Google Pay digital wallet               | Google Pay from Android or Chrome                            |
-|     `token`     | Token-based stored or recurring payment | [Auto-debit](auto-debit.md) or saved card tokenized payments |
+| instrument_type | Description                             | Typical Use Case                                                                         |
+| :-------------: | --------------------------------------- | ---------------------------------------------------------------------------------------- |
+|   `apple_pay`   | Apple Pay digital wallet                | Apple Pay supported devices                                                              |
+|  `google_pay`   | Google Pay digital wallet               | Google Pay from Android or Chrome                                                        |
+|     `token`     | Token-based stored or recurring payment | [Auto-debit](../cards-and-tokens/recurring-payments.md) or saved card tokenized payments |
 
-### [Rules & Restrictions](checkout-api.md#rules-and-restrictions)
+### [Rules & Restrictions](./checkout-api)
 
-- Only one [pg_codes](checkout-api.md#pg_codes-array-required) is allowed per request.
+- Only one [pg_codes](./checkout-api) is allowed per request.
 - The selected gateway must support the chosen instrument_type.
 - The payload must match exactly the format received from the provider — no alterations should be made.
 - The API must be called server-to-server, never from the client.
 
-### [How to Use it](checkout-api.md#how-to-use-it)
+### [How to Use it](./checkout-api)
 
-When your backend is ready to initiate a direct payment using a wallet or card token (e.g., Apple Pay), it should call the [Checkout API](checkout-api.md) and include the `payment_instrument` [parameter](checkout-api.md#payment_instrument-object-details). This parameter tells Ottu to both [**create**](checkout-api.md#create) and **attempt to pay** the transaction in a single call, using the payment data you provide. The example [below ](checkout-api.md#request-example-apple-pay)shows how this works for **Apple Pay**, but the same structure applies to other instruments (e.g., Google Pay) with their own payload formats.
+When your backend is ready to initiate a direct payment using a wallet or card token (e.g., Apple Pay), it should call the [Checkout API](./checkout-api) and include the `payment_instrument` [parameter](./checkout-api). This parameter tells Ottu to both [**create**](./checkout-api) and **attempt to pay** the transaction in a single call, using the payment data you provide. The example [below ](./checkout-api)shows how this works for **Apple Pay**, but the same structure applies to other instruments (e.g., Google Pay) with their own payload formats.
 
 :::info
 
@@ -122,7 +122,7 @@ The `payment_instrument` parameter **must only be used in server-to-server integ
 
 :::
 
-### [Request Example: Apple Pay](checkout-api.md#request-example-apple-pay)
+### [Request Example: Apple Pay](./checkout-api)
 
 ```json
 curl--location 'https://sandbox.ottu.net/b/checkout/v1/pymt-txn/'\
@@ -161,11 +161,11 @@ curl--location 'https://sandbox.ottu.net/b/checkout/v1/pymt-txn/'\
 
 In this example, Ottu receives an Apple Pay token in `payment_instrument.payload` and uses it to authorize and capture the payment with the selected gateway.
 
-### [Response Behavior When `payment_instrument` Is Used](checkout-api.md#response-behavior-when-payment_instrument-is-used)
+### [Response Behavior When `payment_instrument` Is Used](./checkout-api)
 
-When a valid [payment_instrument](checkout-api.md#payment_instrument) is provided, Ottu creates the transaction and attempts to complete the payment immediately in the same [Checkout API](checkout-api.md) call. Instead of returning the standard Checkout API [response](checkout-api.md#response) (used for redirect/hosted flows), the API returns a transaction result payload that follows the same structure as the [payment notification (webhook)](webhooks/payment-notification.md) data. Your backend can process this response directly as the final payment result (e.g., mark the order as paid when `state = "paid"`).
+When a valid [payment_instrument](./checkout-api) is provided, Ottu creates the transaction and attempts to complete the payment immediately in the same [Checkout API](./checkout-api) call. Instead of returning the standard Checkout API [response](./checkout-api) (used for redirect/hosted flows), the API returns a transaction result payload that follows the same structure as the [payment notification (webhook)](../webhooks-and-events/payment-events.md) data. Your backend can process this response directly as the final payment result (e.g., mark the order as paid when `state = "paid"`).
 
-#### [**Response Example**](checkout-api.md#response-example)
+#### [**Response Example**](./checkout-api)
 
 ```json
 {
@@ -177,62 +177,62 @@ When a valid [payment_instrument](checkout-api.md#payment_instrument) is provide
 }
 ```
 
-## [**FAQ**](checkout-api.md#faq)
+## [**FAQ**](./checkout-api)
 
-#### 1 [**What is the Ottu Checkout API used for?**](checkout-api.md#what-is-the-ottu-checkout-api-used-for)
+#### 1 [**What is the Ottu Checkout API used for?**](./checkout-api)
 
-The **Checkout API** is used to create and manage payment transactions. It enables merchants to generate a **payment session** [session_id](checkout-api.md#session_id-string-mandatory), redirect users to a payment gateway, and receive payment updates via [webhooks](webhooks/).
+The **Checkout API** is used to create and manage payment transactions. It enables merchants to generate a **payment session** [session_id](./checkout-api), redirect users to a payment gateway, and receive payment updates via [webhooks](../webhooks-and-events/).
 
-#### 2 [**How do I create a payment transaction?**](checkout-api.md#how-do-i-create-a-payment-transaction)
+#### 2 [**How do I create a payment transaction?**](./checkout-api)
 
-To create a payment transaction, send a [POST request](checkout-api.md#create-payment-transaction) to the Checkout API with the required parameters:
+To create a payment transaction, send a [POST request](./checkout-api) to the Checkout API with the required parameters:
 
 - `amount` – Payment amount
 - `currency_code` – Transaction currency
 - `pg_codes` – Payment gateways allowed
 - `type` - `e_commerce` or `payment_request`
 
-After submission, the API returns a [session_id](checkout-api.md#session_id-string-mandatory), which is required for processing the transaction.
+After submission, the API returns a [session_id](./checkout-api), which is required for processing the transaction.
 
-#### 3 [**How can I ensure that the payer cannot make a payment after a certain amount of time since redirection?**](checkout-api.md#how-can-i-ensure-that-the-payer-cannot-make-a-payment-after-a-certain-amount-of-time-since-redirecti)
+#### 3 [**How can I ensure that the payer cannot make a payment after a certain amount of time since redirection?**](./checkout-api)
 
 To prevent a payer from completing a payment after a specific period, you need to configure the expiration_time parameter based on the payment gateway (PG) auto inquiry time. This ensures that even if the user remains on the payment page, they won’t be able to proceed once the expiration time has passed.
 
 The expiration time should be set as:
 
-[expiration_time](checkout-api.md#expiration_time-string-optional) = [auto inquiry time](checkout-api.md#auto-inquiry-time) + max\{[PG auto inquiry time](checkout-api.md#pg-auto-inquiry-time)\}
+[expiration_time](./checkout-api) = [auto inquiry time](./checkout-api) + max\{[PG auto inquiry time](./checkout-api)\}
 
 - #### **Auto inquiry time:**&#x20;
 
-  This is the time Ottu waits before automatically checking the transaction status with the payment gateway. for more information, please refer [here](payment-status-inquiry.md#automatic-inquiry).
+  This is the time Ottu waits before automatically checking the transaction status with the payment gateway. for more information, please refer [here](../apis/inquiry).
 
 - #### **PG auto inquiry time:**&#x20;
 
-  This is the maximum duration the payment gateway allows before timing out a payment session. More information about PG auto inquiry time is accessible [here](../user-guide/payment-gateway.md#payment-gateway-features-summary).
+  This is the maximum duration the payment gateway allows before timing out a payment session. More information about PG auto inquiry time is accessible [here](https://docs.ottu.com/user-guide/payment-gateway#payment-gateway-features-summary).
 
 #### **Example Calculation:**
 
-- For **MPGS (Mastercard Payment Gateway Services)**, the [PG auto inquiry time](checkout-api.md#pg-auto-inquiry-time) is **11 minutes**.
+- For **MPGS (Mastercard Payment Gateway Services)**, the [PG auto inquiry time](./checkout-api) is **11 minutes**.
 - For **KNET**, the PG auto inquiry time is **8 minutes**.
 
-If your system sets an [auto inquiry time](checkout-api.md#auto-inquiry-time) **of 5 minutes**, then:
+If your system sets an [auto inquiry time](./checkout-api) **of 5 minutes**, then:
 
-- For MPGS: [expiration_time](checkout-api.md#expiration_time-string-optional) = 5 + 11 = 16 minutes
-- For KNET: [expiration_time](checkout-api.md#expiration_time-string-optional) = 5 + 8 = 13 minutes
+- For MPGS: [expiration_time](./checkout-api) = 5 + 11 = 16 minutes
+- For KNET: [expiration_time](./checkout-api) = 5 + 8 = 13 minutes
 
 This means that after 16 minutes (for MPGS) or 13 minutes (for KNET), the payer will not be able to complete the transaction, even if they are still on the payment page.
 
-#### 4 [**Can I update an existing transaction?**](checkout-api.md#can-i-update-an-existing-transaction)
+#### 4 [**Can I update an existing transaction?**](./checkout-api)
 
-Yes! You can update a transaction **before** it is completed by sending a [PUT request](checkout-api.md#update-payment) to the Checkout API, referencing the `session_id`. Updates might include modifying the `amount`, `currency_code`, or allowed `pg_codes`.
+Yes! You can update a transaction **before** it is completed by sending a [PUT request](./checkout-api) to the Checkout API, referencing the `session_id`. Updates might include modifying the `amount`, `currency_code`, or allowed `pg_codes`.
 
-#### 5 [**What happens if a customer abandons the payment?**](checkout-api.md#what-happens-if-a-customer-abandons-the-payment)
+#### 5 [**What happens if a customer abandons the payment?**](./checkout-api)
 
-If a customer does not complete the payment, the transaction remains in a `pending` state until it expires. Ottu's [automatic inquiry](checkout-api.md#auto-inquiry-time) will check the status based on the configured timing and update the state accordingly.
+If a customer does not complete the payment, the transaction remains in a `pending` state until it expires. Ottu's [automatic inquiry](./checkout-api) will check the status based on the configured timing and update the state accordingly.
 
-#### 6 [**How do I get notified when a payment is completed?**](checkout-api.md#how-do-i-get-notified-when-a-payment-is-completed)
+#### 6 [**How do I get notified when a payment is completed?**](./checkout-api)
 
-Ottu **sends a** [payment notification ](webhooks/payment-notification.md)webhook to the [webhook_url](checkout-api.md#webhook_url-string-optional) you provided in the API request. The webhook contains details like:
+Ottu **sends a** [payment notification ](../webhooks-and-events/payment-events.md)webhook to the [webhook_url](./checkout-api) you provided in the API request. The webhook contains details like:
 
 - `status`: `success`, `failed`, `pending`
 - `amount` and `currency_code`
@@ -240,55 +240,55 @@ Ottu **sends a** [payment notification ](webhooks/payment-notification.md)webhoo
 
 Ensure your server verifies and processes these webhook notifications.
 
-#### 7 [**What is the difference between `webhook_url` and `redirect_url`?**](checkout-api.md#what-is-the-difference-between-webhook_url-and-redirect_url)
+#### 7 [**What is the difference between `webhook_url` and `redirect_url`?**](./checkout-api)
 
 - **`webhook_url`** – The API sends real-time payment updates it (for backend processing).
 - **`redirect_url`** – After payment, the customer is sent to it (for UI redirection).
 
-For more details on redirection behavior related to `webhook_url`, please refer to this [section.](webhooks/payment-notification.md#redirectional-diagram)
+For more details on redirection behavior related to `webhook_url`, please refer to this [section.](../webhooks-and-events/payment-events.md)
 
 Both are optional but recommended for a seamless experience.
 
-#### 8 [**Can I retry a failed payment?**](checkout-api.md#can-i-retry-a-failed-payment)
+#### 8 [**Can I retry a failed payment?**](./checkout-api)
 
-Yes, if a transaction fails, you can **reuse the same** [session_id](checkout-api.md#session_id-string-mandatory). the payment state will be `attempt`. for more information about , please refer [here](../user-guide/payment-tracking/payment-transactions-states.md#payment-attempt).
+Yes, if a transaction fails, you can **reuse the same** [session_id](./checkout-api). the payment state will be `attempt`. for more information about , please refer [here](https://docs.ottu.com/user-guide/payment-tracking/payment-transactions-states#payment-attempt).
 
-#### 9 [**Can I set up recurring payments using the Checkout API?**](checkout-api.md#can-i-set-up-recurring-payments-using-the-checkout-api)
+#### 9 [**Can I set up recurring payments using the Checkout API?**](./checkout-api)
 
-Yes! Use [Auto-Debit](auto-debit.md) with a [payment_type](checkout-api.md#payment_type-string-optional) set to `auto_debit` to create [agreements](checkout-api.md#agreement-object-optional) for recurring transactions. Learn more in the [Auto-Debit](auto-debit.md).
+Yes! Use [Auto-Debit](../cards-and-tokens/recurring-payments.md) with a [payment_type](./checkout-api) set to `auto_debit` to create [agreements](./checkout-api) for recurring transactions. Learn more in the [Auto-Debit](../cards-and-tokens/recurring-payments.md).
 
-#### 10 [**How do I integrate the Checkout API with the SDK?**](checkout-api.md#how-do-i-integrate-the-checkout-api-with-the-sdk)
+#### 10 [**How do I integrate the Checkout API with the SDK?**](./checkout-api)
 
-The Checkout SDK ([Web](checkout-sdk/web.md), [Android](checkout-sdk/android/), [iOS](checkout-sdk/ios/)) requires a [session_id](checkout-api.md#session_id-string-mandatory) from the Checkout API. Your backend should:
+The Checkout SDK ([Web](./checkout-sdk#web), [Android](./checkout-sdk#android), [iOS](./checkout-sdk#ios)) requires a [session_id](./checkout-api) from the Checkout API. Your backend should:
 
-1. Call the [Checkout API](checkout-api.md) to create a transaction.
+1. Call the [Checkout API](./checkout-api) to create a transaction.
 2. Pass the `session_id` to the SDK for UI rendering.
-3. Handle [webhooks](webhooks/) for transaction updates.
+3. Handle [webhooks](../webhooks-and-events/) for transaction updates.
 
-#### **11** [**When should One-Step Checkout be used?**](checkout-api.md#id-11-when-should-one-step-checkout-be-used)
+#### **11** [**When should One-Step Checkout be used?**](./checkout-api)
 
 Use One-Step Checkout when you want to create and execute a payment immediately, such as:
 
 - “Buy Now” actions that must charge instantly.
-- [Auto-debit ](auto-debit.md)or recurring payments using a stored token.
+- [Auto-debit ](../cards-and-tokens/recurring-payments.md)or recurring payments using a stored token.
 - Wallet-based payments (Apple Pay / Google Pay) when the payment payload is already available on the server.
 - Server-triggered payments requiring real-time authorization and capture.
 
-#### 12[ W**hat rules or restrictions apply?**](checkout-api.md#id-12-what-rules-or-restrictions-apply)
+#### 12[ W**hat rules or restrictions apply?**](./checkout-api)
 
 - Only **one** `pg_codes` value is allowed per request.
 - The selected gateway must support the chosen `instrument_type`.
 - The payload must match the provider’s format **exactly**—no modifications.
-- Must be executed **server-to-server** using [Private API keys](authentication.md#private-key-api-key).
+- Must be executed **server-to-server** using [Private API keys](../getting-started/authentication.md#private-key-api-key).
 
-#### 13 [W**hat are the benefits of One-Step Checkout?**](checkout-api.md#id-13-what-are-the-benefits-of-one-step-checkout)
+#### 13 [W**hat are the benefits of One-Step Checkout?**](./checkout-api)
 
 - Single backend call → lower latency and simpler logic.
-- Consistent structure with the [Native Payment API](native-payment-api.md).
+- Consistent structure with the [Native Payment API](./native-payments).
 - Unified handling of session creation + payment execution.
 - Ideal for wallets and tokenized recurring payments.
 
-#### **14** [**What does the response look like?**](checkout-api.md#id-14-what-does-the-response-look-like)
+#### **14** [**What does the response look like?**](./checkout-api)
 
 The API returns a unified response that includes:
 
@@ -296,5 +296,5 @@ The API returns a unified response that includes:
 - Session details
 - Transaction status
 
-Additionally, the webhook payload follows the same structure as Ottu’s [Payment Webhook Notification](webhooks/payment-notification.md) parameters.\
-Expected fields can be reviewed [here](webhooks/payment-notification.md#parameters).
+Additionally, the webhook payload follows the same structure as Ottu’s [Payment Webhook Notification](../webhooks-and-events/payment-events.md) parameters.\
+Expected fields can be reviewed [here](../webhooks-and-events/payment-events.md).
