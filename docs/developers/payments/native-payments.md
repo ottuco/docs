@@ -87,10 +87,10 @@ If the call is made from the client side, the backend must be synchronized with 
 </figure>
 
 2. **Client → Backend → Ottu (**[Private API Key](../getting-started/authentication.md#private-key-api-key)**– Recommended)**
-   1. The client sends the payment payload to Backend
-   2. Backend calls Ottu native payment API
-   3. Backend receive payment response callback
-   4. Backend process callback response and notify client side with payment status
+   1. The client sends the payment payload to the backend.
+   2. The backend calls the Ottu Native Payment API.
+   3. The backend receives the payment response callback.
+   4. The backend processes the callback response and notifies the client side with the payment status.
 
 <figure>
   <img src="../.gitbook/assets/image (1) (1).png" alt="" width="563" />
