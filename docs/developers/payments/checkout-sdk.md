@@ -2054,9 +2054,9 @@ func successCallback(_ data: [String : Any]?) {
 
 ### Advanced Features
 
-- [Forms of Payment](https://docs.ottu.com/developer/checkout-sdk/ios#formsofpayment-string-required)
-- [Customization Theme](https://docs.ottu.com/developer/checkout-sdk/ios#customization-theme)
-- [Setup Preload](https://docs.ottu.com/developer/checkout-sdk/ios#setuppreload-object-optional)
+- [Forms of Payment](./checkout-sdk#functions)
+- [Customization Theme](./checkout-sdk#customization-theme)
+- [Setup Preload](./checkout-sdk#functions)
 
 ---
 
@@ -3181,7 +3181,7 @@ The `formsOfPayment` parameter allows customization of the payment methods displ
 
 - **`cardOnsite`**: A direct payment method (onsite checkout) where cardholder data (CHD) is entered directly in the SDK. If 3DS authentication is required, a payment provider is involved.
 - `tokenPay`: Uses [tokenization](../cards-and-tokens) to securely store and process customers' payment information.
-- `redirect`: Redirects customers to an external [payment gateway](https://docs.ottu.com/user-guide/payment-gateway#payment-gateway-features-summary) or a third-party payment processor to complete the transaction.
+- `redirect`: Redirects customers to an external [payment gateway](./payment-methods#activating-payment-gateway-codes) or a third-party payment processor to complete the transaction.
 - `stcPay`: Requires customers to enter their mobile number and authenticate with an OTP sent to their device to complete the payment.
 - `flexMethods`: Allows payments to be split into multiple installments. These methods, also known as BNPL (Buy Now, Pay Later), support providers such as Tabby and Tamara.
 
@@ -3278,7 +3278,7 @@ The `errorCallback` is a callback function triggered when issues occur during a 
 
 :::info
 
-The best practice recommended in the event of an error is to restart the checkout process by generating a new `session_id` through the [Checkout API](https://docs.ottu.com/developer/checkout-api).
+The best practice recommended in the event of an error is to restart the checkout process by generating a new `session_id` through the [Checkout API](./checkout-api).
 :::
 
 To set up the `errorCallback` function, use the `data-error` attribute on the Checkout script tag to designate a global function that will manage errors. If an error arises during a payment, the `errorCallback` function will be called, receiving a `JSONObject` with a `data.status` value indicating an error.

@@ -25,7 +25,7 @@ Ottu Checkout API supports different levels of permissions for the Payment Reque
 
 ### [API Key](./checkout-api)
 
-When using the [API-Key](../getting-started/authentication.md#private-key-api-key), all permissions are granted by default, as the API-Key is considered to have admin permissions. See [How to Generate API Keys](https://docs.ottu.com/user-guide/configuration/how-to-get-api-keys)
+When using the [API-Key](../getting-started/authentication.md#private-key-api-key), all permissions are granted by default, as the API-Key is considered to have admin permissions. See [How to Generate API Keys](../getting-started/authentication.md#private-key-api-key)
 
 ### [Basic Authentication](./checkout-api)
 
@@ -33,16 +33,16 @@ For [Basic Authentication](../getting-started/authentication.md#basic-authentica
 
 #### [Create](./checkout-api)
 
-- To create a transaction, the user needs specific permission depending on the [plugin](https://docs.ottu.com/user-guide/plugins/) being used:
-  - "**Can add payment requests**" for the [Payment Request](https://docs.ottu.com/user-guide/plugins/#payment-request) plugin
-  - "**Can add e-commerce payments**" for the [E-Commerce](https://docs.ottu.com/user-guide/plugins/#e-commerce) plugin
+- To create a transaction, the user needs specific permission depending on the [plugin](./payment-methods.md#enabling-the-plugin) being used:
+  - "**Can add payment requests**" for the [Payment Request](./payment-methods.md#enabling-the-plugin) plugin
+  - "**Can add e-commerce payments**" for the [E-Commerce](./payment-methods.md#enabling-the-plugin) plugin
 - Permission to use the payment gateway [code](./checkout-api) is also required: "**Can use `pg_code`**"
 
 #### [Update](./checkout-api)
 
 - To update a transaction, the user needs specific permission depending on the plugin being used:
-  - "**Can change payment requests**" for the [Payment Request](https://docs.ottu.com/user-guide/plugins/#payment-request) plugin
-  - "**Can change e-commerce payments**" for the [E-Commerce](https://docs.ottu.com/user-guide/plugins/#e-commerce) plugin
+  - "**Can change payment requests**" for the [Payment Request](./payment-methods.md#enabling-the-plugin) plugin
+  - "**Can change e-commerce payments**" for the [E-Commerce](./payment-methods.md#enabling-the-plugin) plugin
 - Permission to use the payment gateway [code](./checkout-api) is also required: **"Can use `pg_code`**"
 
 :::info
@@ -55,8 +55,8 @@ The PUT operation cannot be used if the user does not have permission to use the
 
 - By default, if a user has either the "**Can add**" or "**Can change**" permission, they can [fetch](./checkout-api) transactions from the API.
 - For more granular control, the following view permissions can be used:
-  - "**Can view e-commerce payments**" for the [E-Commerce](https://docs.ottu.com/user-guide/plugins/#e-commerce) plugin
-  - "**Can view payment requests**" for the [Payment Request](https://docs.ottu.com/user-guide/plugins/#payment-request) plugin
+  - "**Can view e-commerce payments**" for the [E-Commerce](./payment-methods.md#enabling-the-plugin) plugin
+  - "**Can view payment requests**" for the [Payment Request](./payment-methods.md#enabling-the-plugin) plugin
 
 ---
 
@@ -208,7 +208,7 @@ The expiration time should be set as:
 
 - #### **PG auto inquiry time:**&#x20;
 
-  This is the maximum duration the payment gateway allows before timing out a payment session. More information about PG auto inquiry time is accessible [here](https://docs.ottu.com/user-guide/payment-gateway#payment-gateway-features-summary).
+  This is the maximum duration the payment gateway allows before timing out a payment session. More information about payment gateway setup is accessible [here](./payment-methods.md#activating-payment-gateway-codes).
 
 #### **Example Calculation:**
 
@@ -251,7 +251,7 @@ Both are optional but recommended for a seamless experience.
 
 #### 8 [**Can I retry a failed payment?**](./checkout-api)
 
-Yes, if a transaction fails, you can **reuse the same** [session_id](./checkout-api). the payment state will be `attempt`. for more information about , please refer [here](https://docs.ottu.com/user-guide/payment-tracking/payment-transactions-states#payment-attempt).
+Yes, if a transaction fails, you can **reuse the same** [session_id](./checkout-api). the payment state will be `attempt`. for more information, please refer [here](../reference/payment-states.md).
 
 #### 9 [**Can I set up recurring payments using the Checkout API?**](./checkout-api)
 

@@ -5,7 +5,7 @@ Your comprehensive guide to Ottu resources, tools, and support channels.
 ## Developer Resources
 
 ### API Documentation
-- **[API Reference](https://docs.ottu.com/api)**: Complete API documentation
+- **[API Reference](../developers/apis/ottu-api)**: Complete API documentation
 - **[Postman Collection](https://documenter.getpostman.com/view/ottu)**: Ready-to-use API requests
 - **[OpenAPI Specification](https://api.ottu.com/docs/openapi.json)**: Machine-readable API spec
 - **[GraphQL Schema](https://api.ottu.com/graphql)**: GraphQL API documentation
@@ -35,7 +35,7 @@ Your comprehensive guide to Ottu resources, tools, and support channels.
 - **[Integration Templates](https://github.com/ottu/integration-templates)**: Boilerplate code
 
 #### Live Demos
-- **[Interactive API Explorer](https://docs.ottu.com/api-explorer)**: Test API calls in your browser
+- **[Interactive API Explorer](../developers/apis/ottu-api)**: Test API calls in your browser
 - **[Payment Demo](https://demo.ottu.com)**: Live payment flow demonstration
 - **[Webhook Tester](https://webhook-tester.ottu.com)**: Test webhook implementations
 
@@ -220,7 +220,7 @@ Your comprehensive guide to Ottu resources, tools, and support channels.
 We value your feedback! Help us improve by:
 - **[Feature Requests](https://feedback.ottu.com)**: Suggest new features
 - **[Bug Reports](https://github.com/ottu/bug-reports)**: Report issues
-- **[Documentation Feedback](https://docs.ottu.com/feedback)**: Improve our docs
+- **[Documentation Feedback](https://feedback.ottu.com)**: Improve our docs
 - **[User Survey](https://survey.ottu.com)**: Share your experience
 
 ---
