@@ -195,7 +195,7 @@ By following these steps, you can easily streamline your payment process, ensuri
 
 #### :digit_one: [Can I use tokenization if my payment gateway doesn’t support it?](#can-i-use-tokenization-if-my-payment-gateway-doesnt-support-it)
 
-Tokenization is supported by specific payment gateways. If your current gateway doesn't support it, please reach out to our support team at [support@ottu.com](mailto:support@otuu.com) for the latest information and possible alternatives.
+Tokenization is supported by specific payment gateways. If your current gateway doesn't support it, please reach out to our support team at [support@ottu.com](mailto:support@ottu.com) for the latest information and possible alternatives.
 
 #### :digit_two: [**How do I handle the token received in the webhook payload for future transactions?**](#how-do-i-handle-the-token-received-in-the-webhook-payload-for-future-transactions)
 
