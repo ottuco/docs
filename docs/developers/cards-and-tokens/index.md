@@ -141,7 +141,7 @@ This guide outlines the steps for initiating payment sessions and securely savin
    - **CVV Requirements:** The necessity for Card Verification Value (CVV) may differ based on the Payment Gateway configuration. Adjustments can be made by reaching out to technical support.
 
 3. **Save the Card:**\
-   When customer elects to save his card details, the information is tokenized and securely stored upon payment completed successfuly, enabling easier transactions in the future.
+   When customer elects to save his card details, the information is tokenized and securely stored upon payment completed successfully, enabling easier transactions in the future.
 4. **Utilize Saved Cards:**\
    In future transactions with the same `customer_id`, the system automatically showcases all associated cards, simplifying payment method selection. Security is prioritized by displaying only the last four card digits, with CVV requirements determined by the acquiring bank's policies.
 5. **Navigate Payment Challenges:**\
