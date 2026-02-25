@@ -171,7 +171,7 @@ Request Example:
 
 #### 2. Access the Checkout Page
 
-After generaing the [checkout_url](/docs/developers/payments/checkout-api#checkout_url-string-mandatory), the merchant should shareit with the customer, who then accesses the **Checkout** page via this link. Here, the [Checkout SDK](/docs/developers/payments/checkout-sdk) displays all available payment methods, such as \[`mpgs`, `credit-card`, `stc-pay`].&#x20;
+After generating the [checkout_url](/docs/developers/payments/checkout-api#checkout_url-string-mandatory), the merchant should share it with the customer, who then accesses the **Checkout** page via this link. Here, the [Checkout SDK](/docs/developers/payments/checkout-sdk) displays all available payment methods, such as \[`mpgs`, `credit-card`, `stc-pay`].&#x20;
 
 To save a card, the customer selects the desired payment method for both the current purchase and future transactions. The customer will then be redirected to the **Payment** page, where he must enter his card details and opt to **Save Card.** Upon completing a successful payment, the card details will be stored, and a token will be linked to the customer_id."
 
