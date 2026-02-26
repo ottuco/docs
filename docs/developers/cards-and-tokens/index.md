@@ -14,7 +14,7 @@ With Ottu, we handle this complexity, so you don’t have to! To activate tokeni
 
 Ottu provides two distinct methods for merchants to add a new card to a customer's profile, catering to different scenarios and requirements. These methods are:
 
-1. **Adding a New Card Without Payment**: This approach is designed for situations where you want to store a customer's card details for future transactions without charging them at the moment of addition. It's especially useful for streamlining the checkout process for repeat customers, enhancing the user experience by removing the need to enter card details for every purchase. Please check [here](#tokenization-without-payment) for mroe details.
+1. **Adding a New Card Without Payment**: This approach is designed for situations where you want to store a customer's card details for future transactions without charging them at the moment of addition. It's especially useful for streamlining the checkout process for repeat customers, enhancing the user experience by removing the need to enter card details for every purchase. Please check [here](#tokenization-without-payment) for more details.
 2. **Adding a New Card With Payment**: Conversely, this method allows merchants to add a customer's card details to their profile while simultaneously processing a payment. This is suitable for instances where immediate payment is required, but the customer also prefers to save their card details for future convenience. Please check [here](#tokenization-with-payment) for more information.
 
 ## [Tokenization without Payment](#tokenization-without-payment)
@@ -171,7 +171,7 @@ Request Example:
 
 #### 2. Access the Checkout Page
 
-After generaing the [checkout_url](/docs/developers/payments/checkout-api#checkout_url-string-mandatory), the merchant should shareit with the customer, who then accesses the **Checkout** page via this link. Here, the [Checkout SDK](/docs/developers/payments/checkout-sdk) displays all available payment methods, such as \[`mpgs`, `credit-card`, `stc-pay`].&#x20;
+After generating the [checkout_url](/docs/developers/payments/checkout-api#checkout_url-string-mandatory), the merchant should share it with the customer, who then accesses the **Checkout** page via this link. Here, the [Checkout SDK](/docs/developers/payments/checkout-sdk) displays all available payment methods, such as \[`mpgs`, `credit-card`, `stc-pay`].&#x20;
 
 To save a card, the customer selects the desired payment method for both the current purchase and future transactions. The customer will then be redirected to the **Payment** page, where he must enter his card details and opt to **Save Card.** Upon completing a successful payment, the card details will be stored, and a token will be linked to the customer_id."
 

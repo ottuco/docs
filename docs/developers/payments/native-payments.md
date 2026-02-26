@@ -19,7 +19,7 @@ Ottu processes the payload with the configured gateway and returns a normalized 
 
 ## [Quick Start](#quick-start)
 
-Send a post request to the payment service endpoint with payment [session_id](./checkout-api), then the payment service collected `token` to perform the payment process.
+Send a POST request to the payment service endpoint with the payment [session_id](checkout-api.md#session_id-string-mandatory), then the payment service uses the collected `token` to process the payment.
 
 #### Quick Apple Pay Example (cURL)
 

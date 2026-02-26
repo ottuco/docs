@@ -3,7 +3,7 @@ import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 # Payment Methods
 
 In the intricate realm of online transactions, a versatile payment experience is essential. \
-The `Payment Methods API` streamlines this process, allowing for effortless automation. by simply integrating with specified operation, [customer_id](./checkout-api), [currencies](./checkout-api), [payment gateway names](./checkout-api#supported-instruments) and desired [payment plugins](./payment-methods.md#enabling-the-plugin), merchant can harness the full power of Ottu's payment automation, all while keeping his existing environment intact. no extra effort, just seamless integration.
+The `Payment Methods API` streamlines this process, allowing for effortless automation. By simply integrating with specified operation, [customer_id](./checkout-api), [currencies](./checkout-api), [payment gateway names](./checkout-api#supported-instruments) and desired [payment plugins](./payment-methods.md#enabling-the-plugin), merchant can harness the full power of Ottu's payment automation, all while keeping his existing environment intact. No extra effort, just seamless integration.
 
 ## [Setup](payment-methods.md#setup)
 
