@@ -96,15 +96,15 @@ const config: Config = {
           items: [
             {
               label: 'Overview',
-              to: '/overview/about',
+              to: '/docs/overview/about',
             },
             {
               label: 'Developer Quick Start',
-              to: '/quick-start/developers',
+              to: '/docs/quick-start/developers',
             },
             {
               label: 'Merchant Quick Start',
-              to: '/quick-start/merchants',
+              to: '/docs/quick-start/merchants',
             },
           ],
         },
@@ -113,15 +113,15 @@ const config: Config = {
           items: [
             {
               label: 'API Reference',
-              to: '/developers/api-fundamentals',
+              to: '/docs/developers/getting-started/api-fundamentals',
             },
             {
               label: 'Quick Start',
-              to: '/developers/quick-start',
+              to: '/docs/developers/quick-start',
             },
             {
               label: 'Developer Guide',
-              to: '/quick-start/developers',
+              to: '/docs/quick-start/developers',
             },
           ],
         },
@@ -130,15 +130,15 @@ const config: Config = {
           items: [
             {
               label: 'Dashboard Tour',
-              to: '/business/dashboard-tour',
+              to: '/docs/business/dashboard-tour',
             },
             {
               label: 'Merchant Guide',
-              to: '/quick-start/merchants',
+              to: '/docs/quick-start/merchants',
             },
             {
               label: 'Getting Started',
-              to: '/overview/about',
+              to: '/docs/overview/about',
             },
           ],
         },

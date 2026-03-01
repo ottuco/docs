@@ -8,6 +8,24 @@ const sidebar: SidebarsConfig = {
     },
     {
       type: "category",
+      label: "Reports API",
+      items: [
+        {
+          type: "doc",
+          id: "developers/apis/list-reports",
+          label: "List Transaction Reports",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/apis/download-report",
+          label: "Download Transaction Report File",
+          className: "api-method get",
+        },
+      ],
+    },
+    {
+      type: "category",
       label: "Satellite API",
       items: [
         {

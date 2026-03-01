@@ -82,7 +82,7 @@ If the call is made from the client side, the backend must be synchronized with 
 - The [Payment Status (Inquiry) API](../apis/inquiry) is called by the backend after the client confirms that the payment has been completed.
 
 <figure>
-  <img src="../.gitbook/assets/image (2).png" alt="" width="563" />
+  <img src="/img/payments/native-payments-apple-pay-flow.png" alt="" width="563" />
   <figcaption></figcaption>
 </figure>
 
@@ -93,7 +93,7 @@ If the call is made from the client side, the backend must be synchronized with 
    4. Backend process callback response and notify client side with payment status
 
 <figure>
-  <img src="../.gitbook/assets/image (1) (1).png" alt="" width="563" />
+  <img src="/img/payments/native-payments-google-pay-flow.png" alt="" width="563" />
   <figcaption></figcaption>
 </figure>
 

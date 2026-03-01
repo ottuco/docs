@@ -76,7 +76,7 @@ html {
   color: var(--ifm-link-hover-color);
 }
 
-/* Make doc section headings match link color */
+/* Style markdown headings to match link color */
 .markdown h2,
 .markdown h3,
 .markdown h4 {
