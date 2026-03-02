@@ -65,7 +65,6 @@ const sidebars: SidebarsConfig = {
           items: [
             {type: 'doc', id: 'developers/payments/index', label: 'Overview'},
             {type: 'doc', id: 'developers/payments/checkout-api', label: 'Checkout API'},
-            {type: 'doc', id: 'developers/payments/upload-attachment', label: 'Upload Attachment'},
             {type: 'doc', id: 'developers/payments/payment-methods', label: 'Payment Methods'},
             {type: 'doc', id: 'developers/payments/native-payments', label: 'Native Payments'},
             {type: 'doc', id: 'developers/payments/checkout-sdk', label: 'Checkout SDK'},
