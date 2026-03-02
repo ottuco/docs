@@ -1,6 +1,7 @@
 ---
 title: Invoices
 sidebar_label: Invoices
+hide_table_of_contents: true
 ---
 
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";

@@ -1,6 +1,7 @@
 ---
 title: Reports
 sidebar_label: Reports
+hide_table_of_contents: true
 ---
 
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";

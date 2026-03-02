@@ -1,6 +1,7 @@
 ---
 title: Operations
 sidebar_label: Operations
+hide_table_of_contents: true
 ---
 
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";

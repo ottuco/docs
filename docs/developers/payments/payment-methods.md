@@ -1,3 +1,9 @@
+---
+title: Payment Methods
+sidebar_label: Payment Methods
+hide_table_of_contents: true
+---
+
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 
 # Payment Methods

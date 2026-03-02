@@ -1,3 +1,9 @@
+---
+title: Native Payments
+sidebar_label: Native Payments
+hide_table_of_contents: true
+---
+
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 
 # Native Payment API
