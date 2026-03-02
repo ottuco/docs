@@ -14,7 +14,7 @@ import Markdown from "docusaurus-theme-openapi-docs/lib/theme/Markdown";
 import SchemaTabs from "docusaurus-theme-openapi-docs/lib/theme/SchemaTabs";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import useLayoutEffect from "@docusaurus/useIsomorphicLayoutEffect";
-import { getFragmentId } from "@site/src/utils";
+import { copyAnchorUrl, getFragmentId } from "@site/src/utils";
 import { merge } from "allof-merge";
 import clsx from "clsx";
 import {
@@ -89,7 +89,7 @@ const Summary: React.FC<SummaryProps> = ({
   useLayoutEffect(() => {
     const hash = typeof window !== "undefined" ? window.location.hash : "";
     if (hash === `#${id}`) {
-      anchorRef.current?.click();
+      anchorRef.current?.scrollIntoView({ block: "start" });
     }
   }, [id]);
 
@@ -101,8 +101,7 @@ const Summary: React.FC<SummaryProps> = ({
           href={`#${id}`}
           onClick={(e) => {
             e.stopPropagation();
-            const url = `${window.location.origin}${window.location.pathname}#${id}`;
-            navigator.clipboard.writeText(url);
+            copyAnchorUrl(id);
           }}
         >
           <Icon
