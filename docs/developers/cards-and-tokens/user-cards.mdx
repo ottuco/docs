@@ -1,3 +1,9 @@
+---
+title: User Cards
+sidebar_label: User Cards
+hide_table_of_contents: true
+---
+
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 
 # User Cards
@@ -16,7 +22,7 @@ When integrating the User Saved Cards endpoints into your system, here are the k
 
 1. You will not receive the full card number (PAN) of the user. Instead, you’ll be provided with the last 4 digits of the card number and a token. This token is what you’ll use for executing payments or authorizations
 2. If you’re using the Ottu [Checkout SDK](/docs/developers/payments/checkout-sdk), customers can delete their saved cards at any point in time. This flexibility gives users more control over their payment information and helps foster trust in your services.
-3. When a customer chooses to save their card for payment, the corresponding token will be included in the payload sent to your designated [webhook_url](/docs/developers/payments/checkout-api#webhook_url-string-optional). This allows you to retrieve and handle the saved card token as required for your application.
+3. When a customer chooses to save their card for payment, the corresponding token will be included in the payload sent to your designated [webhook_url](/docs/developers/payments/checkout-api). This allows you to retrieve and handle the saved card token as required for your application.
 
 :::info
 
@@ -55,19 +61,19 @@ For a more detailed technical understanding and the implementation specifics of 
 
 ## [FAQ](#faq)
 
-#### 1 [Can I offer to the customer the possibility to save a card without making a successful payment?](#can-i-offer-to-the-customer-the-possibility-to-save-a-card-without-making-a-successful-payment)
+#### 1 Can I offer to the customer the possibility to save a card without making a successful payment?
 
 At present, it is not possible to save a card without the customer making a successful payment. However, we continually work to expand and improve our services, so stay tuned for updates.
 
-#### 2 [How can I delete a card?](#how-can-i-delete-a-card)
+#### 2 How can I delete a card?
 
 You have two methods for removing a card. The first one involves utilizing the User Cards API to [retrieve ](#fetch-cards)the customer's cards and establishing a user interface on your end to display the list of saved cards. Upon a customer's selection of a card for deletion, you can invoke the [Delete API ](#delete-card)for that particular card. Alternatively, you have the option of employing the Ottu [Checkout SDK](/docs/developers/payments/checkout-sdk), which adeptly manages these procedures on your behalf.
 
-#### 3 [Can I trigger auto-debit payments?](#can-i-trigger-auto-debit-payments)
+#### 3 Can I trigger auto-debit payments?
 
 Yes, but only if the customer has agreed, and their card has been enabled for auto-debit. For more details, refer to our [Auto-Debit](/docs/developers/cards-and-tokens/recurring-payments) documentation.
 
-#### 4 [Does Ottu save the cards within the Ottu system?](#does-ottu-save-the-cards-within-the-ottu-system)
+#### 4 Does Ottu save the cards within the Ottu system?
 
 No, Ottu doesn’t store the cards internally. We utilize an external vault for storing card details. In most cases, the cards are saved at the [Payment Gateway ](/docs/developers/payments/payment-methods#activating-payment-gateway-codes)with which the merchant has a contract. This approach further ensures the safety and security of the card details.
 

@@ -163,7 +163,7 @@ In this example, Ottu receives an Apple Pay token in `payment_instrument.payload
 
 ### [Response Behavior When `payment_instrument` Is Used](./checkout-api)
 
-When a valid [payment_instrument](./checkout-api) is provided, Ottu creates the transaction and attempts to complete the payment immediately in the same [Checkout API](./checkout-api) call. Instead of returning the standard Checkout API [response](./checkout-api) (used for redirect/hosted flows), the API returns a transaction result payload that follows the same structure as the [payment notification (webhook)](../webhooks-and-events/payment-events.md) data. Your backend can process this response directly as the final payment result (e.g., mark the order as paid when `state = "paid"`).
+When a valid [payment_instrument](./checkout-api) is provided, Ottu creates the transaction and attempts to complete the payment immediately in the same [Checkout API](./checkout-api) call. Instead of returning the standard Checkout API [response](./checkout-api) (used for redirect/hosted flows), the API returns a transaction result payload that follows the same structure as the [payment notification (webhook)](../webhooks/payment-events.md) data. Your backend can process this response directly as the final payment result (e.g., mark the order as paid when `state = "paid"`).
 
 #### [**Response Example**](./checkout-api)
 
@@ -181,7 +181,7 @@ When a valid [payment_instrument](./checkout-api) is provided, Ottu creates the 
 
 #### 1 [**What is the Ottu Checkout API used for?**](./checkout-api)
 
-The **Checkout API** is used to create and manage payment transactions. It enables merchants to generate a **payment session** [session_id](./checkout-api), redirect users to a payment gateway, and receive payment updates via [webhooks](../webhooks-and-events/).
+The **Checkout API** is used to create and manage payment transactions. It enables merchants to generate a **payment session** [session_id](./checkout-api), redirect users to a payment gateway, and receive payment updates via [webhooks](../webhooks/).
 
 #### 2 [**How do I create a payment transaction?**](./checkout-api)
 
@@ -232,7 +232,7 @@ If a customer does not complete the payment, the transaction remains in a `pendi
 
 #### 6 [**How do I get notified when a payment is completed?**](./checkout-api)
 
-Ottu **sends a** [payment notification ](../webhooks-and-events/payment-events.md)webhook to the [webhook_url](./checkout-api) you provided in the API request. The webhook contains details like:
+Ottu **sends a** [payment notification ](../webhooks/payment-events.md)webhook to the [webhook_url](./checkout-api) you provided in the API request. The webhook contains details like:
 
 - `status`: `success`, `failed`, `pending`
 - `amount` and `currency_code`
@@ -245,7 +245,7 @@ Ensure your server verifies and processes these webhook notifications.
 - **`webhook_url`** – The API sends real-time payment updates it (for backend processing).
 - **`redirect_url`** – After payment, the customer is sent to it (for UI redirection).
 
-For more details on redirection behavior related to `webhook_url`, please refer to this [section.](../webhooks-and-events/payment-events.md)
+For more details on redirection behavior related to `webhook_url`, please refer to this [section.](../webhooks/payment-events.md)
 
 Both are optional but recommended for a seamless experience.
 
@@ -263,7 +263,7 @@ The Checkout SDK ([Web](./checkout-sdk#web), [Android](./checkout-sdk#android), 
 
 1. Call the [Checkout API](./checkout-api) to create a transaction.
 2. Pass the `session_id` to the SDK for UI rendering.
-3. Handle [webhooks](../webhooks-and-events/) for transaction updates.
+3. Handle [webhooks](../webhooks/) for transaction updates.
 
 #### **11** [**When should One-Step Checkout be used?**](./checkout-api)
 
@@ -296,5 +296,5 @@ The API returns a unified response that includes:
 - Session details
 - Transaction status
 
-Additionally, the webhook payload follows the same structure as Ottu’s [Payment Webhook Notification](../webhooks-and-events/payment-events.md) parameters.\
-Expected fields can be reviewed [here](../webhooks-and-events/payment-events.md).
+Additionally, the webhook payload follows the same structure as Ottu’s [Payment Webhook Notification](../webhooks/payment-events.md) parameters.\
+Expected fields can be reviewed [here](../webhooks/payment-events.md).

@@ -6,23 +6,23 @@ Welcome to Ottu’s API documentation! We have designed our platform to offer a 
 
 ## [Key Concepts](#key-concepts)
 
-#### [1. Payment Gateway](#1.-payment-gateway)
+#### 1. Payment Gateway
 
-In the context of Ottu, the payment gateway holds the MID (Merchant ID) credentials provided by your bank. For more details on this, check the [Payment Gateway section](/docs/developers/payments/payment-methods#activating-payment-gateway-codes). Currently, our staff handle this configuration and will provide you with the [pg_codes](/docs/developers/payments/checkout-api#pg_codes-array-required) needed for the API. Alternatively, you can fetch these codes using our Payment Methods API.
+In the context of Ottu, the payment gateway holds the MID (Merchant ID) credentials provided by your bank. For more details on this, check the [Payment Gateway section](/docs/developers/payments/payment-methods#activating-payment-gateway-codes). Currently, our staff handle this configuration and will provide you with the [pg_codes](/docs/developers/payments/checkout-api) needed for the API. Alternatively, you can fetch these codes using our Payment Methods API.
 
-#### [2. Currency Configuration](#2.-currency-configuration)
+#### 2. Currency Configuration
 
 Currency configuration involves setting up the currencies you want to charge your customers. Ottu supports multi-currency transactions. If your MID is set up for KWD, but you want to display the charge amount to your customers in USD, we’ve got you covered. Your customers will see the amount in USD, but the actual funds will arrive in your bank account in KWD. Find more details in our [API Fundamentals section](api-fundamentals.md).
 
-#### [3. Payment Transaction](#3.-payment-transaction)
+#### 3. Payment Transaction
 
 Every payment or API operation starts with or involves a payment transaction. Essentially, this is the metadata for the payment. It includes information like amount, currency, customer data (email, phone number, address), and more. A payment transaction’s state can change based on the flow `created`, `paid`, `expired`, `canceled`, etc.). Learn more in the [Payment States section](../reference/payment-states.md).
 
-#### [4. REST API](#4.-rest-api)
+#### 4. REST API
 
-To get started with Ottu’s REST API, first understand our authentication methods in the [Authentication section](authentication.md). Then proceed to the [Checkout API section](/docs/developers/payments/checkout-api) to learn how to create payments and charge customers. Following this, you might want to explore the [Payment Notification Webhook](/docs/developers/webhooks-and-events/payment-events). This feature is crucial if you want to integrate Ottu with a system and get notified about payment status updates. After creating a payment transaction, you can specify a [webhook URL](/docs/developers/payments/checkout-api#webhook_url-string-optional) where Ottu will send updates about the payment status. This will keep your systems up to date in real-time with payment events. See [Webhook](/docs/developers/webhooks-and-events).
+To get started with Ottu’s REST API, first understand our authentication methods in the [Authentication section](authentication.md). Then proceed to the [Checkout API section](/docs/developers/payments/checkout-api) to learn how to create payments and charge customers. Following this, you might want to explore the [Payment Notification Webhook](/docs/developers/webhooks/payment-events). This feature is crucial if you want to integrate Ottu with a system and get notified about payment status updates. After creating a payment transaction, you can specify a [webhook URL](/docs/developers/payments/checkout-api#request-webhook_url) where Ottu will send updates about the payment status. This will keep your systems up to date in real-time with payment events. See [Webhook](/docs/developers/webhooks).
 
-#### [**5. Checkout SDK**](#id-5.-checkout-sdk)
+#### **5. Checkout SDK**
 
 If you're building an ecommerce website or mobile app, Ottu offers a flexible and easy-to-integrate [Checkout SDK](/docs/developers/payments/checkout-sdk) that wraps the full checkout experience into a simple drop-in solution. The SDK is available for both web and mobile platforms and is designed to work seamlessly with the [Checkout API](/docs/developers/payments/checkout-api), ensuring you don’t need to handle payment logic manually.
 
@@ -52,7 +52,7 @@ Based on your specific needs, you can proceed to the sections that apply to your
 
 - #### [Refund, Capture, or Void Operations](#refund-capture-or-void-operations)
 
-  After familiarizing yourself with the [Checkout API](/docs/developers/payments/checkout-api), check the [Operations section](/docs/developers/operations) to understand how they work. If you wish to use these operations, the next step is to check the [Webhook Operation Notification section](/docs/developers/webhooks-and-events/operation-events).
+  After familiarizing yourself with the [Checkout API](/docs/developers/payments/checkout-api), check the [Operations section](/docs/developers/operations) to understand how they work. If you wish to use these operations, the next step is to check the [Webhook Operation Notification section](/docs/developers/webhooks/operation-events).
 
 - #### [Subscription, Recurring Payments, and Offline Payments](#subscription-recurring-payments-and-offline-payments)
 
@@ -60,7 +60,7 @@ Based on your specific needs, you can proceed to the sections that apply to your
 
 - #### [Concerned about Security?](#concerned-about-security)
 
-  Our sensitive API calls are signed for added security. Check out the [Signing Mechanism section](/docs/developers/webhooks-and-events/verify-signatures).
+  Our sensitive API calls are signed for added security. Check out the [Signing Mechanism section](/docs/developers/webhooks/verify-signatures).
 
 For any other questions, please feel free to contact your local Ottu representative.\
 Happy integration!

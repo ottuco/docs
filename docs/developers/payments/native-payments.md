@@ -1,8 +1,14 @@
+---
+title: Native Payments
+sidebar_label: Native Payments
+hide_table_of_contents: true
+---
+
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 
 # Native Payment API
 
-Use the Native Payment API when you want full control of the client experience (web or mobile) and prefer not to use the [Checkout SDK](./checkout-sdk). Your client or backend collects a payment payload and sends it to Ottu to process the payment for a given [session_id](./checkout-api).
+Use the Native Payment API when you want full control of the client experience (web or mobile) and prefer not to use the [Checkout SDK](./checkout-sdk). Your client or backend collects a payment payload and sends it to Ottu to process the payment for a given [session_id](checkout-api#response-CheckoutPOSTResponse-session_id).
 
 A payment payload can be:
 
@@ -19,7 +25,7 @@ Ottu processes the payload with the configured gateway and returns a normalized 
 
 ## [Quick Start](#quick-start)
 
-Send a post request to the payment service endpoint with payment [session_id](./checkout-api), then the payment service collected `token` to perform the payment process.
+Send a POST request to the payment service endpoint with the payment [session_id](checkout-api#response-CheckoutPOSTResponse-session_id), then the payment service uses the collected `token` to process the payment.
 
 #### Quick Apple Pay Example (cURL)
 
@@ -82,7 +88,7 @@ If the call is made from the client side, the backend must be synchronized with 
 - The [Payment Status (Inquiry) API](../apis/inquiry) is called by the backend after the client confirms that the payment has been completed.
 
 <figure>
-  <img src="../.gitbook/assets/image (2).png" alt="" width="563" />
+  <img src="/img/payments/native-payments-apple-pay-flow.png" alt="" width="563" />
   <figcaption></figcaption>
 </figure>
 
@@ -93,7 +99,7 @@ If the call is made from the client side, the backend must be synchronized with 
    4. The backend processes the callback response and notifies the client side with the payment status.
 
 <figure>
-  <img src="../.gitbook/assets/image (1) (1).png" alt="" width="563" />
+  <img src="/img/payments/native-payments-google-pay-flow.png" alt="" width="563" />
   <figcaption></figcaption>
 </figure>
 

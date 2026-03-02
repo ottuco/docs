@@ -7,7 +7,7 @@ import { mdiLinkVariant } from "@mdi/js";
 import Icon from "@mdi/react";
 
 import useLayoutEffect from "@docusaurus/useIsomorphicLayoutEffect";
-import { getFragmentId } from "@site/src/utils";
+import { copyAnchorUrl, getFragmentId } from "@site/src/utils";
 import { guard } from "docusaurus-theme-openapi-docs/lib/markdown/utils";
 
 export interface Props {
@@ -197,21 +197,14 @@ export default function SchemaItem(props: Props) {
   useLayoutEffect(() => {
     const hash = typeof window !== "undefined" ? window.location.hash : "";
     if (hash === `#${id}`) {
-      anchorRef.current?.click();
+      anchorRef.current?.scrollIntoView({ block: "start" });
     }
   }, [id]);
 
   const schemaContent = (
     <div>
       <span id={id} className="openapi-schema__container">
-        <a
-          ref={anchorRef}
-          href={`#${id}`}
-          onClick={() => {
-            const url = `${window.location.origin}${window.location.pathname}#${id}`;
-            navigator.clipboard.writeText(url);
-          }}
-        >
+        <a ref={anchorRef} href={`#${id}`} onClick={() => copyAnchorUrl(id)}>
           <Icon
             path={mdiLinkVariant}
             size={0.75}

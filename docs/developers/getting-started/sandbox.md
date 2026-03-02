@@ -1,6 +1,6 @@
 # Test Cards
 
-### [Apple Pay](test-cards.md#apple-pay)
+### Apple Pay
 
 <details>
 
@@ -11,7 +11,7 @@ It is important to keep in mind that these cards are only able to be added on Ap
 
 </details>
 
-### [Ottu PG](test-cards.md#ottu-pg)
+### Ottu PG
 
 <details>
 
@@ -33,7 +33,7 @@ It is important to keep in mind that these cards are only able to be added on Ap
 
 </details>
 
-### [Amazon Pay](test-cards.md#amazon-pay)
+### Amazon Pay
 
 <details>
 
@@ -67,7 +67,7 @@ It is important to keep in mind that these cards are only able to be added on Ap
 
 </details>
 
-### [Bambora](test-cards.md#bambora)
+### Bambora
 
 <details>
 
@@ -87,7 +87,7 @@ It is important to keep in mind that these cards are only able to be added on Ap
 
 </details>
 
-### [Bookeey](test-cards.md#bookeey)
+### Bookeey
 
 <details>
 
@@ -101,7 +101,7 @@ It is important to keep in mind that these cards are only able to be added on Ap
 
 </details>
 
-### [Burgan](test-cards.md#burgan)
+### Burgan
 
 <details>
 
@@ -121,7 +121,7 @@ It is important to keep in mind that these cards are only able to be added on Ap
 
 </details>
 
-### [Checkout.com](test-cards.md#checkout.com)
+### Checkout.com
 
 <details>
 
@@ -139,7 +139,7 @@ It is important to keep in mind that these cards are only able to be added on Ap
 
 </details>
 
-### [FSS](test-cards.md#fss)
+### FSS
 
 <details>
 
@@ -161,7 +161,7 @@ It is important to keep in mind that these cards are only able to be added on Ap
 
 </details>
 
-### [N-Genius](test-cards.md#n-genius)
+### N-Genius
 
 <details>
 
@@ -181,7 +181,7 @@ It is important to keep in mind that these cards are only able to be added on Ap
 
 </details>
 
-### [MiGS](test-cards.md#migs)
+### MiGS
 
 <details>
 
@@ -201,7 +201,7 @@ It is important to keep in mind that these cards are only able to be added on Ap
 
 </details>
 
-### [Cybersource](test-cards.md#cybersource)
+### Cybersource
 
 <details>
 
@@ -231,7 +231,7 @@ It is important to keep in mind that these cards are only able to be added on Ap
 
 </details>
 
-### [MPGS](test-cards.md#mpgs)
+### MPGS
 
 <details>
 
@@ -275,7 +275,7 @@ It is important to keep in mind that these cards are only able to be added on Ap
 
 </details>
 
-### [KNET](test-cards.md#knet)
+### KNET
 
 <details>
 
@@ -295,7 +295,7 @@ It is important to keep in mind that these cards are only able to be added on Ap
 
 </details>
 
-### [MADA](test-cards.md#mada)
+### MADA
 
 <details>
 
@@ -317,7 +317,7 @@ It is important to keep in mind that these cards are only able to be added on Ap
 
 </details>
 
-### [OmanNet](test-cards.md#omannet)
+### OmanNet
 
 <details>
 
@@ -339,7 +339,7 @@ It is important to keep in mind that these cards are only able to be added on Ap
 
 </details>
 
-### [CBK](test-cards.md#cbk)
+### CBK
 
 <details>
 
@@ -359,7 +359,7 @@ It is important to keep in mind that these cards are only able to be added on Ap
 
 </details>
 
-### [PayPal](test-cards.md#paypal)
+### PayPal
 
 <details>
 
@@ -379,7 +379,7 @@ It is important to keep in mind that these cards are only able to be added on Ap
 
 </details>
 
-### [PayU India](test-cards.md#payu-india)
+### PayU India
 
 <details>
 
@@ -401,7 +401,7 @@ It is important to keep in mind that these cards are only able to be added on Ap
 
 </details>
 
-### [NBO](test-cards.md#nbo)
+### NBO
 
 <details>
 
@@ -421,7 +421,7 @@ It is important to keep in mind that these cards are only able to be added on Ap
 
 </details>
 
-### [QPay](test-cards.md#qpay)
+### QPay
 
 <details>
 
@@ -457,7 +457,7 @@ For failed: Any 4 digits
 
 </details>
 
-### [HyperPay](test-cards.md#hyperpay)
+### HyperPay
 
 <details>
 
@@ -483,7 +483,7 @@ For failed: 251
 
 </details>
 
-### [Benefit](test-cards.md#benefit)
+### Benefit
 
 <details>
 
@@ -537,7 +537,7 @@ For failed: 251
 
 </details>
 
-### [UPG](test-cards.md#upg)
+### UPG
 
 <details>
 
@@ -559,7 +559,7 @@ For failed: 251
 
 </details>
 
-### [AlRajhi Bank](test-cards.md#alrajhi-bank)
+### AlRajhi Bank
 
 <details>
 
@@ -581,7 +581,7 @@ For failed: 251
 
 </details>
 
-### [Tamara](test-cards.md#tamara)
+### Tamara
 
 <details>
 

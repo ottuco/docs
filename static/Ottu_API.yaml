@@ -4,6 +4,243 @@ info:
   version: 1.0.0
   description: Ottu API
 paths:
+  /b/api/v1/reports/files/:
+    get:
+      operationId: list_reports
+      description: |+
+        Retrieve a paginated list of completed transaction reports for reconciliation, accounting, analytics, and compliance purposes.
+
+        ## Authentication
+
+        - **API Key** (Recommended): `Api-Key: your_private_api_key`
+        - **Basic Auth**: User must have `report.view_report` permission
+
+        ## Example Request
+
+        ```bash
+        curl -X GET 'https://your-domain.com/b/api/v1/reports/files/?created_after=2025-11-01&limit=50' \
+          -H 'Api-Key: your_private_api_key_here'
+        ```
+
+        ## Key Features
+
+        - Only returns finished reports (optimized queries)
+        - Includes `encrypted_id` for reference (prevents enumeration)
+        - Provides `download_action` with ready-to-use secure download URL
+        - Ordered by creation date (newest first)
+        - Merchant-isolated (each instance sees only their reports)
+
+        ## Response Fields
+
+        - `encrypted_id`: Encrypted report identifier for reference
+        - `download_action.url`: Pre-signed download URL with embedded token
+        - `download_action.method`: HTTP method to use (always `GET`)
+
+        ## Integration Walkthrough
+
+        **Step 1**: Call this endpoint to list available reports
+
+        **Step 2**: From the response, extract `download_action.url` for the desired report
+
+        **Step 3**: Make a GET request to that URL (same auth headers) to download the file
+
+      summary: List Transaction Reports
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+          description: Private API key to be provided in the format `Api-Key <key>`.
+          required: true
+        - in: query
+          name: created_after
+          schema:
+            type: string
+            format: date
+          description: Created after (inclusive)
+        - in: query
+          name: created_before
+          schema:
+            type: string
+            format: date
+          description: Created before (inclusive)
+        - in: query
+          name: interval
+          schema:
+            type: string
+            enum:
+              - daily
+              - monthly
+              - weekly
+              - yearly
+          description: |-
+            Report interval
+
+            * `daily` - Daily
+            * `weekly` - Weekly
+            * `monthly` - Monthly
+            * `yearly` - Yearly
+        - name: limit
+          required: false
+          in: query
+          description: Number of results to return per page.
+          schema:
+            type: integer
+        - name: offset
+          required: false
+          in: query
+          description: The initial index from which to return the results.
+          schema:
+            type: integer
+        - in: query
+          name: source
+          schema:
+            type: string
+            enum:
+              - auto
+              - manual
+          description: |-
+            Report source
+
+            * `auto` - Auto
+            * `manual` - Manual
+      tags:
+        - Reports API
+      security:
+        - basicAuth: []
+        - SSO_BasicAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedReportAPIListList"
+          description: ""
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FieldErrors"
+          description: ""
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ""
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ""
+  /b/api/v1/reports/files/{token}/download/:
+    get:
+      operationId: download_report
+      description: |+
+        Download a report file using the secure token from the list endpoint.
+
+        ## How It Works
+
+        1. Call `/b/api/v1/reports/files/` to list reports
+        2. Each report includes a `download_action` object with a pre-built URL
+        3. Use that URL directly - the token is already embedded in the path
+
+        ## Authentication
+
+        - **API Key** (Recommended): `Api-Key: your_private_api_key`
+        - **Basic Auth**: User must have `report.view_report` permission
+
+        ## Example Flow
+
+        ```bash
+        # Step 1: List reports
+        curl -X GET 'https://your-domain.com/b/api/v1/reports/files/' \
+          -H 'Api-Key: your_private_api_key_here'
+
+        # Response includes:
+        # {
+        #   "encrypted_id": "abc123...",
+        #   "download_action": {
+        #     "method": "GET",
+        #     "url": "https://your-domain.com/b/api/v1/reports/files/<token>/download/"
+        #   }
+        # }
+
+        # Step 2: Download using the URL from download_action
+        curl -X GET 'https://your-domain.com/b/api/v1/reports/files/<token>/download/' \
+          -H 'Api-Key: your_private_api_key_here' \
+          -o report.csv
+        ```
+
+        ## Security Features
+
+        - **Token-based**: Download tokens are UUIDs cached in Redis
+        - **Time-limited**: Tokens expire (configurable TTL, default from settings)
+        - **User-bound**: Token is tied to the user who requested the list
+        - **Rate Limiting**: Downloads are rate-limited per user
+        - **Ownership Verification**: Server verifies user owns the report
+
+        ## File Delivery
+
+        - **S3 Storage**: Redirects (302) to a pre-signed S3 URL
+        - **Local Storage**: Returns file with `X-Sendfile` header for Apache
+
+        ## File Formats
+
+        - **CSV**: `text/csv` - UTF-8 encoded, comma-delimited
+        - **XLSX**: `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+
+      summary: Download Transaction Report File
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+          description: Private API key to be provided in the format `Api-Key <key>`.
+          required: true
+        - in: path
+          name: token
+          schema:
+            type: string
+          description:
+            Secure download token (UUID) from the `download_action.url` field
+            in the list response. Tokens are time-limited and bound to the authenticated
+            user.
+          required: true
+      tags:
+        - Reports API
+      security:
+        - basicAuth: []
+        - SSO_BasicAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+          description:
+            "Report file (CSV or XLSX). For S3: redirects to pre-signed
+            URL."
+        "302":
+          description: Redirect to pre-signed S3 URL (when S3 storage is enabled)
+        "400":
+          description: Invalid token (unknown alias or malformed token)
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ""
+        "403":
+          description: User is not authorized to download this file
+        "404":
+          description: Report or file not found
+        "410":
+          description: Download link has expired or is invalid
   /b/api/v1/publisher/compare/metrics/:
     get:
       operationId: compare_metrics
@@ -1148,7 +1385,7 @@ paths:
   /b/checkout/v1/pymt-txn/:
     post:
       operationId: create_payment_transaction_checkout
-      description: The objective of the  POST request is to facilitate the creation of payment transactions and the subsequent generation of payment links, each of which is associated with a unique session ID. These links can be effortlessly shared with customers through a range of communication channels, including email, WhatsApp, and SMS. Additionally, it is possible to incorporate the customer's billing and shipping information into the transaction. Moreover, users of this API have the ability to include diverse forms of data and information within the body request.
+      description: The objective of the POST request is to facilitate the creation of payment transactions and the subsequent generation of payment links, each of which is associated with a unique session ID. These links can be effortlessly shared with customers through a range of communication channels, including email, WhatsApp, and SMS. Additionally, it is possible to incorporate the customer's billing and shipping information into the transaction. Moreover, users of this API have the ability to include diverse forms of data and information within the body request.
       summary: Create a new Payment Transaction
       x-hard-coded-response:
         result: success
@@ -5690,6 +5927,29 @@ components:
         - settled_pg_code
         - state
         - type
+    PaginatedReportAPIListList:
+      type: object
+      required:
+        - count
+        - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReportAPIList"
     PatchedCheckoutPATCHRequest:
       type: object
       description: |-
@@ -15010,6 +15270,57 @@ components:
         - product_id
         - session_id
         - total_price
+    ReportAPIList:
+      type: object
+      properties:
+        encrypted_id:
+          type: string
+          readOnly: true
+        report_name:
+          type: string
+          readOnly: true
+        interval:
+          type: string
+          readOnly: true
+        source:
+          type: string
+          readOnly: true
+        file_format:
+          type: string
+          maxLength: 10
+        records_amount:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        status:
+          enum:
+            - in_progress
+            - finished
+            - expired
+          type: string
+          description: |-
+            * `in_progress` - In Progress
+            * `finished` - Finished
+            * `expired` - Expired
+          x-spec-enum-id: 915999f8860a5adb
+        generated_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        download_action:
+          type: string
+          readOnly: true
+      required:
+        - created_at
+        - download_action
+        - encrypted_id
+        - generated_at
+        - interval
+        - report_name
+        - source
     SamsungPayInstrument:
       type: object
       description: Samsung Pay payment instrument
