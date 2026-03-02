@@ -197,9 +197,28 @@ export default function SchemaItem(props: Props) {
   useLayoutEffect(() => {
     const hash = typeof window !== "undefined" ? window.location.hash : "";
     if (hash === `#${id}`) {
-      anchorRef.current?.click();
+      anchorRef.current?.scrollIntoView({ block: "start" });
     }
   }, [id]);
+
+  const handleAnchorClick = async (event: React.MouseEvent<HTMLAnchorElement>) => {
+    const url = `${window.location.origin}${window.location.pathname}#${id}`;
+
+    if (
+      typeof navigator === "undefined" ||
+      !navigator.clipboard ||
+      typeof document === "undefined" ||
+      !document.hasFocus()
+    ) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      // Ignore clipboard failures and keep the anchor navigation working.
+    }
+  };
 
   const schemaContent = (
     <div>
@@ -207,10 +226,7 @@ export default function SchemaItem(props: Props) {
         <a
           ref={anchorRef}
           href={`#${id}`}
-          onClick={() => {
-            const url = `${window.location.origin}${window.location.pathname}#${id}`;
-            navigator.clipboard.writeText(url);
-          }}
+          onClick={handleAnchorClick}
         >
           <Icon
             path={mdiLinkVariant}
