@@ -1387,9 +1387,11 @@ paths:
       operationId: create_payment_transaction_checkout
       description: The objective of the POST request is to facilitate the creation of payment transactions and the subsequent generation of payment links, each of which is associated with a unique session ID. These links can be effortlessly shared with customers through a range of communication channels, including email, WhatsApp, and SMS. Additionally, it is possible to incorporate the customer's billing and shipping information into the transaction. Moreover, users of this API have the ability to include diverse forms of data and information within the body request.
       summary: Create a new Payment Transaction
-      x-hard-coded-response:
-        result: success
-        message: custom response here
+      x-hard-coded-response: |
+        {
+          "result": "success",
+          "message": "This is just a test hard coded response"
+        }
       parameters:
       tags:
         - Checkout API
