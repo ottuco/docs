@@ -31,8 +31,8 @@ Ottu serves as a payment orchestration layer that sits between your business and
 
 Choose your path to get started with Ottu:
 
-- **[Developer Quick Start](../quick-start/developers)**: Integrate Ottu APIs in minutes
-- **[Merchant Quick Start](../quick-start/merchants)**: Set up your first payment flow
+- **[Developer Documentation](/docs/developers/)**: Integrate Ottu's payment APIs, SDKs, and webhooks
+- **[Business Guide](/docs/business/dashboard-tour)**: Set up your dashboard and start accepting payments
 
 ## Support
 

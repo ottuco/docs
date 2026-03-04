@@ -94,7 +94,6 @@ Lead with what the feature does for their business. No code. Dashboard-focused w
 ```
 docs/
 ├── overview/              # About Ottu, Architecture, Changelog
-├── quick-start/           # Developer & Merchant quick start guides
 ├── developers/            # API docs, SDK guides, webhooks, operations
 │   ├── getting-started/   # Authentication, API fundamentals, sandbox
 │   ├── payments/          # Checkout API, SDK, payment methods, native payments

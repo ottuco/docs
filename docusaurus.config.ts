@@ -103,12 +103,12 @@ const config: Config = {
               to: '/docs/overview/about',
             },
             {
-              label: 'Developer Quick Start',
-              to: '/docs/quick-start/developers',
+              label: 'Developer Docs',
+              to: '/docs/developers/getting-started',
             },
             {
-              label: 'Merchant Quick Start',
-              to: '/docs/quick-start/merchants',
+              label: 'Business Guide',
+              to: '/docs/business/dashboard-tour',
             },
           ],
         },
@@ -125,7 +125,7 @@ const config: Config = {
             },
             {
               label: 'Developer Guide',
-              to: '/docs/quick-start/developers',
+              to: '/docs/developers/',
             },
           ],
         },
@@ -138,7 +138,7 @@ const config: Config = {
             },
             {
               label: 'Merchant Guide',
-              to: '/docs/quick-start/merchants',
+              to: '/docs/business/dashboard-tour',
             },
             {
               label: 'Getting Started',

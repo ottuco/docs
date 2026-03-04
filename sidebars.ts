@@ -27,15 +27,6 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Quick Start',
-      link: {type: 'doc', id: 'quick-start/developers'},
-      items: [
-        'quick-start/developers',
-        'quick-start/merchants',
-      ],
-    },
-    {
-      type: 'category',
       label: 'Glossary & Resources',
       link: {type: 'doc', id: 'glossary/index'},
       items: [
@@ -52,7 +43,6 @@ const sidebars: SidebarsConfig = {
       label: 'Developers',
       link: {type: 'doc', id: 'developers/index'},
       items: [
-        {type: 'doc', id: 'developers/index', label: 'Introduction'},
         {
           type: 'category',
           label: 'Getting Started',

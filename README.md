@@ -70,7 +70,6 @@ npm run deploy
 ```
 docs/
 ├── overview/          # About Ottu, Architecture, Changelog
-├── quick-start/       # Developer & Merchant quick start guides
 ├── developers/        # API documentation and developer guides
 ├── business/          # Dashboard and business user guides
 ├── glossary/          # Payment terminology and concepts
