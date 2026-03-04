@@ -1,27 +1,118 @@
 # Claude Code Instructions for Ottu Documentation
 
-## Project Overview
+## Project Identity
 
-This is the Ottu public documentation site built with Docusaurus 3.8.1 and TypeScript. It follows a Stripe-inspired dual-path documentation approach serving both developers and business users.
+Ottu is a payment processing platform. This repository is its **official public documentation**, serving two distinct audiences:
+
+- **Developers**: API integration, SDK usage, webhooks, payment operations, tokenization
+- **Business users**: Dashboard configuration, payment management, merchant workflows
+
+Built with Docusaurus 3.8.1 and TypeScript. Deployed on DigitalOcean App Platform. Follows a Stripe-inspired, domain-structured documentation approach where content is organized by business capability, not by API endpoint.
 
 ## Architecture & Technology
 
 - **Framework**: Docusaurus 3.8.1 with TypeScript
 - **Deployment**: DigitalOcean App Platform
-- **Styling**: CSS modules with custom CSS
+- **Styling**: CSS modules with custom CSS + SCSS
 - **Package Manager**: npm (not yarn)
+- **API Docs Plugin**: `docusaurus-plugin-openapi-docs` + `docusaurus-theme-openapi-docs` — auto-generates interactive API reference from `static/Ottu_API.yaml`
+
+## Documentation Philosophy
+
+### Domain-Structured
+Content is organized by business domain (Payments, Operations, Cards & Tokenization, Webhooks), not by API endpoint or HTTP method. This matches how developers think about integration problems.
+
+### Self-Contained Pages
+Each page provides full context. Never assume the reader has read other pages. Repeat critical context with a link rather than writing "as described above" or "see the previous section." A reader landing on any page from a search engine should understand it without navigating elsewhere.
+
+### Progressive Disclosure
+Start simple. Lead with the most common use case. Use collapsible sections (`<details>` or Docusaurus `<Details>`) for advanced options, edge cases, and deep configuration.
+
+### Cross-Referenced
+Link liberally throughout body text — not just in a "Related" section at the bottom. Every mention of a payment concept, API endpoint, error code, or webhook event should be a hyperlink to its documentation. Include hints, notes, and admonitions pointing readers to related features they might need.
+
+### Code-First for Developers
+Working code before explanation. Show a complete, runnable example first, then explain what it does and why.
+
+### Feature-Benefit for Business Users
+Lead with what the feature does for their business. No code. Dashboard-focused with screenshots and step-by-step instructions.
+
+## Writing Standards
+
+### General Rules
+
+- **Every page ends with "What's Next?" or "Related"** — link to the logical next steps and related topics
+- **Admonitions**: Use consistently throughout:
+  - `:::note` — supplementary info, clarifications
+  - `:::tip` — best practices, recommended approaches
+  - `:::warning` — gotchas, common mistakes, behavior that could break things
+  - `:::danger` — security risks, data loss, irreversible actions
+- **No jargon without definition** — first use of any payment domain term (MID, PG, tokenization, PCI DSS) links to the glossary
+- **Hyperlinks throughout** — link inline in body text where concepts are mentioned, don't batch all links at the bottom
+- **Code examples must be copy-paste ready** — runnable against the sandbox environment with only an API key substitution
+- **Multi-language code tabs** — use Docusaurus `<Tabs>` with `groupId="language"` in this order: cURL, Python, Node.js, PHP
+- **Self-contained** — don't redirect the reader to another page for essential information; include the key context on the current page with a link for deeper reading
+
+### Developer Documentation
+
+- **Code-first**: every guide starts with a minimal working example showing the happy path
+- **Error handling**: immediately after the happy path, show common errors and how to handle them
+- **Authentication in every example**: include the auth header/setup, with a link to the authentication page
+- **Interactive API docs**: reference the auto-generated API reference for try-it-out exploration; link to specific endpoints
+- **5-minute quickstarts**: each major feature should have a quickstart getting developers from zero to a working call quickly
+
+### Business Documentation
+
+- **Feature-benefit focused**: explain what the feature does for the merchant's business
+- **Dashboard-first**: document UI workflows with screenshots and annotations
+- **No code required**: reference developer docs for technical implementation details
+- **Step-by-step**: numbered instructions for every workflow
+
+## Content Structure Patterns
+
+### Page Template (where applicable)
+
+1. **Overview** — what this is and why you need it
+2. **Use Cases** — when to use this feature
+3. **Quick Implementation** — minimal working example
+4. **Detailed Guide** — step-by-step walkthrough
+5. **API Reference** — inline request/response or link to auto-generated docs
+6. **Error Handling** — what can go wrong and how to handle it
+7. **Best Practices** — recommendations and patterns
+8. **What's Next? / Related** — logical next pages and related topics
+
+### Cross-Linking Strategy
+
+- **Inline**: link terms, concepts, and endpoints as they appear in text
+- **Callout boxes**: use `:::tip` blocks for guided workflow suggestions (e.g., "Want to save the card for later? See [Tokenization](../cards-and-tokens/)")
+- **Related section**: 3-5 links at page end to directly related topics
+- **What's Next**: suggest the logical next step in the developer/merchant journey
 
 ## Documentation Structure
 
 ```
 docs/
-├── overview/          # About Ottu, Architecture, Changelog
-├── quick-start/       # Developer & Merchant quick start guides
-├── developers/        # API documentation and developer guides
-├── business/          # Dashboard and business user guides
-├── glossary/          # Payment terminology and concepts
-└── resources/         # Support, tools, and additional resources
+├── overview/              # About Ottu, Architecture, Changelog
+├── quick-start/           # Developer & Merchant quick start guides
+├── developers/            # API docs, SDK guides, webhooks, operations
+│   ├── getting-started/   # Authentication, API fundamentals, sandbox
+│   ├── payments/          # Checkout API, SDK, payment methods, native payments
+│   ├── cards-and-tokens/  # Tokenization, user cards, recurring payments
+│   ├── webhooks/          # Setup, payment events, operation events, signatures
+│   ├── reference/         # Error codes, payment states, glossary
+│   └── apis/              # Auto-generated OpenAPI reference (do not edit)
+├── business/              # Dashboard and business user guides
+├── glossary/              # Payment terminology and concepts
+└── resources/             # Support, tools, additional resources
 ```
+
+## Interactive API Documentation
+
+- **OpenAPI spec**: `static/Ottu_API.yaml` (source of truth for all API endpoints)
+- **Auto-generated output**: `docs/developers/apis/` — `.api.mdx` + `.RequestSchema.json` + `.StatusCodes.json` + `.ParamsDetails.json` per endpoint
+- **Regenerate**: `npx docusaurus gen-api-docs ottuApi`
+- **Do NOT manually edit** files in `docs/developers/apis/` — they are overwritten on regeneration
+- Deep-nested schema permalink support via swizzled components (see Swizzled OpenAPI Schema Components section below)
 
 ## Key Configuration
 
@@ -31,11 +122,12 @@ docs/
 ## Development Commands
 
 ```bash
-npm install         # Install dependencies
-npm start          # Development server
-npm run build      # Production build
-npm run serve      # Test production build
-npm run typecheck  # TypeScript validation
+npm install                            # Install dependencies
+npm start                             # Development server
+npm run build                         # Production build
+npm run serve                         # Test production build
+npm run typecheck                     # TypeScript validation
+npx docusaurus gen-api-docs ottuApi   # Regenerate API docs from OpenAPI spec
 ```
 
 ## Deployment
@@ -44,26 +136,41 @@ npm run typecheck  # TypeScript validation
 - **Production**: `main` branch → https://docs.ottu.net
 - **Staging**: `dev` branch → https://docs.ottu.dev
 
-## Content Guidelines
+## Navigation Structure
 
-- Follow Stripe-style documentation approach
-- Dual-path navigation (developers vs business users)
-- No external link dependencies in core documentation
-- Use relative links within docs (e.g., `../quick-start/developers`)
-- Comprehensive, self-contained content
+- **Main Sidebar** (`mainSidebar`): Overview, Quick Start, Glossary & Resources
+- **Developer Sidebar** (`developerSidebar`): Deep collapsible categories with method badges, `customProps.targetHref` for in-page section links
+- **Business Sidebar** (`businessSidebar`): User-focused documentation flow
+
+All sidebars defined in `sidebars.ts`. Auto-generated API reference uses `{type: 'autogenerated', dirName: 'developers/apis'}`.
 
 ## Technical Constraints
 
-- Build must pass without broken links (`onBrokenLinks: 'throw'`)
+- Build must pass without errors (`onBrokenLinks` is currently `'warn'`, goal is to move to `'throw'` once all links resolve)
 - TypeScript strict mode enabled
 - All content must work offline
 - No external API dependencies for core functionality
 
-## Navigation Structure
+## Quality Standards
 
-- **Main Sidebar**: Overview, Quick Start, Glossary & Resources
-- **Developer Sidebar**: Technical documentation flow
-- **Business Sidebar**: User-focused documentation flow
+- All documentation must build successfully (`npm run build`)
+- All internal links must resolve correctly
+- TypeScript must compile without errors (`npm run typecheck`)
+- Code examples must be copy-paste ready and runnable against sandbox
+- Content must be self-contained and comprehensive
+- Follow existing code style and sidebar patterns in `sidebars.ts`
+
+## File Management
+
+- Static assets in `static/` folder
+- React components in `src/components/`
+- Custom CSS in `src/css/custom.css`
+- Swizzled theme components in `src/theme/`
+- Utility functions in `src/utils/`
+
+## Planning & Scratch Files
+
+`.scratch/` directory contains planning and analysis documents (migration plans, structure proposals, architecture options). Git-ignored, not deployed. Use for design exploration before implementing changes.
 
 ## Maintenance Notes
 
@@ -84,20 +191,6 @@ This documentation covers:
 - Security and compliance (PCI DSS)
 - Business payment flows
 - Developer tools and SDKs
-
-## File Management
-
-- Static assets in `static/` folder
-- React components in `src/components/`
-- Custom CSS in `src/css/custom.css`
-
-## Quality Standards
-
-- All documentation must build successfully
-- Links must resolve correctly
-- TypeScript must compile without errors
-- Content should be comprehensive and practical
-- Follow existing code style and conventions
 
 ## Swizzled OpenAPI Schema Components
 
