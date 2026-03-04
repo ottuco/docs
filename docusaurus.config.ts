@@ -18,7 +18,7 @@ const config: Config = {
   url: 'https://docs.ottu.net',
   baseUrl: '/',
 
-  trailingSlash: false,
+  trailingSlash: true,
 
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
