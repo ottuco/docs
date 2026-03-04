@@ -43,9 +43,10 @@ docs/developers/
 │   └── sandbox.md                  # Sandbox environment, test cards per gateway
 │
 ├── cards-and-tokens/
-│   ├── index.md                    # Tokenization overview and concepts
+│   ├── index.md                    # Section overview — save, manage, charge saved cards
+│   ├── tokenization.md             # How to save cards (with/without payment)
 │   ├── user-cards.mdx              # List/delete saved customer cards
-│   └── recurring-payments.md       # Auto-debit and recurring flows (EMPTY — needs content)
+│   └── recurring-payments.md       # Auto-debit, CIT/MIT, agreement setup, recurring billing
 │
 ├── webhooks/
 │   ├── index.md                    # Webhook setup, retries, delivery guarantees

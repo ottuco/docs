@@ -16,6 +16,7 @@ Built with Docusaurus 3.8.1 and TypeScript. Deployed on DigitalOcean App Platfor
 - **Styling**: CSS modules with custom CSS + SCSS
 - **Package Manager**: npm (not yarn)
 - **API Docs Plugin**: `docusaurus-plugin-openapi-docs` + `docusaurus-theme-openapi-docs` — auto-generates interactive API reference from `static/Ottu_API.yaml`
+- **Mermaid Diagrams**: `@docusaurus/theme-mermaid` — enabled via `markdown.mermaid: true` in `docusaurus.config.ts`
 
 ## Documentation Philosophy
 
@@ -168,6 +169,19 @@ All sidebars defined in `sidebars.ts`. Auto-generated API reference uses `{type:
 - Swizzled theme components in `src/theme/`
 - Utility functions in `src/utils/`
 
+## Mermaid Diagrams
+
+All diagrams use a semantic color system where color communicates **responsibility**:
+
+- **Blue** (`#1983BC`) — Ottu services, APIs, infrastructure (Ottu owns it)
+- **Orange** (`#F57D2D`) — Core execution, orchestration, decision points (Ottu executes it) — **use sparingly, 1-3 nodes max**
+- **Red** (`#ED2833`) — Security, PCI boundaries, encryption, failure paths (Ottu protects it)
+- **Pink** (`#F093BC`) — External actors, merchant UI, banks, third parties (Ottu integrates with it)
+- **Dark** (`#302F37`) — Boundaries, containers, trust domains (Ottu isolates it)
+- **Light** (`#F4F4F4`) — Background (always light, never white or dark)
+
+Use the `/mermaid` skill (`.claude/commands/mermaid.md`) for the full spec including theme config, classDefs, node shapes, and rules.
+
 ## Planning & Scratch Files
 
 `.scratch/` directory contains planning and analysis documents (migration plans, structure proposals, architecture options). Git-ignored, not deployed. Use for design exploration before implementing changes.
@@ -180,17 +194,28 @@ All sidebars defined in `sidebars.ts`. Auto-generated API reference uses `{type:
 - Follow semantic commit messages
 - Test builds locally before pushing
 
-## Payment Domain Knowledge
+## Payment Domain Context
 
-This documentation covers:
+### Actors
 
-- Payment processing fundamentals
-- API integration patterns
-- Webhook implementation
-- Multi-currency handling
-- Security and compliance (PCI DSS)
-- Business payment flows
-- Developer tools and SDKs
+- **Merchant** — the business integrating with Ottu. Calls server-side APIs (Checkout, User Cards, Auto-Debit, Operations). The primary audience of developer documentation. The merchant's backend creates payment sessions, receives webhook notifications, and initiates operations like refunds or auto-debit charges.
+- **Customer** — the end user making a payment. Interacts only with the checkout UI (Checkout SDK, redirect to hosted page, or payment gateway page). **Never calls Ottu's API directly.** The customer enters card details, authenticates (3DS), and sees payment results.
+- **Ottu** — the payment platform. Provides APIs, SDKs, hosted checkout pages, and webhook notifications. Sits between the merchant and the payment gateway.
+- **Payment Gateway (PG)** — the bank or processor behind the scenes (e.g., KNET, MPGS, Cybersource). Configured by Ottu staff; the merchant receives `pg_codes` to reference gateways in API calls.
+
+### Key Flow Pattern
+
+Every payment follows this pattern — always get this right in documentation:
+
+1. **Merchant → Ottu API**: Merchant's server calls an API (e.g., Checkout API) to create a session
+2. **Ottu → Merchant**: Returns `session_id`, `checkout_url`, and/or SDK initialization data
+3. **Merchant → Customer**: Presents the checkout UI (SDK embed, redirect, or link)
+4. **Customer → Ottu**: Customer interacts with checkout (enters card, authenticates)
+5. **Ottu → PG**: Ottu processes the payment through the gateway
+6. **Ottu → Merchant**: Sends result via webhook to merchant's `webhook_url`
+7. **Ottu → Customer**: Redirects customer to merchant's `redirect_url`
+
+The merchant is always the API caller. The customer is always the UI user. Never show a customer calling an API endpoint.
 
 ## Swizzled OpenAPI Schema Components
 

@@ -52,7 +52,7 @@ const sidebars: SidebarsConfig = {
       label: 'Developers',
       link: {type: 'doc', id: 'developers/index'},
       items: [
-        {type: 'doc', id: 'developers/index', label: 'Developer Home'},
+        {type: 'doc', id: 'developers/index', label: 'Introduction'},
         {
           type: 'category',
           label: 'Getting Started',
@@ -457,6 +457,7 @@ const sidebars: SidebarsConfig = {
           link: {type: 'doc', id: 'developers/cards-and-tokens/index'},
           items: [
             {type: 'doc', id: 'developers/cards-and-tokens/index', label: 'Overview'},
+            {type: 'doc', id: 'developers/cards-and-tokens/tokenization', label: 'Tokenization'},
             {
               type: 'category',
               label: 'User Cards',

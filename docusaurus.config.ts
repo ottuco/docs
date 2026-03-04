@@ -31,6 +31,10 @@ const config: Config = {
     locales: ['en'],
   },
 
+  markdown: {
+    mermaid: true,
+  },
+
   presets: [
     [
       'classic',
@@ -117,7 +121,7 @@ const config: Config = {
             },
             {
               label: 'Quick Start',
-              to: '/docs/developers/quick-start',
+              to: '/docs/developers/getting-started',
             },
             {
               label: 'Developer Guide',
@@ -188,7 +192,7 @@ const config: Config = {
     ],
   ],
 
-  themes: ["docusaurus-theme-openapi-docs"],
+  themes: ["docusaurus-theme-openapi-docs", "@docusaurus/theme-mermaid"],
 };
 
 export default config;

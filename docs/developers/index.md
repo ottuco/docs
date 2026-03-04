@@ -1,6 +1,6 @@
-# Developer Documentation
+# Introduction
 
-Welcome to Ottu's developer documentation. Ottu provides a unified payment API — integrate once, and we handle the complexity of multiple payment gateways, currencies, and payment methods behind a single interface.
+Ottu provides a unified payment API — integrate once, and we handle the complexity of multiple payment gateways, currencies, and payment methods behind a single interface.
 
 ## Key Concepts
 
