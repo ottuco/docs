@@ -23,26 +23,24 @@ Context-specific guidance for the developer documentation section. Supplements t
 
 ```
 docs/developers/
-├── index.md                        # Developer hub landing page (EMPTY — needs content)
-├── api-fundamentals.md             # Base URLs, request/response format, currencies
-├── quick-start.md                  # Developer quickstart walkthrough
+├── index.md                        # Developer hub landing page (Key Concepts + Integration Paths)
 ├── invoices.md                     # Invoice creation and management
 ├── notifications.md                # SMS/email notification API
 ├── operations.md                   # Refund, capture, void, cancel, expire, delete
 ├── reports.md                      # Transaction report listing and download
 │
 ├── getting-started/
-│   ├── index.md                    # Getting started overview with API selection guide
+│   ├── index.md                    # Getting started overview — setup, first API call
 │   ├── authentication.md           # API keys, basic auth, public key setup
-│   ├── api-fundamentals.md         # Request/response format, currencies, pagination
-│   └── sandbox.md                  # Sandbox environment, test cards per gateway
+│   └── api-fundamentals.md         # Request/response format, currencies, pagination
 │
 ├── payments/
 │   ├── index.md                    # Payments overview (EMPTY — needs content)
 │   ├── checkout-api.mdx            # Core: create/retrieve/update payment transactions
 │   ├── checkout-sdk.md             # Drop-in SDK for web and mobile (largest file ~5K lines)
 │   ├── payment-methods.md          # Discovering available payment methods via pg_codes
-│   └── native-payments.md          # Apple Pay, Google Pay direct payments
+│   ├── native-payments.md          # Apple Pay, Google Pay direct payments
+│   └── sandbox.md                  # Sandbox environment, test cards per gateway
 │
 ├── cards-and-tokens/
 │   ├── index.md                    # Tokenization overview and concepts
@@ -142,7 +140,7 @@ These files exist but are empty (0 bytes). Priority for content creation:
 
 ## Testing & Sandbox
 
-- Sandbox environment details in `getting-started/sandbox.md`
+- Sandbox environment details in `payments/sandbox.md`
 - Test cards documented per payment gateway (Ottu PG, KNET, Apple Pay, etc.)
 - All code examples should use sandbox base URL
 - Webhook testing: developers can use ngrok or webhook.site for local development

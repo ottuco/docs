@@ -61,7 +61,6 @@ const sidebars: SidebarsConfig = {
             {type: 'doc', id: 'developers/getting-started/index', label: 'Quickstart'},
             {type: 'doc', id: 'developers/getting-started/authentication', label: 'Authentication'},
             {type: 'doc', id: 'developers/getting-started/api-fundamentals', label: 'API Fundamentals'},
-            {type: 'doc', id: 'developers/getting-started/sandbox', label: 'Sandbox & Test Cards'},
           ],
         },
         {
@@ -381,6 +380,7 @@ const sidebars: SidebarsConfig = {
               ],
             },
             {type: 'doc', id: 'developers/payments/checkout-sdk', label: 'Checkout SDK'},
+            {type: 'doc', id: 'developers/payments/sandbox', label: 'Sandbox & Test Cards'},
           ],
         },
         {
