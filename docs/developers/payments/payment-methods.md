@@ -104,8 +104,6 @@ POST: https://beta.ottu.net/b/pbl/v2/payment-methods/
 
 This request will return the `"pg_codes": ["kpay"]`, which can then be used in subsequent API calls.
 
-## [API Schema Reference](payment-methods.md#api-schema-reference)
-
 <ApiDocEmbed path="get-payment-methods.api.mdx" />
 
 ## [Guide](payment-methods.md#guide)

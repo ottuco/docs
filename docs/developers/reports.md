@@ -207,8 +207,6 @@ Reports can be generated in two ways:
 
 ![Reports workflow](/img/reports/reports-workflow.png)
 
-## [API Schema Reference](#api-schema-reference)
-
 ---
 
 <ApiDocEmbed path="list-reports.api.mdx" />
