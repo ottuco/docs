@@ -78,7 +78,8 @@ const sidebars: SidebarsConfig = {
                 {
                   type: 'category',
                   label: 'Best Practices and Guidelines',
-                  collapsible: false,
+                  collapsible: true,
+                  collapsed: true,
                   customProps: {
                     targetHref:
                       '/docs/developers/payments/checkout-api#best-practices-and-guidelines',
@@ -113,7 +114,8 @@ const sidebars: SidebarsConfig = {
                 {
                   type: 'category',
                   label: 'One-Step Checkout',
-                  collapsible: false,
+                  collapsible: true,
+                  collapsed: true,
                   customProps: {
                     targetHref: '/docs/developers/payments/checkout-api#one-step-checkout',
                   },
@@ -146,7 +148,8 @@ const sidebars: SidebarsConfig = {
                 {
                   type: 'category',
                   label: 'Upload Attachment',
-                  collapsible: false,
+                  collapsible: true,
+                  collapsed: true,
                   customProps: {
                     targetHref: '/docs/developers/payments/checkout-api#use-cases',
                   },
@@ -156,7 +159,8 @@ const sidebars: SidebarsConfig = {
                     {
                       type: 'category',
                       label: 'Setup',
-                      collapsible: false,
+                      collapsible: true,
+                  collapsed: true,
                       customProps: {
                         targetHref: '/docs/developers/payments/checkout-api#setup',
                       },
@@ -177,7 +181,8 @@ const sidebars: SidebarsConfig = {
                     {
                       type: 'category',
                       label: 'How It Works',
-                      collapsible: false,
+                      collapsible: true,
+                  collapsed: true,
                       customProps: {
                         targetHref: '/docs/developers/payments/checkout-api#how-it-works',
                       },
@@ -203,7 +208,8 @@ const sidebars: SidebarsConfig = {
                     {
                       type: 'category',
                       label: 'Guide',
-                      collapsible: false,
+                      collapsible: true,
+                  collapsed: true,
                       customProps: {
                         targetHref: '/docs/developers/payments/checkout-api#guide',
                       },
@@ -239,7 +245,8 @@ const sidebars: SidebarsConfig = {
                 {
                   type: 'category',
                   label: 'Setup',
-                  collapsible: false,
+                  collapsible: true,
+                  collapsed: true,
                   customProps: {
                     targetHref: '/docs/developers/payments/payment-methods#setup',
                   },
@@ -256,7 +263,8 @@ const sidebars: SidebarsConfig = {
                 {
                   type: 'category',
                   label: 'How it Works',
-                  collapsible: false,
+                  collapsible: true,
+                  collapsed: true,
                   customProps: {
                     targetHref: '/docs/developers/payments/payment-methods#how-it-works',
                   },
@@ -282,7 +290,8 @@ const sidebars: SidebarsConfig = {
                 {
                   type: 'category',
                   label: 'Guide',
-                  collapsible: false,
+                  collapsible: true,
+                  collapsed: true,
                   customProps: {
                     targetHref: '/docs/developers/payments/payment-methods#guide',
                   },
@@ -320,7 +329,8 @@ const sidebars: SidebarsConfig = {
                 {
                   type: 'category',
                   label: 'Apple Pay',
-                  collapsible: false,
+                  collapsible: true,
+                  collapsed: true,
                   customProps: {
                     targetHref: '/docs/developers/payments/native-payments#apple-pay',
                   },
@@ -336,7 +346,8 @@ const sidebars: SidebarsConfig = {
                 {
                   type: 'category',
                   label: 'Google Pay',
-                  collapsible: false,
+                  collapsible: true,
+                  collapsed: true,
                   customProps: {
                     targetHref: '/docs/developers/payments/native-payments#google-pay',
                   },
@@ -352,7 +363,8 @@ const sidebars: SidebarsConfig = {
                 {
                   type: 'category',
                   label: 'Auto-Debit (Tokenized Payments)',
-                  collapsible: false,
+                  collapsible: true,
+                  collapsed: true,
                   customProps: {
                     targetHref: '/docs/developers/payments/native-payments#auto-debit-tokenized-payments',
                   },
@@ -379,7 +391,8 @@ const sidebars: SidebarsConfig = {
             {
               type: 'category',
               label: 'Setup',
-              collapsible: false,
+              collapsible: true,
+                  collapsed: true,
               customProps: {
                 targetHref: '/docs/developers/operations#setup',
               },
@@ -452,7 +465,8 @@ const sidebars: SidebarsConfig = {
                 {
                   type: 'category',
                   label: 'Setup',
-                  collapsible: false,
+                  collapsible: true,
+                  collapsed: true,
                   customProps: {
                     targetHref: '/docs/developers/cards-and-tokens/user-cards#setup',
                   },
@@ -492,7 +506,8 @@ const sidebars: SidebarsConfig = {
             {
               type: 'category',
               label: 'Setup',
-              collapsible: false,
+              collapsible: true,
+                  collapsed: true,
               customProps: {
                 targetHref: '/docs/developers/invoices#setup',
               },
@@ -509,7 +524,8 @@ const sidebars: SidebarsConfig = {
             {
               type: 'category',
               label: 'How it Works',
-              collapsible: false,
+              collapsible: true,
+                  collapsed: true,
               customProps: {
                 targetHref: '/docs/developers/invoices#how-it-works',
               },
@@ -537,7 +553,8 @@ const sidebars: SidebarsConfig = {
             {
               type: 'category',
               label: 'Invoice Generation Logic',
-              collapsible: false,
+              collapsible: true,
+                  collapsed: true,
               customProps: {
                 targetHref: '/docs/developers/invoices#invoice-generation-logic',
               },
