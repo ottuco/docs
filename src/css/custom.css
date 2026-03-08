@@ -272,16 +272,3 @@ html {
 [data-theme="dark"] .openapi-tabs__code-item--rust::after {
   filter: brightness(0) invert(1) saturate(1.1);
 }
-
-/* Make the OpenAPI right panel sticky on desktop */
-@media (min-width: 997px) {
-  .openapi-right-panel__container {
-    position: sticky;
-    top: calc(var(--ifm-navbar-height) + 1rem);
-    align-self: flex-start;
-
-    /* avoid it growing beyond viewport */
-    max-height: calc(100vh - var(--ifm-navbar-height) - 2rem);
-    overflow: auto;
-  }
-}
