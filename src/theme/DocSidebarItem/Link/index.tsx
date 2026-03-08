@@ -6,16 +6,12 @@ import Link from "@docusaurus/Link";
 import isInternalUrl from "@docusaurus/isInternalUrl";
 import IconExternalLink from "@theme/Icon/ExternalLink";
 import originalStyles from "@docusaurus/theme-classic/lib/theme/DocSidebarItem/Link/styles.module.css";
-import styles from "./styles.module.css";
 
 type SidebarLinkItem = {
   href: string;
   label: string;
   className?: string;
   autoAddBaseUrl?: boolean;
-  customProps?: {
-    method?: string;
-  };
 };
 
 type Props = {
@@ -25,23 +21,6 @@ type Props = {
   level: number;
   index: number;
 };
-
-function getMethodClassName(method?: string): string {
-  switch (method?.toUpperCase()) {
-    case "POST":
-      return styles.methodPost;
-    case "GET":
-      return styles.methodGet;
-    case "PATCH":
-      return styles.methodPatch;
-    case "PUT":
-      return styles.methodPut;
-    case "DELETE":
-      return styles.methodDelete;
-    default:
-      return styles.methodDefault;
-  }
-}
 
 export default function DocSidebarItemLink({
   item,
@@ -53,7 +32,6 @@ export default function DocSidebarItemLink({
   const { href, label, className, autoAddBaseUrl } = item;
   const isActive = isActiveSidebarItem(item as never, activePath);
   const isInternalLink = isInternalUrl(href);
-  const method = item.customProps?.method?.toUpperCase();
 
   return (
     <li
@@ -81,13 +59,6 @@ export default function DocSidebarItemLink({
         })}
         {...props}
       >
-        {method ? (
-          <span
-            className={clsx(styles.methodBadge, getMethodClassName(method))}
-          >
-            {method}
-          </span>
-        ) : null}
         {label}
         {!isInternalLink && <IconExternalLink />}
       </Link>
