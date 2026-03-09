@@ -272,3 +272,23 @@ html {
 [data-theme="dark"] .openapi-tabs__code-item--rust::after {
   filter: brightness(0) invert(1) saturate(1.1);
 }
+
+/* Postman CLI language tab logo */
+.openapi-tabs__code-item--postman-cli {
+  color: #ff6c37;
+}
+
+.openapi-tabs__code-item--postman-cli::after {
+  content: "";
+  width: var(--code-tab-logo-width);
+  height: var(--code-tab-logo-height);
+  background: url("https://raw.githubusercontent.com/devicons/devicon/master/icons/postman/postman-original.svg")
+    no-repeat center;
+  background-size: contain;
+  margin-block: auto;
+}
+
+.openapi-tabs__code-item--postman-cli.active {
+  box-shadow: 0 0 0 3px rgba(255, 108, 55, 0.3);
+  border-color: #ff6c37;
+}
