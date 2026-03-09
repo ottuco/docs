@@ -65,24 +65,6 @@ const sidebars: SidebarsConfig = {
               link: {type: 'doc', id: 'developers/payments/checkout-api'},
               items: [
                 {
-                  type: 'category',
-                  label: 'Best Practices and Guidelines',
-                  collapsible: true,
-                  collapsed: true,
-                  customProps: {
-                    targetHref:
-                      '/docs/developers/payments/checkout-api#best-practices-and-guidelines',
-                  },
-                  items: [
-                    {type: 'link', label: 'API Key', href: '/docs/developers/payments/checkout-api#api-key'},
-                    {
-                      type: 'link',
-                      label: 'Basic Authentication',
-                      href: '/docs/developers/payments/checkout-api#basic-authentication',
-                    },
-                  ],
-                },
-                {
                   type: 'link',
                   label: 'Create a new Payment Transaction',
                   href: '/docs/developers/payments/checkout-api#api-create-a-new-payment-transaction',
@@ -97,129 +79,9 @@ const sidebars: SidebarsConfig = {
                   label: 'Update Payment Transaction',
                   href: '/docs/developers/payments/checkout-api#api-update-payment-transaction',
                 },
-                {
-                  type: 'category',
-                  label: 'One-Step Checkout',
-                  collapsible: true,
-                  collapsed: true,
-                  customProps: {
-                    targetHref: '/docs/developers/payments/checkout-api#one-step-checkout',
-                  },
-                  items: [
-                    {type: 'link', label: 'When to Use', href: '/docs/developers/payments/checkout-api#when-to-use'},
-                    {
-                      type: 'link',
-                      label: 'Supported Instruments',
-                      href: '/docs/developers/payments/checkout-api#supported-instruments',
-                    },
-                    {
-                      type: 'link',
-                      label: 'Rules & Restrictions',
-                      href: '/docs/developers/payments/checkout-api#rules--restrictions',
-                    },
-                    {type: 'link', label: 'How to Use it', href: '/docs/developers/payments/checkout-api#how-to-use-it'},
-                    {
-                      type: 'link',
-                      label: 'Request Example: Apple Pay',
-                      href: '/docs/developers/payments/checkout-api#request-example-apple-pay',
-                    },
-                    {
-                      type: 'link',
-                      label: 'Response Behavior',
-                      href: '/docs/developers/payments/checkout-api#response-behavior-when-payment_instrument-is-used',
-                    },
-                  ],
-                },
+                {type: 'link', label: 'One-Step Checkout', href: '/docs/developers/payments/checkout-api#one-step-checkout'},
                 {type: 'link', label: 'FAQ', href: '/docs/developers/payments/checkout-api#faq'},
-                {
-                  type: 'category',
-                  label: 'Upload Attachment',
-                  collapsible: true,
-                  collapsed: true,
-                  customProps: {
-                    targetHref: '/docs/developers/payments/checkout-api#use-cases',
-                  },
-                  items: [
-                    {type: 'link', label: 'Use Cases', href: '/docs/developers/payments/checkout-api#use-cases'},
-                    {type: 'link', label: 'Specifications', href: '/docs/developers/payments/checkout-api#specifications'},
-                    {
-                      type: 'category',
-                      label: 'Setup',
-                      collapsible: true,
-                  collapsed: true,
-                      customProps: {
-                        targetHref: '/docs/developers/payments/checkout-api#setup',
-                      },
-                      items: [
-                        {
-                          type: 'link',
-                          label: 'Upload Before session_id Generation',
-                          href: '/docs/developers/payments/checkout-api#upload-before-session_id-generation',
-                        },
-                        {
-                          type: 'link',
-                          label: 'Upload After session_id Generation',
-                          href: '/docs/developers/payments/checkout-api#upload-after-session_id-generation',
-                        },
-                      ],
-                    },
-                    {type: 'link', label: 'Authentication', href: '/docs/developers/payments/checkout-api#authentication'},
-                    {
-                      type: 'category',
-                      label: 'How It Works',
-                      collapsible: true,
-                  collapsed: true,
-                      customProps: {
-                        targetHref: '/docs/developers/payments/checkout-api#how-it-works',
-                      },
-                      items: [
-                        {
-                          type: 'link',
-                          label: 'Upload Before session_id Generation',
-                          href: '/docs/developers/payments/checkout-api#upload-before-session_id-generation-1',
-                        },
-                        {
-                          type: 'link',
-                          label: 'Upload After session_id Generation',
-                          href: '/docs/developers/payments/checkout-api#upload-after-session_id-generation-1',
-                        },
-                        {
-                          type: 'link',
-                          label: 'Attachment Upload',
-                          href: '/docs/developers/payments/checkout-api#api-attachment-upload',
-                        },
-                      ],
-                    },
-                    {
-                      type: 'category',
-                      label: 'Guide',
-                      collapsible: true,
-                  collapsed: true,
-                      customProps: {
-                        targetHref: '/docs/developers/payments/checkout-api#guide',
-                      },
-                      items: [
-                        {
-                          type: 'link',
-                          label: 'Upload Before session_id Generation',
-                          href: '/docs/developers/payments/checkout-api#upload-before-session_id-generation-2',
-                        },
-                        {
-                          type: 'link',
-                          label: 'Upload After session_id Generation',
-                          href: '/docs/developers/payments/checkout-api#upload-after-session_id-generation-2',
-                        },
-                      ],
-                    },
-                    {type: 'link', label: 'Best Practices', href: '/docs/developers/payments/checkout-api#best-practices'},
-                    {
-                      type: 'link',
-                      label: 'Different Way to Upload Attachment',
-                      href: '/docs/developers/payments/checkout-api#different-way-to-upload-attachment',
-                    },
-                    {type: 'link', label: 'FAQ', href: '/docs/developers/payments/checkout-api#faq-1'},
-                  ],
-                },
+                {type: 'link', label: 'Upload Attachment', href: '/docs/developers/payments/checkout-api#upload-attachment'},
               ],
             },
             {
@@ -227,76 +89,16 @@ const sidebars: SidebarsConfig = {
               label: 'Payment Methods',
               link: {type: 'doc', id: 'developers/payments/payment-methods'},
               items: [
-                {
-                  type: 'category',
-                  label: 'Setup',
-                  collapsible: true,
-                  collapsed: true,
-                  customProps: {
-                    targetHref: '/docs/developers/payments/payment-methods#setup',
-                  },
-                  items: [
-                    {
-                      type: 'link',
-                      label: 'Boost Your Integration',
-                      href: '/docs/developers/payments/payment-methods#boost-your-integration',
-                    },
-                  ],
-                },
+                {type: 'link', label: 'Setup', href: '/docs/developers/payments/payment-methods#setup'},
                 {type: 'link', label: 'Authentication', href: '/docs/developers/payments/payment-methods#authentication'},
                 {type: 'link', label: 'Permissions', href: '/docs/developers/payments/payment-methods#permissions'},
-                {
-                  type: 'category',
-                  label: 'How it Works',
-                  collapsible: true,
-                  collapsed: true,
-                  customProps: {
-                    targetHref: '/docs/developers/payments/payment-methods#how-it-works',
-                  },
-                  items: [
-                    {
-                      type: 'link',
-                      label: 'Purpose of the Payment Methods API',
-                      href: '/docs/developers/payments/payment-methods#purpose-of-the-payment-methods-api',
-                    },
-                    {
-                      type: 'link',
-                      label: 'Usage Scenarios',
-                      href: '/docs/developers/payments/payment-methods#usage-scenarios',
-                    },
-                  ],
-                },
+                {type: 'link', label: 'How it Works', href: '/docs/developers/payments/payment-methods#how-it-works'},
                 {
                   type: 'link',
                   label: 'Retrieve a list of payment methods based on filter values.',
                   href: '/docs/developers/payments/payment-methods#api-retrieve-a-list-of-payment-methods-based-on-filter-values',
                 },
-                {
-                  type: 'category',
-                  label: 'Guide',
-                  collapsible: true,
-                  collapsed: true,
-                  customProps: {
-                    targetHref: '/docs/developers/payments/payment-methods#guide',
-                  },
-                  items: [
-                    {
-                      type: 'link',
-                      label: 'Streamlining Checkout Process',
-                      href: '/docs/developers/payments/payment-methods#streamlining-checkout-process-by-payment-methods-api',
-                    },
-                    {
-                      type: 'link',
-                      label: 'Workflow Diagram',
-                      href: '/docs/developers/payments/payment-methods#payment-methods-api-workflow-diagram',
-                    },
-                    {
-                      type: 'link',
-                      label: 'Use Cases Examples',
-                      href: '/docs/developers/payments/payment-methods#use-cases-examples',
-                    },
-                  ],
-                },
+                {type: 'link', label: 'Guide', href: '/docs/developers/payments/payment-methods#guide'},
                 {type: 'link', label: 'Best Practices', href: '/docs/developers/payments/payment-methods#best-practices'},
                 {type: 'link', label: 'FAQ', href: '/docs/developers/payments/payment-methods#faq'},
               ],
