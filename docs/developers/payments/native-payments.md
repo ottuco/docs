@@ -8,7 +8,7 @@ import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 
 # Native Payment API
 
-Use the Native Payment API when you want full control of the client experience (web or mobile) and prefer not to use the [Checkout SDK](./checkout-sdk). Your client or backend collects a payment payload and sends it to Ottu to process the payment for a given [session_id](checkout-api#response-CheckoutPOSTResponse-session_id).
+Use the Native Payment API when you want full control of the client experience (web or mobile) and prefer not to use the [Checkout SDK](./checkout-sdk/index.md). Your client or backend collects a payment payload and sends it to Ottu to process the payment for a given [session_id](checkout-api#response-CheckoutPOSTResponse-session_id).
 
 A payment payload can be:
 

@@ -361,7 +361,17 @@ const sidebars: SidebarsConfig = {
                 {type: 'link', label: 'FAQ', href: '/docs/developers/payments/native-payments#faq'},
               ],
             },
-            {type: 'doc', id: 'developers/payments/checkout-sdk', label: 'Checkout SDK'},
+            {
+              type: 'category',
+              label: 'Checkout SDK',
+              link: {type: 'doc', id: 'developers/payments/checkout-sdk/index'},
+              items: [
+                {type: 'doc', id: 'developers/payments/checkout-sdk/web', label: 'Web'},
+                {type: 'doc', id: 'developers/payments/checkout-sdk/ios', label: 'iOS'},
+                {type: 'doc', id: 'developers/payments/checkout-sdk/android', label: 'Android'},
+                {type: 'doc', id: 'developers/payments/checkout-sdk/flutter', label: 'Flutter'},
+              ],
+            },
             {type: 'doc', id: 'developers/payments/sandbox', label: 'Sandbox & Test Cards'},
           ],
         },

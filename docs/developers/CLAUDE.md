@@ -37,7 +37,12 @@ docs/developers/
 ├── payments/
 │   ├── index.md                    # Payments overview (EMPTY — needs content)
 │   ├── checkout-api.mdx            # Core: create/retrieve/update payment transactions
-│   ├── checkout-sdk.md             # Drop-in SDK for web and mobile (largest file ~5K lines)
+│   ├── checkout-sdk/               # Drop-in SDK for web and mobile (split by platform)
+│   │   ├── index.md                # Overview and shared SDK flow diagrams
+│   │   ├── web.md                  # JavaScript/Web SDK
+│   │   ├── ios.md                  # iOS Swift SDK
+│   │   ├── android.md              # Android Kotlin SDK
+│   │   └── flutter.md              # Flutter SDK
 │   ├── payment-methods.md          # Discovering available payment methods via pg_codes
 │   ├── native-payments.md          # Apple Pay, Google Pay direct payments
 │   └── sandbox.md                  # Sandbox environment, test cards per gateway

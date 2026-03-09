@@ -24,7 +24,7 @@ Ottu's REST API is the foundation for all integrations. Start with [Authenticati
 
 #### Checkout SDK
 
-For ecommerce websites and mobile apps, Ottu offers a drop-in [Checkout SDK](payments/checkout-sdk.md) that wraps the full checkout experience into a simple integration. The SDK:
+For ecommerce websites and mobile apps, Ottu offers a drop-in [Checkout SDK](payments/checkout-sdk/index.md) that wraps the full checkout experience into a simple integration. The SDK:
 
 - **Supports Apple Pay, Google Pay, and digital wallets** — automatically enabled on compatible devices
 - **Simplifies integration** — load the SDK, initialize with your transaction session, and it handles rendering, payment options, and status transitions
@@ -36,9 +36,9 @@ Based on your use case, start with the section that fits:
 
 - **CRM or Internal Systems** — Use the [Checkout API](payments/checkout-api.mdx) to create payment links and share them with customers. They land on Ottu's hosted checkout page — no frontend work needed.
 
-- **Ecommerce or Mobile Apps** — The [Checkout SDK](payments/checkout-sdk.md) integrates seamlessly with the Checkout API. Load the library, install it on your page, and it manages the entire payment flow.
+- **Ecommerce or Mobile Apps** — The [Checkout SDK](payments/checkout-sdk/index.md) integrates seamlessly with the Checkout API. Load the library, install it on your page, and it manages the entire payment flow.
 
-- **Apple Pay, Google Pay, Digital Wallets** — These work through the [Checkout SDK](payments/checkout-sdk.md), which automatically enables supported services on your website or app.
+- **Apple Pay, Google Pay, Digital Wallets** — These work through the [Checkout SDK](payments/checkout-sdk/index.md), which automatically enables supported services on your website or app.
 
 - **Refund, Capture, or Void** — After familiarizing yourself with the [Checkout API](payments/checkout-api.mdx), see the [Operations](operations.md) section. Set up [Operation Webhooks](webhooks/operation-events.md) to get notified about operation results.
 

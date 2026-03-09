@@ -139,7 +139,7 @@ This guide outlines the steps for initiating payment sessions and securely savin
    Utilize the [Checkout SDK](/docs/developers/payments/checkout-sdk) or manage payments via the [Checkout API](/docs/developers/payments/checkout-api) to enable a **Save Card** option, offering customers the ability to securely store their payment card information for future transactions.\
    \
    **Key Notes:**
-   - **Choosing Between Checkout SDK and API:** The `Checkout SDK` is preferred for its user-friendly UI implementation and essential support for specific payment methods like [Apple Pay](/docs/developers/payments/checkout-sdk#ios) and [Google Pay](/docs/developers/payments/checkout-sdk#android). Your choice should align with your specific operational needs.
+   - **Choosing Between Checkout SDK and API:** The `Checkout SDK` is preferred for its user-friendly UI implementation and essential support for specific payment methods like [Apple Pay](/docs/developers/payments/checkout-sdk/ios) and [Google Pay](/docs/developers/payments/checkout-sdk/android). Your choice should align with your specific operational needs.
    - **CVV Requirements:** The necessity for Card Verification Value (CVV) may differ based on the Payment Gateway configuration. Adjustments can be made by reaching out to technical support.
 
 3. **Save the Card:**\

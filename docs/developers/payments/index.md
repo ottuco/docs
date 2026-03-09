@@ -16,7 +16,7 @@ The Checkout API also handles updating transactions (amount changes, adding meta
 
 A pre-built checkout component you embed in your website or mobile app. Initialize it with the `session_id` from the Checkout API, and it handles everything: payment method selection, card entry, Apple Pay / Google Pay, 3-D Secure authentication, and status transitions.
 
-[**Go to Checkout SDK →**](checkout-sdk.md)
+[**Go to Checkout SDK →**](checkout-sdk/index.md)
 
 ### Payment Methods API (Discovery)
 
@@ -84,6 +84,6 @@ flowchart LR
 ## What's Next?
 
 - [**Checkout API**](checkout-api.mdx) — Create your first payment session
-- [**Checkout SDK**](checkout-sdk.md) — Embed payments in your website or app
+- [**Checkout SDK**](checkout-sdk/index.md) — Embed payments in your website or app
 - [**Operations**](../operations.md) — Refund, capture, or void completed payments
 - [**Cards & Tokenization**](../cards-and-tokens/) — Save cards and set up recurring billing

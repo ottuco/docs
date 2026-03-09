@@ -47,5 +47,5 @@ Use the [Sandbox & Test Cards](../payments/sandbox.md) to simulate payments with
 ## What's Next?
 
 - [**Checkout API**](../payments/checkout-api.mdx) — Full guide to creating, retrieving, and updating payment transactions
-- [**Checkout SDK**](../payments/checkout-sdk.md) — Drop-in UI for ecommerce and mobile apps
+- [**Checkout SDK**](../payments/checkout-sdk/index.md) — Drop-in UI for ecommerce and mobile apps
 - [**Webhooks**](../webhooks/index.md) — Get real-time notifications when payment states change
