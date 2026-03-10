@@ -164,10 +164,6 @@ Details at the item level are encapsulated within the `invoice_items` object. Th
 - All rate or percentage-related fields are limited to two decimal places. For other monetary fields, the number of decimal places is determined by the currency of the invoice, generally according to [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html).&#x20;
 - The `Invoice API` differs from the [Checkout API](/docs/developers/payments/checkout-api) in that it does not support the [`PATCH`](/docs/developers/payments/checkout-api) method. Once an invoice is created, it is immutable and cannot be modified. Should any updates be necessary, a new invoice must be created in place of the original.
 
-## API Schema Reference
-
-For a more detailed technical understanding and implementation specifics, refer to the API schema below.
-
 ---
 
 <ApiDocEmbed path="create-invoice.api.mdx" />
@@ -406,6 +402,6 @@ Ottu uses a specific logic for calculating totals and taxes at both the item and
 
 #### 9. **Where can I find more technical details and implementation specifics?**
 
-For detailed technical understanding and implementation specifics, refer to Ottu's OpenAPI schema in the API Schema Reference section of the documentation.
+For detailed technical understanding and implementation specifics, refer to Ottu's OpenAPI schema in the [API Schema Reference](/docs/developers/apis/ottu-api) section of the documentation.
 
 **To conclude,** Ottu's `Invoice API` presents a powerful tool for businesses and developers, offering a seamless and automated solution for invoice generation. With a focus on user-friendly integration, the API streamlines the invoicing process, providing flexibility and customization for merchants. The comprehensive features, including detailed invoice information and generation logic, ensure accuracy and efficiency. Ottu's `Invoice API` stands as a valuable asset for those seeking to enhance their invoicing workflows, providing a reliable and advanced solution for a diverse range of businesses.

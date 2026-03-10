@@ -28,6 +28,9 @@ yarn-error.log*
 *.swp
 *.swo
 
+# Scratch/planning files
+.scratch/
+
 # Claude AI local settings
 .claude/local
 .claude/local.*

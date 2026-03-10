@@ -27,7 +27,7 @@ It should NEVER be embedded in SDKs or made public. Ensure it’s used on the se
 
 ## [**Public Key**](authentication.md#public-key)
 
-The Public Key is used to initialize the [Checkout SDK](../payments/checkout-sdk.md) and can safely be shared with clients. This key doesn’t provide access to public API endpoints, making it secure for client-side use.
+The Public Key is used to initialize the [Checkout SDK](../payments/checkout-sdk/index.md) and can safely be shared with clients. This key doesn’t provide access to public API endpoints, making it secure for client-side use.
 
 :::info
 

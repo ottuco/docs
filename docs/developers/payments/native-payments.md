@@ -8,7 +8,7 @@ import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 
 # Native Payment API
 
-Use the Native Payment API when you want full control of the client experience (web or mobile) and prefer not to use the [Checkout SDK](./checkout-sdk). Your client or backend collects a payment payload and sends it to Ottu to process the payment for a given [session_id](checkout-api#response-CheckoutPOSTResponse-session_id).
+Use the Native Payment API when you want full control of the client experience (web or mobile) and prefer not to use the [Checkout SDK](./checkout-sdk/index.md). Your client or backend collects a payment payload and sends it to Ottu to process the payment for a given [session_id](checkout-api#response-CheckoutPOSTResponse-session_id).
 
 A payment payload can be:
 
@@ -150,8 +150,6 @@ The prerequisites and [checklist](#checklist) mentioned in the general [Setup](#
 
 :::
 
-#### [API Schema Reference](#api-schema-reference)
-
 <ApiDocEmbed path="apple-direct-payment.api.mdx" />
 
 ## [Google Pay](#google-pay)
@@ -177,8 +175,6 @@ The prerequisites and [checklist](#checklist) mentioned in the general [Setup](#
 
 :::
 
-#### [API Schema Reference](#api-schema-reference-1)
-
 <ApiDocEmbed path="google-direct-payment.api.mdx" />
 
 ## [Auto-Debit (Tokenized Payments)](#auto-debit-tokenized-payments)
@@ -197,8 +193,6 @@ The prerequisites and [checklist](#checklist) mentioned in the general [Setup](#
 4. Ottu processes the payment with the configured gateway and returns the callback result.
 
 Supports CIT ([Cardholder Initiated](../cards-and-tokens/recurring-payments)) and MIT ([Merchant Initiated](../cards-and-tokens/recurring-payments)) transactions.
-
-#### [API Schema Reference](#api-schema-reference-2)
 
 <ApiDocEmbed path="auto-debit.api.mdx" />
 

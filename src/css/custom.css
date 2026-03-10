@@ -273,15 +273,22 @@ html {
   filter: brightness(0) invert(1) saturate(1.1);
 }
 
-/* Make the OpenAPI right panel sticky on desktop */
-@media (min-width: 997px) {
-  .openapi-right-panel__container {
-    position: sticky;
-    top: calc(var(--ifm-navbar-height) + 1rem);
-    align-self: flex-start;
+/* Postman CLI language tab logo */
+.openapi-tabs__code-item--postman-cli {
+  color: #ff6c37;
+}
 
-    /* avoid it growing beyond viewport */
-    max-height: calc(100vh - var(--ifm-navbar-height) - 2rem);
-    overflow: auto;
-  }
+.openapi-tabs__code-item--postman-cli::after {
+  content: "";
+  width: var(--code-tab-logo-width);
+  height: var(--code-tab-logo-height);
+  background: url("https://raw.githubusercontent.com/devicons/devicon/master/icons/postman/postman-original.svg")
+    no-repeat center;
+  background-size: contain;
+  margin-block: auto;
+}
+
+.openapi-tabs__code-item--postman-cli.active {
+  box-shadow: 0 0 0 3px rgba(255, 108, 55, 0.3);
+  border-color: #ff6c37;
 }

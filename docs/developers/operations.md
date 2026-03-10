@@ -231,10 +231,6 @@ Ottu's system, recognizing the `Tracking-Key` and the associated `session_id` re
 }
 ```
 
-For a more detailed technical understanding and the implementation specifics of these operations, please refer to the OpenAPI schema in the [Operation API Schema Reference](#operation-api-schema-reference).
-
-## [Operation API Schema Reference](#operation-api-schema-reference)
-
 ---
 
 <ApiDocEmbed path="public-operations.api.mdx" />
@@ -284,4 +280,4 @@ The required permissions depend on the operation you want to perform. You can gr
 
 When a [refund](#refund) operation is requested via the API, the request goes directly to the payment gateway and the maker-checker flow is not activated. Currently, the maker-checker flow can only be enabled for operations performed manually via the Ottu dashboard. This ensures that refunds are issued directly when requested via the API, bypassing the internal approval process.
 
-As we conclude this guide, we hope that the provided information has given you a comprehensive understanding of the operations endpoint and its various functionalities. We've covered everything from initial setup to the various types of operations and how they interact with different transaction states. However, in case you need to delve deeper into the technical implementation, feel free to explore the [Operation API Schema Reference](#operation-api-schema-reference). Remember, each operation has specific requirements and behaviors, so it's important to carefully review this documentation before proceeding. As always, we're here to help should you need any further assistance or clarification. Happy integrating with Ottu!
+As we conclude this guide, we hope that the provided information has given you a comprehensive understanding of the operations endpoint and its various functionalities. We've covered everything from initial setup to the various types of operations and how they interact with different transaction states. However, in case you need to delve deeper into the technical implementation, feel free to explore the [API Schema Reference](/docs/developers/apis/ottu-api). Remember, each operation has specific requirements and behaviors, so it's important to carefully review this documentation before proceeding. As always, we're here to help should you need any further assistance or clarification. Happy integrating with Ottu!

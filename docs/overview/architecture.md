@@ -111,6 +111,6 @@ Combination of server and client-side:
 ## Next Steps
 
 Now that you understand Ottu's architecture, explore:
-- **[Developer Quick Start](../quick-start/developers)**: Start integrating
-- **[API Fundamentals](../developers/api-fundamentals)**: Learn API basics
+- **[Developer Documentation](../developers/)**: Start integrating
+- **[API Fundamentals](../developers/getting-started/api-fundamentals)**: Learn API basics
 - **Security Guide**: Understand security requirements

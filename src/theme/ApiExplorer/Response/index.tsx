@@ -1,8 +1,6 @@
 import React from "react";
 import OriginalResponse from "@theme-original/ApiExplorer/Response";
 
-const DEFAULT_HARD_CODED_RESPONSE = "HERE_REPLACE_YOUR_HARD_CODED_RESPONSE";
-
 // Optional fallback map (kept only as fallback if no YAML extension is found).
 // Prefer using x-hard-coded-response in static/Ottu_API.yaml.
 const HARD_CODED_RESPONSES: Record<string, string | object> = {};
@@ -20,19 +18,34 @@ function readYamlExtension(item: any): string | object | undefined {
   return undefined;
 }
 
-function resolveResponseText(item: any): string {
+function resolveResponseValue(item: any): string | object | undefined {
   const fromYaml = readYamlExtension(item);
   const operationId = item?.operationId;
   const method = String(item?.method ?? "").toUpperCase();
   const path = item?.path;
   const methodPathKey = method && path ? `${method} ${path}` : undefined;
 
-  const value =
+  return (
     fromYaml ??
     (operationId ? HARD_CODED_RESPONSES[operationId] : undefined) ??
-    (methodPathKey ? HARD_CODED_RESPONSES[methodPathKey] : undefined) ??
-    DEFAULT_HARD_CODED_RESPONSE;
+    (methodPathKey ? HARD_CODED_RESPONSES[methodPathKey] : undefined)
+  );
+}
 
+function hasRenderableResponse(value: string | object | undefined): boolean {
+  if (value === undefined || value === null) {
+    return false;
+  }
+  if (typeof value === "string") {
+    return value.trim().length > 0;
+  }
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+  return Object.keys(value).length > 0;
+}
+
+function resolveResponseText(value: string | object): string {
   if (typeof value === "string") {
     return value;
   }
@@ -40,29 +53,31 @@ function resolveResponseText(item: any): string {
 }
 
 export default function Response(props: any): React.ReactElement {
-  const text = resolveResponseText(props?.item);
+  const responseValue = resolveResponseValue(props?.item);
 
   return (
     <>
       <OriginalResponse {...props} />
-      <div className="openapi-explorer__response-container">
-        <div className="openapi-explorer__response-title-container">
-          <span className="openapi-explorer__response-title">
-            Hard Coded Response
-          </span>
+      {hasRenderableResponse(responseValue) && (
+        <div className="openapi-explorer__response-container">
+          <div className="openapi-explorer__response-title-container">
+            <span className="openapi-explorer__response-title">
+              Hard Coded Response
+            </span>
+          </div>
+          <div
+            style={{
+              paddingLeft: "1rem",
+              paddingTop: "1rem",
+              paddingBottom: "1rem",
+            }}
+          >
+            <pre className="openapi-explorer__code-block openapi-response__status-code">
+              {resolveResponseText(responseValue)}
+            </pre>
+          </div>
         </div>
-        <div
-          style={{
-            paddingLeft: "1rem",
-            paddingTop: "1rem",
-            paddingBottom: "1rem",
-          }}
-        >
-          <pre className="openapi-explorer__code-block openapi-response__status-code">
-            {text}
-          </pre>
-        </div>
-      </div>
+      )}
     </>
   );
 }

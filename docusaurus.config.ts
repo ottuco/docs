@@ -31,6 +31,10 @@ const config: Config = {
     locales: ['en'],
   },
 
+  markdown: {
+    mermaid: true,
+  },
+
   presets: [
     [
       'classic',
@@ -99,12 +103,12 @@ const config: Config = {
               to: '/docs/overview/about',
             },
             {
-              label: 'Developer Quick Start',
-              to: '/docs/quick-start/developers',
+              label: 'Developer Docs',
+              to: '/docs/developers/getting-started',
             },
             {
-              label: 'Merchant Quick Start',
-              to: '/docs/quick-start/merchants',
+              label: 'Business Guide',
+              to: '/docs/business/dashboard-tour',
             },
           ],
         },
@@ -117,11 +121,11 @@ const config: Config = {
             },
             {
               label: 'Quick Start',
-              to: '/docs/developers/quick-start',
+              to: '/docs/developers/getting-started',
             },
             {
               label: 'Developer Guide',
-              to: '/docs/quick-start/developers',
+              to: '/docs/developers/',
             },
           ],
         },
@@ -134,7 +138,7 @@ const config: Config = {
             },
             {
               label: 'Merchant Guide',
-              to: '/docs/quick-start/merchants',
+              to: '/docs/business/dashboard-tour',
             },
             {
               label: 'Getting Started',
@@ -166,6 +170,29 @@ const config: Config = {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
     },
+    languageTabs: [
+      { language: "curl" },
+      { language: "csharp" },
+      { language: "dart" },
+      { language: "go" },
+      { language: "http" },
+      { language: "java" },
+      { language: "javascript" },
+      { language: "kotlin" },
+      { language: "c" },
+      { language: "nodejs" },
+      { language: "objective-c" },
+      { language: "ocaml" },
+      { language: "php" },
+      { language: "postman-cli" },
+      { language: "powershell" },
+      { language: "python" },
+      { language: "r" },
+      { language: "ruby" },
+      { language: "rust" },
+      { language: "shell" },
+      { language: "swift" },
+    ],
   } satisfies Preset.ThemeConfig,
 
   plugins: [
@@ -188,7 +215,7 @@ const config: Config = {
     ],
   ],
 
-  themes: ["docusaurus-theme-openapi-docs"],
+  themes: ["docusaurus-theme-openapi-docs", "@docusaurus/theme-mermaid"],
 };
 
 export default config;
