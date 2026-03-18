@@ -54,22 +54,6 @@ While these packages offer substantial speed and convenience benefits, understan
 
 For detailed information on authentication procedures, please refer to the [Authentication documentation](payment-methods.md#authentication).
 
-## [Permissions](payment-methods.md#permissions)
-
-Ensuring the right level of access is crucial for maintaining the security and integrity of your payment processes. The `Payment Methods API` provides two authentication methods, each with its own set of permissions:
-
-#### Private API Key
-
-- **Privileges:** This method grants super admin privileges to the caller. It provides unrestricted access to all available payment methods and associated functionalities.
-- **Usage:** Given its broad access, it’s essential to handle API keys with utmost care. Ensure they are securely stored and only shared with trusted individuals or systems.
-
-#### BasicAuth
-
-- **Privileges:** `BasicAuth` is user-centric, meaning it’s tied to a specific user profile. Access to payment methods can be restricted based on the user’s assigned permissions.
-- **Setting Permissions:** To grant a user access to a specific payment method, assign the permission: "**Can use pg_code**". Here, the [pg_code](./checkout-api) represents the unique code of the [payment gateway](./checkout-api#supported-instruments) or merchant ID (`MID`).\
-  For instance, if you want to grant a user access to a payment gateway with the code ‘`credit-card`’, you would assign them the permission “**Can use Credit Card**”.
-- **Usage:** Since `BasicAuth` is user-specific, it’s suitable for scenarios where you want to provide selective access to different payment methods based on user roles or responsibilities.
-
 ## [How it Works](payment-methods.md#how-it-works)
 
 The `Payment Methods API` is designed to streamline and automate the end-to-end integration with Ottu, ensuring that your payment processes remain up-to-date and efficient without the need for constant code modifications.

@@ -1,0 +1,8 @@
+# Enrichments for tag: "Invoice API"
+
+operations:
+
+  create_invoice:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_create_invoice

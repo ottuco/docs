@@ -42,12 +42,6 @@ Before implementing auto-debit, ensure you have:
 - A [webhook endpoint](/docs/developers/webhooks/index.md) configured to receive payment notifications
 - Familiarity with the [User Cards API](user-cards.mdx) for card management
 
-## Authentication
-
-The Auto-Debit API supports:
-- **Private API Key** (recommended) — see [Authentication](/docs/developers/getting-started/authentication)
-- **Basic Authentication**
-
 ## Implementation: First Payment (CIT)
 
 The first payment establishes the agreement and saves the customer's card.

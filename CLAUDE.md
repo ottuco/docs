@@ -15,7 +15,8 @@ Built with Docusaurus 3.8.1 and TypeScript. Deployed on DigitalOcean App Platfor
 - **Deployment**: DigitalOcean App Platform
 - **Styling**: CSS modules with custom CSS + SCSS
 - **Package Manager**: npm (not yarn)
-- **API Docs Plugin**: `docusaurus-plugin-openapi-docs` + `docusaurus-theme-openapi-docs` — auto-generates interactive API reference from `static/Ottu_API.yaml`
+- **API Docs Plugin**: `docusaurus-plugin-openapi-docs` + `docusaurus-theme-openapi-docs` — auto-generates interactive API reference from the enriched OpenAPI spec
+- **API Enrichment Engine**: `scripts/enrich-api-spec.ts` — transforms raw OpenAPI spec with permissions, better descriptions, and cross-links before the plugin processes it. See `scripts/README.md` for full docs.
 - **Mermaid Diagrams**: `@docusaurus/theme-mermaid` — enabled via `markdown.mermaid: true` in `docusaurus.config.ts`
 
 ## Documentation Philosophy
@@ -108,11 +109,20 @@ docs/
 
 ## Interactive API Documentation
 
-- **OpenAPI spec**: `static/Ottu_API.yaml` (source of truth for all API endpoints)
+### Pipeline: Fetch → Enrich → Generate
+
+- **Raw spec**: `static/Ottu_API.yaml` — fetched from Ottu core (`/schema/public`), committed to git
+- **Source config**: `static/api-sources.yaml` — defines fetch URLs and output paths per schema source
+- **Enrichment overlays**: `static/api-enrichments/` — YAML files that add permissions, better field descriptions, and cross-links
+  - `operations/` — one file per API tag, matched by `operationId`
+  - `schemas/` — one file per schema name, overrides field descriptions
+  - `_shared/` — reusable permission blocks and field descriptions
+  - `_variables.yaml` — template variables (`{{apiBaseUrl}}`, etc.) resolved at build time
+- **Enriched spec**: `static/Ottu_API_enriched.yaml` — generated output (gitignored), consumed by the plugin
 - **Auto-generated output**: `docs/developers/apis/` — `.api.mdx` + `.RequestSchema.json` + `.StatusCodes.json` + `.ParamsDetails.json` per endpoint
-- **Regenerate**: `npx docusaurus gen-api-docs ottuApi`
-- **Do NOT manually edit** files in `docs/developers/apis/` — they are overwritten on regeneration
+- **Do NOT manually edit** files in `docs/developers/apis/` or `static/Ottu_API_enriched.yaml` — they are overwritten on regeneration
 - Deep-nested schema permalink support via swizzled components (see Swizzled OpenAPI Schema Components section below)
+- Full enrichment engine docs: `scripts/README.md`
 
 ## Key Configuration
 
@@ -127,7 +137,10 @@ npm start                             # Development server
 npm run build                         # Production build
 npm run serve                         # Test production build
 npm run typecheck                     # TypeScript validation
-npx docusaurus gen-api-docs ottuApi   # Regenerate API docs from OpenAPI spec
+npm run fetch-api                     # Download schema from Ottu core
+npm run enrich-api                    # Apply enrichment overlays to raw spec
+npm run gen-api                       # Enrich + clean + regenerate API docs
+npm run update-api                    # Full pipeline: fetch + gen-api
 ```
 
 ## Deployment

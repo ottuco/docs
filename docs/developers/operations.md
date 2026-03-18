@@ -46,36 +46,6 @@ To enhance your integration with Operation APIs such as [Cancel](#cancel), [Expi
 
 Understanding the key concepts and frameworks documented is crucial for utilizing this package effectively and ensuring robust, maintainable integration.
 
-## [Authentication](#authentication)
-
-To interact with Ottu’s Operation API, both [API-Key](/docs/developers/getting-started/authentication#private-key-api-key) and [Basic Authentication](/docs/developers/getting-started/authentication#basic-authentication) methods are supported. Using the API Key for authentication provides superadmin privileges, enabling the performance of any operation. It’s crucial to handle this information with utmost care and restrict its sharing to prevent misuse. For enhanced security, it is recommended to use Basic Authentication and assign specific permissions, ensuring controlled access to different API endpoints.
-
-:::info
-For optimal security, we highly recommend using Basic Authentication and assigning specific permissions to control access to various API endpoints.
-:::
-
-## [Permissions](#permissions)
-
-**API Key:** Superadmin privileges are automatically granted to the [private API Key](/docs/developers/getting-started/authentication#private-key-api-key). For more information on using the API Key, check this [resource](/docs/developers/getting-started/authentication#private-key-api-key).
-
-**Basic Authentication:** This method works with any user and permission that has access to the system. If a user is a superadmin, they have access to all operations. However, for a more granular control, you can assign specific permissions to the user.
-
-Each action performed on the system is logged and can be traced back to the specific user who performed the operation. For this reason, it’s strongly recommended not to share a single user among multiple people. Instead, create an individual user for each person who needs access. Permissions can be assigned for one or more specific operations.&#x20;
-
-#### Permission codes for each operation:
-
-- `payment.capture`: For the **Capture** operation
-- `payment.expire`: For the **Expire** operation
-- `payment.refund`: For the **Refund** operation
-- `payment.void`: For the **Void** operation
-- `payment.cancel`: For the **Cancel** operation
-- `payment.delete`: For the **Delete** operation
-- `payment.inquiry`: For the **Inquiry** operation
-
-:::info
-Remember to assign the relevant permissions to your users based on the operations they need to perform.
-:::
-
 ## [Internal Operations](#internal-operations)
 
 Internal operations are actions performed directly on Ottu’s system level, affecting the status of transactions without interacting with external payment gateways. They provide control over transaction lifecycles and data management.

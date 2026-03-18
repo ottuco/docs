@@ -1,0 +1,42 @@
+# Enrichments for tags: "Payment Operations"
+# Operations: refund, capture, void, cancel, expire, delete, inquiry, auto-debit, cash, native payments
+
+operations:
+
+  public_operations:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_operations
+
+  inquiry:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_inquiry
+
+  auto_debit:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_auto_debit
+
+  auto_debit_2:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_auto_debit
+
+  apple_direct_payment:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_native_payment
+
+  google_direct_payment:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_native_payment
+
+  cash_payment_acknowledgement:
+    permissions:
+      - $perm:api_key_admin
+
+  cash_payment_acknowledgement_2:
+    permissions:
+      - $perm:api_key_admin

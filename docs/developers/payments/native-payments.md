@@ -60,22 +60,6 @@ Use the response values to reconcile the payment in your backend and update your
 
 Continue with the sections below to learn more about response fields, error handling, and webhook integration.
 
-## [Authentication](#authentication)
-
-**Supported Methods**
-
-- [Private API Key](../getting-started/authentication.md#private-key-api-key) (Server-Only)
-- [Public API Key](../getting-started/authentication.md#public-key) (Client-Safe)
-- [Basic Authentication](../getting-started/authentication.md#basic-authentication) (Server-Only)
-
-For detailed information on authentication procedures, please refer to the [Authentication ](#authentication)section.
-
-:::danger
-
-&#x20;The Private API Key must **never** be exposed in any client-side application.
-
-:::
-
 ## [Integration Flows](#integration-flows)
 
 1. **Client → Ottu (**[Public API Key](../getting-started/authentication.md#public-key) **)**

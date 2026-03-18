@@ -1,0 +1,29 @@
+# Schema sources — each entry defines a fetch → enrich → generate pipeline
+#
+# Environment variables are resolved at runtime:
+#   ${OTTU_SCHEMA_URL}  — base URL of the Ottu core instance
+#   ${OTTU_API_KEY}     — API key for authentication (optional)
+#
+# Usage:
+#   npm run fetch-api                     # Fetch all sources
+#   npm run fetch-api -- --source=payments   # Fetch only payments
+#   OTTU_SCHEMA_URL=https://staging.ottu.net npm run update-api
+
+sources:
+  payments:
+    url: "${OTTU_SCHEMA_URL}/schema/public"
+    output: "static/Ottu_API.yaml"
+    enrichedOutput: "static/Ottu_API_enriched.yaml"
+    enrichments: "static/api-enrichments"
+    pluginId: "ottuApi"
+
+  # Future — uncomment when payout schema is ready:
+  # payouts:
+  #   url: "${OTTU_SCHEMA_URL}/schema/payout"
+  #   output: "static/Payout_API.yaml"
+  #   enrichedOutput: "static/Payout_API_enriched.yaml"
+  #   enrichments: "static/payout-enrichments"
+  #   pluginId: "payoutApi"
+
+defaults:
+  schemaUrl: "http://localhost:8000"

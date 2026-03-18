@@ -203,7 +203,7 @@ const config: Config = {
         docsPluginId: "classic",
         config: {
           ottuApi: {
-            specPath: "static/Ottu_API.yaml",
+            specPath: "static/Ottu_API_enriched.yaml",
             outputDir: "docs/developers/apis",
             sidebarOptions: {
               groupPathsBy: "tag",

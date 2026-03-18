@@ -10,6 +10,7 @@ __IGNORED__
 # Generated files
 .docusaurus
 .cache-loader
+static/Ottu_API_enriched.yaml
 
 # Misc
 .DS_Store

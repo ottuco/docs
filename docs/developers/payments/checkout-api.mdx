@@ -14,50 +14,6 @@ In order to ensure optimal transaction success tracking and minimize the number 
 
 By updating the same payment transaction, rather than creating a new one for each payment attempt, merchants can more effectively trace customer interactions with their cart. This is particularly useful for events such as insufficient funds, where a customer may remove an item from their cart and successfully complete a transaction on their next attempt. Tracking and analyzing such events can help merchants make data-driven decisions for future improvements.
 
-## [Permissions](./checkout-api)
-
-Permissions are managed using [Basic Authentication](../getting-started/authentication.md#basic-authentication) and [API-Key](../getting-started/authentication.md#private-key-api-key). \
-Specifically, Basic Authentication is used to grant permissions for creating, updating, and reading data, as well as using allowed [PG codes](./checkout-api) when [creating ](./checkout-api)or [updating](./checkout-api) payment transactions.
-
-It is important to ensure that the appropriate level of permissions is assigned to each user or application using the APIs. This can help to prevent unauthorized access or modification of sensitive data. Additionally, it is recommended to rotate API-Keys on a regular basis and to use secure password storage practices when using Basic Authentication.
-
-Ottu Checkout API supports different levels of permissions for the Payment Request and E-Commerce plugins. The permissions depend on the [authentication ](../getting-started/authentication.md)method being used.
-
-### [API Key](./checkout-api)
-
-When using the [API-Key](../getting-started/authentication.md#private-key-api-key), all permissions are granted by default, as the API-Key is considered to have admin permissions. See [How to Generate API Keys](../getting-started/authentication.md#private-key-api-key)
-
-### [Basic Authentication](./checkout-api)
-
-For [Basic Authentication](../getting-started/authentication.md#basic-authentication), permissions are granted as follows:
-
-#### [Create](./checkout-api)
-
-- To create a transaction, the user needs specific permission depending on the [plugin](./payment-methods.md#enabling-the-plugin) being used:
-  - "**Can add payment requests**" for the [Payment Request](./payment-methods.md#enabling-the-plugin) plugin
-  - "**Can add e-commerce payments**" for the [E-Commerce](./payment-methods.md#enabling-the-plugin) plugin
-- Permission to use the payment gateway [code](./checkout-api) is also required: "**Can use `pg_code`**"
-
-#### [Update](./checkout-api)
-
-- To update a transaction, the user needs specific permission depending on the plugin being used:
-  - "**Can change payment requests**" for the [Payment Request](./payment-methods.md#enabling-the-plugin) plugin
-  - "**Can change e-commerce payments**" for the [E-Commerce](./payment-methods.md#enabling-the-plugin) plugin
-- Permission to use the payment gateway [code](./checkout-api) is also required: **"Can use `pg_code`**"
-
-:::info
-
-The PUT operation cannot be used if the user does not have permission to use the previously defined payment gateway [code](./checkout-api) on the transaction. For [PATCH](./checkout-api), updates can be performed as long as the payment gateway codes are not updated.
-
-:::
-
-#### [View](./checkout-api)
-
-- By default, if a user has either the "**Can add**" or "**Can change**" permission, they can [fetch](./checkout-api) transactions from the API.
-- For more granular control, the following view permissions can be used:
-  - "**Can view e-commerce payments**" for the [E-Commerce](./payment-methods.md#enabling-the-plugin) plugin
-  - "**Can view payment requests**" for the [Payment Request](./payment-methods.md#enabling-the-plugin) plugin
-
 ---
 
 <ApiDocEmbed path="create-payment-transaction-checkout.api.mdx" />

@@ -1,0 +1,24 @@
+# Shared field descriptions for schema enrichments
+# Referenced via $shared marker in schemas/*.yaml files
+#
+# Use for fields that appear in many schemas with the same meaning.
+# If a schema needs a different description for the same field name,
+# override it directly in the schema file instead of using $shared.
+
+session_id:
+  description: |
+    Unique identifier for the payment session, returned by the
+    [Checkout API]({{apiBaseUrl}}/payments/checkout-api/) when creating a transaction.
+
+currency_code:
+  description: |
+    Three-letter ISO 4217 currency code (e.g., `KWD`, `SAR`, `USD`).
+    See [Supported Currencies]({{apiBaseUrl}}/getting-started/api-fundamentals/#currencies).
+
+state:
+  description: |
+    Current [payment state]({{apiBaseUrl}}/reference/payment-states/) of the transaction.
+
+customer_email:
+  description: |
+    Customer's email address. Used for [payment notifications]({{apiBaseUrl}}/webhooks/payment-events/).

@@ -1,0 +1,24 @@
+# Overrides for: components/schemas/CheckoutPOSTRequest
+# Only list fields you want to change. Others keep their original descriptions.
+
+properties:
+  amount:
+    description: |
+      The payment amount as a decimal string (e.g., `"10.500"`).
+      See [Currency Formatting]({{apiBaseUrl}}/getting-started/api-fundamentals/#currencies)
+      for precision rules per currency.
+
+  pg_codes:
+    description: |
+      Array of [payment gateway codes]({{apiBaseUrl}}/payments/payment-methods/)
+      to offer for this transaction. At least one is required.
+
+  webhook_url:
+    description: |
+      HTTPS URL to receive [webhook notifications]({{apiBaseUrl}}/webhooks/)
+      when the payment status changes.
+      See [Webhook Setup]({{apiBaseUrl}}/webhooks/#setup) for configuration details.
+
+  redirect_url:
+    description: |
+      URL where the customer is redirected after completing or canceling the payment.

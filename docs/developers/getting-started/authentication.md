@@ -39,4 +39,65 @@ For detailed instructions on generating API keys for both [Public ](authenticati
 
 Please note that Token Authentication, an earlier method, is now considered obsolete and isn’t recommended.
 
+## [Permissions](authentication.md#permissions)
+
+Permissions control what actions an authenticated user or application can perform. The permission model depends on which authentication method you use.
+
+### API Key
+
+When using the [API Key](authentication.md#private-key-api-key), **all permissions are granted by default**. The API Key has admin-level access to all endpoints, so no additional permission configuration is needed.
+
+### Basic Authentication
+
+With [Basic Authentication](authentication.md#basic-authentication), permissions must be explicitly assigned to each user. This provides granular control over what each user or integration can do.
+
+#### Plugin-Based Permissions
+
+Ottu supports different plugins for payment processing. Permissions are scoped per plugin:
+
+| Plugin | Create | Update | View |
+|---|---|---|---|
+| **Payment Request** | `Can add payment requests` | `Can change payment requests` | `Can view payment requests` |
+| **E-Commerce** | `Can add e-commerce payments` | `Can change e-commerce payments` | `Can view e-commerce payments` |
+
+:::info
+View permissions are automatically implied — if a user has `Can add` or `Can change` permission, they can also view transactions.
+:::
+
+#### Gateway Permissions
+
+To use a specific payment gateway, the user must have the permission **`Can use pg_code`**, where `pg_code` is the code of the [payment gateway](../payments/payment-methods.md) (e.g., "Can use Credit Card", "Can use KNET").
+
+#### Operation Permissions
+
+For [post-payment operations](../operations.md) (refund, capture, void, etc.), each action has its own permission code:
+
+| Permission Code | Operation |
+|---|---|
+| `payment.capture` | Capture |
+| `payment.refund` | Refund |
+| `payment.void` | Void |
+| `payment.cancel` | Cancel |
+| `payment.expire` | Expire |
+| `payment.delete` | Delete |
+| `payment.inquiry` | Inquiry |
+
+#### Other Permissions
+
+| Permission | Used By |
+|---|---|
+| `Can add Invoice` | [Invoice API](../invoices.md) |
+| `report.can_view_report` | [Reports API](../reports.md) |
+
+### Best Practices
+
+- **Use Basic Auth for integrations** — assign only the permissions each integration needs, rather than using the API Key for everything.
+- **Don’t share users** — create a separate user for each person or system that needs API access. Each action is logged and traceable to the user.
+- **Rotate API Keys regularly** — if the API Key is compromised, rotate it immediately.
+- **Secure credentials** — never store passwords or API Keys in client-side code. Keep them in server environment variables.
+
+:::tip
+Each API endpoint documents its specific permission requirements in its **Permissions** section. Check the API reference for the exact permissions needed for each operation.
+:::
+
 Understanding and implementing these authentication methods correctly are crucial steps toward ensuring the security of your transactions and the protection of your data. Secure key management significantly contributes to the overall safety and integrity of your operations.

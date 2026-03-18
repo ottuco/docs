@@ -1,0 +1,13 @@
+# Enrichments for tag: "Reports API"
+
+operations:
+
+  list_reports:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_view_reports
+
+  download_report:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_view_reports
