@@ -1,0 +1,49 @@
+# Overrides for: components/schemas/CheckoutPATCHResponse
+# Response from PATCH /checkout/v1/pymt-txn/{session_id}/
+
+properties:
+  # ── Shared fields ────────────────────────────────────────────
+  amount: $shared
+  currency_code: $shared
+  customer_email: $shared
+  customer_first_name: $shared
+  customer_last_name: $shared
+  customer_phone: $shared
+  customer_id: $shared
+  customer_birthdate: $shared
+  order_no: $shared
+  language: $shared
+  payment_type: $shared
+  type: $shared
+  redirect_url: $shared
+  webhook_url: $shared
+  pg_codes: $shared
+  extra: $shared
+  expiration_time: $shared
+  due_datetime: $shared
+  product_type: $shared
+  vendor_name: $shared
+  email_recipients: $shared
+  state: $shared
+  session_id: $shared
+  operation: $shared
+  checkout_url: $shared
+  initiator_id: $shared
+
+  # ── Response-specific fields ─────────────────────────────────
+
+  checkout_short_url:
+    description: |
+      Short checkout URL. `shortify_checkout_url` request parameter should be set to `true` in order to generate it.
+
+  attachment_short_url:
+    description: |
+      A short attachment retrieval URL. Max length: 200. `shortify_attachment_url` request parameter should be `true` in order to generate it.
+
+  qr_code_url:
+    description: |
+      A QR code that, when scanned, redirects to the checkout page for this payment. This QR code may be displayed on invoices, receipts, or other documents to allow customers to easily access the checkout page and make a payment. The request parameter `generate_qr_code` should be set to `true`.
+
+  sdk_setup_preload_payload:
+    description: |
+      It is a JSON object containing preloaded data necessary for initializing the [Checkout SDK]({{apiBaseUrl}}/payments/checkout-sdk/). This data encompasses vital details such as customer information, available payment methods, and specific transaction details, all formatted according to the Checkout SDK's initialization specifications. It must be passed to the Checkout SDK constructor without any modifications. It will be included in the response solely when the `include_sdk_setup_preload` parameter is set to `true`.

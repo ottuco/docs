@@ -1,24 +1,140 @@
 # Overrides for: components/schemas/CheckoutPOSTRequest
-# Only list fields you want to change. Others keep their original descriptions.
+# Fields using $shared pull descriptions from _shared/fields.yaml
+# Fields with inline descriptions are request-specific
 
 properties:
-  amount:
-    description: |
-      The payment amount as a decimal string (e.g., `"10.500"`).
-      See [Currency Formatting]({{apiBaseUrl}}/getting-started/api-fundamentals/#currencies)
-      for precision rules per currency.
+  # ── Shared fields (same description across schemas) ──────────
+  amount: $shared
+  currency_code: $shared
+  customer_email: $shared
+  customer_first_name: $shared
+  customer_last_name: $shared
+  customer_phone: $shared
+  customer_id: $shared
+  customer_birthdate: $shared
+  order_no: $shared
+  language: $shared
+  payment_type: $shared
+  type: $shared
+  redirect_url: $shared
+  webhook_url: $shared
+  pg_codes: $shared
+  extra: $shared
+  expiration_time: $shared
+  due_datetime: $shared
+  product_type: $shared
+  vendor_name: $shared
+  email_recipients: $shared
 
-  pg_codes:
-    description: |
-      Array of [payment gateway codes]({{apiBaseUrl}}/payments/payment-methods/)
-      to offer for this transaction. At least one is required.
+  # ── Request-specific fields ──────────────────────────────────
 
-  webhook_url:
+  attachment:
     description: |
-      HTTPS URL to receive [webhook notifications]({{apiBaseUrl}}/webhooks/)
-      when the payment status changes.
-      See [Webhook Setup]({{apiBaseUrl}}/webhooks/#setup) for configuration details.
+      Attachments can be included as an optional feature in email notifications sent to the customer regarding their payment. These attachments will also be available for download on the checkout page. The primary purpose of this field is to provide the customer with additional information or documentation related to their purchase. Attachments should be sent using the [multipart/form-data](https://developer.mozilla.org/en-US/docs/Web/API/FormData/Using_FormData_Objects) encoding type. Ensure that you change the content type to `multipart/form-data` when sending attachments. They cannot be sent using [JSON](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON) encoding. Allowed file extensions: PDF, JPEG, PNG, DOC, DOCX, JPG, XLS, XLSX, and TXT. The name of the attached file should not exceed 100 characters.
 
-  redirect_url:
+  attachment_upload_url:
     description: |
-      URL where the customer is redirected after completing or canceling the payment.
+      A writable field used to reference an attachment that has already been uploaded to the server.
+
+  generate_qr_code:
+    description: |
+      If set to true, the `qr_code_url` field will be present in the response. Upon scanning it, the customer will be redirected to the `checkout_url`, which is the Ottu Checkout page. Default value is false.
+
+  include_sdk_setup_preload:
+    description: |
+      When set to true, the Checkout API will include the `sdk_setup_preload_payload` in its response. This payload facilitates immediate UI setup without the need for further API calls. By default, the parameter is set to `false`, and the `sdk_setup_preload_payload` is not included in the API response.
+
+  shortify_attachment_url:
+    description: |
+      If true, it generates short attachment retrieval URL, which could be embedded in either SMS, Email, or WhatsApp messages, as it uses fewer characters. If an external URL shortening service, such as [Bitly](https://bitly.com/), is configured, the `attachment_short_url` will be shorter than attachment response parameter. If not configured, the `attachment_short_url` will be in the same format with `attachment` response parameter. Default value is false. <!-- TODO:merchant-link URL shortener configuration page -->
+
+  shortify_checkout_url:
+    description: |
+      If true, it generates short checkout retrieval URL, which could be embedded in either SMS, Email, or WhatsApp messages, as it uses fewer characters. If an external URL shortening service, such as [Bitly](https://bitly.com/), is configured, the `checkout_short_url` will be shorter than `checkout_url` parameter. If not configured, the `checkout_short_url` will be in the format of `https://<ottu-url>/b/abc123`. Default value is false. <!-- TODO:merchant-link URL shortener configuration page -->
+
+  card_acceptance_criteria:
+    description: |
+      This field allows the merchant to define specific rules and conditions that a card must meet to be eligible for payment. These stipulations apply regardless of whether a customer chooses to pay using a saved card or opts to add a new card for the transaction. The `card_acceptance_criteria` field is applicable only for direct payments and not for hosted session payments.
+    properties:
+      min_expiry_time:
+        description: |
+          Specifies the minimum required validity period, in days, for a card to be eligible for payment. If set to 30 days, for example, cards set to expire within the next month would be declined. Additionally, it defaults to 30 days when the `payment_type` is `auto_debit`. If any other payment type is selected, no default value is set.
+
+  notifications:
+    description: |
+      An object that contains the notification settings for this payment transaction, including SMS and email notifications, as well as the events for which they will be sent (e.g., `created`, `paid`, `refund`, `canceled`, etc.). This field may be used to configure and customize the [notifications]({{apiBaseUrl}}/notifications/) sent to customers and internal recipients throughout the payment process.
+    properties:
+      email:
+        description: |
+          Will be triggered at the following notification events: `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`, `voided`, `refunded`, `captured`. If the payment transaction transitions to an **error** state and an email notification has been set up for the **failed** state, then the customer will receive an email.
+      sms:
+        description: |
+          Will be triggered at the following notification events: `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`, `voided`, `refunded`, `captured`. If the payment transaction transitions to an **error** state and an SMS notification has been set up for the **failed** state, then the customer will receive an SMS.
+
+  billing_address:
+    description: |
+      An object to save customer registered address data into payment transaction.
+    properties:
+      line1:
+        description: "Should be filled by street & house data."
+      line2:
+        description: "Additional address data for accuracy."
+      city:
+        description: "The city where the customer is living and registered."
+      state:
+        description: "State of the customer's city (sometimes the same as the city)."
+      country:
+        description: "Customer's country, [ISO 3166-1 Alpha-2 code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Will be validated against existing countries."
+      postal_code:
+        description: "Postal code (may have different length for different countries)."
+
+  shipping_address:
+    description: |
+      An object to save address data into payment transaction.
+    properties:
+      line1:
+        description: "Location details where the shipment should be delivered to. Should be filled by street & house data."
+      line2:
+        description: "Additional address data for accuracy."
+      city:
+        description: "The city where the shipment should be delivered to."
+      state:
+        description: "The state where the shipment should be delivered to (sometimes the same as the city)."
+      country:
+        description: "Destination country, [ISO 3166-1 Alpha-2 code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Will be validated against existing countries."
+      postal_code:
+        description: "Postal code (may have different length for different countries)."
+      first_name:
+        description: "Shipment recipient first name."
+      last_name:
+        description: "Shipment recipient last name."
+      email:
+        description: "Shipment recipient email address."
+      phone:
+        description: "Shipment recipient phone number."
+
+  agreement:
+    description: |
+      An established contractual arrangement with the payer, which authorizes the merchant to securely store and subsequently utilize their payment information for specific purposes. This could encompass arrangements like recurring payments for services such as mobile subscriptions, installment-based payments for purchases, arrangements for ad-hoc charges like account top-ups, or for standard industry practices like penalty charges for missed appointments. For more information please refer to [Recurring Payments]({{apiBaseUrl}}/cards-and-tokens/recurring-payments/). It is imperative for the merchant to strictly avoid including these parameters when the payment type is labeled as `one_off`. The agreement parameter should be sent exclusively when the payment type is designated as `auto_debit`.
+    properties:
+      id:
+        description: |
+          It serves as a unique identifier for the agreement established with the payer. The Agreement ID plays a crucial role as an identifier for correlated payments associated with a customer order or invoice, highlighting the need for it to vary based on the correlated payments.
+      amount_variability:
+        description: "It defines if the payment amount can vary with each transaction within the agreement. Enum: `fixed`, `variable`."
+      start_date:
+        description: "The date on which the agreement with the payer to process payments begins."
+      expiry_date:
+        description: "The final date until which the agreement remains valid."
+      max_amount_per_cycle:
+        description: "The agreed-upon maximum amount for an individual payment within the series."
+      cycle_interval_days:
+        description: "The number of days between each recurring payment."
+      total_cycles:
+        description: "The total number of payment cycles within the agreement duration."
+      frequency:
+        description: |
+          This pertains to the frequency of payments within the series as agreed upon with the payer. Such as: `irregular`, `daily`, `weekly`, `monthly`, `quarterly`, `semi_annually`, `yearly`, and `other`. When `type` set as `unscheduled`, `frequency` should set as `irregular`.
+      type:
+        description: |
+          The type of commercial agreement that the payer has with the merchant: `recurring` (Default), `unscheduled`, `other`, `event_based`, `installment`.

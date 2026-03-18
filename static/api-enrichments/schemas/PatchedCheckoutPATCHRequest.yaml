@@ -1,0 +1,26 @@
+# Overrides for: components/schemas/PatchedCheckoutPATCHRequest
+# Request body for PATCH /checkout/v1/pymt-txn/{session_id}/
+
+properties:
+  # ── Shared fields ────────────────────────────────────────────
+  amount: $shared
+  currency_code: $shared
+  customer_email: $shared
+  customer_first_name: $shared
+  customer_last_name: $shared
+  customer_phone: $shared
+  customer_id: $shared
+  customer_birthdate: $shared
+  order_no: $shared
+  language: $shared
+  payment_type: $shared
+  type: $shared
+  redirect_url: $shared
+  webhook_url: $shared
+  pg_codes: $shared
+  extra: $shared
+  expiration_time: $shared
+  due_datetime: $shared
+  product_type: $shared
+  vendor_name: $shared
+  email_recipients: $shared
