@@ -35,18 +35,26 @@ async function fetchArtifacts() {
   console.log(`Artifacts loaded: docs.json (${docsSize}KB), search-index.json (${indexSize}KB)`);
 }
 
-async function start() {
-  await fetchArtifacts();
+async function fetchWithRetry(maxAttempts = 10, delayMs = 15000) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      await fetchArtifacts();
+      return;
+    } catch (err) {
+      console.error(`Attempt ${attempt}/${maxAttempts} failed: ${err.message}`);
+      if (attempt === maxAttempts) throw err;
+      console.log(`Retrying in ${delayMs / 1000}s...`);
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+  }
+}
 
-  const mcpServer = new McpDocsServer({
-    docsPath: DOCS_PATH,
-    indexPath: INDEX_PATH,
-    name: "ottu-docs",
-    baseUrl: BASE_URL,
-  });
+async function start() {
+  // Start the HTTP server first so health checks pass while artifacts load
+  let mcpServer = null;
+  let ready = false;
 
   const httpServer = http.createServer(async (req, res) => {
-    // CORS headers
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -57,14 +65,12 @@ async function start() {
       return;
     }
 
-    // Health check
     if (req.method === "GET" && req.url === "/health") {
       res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ status: "ok", baseUrl: BASE_URL }));
+      res.end(JSON.stringify({ status: ready ? "ok" : "loading", baseUrl: BASE_URL }));
       return;
     }
 
-    // Refresh artifacts on demand
     if (req.method === "POST" && req.url === "/refresh") {
       try {
         await fetchArtifacts();
@@ -77,20 +83,38 @@ async function start() {
       return;
     }
 
+    if (!ready || !mcpServer) {
+      res.writeHead(503, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "MCP server is loading artifacts, please retry shortly" }));
+      return;
+    }
+
     if (req.method !== "POST") {
       res.writeHead(405);
       res.end();
       return;
     }
 
-    // MCP protocol handler
     await mcpServer.handleHttpRequest(req, res);
   });
 
   httpServer.listen(PORT, () => {
-    console.log(`MCP server listening on port ${PORT}`);
+    console.log(`HTTP server listening on port ${PORT}`);
     console.log(`Base URL: ${BASE_URL}`);
   });
+
+  // Fetch artifacts with retry (static site may still be deploying)
+  await fetchWithRetry();
+
+  mcpServer = new McpDocsServer({
+    docsPath: DOCS_PATH,
+    indexPath: INDEX_PATH,
+    name: "ottu-docs",
+    baseUrl: BASE_URL,
+  });
+
+  ready = true;
+  console.log("MCP server ready.");
 }
 
 start().catch((err) => {
