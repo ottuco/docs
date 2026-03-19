@@ -31,30 +31,53 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 ## Integration Flows
 
-1. **Client → Ottu (**[Public API Key](../getting-started/authentication.md#public-key) **)**
-   1. The client collects the wallet or tokenized payment payload and calls the Native Payments endpoint directly using the [Public API Key](../getting-started/authentication.md#public-key).
-   2. The client receives the API callback response.
+### Client → Ottu ([Public API Key](../getting-started/authentication.md#public-key))
+
+1. The client collects the wallet or tokenized payment payload and calls the Native Payments endpoint directly using the [Public API Key](../getting-started/authentication.md#public-key).
+2. The client receives the API callback response.
 
 If the call is made from the client side, the backend must be synchronized with the payment result by ensuring that one of the following actions is performed:
 
 - The API response is forwarded to the backend, **or**
 - The [Payment Status (Inquiry) API](../apis/inquiry) is called by the backend after the client confirms that the payment has been completed.
 
-<figure>
-  <img src="/img/payments/native-payments-apple-pay-flow.png" alt="" width="563" />
-  <figcaption></figcaption>
-</figure>
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#1983BC", "primaryTextColor": "#302F37", "primaryBorderColor": "#302F37", "lineColor": "#302F37"}}}%%
+flowchart TD
+    A[Client App] -->|payload + session_id| B[Ottu Native Payments]
+    B -->|payment result| A
+    B --> C{Success?}
+    C -->|Yes| D[Client notifies Backend]
+    C -->|No| E[Log failure]
+    D -->|Inquiry API| F[Backend updates order]
 
-2. **Client → Backend → Ottu (**[Private API Key](../getting-started/authentication.md#private-key-api-key)**– Recommended)**
-   1. The client sends the payment payload to the backend.
-   2. The backend calls the Ottu Native Payments endpoint.
-   3. The backend receives the payment response callback.
-   4. The backend processes the callback response and notifies the client side with the payment status.
+    classDef ottu fill:#1983BC,color:#FFF,stroke:#1983BC
+    classDef default fill:#F4F4F4,color:#302F37,stroke:#302F37
 
-<figure>
-  <img src="/img/payments/native-payments-google-pay-flow.png" alt="" width="563" />
-  <figcaption></figcaption>
-</figure>
+    class B,F ottu
+```
+
+### Client → Backend → Ottu ([Private API Key](../getting-started/authentication.md#private-key-api-key) — Recommended)
+
+1. The client sends the payment payload to the backend.
+2. The backend calls the Ottu Native Payments endpoint.
+3. The backend receives the payment response callback.
+4. The backend processes the callback response and notifies the client side with the payment status.
+
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#1983BC", "primaryTextColor": "#302F37", "primaryBorderColor": "#302F37", "lineColor": "#302F37"}}}%%
+flowchart TD
+    A[Client App] -->|1. payload| B[Merchant Backend]
+    B -->|2. payload + session_id| C[Ottu Native Payments]
+    C -->|3. result| B
+    B -->|4. update order| D[(Database)]
+    B -->|5. status| A
+
+    classDef ottu fill:#1983BC,color:#FFF,stroke:#1983BC
+    classDef default fill:#F4F4F4,color:#302F37,stroke:#302F37
+
+    class C ottu
+```
 
 ## Setup
 

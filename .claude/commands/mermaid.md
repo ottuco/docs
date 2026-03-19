@@ -1,5 +1,5 @@
 ---
-description: Generate a Mermaid diagram using Ottu's semantic color system (usage: /mermaid describe the diagram you need)
+description: Generate a minimalistic Mermaid diagram for Ottu docs (usage: /mermaid describe the diagram you need)
 allowed-tools:
   - Read
   - Edit
@@ -8,86 +8,129 @@ allowed-tools:
   - Glob
 ---
 
-# Generate Mermaid Diagram with Ottu Semantic Colors
+# Ottu Minimalistic Mermaid Diagram Generator
+
+You generate clean, professional Mermaid diagrams for Ottu's developer documentation. Your diagrams are **minimalistic** — they look like a whiteboard sketch, not a marketing slide.
 
 Create or update a Mermaid diagram based on: **$ARGUMENTS**
 
 If no arguments are provided, ask the user what diagram they need.
 
-## Semantic Color System
+---
 
-Every diagram must use these semantic color roles consistently. Color communicates **responsibility**, not decoration.
+## Design Philosophy
 
-| Role | Hex | Meaning | When to Use |
-|------|-----|---------|-------------|
-| Blue | `#1983BC` | **Services / APIs / Infrastructure** | Ottu APIs, workers, backends, SDKs, stateless services |
-| Orange | `#F57D2D` | **Execution / Core Logic / Flow** | Orchestrators, pipelines, decision points, "where things happen" — **use sparingly (1-3 nodes max)** |
-| Red | `#ED2833` | **Security / Risk / Failure** | PCI boundaries, encryption, error paths, alerts — reader should **pause** when they see red |
-| Pink | `#F093BC` | **External / UI / Optional** | Merchant frontend, banks, third-party services, anything not under Ottu's control |
-| Dark | `#302F37` | **Boundaries / Containers / Domains** | Subgraph backgrounds, domain labels, trust boundaries |
-| Light | `#F4F4F4` | **Background / Neutral** | Diagram background — always light, never white or dark |
+> **Less is more. One accent color. Grayscale everything else.**
+
+Diagrams should be instantly readable — a developer glances at it and understands the flow in 3 seconds. No decoration, no visual noise, no rainbow colors.
+
+---
+
+## Color Palette (Strict)
+
+Only TWO visual treatments exist:
+
+| Role | Style | When to Use |
+|------|-------|-------------|
+| **Ottu service** | `fill:#1983BC,color:#FFF,stroke:#1983BC` | Ottu APIs, services, infrastructure — the blue nodes are "us" |
+| **Everything else** | `fill:#F4F4F4,color:#302F37,stroke:#302F37` | Client apps, merchant backends, banks, databases, external services |
+
+That's it. Two styles. Blue = Ottu. Gray = not Ottu.
+
+**Do NOT use:**
+- Pink, orange, red, green, or any other fill color
+- Rounded shapes `([text])` — use plain rectangles `[text]`
+- Thick borders or special stroke styles
+- Multiple classDef beyond `ottu` and `default`
+
+**Exception:** Decision diamonds `{text}` use default styling (gray fill, dark border).
+
+---
 
 ## Required Theme Config
 
-Every diagram MUST start with this init block:
+Every diagram MUST start with:
 
 ```
-%%{init: {
-  "theme": "base",
-  "themeVariables": {
-    "background": "#F4F4F4",
-    "primaryColor": "#1983BC",
-    "primaryTextColor": "#302F37",
-    "primaryBorderColor": "#302F37",
-    "lineColor": "#302F37",
-    "secondaryColor": "#F57D2D",
-    "tertiaryColor": "#F093BC"
-  }
-}}%%
+%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#1983BC", "primaryTextColor": "#302F37", "primaryBorderColor": "#302F37", "lineColor": "#302F37"}}}%%
 ```
 
-## Class Definitions
-
-Include only the classes you actually use in the diagram:
+## Required Class Definitions
 
 ```
-classDef service fill:#1983BC,color:#FFFFFF,stroke:#302F37
-classDef execution fill:#F57D2D,color:#FFFFFF,stroke:#302F37
-classDef external fill:#F093BC,color:#302F37,stroke:#302F37
-classDef danger fill:#ED2833,color:#FFFFFF,stroke:#302F37
-classDef boundary fill:#302F37,color:#FFFFFF,stroke:#302F37
+classDef ottu fill:#1983BC,color:#FFF,stroke:#1983BC
+classDef default fill:#F4F4F4,color:#302F37,stroke:#302F37
 ```
+
+Apply `ottu` class only to Ottu-owned nodes. Everything else uses default.
+
+---
 
 ## Rules
 
-1. **Blue is the default** — if everything is blue, nothing is special. Only switch to orange to say "this part matters"
-2. **Orange must be rare** — 1-3 orange nodes per diagram maximum
-3. **Red must feel dangerous** — if red appears, the reader should pause. Never use for normal APIs or UI
-4. **Pink is soft** — external, replaceable, not under Ottu's control
-5. **Background always light** — `#F4F4F4`, keeps diagrams printable and readable
-6. **Line semantics** — dashed for async/optional, thick for critical flow, red for failure paths
+### Rule 1 — One accent color
+Blue (`#1983BC`) is the only non-gray color. It marks Ottu services. If you need to highlight something, it's blue. If it's not Ottu, it's gray.
 
-## Line Styling
+### Rule 2 — Short edge labels
+Edge labels should be 1-4 words max. No sentences. Use numbered steps (`1. payload`, `2. result`) for sequential flows.
 
+### Rule 3 — Plain rectangles
+Use `[text]` for everything. No rounded `([text])`, no hexagons `{{text}}`, no special shapes. Exception: `{text}` for decisions, `[(text)]` for databases.
+
+### Rule 4 — No subgraphs unless essential
+Subgraphs add visual weight. Only use them for genuine trust/network boundaries (e.g., PCI scope). Never for grouping.
+
+### Rule 5 — Top-down flow
+Use `flowchart TD` (top-down) as default. Left-right only when the flow is genuinely horizontal (e.g., request → response pipeline).
+
+### Rule 6 — Minimal nodes
+If you can explain it with 4 nodes, don't use 7. Every node must earn its place.
+
+---
+
+## Example: Good vs Bad
+
+**Bad (Christmas tree):**
+```mermaid
+flowchart TD
+    A([Client]) -->|"Send payment"| B[API Gateway]
+    B --> C[Payment Engine]
+    C --> D{Valid?}
+    D -->|Yes| E[Process]
+    D -->|No| F[Reject]
+
+    classDef service fill:#1983BC,color:#FFF,stroke:#302F37
+    classDef external fill:#F093BC,color:#302F37,stroke:#302F37
+    classDef execution fill:#F57D2D,color:#FFF,stroke:#302F37
+    classDef danger fill:#ED2833,color:#FFF,stroke:#302F37
+
+    class A external
+    class B,E service
+    class C execution
+    class D,F danger
 ```
-linkStyle default stroke:#302F37,stroke-width:1.5px
+
+**Good (minimalistic):**
+```mermaid
+flowchart TD
+    A[Client] -->|payment| B[Ottu API]
+    B --> C{Valid?}
+    C -->|Yes| D[Process Payment]
+    C -->|No| E[Reject]
+
+    classDef ottu fill:#1983BC,color:#FFF,stroke:#1983BC
+    classDef default fill:#F4F4F4,color:#302F37,stroke:#302F37
+
+    class B,D ottu
 ```
 
-For failure/error paths, use red lines where supported.
-
-## Node Shape Guide
-
-- `([text])` — rounded (people, external actors)
-- `[text]` — rectangle (services, APIs)
-- `{{text}}` — hexagon (data, tokens, artifacts)
-- `{text}` — diamond (decisions)
-- `[[text]]` — subroutine (sub-processes)
+---
 
 ## Process
 
-1. Read the target file if updating an existing diagram
-2. Understand the concept being diagrammed
-3. Choose the right diagram type (flowchart, sequence, state, etc.)
-4. Assign semantic colors based on each node's **role**, not aesthetics
-5. Write the diagram with the theme config, classDefs, and proper styling
-6. Place it in the appropriate location in the document
+1. **Read** the target file if updating an existing diagram
+2. **Understand** the concept — identify the minimum nodes needed
+3. **Choose** `flowchart TD` unless horizontal makes more sense
+4. **Assign** colors: blue for Ottu, gray for everything else
+5. **Write** with theme config, two classDefs, plain rectangles, short labels
+6. **Check** — can any node be removed without losing meaning? If yes, remove it.
