@@ -1,0 +1,44 @@
+name: docs-dev
+region: ams
+alerts:
+  - rule: DEPLOYMENT_FAILED
+  - rule: DOMAIN_FAILED
+domains:
+  - domain: docs.ottu.dev
+    type: PRIMARY
+features:
+  - buildpack-stack=ubuntu-22
+ingress:
+  rules:
+    - component:
+        name: mcp
+      match:
+        path:
+          prefix: /mcp
+    - component:
+        name: docs
+      match:
+        path:
+          prefix: /
+static_sites:
+  - name: docs
+    github:
+      branch: dev
+      repo: ottuco/docs
+    source_dir: /
+    environment_slug: node-js
+services:
+  - name: mcp
+    github:
+      branch: dev
+      repo: ottuco/docs
+    source_dir: /mcp-server
+    environment_slug: node-js
+    http_port: 3456
+    instance_size_slug: apps-s-1vcpu-0.5gb
+    instance_count: 1
+    envs:
+      - key: BASE_URL
+        value: "https://docs.ottu.dev"
+      - key: PORT
+        value: "3456"
