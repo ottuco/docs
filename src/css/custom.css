@@ -4,24 +4,41 @@
  * work well for content-centric websites.
  */
 
+/* Poppins font import */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+
 /* You can override the default Infima variables here. */
 :root {
-  /* Brand primary (Ottu orange) */
-  --ifm-color-primary: #f57d2d;
-  --ifm-color-primary-dark: #dc7028;
-  --ifm-color-primary-darker: #d06a26;
-  --ifm-color-primary-darkest: #ab571f;
-  --ifm-color-primary-light: #f6904c;
-  --ifm-color-primary-lighter: #f8a46c;
-  --ifm-color-primary-lightest: #fabf97;
+  /* Typography — Poppins */
+  --ifm-font-family-base: 'Poppins', system-ui, -apple-system, sans-serif;
+  --ifm-heading-font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+  --ifm-font-family-monospace: 'Consolas', 'Monaco', 'Courier New', monospace;
+
+  /* Font sizes matching Figma design */
+  --ifm-h1-font-size: 2rem;      /* 32px — Headline 1 */
+  --ifm-h2-font-size: 1.5rem;    /* 24px — Subheading 3 */
+  --ifm-h3-font-size: 1.25rem;   /* 20px — Subheading 4 */
+  --ifm-font-size-base: 1rem;    /* 16px — Basic text */
+
+  /* Font weights */
+  --ifm-heading-font-weight: 700;
+
+  /* Brand primary (Ottu orange — from Figma) */
+  --ifm-color-primary: #f27e20;
+  --ifm-color-primary-dark: #da711d;
+  --ifm-color-primary-darker: #ce6b1b;
+  --ifm-color-primary-darkest: #a95816;
+  --ifm-color-primary-light: #f4913d;
+  --ifm-color-primary-lighter: #f59d52;
+  --ifm-color-primary-lightest: #f8bc83;
 
   /* Backgrounds */
-  --ifm-background-color: #ffffff; /* main page bg */
-  --ifm-background-surface-color: #f7f7f7; /* cards, panels */
+  --ifm-background-color: #ffffff;
+  --ifm-background-surface-color: #fafafa;
 
-  /* Text */
-  --ifm-font-color-base: #1d1d1d;
-  --ifm-heading-color: #1d1d1d;
+  /* Text — from Figma design */
+  --ifm-font-color-base: #4a4a4a;     /* secondary-text */
+  --ifm-heading-color: #302f37;        /* heading text */
 
   /* Navbar */
   --ifm-navbar-background-color: #ffffff;
@@ -31,18 +48,33 @@
   --ifm-footer-background-color: #f7f7f7;
 
   /* Links */
-  --ifm-link-color: #f57d2d;
-  --ifm-link-hover-color: #f8a46c;
+  --ifm-link-color: #f27e20;
+  --ifm-link-hover-color: #da711d;
 
-  /* Borders */
+  /* Borders — from Figma */
   --ifm-global-border-color: #e5e5e5;
 
-  /* Code */
+    /* Code */
   --ifm-code-background: #f2f2f2;
   --ifm-code-color: #1d1d1d;
+  /* Code — from Figma inline code style */
+  /* --ifm-code-background: #e5e7eb;
+  --ifm-code-color: #364153; */
 
   /* Sidebar */
-  --ifm-menu-color-background-active: #f7f7f7;
+  --ifm-menu-color-background-active: #f2f2f2;
+
+  /* OpenAPI schema colors — from Figma */
+  /* --openapi-required: #f0252b;
+  --openapi-nullable: #0b82be;
+  --openapi-deprecated: #6b7280; */
+
+  /* HTTP method badge colors — from Figma */
+  /* --ottu-method-post: #0b82be;
+  --ottu-method-get: #f27e20;
+  --ottu-method-patch: #ffba00;
+  --ottu-method-put: #ffba00;
+  --ottu-method-delete: #f0252b; */
 }
 
 html {
@@ -50,7 +82,7 @@ html {
 }
 
 /* ================================
-   DARK MODE (forced consistency)
+   DARK MODE — from Figma API explorer panel
    ================================ */
 [data-theme="dark"] {
   --ifm-background-color: #0f1117;
@@ -58,6 +90,8 @@ html {
 
   --ifm-font-color-base: #e5e7eb;
   --ifm-heading-color: #ffffff;
+ /* --ifm-font-color-base: #d1d5dc;
+  --ifm-heading-color: #e5e7eb; */
 
   --ifm-navbar-background-color: #0b0d12;
   --ifm-footer-background-color: #0b0d12;
@@ -66,6 +100,15 @@ html {
   --ifm-link-hover-color: #fabf97;
 
   --ifm-code-background: #020617;
+
+  /* --ifm-link-color: #f27e20;
+  --ifm-link-hover-color: #f4913d;
+
+  --ifm-code-background: #1e2939;
+  --ifm-code-color: #d1d5dc;
+
+  --ifm-global-border-color: #1e2939;
+  --ifm-menu-color-background-active: #1e2939; */
 }
 
 .markdown a {
@@ -76,11 +119,26 @@ html {
   color: var(--ifm-link-hover-color);
 }
 
-/* Style markdown headings to match link color */
-.markdown h2,
-.markdown h3,
+/* Style markdown headings — Figma uses #302f37 for all headings */
+.markdown h1 {
+  font-weight: 700;
+  color: var(--ifm-heading-color);
+}
+
+.markdown h2 {
+  font-weight: 600;
+  color: var(--ifm-heading-color);
+}
+
+.markdown h3 {
+  font-weight: 600;
+  /* font-size: 1.25rem; */
+  color: var(--ifm-heading-color);
+}
+
 .markdown h4 {
-  color: var(--ifm-link-color);
+  font-weight: 600;
+  color: var(--ifm-heading-color);
 }
 
 /* Table cells: align content to top */
@@ -179,34 +237,35 @@ html {
   scroll-margin-top: calc(var(--ifm-navbar-height));
 }
 
+/* Admonition colors — from Figma design (rgba backgrounds, 8px radius) */
 [data-theme="light"] .alert--note {
   --ifm-alert-background-color: #f7f7f7;
   --ifm-alert-border-color: #d9d9d9;
-  color: #1d1d1d;
+  color: #1a1a1a;
 }
 
 [data-theme="light"] .alert--info {
-  --ifm-alert-background-color: #eef6fb;
-  --ifm-alert-border-color: #1983bc;
-  color: #1d1d1d;
+  --ifm-alert-background-color: rgba(11, 130, 190, 0.08);
+  --ifm-alert-border-color: #0b82be;
+  color: #1a1a1a;
 }
 
 [data-theme="light"] .alert--tip {
   --ifm-alert-background-color: #eaf7f0;
   --ifm-alert-border-color: #22c55e;
-  color: #1d1d1d;
+  color: #1a1a1a;
 }
 
 [data-theme="light"] .alert--warning {
   --ifm-alert-background-color: #fff4ed;
-  --ifm-alert-border-color: #f77d1a;
-  color: #1d1d1d;
+  --ifm-alert-border-color: #f27e20;
+  color: #1a1a1a;
 }
 
 [data-theme="light"] .alert--danger {
   --ifm-alert-background-color: #fde8ea;
   --ifm-alert-border-color: #ed2833;
-  color: #1d1d1d;
+  color: #1a1a1a;
 }
 
 [data-theme="dark"] .alert--note {
@@ -229,7 +288,7 @@ html {
 
 [data-theme="dark"] .alert--warning {
   --ifm-alert-background-color: #241a0f;
-  --ifm-alert-border-color: #f57d2d;
+  --ifm-alert-border-color: #f27e20;
   color: #fef3c7;
 }
 
@@ -240,12 +299,19 @@ html {
 }
 
 .alert {
-  border-left-width: 6px;
+  border-left-width: 4px;
+  border-radius: 8px;
 }
 
 .alert__title {
   color: var(--ifm-heading-color);
   font-weight: 700;
+  font-size: 18px;
+}
+
+.alert p {
+  font-size: 14px;
+  line-height: 20px;
 }
 
 .alert code {
@@ -292,3 +358,178 @@ html {
   box-shadow: 0 0 0 3px rgba(255, 108, 55, 0.3);
   border-color: #ff6c37;
 }
+
+/* ================================
+   OpenAPI method badges — from Figma design
+   ================================ */
+/* .openapi-method-badge--post,
+.api-method-post {
+  background-color: var(--ottu-method-post) !important;
+}
+
+.openapi-method-badge--get,
+.api-method-get {
+  background-color: var(--ottu-method-get) !important;
+}
+
+.openapi-method-badge--patch,
+.api-method-patch {
+  background-color: var(--ottu-method-patch) !important;
+  color: #ffffff !important;
+}
+
+.openapi-method-badge--put,
+.api-method-put {
+  background-color: var(--ottu-method-put) !important;
+  color: #ffffff !important;
+}
+
+.openapi-method-badge--delete,
+.api-method-delete {
+  background-color: var(--ottu-method-delete) !important;
+} */
+
+/* OpenAPI endpoint URL container — from Figma */
+/* .openapi-explorer__url-container {
+  background-color: var(--ifm-background-surface-color);
+  border-radius: 8px;
+} */
+
+/* OpenAPI tabs — active state border from Figma */
+/* .openapi-tabs__schema-item--active,
+.openapi-tabs__schema-item[aria-selected="true"] {
+  border-color: #f27e20 !important;
+  color: #f27e20 !important;
+} */
+
+/* OpenAPI schema required badge — Figma red */
+/* .openapi-schema__required {
+  color: #f0252b !important;
+} */
+
+/* ================================
+   Sidebar — from Figma design
+   ================================ */
+
+/* All sidebar links: Poppins Regular 14px */
+.menu__list-item-collapsible--active {
+  background: #f2f2f2;
+}
+
+.menu__link {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #302f37;
+  border-radius: 8px;
+  padding: 12px 8px;
+  line-height: normal;
+}
+
+.menu__link--active {
+  color: var(--ifm-menu-color-active) !important;
+  font-weight: 600;
+}
+
+/* Sidebar category labels (collapsible parents): Poppins Regular 14px, gray */
+.menu__link--sublist {
+  color: #8e8e93;
+  padding: 8px 8px;
+}
+
+/* Sidebar sub-items: 40px left padding from Figma */
+/* .menu__list .menu__list .menu__link {
+  padding-left: 40px;
+} */
+
+/* Sidebar active category background — Figma */
+/* .menu__list-item--active > .menu__link--sublist-caret {
+  background-color: transparent;
+} */
+
+
+/* Sidebar border — Figma uses right border #dadada */
+.theme-doc-sidebar-container {
+  border-right-color: #dadada !important;
+}
+
+/* Inline code styling — Figma */
+.markdown code {
+  background-color: #e5e7eb;
+  color: #364153;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+/* Table styling — from Figma */
+.markdown table thead tr {
+  background-color: var(--ifm-background-surface-color);
+}
+table tr:nth-child(2n) {
+  background-color: var(--ifm-background-surface-color) !important;
+}
+
+.markdown table thead th {
+  font-weight: 600;
+  color: var(--ifm-heading-color);
+}
+
+/* OpenAPI response status code tabs — from Figma */
+/* .openapi-tabs__response-code-item--active {
+  background-color: #f0252b !important;
+  color: white !important;
+  border-radius: 8px;
+} */
+
+/* Navbar items — Figma: Poppins Medium 16px */
+/* .navbar__link {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  color: #4a4a4a;
+}
+
+[data-theme="dark"] .navbar__link {
+  color: #d1d5dc;
+}
+
+.navbar__title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+} */
+
+/* Footer text — Figma: Poppins Regular 14px, #8e8e93 */
+/* .footer__link-item {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+} */
+
+/* Hero section styles */
+/* .hero__title {
+  font-weight: 700;
+  color: var(--ifm-heading-color);
+}
+
+.hero__subtitle {
+  color: var(--ifm-font-color-base);
+} */
+
+/* TOC (table of contents) sidebar — Figma: 14px */
+/* .table-of-contents__link {
+  font-size: 14px;
+  font-weight: 400;
+  color: #4a4a4a;
+}
+
+[data-theme="dark"] .table-of-contents__link {
+  color: #d1d5dc;
+}
+
+.table-of-contents__link--active {
+  color: #f27e20;
+  font-weight: 500;
+} */
