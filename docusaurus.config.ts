@@ -20,6 +20,10 @@ const config: Config = {
 
   trailingSlash: true,
 
+  clientModules: [
+    './src/clientModules/sidebarHashActiveLink.ts',
+  ],
+
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
 
