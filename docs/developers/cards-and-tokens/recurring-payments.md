@@ -239,9 +239,9 @@ Instead of: Checkout API (get session_id) → Auto-Debit API (charge), you do: O
 
 See [Checkout API — One-Step Checkout](/docs/developers/payments/checkout-api#one-step-checkout) for details.
 
-### Native Payment API
+### Native Payments
 
-The [Native Payment API](/docs/developers/payments/native-payments#auto-debit-tokenized-payments) provides direct token-based payments for scenarios where you need full client-side control. Supports both CIT and MIT transactions.
+The [Native Payments](/docs/developers/payments/native-payments#auto-debit-tokenized-payments) provides direct token-based payments for scenarios where you need full client-side control. Supports both CIT and MIT transactions.
 
 See [Native Payments — Auto-Debit](/docs/developers/payments/native-payments#auto-debit-tokenized-payments) for details.
 

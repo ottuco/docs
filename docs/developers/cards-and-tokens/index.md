@@ -32,7 +32,7 @@ Use saved tokens to charge customers automatically — for subscriptions, instal
 
 - **CIT (Cardholder Initiated)** — first payment where the customer saves their card
 - **MIT (Merchant Initiated)** — subsequent automatic charges using the saved token
-- Multiple integration paths: Auto-Debit API, One-Step Checkout, or Native Payment API
+- Multiple integration paths: Auto-Debit API, One-Step Checkout, or Native Payments
 
 [**Go to Recurring Payments Guide →**](recurring-payments.md)
 

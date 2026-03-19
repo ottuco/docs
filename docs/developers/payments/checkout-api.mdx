@@ -297,7 +297,7 @@ Merchants can use the [Checkout API](/docs/developers/payments/checkout-api) to 
 
 ## One-Step Checkout
 
-One-Step Checkout combines the [Checkout API](./checkout-api) and the [Native Payment API ](./native-payments)into a single backend request.\
+One-Step Checkout combines the [Checkout API](./checkout-api) and the [Native Payments](./native-payments)into a single backend request.\
 Instead of creating a session first and then calling a separate payment endpoint, you can perform both actions in one step by including the [payment_instrument](./checkout-api) parameter.
 
 This flow is ideal when you want to immediately process a payment as it's created, for example:
@@ -470,7 +470,7 @@ The Checkout SDK ([Web](./checkout-sdk/web), [Android](./checkout-sdk/android), 
 #### 11. What are the benefits of One-Step Checkout?
 
 - Single backend call → lower latency and simpler logic.
-- Consistent structure with the [Native Payment API](./native-payments).
+- Consistent structure with [Native Payments](./native-payments).
 - Unified handling of session creation + payment execution.
 - Ideal for wallets and tokenized recurring payments.
 

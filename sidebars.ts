@@ -89,13 +89,11 @@ const sidebars: SidebarsConfig = {
               label: 'Payment Methods',
               link: {type: 'doc', id: 'developers/payments/payment-methods'},
               items: [
-                {type: 'link', label: 'Setup', href: '/docs/developers/payments/payment-methods#setup'},
-                {type: 'link', label: 'Authentication', href: '/docs/developers/payments/payment-methods#authentication'},
-                {type: 'link', label: 'Permissions', href: '/docs/developers/payments/payment-methods#permissions'},
+                {type: 'link', label: 'When to Use', href: '/docs/developers/payments/payment-methods#when-to-use'},
                 {type: 'link', label: 'How it Works', href: '/docs/developers/payments/payment-methods#how-it-works'},
                 {
                   type: 'link',
-                  label: 'Retrieve a list of payment methods based on filter values.',
+                  label: 'Retrieve Payment Methods',
                   href: '/docs/developers/payments/payment-methods#api-retrieve-a-list-of-payment-methods-based-on-filter-values',
                 },
                 {type: 'link', label: 'Guide', href: '/docs/developers/payments/payment-methods#guide'},
@@ -108,58 +106,11 @@ const sidebars: SidebarsConfig = {
               label: 'Native Payments',
               link: {type: 'doc', id: 'developers/payments/native-payments'},
               items: [
-                {type: 'link', label: 'Quick Start', href: '/docs/developers/payments/native-payments#quick-start'},
-                {type: 'link', label: 'Authentication', href: '/docs/developers/payments/native-payments#authentication'},
+                {type: 'link', label: 'When to Use', href: '/docs/developers/payments/native-payments#when-to-use'},
                 {type: 'link', label: 'Integration Flows', href: '/docs/developers/payments/native-payments#integration-flows'},
                 {type: 'link', label: 'Setup', href: '/docs/developers/payments/native-payments#setup'},
-                {
-                  type: 'category',
-                  label: 'Apple Pay',
-                  collapsible: true,
-                  collapsed: true,
-                  customProps: {
-                    targetHref: '/docs/developers/payments/native-payments#apple-pay',
-                  },
-                  items: [
-                    {
-                      type: 'link',
-                      label: 'Native Payment API(Apple Pay)',
-                      href: '/docs/developers/payments/native-payments#api-native-payment-apiapple-pay',
-                    },
-                  ],
-                },
-                {
-                  type: 'category',
-                  label: 'Google Pay',
-                  collapsible: true,
-                  collapsed: true,
-                  customProps: {
-                    targetHref: '/docs/developers/payments/native-payments#google-pay',
-                  },
-                  items: [
-                    {
-                      type: 'link',
-                      label: 'Native Payment API(Google Pay)',
-                      href: '/docs/developers/payments/native-payments#api-native-payment-apigoogle-pay',
-                    },
-                  ],
-                },
-                {
-                  type: 'category',
-                  label: 'Auto-Debit (Tokenized Payments)',
-                  collapsible: true,
-                  collapsed: true,
-                  customProps: {
-                    targetHref: '/docs/developers/payments/native-payments#auto-debit-tokenized-payments',
-                  },
-                  items: [
-                    {
-                      type: 'link',
-                      label: 'Native Payment API(Auto Debit)',
-                      href: '/docs/developers/payments/native-payments#api-native-payment-apiauto-debit',
-                    },
-                  ],
-                },
+                {type: 'link', label: 'Quick Start', href: '/docs/developers/payments/native-payments#quick-start'},
+                {type: 'link', label: 'API Reference', href: '/docs/developers/payments/native-payments#api-reference'},
                 {type: 'link', label: 'FAQ', href: '/docs/developers/payments/native-payments#faq'},
               ],
             },

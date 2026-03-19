@@ -26,7 +26,7 @@ Dynamically fetch available payment methods for a customer based on currency, ga
 
 ### Native Payments (Direct Control)
 
-Process payments directly when you manage your own UI — Apple Pay buttons, Google Pay buttons, or gateway tokens. Your client collects the payment payload and sends it to Ottu via the Native Payment API. Use this when you need full control over the checkout experience while still leveraging Ottu's gateway orchestration.
+Process payments directly when you manage your own UI — Apple Pay buttons, Google Pay buttons, or gateway tokens. Your client collects the payment payload and sends it to Ottu via Native Payments. Use this when you need full control over the checkout experience while still leveraging Ottu's gateway orchestration.
 
 [**Go to Native Payments →**](native-payments.md)
 

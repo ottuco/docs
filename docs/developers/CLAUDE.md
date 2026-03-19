@@ -113,6 +113,7 @@ Standard structure for developer API/feature pages. Apply sections as relevant �
 - **FAQ is always second-to-last** (before What's Next). Use bold text for sub-groupings within FAQ, not H3 headings (H3s create sidebar entries).
 - **Guide sections use "Guide" as the heading** — not "Implementation", "Quick Start", or "How to Use". Keep it consistent.
 - **Section headings use H2 (##)** — sub-sections use H3 (###). H4 (####) only for items within a section (e.g., FAQ questions).
+- **Interactive API reference is mandatory** — every page that documents a REST API endpoint must include an `<ApiDocEmbed>` with the full interactive schema. If a page covers multiple related endpoints (e.g., Native Payments with Apple Pay, Google Pay, Auto-Debit), use `<Tabs>` wrapping multiple `<ApiDocEmbed>` components so the reader can switch between them without scrolling through separate schema sections.
 
 ## API Documentation
 
