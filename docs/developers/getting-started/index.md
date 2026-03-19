@@ -21,7 +21,31 @@ Familiarize yourself with the request format, base URLs, error handling, and con
 
 All requests and responses use JSON. See [API Fundamentals](api-fundamentals.md) for the complete reference on base URLs, authentication headers, error codes, pagination, and rate limiting.
 
-## 3. Make Your First API Call
+## 3. Configure Your Environment
+
+Before making API calls, ensure your Ottu dashboard is configured:
+
+### Enable Your Plugin
+
+Ottu uses plugins to define payment types. Enable the one that matches your use case in the Admin Panel under **Plugin Config**:
+
+- **Payment Request** — for invoices, payment links, and manual payment collection
+- **E-Commerce** — for online store checkout flows
+
+### Activate Payment Gateway Codes
+
+Activate the payment gateways (`pg_codes`) you intend to use. Ensure all desired `pg_codes` are set to **active** status in your configuration. These codes are passed to the [Checkout API](../payments/checkout-api.mdx) to determine which payment methods the customer can choose from.
+
+### Sandbox vs Production
+
+- **Sandbox** (`type: sandbox`) — for testing with simulated transactions
+- **Production** (`type: production`) — for live payments
+
+:::info
+Ensure you're in the correct mode before initiating payments.
+:::
+
+## 4. Make Your First API Call
 
 Create a payment transaction with a single API call:
 
@@ -44,7 +68,7 @@ The response includes a `session_id` and `payment_url`. Open the `payment_url` t
 Use the [Sandbox & Test Cards](../payments/sandbox.md) to simulate payments without processing real transactions.
 :::
 
-## 4. Boost Your Integration
+## 5. Boost Your Integration
 
 Ottu offers multiple integration paths depending on your stack and use case:
 

@@ -11,32 +11,15 @@ import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 In the intricate realm of online transactions, a versatile payment experience is essential. \
 The `Payment Methods API` streamlines this process, allowing for effortless automation. By simply integrating with specified operation, [customer_id](./checkout-api), [currencies](./checkout-api), [payment gateway names](./checkout-api#supported-instruments) and desired [payment plugins](./payment-methods.md#enabling-the-plugin), merchant can harness the full power of Ottu's payment automation, all while keeping his existing environment intact. No extra effort, just seamless integration.
 
-## [Setup](payment-methods.md#setup)
-
-#### [Enabling the Plugin](payment-methods.md#enabling-the-plugin)
-
-Ensure the relevant plugin ([E-Commerce](payment-methods.md#enabling-the-plugin) or [Payment Request](payment-methods.md#enabling-the-plugin)) is activated in the Admin Panel under the Plugin Config section. For detailed activation steps, refer to the [Plugin Activation Guide](payment-methods.md#enabling-the-plugin).
-
-#### [Activating Payment Gateway Codes](payment-methods.md#activating-payment-gateway-codes)
-
-Activate the [payment gateway](./checkout-api#supported-instruments) ([pg_codes](./checkout-api)) you intend to use. Ensure all desired `pg_codes` are set to ‘`active`’ status in your configuration.
-
-#### [Understanding the `type` Filter](payment-methods.md#understanding-the-type-filter)
-
-The `type` filter determines the mode of your environment:
-
-- **Development Mode:** Configure the `type` to `sandbox` mode for conducting tests with sandbox transactions instead of live transactions.
-- **Production Mode:** Set the `type` to `production` for handling real transactions in a live environment.
-
-:::info
-
-Ensure you’re in the correct mode before initiating payments.
-
-:::
-
 :::tip Boost Your Integration
-Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../getting-started/#boost-your-integration) for all available options.
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../getting-started/#boost-your-integration) for all available options. For environment setup (plugins, gateway codes, sandbox vs production), see [Configure Your Environment](../getting-started/#configure-your-environment).
 :::
+
+---
+
+<ApiDocEmbed path="get-payment-methods.api.mdx" />
+
+---
 
 ## [How it Works](payment-methods.md#how-it-works)
 
@@ -71,8 +54,6 @@ POST: https://beta.ottu.net/b/pbl/v2/payment-methods/
 ```
 
 This request will return the `"pg_codes": ["kpay"]`, which can then be used in subsequent API calls.
-
-<ApiDocEmbed path="get-payment-methods.api.mdx" />
 
 ## [Guide](payment-methods.md#guide)
 
@@ -248,10 +229,6 @@ The `Payment Methods API` is designed to streamline the process of online transa
 #### :digit_two: [Do I need to make changes to my existing environment when integrating with the Payment Methods API?](./payment-methods)
 
 No, the `Payment Methods API` allows for a seamless integration without requiring changes to your current environment. You only need to integrate with specific operation, [customer_id](./checkout-api), [currencies](./checkout-api), and desired payment [plugins](./payment-methods.md#enabling-the-plugin).
-
-**Conclusion**
-
-In conclusion, the `Payment Methods API` offers dynamic adaptability. Any modifications made to the gateway settings or `MID` configuration will be automatically reflected in the API. This ensures a hassle-free experience, eliminating the need for constant developer intervention. Whether you're adding a new gateway, introducing a new method, or incorporating an additional payment method for your store, there's no need for manual updates in your shop's integration. Once integrated with this API, any changes made will be seamlessly displayed. Simplifying the process, the `Payment Methods API` guarantees efficiency and adaptability for your transaction needs.
 
 ## What's Next?
 
