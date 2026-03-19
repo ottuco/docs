@@ -89,14 +89,14 @@ function TabContent({
 }) {
   const childTabs = (Array.isArray(children) ? children : [children]).filter(
     Boolean
-  ) as React.ReactElement[];
+  ) as React.ReactElement<{ value: string }>[];
 
   if (lazy) {
     const selectedTabItem = childTabs.find(
       (tabItem) => tabItem.props.value === selectedValue
     );
     if (!selectedTabItem) return null;
-    return cloneElement(selectedTabItem, { className: "margin-top--md" });
+    return cloneElement(selectedTabItem, { className: "margin-top--md" } as any);
   }
 
   return (
@@ -105,7 +105,7 @@ function TabContent({
         cloneElement(tabItem, {
           key: i,
           hidden: tabItem.props.value !== selectedValue,
-        })
+        } as any)
       )}
     </div>
   );

@@ -67,6 +67,7 @@ If the call is made from the client side, the backend must be synchronized with 
 - The [Payment Status (Inquiry) API](../apis/inquiry) is called by the backend after the client confirms that the payment has been completed.
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
 graph LR
     A[Client] --> B[Ottu]
     B --> C{OK?}
@@ -74,8 +75,8 @@ graph LR
     C -- No --> E[Log]
     D --> F[Inquiry]
 
-    classDef ottu fill:#1983BC,color:#fff,stroke:#1983BC
-    class B,F ottu
+    classDef accent fill:#1983BC,color:#FFFFFF,stroke:#302F37
+    class B accent
 ```
 
 #### Client → Backend → Ottu (Recommended)
@@ -86,14 +87,15 @@ graph LR
 4. The backend processes the callback response and notifies the client side with the payment status.
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
 graph LR
     A[Client] --> B[Backend]
     B --> C[Ottu]
     C --> B
     B --> A
 
-    classDef ottu fill:#1983BC,color:#fff,stroke:#1983BC
-    class C ottu
+    classDef accent fill:#1983BC,color:#FFFFFF,stroke:#302F37
+    class C accent
 ```
 
 ### Step-by-Step

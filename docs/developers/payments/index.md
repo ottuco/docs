@@ -39,26 +39,15 @@ Test your integration with sandbox credentials and test card numbers before goin
 ## How They Connect
 
 ```mermaid
-%%{init: {
-  "theme": "base",
-  "themeVariables": {
-    "background": "#F4F4F4",
-    "primaryColor": "#1983BC",
-    "primaryTextColor": "#302F37",
-    "primaryBorderColor": "#302F37",
-    "lineColor": "#302F37",
-    "secondaryColor": "#F57D2D",
-    "tertiaryColor": "#F093BC"
-  }
-}}%%
+%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
 flowchart LR
-    M([Merchant]):::external -->|Creates session| API[Checkout API]:::service
-    API -->|Checkout page| CUST([Customer]):::external
+    M([Merchant]) -->|Creates session| API[Checkout API]
+    API -->|Checkout page| CUST([Customer])
     CUST -->|Pays| API
     API -->|Result via webhook| M
 
-    classDef service fill:#1983BC,color:#FFFFFF,stroke:#302F37
-    classDef external fill:#F093BC,color:#302F37,stroke:#302F37
+    classDef accent fill:#1983BC,color:#FFFFFF,stroke:#302F37
+    class API accent
 ```
 
 1. **Merchant** creates a payment session via the Checkout API

@@ -29,18 +29,15 @@ The Payment Methods API is a foundation for other Ottu APIs. It returns detailed
 ### Workflow
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
 graph LR
     A([Merchant]) --> B[Payment Methods API]
     B --> C{{pg_codes}}
     C --> D[Checkout API]
     D --> E([Customer])
-    E --> F[Ottu]
-    F --> G([Payment Gateway])
 
-    classDef service fill:#1983BC,color:#FFFFFF,stroke:#302F37
-    classDef external fill:#F093BC,color:#302F37,stroke:#302F37
-    class B,D,F service
-    class A,E,G external
+    classDef accent fill:#1983BC,color:#FFFFFF,stroke:#302F37
+    class B accent
 ```
 
 1. **Merchant calls the Payment Methods API** with filters (`customer_id`, `currency`, `plugin`, `tokenizable`, etc.).

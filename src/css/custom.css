@@ -184,6 +184,15 @@ html {
   display: block;
 }
 
+/* Checkout SDK page images — 40% smaller + centered */
+.theme-doc-markdown figure img[src*="checkout-sdk"],
+.theme-doc-markdown figure img[src*="googleusercontent"] {
+  max-width: 60%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
 /* Stepper (old docs style) */
 .stepper {
   counter-reset: step;

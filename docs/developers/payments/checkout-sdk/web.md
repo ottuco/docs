@@ -1,10 +1,11 @@
 ---
 toc_min_heading_level: 2
-toc_max_heading_level: 4
+toc_max_heading_level: 3
 ---
 
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
+import CheckoutDemo from "@site/src/components/CheckoutDemo";
 
 In this documentation, you will find comprehensive resources and guides to help you seamlessly integrate and leverage the features of SDK Version 3 in your development projects. Whether you're an experienced developer or just starting out, this documentation is designed to assist you at every step. For SDK Version 2 Documentation, please visit the following link: [SDK Version 2 Documentation](https://under-review-docs-ottu.gitbook.io/ottu-web-sdk/)
 
@@ -25,13 +26,7 @@ For optimal security, call REST APIs from server-side implementations, not clien
 
 Below is a demo of the Checkout SDK in action. This demo shows how the Checkout SDK can be used to create a streamlined checkout experience for customers, with support for multiple forms of payment and a customizable interface.
 
-<iframe
-  title="Ottu Checkout SDK Demo"
-  src="https://codepen.io/Ottu/embed/MWZrgPy?default-tab=result"
-  style={{ width: "100%", height: "600px", border: "0" }}
-  loading="lazy"
-  allow="fullscreen"
-/>
+<CheckoutDemo />
 
 ### Installation
 

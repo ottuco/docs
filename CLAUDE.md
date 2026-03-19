@@ -185,14 +185,12 @@ All sidebars defined in `sidebars.ts`. Auto-generated API reference uses `{type:
 
 ## Mermaid Diagrams
 
-All diagrams use a semantic color system where color communicates **responsibility**:
+**Monochrome + one accent.** Most nodes are neutral (no fill, gray border). Only the 1-2 key nodes get Ottu blue (`#1983BC`). Do NOT color every node — a diagram with 7 nodes should have 1-2 colored, not 5-7.
 
-- **Blue** (`#1983BC`) — Ottu services, APIs, infrastructure (Ottu owns it)
-- **Orange** (`#F57D2D`) — Core execution, orchestration, decision points (Ottu executes it) — **use sparingly, 1-3 nodes max**
-- **Red** (`#ED2833`) — Security, PCI boundaries, encryption, failure paths (Ottu protects it)
-- **Pink** (`#F093BC`) — External actors, merchant UI, banks, third parties (Ottu integrates with it)
-- **Dark** (`#302F37`) — Boundaries, containers, trust domains (Ottu isolates it)
-- **Light** (`#F4F4F4`) — Background (always light, never white or dark)
+- **Default nodes** — `#FAFAFA` fill, `#BFBFBF` border, `#302F37` text (set via theme config, no classDef needed)
+- **Accent** (`#1983BC`) — the key Ottu service or API the diagram is about (1-2 nodes max)
+- **Danger** (`#ED2833`) — genuine risk only: PCI boundary, encryption, failure path (0-1 nodes)
+- **Extended palette** (orange, pink, dark) — architecture diagrams only, never in simple workflows
 
 Use the `/mermaid` skill (`~/.claude/commands/mermaid.md`, global) for the full spec including theme config, classDefs, node shapes, and rules.
 

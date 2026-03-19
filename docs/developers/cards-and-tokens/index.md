@@ -39,31 +39,19 @@ Use saved tokens to charge customers automatically — for subscriptions, instal
 ## How They Connect
 
 ```mermaid
-%%{init: {
-  "theme": "base",
-  "themeVariables": {
-    "background": "#F4F4F4",
-    "primaryColor": "#1983BC",
-    "primaryTextColor": "#302F37",
-    "primaryBorderColor": "#302F37",
-    "lineColor": "#302F37",
-    "secondaryColor": "#F57D2D",
-    "tertiaryColor": "#F093BC"
-  }
-}}%%
+%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
 flowchart LR
-    M([Merchant]):::external -->|Creates session| CHECKOUT[Checkout API]:::service
-    CHECKOUT -->|Checkout page| CUST([Customer]):::external
+    M([Merchant]) -->|Creates session| CHECKOUT[Checkout API]
+    CHECKOUT -->|Checkout page| CUST([Customer])
     CUST -->|Enters card & pays| CHECKOUT
-    CHECKOUT -->|Token via webhook| TOKEN{{Secure Token}}:::execution
-    TOKEN --> CARDS[User Cards API]:::service
-    TOKEN --> DEBIT[Auto-Debit API]:::service
+    CHECKOUT -->|Token via webhook| TOKEN{{Secure Token}}
+    TOKEN --> CARDS[User Cards API]
+    TOKEN --> DEBIT[Auto-Debit API]
     M -->|List / delete cards| CARDS
     M -->|Charge saved token| DEBIT
 
-    classDef service fill:#1983BC,color:#FFFFFF,stroke:#302F37
-    classDef execution fill:#F57D2D,color:#FFFFFF,stroke:#302F37
-    classDef external fill:#F093BC,color:#302F37,stroke:#302F37
+    classDef accent fill:#1983BC,color:#FFFFFF,stroke:#302F37
+    class TOKEN accent
 ```
 
 **Typical flow:**
