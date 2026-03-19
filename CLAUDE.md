@@ -17,6 +17,8 @@ Built with Docusaurus 3.8.1 and TypeScript. Deployed on DigitalOcean App Platfor
 - **Package Manager**: npm (not yarn)
 - **API Docs Plugin**: `docusaurus-plugin-openapi-docs` + `docusaurus-theme-openapi-docs` — auto-generates interactive API reference from the enriched OpenAPI spec
 - **API Enrichment Engine**: `scripts/enrich-api-spec.ts` — transforms raw OpenAPI spec with permissions, better descriptions, and cross-links before the plugin processes it. See `scripts/README.md` for full docs.
+- **MCP Server**: `docusaurus-plugin-mcp-server` — exposes docs as an MCP server for AI tools (Claude Code, Cursor, VS Code). Install button in navbar. Section filtering via `excludeRoutes`.
+- **Search**: `@easyops-cn/docusaurus-search-local` — local full-text search, builds index at build time, no external service needed
 - **Mermaid Diagrams**: `@docusaurus/theme-mermaid` — enabled via `markdown.mermaid: true` in `docusaurus.config.ts`
 
 ## Documentation Philosophy

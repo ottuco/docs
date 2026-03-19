@@ -79,9 +79,9 @@ const sidebars: SidebarsConfig = {
                   label: 'Update Payment Transaction',
                   href: '/docs/developers/payments/checkout-api#api-update-payment-transaction',
                 },
+                {type: 'link', label: 'Upload Attachment', href: '/docs/developers/payments/checkout-api#upload-attachment'},
                 {type: 'link', label: 'One-Step Checkout', href: '/docs/developers/payments/checkout-api#one-step-checkout'},
                 {type: 'link', label: 'FAQ', href: '/docs/developers/payments/checkout-api#faq'},
-                {type: 'link', label: 'Upload Attachment', href: '/docs/developers/payments/checkout-api#upload-attachment'},
               ],
             },
             {

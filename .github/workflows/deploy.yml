@@ -1,6 +1,8 @@
 name: Deploy to DigitalOcean
 
 on:
+  push:
+    branches: [dev]
   workflow_dispatch:
     inputs:
       environment:
@@ -42,11 +44,20 @@ jobs:
     steps:
       - name: Trigger DigitalOcean App Platform Deployment
         run: |
-          if [ "${{ inputs.environment }}" == "dev" ]; then
+          # Auto-deploy: push to dev → dev environment
+          # Manual: workflow_dispatch → selected environment
+          if [ "${{ github.event_name }}" == "push" ]; then
             APP_ID="${{ secrets.DO_APP_ID_DEV }}"
-          else
+            ENV="dev"
+          elif [ "${{ inputs.environment }}" == "production" ]; then
             APP_ID="${{ secrets.DO_APP_ID_PROD }}"
+            ENV="production"
+          else
+            APP_ID="${{ secrets.DO_APP_ID_DEV }}"
+            ENV="dev"
           fi
+
+          echo "Deploying to $ENV environment..."
 
           curl -X POST \
             -H "Authorization: Bearer ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" \
@@ -55,4 +66,4 @@ jobs:
             --fail-with-body
 
       - name: Deployment Triggered
-        run: echo "Deployment triggered for ${{ inputs.environment }} environment"
+        run: echo "Deployment triggered successfully"

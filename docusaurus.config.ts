@@ -81,6 +81,10 @@ const config: Config = {
           label: 'Business',
         },
         {
+          type: 'custom-mcpButton' as any,
+          position: 'right',
+        },
+        {
           href: 'https://github.com/ottu',
           label: 'GitHub',
           position: 'right',
@@ -213,9 +217,34 @@ const config: Config = {
         },
       },
     ],
+    [
+      "docusaurus-plugin-mcp-server",
+      {
+        server: { name: "ottu-docs", version: "1.0.0" },
+        excludeRoutes: [
+          "/404*",
+          "/search*",
+          "/docs/business/*",
+          "/docs/developers/reference/*",
+        ],
+      },
+    ],
   ],
 
-  themes: ["docusaurus-theme-openapi-docs", "@docusaurus/theme-mermaid"],
+  themes: [
+    "docusaurus-theme-openapi-docs",
+    "@docusaurus/theme-mermaid",
+    [
+      "@easyops-cn/docusaurus-search-local",
+      {
+        hashed: true,
+        language: ["en"],
+        indexDocs: true,
+        indexBlog: false,
+        docsRouteBasePath: "/docs",
+      },
+    ],
+  ],
 };
 
 export default config;
