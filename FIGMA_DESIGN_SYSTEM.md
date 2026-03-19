@@ -54,14 +54,13 @@ Reference document for translating Figma designs into this codebase via the Mode
 | `--ifm-footer-background-color` | `#f7f7f7` | `#0b0d12` | `bg-[var(--background,white)]` on footer |
 | `--ifm-link-color` | `#f27e20` | `#f57d2d` | `text-[#f27e20]` on inline links |
 | `--ifm-link-hover-color` | `#da711d` | `#fabf97` | Derived (no hover state in Figma) |
-| `--ifm-global-border-color` | `#e5e5e5` | — | — |
+| `--ifm-global-border-color` | `#e5e5e5` | `#1e2939` | — |
 | `--ifm-code-background` | `#f2f2f2` | `#020617` | — |
 | `--ifm-code-color` | `#1d1d1d` | — | — |
-| `--ifm-menu-color-background-active` | `#f2f2f2` | — | `bg-[...#f2f2f2]` on active sidebar item |
+| `--ifm-menu-color-background-active` | `#f2f2f2` | `#1e2939` | `bg-[...#f2f2f2]` on active sidebar item |
 
 **Note:** Some Figma values differ from what's currently active in the CSS. The Figma design shows:
-- Borders: `#dadada` (from `border-[var(--border,#dadada)]`) — currently `#e5e5e5` in CSS
-- Inline code: bg `#e5e7eb`, text `#364153` — currently `#f2f2f2` / `#1d1d1d` in CSS
+- Borders: `#dadada` (from `border-[var(--border,#dadada)]`) — currently `#e5e5e5` in the CSS variable; `#dadada` is used directly for the sidebar container border
 - Dark mode text: `#d1d5dc` — currently `#e5e7eb` in CSS
 - Dark mode headings: `#e5e7eb` — currently `#ffffff` in CSS
 
@@ -138,8 +137,8 @@ These are actively applied in the CSS:
 | All menu links | Poppins | 14px | 400 (Regular) | `#302f37` | `font-['Poppins:Regular'] text-[#302f37] text-[14px]` |
 | Category labels | Poppins | 14px | 400 (Regular) | `#8e8e93` | `font-['Poppins:Regular'] text-[color:var(--grays/gray,#8e8e93)]` |
 | Active item text | Poppins | 14px | 600 (SemiBold) | `var(--ifm-menu-color-active)` | `font-['Poppins:SemiBold'] text-[#f27e20]` |
-| Active category bg | — | — | — | `#f2f2f2` | `bg-[...#f2f2f2]` on active collapsible |
-| Sidebar border | — | — | — | `#dadada` | `border-[var(--border,#dadada)]` on sidebar container |
+| Active category bg | — | — | — | `#f2f2f2` (light) / `#1e2939` (dark) | `bg-[...#f2f2f2]` on active collapsible |
+| Sidebar border | — | — | — | `#dadada` (light) / `#1e2939` (dark) | `border-[var(--border,#dadada)]` on sidebar container |
 | Link border-radius | — | — | — | `8px` | `rounded-[8px]` on menu items |
 | Link padding | — | — | — | `12px 8px` | `p-[12px]` on active item |
 
@@ -149,15 +148,15 @@ These are actively applied in the CSS:
 
 Actively applied in `.markdown code`:
 
-| Property | Value | Figma Source |
-|----------|-------|--------------|
-| Background | `#e5e7eb` | `bg-[#e5e7eb]` on code badges like "PG_code" |
-| Text color | `#364153` | `text-[#364153]` on code badge text |
-| Border radius | `4px` | `rounded-[4px]` on code badges |
-| Padding | `4px 8px` | `px-[8px] py-[4px]` on code badges |
-| Font family | Consolas | `font-['Consolas:Regular']` |
-| Font size | 14px / 0.875rem | `text-[14px]` |
-| Font weight | 400 | Regular weight |
+| Property | Light Mode | Dark Mode | Figma Source |
+|----------|-----------|-----------|--------------|
+| Background | `#e5e7eb` | `#1e2939` | `bg-[#e5e7eb]` on code badges like "PG_code" |
+| Text color | `#364153` | `#d1d5dc` | `text-[#364153]` on code badge text |
+| Border radius | `4px` | — | `rounded-[4px]` on code badges |
+| Padding | `4px 8px` | — | `px-[8px] py-[4px]` on code badges |
+| Font family | Consolas | — | `font-['Consolas:Regular']` |
+| Font size | 14px / 0.875rem | — | `text-[14px]` |
+| Font weight | 400 | — | Regular weight |
 
 ---
 
