@@ -8,7 +8,7 @@ import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 
 # Payment Methods
 
-The Payment Methods API lets you discover which payment gateways and methods are available for a given transaction. Instead of hardcoding payment options, you call this API to get the current list of active gateways — filtered by currency, plugin, tokenization support, or customer. This ensures your checkout always shows up-to-date payment options, even when gateway configurations change.
+The Payment Methods API lets you discover which payment gateways and methods are available for a given transaction. Instead of hardcoding payment options, you call this API to get the current list of active gateways — filtered by currency, plugin, tokenization support, or customer. The response includes each gateway's supported operations ([refunds](../operations.md), voids, captures), wallet integrations (Apple Pay, Google Pay), currencies, and tokenization capabilities. This ensures your checkout always shows up-to-date payment options, even when gateway configurations change.
 
 :::tip Boost Your Integration
 Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../getting-started/#boost-your-integration) for all available options. For environment setup (plugins, gateway codes, sandbox vs production), see [Configure Your Environment](../getting-started/#configure-your-environment).
@@ -22,70 +22,55 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 - **Customized checkout** — tailor payment options per customer based on their history or preferences.
 - **Dynamic updates** — when gateway settings or MID configurations change in the dashboard, the API automatically reflects the updates. No code changes needed.
 
-## How it Works
+## Guide
 
-The Payment Methods API is a foundation for other Ottu APIs. It provides the data needed to create payment sessions with the right gateways.
-
-### Purpose
-
-1. **Automation and Flexibility:** The API ensures your integration stays current even when payment gateway configurations change — no code modifications needed.
-2. **Caching for Efficiency:** The data doesn't change frequently. Cache the response for 24 hours to reduce API calls. Implement a cache-clear mechanism for immediate updates.
-3. **Tailored Customer Experience:** Use filters to customize which payment methods the customer sees. For example, filter by `tokenizable`=`true` for recurring payment setups.
-4. **Versatility:** The API isn't just for the [Checkout API](./checkout-api.mdx) — it's also used by the [User Cards API](../cards-and-tokens/user-cards) and other services.
+The Payment Methods API is a foundation for other Ottu APIs. It returns detailed information about each available payment method — supported operations, wallet integrations, currencies, and tokenization capabilities — giving you the data needed to create payment sessions with the right gateways.
 
 ### Workflow
 
-<figure>
-  <img
-    src="/img/payment-methods-workflow.png"
-    alt="Payment Methods API workflow diagram"
-    style={{ maxWidth: "100%", height: "auto" }}
-  />
-  <figcaption>Payment Methods API workflow diagram</figcaption>
-</figure>
+```mermaid
+graph LR
+    A([Merchant]) --> B[Payment Methods API]
+    B --> C{{pg_codes}}
+    C --> D[Checkout API]
+    D --> E([Customer])
+    E --> F[Ottu]
+    F --> G([Payment Gateway])
+
+    classDef service fill:#1983BC,color:#FFFFFF,stroke:#302F37
+    classDef external fill:#F093BC,color:#302F37,stroke:#302F37
+    class B,D,F service
+    class A,E,G external
+```
+
+1. **Merchant calls the Payment Methods API** with filters (`customer_id`, `currency`, `plugin`, `tokenizable`, etc.).
+2. **Ottu returns available `pg_codes`** — the active gateways matching the filters.
+3. **Merchant passes `pg_codes` to the Checkout API** to create a payment session with the right gateways.
+4. **Customer sees current payment options** — only active, relevant methods. No manual updates needed.
 
 ### Step-by-Step
 
-1. **Call the Payment Methods API** — retrieve available payment methods based on your filters (`customer_id`, `currency`, `plugin`, `tokenizable`, etc.).
+1. **Call the Payment Methods API** — retrieve available payment methods based on your filters.
+
+    ```json
+    POST: https://beta.ottu.net/b/pbl/v2/payment-methods/
+    {
+        "plugin": "e_commerce",
+        "operation": "purchase",
+        "tokenizable": "true",
+        "currencies": ["USD"]
+    }
+    ```
+
+    This returns `"pg_codes": ["kpay"]`, which can then be used in subsequent API calls.
 
 2. **Pass the results to the Checkout API** — use the returned `pg_codes` when creating a payment session. For example, if the API returns `"pg_codes": ["PG001"]`, include that code in your [Checkout API](./checkout-api.mdx) call.
 
-3. **Customer sees current payment options** — the checkout page displays only the active, relevant payment methods. No manual updates needed.
-
-#### Example
-
-To retrieve payment methods that support `USD` and `tokenization` for `e-commerce` purchases:
-
-```json
-POST: https://beta.ottu.net/b/pbl/v2/payment-methods/
-{
-    "plugin": "e_commerce",
-    "operation": "purchase",
-    "tokenizable": "true",
-    "currencies": ["USD"]
-}
-```
-
-This request will return the `"pg_codes": ["kpay"]`, which can then be used in subsequent API calls.
-
----
-
-<ApiDocEmbed path="get-payment-methods.api.mdx" />
-
----
-
-## Guide
-
-The Payment Methods API response provides detailed information about each available payment method — not just which ones are available, but their capabilities:
-
-- **Operations:** Which operations each gateway supports ([refunds](../operations.md), voids, captures).
-- **Wallet integrations:** Apple Pay, Google Pay support per gateway.
-- **Supported currencies:** Which currencies each gateway handles.
-- **Tokenization:** Whether the gateway supports saving cards for future payments.
+3. **Customer sees current payment options** — the checkout page displays only the active, relevant payment methods. When gateway configurations change, the API automatically reflects the updates — no code changes needed.
 
 ### Use Cases
 
-#### Use Case 1: Expanding Payment Options
+#### Expanding Payment Options
 
 **Scenario:** A merchant wants to offer a broad range of payment options for e-commerce customers.
 
@@ -93,17 +78,13 @@ The Payment Methods API response provides detailed information about each availa
 2. Use the `plugin` filter to get only `e_commerce` payment methods.
 3. Customers see a broader range of options at checkout, increasing successful transactions.
 
----
-
-#### Use Case 2: Dynamic Payment Updates
+#### Dynamic Payment Updates
 
 **Scenario:** The merchant's gateway settings or MID configuration has changed, and they want updates reflected automatically.
 
 Once integrated with the Payment Methods API, any change in gateway settings or MID configuration is auto-reflected. Merchants don't have to initiate manual updates — the API handles seamless integration.
 
----
-
-#### Use Case 3: Subscription Payments with Tokenization Filter
+#### Subscription Payments with Tokenization Filter
 
 **Scenario:** An online subscription service wants to offer automatic recurring payments.
 
@@ -111,15 +92,17 @@ Once integrated with the Payment Methods API, any change in gateway settings or 
 2. Integrate these gateways into the checkout process.
 3. Customers choosing a subscription see only payment methods that support tokenization. The selected method is set to automatically debit at specified intervals.
 
----
-
-#### Use Case 4: Managing Subsequent Charges with Tokenized Cards
+#### Managing Subsequent Charges with Tokenized Cards
 
 **Scenario:** An e-commerce platform wants to charge only cards that are tokenization-enabled by the customer.
 
 1. Call the Payment Methods API to retrieve tokenization-supported `pg_codes`.
 2. Pass these `pg_codes` to the [User Cards API](../cards-and-tokens/user-cards). It returns only saved cards that have tokenization enabled.
 3. For [subsequent transactions](../cards-and-tokens/recurring-payments), the system only charges approved, tokenization-enabled cards.
+
+## API Reference
+
+<ApiDocEmbed path="get-payment-methods.api.mdx" />
 
 ## Best Practices
 

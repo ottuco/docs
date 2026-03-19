@@ -198,6 +198,33 @@ ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
   }
 }
 
+/* Hide the authorization display box on API reference pages —
+   auth is documented in getting-started/authentication.md */
+.openapi-security__details {
+  display: none;
+}
+
+/* Language selector dropdown (replaces horizontal carousel) */
+.openapi-tabs__code-dropdown {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--ifm-global-border-color);
+  border-radius: 8px;
+  background: var(--ifm-background-surface-color);
+  color: var(--ifm-font-color-base);
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  appearance: auto;
+}
+
+.openapi-tabs__code-dropdown:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: -2px;
+}
+
 .openapi-tabs__schema-container
   .openapi-tabs__schema-tabs-container
   ul.openapi-tabs__schema-list-container.tabs.openapi-tabs__schema {

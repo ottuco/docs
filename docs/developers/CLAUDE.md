@@ -72,48 +72,53 @@ docs/developers/
 
 ## Page Template
 
-Standard structure for developer API/feature pages. Apply sections as relevant — not every page needs every section, but the **order must be consistent**:
+Standard structure for developer API/feature pages. **Section order is fixed** — skip sections that don't apply, but never reorder them:
 
 ```
 # Page Title
 
 [Overview paragraph — what this is and why you need it]
 
-## Setup
-  - Prerequisites / checklist
-  - Enabling the plugin (if applicable)
-  - Activating payment gateway codes (if applicable)
-  - :::tip Boost Your Integration (one-liner linking to getting-started)
+:::tip Boost Your Integration
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../getting-started/#boost-your-integration) for all available options.
+:::
 
----
-<ApiDocEmbed ... />   ← auto-generated API reference (permissions are injected via enrichment engine)
----
+## When to Use                    ← scenarios / bullet list of when this feature applies
 
-## Guide
-  - Step-by-step walkthrough with code examples
-  - Workflow diagram (if applicable)
+## Setup                          ← (optional) prerequisites, requirements, checklist
 
-## Best Practices
+## Guide                          ← ALL walkthrough content lives here
+  ### Workflow                    ← mermaid diagram + brief explanation of each step
+  ### Step-by-Step                ← numbered steps with code examples
+  ### Use Cases                   ← (optional) specific scenarios, provider-specific details
+
+## API Reference                  ← interactive schema via <ApiDocEmbed>, always with this H2 heading
+  <ApiDocEmbed path="..." />
+
+## Best Practices                 ← (optional) caching, error handling, performance tips
 
 ## FAQ
 
 ## What's Next?
 ```
 
-### Page Structure Rules
+### Key Rules
+
+- **"Guide" is the single walkthrough section** — all tutorial content goes here. No standalone "How it Works", "Integration Flows", "Quick Start", or "Provider Setup" at H2 level. Use these canonical `###` subsections within Guide:
+  - `### Workflow` — mermaid diagram showing the flow + brief explanation of each step
+  - `### Step-by-Step` — numbered instructions with code examples (the "how to actually call it" section)
+  - `### Use Cases` — (optional) specific scenarios, provider-specific details
+- **"API Reference" always has an H2 heading** — never use bare `<ApiDocEmbed>` with `---` separators. If a page covers multiple related endpoints, use `<Tabs>` wrapping multiple `<ApiDocEmbed>` components.
+- **Section order is fixed** — Overview → When to Use → Setup → Guide → API Reference → Best Practices → FAQ → What's Next? Skip optional sections, never reorder.
+- **Optional sections** — Setup, Best Practices can be omitted. When to Use, Guide, FAQ, and What's Next? should be on every page.
+
+### Additional Rules
 
 - **No standalone Authentication or Permissions sections** — authentication is documented in `getting-started/authentication.md`, and per-endpoint permissions are injected into the API reference via the enrichment engine (`static/api-enrichments/`). Do not duplicate this on individual pages.
-- **No per-page SDK/package callouts** — all integration options (REST API, Checkout SDK, Python SDK, Django SDK, MCP Server) are documented centrally in `getting-started/index.md#boost-your-integration`. Individual pages use a brief `:::tip` linking back:
-  ```markdown
-  :::tip Boost Your Integration
-  Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../getting-started/#boost-your-integration) for all available options.
-  :::
-  ```
+- **No per-page SDK/package callouts** — all integration options are documented centrally in `getting-started/index.md#boost-your-integration`. Individual pages use the `:::tip Boost Your Integration` block shown above.
 - **Every page ends with "What's Next?"** — 3-5 links to the logical next steps in the developer journey.
-- **FAQ is always second-to-last** (before What's Next). Use bold text for sub-groupings within FAQ, not H3 headings (H3s create sidebar entries).
-- **Guide sections use "Guide" as the heading** — not "Implementation", "Quick Start", or "How to Use". Keep it consistent.
-- **Section headings use H2 (##)** — sub-sections use H3 (###). H4 (####) only for items within a section (e.g., FAQ questions).
-- **Interactive API reference is mandatory** — every page that documents a REST API endpoint must include an `<ApiDocEmbed>` with the full interactive schema. If a page covers multiple related endpoints (e.g., Native Payments with Apple Pay, Google Pay, Auto-Debit), use `<Tabs>` wrapping multiple `<ApiDocEmbed>` components so the reader can switch between them without scrolling through separate schema sections.
+- **FAQ is always second-to-last** (before What's Next). Use H4 (####) for individual questions, not H3 (H3s create sidebar entries).
+- **Section headings use H2 (##)** — sub-sections use H3 (###). H4 (####) only for items within a section (e.g., FAQ questions, best practice items).
 
 ## API Documentation
 

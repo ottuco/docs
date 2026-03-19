@@ -477,6 +477,14 @@ html {
   color: #d1d5dc;
 }
 
+/* Prevent markdown font overrides from breaking Mermaid node text sizing.
+   Mermaid calculates node widths using its default font before CSS applies.
+   If a custom font (Poppins) is inherited, text overflows the pre-sized nodes. */
+.markdown .docusaurus-mermaid-container,
+.markdown .docusaurus-mermaid-container * {
+  font-family: "trebuchet ms", verdana, arial, sans-serif;
+}
+
 /* Table styling — from Figma */
 .markdown table thead tr {
   background-color: var(--ifm-background-surface-color);

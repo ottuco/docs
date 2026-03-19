@@ -194,7 +194,7 @@ All diagrams use a semantic color system where color communicates **responsibili
 - **Dark** (`#302F37`) — Boundaries, containers, trust domains (Ottu isolates it)
 - **Light** (`#F4F4F4`) — Background (always light, never white or dark)
 
-Use the `/mermaid` skill (`.claude/commands/mermaid.md`) for the full spec including theme config, classDefs, node shapes, and rules.
+Use the `/mermaid` skill (`~/.claude/commands/mermaid.md`, global) for the full spec including theme config, classDefs, node shapes, and rules.
 
 ## Planning & Scratch Files
 

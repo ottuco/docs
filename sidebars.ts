@@ -90,13 +90,8 @@ const sidebars: SidebarsConfig = {
               link: {type: 'doc', id: 'developers/payments/payment-methods'},
               items: [
                 {type: 'link', label: 'When to Use', href: '/docs/developers/payments/payment-methods#when-to-use'},
-                {type: 'link', label: 'How it Works', href: '/docs/developers/payments/payment-methods#how-it-works'},
-                {
-                  type: 'link',
-                  label: 'Retrieve Payment Methods',
-                  href: '/docs/developers/payments/payment-methods#api-retrieve-a-list-of-payment-methods-based-on-filter-values',
-                },
                 {type: 'link', label: 'Guide', href: '/docs/developers/payments/payment-methods#guide'},
+                {type: 'link', label: 'API Reference', href: '/docs/developers/payments/payment-methods#api-reference'},
                 {type: 'link', label: 'Best Practices', href: '/docs/developers/payments/payment-methods#best-practices'},
                 {type: 'link', label: 'FAQ', href: '/docs/developers/payments/payment-methods#faq'},
               ],
@@ -107,9 +102,8 @@ const sidebars: SidebarsConfig = {
               link: {type: 'doc', id: 'developers/payments/native-payments'},
               items: [
                 {type: 'link', label: 'When to Use', href: '/docs/developers/payments/native-payments#when-to-use'},
-                {type: 'link', label: 'Integration Flows', href: '/docs/developers/payments/native-payments#integration-flows'},
                 {type: 'link', label: 'Setup', href: '/docs/developers/payments/native-payments#setup'},
-                {type: 'link', label: 'Quick Start', href: '/docs/developers/payments/native-payments#quick-start'},
+                {type: 'link', label: 'Guide', href: '/docs/developers/payments/native-payments#guide'},
                 {type: 'link', label: 'API Reference', href: '/docs/developers/payments/native-payments#api-reference'},
                 {type: 'link', label: 'FAQ', href: '/docs/developers/payments/native-payments#faq'},
               ],
