@@ -42,6 +42,10 @@ Before implementing auto-debit, ensure you have:
 - A [webhook endpoint](/docs/developers/webhooks/index.md) configured to receive payment notifications
 - Familiarity with the [User Cards API](user-cards.mdx) for card management
 
+:::tip Boost Your Integration
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../../getting-started/#boost-your-integration) for all available options.
+:::
+
 ## Implementation: First Payment (CIT)
 
 The first payment establishes the agreement and saves the customer's card.

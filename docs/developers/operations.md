@@ -35,16 +35,9 @@ Before proceeding with any operation, it is essential to have an existing paymen
 
 Once a payment transaction has been initiated, you will receive either a [session_id](/docs/developers/payments/checkout-api) or an [order_no](/docs/developers/payments/checkout-api). It is recommended to use the session_id for operations, as it is always present in the response, whereas order_no is a property defined by the merchant and may not always be available. Remember to securely store these identifiers, as they are essential for performing operations on the payment transaction.
 
-### [Boost Your Integration](#boost-your-integration)
-
-To enhance your integration with Operation APIs such as [Cancel](#cancel), [Expire](#expire), [Delete](#delete), [Capture](#capture), [Refund](#refund), and [Void](#void), consider leveraging our dedicated Python SDK. This SDK simplifies the integration process by encapsulating complex API interactions, thus allowing you to focus on the core functionalities of your business.
-
-**Available Package:**
-
-- **Python SDK:** Streamlines the management of operations like cancellation, expiration, deletion, capture, refund, and void actions through a straightforward, object-oriented interface. [Learn more](https://github.com/ottuco/ottu-py?tab=readme-ov-file#operations)
-- **Django SDK:** Seamlessly integrates payment methods into Django projects, offering specialized tools and utilities that simplify payment processes. [Explore details](https://github.com/ottuco/ottu-py?tab=readme-ov-file#django-integration)
-
-Understanding the key concepts and frameworks documented is crucial for utilizing this package effectively and ensuring robust, maintainable integration.
+:::tip Boost Your Integration
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](./getting-started/#boost-your-integration) for all available options.
+:::
 
 ## [Internal Operations](#internal-operations)
 
@@ -251,3 +244,9 @@ The required permissions depend on the operation you want to perform. You can gr
 When a [refund](#refund) operation is requested via the API, the request goes directly to the payment gateway and the maker-checker flow is not activated. Currently, the maker-checker flow can only be enabled for operations performed manually via the Ottu dashboard. This ensures that refunds are issued directly when requested via the API, bypassing the internal approval process.
 
 As we conclude this guide, we hope that the provided information has given you a comprehensive understanding of the operations endpoint and its various functionalities. We've covered everything from initial setup to the various types of operations and how they interact with different transaction states. However, in case you need to delve deeper into the technical implementation, feel free to explore the [API Schema Reference](/docs/developers/apis/ottu-api). Remember, each operation has specific requirements and behaviors, so it's important to carefully review this documentation before proceeding. As always, we're here to help should you need any further assistance or clarification. Happy integrating with Ottu!
+
+## What's Next?
+
+- [**Webhooks**](./webhooks/operation-events.md) — Receive notifications when operations complete
+- [**Checkout API**](./payments/checkout-api.mdx) — Create payment sessions to operate on
+- [**Payment States**](./reference/payment-states.md) — Understand how operations change transaction states

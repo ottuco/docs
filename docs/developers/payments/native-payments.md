@@ -112,6 +112,10 @@ If a transaction has `knet` and `mpgs` `pg_code` but only `knet` supports Apple 
 - [x] Sent wallet payment payload or gateway token (no raw card data).
 - [x] Implemented backend sync logic.
 
+:::tip Boost Your Integration
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../getting-started/#boost-your-integration) for all available options.
+:::
+
 ## [Apple Pay](#apple-pay)
 
 :::info
@@ -205,3 +209,9 @@ The payment will fail — wallet tokens must be sent unmodified.
 #### 6 Can I charge saved tokens automatically?
 
 Yes, use the **Native Payment API** for tokenized or recurring payments.
+
+## What's Next?
+
+- [**Checkout API**](./checkout-api.mdx) — Create sessions with `payment_instrument` for one-step checkout
+- [**Recurring Payments**](../cards-and-tokens/recurring-payments.md) — Use tokens for auto-debit payments
+- [**Webhooks**](../webhooks/payment-events.md) — Receive payment result notifications

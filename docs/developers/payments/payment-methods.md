@@ -34,25 +34,9 @@ Ensure you’re in the correct mode before initiating payments.
 
 :::
 
-### [Boost Your Integration](payment-methods.md#boost-your-integration)
-
-To accelerate the integration process, consider using our official packages. These packages handle the heavy lifting involved in integrating with our API. They encapsulate much of the API interaction logic, allowing you to focus on core business logic.
-
-**Available Packages:**
-
-- **Python SDK:** Simplifies access to payment methods using a Pythonic interface, enhancing developer productivity by abstracting complex API calls. [Learn more](https://github.com/ottuco/ottu-py#accessing-the-payment-methods).
-- **Django SDK:** Integrates payment methods seamlessly into Django projects, providing tools and utilities specific to Django, which streamline payment processes. [Explore details](https://github.com/ottuco/ottu-py?tab=readme-ov-file#django-integration).
-
-While these packages offer substantial speed and convenience benefits, understanding the foundational concepts and structures outlined in the documentation is crucial. This ensures that you can effectively integrate and use the packages in a robust and maintainable manner.
-
-## [Authentication](payment-methods.md#authentication)
-
-**Supported Methods**
-
-- [Private API Key](../getting-started/authentication.md#private-key-api-key)
-- [Basic Authentication](../getting-started/authentication.md#basic-authentication)
-
-For detailed information on authentication procedures, please refer to the [Authentication documentation](payment-methods.md#authentication).
+:::tip Boost Your Integration
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../getting-started/#boost-your-integration) for all available options.
+:::
 
 ## [How it Works](payment-methods.md#how-it-works)
 
@@ -256,6 +240,7 @@ By adhering to these best practices, you’ll ensure efficient API usage, mainta
 
 ## [FAQ](payment-methods.md#faq)
 
+
 #### :digit_one: [What is the main purpose of the Payment Methods API?](./payment-methods)
 
 The `Payment Methods API` is designed to streamline the process of online transactions by offering an effortless automation system for payments.
@@ -267,3 +252,9 @@ No, the `Payment Methods API` allows for a seamless integration without requirin
 **Conclusion**
 
 In conclusion, the `Payment Methods API` offers dynamic adaptability. Any modifications made to the gateway settings or `MID` configuration will be automatically reflected in the API. This ensures a hassle-free experience, eliminating the need for constant developer intervention. Whether you're adding a new gateway, introducing a new method, or incorporating an additional payment method for your store, there's no need for manual updates in your shop's integration. Once integrated with this API, any changes made will be seamlessly displayed. Simplifying the process, the `Payment Methods API` guarantees efficiency and adaptability for your transaction needs.
+
+## What's Next?
+
+- [**Checkout API**](./checkout-api.mdx) — Create payment sessions using the discovered payment methods
+- [**Native Payments**](./native-payments.md) — Direct Apple Pay and Google Pay payments
+- [**Checkout SDK**](./checkout-sdk/) — Drop-in UI that automatically uses available payment methods

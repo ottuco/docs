@@ -43,14 +43,9 @@ Before you can integrate with Ottu's `Message Notifications API`, several prereq
    - **Template Approval**: All WhatsApp templates and their content must be pre-approved by Meta/WhatsApp before being used for message notifications.
    - **WhatsApp Integration Authenticator**: This acts as the link between WhatsApp and Ottu. Contact the [Ottu support team](mailto:support@ottu.com) for assistance in configuring the integration.
 
-## Authentication
-
-**Supported Methods**
-
-- [Private API Key](/docs/developers/getting-started/authentication#private-key-api-key)
-- [Basic Authentication](/docs/developers/getting-started/authentication#basic-authentication)
-
-For further information, please refer to the [Authentication](/docs/developers/getting-started/authentication) section.
+:::tip Boost Your Integration
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](./getting-started/#boost-your-integration) for all available options.
+:::
 
 ## How It Works
 
@@ -220,3 +215,8 @@ To configure your SMS or WhatsApp provider, contact the [Ottu support team](mail
 #### 9. **Is it possible to send message notifications for different channels in a single API call?**
 
 Yes, you can specify multiple channels (e.g., [`sms`, `email`, `whatsapp`]) in a single API call to send message notifications via multiple platforms simultaneously.
+
+## What's Next?
+
+- [**Checkout API**](./payments/checkout-api.mdx) — Configure notifications when creating payment sessions
+- [**Webhooks**](./webhooks/payment-events.md) — Server-to-server payment event notifications

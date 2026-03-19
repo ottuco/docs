@@ -72,16 +72,47 @@ docs/developers/
 
 ## Page Template
 
-Standard structure for developer documentation pages (apply sections as relevant):
+Standard structure for developer API/feature pages. Apply sections as relevant — not every page needs every section, but the **order must be consistent**:
 
-1. **Overview** — what this feature is and why you need it
-2. **Prerequisites** — what the developer needs before starting (with links)
-3. **Authentication** — which method to use, link to `getting-started/authentication.md`
-4. **How It Works** — conceptual explanation of the flow
-5. **Code Examples** — multi-language tabs with complete, runnable examples
-6. **Error Handling** — common errors, what they mean, how to fix them
-7. **Best Practices** — recommended patterns and approaches
-8. **What's Next? / Related** — logical next steps and related topics
+```
+# Page Title
+
+[Overview paragraph — what this is and why you need it]
+
+## Setup
+  - Prerequisites / checklist
+  - Enabling the plugin (if applicable)
+  - Activating payment gateway codes (if applicable)
+  - :::tip Boost Your Integration (one-liner linking to getting-started)
+
+---
+<ApiDocEmbed ... />   ← auto-generated API reference (permissions are injected via enrichment engine)
+---
+
+## Guide
+  - Step-by-step walkthrough with code examples
+  - Workflow diagram (if applicable)
+
+## Best Practices
+
+## FAQ
+
+## What's Next?
+```
+
+### Page Structure Rules
+
+- **No standalone Authentication or Permissions sections** — authentication is documented in `getting-started/authentication.md`, and per-endpoint permissions are injected into the API reference via the enrichment engine (`static/api-enrichments/`). Do not duplicate this on individual pages.
+- **No per-page SDK/package callouts** — all integration options (REST API, Checkout SDK, Python SDK, Django SDK, MCP Server) are documented centrally in `getting-started/index.md#boost-your-integration`. Individual pages use a brief `:::tip` linking back:
+  ```markdown
+  :::tip Boost Your Integration
+  Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../getting-started/#boost-your-integration) for all available options.
+  :::
+  ```
+- **Every page ends with "What's Next?"** — 3-5 links to the logical next steps in the developer journey.
+- **FAQ is always second-to-last** (before What's Next). Use bold text for sub-groupings within FAQ, not H3 headings (H3s create sidebar entries).
+- **Guide sections use "Guide" as the heading** — not "Implementation", "Quick Start", or "How to Use". Keep it consistent.
+- **Section headings use H2 (##)** — sub-sections use H3 (###). H4 (####) only for items within a section (e.g., FAQ questions).
 
 ## API Documentation
 

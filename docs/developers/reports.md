@@ -153,32 +153,8 @@ make GET request to `download_action.url` to download the file
 If you don’t pass date filters, the List Reports API returns **the last 30 days** of finished reports, sorted newest first.
 :::
 
-## [Authentication](#authentication)
-
-**Supported Methods**
-
-- [Private API Key](/docs/developers/getting-started/authentication#private-key-api-key)
-- [Basic Authentication](/docs/developers/getting-started/authentication#basic-authentication)
-
-For detailed information on authentication procedures, please refer to the [Authentication documentation](#authentication).
-
-## [Permissions](#permissions)
-
-Permissions apply only when using [Basic Auth](/docs/developers/getting-started/authentication#basic-authentication).
-
-#### Required permission
-
-- `report.can_view_report`
-
-#### Rules
-
-- If the user has the permission or is a superuser, the **List** and **Download** APIs work normally.
-- If the user **does not have the permission**, the API responds with:
-  - **403 Forbidden**
-  - Message like: `"No permission assigned"`
-
-:::tip
-API Key authentication does **not** require user permissions, since it is merchant-scoped.
+:::tip Boost Your Integration
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](./getting-started/#boost-your-integration) for all available options.
 :::
 
 ## [How it works](#how-it-works)
@@ -328,3 +304,8 @@ Ask your admin to enable report API access.
 #### 7. **Are downloads logged even if they fail?**
 
 Yes. Every attempt is logged with outcome status for audit compliance.
+
+## What's Next?
+
+- [**Checkout API**](./payments/checkout-api.mdx) — Create payment transactions that appear in reports
+- [**Operations**](./operations.md) — Refund, capture, or void transactions

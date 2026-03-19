@@ -52,50 +52,9 @@ Sources of Decimal Standards:
 
 Once you've fulfilled these prerequisites, you're ready to integrate the Invoice API. The following sections of this document will guide you through the authentication process and the usage of various API endpoints.
 
-### [Boost Your Integration](#boost-your-integration)
-
-Optimize your integration with the `Invoice API` using our official packages, designed to significantly simplify the process. These packages efficiently handle the complexities of API integration, allowing you to focus on the critical elements of your project.
-
-**Available Packages:**
-
-- **Python SDK:** Enhances access to invoice functionalities through a Pythonic interface, effectively abstracting the intricacies of API interactions to boost developer efficiency. [Learn more](https://github.com/ottuco/ottu-py?tab=readme-ov-file#ottu-py)
-- **Django SDK:** Seamlessly integrates invoice features into Django-based applications, providing Django-specific enhancements that streamline invoice transactions. [Continue exploring](https://github.com/ottuco/ottu-py?tab=readme-ov-file#django-integration)
-
-While these packages enhance speed and convenience, understanding the foundational concepts detailed in the documentation is essential for robust and sustainable integration.&#x20;
-
-## [Authentication](#authentication)
-
-**Supported Methods**
-
-- [Private API Key](/docs/developers/getting-started/authentication#private-key-api-key)
-- [Basic Authentication](/docs/developers/getting-started/authentication#basic-authentication)
-
-For detailed information on authentication procedures, please refer to the [Authentication documentation](#authentication).
-
-## [Permissions](#permissions)
-
-Below, we are explaining how permissions are managed using [Basic Authentication](/docs/developers/getting-started/authentication#basic-authentication) and [Private API Key](/docs/developers/getting-started/authentication#private-key-api-key).
-
-**When using Basic Authentication,** it is important to ensure that the appropriate level of permissions is assigned to each user or application using the APIs. This can help to prevent unauthorized access to sensitive data.
-
-Ottu `Invoice API` supports different levels of permissions for the [Payment Request](/docs/developers/payments/payment-methods#enabling-the-plugin) and[ E-Commerce](/docs/developers/payments/payment-methods#enabling-the-plugin) plugins.
-
-To create a transaction, user requires specific permissions that vary depending on the plugin in use:
-
-- “**Can add payment requests**” for the Payment Request plugin
-- “**Can add e-commerce payments**” for the E-Commerce plugin
-
-And also needs permission to use the required Payment Gateway
-
-- "**Can use `pg_code`**”
-
-To add invoice, user needs to have below permission:
-
-- “**Can add Invoice**”&#x20;
-
-**When using the Private API Key**, all permissions are granted by default, as the private `API-Key` is considered to have admin permissions.\
-\
-It is recommended to regularly rotate `API keys` and follow secure password storage practices when using `Basic Authentication`.
+:::tip Boost Your Integration
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](./getting-started/#boost-your-integration) for all available options.
+:::
 
 ## [How it Works](#how-it-works)
 
@@ -405,3 +364,9 @@ Ottu uses a specific logic for calculating totals and taxes at both the item and
 For detailed technical understanding and implementation specifics, refer to Ottu's OpenAPI schema in the [API Schema Reference](/docs/developers/apis/ottu-api) section of the documentation.
 
 **To conclude,** Ottu's `Invoice API` presents a powerful tool for businesses and developers, offering a seamless and automated solution for invoice generation. With a focus on user-friendly integration, the API streamlines the invoicing process, providing flexibility and customization for merchants. The comprehensive features, including detailed invoice information and generation logic, ensure accuracy and efficiency. Ottu's `Invoice API` stands as a valuable asset for those seeking to enhance their invoicing workflows, providing a reliable and advanced solution for a diverse range of businesses.
+
+## What's Next?
+
+- [**Checkout API**](./payments/checkout-api.mdx) — The underlying API that Invoice API builds upon
+- [**Webhooks**](./webhooks/payment-events.md) — Receive payment status notifications for invoices
+- [**Operations**](./operations.md) — Refund, capture, or void invoice payments
