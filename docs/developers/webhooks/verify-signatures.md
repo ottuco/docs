@@ -92,9 +92,9 @@ Ensuring the integrity and authenticity of webhook payloads is paramount for the
 
 ### Python
 
-Python function example for generating the HMAC signature given a payload and an HMAC key:
+Python function for generating the HMAC signature given a payload and an HMAC key:
 
-```python
+```python title="Python"
 import hmac
 import hashlib
 
@@ -151,7 +151,7 @@ When you run this code, the printed result should match the provided HMAC signat
 
 ### PHP
 
-```php
+```php title="PHP"
 <?php
 
 function generateHmacSignature($payload, $hmacKey) {
@@ -186,7 +186,7 @@ echo generateHmacSignature($payload, $hmacKey);
 
 ### Java
 
-```java
+```java title="Java"
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
@@ -261,7 +261,7 @@ public class SignatureGenerator {
 
 ### .NET (C#)
 
-```csharp
+```csharp title="C# (.NET)"
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -303,7 +303,7 @@ public class SignatureGenerator {
 
 ### Node.js
 
-```javascript
+```javascript title="Node.js"
 const crypto = require('crypto');
 
 function generateHmacSignature(payload, hmacKey) {
@@ -336,7 +336,7 @@ console.log(generateHmacSignature(payload, hmacKey));
 
 ### Ruby
 
-```ruby
+```ruby title="Ruby"
 require 'openssl'
 
 def generate_hmac_signature(payload, hmac_key)
@@ -372,7 +372,7 @@ puts generate_hmac_signature(payload, hmac_key)
 
 ### Go
 
-```go
+```go title="Go"
 package main
 
 import(
@@ -486,4 +486,8 @@ The above examples provide a way for developers in different languages to genera
 
 **Need Further Assistance?** Our dedicated support team is always on hand to help. Reach out to us at [support@ottu.com](mailto:support@ottu.com).
 
-**Your Feedback Matters**: We continually strive to improve, and your feedback is invaluable to us. Please let us know if you found this guide helpful or if there are areas you feel could benefit from more detail.
+## What's Next?
+
+- [**Payment Events**](./payment-events) — Payment webhook payload reference
+- [**Operation Events**](./operation-events) — Operation webhook payload reference
+- [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration

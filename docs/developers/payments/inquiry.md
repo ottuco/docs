@@ -1,0 +1,194 @@
+---
+title: Payment Status Inquiry
+sidebar_label: Payment Status Inquiry
+hide_table_of_contents: true
+---
+
+import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
+
+# Payment Status Inquiry
+
+The Payment Status Inquiry API lets you manually check the status of a payment transaction. It acts as a confirmation mechanism when your system hasn't received a [webhook notification](/docs/developers/webhooks/payment-events) about a status change — due to network issues, temporary downtime, or third-party service failures.
+
+The response mirrors the structure of a [payment webhook payload](/docs/developers/webhooks/payment-events). For payment transactions in `pending`, `attempted`, `failed`, or `expired` states, Ottu queries the payment gateway for the latest status. For `paid` or `authorized` states, the current status is returned immediately without re-confirming with the gateway.
+
+When multiple payment methods were attempted using different gateways, all gateways supporting status checks are queried — ensuring you receive the most up-to-date status.
+
+:::tip Boost Your Integration
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../getting-started/#boost-your-integration) for all available options.
+:::
+
+## When to Use
+
+- **Webhook not received** — network issues, temporary downtime, or third-party failures prevented delivery.
+- **Manual verification** — a customer reports the payment was completed but your system shows `pending` or `failed`.
+- **Reconciliation** — periodic checks to ensure your records match the gateway's state.
+- **Fallback for automatic inquiry** — when Ottu's built-in [automatic inquiry](#automatic-inquiry) hasn't resolved the status yet.
+
+:::warning
+If you've configured [webhook notifications](/docs/developers/webhooks/payment-events), rely on those as the primary mechanism. Use the Inquiry API only when webhooks haven't arrived or you need manual confirmation.
+:::
+
+## Setup
+
+- **Payment gateway** — at least one gateway that supports status checks must be configured. See [Payment Methods](/docs/developers/payments/payment-methods) for available gateways and their capabilities.
+- **Webhook familiarity** — the Inquiry API response matches the [payment webhook payload](/docs/developers/webhooks/payment-events). Understand the response format before integrating.
+
+#### Timing is Critical
+
+Schedule your inquiry calls carefully to avoid missing the latest status. Each payment gateway has a session expiration time after which the status becomes final:
+
+- **MPGS** — requires inquiry after ~11 minutes. Recommend calling after **13-14 minutes** (with 2-3 min margin).
+- **KNET** — requires inquiry after ~8 minutes. Recommend calling after **~10 minutes**.
+
+When integrating with multiple gateways, identify the one with the **longest** inquiry time, add a 2-3 minute margin, and use that as the standard for all inquiries. Calling too early (e.g., at 8 minutes for MPGS) means the gateway may not have finalized the status yet.
+
+## Guide
+
+### Workflow
+
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
+flowchart TD
+    A([Merchant]) -->|POST /inquiry/| B[Inquiry API]
+    B --> C{Payment transaction state?}
+    C -->|pending / attempted / failed / expired| D[Query Payment Gateway]
+    C -->|paid / authorized| E[Return status immediately]
+    D --> F{{Updated status}}
+    E --> F
+
+    classDef accent fill:#1983BC,color:#FFFFFF,stroke:#302F37
+    class B accent
+```
+
+1. **Merchant sends an inquiry request** with `session_id` or `order_no`.
+2. **Ottu checks the payment transaction state:**
+   - If `pending`, `attempted`, `failed`, or `expired` → Ottu queries the payment gateway for the latest status.
+   - If `paid` or `authorized` → Ottu returns the current status immediately (no gateway call needed).
+3. **Response** mirrors the [webhook payload](/docs/developers/webhooks/payment-events) — same structure, same fields.
+
+### Automatic Inquiry
+
+Ottu includes a built-in automatic inquiry feature that runs without any merchant action. It's enabled by default for every payment gateway.
+
+**How it works:**
+
+1. **Scheduled inquiry job** — for every gateway that supports inquiry, Ottu schedules an automatic check after the gateway's session expiration time. The timing varies per gateway.
+2. **Retries** — the job queries the gateway **3 times** to ensure accurate reconciliation. If a successful response is received during any call, the remaining retries are skipped.
+3. **Webhook delivery** — once the automatic inquiry resolves the status, Ottu sends a [webhook notification](/docs/developers/webhooks/payment-events) to the merchant.
+
+**Aggregator handling (e.g., MyFatoorah):**
+
+Some aggregator integrations may return a `pending` status even after the customer is redirected back. This happens when the underlying gateway hasn't provided a definitive response yet. In these cases:
+
+- Ottu does **not** send a webhook for the `pending` status.
+- Instead, Ottu schedules additional inquiry jobs to monitor the status.
+- Once a definitive state is reached (`paid` or `failed`), Ottu sends the webhook notification.
+
+This ensures merchants only receive webhooks with final, actionable payment statuses.
+
+### Step-by-Step
+
+#### 1. Send an inquiry request
+
+Provide at least one identifier — `session_id` or `order_no`:
+
+```bash
+curl -X POST "https://sandbox.ottu.net/b/pbl/v2/inquiry/" \
+  -H "Authorization: Api-Key your_private_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{"session_id": "your_session_id"}'
+```
+
+#### 2. Handle the response
+
+The response matches the [webhook payload](/docs/developers/webhooks/payment-events) structure. Check the `state` field for the current payment transaction status:
+
+- `paid` / `authorized` / `cod` → payment succeeded
+- `pending` / `attempted` → payment still in progress
+- `failed` / `expired` / `canceled` → payment did not complete
+
+#### 3. Optionally trigger a webhook
+
+Include `"notify_webhook_url": true` in the request to have Ottu send a webhook notification with the inquiry result to your configured `webhook_url`:
+
+```json
+{
+  "session_id": "your_session_id",
+  "notify_webhook_url": true
+}
+```
+
+You can also specify an alternate `webhook_url` to receive the result at a different endpoint.
+
+### Throttling Rules
+
+The Inquiry API implements throttling to prevent system abuse. Rules are **per payment transaction**:
+
+1. **Initial grace period (10 minutes)** — requests within 10 minutes of payment transaction creation are throttled.
+2. **First request** — after the grace period, the first request is allowed. Subsequent requests for the same payment transaction within the next 30 minutes are throttled.
+3. **Second request** — after the first 30-minute throttle period, a second request is allowed. Further requests within another 30 minutes are throttled.
+4. **Subsequent requests** — if requests for the same payment transaction exceed 3 in a single day, further requests are denied.
+
+:::info
+Additionally, the endpoint allows a maximum of **30 requests per minute** across all payment transactions (global rate limit).
+:::
+
+## API Reference
+
+<ApiDocEmbed path="inquiry.api.mdx" />
+
+## Best Practices
+
+#### Stay within request limits
+
+Respect the [throttling rules](#throttling-rules). Schedule inquiry calls based on gateway timing, not on arbitrary intervals.
+
+#### Understand the webhook response
+
+The Inquiry API response mirrors the [payment webhook payload](/docs/developers/webhooks/payment-events). Familiarize yourself with the response structure before integrating.
+
+#### Use the correct identifier
+
+Provide `session_id` (preferred — always present) or `order_no`. At least one is required.
+
+#### Consider the payment transaction state
+
+`paid` and `authorized` payment transactions return status immediately. For other states, Ottu queries the gateway — factor in the gateway's session expiration time when scheduling your inquiry.
+
+## FAQ
+
+#### 1. What are the prerequisites?
+
+At least one payment gateway that supports status checks, and familiarity with the [payment webhook response](/docs/developers/webhooks/payment-events) format.
+
+#### 2. What authentication does the Inquiry API support?
+
+Both [API Key](/docs/developers/getting-started/authentication#private-key-api-key) and [Basic Authentication](/docs/developers/getting-started/authentication#basic-authentication). No special permissions required for Basic Auth beyond `payment.inquiry`.
+
+#### 3. Which payment transaction states can I inquire?
+
+You can trigger the inquiry for `pending`, `attempted`, `failed`, or `expired` states. For `paid` or `authorized`, the status is returned immediately without querying the gateway. See [Payment States](/docs/developers/reference/payment-states).
+
+#### 4. How does Ottu handle payment transactions with outdated states?
+
+If a payment transaction is still in `pending`, `attempted`, `failed`, or `expired`, Ottu queries the payment gateway for the latest status and updates accordingly.
+
+#### 5. What if multiple gateways were attempted?
+
+All gateways that support status checks are queried, ensuring you receive the most up-to-date status regardless of which gateway the customer used.
+
+#### 6. Are there throttling limits?
+
+Yes. See [Throttling Rules](#throttling-rules) — per-transaction limits (grace period, 30-min intervals, max 3/day) plus a global rate limit of 30 requests/minute.
+
+#### 7. What identifiers do I need?
+
+At least one of `session_id` or `order_no`. Prefer `session_id` as it's always available in the [Checkout API](/docs/developers/payments/checkout-api) response.
+
+## What's Next?
+
+- [**Payment Events**](/docs/developers/webhooks/payment-events) — Webhook notifications triggered by payment state changes
+- [**Payment States**](/docs/developers/reference/payment-states) — Complete state machine reference
+- [**Operations**](/docs/developers/operations) — Refund, capture, void, cancel payment transactions
+- [**Checkout API**](/docs/developers/payments/checkout-api) — Create payment transactions to inquire about

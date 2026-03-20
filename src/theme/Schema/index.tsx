@@ -18,7 +18,7 @@ import { copyAnchorUrl, getFragmentId } from "@site/src/utils";
 import { merge } from "allof-merge";
 import clsx from "clsx";
 import {
-  getQualifierMessage,
+  getQualifierMessage as _getQualifierMessage,
   getSchemaName,
 } from "docusaurus-plugin-openapi-docs/lib/markdown/schema";
 import {
@@ -26,6 +26,15 @@ import {
   SchemaType,
 } from "docusaurus-plugin-openapi-docs/lib/openapi/types";
 import isEmpty from "lodash/isEmpty";
+
+// Wrapper: strip "Possible values:" when no actual values follow (upstream bug)
+function getQualifierMessage(schema: any): string | undefined {
+  const msg = _getQualifierMessage(schema);
+  if (!msg) return undefined;
+  const stripped = msg.replace(/\*\*Possible values:\*\*\s*/i, "").trim();
+  if (!stripped) return undefined;
+  return msg;
+}
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 // const jsonSchemaMergeAllOf = require("json-schema-merge-allof");

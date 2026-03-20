@@ -15,10 +15,10 @@ Moreover, for those who might need it, the original response from the payment ga
 
 Ottu supports two primary types of webhooks:
 
-1.  #### Payment Event Webhook
+1.  #### [Payment Event Webhook](./payment-events)
 
     This webhook is triggered when a transaction is processed. It’s a real-time notification mechanism that informs the merchant immediately after a payment event.
-2.  #### Operations Webhook
+2.  #### [Operations Webhook](./operation-events)
 
     This webhook is asynchronous and is triggered for subsequent payment gateway operations on a transaction, such as refunds, captures, or voids.
 

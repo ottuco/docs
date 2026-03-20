@@ -79,59 +79,11 @@ GET /v1/payments?limit=10&status=succeeded&created_after=2024-01-01
 }
 ```
 
-## HTTP Status Codes
-
-| Code | Description |
-|------|-------------|
-| 200 | Success |
-| 201 | Created |
-| 400 | Bad Request |
-| 401 | Unauthorized |
-| 403 | Forbidden |
-| 404 | Not Found |
-| 422 | Validation Error |
-| 429 | Rate Limited |
-| 500 | Internal Server Error |
-
 ## Error Handling
 
-### Error Types
+Ottu APIs return standard HTTP status codes (`2xx` for success, `4xx` for client errors, `5xx` for server errors) and structured JSON error responses with `type`, `code`, and `message` fields.
 
-#### Validation Errors (400)
-```json
-{
-  "error": {
-    "type": "validation_error",
-    "code": "required_field_missing",
-    "message": "Amount is required",
-    "field": "amount"
-  }
-}
-```
-
-#### Authentication Errors (401)
-```json
-{
-  "error": {
-    "type": "authentication_error",
-    "code": "invalid_api_key",
-    "message": "Invalid API key provided"
-  }
-}
-```
-
-#### Rate Limit Errors (429)
-```json
-{
-  "error": {
-    "type": "rate_limit_error",
-    "code": "rate_limit_exceeded",
-    "message": "Too many requests. Please try again later."
-  }
-}
-```
-
-### Error Handling Best Practices
+For the complete reference of all HTTP status codes, error types, error response format, and endpoint-specific errors, see [Error Codes](/docs/developers/reference/error-codes).
 
 ```javascript
 async function createPayment(paymentData) {

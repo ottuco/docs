@@ -18,6 +18,10 @@ operations:
     permissions:
       - $perm:api_key_admin
       - $perm:basic_auth_inquiry
+    description_replace: |
+      Check the status of a payment transaction. For `pending`, `attempted`, `failed`, or `expired` states, Ottu queries the payment gateway for the latest status. For `paid` or `authorized` states, returns the current status immediately.
+
+      Requires at least one identifier: `session_id` or `order_no`.
 
   auto_debit:
     permissions:

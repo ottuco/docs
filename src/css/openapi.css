@@ -198,6 +198,18 @@ ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
   }
 }
 
+/* SchemaEmbed response context: change "required" badge to "always present" */
+.schema-embed-response .openapi-schema__required {
+  font-size: 0;
+  line-height: 0;
+}
+
+.schema-embed-response .openapi-schema__required::after {
+  content: "ALWAYS PRESENT";
+  font-size: 12px;
+  line-height: normal;
+}
+
 /* Hide the authorization display box on API reference pages —
    auth is documented in getting-started/authentication.md */
 .openapi-security__details {

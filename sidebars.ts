@@ -86,6 +86,19 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: 'category',
+              label: 'Payment Status (Inquiry)',
+              link: {type: 'doc', id: 'developers/payments/inquiry'},
+              items: [
+                {type: 'link', label: 'When to Use', href: '/docs/developers/payments/inquiry#when-to-use'},
+                {type: 'link', label: 'Setup', href: '/docs/developers/payments/inquiry#setup'},
+                {type: 'link', label: 'Guide', href: '/docs/developers/payments/inquiry#guide'},
+                {type: 'link', label: 'API Reference', href: '/docs/developers/payments/inquiry#api-reference'},
+                {type: 'link', label: 'Best Practices', href: '/docs/developers/payments/inquiry#best-practices'},
+                {type: 'link', label: 'FAQ', href: '/docs/developers/payments/inquiry#faq'},
+              ],
+            },
+            {
+              type: 'category',
               label: 'Payment Methods',
               link: {type: 'doc', id: 'developers/payments/payment-methods'},
               items: [
@@ -162,6 +175,7 @@ const sidebars: SidebarsConfig = {
                 {type: 'link', label: 'Setup', href: '/docs/developers/cards-and-tokens/recurring-payments#setup'},
                 {type: 'link', label: 'Guide', href: '/docs/developers/cards-and-tokens/recurring-payments#guide'},
                 {type: 'link', label: 'API Reference', href: '/docs/developers/cards-and-tokens/recurring-payments#api-reference'},
+                {type: 'link', label: 'Best Practices', href: '/docs/developers/cards-and-tokens/recurring-payments#best-practices'},
                 {type: 'link', label: 'FAQ', href: '/docs/developers/cards-and-tokens/recurring-payments#faq'},
               ],
             },

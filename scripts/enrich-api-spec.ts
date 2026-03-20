@@ -418,9 +418,17 @@ function enrichSchemas(
       continue;
     }
 
+    // Top-level schema description override
+    if ((data as any)._description) {
+      schemas[fileName].description = (data as any)._description;
+      count++;
+    }
+
     const schemaProps = schemas[fileName].properties;
     if (!schemaProps) {
-      warn(`Schema '${fileName}' has no properties in spec`);
+      if (!(data as any)._description) {
+        warn(`Schema '${fileName}' has no properties in spec`);
+      }
       continue;
     }
 

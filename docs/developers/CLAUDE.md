@@ -120,6 +120,7 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 - **No standalone Authentication or Permissions sections** — authentication is documented in `getting-started/authentication.md`, and per-endpoint permissions are injected into the API reference via the enrichment engine (`static/api-enrichments/`). Do not duplicate this on individual pages.
 - **No per-page SDK/package callouts** — all integration options are documented centrally in `getting-started/index.md#boost-your-integration`. Individual pages use the `:::tip Boost Your Integration` block shown above.
 - **Every page ends with "What's Next?"** — 3-5 links to the logical next steps in the developer journey.
+- **Code block titles** — API request/response examples and webhook payloads use the Docusaurus `title` attribute for premium styling (constrained width, labeled header bar). Use the `/code-blocks` skill for the full convention and naming patterns.
 - **FAQ is always second-to-last** (before What's Next). Use H4 (####) for individual questions, not H3 (H3s create sidebar entries).
 - **Section headings use H2 (##)** — sub-sections use H3 (###). H4 (####) only for items within a section (e.g., FAQ questions, best practice items).
 
