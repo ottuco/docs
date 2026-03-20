@@ -127,65 +127,10 @@ const sidebars: SidebarsConfig = {
           label: 'Operations',
           link: {type: 'doc', id: 'developers/operations'},
           items: [
-            {
-              type: 'category',
-              label: 'Setup',
-              collapsible: true,
-                  collapsed: true,
-              customProps: {
-                targetHref: '/docs/developers/operations#setup',
-              },
-              items: [
-                {
-                  type: 'link',
-                  label: 'Boost Your Integration',
-                  href: '/docs/developers/operations#boost-your-integration',
-                },
-              ],
-            },
-            {type: 'link', label: 'Authentication', href: '/docs/developers/operations#authentication'},
-            {type: 'link', label: 'Permissions', href: '/docs/developers/operations#permissions'},
-            {
-              type: 'category',
-              label: 'Internal Operations',
-              customProps: {
-                targetHref: '/docs/developers/operations#internal-operations',
-              },
-              items: [
-                {type: 'link', label: 'Cancel', href: '/docs/developers/operations#cancel'},
-                {type: 'link', label: 'Expire', href: '/docs/developers/operations#expire'},
-                {type: 'link', label: 'Delete', href: '/docs/developers/operations#delete'},
-              ],
-            },
-            {
-              type: 'category',
-              label: 'External Operations',
-              customProps: {
-                targetHref: '/docs/developers/operations#external-operations',
-              },
-              items: [
-                {type: 'link', label: 'Capture', href: '/docs/developers/operations#capture'},
-                {type: 'link', label: 'Refund', href: '/docs/developers/operations#refund'},
-                {type: 'link', label: 'Void', href: '/docs/developers/operations#void'},
-              ],
-            },
-            {
-              type: 'category',
-              label: 'Tracking-Key Header',
-              customProps: {
-                targetHref: '/docs/developers/operations#tracking-key-header',
-              },
-              items: [
-                {type: 'link', label: 'Overview', href: '/docs/developers/operations#overview'},
-                {type: 'link', label: 'Purpose of Tracking Key', href: '/docs/developers/operations#purpose-of-tracking-key'},
-                {type: 'link', label: 'Guide: Step by Step', href: '/docs/developers/operations#guide-step-by-step'},
-              ],
-            },
-            {
-              type: 'link',
-              label: 'Operations',
-              href: '/docs/developers/operations#api-operations',
-            },
+            {type: 'link', label: 'When to Use', href: '/docs/developers/operations#when-to-use'},
+            {type: 'link', label: 'Setup', href: '/docs/developers/operations#setup'},
+            {type: 'link', label: 'Guide', href: '/docs/developers/operations#guide'},
+            {type: 'link', label: 'API Reference', href: '/docs/developers/operations#api-reference'},
             {type: 'link', label: 'FAQ', href: '/docs/developers/operations#faq'},
           ],
         },
@@ -201,38 +146,25 @@ const sidebars: SidebarsConfig = {
               label: 'User Cards',
               link: {type: 'doc', id: 'developers/cards-and-tokens/user-cards'},
               items: [
-                {
-                  type: 'category',
-                  label: 'Setup',
-                  collapsible: true,
-                  collapsed: true,
-                  customProps: {
-                    targetHref: '/docs/developers/cards-and-tokens/user-cards#setup',
-                  },
-                  items: [
-                    {
-                      type: 'link',
-                      label: 'Boost Your Integration',
-                      href: '/docs/developers/cards-and-tokens/user-cards#boost-your-integration',
-                    },
-                  ],
-                },
-                {type: 'link', label: 'Authentication', href: '/docs/developers/cards-and-tokens/user-cards#authentication'},
-                {
-                  type: 'link',
-                  label: 'Retrieve a list of saved cards for the customer.',
-                  href: '/docs/developers/cards-and-tokens/user-cards#api-retrieve-a-list-of-saved-cards-for-the-customer',
-                },
-                {
-                  type: 'link',
-                  label: 'Delete a saved card for the customer.',
-                  href: '/docs/developers/cards-and-tokens/user-cards#api-delete-a-saved-card-for-the-customer',
-                },
+                {type: 'link', label: 'When to Use', href: '/docs/developers/cards-and-tokens/user-cards#when-to-use'},
+                {type: 'link', label: 'Setup', href: '/docs/developers/cards-and-tokens/user-cards#setup'},
+                {type: 'link', label: 'Guide', href: '/docs/developers/cards-and-tokens/user-cards#guide'},
+                {type: 'link', label: 'API Reference', href: '/docs/developers/cards-and-tokens/user-cards#api-reference'},
                 {type: 'link', label: 'FAQ', href: '/docs/developers/cards-and-tokens/user-cards#faq'},
-                {type: 'link', label: 'What’s Next?', href: '/docs/developers/cards-and-tokens/user-cards#whats-next'},
               ],
             },
-            {type: 'doc', id: 'developers/cards-and-tokens/recurring-payments', label: 'Recurring Payments'},
+            {
+              type: 'category',
+              label: 'Recurring Payments',
+              link: {type: 'doc', id: 'developers/cards-and-tokens/recurring-payments'},
+              items: [
+                {type: 'link', label: 'When to Use', href: '/docs/developers/cards-and-tokens/recurring-payments#when-to-use'},
+                {type: 'link', label: 'Setup', href: '/docs/developers/cards-and-tokens/recurring-payments#setup'},
+                {type: 'link', label: 'Guide', href: '/docs/developers/cards-and-tokens/recurring-payments#guide'},
+                {type: 'link', label: 'API Reference', href: '/docs/developers/cards-and-tokens/recurring-payments#api-reference'},
+                {type: 'link', label: 'FAQ', href: '/docs/developers/cards-and-tokens/recurring-payments#faq'},
+              ],
+            },
           ],
         },
         {
@@ -240,68 +172,11 @@ const sidebars: SidebarsConfig = {
           label: 'Invoices',
           link: {type: 'doc', id: 'developers/invoices'},
           items: [
-            {
-              type: 'category',
-              label: 'Setup',
-              collapsible: true,
-                  collapsed: true,
-              customProps: {
-                targetHref: '/docs/developers/invoices#setup',
-              },
-              items: [
-                {
-                  type: 'link',
-                  label: 'Boost Your Integration',
-                  href: '/docs/developers/invoices#boost-your-integration',
-                },
-              ],
-            },
-            {type: 'link', label: 'Authentication', href: '/docs/developers/invoices#authentication'},
-            {type: 'link', label: 'Permissions', href: '/docs/developers/invoices#permissions'},
-            {
-              type: 'category',
-              label: 'How it Works',
-              collapsible: true,
-                  collapsed: true,
-              customProps: {
-                targetHref: '/docs/developers/invoices#how-it-works',
-              },
-              items: [
-                {
-                  type: 'link',
-                  label: 'Invoice Information',
-                  href: '/docs/developers/invoices#invoice-information',
-                },
-                {
-                  type: 'link',
-                  label: 'Invoice API Parameters Specification',
-                  href: '/docs/developers/invoices#invoice-api-parameters-specification',
-                },
-              ],
-            },
-            {
-              type: 'link',
-              label: 'Create a new Invoice',
-              href: '/docs/developers/invoices#api-create-a-new-invoice',
-            },
-            {type: 'link', label: 'Guide: Step by Step', href: '/docs/developers/invoices#guide-step-by-step'},
+            {type: 'link', label: 'When to Use', href: '/docs/developers/invoices#when-to-use'},
+            {type: 'link', label: 'Setup', href: '/docs/developers/invoices#setup'},
+            {type: 'link', label: 'Guide', href: '/docs/developers/invoices#guide'},
+            {type: 'link', label: 'API Reference', href: '/docs/developers/invoices#api-reference'},
             {type: 'link', label: 'Best Practices', href: '/docs/developers/invoices#best-practices'},
-            {
-              type: 'category',
-              label: 'Invoice Generation Logic',
-              collapsible: true,
-                  collapsed: true,
-              customProps: {
-                targetHref: '/docs/developers/invoices#invoice-generation-logic',
-              },
-              items: [
-                {
-                  type: 'link',
-                  label: 'Key Steps in Invoice Generation',
-                  href: '/docs/developers/invoices#key-steps-in-invoice-generation',
-                },
-              ],
-            },
             {type: 'link', label: 'FAQ', href: '/docs/developers/invoices#faq'},
           ],
         },
@@ -321,16 +196,10 @@ const sidebars: SidebarsConfig = {
           label: 'Notifications',
           link: {type: 'doc', id: 'developers/notifications'},
           items: [
-            {type: 'link', label: 'Message Notifications', href: '/docs/developers/notifications#message-notifications'},
+            {type: 'link', label: 'When to Use', href: '/docs/developers/notifications#when-to-use'},
             {type: 'link', label: 'Setup', href: '/docs/developers/notifications#setup'},
-            {type: 'link', label: 'Authentication', href: '/docs/developers/notifications#authentication'},
-            {type: 'link', label: 'How It Works', href: '/docs/developers/notifications#how-it-works'},
-            {
-              type: 'link',
-              label: 'Message Notifications',
-              href: '/docs/developers/notifications#api-message-notifications',
-            },
             {type: 'link', label: 'Guide', href: '/docs/developers/notifications#guide'},
+            {type: 'link', label: 'API Reference', href: '/docs/developers/notifications#api-reference'},
             {type: 'link', label: 'Best Practices', href: '/docs/developers/notifications#best-practices'},
             {type: 'link', label: 'FAQ', href: '/docs/developers/notifications#faq'},
           ],
@@ -340,22 +209,10 @@ const sidebars: SidebarsConfig = {
           label: 'Reports',
           link: {type: 'doc', id: 'developers/reports'},
           items: [
-            {type: 'link', label: 'Quick Start', href: '/docs/developers/reports#quick-start'},
+            {type: 'link', label: 'When to Use', href: '/docs/developers/reports#when-to-use'},
             {type: 'link', label: 'Setup', href: '/docs/developers/reports#setup'},
-            {type: 'link', label: 'Authentication', href: '/docs/developers/reports#authentication'},
-            {type: 'link', label: 'Permissions', href: '/docs/developers/reports#permissions'},
-            {type: 'link', label: 'How it works', href: '/docs/developers/reports#how-it-works'},
-            {
-              type: 'link',
-              label: 'List Transaction Reports',
-              href: '/docs/developers/reports#api-list-transaction-reports',
-            },
-            {
-              type: 'link',
-              label: 'Download Transaction Report File',
-              href: '/docs/developers/reports#api-download-transaction-report-file',
-            },
             {type: 'link', label: 'Guide', href: '/docs/developers/reports#guide'},
+            {type: 'link', label: 'API Reference', href: '/docs/developers/reports#api-reference'},
             {type: 'link', label: 'Best Practices', href: '/docs/developers/reports#best-practices'},
             {type: 'link', label: 'FAQ', href: '/docs/developers/reports#faq'},
           ],

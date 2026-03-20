@@ -1,0 +1,15 @@
+# Enrichments for tags: "Payment Notifications", "Communication Notifications"
+
+operations:
+
+  message_notifications:
+    description_replace: |
+      Resend transaction notifications (SMS, email, WhatsApp) for a specific payment transaction identified by `session_id` or `order_no`.
+
+  send_notification:
+    description_replace: |
+      Send a notification using a pre-configured mail template. Requires `template_id` and `channel` (email, sms, or whatsapp).
+
+  send_specific_notification:
+    description_replace: |
+      Send a notification via a specific channel (email, SMS, or WhatsApp) for a given template. The channel is specified in the URL path.

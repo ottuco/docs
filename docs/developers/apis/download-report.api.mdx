@@ -1,11 +1,11 @@
 ---
 id: download-report
 title: "Download Transaction Report File"
-description: "Download a report file using the secure token from the list endpoint."
+description: "Download a report file using the secure token from the list endpoint. Returns the file as binary (CSV or XLSX). Tokens are time-limited, user-bound, and rate-limited."
 sidebar_label: "Download Transaction Report File"
 hide_title: true
 hide_table_of_contents: true
-api: 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
+api: eJzVVW1v2zYQ/ivEfUoARYqbbh2EYUDWNkHQFgniOM2QGA0tnS3WEqmSJ7/M0H8vjnqp43jZsE/bJ1sk73j3PM893IAp0UpSRl+kEENqljo3Mv1isTSWIIAUXWJVyScghnftvpCiOSGmKkdROaVngjIUDpPKoiAzRy2m1hR+NVeOBOq0NEpTKK6RKqud3/Lx0omJ0tKuxcHb4a0wVtx9HN4dhuKG8zghOaUq8ChXhSJMA1E5tEcTU+k0EFKnwkrqd8MHDQGU0soCCa2D+H4DisvPUKZoIQAtC4QYTivKjFV/egAgAJdkWEiIN0Drkg84skrPPAxTWeXEMaU6+oBrsRiOipW7W4W3vwzMH4vLz2efkov1Ul5WP70Z0ern2+Hb4nwwyA3UuyheWbWQhOL06kLMcS3IiAmK0pqFSjEVSjfIGFtIEo/dhb/Ocf3bYwgBWPxWKYspxGQrrIO2u1JS9qM3T8ELPT2rathQ10mg5fBgNLp4d/iDysdeIjLhwLCy+aOYKsz7wj3bFl1ptMO/5NDT5hnk/jlOVpShJpVI3maG9zQ7DoDkjDmFa69AxzDCOAAvPUVrT/fv0qlEML8Q348ZouHw8otf7RfHnLyp0jE+r46P+ScxmlAT/5VlmXM5yujoq2OUNi9opCEMYmi0DHX9DOPrraHZkfqZsWJ4EguLqbKYkGNYSotHTs00pmJ0/TFk0k6OX/Hlu3mboJ2Y4QmHiYNlhpo/HBkrZyiUE6jlJMf0kFO+bhp/mvJCL2SuehlUeq7NUguZK+m47ELm3DC2J9pEg3+DoJl8xYTNprRsR6QaPlIkqfI9yq23VXHfnWNlKMr54DlqtCp5b62xn9A5OcN9bDQlnzzvfeTQMkjakFcle4RvdGs6MuU8j02S1/s48Vwb29DNuaYsdx8w2IN4b6650nORSSdwVXKTnEM5oRpGfP8FUmbYsWfogePRjyGaRLJU0WIQNe7sIr7aRRtPUR111UfsC2gXnTlWNmd3JCpdHEVO6nRiVqEhqkKNBPXWdA2ZvIaf7RnrOeIknevw94QPcctsdmxjO+dlqT7gGoJ/ZtBPAev8c8s4lNFiqSgTnUB4HKZqJR46434AD6DSU+PLaCVzSVR5JwmAYWkuGITH4fGza/ujdQClcVRIL+u25J7FGyu1a0xStFo4Y73spNsal//T89rSR7iiqMyl0oyG19GmVeM9TCBgfhnSgXdyr0l2SlYlBBB3j1QnTAiA5zgzjjjBZjORDkc2r2te/lahZXsfB7CQVrGBefmmynkzg3gqc4cvAHxw3criUPxHn7u9uHazonlQFjKv+AsCmOO6f+nrcR1088OgNHunSYIlbUU9M2Qe7t5Nzt/fMGdPR7QZ4aD95dx76/FkNc8r+yePQ133RVbtEvBb/HfxV9K5pbHpVnzZLnGfdf0dpROvVA==
 sidebar_class_name: "get api-method"
 info_path: docs/developers/apis/ottu-api
 custom_edit_url: null
@@ -37,66 +37,7 @@ import Translate from "@docusaurus/Translate";
 
 
 
-Download a report file using the secure token from the list endpoint.
-
-## How It Works
-
-1. Call `/b/api/v1/reports/files/` to list reports
-2. Each report includes a `download_action` object with a pre-built URL
-3. Use that URL directly - the token is already embedded in the path
-
-## Authentication
-
-- **API Key** (Recommended): `Api-Key: your_private_api_key`
-- **Basic Auth**: User must have `report.view_report` permission
-
-## Example Flow
-
-```bash
-# Step 1: List reports
-curl -X GET 'https://your-domain.com/b/api/v1/reports/files/' \
-  -H 'Api-Key: your_private_api_key_here'
-
-# Response includes:
-# {
-#   "encrypted_id": "abc123...",
-#   "download_action": {
-#     "method": "GET",
-#     "url": "https://your-domain.com/b/api/v1/reports/files/<token>/download/"
-#   }
-# }
-
-# Step 2: Download using the URL from download_action
-curl -X GET 'https://your-domain.com/b/api/v1/reports/files/<token>/download/' \
-  -H 'Api-Key: your_private_api_key_here' \
-  -o report.csv
-```
-
-## Security Features
-
-- **Token-based**: Download tokens are UUIDs cached in Redis
-- **Time-limited**: Tokens expire (configurable TTL, default from settings)
-- **User-bound**: Token is tied to the user who requested the list
-- **Rate Limiting**: Downloads are rate-limited per user
-- **Ownership Verification**: Server verifies user owns the report
-
-## File Delivery
-
-- **S3 Storage**: Redirects (302) to a pre-signed S3 URL
-- **Local Storage**: Returns file with `X-Sendfile` header for Apache
-
-## File Formats
-
-- **CSV**: `text/csv` - UTF-8 encoded, comma-delimited
-- **XLSX**: `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
-
-
-### Permissions
-
-| Auth Method | Required Permissions |
-|---|---|
-| [API Key](/developers/getting-started/authentication/#api-key-auth) | All permissions (admin access) |
-| [Basic Auth](/developers/getting-started/authentication/#basic-auth) | `report.can_view_report` |
+Download a report file using the secure token from the list endpoint. Returns the file as binary (CSV or XLSX). Tokens are time-limited, user-bound, and rate-limited.
 
 
 <Heading

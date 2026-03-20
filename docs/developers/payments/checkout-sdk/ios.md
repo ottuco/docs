@@ -1,6 +1,6 @@
 ---
 toc_min_heading_level: 2
-toc_max_heading_level: 4
+toc_max_heading_level: 3
 ---
 
 The [Checkout SDK](../) is a Swift framework (library) provided by Ottu, designed to facilitate the seamless integration of an Ottu-powered checkout process into iOS applications.
@@ -20,15 +20,6 @@ Additionally, optional configurations such as the [forms of payment](#formsofpay
 [API private key](../../../getting-started/authentication#private-key-api-key) should never be used on the client side. Instead, [API public key ](../../../getting-started/authentication#public-key)should be used. This is essential to ensure the security of your application and the protection of sensitive data.
 :::
 
----
-
-## Quick Start
-
-This guide walks you through installing and integrating the Ottu Checkout iOS SDK into your iOS project.\
-Choose your installation **path** and follow the journey step by step.
-
-### Video Tutorial: iOS SDK Integration
-
 This video walks you step-by-step through the iOS SDK integration process. Watch it to quickly understand setup, configuration, and key features in action.
 
 <iframe
@@ -38,6 +29,8 @@ This video walks you step-by-step through the iOS SDK integration process. Watch
   loading="lazy"
   allow="fullscreen"
 />
+
+## Installation
 
 ### Prerequisites
 
@@ -55,17 +48,10 @@ If your app should support **Apple Pay**:
 
 - Since the **minimum supported iOS version** is **14**, the **primary demo application** is implemented using **UIKit framework** (SwiftUI is recommended starting from iOS 15).\
   &#x20;[ottu-ios/Example at main · ottuco/ottu-ios](https://github.com/ottuco/ottu-ios/tree/main/Example?utm_source=chatgpt.com)
-- However, there’s also a **minimalistic SwiftUI-based demo app**:\
+- However, there's also a **minimalistic SwiftUI-based demo app**:\
   [ottu-ios/Example_SwiftUI at main · ottuco/ottu-ios](https://github.com/ottuco/ottu-ios/tree/main/Example_SwiftUI?utm_source=chatgpt.com)
 
-### Installation
-
-You can install the SDK via two paths:
-
-- **Path One:** Swift Package Manager (Recommended)
-- **Path Two:** CocoaPods (Deprecated)
-
-#### Path One – Install via Swift Package Manager (Recommended)
+### Swift Package Manager
 
 Add Ottu SDK as a dependency in `Package.swift`:
 
@@ -81,7 +67,7 @@ Or in Xcode:
 2. Go to **Project > Targets > Package Dependencies**
 3. Add `ottu-ios` as a dependency
 
-#### Path Two – Install via CocoaPods (Deprecated)
+### CocoaPods
 
 Add the following line to your **Podfile**:
 
@@ -107,7 +93,7 @@ pod 'ottu_checkout_sdk', :git => 'https://github.com/ottuco/ottu-ios'
 
 :::warning
 
-If you see _“could not find compatible versions for pod”_, run:
+If you see _"could not find compatible versions for pod"_, run:
 
 ```bash
 pod repo update
@@ -115,9 +101,24 @@ pod repo update
 
 :::
 
-### Integrate Checkout SDK to the Source Code
+## Initialization
 
-Once the SDK is installed (via Path One or Path Two), follow these steps to integrate it into your app.
+### Checkout.init
+
+The `Checkout.init` function is responsible for initializing the checkout process and configuring the necessary settings for the Checkout SDK.
+
+It must be called once by the parent application and provided with a set of configuration fields that define all the required options for the checkout process.
+
+When `Checkout.init` is invoked, the SDK automatically sets up the essential components, including:
+
+- Generating a form for the customer to enter their payment details.
+- Handling communication with Ottu's servers to process the payment.
+
+This function returns a `View` object, which is a native iOS UI component. It can be embedded within any `ViewController` instance in the application.
+
+### Integration Guide
+
+Once the SDK is installed (via Swift Package Manager or CocoaPods), follow these steps to integrate it into your app.
 
 <ol className="stepper">
   <li className="stepper-item">
@@ -234,137 +235,9 @@ Once the SDK is installed (via Path One or Path Two), follow these steps to inte
 > This is a **basic example** that adds the Checkout view without handling dimensions.\
 > For proper layout with constraints, refer to the demo app: [OttuPaymentsViewController.swift](https://github.com/ottuco/ottu-ios/blob/main/Example/OttuApp/OttuPaymentsViewController.swift#L91)
 
-### Callbacks
+## Properties
 
-In order `ViewController` to be compliant to `OttuDelegate`, add the following functions to `ViewController` class:
-
-```swift
-func errorCallback(_ data: [String : Any]?) {
-    navigationController?.popViewController(animated: true)
-    let alert = UIAlertController(title: "Error", message: data?.debugDescription ?? "", preferredStyle: .alert)
-    alert.addAction(UIAlertAction(title: "OK", style: .cancel))
-    self.present(alert, animated: true)
-}
-
-func cancelCallback(_ data: [String : Any]?) {
-    var message = ""
-
-    if let paymentGatewayInfo = data?["payment_gateway_info"] as? [String : Any],
-       let pgName = paymentGatewayInfo["pg_name"] as? String,
-       pgName == "kpay" {
-           message = paymentGatewayInfo["pg_response"].debugDescription
-    } else {
-        message = data?.debugDescription ?? ""
-    }
-
-    navigationController?.popViewController(animated: true)
-    let alert = UIAlertController(title: "Canсel", message: message, preferredStyle: .alert)
-    alert.addAction(UIAlertAction(title: "OK", style: .cancel))
-    self.present(alert, animated: true)
-}
-
-func successCallback(_ data: [String : Any]?) {
-    navigationController?.popViewController(animated: true)
-    let alert = UIAlertController(title: "Success", message: data?.debugDescription ?? "", preferredStyle: .alert)
-    alert.addAction(UIAlertAction(title: "OK", style: .cancel))
-    present(alert, animated: true)
-}
-```
-
-#### **Callback behavior:**
-
-- **Error** → Displays an error alert and navigates back
-- **Cancel** → Displays cancel reason (custom handling for `kpay`)
-- **Success** → Displays success confirmation
-
-> This code describes callbacks to be handled by the parent app.
-
-### Advanced Features
-
-- [Forms of Payment](#functions)
-- [Customization Theme](#customization-theme)
-- [Setup Preload](#functions)
-
----
-
-## Installation
-
-### Minimum Requirements <a href="#minimum-requirements" id="minimum-requirements"></a>
-
-The SDK is supported on devices running iOS 14 or higher.
-
-#### **Installation with CocoaPods**
-
-Ottu is available via [CocoaPods](http://cocoapods.org/). To install it, the following line must be added to the Podfile:
-
-```ruby
-pod 'ottu_checkout_sdk', :git => 'https://github.com/ottuco/ottu-ios.git', :tag => '2.1.10'
-```
-
-:::info
-
-- When `ottu_checkout_sdk` is added to the **Podfile**, the **GitHub repository** must also be specified as follows:
-- If CocoaPods returns an error like _"could not find compatible versions for pod"_, try running the `pod repo update` command to resolve it.
-  :::
-
-```ruby
-pod 'ottu_checkout_sdk', :git => 'https://github.com/ottuco/ottu-ios'
-```
-
-#### **Installation with Swift Package Manager**
-
-The [Swift Package Manager](https://swift.org/package-manager/) (SPM) is a tool designed for automating the distribution of Swift code and is integrated into the `Swift` compiler.
-
-Once the Swift package has been set up, adding Alamofire as a dependency requires simply including it in the `dependencies` value of the `Package.swift` file.
-
-```swift
-dependencies: [
-    .package(url: "https://github.com/ottuco/ottu-ios.git", from: "2.1.10")
-]
-```
-
----
-
-## SDK Configuration
-
-#### Language <a href="#language" id="language"></a>
-
-The SDK supports two languages: English and Arabic, with English set as the default.
-
-The language applied in the device settings is automatically used by the SDK, requiring no manual adjustments within the application.
-
-However, if the transaction is created in a different language and setup preload is enabled, texts retrieved from the backend (such as fee descriptions) will be displayed in the transaction language rather than the device's language.
-
-Therefore, the currently selected device language or the app's selected language should be considered when specifying a language code in the transaction creation request of the [Checkout API](../../checkout-api).
-
-#### Light and dark theme <a href="#light-and-dark-theme" id="light-and-dark-theme"></a>
-
-The SDK also supports UI adjustments based on the device's theme settings (light or dark mode).
-
-The appropriate theme is applied automatically during SDK initialization, aligning with the device's settings. Similar to language settings, no manual adjustments are required within the application.
-
----
-
-## Functions
-
-The SDK currently provides a single function, serving as the entry point for the merchant's application.
-
-Additionally, callbacks are provided and must be handled by the parent application. These callbacks are described here.
-
-### **Checkout.init**
-
-The `Checkout.init` function is responsible for initializing the checkout process and configuring the necessary settings for the Checkout SDK.
-
-It must be called once by the parent application and provided with a set of configuration fields that define all the required options for the checkout process.
-
-When `Checkout.init` is invoked, the SDK automatically sets up the essential components, including:
-
-- Generating a form for the customer to enter their payment details.
-- Handling communication with Ottu's servers to process the payment.
-
-This function returns a `View` object, which is a native iOS UI component. It can be embedded within any `ViewController` instance in the application.
-
-### Properties <a href="#properties" id="properties"></a>
+### Required Properties
 
 #### **merchantId** _`string`_ _`required`_
 
@@ -391,6 +264,14 @@ This identifier is automatically generated when the payment transaction is creat
 
 For more details on how to use the `session_id` parameter in the Checkout API, refer to the session_id.
 
+#### **delegate** _`object`_ _`required`_
+
+An object is used to provide SDK callbacks to the application. Typically, this is the parent app's class that conforms to `OttuDelegate`, aggregating the SDK object.
+
+To implement this delegate, the class must define three callback functions. More details are accessible next secion.
+
+### Display Options
+
 #### **formsOfPayment** _`array`_ _`optional`_
 
 The forms of payment displayed in the [checkout process](../#ottu-checkout-sdk-flow) can be customized using `formsOfPayment`. By default, all forms of payment are enabled.
@@ -403,27 +284,11 @@ Available options for `formsOfPayment`:
 - `tokenPay`: Uses tokenization to securely store and process customers' payment information.
 - `redirect`: Redirects customers to an external payment gateway or a third-party payment processor to complete the transaction.
 
-#### **setupPreload** _`object`_ _`optional`_
-
-An `ApiTransactionDetails` struct object is used to store transaction details.
-
-If provided, the SDK will not request transaction details from the backend, reducing processing time and improving efficiency.
-
-#### **theme** _`object`_ _`optional`_
-
-The `Theme` struct object is used for UI customization, allowing modifications to background colors, text colors, and fonts for various components. It supports customization for both light and dark device modes. All fields in the `Theme` struct are optional. If a theme is not provided, the default UI settings will be applied. For more details, refer to the Customization Theme section.
-
 #### displaySettings _`object`_ _`optional`_
 
 The display of payment options is configured using the `PaymentOptionsDisplaySettings` struct. Additional information is provided in the Payment Options Display Mode section.
 
-#### **delegate** _`object`_ _`required`_
-
-An object is used to provide SDK callbacks to the application. Typically, this is the parent app’s class that conforms to `OttuDelegate`, aggregating the SDK object.
-
-To implement this delegate, the class must define three callback functions. More details are accessible next secion.
-
-### Payment Options Display Mode
+#### Payment Options Display Mode
 
 The payment options display can be adjusted using the SDK with the following settings:
 
@@ -474,7 +339,295 @@ displaySettings: PaymentOptionsDisplaySettings(
 
 To view the full function call, please refer to the Ottu SDK - iOS | Example chapter in the documentation. This section provides the complete example, including how the function is used in the context of the Ottu SDK.
 
----
+### Preloading
+
+#### **setupPreload** _`object`_ _`optional`_
+
+An `ApiTransactionDetails` struct object is used to store transaction details.
+
+If provided, the SDK will not request transaction details from the backend, reducing processing time and improving efficiency.
+
+### Theme
+
+#### **theme** _`object`_ _`optional`_
+
+The `Theme` struct object is used for UI customization, allowing modifications to background colors, text colors, and fonts for various components. It supports customization for both light and dark device modes. All fields in the `Theme` struct are optional. If a theme is not provided, the default UI settings will be applied.
+
+The main class describing theme is called `CheckoutTheme`.
+
+It uses additional component classes like:
+
+- `ButtonComponent`
+- `LabelComponent`
+- `TextFieldComponent`
+
+The `CheckoutTheme` class consists of objects that define various UI components. While the names of these components largely correspond to those listed here, they also include platform-specific fields for further customization.
+
+<iframe
+  title="Ottu SDK Components (Figma)"
+  src="https://www.figma.com/embed?embed_host=share&url=https://www.figma.com/design/J6WsECtu4F6ynCetrvTLcp/Ottu-SDK---Components-Documentation--Copy-?node-id=0-1"
+  style={{ width: "100%", height: "600px", border: "0" }}
+  loading="lazy"
+  allow="fullscreen"
+/>
+
+#### Properties Description
+
+All properties in the `CheckoutTheme` class are optional, allowing users to customize any of them as needed.
+
+If a property is not specified, the default value (as defined in the Figma design [here](https://www.figma.com/proto/BmLOTN8QCvMaaIteZflzgG?content-scaling=fixed&kind=proto&node-id=1-624&scaling=scale-down)) will be automatically applied.
+
+##### **Texts**
+
+##### **General**
+
+| Property Name |                            Description                            |   Data Type    |
+| ------------- | :---------------------------------------------------------------: | :------------: |
+| `mainTitle`   |                 Font and color for all "Captions"                 | LabelComponent |
+| `title`       |          Font and color for payment options in the list           | LabelComponent |
+| `subtitle`    | Font and color for payment options details (like expiration date) | LabelComponent |
+
+##### **Fees**
+
+| Property Name  |                          Description                           |   Data Type    |
+| -------------- | :------------------------------------------------------------: | :------------: |
+| `feesTitle`    |    Font and color of fees value in the payment options list    | LabelComponent |
+| `feesSubtitle` | Font and color of fees description in the payment options list | LabelComponent |
+
+##### **Data**
+
+| Property Name |                       Description                        |   Data Type    |
+| ------------- | :------------------------------------------------------: | :------------: |
+| `dataLabel`   | Font and color of payment details fields (like "Amount") | LabelComponent |
+| `dataValue`   |         Font and color of payment details values         | LabelComponent |
+
+##### **Other**
+
+| Property Name                   |                          Description                           |   Data Type    |
+| ------------------------------- | :------------------------------------------------------------: | :------------: |
+| `errorMessageText`              |        Font and color of error message text in pop-ups         | LabelComponent |
+| `selectPaymentMethodTitleLabel` | The text of "Select Payment Method" in the bottom sheet header | LabelComponent |
+
+##### **Text Fields**
+
+| Property Name    |                             Description                              |     Data Type      |
+| ---------------- | :------------------------------------------------------------------: | :----------------: |
+| `inputTextField` | Font and color of text in any input field (including disabled state) | TextFieldComponent |
+
+##### **Colors**
+
+| Property Name                             |                            Description                            | Data Type |
+| ----------------------------------------- | :---------------------------------------------------------------: | :-------: |
+| `backgroundColor`                         |           The main background of the SDK view component           |  UIColor  |
+| `backgroundColorModal`                    |                The background of any modal window                 |  UIColor  |
+| `iconColor`                               |               The color of the icon of the payment                |  UIColor  |
+| `paymentItemBackgroundColor`              |         The background of an item in payment options list         |  UIColor  |
+| `selectPaymentMethodTitleBackgroundColor` | The background of the "Select Payment Method" bottom sheet header |  UIColor  |
+
+##### **Buttons**
+
+| Property Name    |                            Description                            |    Data Type    |
+| ---------------- | :---------------------------------------------------------------: | :-------------: |
+| `button`         |          Background, text color and font for any button           | ButtonComponent |
+| `selectorButton` | Background, text color and font for payment item selection button | ButtonComponent |
+
+##### **Switch**
+
+| Property Name       |             Description              | Data Type |
+| ------------------- | :----------------------------------: | :-------: |
+| `switchOnTintColor` | The color of switch (toggle) control |  UIColor  |
+
+##### **Margins**
+
+| Property Name |                     Description                     |  Data Type   |
+| ------------- | :-------------------------------------------------: | :----------: |
+| margins       | Top, left, bottom and right margins between compone | UIEdgeInsets |
+
+##### Payment Details
+
+| Property Name        |                                            Description                                            | Data Type |
+| -------------------- | :-----------------------------------------------------------------------------------------------: | :-------: |
+| `showPaymentDetails` | Boolean variable determining whether the "Payment Details" section should be displayed or hidden. |  Boolean  |
+
+#### Data Types Description
+
+##### **LabelComponent**
+
+| Property Name | Data Type |
+| ------------- | :-------: |
+| `color`       |  UIColor  |
+| `font`        |  UIFont   |
+| `fontFamily`  |  String   |
+
+##### **TextFieldComponent**
+
+| Property Name     |                                                                    Data Type                                                                    |
+| ----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------: |
+| `label`           |                                                                 LabelComponent                                                                  |
+| `text`            | [LabelComponent](https://app.gitbook.com/o/RxY0H8C3fNw3knTb5iVs/s/XdPwy0yrnZJ8gfKCUk9E/~/changes/601/developer/checkout-sdk/ios#labelcomponent) |
+| `backgroundColor` |                                                                     UIColor                                                                     |
+
+##### **ButtonComponent**
+
+| Property Name             | Data Type |
+| ------------------------- | :-------: |
+| `enabledTitleColor`       |  UIColor  |
+| `disabledTitleColor`      |  UIColor  |
+| `font`                    |  UIFont   |
+| `enabledBackgroundColor`  |  UIColor  |
+| `disabledBackgroundColor` |  UIColor  |
+| `fontFamily`              |  String   |
+
+##### **UIEdgeInsets**
+
+| Property Name | Data Type |
+| ------------- | :-------: |
+| `left`        |    Int    |
+| `top`         |    Int    |
+| `right`       |    Int    |
+| `bottom`      |    Int    |
+
+#### Theme Example
+
+To configure the `theme`, similar steps must be followed as described in the test app file.
+
+**Code Snippet:**
+
+```swift
+func createTheme() - > CheckoutTheme {
+    var theme = CheckoutTheme()
+    theme.backgroundColor = .systemBackground
+    theme.backgroundColorModal = .secondarySystemBackground
+    theme.margins = UIEdgeInsets(top: 8, left: 2, bottom: 8, right: 2)
+    theme.mainTitle.color = .label
+    theme.mainTitle.fontFamily = "Arial"
+    theme.button.enabledTitleColor = .payButtonTitle
+    theme.button.disabledTitleColor = .payButtonDisabledTitle
+    theme.button.fontFamily = "Arial"
+    theme.button.enabledBackgroundColor = .payButtonBackground
+    theme.button.disabledBackgroundColor = .payButtonDisabledBackground
+    return theme
+}
+```
+
+The theme object is passed to the SDK initialization as shown below:
+
+**Code Snippet:**
+
+```swift
+self.checkout = Checkout(
+    theme: theme,
+    sessionId: sessionId,
+    merchantId: merchantId,
+    apiKey: apiKey,
+    delegate: self
+)
+```
+
+### SDK Configuration
+
+#### Language
+
+The SDK supports two languages: English and Arabic, with English set as the default.
+
+The language applied in the device settings is automatically used by the SDK, requiring no manual adjustments within the application.
+
+However, if the transaction is created in a different language and setup preload is enabled, texts retrieved from the backend (such as fee descriptions) will be displayed in the transaction language rather than the device's language.
+
+Therefore, the currently selected device language or the app's selected language should be considered when specifying a language code in the transaction creation request of the [Checkout API](../../checkout-api).
+
+#### Light and dark theme
+
+The SDK also supports UI adjustments based on the device's theme settings (light or dark mode).
+
+The appropriate theme is applied automatically during SDK initialization, aligning with the device's settings. Similar to language settings, no manual adjustments are required within the application.
+
+## Wallet Configuration
+
+### Apple Pay
+
+When the [integration ](#apple-pay)between Ottu and Apple for Apple Pay is completed, the necessary checks to display the Apple Pay button are handled automatically by the Checkout SDK.
+
+1. **Initialization**: Upon initialization of the Checkout SDK with the provided [session_id](#sessionid-string-required) and payment gateway codes ([pg_codes](../../checkout-api)), several conditions are automatically verified:
+   - It is confirmed that a `session_id` and `pg_codes` associated with the Apple Pay Payment Service have been supplied.
+   - It is ensured that the customer is using an Apple device that supports Apple Pay. If the device is not supported, the button will not be shown, and an error message stating `This device doesn't support Apple Pay` will be displayed to inform the user of the compatibility issue.
+   - It is verified that the customer has a wallet configured on their Apple Pay device. if the wallet is not configured (i.e., no payment cards are added), the Setup button will appear. Clicking on this button will prompt the Apple Pay wallet on the user's device to open, allowing them to configure it by adding payment cards.
+2. **Displaying the Apple Pay Button**: If all these conditions are met, the Apple Pay button is displayed and made available for use in the checkout flow.
+3. **Restricting Payment Options**: To display only the Apple Pay button, `applePay` should be passed within the `formsOfPayment` parameter. The `formsOfPayment` property instructs the Checkout SDK to render only the Apple Pay button. If this property is not included, all available payment options are rendered by the SDK.
+
+This setup ensures a seamless integration and user experience, allowing customers to easily set up and use Apple Pay during the checkout process.
+
+#### KNET Integration
+
+Due to compliance requirements, KNET necessitates a popup displaying the payment result after each failed payment. This functionality is available only in the `cancelCallback` when there is a response from the payment gateway. As a result, the user must click on the Apple Pay button again to retry the payment.
+
+:::info
+
+The popup notification requirement is specific to the KNET payment gateway. Other payment gateways may have different requirements or notification mechanisms, so it is essential to follow the respective documentation for each payment gateway integration.
+:::
+
+To properly handle the popup notification for KNET, the following code snippet should be implemented into your payment processing flow:
+
+```swift
+func cancelCallback(_ data: [String: Any] ? ) {
+    var message = ""
+
+    if let paymentGatewayInfo = data ? ["payment_gateway_info"] as ? [String: Any],
+        let pgName = paymentGatewayInfo["pg_name"] as ? String,
+            pgName == "kpay" {
+                message = paymentGatewayInfo["pg_response"].debugDescription
+            } else {
+                message = data?.debugDescription ?? ""
+            }
+
+    navigationController?.popViewController(animated: true)
+    let alert = UIAlertController(title: "Canсel", message: message, preferredStyle: .alert)
+    alert.addAction(UIAlertAction(title: "OK", style: .cancel))
+    self.present(alert, animated: true)
+}
+}
+```
+
+The above code performs the following checks and actions:
+
+1. **Verification**: It first checks if the cancel object contains information about the payment gateway `payment_gateway_info`.
+2. **Payment Gateway Identification**: It then verifies if the `pg_name` property in `payment_gateway_info` is equal to "kpay", confirming that the payment gateway used is KNET.
+3. **Response Handling**: If the conditions are met, it retrieves the payment gateway's response from the `pg_response` property. If not available, it uses a default "Payment was cancelled." error message.
+4. **Popup Notification**: Finally, it displays the error message in a popup using `self.present(alert, animated: true)` to notify the user about the failed payment.
+
+This setup ensures compliance with KNET's requirements and provides a clear user experience for handling failed payments.
+
+### STC Pay
+
+When the [integration](#stc-pay) between Ottu and STC Pay is completed, the necessary checks to display the STC Pay button are handled seamlessly by the Checkout SDK.
+
+**Initialization**: Upon initialization of the Checkout SDK with the provided [session_id](#sessionid-string-required) and payment gateway codes ([pg_codes](../../checkout-api)), several conditions are automatically verified:
+
+- It is confirmed that the `session_id` and `pg_codes` provided during SDK initialization are associated with the STC Pay Payment Service. This ensures that the STC Pay option is available for the customer to choose as a payment method.
+- It is ensured that the STC Pay button is displayed by the iOS SDK, regardless of whether the customer has provided a mobile number while creating the transaction.
+
+This setup ensures a seamless integration and user experience, allowing customers to easily set up and use STC Pay during the checkout process.
+
+### Onsite Checkout
+
+This payment option enables direct payments through the mobile SDK. The SDK provides a user interface where the Cardholder Data (CHD) is entered by the user. If permitted by the backend, the card can be tokenized and saved for future payments.
+
+Below is an example of how the onsite checkout screen appears:
+
+<figure className="checkout-sdk-figure">
+  <img src="/img/checkout-sdk/image%20%282%29%20%281%29%20%281%29%20%281%29%20%281%29%20%281%29.png" alt="Onsite checkout screen" />
+</figure>
+
+The SDK supports multiple instances of onsite checkout payments. Therefore, for each payment method with a PG code of `ottu_pg`, the card form (as described above) will be displayed.
+
+<figure className="checkout-sdk-figure">
+  <img src="/img/checkout-sdk/image%20%28102%29.png" alt="Onsite checkout with multiple payment options" />
+</figure>
+
+:::info
+
+Fees are not shown for onsite checkout instances because the system supports payments through multiple cards (omni PG). The multiple payment icons indicate the availability of different card options.
+:::
 
 ## Callbacks
 
@@ -488,7 +641,7 @@ These `callbacks` improve the user experience by enabling seamless and efficient
 
 All the callbacks described below can be triggered for any type of payment.
 
-### **errorCallback**
+### errorCallback
 
 The `errorCallback` function is triggered when an issue occurs during the payment process. Proper error handling is essential to ensure a smooth user experience.
 
@@ -512,7 +665,7 @@ When an **error occurs**, the **`errorCallback`** function is invoked with a **`
 - `order_no` optional
 - `reference_number` optional
 
-### **cancelCallback**
+### cancelCallback
 
 The `cancelCallback` function in the [Checkout SDK](../) is triggered when a payment is canceled.
 
@@ -540,7 +693,7 @@ If a customer cancels a payment, the `cancelCallback` function is invoked with a
 In both `cancelCallback` and `errorCallback`, the SDK must be reinitialized, either on the same session or on a new session.
 :::
 
-### **successCallback**
+### successCallback
 
 In the [Checkout SDK](../), the `successCallback` function is triggered upon the successful completion of the [payment process](../#ottu-checkout-sdk-flow).
 
@@ -564,9 +717,54 @@ When a payment is successfully processed, the `successCallback` function is invo
 - `redirect_url` optional
 - `payment_gateway_info` optional
 
----
+## Examples
 
-## Example
+### Basic Example
+
+In order `ViewController` to be compliant to `OttuDelegate`, add the following functions to `ViewController` class:
+
+```swift
+func errorCallback(_ data: [String : Any]?) {
+    navigationController?.popViewController(animated: true)
+    let alert = UIAlertController(title: "Error", message: data?.debugDescription ?? "", preferredStyle: .alert)
+    alert.addAction(UIAlertAction(title: "OK", style: .cancel))
+    self.present(alert, animated: true)
+}
+
+func cancelCallback(_ data: [String : Any]?) {
+    var message = ""
+
+    if let paymentGatewayInfo = data?["payment_gateway_info"] as? [String : Any],
+       let pgName = paymentGatewayInfo["pg_name"] as? String,
+       pgName == "kpay" {
+           message = paymentGatewayInfo["pg_response"].debugDescription
+    } else {
+        message = data?.debugDescription ?? ""
+    }
+
+    navigationController?.popViewController(animated: true)
+    let alert = UIAlertController(title: "Canсel", message: message, preferredStyle: .alert)
+    alert.addAction(UIAlertAction(title: "OK", style: .cancel))
+    self.present(alert, animated: true)
+}
+
+func successCallback(_ data: [String : Any]?) {
+    navigationController?.popViewController(animated: true)
+    let alert = UIAlertController(title: "Success", message: data?.debugDescription ?? "", preferredStyle: .alert)
+    alert.addAction(UIAlertAction(title: "OK", style: .cancel))
+    present(alert, animated: true)
+}
+```
+
+#### Callback behavior:
+
+- **Error** → Displays an error alert and navigates back
+- **Cancel** → Displays cancel reason (custom handling for `kpay`)
+- **Success** → Displays success confirmation
+
+> This code describes callbacks to be handled by the parent app.
+
+### Full Example
 
 There are both UIKit and SwiftUI samples available at the sample repo:
 
@@ -704,281 +902,13 @@ extension OttuPaymentsViewController: OttuDelegate {
 
 ```
 
----
+## Error Reporting & Security
 
-## Customization Theme
-
-The main class describing theme is called `CheckoutTheme`.
-
-It uses additional component classes like:
-
-- `ButtonComponent`
-- `LabelComponent`
-- `TextFieldComponent`
-
-The `CheckoutTheme` class consists of objects that define various UI components. While the names of these components largely correspond to those listed here, they also include platform-specific fields for further customization.
-
-<iframe
-  title="Ottu SDK Components (Figma)"
-  src="https://www.figma.com/embed?embed_host=share&url=https://www.figma.com/design/J6WsECtu4F6ynCetrvTLcp/Ottu-SDK---Components-Documentation--Copy-?node-id=0-1"
-  style={{ width: "100%", height: "600px", border: "0" }}
-  loading="lazy"
-  allow="fullscreen"
-/>
-
-### Properties Description <a href="#properties-description" id="properties-description"></a>
-
-All properties in the `CheckoutTheme` class are optional, allowing users to customize any of them as needed.
-
-If a property is not specified, the default value (as defined in the Figma design [here](https://www.figma.com/proto/BmLOTN8QCvMaaIteZflzgG?content-scaling=fixed&kind=proto&node-id=1-624&scaling=scale-down)) will be automatically applied.
-
-#### **Texts**
-
-#### **General**
-
-| Property Name |                            Description                            |   Data Type    |
-| ------------- | :---------------------------------------------------------------: | :------------: |
-| `mainTitle`   |                 Font and color for all “Captions”                 | LabelComponent |
-| `title`       |          Font and color for payment options in the list           | LabelComponent |
-| `subtitle`    | Font and color for payment options details (like expiration date) | LabelComponent |
-
-#### **Fees**
-
-| Property Name  |                          Description                           |   Data Type    |
-| -------------- | :------------------------------------------------------------: | :------------: |
-| `feesTitle`    |    Font and color of fees value in the payment options list    | LabelComponent |
-| `feesSubtitle` | Font and color of fees description in the payment options list | LabelComponent |
-
-#### **Data**
-
-| Property Name |                       Description                        |   Data Type    |
-| ------------- | :------------------------------------------------------: | :------------: |
-| `dataLabel`   | Font and color of payment details fields (like “Amount”) | LabelComponent |
-| `dataValue`   |         Font and color of payment details values         | LabelComponent |
-
-#### **Other**
-
-| Property Name                   |                          Description                           |   Data Type    |
-| ------------------------------- | :------------------------------------------------------------: | :------------: |
-| `errorMessageText`              |        Font and color of error message text in pop-ups         | LabelComponent |
-| `selectPaymentMethodTitleLabel` | The text of "Select Payment Method" in the bottom sheet header | LabelComponent |
-
-#### **Text Fields**
-
-| Property Name    |                             Description                              |     Data Type      |
-| ---------------- | :------------------------------------------------------------------: | :----------------: |
-| `inputTextField` | Font and color of text in any input field (including disabled state) | TextFieldComponent |
-
-#### **Colors**
-
-| Property Name                             |                            Description                            | Data Type |
-| ----------------------------------------- | :---------------------------------------------------------------: | :-------: |
-| `backgroundColor`                         |           The main background of the SDK view component           |  UIColor  |
-| `backgroundColorModal`                    |                The background of any modal window                 |  UIColor  |
-| `iconColor`                               |               The color of the icon of the payment                |  UIColor  |
-| `paymentItemBackgroundColor`              |         The background of an item in payment options list         |  UIColor  |
-| `selectPaymentMethodTitleBackgroundColor` | The background of the "Select Payment Method" bottom sheet header |  UIColor  |
-
-#### **Buttons**
-
-| Property Name    |                            Description                            |    Data Type    |
-| ---------------- | :---------------------------------------------------------------: | :-------------: |
-| `button`         |          Background, text color and font for any button           | ButtonComponent |
-| `selectorButton` | Background, text color and font for payment item selection button | ButtonComponent |
-
-#### **Switch**
-
-| Property Name       |             Description              | Data Type |
-| ------------------- | :----------------------------------: | :-------: |
-| `switchOnTintColor` | The color of switch (toggle) control |  UIColor  |
-
-#### **Margins**
-
-| Property Name |                     Description                     |  Data Type   |
-| ------------- | :-------------------------------------------------: | :----------: |
-| margins       | Top, left, bottom and right margins between compone | UIEdgeInsets |
-
-#### Payment Details
-
-| Property Name        |                                            Description                                            | Data Type |
-| -------------------- | :-----------------------------------------------------------------------------------------------: | :-------: |
-| `showPaymentDetails` | Boolean variable determining whether the “Payment Details” section should be displayed or hidden. |  Boolean  |
-
-### Data Types Description <a href="#data-types-description" id="data-types-description"></a>
-
-#### **LabelComponent**
-
-| Property Name | Data Type |
-| ------------- | :-------: |
-| `color`       |  UIColor  |
-| `font`        |  UIFont   |
-| `fontFamily`  |  String   |
-
-#### **TextFieldComponent**
-
-| Property Name     |                                                                    Data Type                                                                    |
-| ----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------: |
-| `label`           |                                                                 LabelComponent                                                                  |
-| `text`            | [LabelComponent](https://app.gitbook.com/o/RxY0H8C3fNw3knTb5iVs/s/XdPwy0yrnZJ8gfKCUk9E/~/changes/601/developer/checkout-sdk/ios#labelcomponent) |
-| `backgroundColor` |                                                                     UIColor                                                                     |
-
-#### **ButtonComponent**
-
-| Property Name             | Data Type |
-| ------------------------- | :-------: |
-| `enabledTitleColor`       |  UIColor  |
-| `disabledTitleColor`      |  UIColor  |
-| `font`                    |  UIFont   |
-| `enabledBackgroundColor`  |  UIColor  |
-| `disabledBackgroundColor` |  UIColor  |
-| `fontFamily`              |  String   |
-
-#### **UIEdgeInsets**
-
-| Property Name | Data Type |
-| ------------- | :-------: |
-| `left`        |    Int    |
-| `top`         |    Int    |
-| `right`       |    Int    |
-| `bottom`      |    Int    |
-
-### Example <a href="#example.1" id="example.1"></a>
-
-To configure the `theme`, similar steps must be followed as described in the test app file.
-
-**Code Snippet:**
-
-```swift
-func createTheme() - > CheckoutTheme {
-    var theme = CheckoutTheme()
-    theme.backgroundColor = .systemBackground
-    theme.backgroundColorModal = .secondarySystemBackground
-    theme.margins = UIEdgeInsets(top: 8, left: 2, bottom: 8, right: 2)
-    theme.mainTitle.color = .label
-    theme.mainTitle.fontFamily = "Arial"
-    theme.button.enabledTitleColor = .payButtonTitle
-    theme.button.disabledTitleColor = .payButtonDisabledTitle
-    theme.button.fontFamily = "Arial"
-    theme.button.enabledBackgroundColor = .payButtonBackground
-    theme.button.disabledBackgroundColor = .payButtonDisabledBackground
-    return theme
-}
-```
-
-The theme object is passed to the SDK initialization as shown below:
-
-**Code Snippet:**
-
-```swift
-self.checkout = Checkout(
-    theme: theme,
-    sessionId: sessionId,
-    merchantId: merchantId,
-    apiKey: apiKey,
-    delegate: self
-)
-```
-
----
-
-## Payment Gateway Compliance & Information
-
-### Apple Pay <a href="#apple-pay" id="apple-pay"></a>
-
-When the [integration ](#apple-pay)between Ottu and Apple for Apple Pay is completed, the necessary checks to display the Apple Pay button are handled automatically by the Checkout SDK.
-
-1. **Initialization**: Upon initialization of the Checkout SDK with the provided [session_id](#sessionid-string-required) and payment gateway codes ([pg_codes](../../checkout-api)), several conditions are automatically verified:
-   - It is confirmed that a `session_id` and `pg_codes` associated with the Apple Pay Payment Service have been supplied.
-   - It is ensured that the customer is using an Apple device that supports Apple Pay. If the device is not supported, the button will not be shown, and an error message stating `This device doesn't support Apple Pay` will be displayed to inform the user of the compatibility issue.
-   - It is verified that the customer has a wallet configured on their Apple Pay device. if the wallet is not configured (i.e., no payment cards are added), the Setup button will appear. Clicking on this button will prompt the Apple Pay wallet on the user's device to open, allowing them to configure it by adding payment cards.
-2. **Displaying the Apple Pay Button**: If all these conditions are met, the Apple Pay button is displayed and made available for use in the checkout flow.
-3. **Restricting Payment Options**: To display only the Apple Pay button, `applePay` should be passed within the `formsOfPayment` parameter. The `formsOfPayment` property instructs the Checkout SDK to render only the Apple Pay button. If this property is not included, all available payment options are rendered by the SDK.
-
-This setup ensures a seamless integration and user experience, allowing customers to easily set up and use Apple Pay during the checkout process.
-
-### STC Pay <a href="#stc-pay" id="stc-pay"></a>
-
-When the [integration](#stc-pay) between Ottu and STC Pay is completed, the necessary checks to display the STC Pay button are handled seamlessly by the Checkout SDK.
-
-**Initialization**: Upon initialization of the Checkout SDK with the provided [session_id](#sessionid-string-required) and payment gateway codes ([pg_codes](../../checkout-api)), several conditions are automatically verified:
-
-- It is confirmed that the `session_id` and `pg_codes` provided during SDK initialization are associated with the STC Pay Payment Service. This ensures that the STC Pay option is available for the customer to choose as a payment method.
-- It is ensured that the STC Pay button is displayed by the iOS SDK, regardless of whether the customer has provided a mobile number while creating the transaction.
-
-This setup ensures a seamless integration and user experience, allowing customers to easily set up and use STC Pay during the checkout process.
-
-### KNET - Apple Pay <a href="#knet-apple-pay" id="knet-apple-pay"></a>
-
-Due to compliance requirements, KNET necessitates a popup displaying the payment result after each failed payment. This functionality is available only in the `cancelCallback` when there is a response from the payment gateway. As a result, the user must click on the Apple Pay button again to retry the payment.
-
-:::info
-
-The popup notification requirement is specific to the KNET payment gateway. Other payment gateways may have different requirements or notification mechanisms, so it is essential to follow the respective documentation for each payment gateway integration.
-:::
-
-To properly handle the popup notification for KNET, the following code snippet should be implemented into your payment processing flow:
-
-```swift
-func cancelCallback(_ data: [String: Any] ? ) {
-    var message = ""
-
-    if let paymentGatewayInfo = data ? ["payment_gateway_info"] as ? [String: Any],
-        let pgName = paymentGatewayInfo["pg_name"] as ? String,
-            pgName == "kpay" {
-                message = paymentGatewayInfo["pg_response"].debugDescription
-            } else {
-                message = data?.debugDescription ?? ""
-            }
-
-    navigationController?.popViewController(animated: true)
-    let alert = UIAlertController(title: "Canсel", message: message, preferredStyle: .alert)
-    alert.addAction(UIAlertAction(title: "OK", style: .cancel))
-    self.present(alert, animated: true)
-}
-}
-```
-
-The above code performs the following checks and actions:
-
-1. **Verification**: It first checks if the cancel object contains information about the payment gateway `payment_gateway_info`.
-2. **Payment Gateway Identification**: It then verifies if the `pg_name` property in `payment_gateway_info` is equal to "kpay", confirming that the payment gateway used is KNET.
-3. **Response Handling**: If the conditions are met, it retrieves the payment gateway's response from the `pg_response` property. If not available, it uses a default "Payment was cancelled." error message.
-4. **Popup Notification**: Finally, it displays the error message in a popup using `self.present(alert, animated: true)` to notify the user about the failed payment.
-
-This setup ensures compliance with KNET's requirements and provides a clear user experience for handling failed payments.
-
-### Onsite Checkout
-
-This payment option enables direct payments through the mobile SDK. The SDK provides a user interface where the Cardholder Data (CHD) is entered by the user. If permitted by the backend, the card can be tokenized and saved for future payments.
-
-Below is an example of how the onsite checkout screen appears:
-
-<figure className="checkout-sdk-figure">
-  <img src="/img/checkout-sdk/image%20%282%29%20%281%29%20%281%29%20%281%29%20%281%29%20%281%29.png" alt="Onsite checkout screen" />
-</figure>
-
-The SDK supports multiple instances of onsite checkout payments. Therefore, for each payment method with a PG code of `ottu_pg`, the card form (as described above) will be displayed.
-
-<figure className="checkout-sdk-figure">
-  <img src="/img/checkout-sdk/image%20%28102%29.png" alt="Onsite checkout with multiple payment options" />
-</figure>
-
-:::info
-
-Fees are not shown for onsite checkout instances because the system supports payments through multiple cards (omni PG). The multiple payment icons indicate the availability of different card options.
-:::
-
----
-
-## Error Reporting & Cybersecurity Measures
-
-### Error Reporting <a href="#error-reporting" id="error-reporting"></a>
+### Error Reporting
 
 The SDK utilizes Sentry for error logging and reporting, which is initialized based on the configuration from SDK Studio. However, since the SDK is integrated into the merchant's app, conflicts may arise if the app also uses Sentry. To avoid this, merchants can disable Sentry in the Checkout SDK by setting the `is_enabled` flag to `false` in the configuration.
 
-### Cyber Security Measures <a href="#cyber-security-measures" id="cyber-security-measures"></a>
-
-#### Jailbreak Detection <a href="#jailbreak-detection" id="jailbreak-detection"></a>
+### Jailbreak Detection
 
 To enable the detection of jailbroken devices, the following section must be added to the application's **Info.plist** file:
 
@@ -995,7 +925,7 @@ To enable the detection of jailbroken devices, the following section must be add
 
 ```
 
-#### Screen Capture Prevention
+### Screen Capture Prevention
 
 The SDK implements screen capture restrictions to prevent the collection of sensitive data. This applies to fields containing Cardholder Data (CHD), such as the onsite checkout form for entering card details and the CVV field for tokenized payments.
 
@@ -1004,25 +934,23 @@ This technique works in two ways:
 1. When attempting to take a screenshot of a protected screen, the fields appear empty, even if they contain input.
 2. When attempting to record a video of the screen, the video is completely blurred, making the content unreadable.
 
----
-
 ## FAQ
 
-#### 1 What forms of payments are supported by the SDK? <a href="#id-1.-what-forms-of-payments-are-supported-by-the-sdk" id="id-1.-what-forms-of-payments-are-supported-by-the-sdk"></a>
+#### 1 What forms of payments are supported by the SDK?
 
 The SDK supports the following payment forms: `tokenPay`, `ottuPG`, `redirect` `applePay` and `stcPay`. Merchants can display specific methods according to their needs.
 
 **For example,** if you want to only show the STC Pay button, you can do so using formsOfPayment = `stcPay`, and only the STC Pay button will be displayed. The same applies for `applePay` and other methods.
 
-#### 2 What are the minimum system requirements for the SDK integration? <a href="#id-2.-what-are-the-minimum-system-requirements-for-the-sdk-integration" id="id-2.-what-are-the-minimum-system-requirements-for-the-sdk-integration"></a>
+#### 2 What are the minimum system requirements for the SDK integration?
 
 It is required to have a device running iOS 13 or higher.
 
-#### 3 Can I customize the appearance beyond the provided themes? <a href="#id-3.-can-i-customize-the-appearance-beyond-the-provided-themes" id="id-3.-can-i-customize-the-appearance-beyond-the-provided-themes"></a>
+#### 3 Can I customize the appearance beyond the provided themes?
 
 Yes, see the Customization theme section.
 
-#### 4 How do I customize the payment request for Apple Pay? <a href="#id-4.-how-do-i-customize-the-payment-request-for-apple-pay" id="id-4.-how-do-i-customize-the-payment-request-for-apple-pay"></a>
+#### 4 How do I customize the payment request for Apple Pay?
 
 The payment request for Apple Pay can be customized using its initialization methods. These methods allow the configuration of various properties, including:
 
@@ -1033,5 +961,3 @@ The payment request for Apple Pay can be customized using its initialization met
 - Merchant capabilities
 
 For a complete list of supported properties, refer to the [Apple Pay](https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypaymentrequest) documentation.
-
----

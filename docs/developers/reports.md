@@ -4,304 +4,197 @@ sidebar_label: Reports
 hide_table_of_contents: true
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 
 # Reports API
 
-The Reports-API lets merchants access their completed transaction reports programmatically.\
-It’s designed for reconciliation, accounting, analytics, and compliance — without exposing any public storage links.
+The Reports API lets merchants access completed transaction reports programmatically. It's designed for reconciliation, accounting, analytics, and compliance — without exposing any public storage links. Two secure endpoints are provided: **List Reports** (filtered, paginated list of finished reports with a secure download URL) and **Download Report** (authenticated binary file download).
 
-Two secure APIs are provided:
-
-1. **List Reports**: Returns a filtered, paginated list of finished reports (auto or manual), plus a secure `download_action`.
-2. **Download Report**: Downloads the binary file using authenticated access.
-
-**Why this matters:**\
 The dashboard already shows reports, but this API enables automated systems (ERP, BI tools, finance scripts) to fetch and download reports safely.
-
-## [Quick Start](#quick-start)
-
-This quick start shows how to authenticate, list available reports, and securely download a report using the Reports API in just a few steps.
-
-![Reports quick start](/img/reports/reports-quickstart.png)
-
-<ol className="stepper">
-  <li className="stepper-item">
-    <strong>Authenticate</strong>
-    <div>Choose one authentication method:</div>
-    <ul>
-      <li>
-        <strong>API Key (recommended)</strong>
-        <div>Add your private API key to the request header:</div>
-        <pre>
-          <code>Api-Key: your_private_api_key</code>
-        </pre>
-      </li>
-      <li>
-        <strong>Basic Auth (user-based)</strong>
-        <div>
-          Use Basic Auth credentials. The user must have the
-          <code>report.can_view_report</code> permission (or be a superuser).
-        </div>
-      </li>
-    </ul>
-  </li>
-
-  <li className="stepper-item">
-    <strong>List Available Reports</strong>
-    <div>Call the List Reports API to retrieve finished reports.</div>
-    <div>
-      <strong>Request</strong>
-    </div>
-
-    ```bash
-    curl -X GET "https://sandbox.ottu.net/api/v1/reports?limit=10" \
-      -H "Api-Key: your_private_api_key"
-    ```
-
-    <div>
-      <strong>What you get</strong>
-    </div>
-    <ul>
-      <li>A list of completed reports only</li>
-      <li>Each report includes metadata and a secure <code>download_action.url</code></li>
-    </ul>
-
-  </li>
-
-  <li className="stepper-item">
-    <strong>Select a Report</strong>
-    <div>
-      From the response, choose the report you want to download and copy its
-      <code>encrypted_id</code> or <code>download_action.url</code>.
-    </div>
-    <div>Example:</div>
-
-    ```json
-    "download_action": {
-      "method": "GET",
-      "url": "https://<ottu-url>/b/api/v1/reports/files/{report_id}/download/"
-    }
-    ```
-
-  </li>
-
-  <li className="stepper-item">
-    <strong>Download the Report</strong>
-    <div>Use the provided <code>download_action.url</code> to download the file.</div>
-    <div>
-      <strong>Request</strong>
-    </div>
-
-    ```bash
-    curl -X GET "https://<ottu-url>/b/api/v1/reports/files/{report_id}/download/" \
-      -H "Api-Key: your_private_api_key"
-    ```
-
-    <div>
-      <strong>Result</strong>
-    </div>
-    <ul>
-      <li>The report file is returned as binary (CSV, XLSX, etc.)</li>
-      <li>The download action is securely authenticated and audit-logged</li>
-    </ul>
-
-  </li>
-
-  <li className="stepper-item">
-    <strong>Handle Common Scenarios</strong>
-    <ul>
-      <li>
-        <strong>No reports found:</strong> The API returns <code>200 OK</code> with an empty
-        <code>results</code> array.
-      </li>
-      <li>
-        <strong>Missing permission (Basic Auth):</strong> The API returns <code>403 Forbidden</code>.
-      </li>
-      <li>
-        <strong>Invalid credentials:</strong> The API returns <code>401 Unauthorized</code>.
-      </li>
-    </ul>
-  </li>
-</ol>
-
-## [Setup](#setup)
-
-#### Base URL
-
-Use your Ottu domain:
-
-```
-https://<ottu-url>
-```
-
-#### Endpoints
-
-#### **1) List Reports**
-
-```
-GET b/api/v1/reports
-```
-
-#### **2) Download Report**
-
-From the response of **List Reports API**, extract `download_action.url` for the desired report.
-
-make GET request to `download_action.url` to download the file
-
-:::info
-If you don’t pass date filters, the List Reports API returns **the last 30 days** of finished reports, sorted newest first.
-:::
 
 :::tip Boost Your Integration
 Ottu offers SDKs and tools to speed up your integration. See [Getting Started](./getting-started/#boost-your-integration) for all available options.
 :::
 
-## [How it works](#how-it-works)
+## When to Use
 
-#### Reports sources
+- **Automated reconciliation** — pull transaction reports into your ERP or accounting system on a schedule.
+- **Analytics pipelines** — feed reports into BI tools for trend analysis, fraud detection, or financial reporting.
+- **Compliance & audit** — download reports for regulatory requirements with full audit trail.
+- **Manual download fallback** — when dashboard access is unavailable or you need programmatic access.
 
-Reports can be generated in two ways:
+## Setup
 
-- **Auto reports**: daily / weekly / monthly / yearly schedules.
-- **Manual reports**: created via dashboard.
+:::info
+If you don't pass date filters, the List Reports API returns the **last 30 days** of finished reports, sorted newest first.
+:::
 
-#### Visibility and security rules
+## Guide
 
-- A merchant can only see **their own reports**.
-- Only **finished reports** are returned.
-- **No public or raw storage URLs are ever returned.**
-- Every download attempt is **audit-logged**.
+### Workflow
 
-#### Download workflow (high-level)
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
+graph LR
+    A([Merchant]) -->|List reports| B[List Reports API]
+    B -->|download_action.url| A
+    A -->|GET download URL| C[Download Report API]
+    C -->|Binary file| A
 
-1. Call **List Reports** to get available reports.
-2. Pick a report from `results`.
-3. Use its secure `download_action.url`.
-4. Call that URL with the same authentication headers.
-5. The report file is returned as binary.
+    classDef accent fill:#1983BC,color:#FFFFFF,stroke:#302F37
+    class B accent
+```
 
-![Reports workflow](/img/reports/reports-workflow.png)
+1. **Call List Reports** to get available reports — filter by date, interval, or source.
+2. **Pick a report** from the `results` array.
+3. **Extract `download_action.url`** — a pre-signed, secure download URL with an embedded token.
+4. **Call that URL** with the same authentication headers to download the file as binary.
 
----
+#### Report Sources
+
+Reports are generated in two ways:
+- **Auto reports** — scheduled daily, weekly, monthly, or yearly.
+- **Manual reports** — created on demand via the dashboard.
+
+#### Visibility & Security
+
+- A merchant can only see **their own reports** (instance-isolated).
+- Only **finished reports** are returned — in-progress reports are excluded.
+- **No public or raw storage URLs** are ever exposed.
+- Reports use `encrypted_id` to prevent ID enumeration.
+- Every download attempt is **audit-logged** (success or failure).
+
+#### Download Security
+
+Download URLs are secured with multiple layers:
+
+- **Token-based** — download tokens are UUIDs cached in Redis, not direct file paths.
+- **Time-limited** — tokens expire after a configurable TTL.
+- **User-bound** — each token is tied to the authenticated user who requested the list.
+- **Rate-limited** — downloads are rate-limited per user to prevent abuse.
+- **Ownership verification** — the server verifies the user owns the report before serving.
+
+#### File Formats & Delivery
+
+| Format | Content-Type | Details |
+|--------|-------------|---------|
+| CSV | `text/csv` | UTF-8 encoded, comma-delimited |
+| XLSX | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` | Standard Excel format |
+
+For S3-backed storage, the download returns a `302` redirect to a pre-signed S3 URL. For local storage, the file is served via `X-Sendfile` header.
+
+### Step-by-Step
+
+#### 1. List available reports
+
+```bash
+curl -X GET "https://sandbox.ottu.net/b/api/v1/reports/files/?limit=10" \
+  -H "Api-Key: your_private_api_key"
+```
+
+The response includes completed reports, each with a secure `download_action.url`. Use query parameters (see [API Reference](#api-reference)) to filter by date, interval, or source.
+
+#### 2. Download a report
+
+Use the `download_action.url` from the response:
+
+```bash
+curl -X GET "https://<ottu-url>/b/api/v1/reports/files/{token}/download/" \
+  -H "Api-Key: your_private_api_key" \
+  -o report.csv
+```
+
+The file is returned as binary (CSV or XLSX).
+
+#### 3. Handle errors
+
+| HTTP | When |
+|------|------|
+| 200 + empty `results` | No reports match your filters |
+| 401 | Invalid or missing credentials |
+| 403 | Basic Auth user lacks `report.can_view_report` |
+| 429 | Rate limit exceeded — backoff and retry |
+
+## API Reference
+
+<Tabs groupId="reports-api" queryString>
+<TabItem value="list" label="List Reports">
 
 <ApiDocEmbed path="list-reports.api.mdx" />
 
----
+</TabItem>
+<TabItem value="download" label="Download Report">
 
 <ApiDocEmbed path="download-report.api.mdx" />
 
----
+</TabItem>
+</Tabs>
 
-## [Guide](#guide)
+## Best Practices
 
-#### 1) List Reports
+#### Use API Key for automation
 
-**Purpose:**\
-Retrieve a paginated list of completed reports.
+API Key auth is more stable and doesn't require per-user permission management for system integrations.
 
-**Request**
+#### Always filter by date
 
-```
-GET b/api/v1/reports/files/
-```
+Avoid pulling large histories unintentionally. Use `created_after` and `created_before` to fetch only the period you need.
 
-**Query parameters**
+#### Respect pagination
 
-|       Name       | Type | Required | Notes                                           |
-| :--------------: | :--: | :------: | ----------------------------------------------- |
-| `created_after`  | date |    No    | Lower bound (inclusive)                         |
-| `created_before` | date |    No    | Upper bound (inclusive)                         |
-|    `interval`    | enum |    No    | `daily`, `weekly`, `monthly`, `yearly`          |
-|     `source`     | enum |    No    | `auto` or `manual`                              |
-|     `limit`      | int  |    No    | Default 50, max 200                             |
-|     `offset`     | int  |    No    | Pagination mode (cursor recommended if enabled) |
+Use `limit` and `offset` (or cursor) until `next` is null. Don't assume all results fit in one response.
 
-**Response**&#x20;
+#### Handle empty results
 
-- `download_action.url` – pre-signed download URL with embedded token.
-- `download_action.method` – always `GET`.
+A valid response can return zero reports:
 
-#### 2) Download Report
-
-**Purpose**\
-Download the report file as binary.
-
-**Request**
-
-```
-GET b/api/v1/reports/files/a75cd20e-d5b7-4019-972e-c0fe45c1bb96/download/
+```json
+{ "count": 0, "next": null, "previous": null, "results": [] }
 ```
 
-:::info
-`:report_id` is file download token&#x20;
-:::
+#### Log download tracking
 
-**Response**
+Even though Ottu logs every download, your system should store the report ID, download time, and success state for your own audit trail.
 
-- Returns the file directly (CSV, XLSX, etc.) as binary.
-- No JSON body unless there’s an error.
+#### Retry safely
 
-## [Best Practices](#best-practices)
+On `429 rate_limited`, implement exponential backoff before retrying.
 
-1. **Use API Key for automation**
-   - More stable and permission-free for system integrations.
-2. **Always filter by date**
-   - Avoid pulling large histories unintentionally.
-   - Example: fetch only last month’s reports.
-3. **Respect pagination**
-   - Use `limit` and `cursor/offset` until `next` is null.
-4. **Handle empty results**
-   - A valid response can be:
+## FAQ
 
-     ```json
-     { "count": 0, "next": null, "previous": null, "results": [] }
-     ```
+#### 1. Can I download reports without listing them first?
 
-5. **Log your own download tracking**
-   - Even though Ottu logs downloads, your system should store:
-     - report id
-     - download time
-     - success state
-6. **Retry safely**
-   - On `429 rate_limited`, backoff before retrying.
+Technically yes, if you stored the download token previously. But listing first is the safest way to discover available reports and get fresh tokens.
 
-## [FAQ](#faq)
+#### 2. Why don't I see reports that are still generating?
 
-#### 1. **Can I download reports without listing them first?**
+The List Reports API returns **finished reports only** to keep results correct and queries fast.
 
-You technically can if you already stored the `encrypted_id`.\
-But listing first is the safest way to discover available reports.
-
-#### 2. **Why don’t I see reports that are still generating?**
-
-The List Reports API returns **finished reports only** to keep results correct and fast.
-
-#### 3. **What happens if I don’t pass date filters?**
+#### 3. What happens if I don't pass date filters?
 
 The API returns reports from the **last 30 days**, newest first.
 
-#### 4. **Can I share download links publicly?**
+#### 4. Can I share download links publicly?
 
-No. Download URLs are secure, tokenized, and require authentication.\
-They are not permanent or public.
+No. Download URLs are secure, tokenized, time-limited, and require authentication. They are not permanent or public.
 
-#### 5. **What errors should I expect?**
+#### 5. What errors should I expect?
 
-| HTTP | code                 | message                  | When                               |
-| ---- | -------------------- | ------------------------ | ---------------------------------- |
-| 400  | `invalid_parameters` | Bad filters              | `created_before` < `created_after` |
-| 401  | `unauthorized`       | Invalid/missing auth     | Header missing or wrong            |
-| 403  | `forbidden`          | Insufficient permissions | Basic user lacks report permission |
-| 404  | `not_found`          | Report not found         | Wrong or inaccessible ID           |
-| 429  | `rate_limited`       | Too many requests        | Quota exceeded                     |
+| HTTP | Code | Message | When |
+|------|------|---------|------|
+| 400 | `invalid_parameters` | Bad filters | `created_before` < `created_after` |
+| 401 | `unauthorized` | Invalid/missing auth | Header missing or wrong |
+| 403 | `forbidden` | Insufficient permissions | Basic Auth user lacks `report.can_view_report` |
+| 404 | `not_found` | Report not found | Wrong or inaccessible token |
+| 429 | `rate_limited` | Too many requests | Rate limit exceeded |
 
-#### 6. **I’m using Basic Auth but still getting 403 — why?**
+#### 6. I'm using Basic Auth but getting 403 — why?
 
-Your user is missing `report.can_view_report`.\
-Ask your admin to enable report API access.
+Your user is missing `report.can_view_report`. Ask your admin to enable report API access.
 
-#### 7. **Are downloads logged even if they fail?**
+#### 7. Are downloads logged even if they fail?
 
 Yes. Every attempt is logged with outcome status for audit compliance.
 

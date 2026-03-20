@@ -4,68 +4,68 @@ sidebar_label: Notifications
 hide_table_of_contents: true
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 
-## Message Notifications
+# Notifications
 
-This API provides a reliable interface to manually initiate message notifications for a specific transaction, based on either a provided [`session_id`](/docs/developers/payments/checkout-api) or [`order_no`](/docs/developers/payments/checkout-api). It is particularly useful in scenarios where message notifications, such as SMS, email, or WhatsApp, have not been delivered as expected, often due to issues with third-party services. Additionally, the API is helpful when customer contact information ([email](/docs/developers/payments/checkout-api) or [phone number](/docs/developers/payments/checkout-api)) has been updated, and you want to ensure the customer receives the relevant transaction message notifications again. By using this API, you can ensure that once the issue is resolved or contact details are updated, message notifications can be promptly sent to the customer without requiring a new transaction.
+The Notifications API lets you manually send or resend transaction notifications (SMS, email, WhatsApp) to customers. It handles scenarios where notifications failed due to third-party service issues, or when customer contact information has been updated and you need to re-deliver the message.
 
 **Benefits:**
 
-- **Error Recovery:** Allows businesses to resend message notifications after resolving issues with SMS gateways, email providers, or WhatsApp services.
-- **Seamless Customer Communication:** Ensures that customers receive critical transaction updates, enhancing the overall payment experience.
-- **Manual Control:** Offers manual flexibility for cases where automatic message notifications have failed or been delayed.
-- **Contact Information Updates:** Enables re-notifying customers when their email or phone details have been changed.
-
-## Setup
-
-Before you can integrate with Ottu's `Message Notifications API`, several prerequisites must be fulfilled. These are essential to ensure the API functions correctly and securely.
-
-1. **Checkout API Integration:**
-   Prior to using the `Message Notifications API`, you must create a payment transaction via the [Checkout API](/docs/developers/payments/checkout-api). This step captures vital transaction details, such as:
-   - **Customer Data**: Information like [`customer_phone`](/docs/developers/payments/checkout-api) for SMS and WhatsApp, and [`customer_email`](/docs/developers/payments/checkout-api) for email message notifications is collected.
-   - **Optional Order Number**: The [`order_no`](/docs/developers/payments/checkout-api) may also be provided as an alternative reference for the required transaction.
-
-   Upon successful creation of the payment transaction, a [`session_id`](/docs/developers/payments/checkout-api) is generated. This `session_id` or the `order_no` (if provided) becomes a key parameter for sending the message notifications using the `Message Notifications API`.
-
-2. **Templates Configuration:**
-   Ensure that all relevant message notifications templates (for SMS, email, WhatsApp, etc.) are pre-configured. The [Ottu support team](mailto:support@ottu.com) can assist with this setup to ensure that message notifications follow your desired format.
-3. **Enabling Message Notifications Channels:**
-   When creating the payment transaction, enable the required message notification channels (e.g., SMS, email, WhatsApp).
-   - If the transaction is created via the `Checkout API`, message [notifications](/docs/developers/payments/checkout-api) parameters should be provided within the API call.
-   - Alternatively, if the transaction is created from the **Ottu dashboard**, ensure that the designated checkbox for enabling message notifications is selected.
-
-4. **Optional: SMS Notification Channel**
-   If SMS message notifications are required, an SMS provider should be configured for your account. Contact the [Ottu support team](mailto:support@ottu.com) for assistance with configuring the SMS provider.
-5. **Optional: Integrated WhatsApp Channel**
-   The following requirements must be met:
-   - **WhatsApp Business Account**: The merchant must have a registered WhatsApp Business account.
-   - **Template Approval**: All WhatsApp templates and their content must be pre-approved by Meta/WhatsApp before being used for message notifications.
-   - **WhatsApp Integration Authenticator**: This acts as the link between WhatsApp and Ottu. Contact the [Ottu support team](mailto:support@ottu.com) for assistance in configuring the integration.
+- **Error recovery** — resend notifications after resolving SMS gateway, email provider, or WhatsApp service issues.
+- **Contact updates** — re-notify customers when their email or phone details change.
+- **Manual control** — trigger notifications on demand when automatic delivery fails or is delayed.
 
 :::tip Boost Your Integration
 Ottu offers SDKs and tools to speed up your integration. See [Getting Started](./getting-started/#boost-your-integration) for all available options.
 :::
 
-## How It Works
+## When to Use
 
-The `Message Notifications API` allows merchants to manually resend message notifications for specific transactions, following a structured process. Here's how it works:
+- **Payment notification failed** — SMS gateway or email provider had an outage, and the customer didn't receive the payment link or receipt.
+- **Customer updated contact info** — email or phone number changed after the transaction was created.
+- **Manual resend needed** — business process requires re-sending a notification for a specific transaction state.
+- **Template-based messaging** — send notifications using pre-configured templates for custom communication flows.
 
-1. **Obtain** [`session_id`](/docs/developers/payments/checkout-api) **or** [`order_no`](/docs/developers/payments/checkout-api):
-   Once the payment transaction is initiated via Ottu dashboard or `Checkout API` and all setup requirements are fulfilled, the merchant will take the generated `session_id` or the provided `order_no` (if applicable). These identifiers are crucial parameters for the `Message Notifications API`.
-2. **Send Request via** `Message Notifications API`:
-   The merchant sends a request to the `Message Notifications API`, including the following key parameters:
-   - `session_id` or `order_no`: To identify the transaction for which the message notifications should be sent.
-   - **Notification Channels**: The merchant specifies the required channels (e.g., SMS, email, WhatsApp) through which the message notifications should be sent.
+## Setup
 
-<ApiDocEmbed path="message-notifications.api.mdx" />
+1. **Checkout API integration** — create a payment transaction via the [Checkout API](/docs/developers/payments/checkout-api) first. This captures customer data ([`customer_phone`](/docs/developers/payments/checkout-api) for SMS/WhatsApp, [`customer_email`](/docs/developers/payments/checkout-api) for email) and generates the `session_id`.
+
+2. **Template configuration** — ensure notification templates (SMS, email, WhatsApp) are pre-configured. Contact the [Ottu support team](mailto:support@ottu.com) for template setup.
+
+3. **Enable notification channels** — when creating the transaction, include the `notifications` parameter to enable channels per payment state. If creating via the dashboard, select the notification checkboxes.
+
+4. **Optional: SMS provider** — configure an SMS provider for your account. Contact [Ottu support](mailto:support@ottu.com).
+
+5. **Optional: WhatsApp integration** — requires a WhatsApp Business account, Meta-approved templates, and WhatsApp integration configuration via [Ottu support](mailto:support@ottu.com).
 
 ## Guide
 
-Follow these guidelines to send message notifications for specific payment states using the `Message Notifications API`.
+### Workflow
 
-1. **Initiating the Transaction:**
-   Ensure that all setup requirements are implemented and provide the necessary request payload parameters via the [Checkout API](/docs/developers/payments/checkout-api). Here's an example of a transaction initiation request:
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
+graph LR
+    A([Merchant]) -->|session_id / order_no| B[Notifications API]
+    B -->|SMS| C([Customer])
+    B -->|Email| C
+    B -->|WhatsApp| C
+
+    classDef accent fill:#1983BC,color:#FFFFFF,stroke:#302F37
+    class B accent
+```
+
+1. **Merchant obtains `session_id` or `order_no`** from a transaction created via the [Checkout API](/docs/developers/payments/checkout-api) or dashboard.
+2. **Merchant sends a request** to the Notifications API with the transaction identifier and desired channels.
+3. **Ottu dispatches notifications** via the specified channels (SMS, email, WhatsApp) based on the transaction's current state and configured templates.
+
+### Step-by-Step
+
+#### 1. Create a transaction with notification channels
+
+Include the `notifications` parameter when creating the transaction via the [Checkout API](/docs/developers/payments/checkout-api):
 
 ```json
 {
@@ -77,45 +77,16 @@ Follow these guidelines to send message notifications for specific payment state
   "customer_email": "example@example.com",
   "customer_phone": "123456789",
   "notifications": {
-    "email": [
-      "created",
-      "paid",
-      "canceled",
-      "failed",
-      "expired",
-      "authorized",
-      "voided",
-      "refunded",
-      "captured"
-    ],
-    "SMS": [
-      "created",
-      "paid",
-      "canceled",
-      "failed",
-      "expired",
-      "authorized",
-      "voided",
-      "refunded",
-      "captured"
-    ],
-    "whatsapp": [
-      "created",
-      "paid",
-      "canceled",
-      "failed",
-      "expired",
-      "authorized"
-    ]
+    "email": ["created", "paid", "canceled", "failed", "expired", "authorized", "voided", "refunded", "captured"],
+    "SMS": ["created", "paid", "canceled", "failed", "expired", "authorized", "voided", "refunded", "captured"],
+    "whatsapp": ["created", "paid", "canceled", "failed", "expired", "authorized"]
   }
 }
 ```
 
-This initiates the transaction and sets up message notifications across the specified channels (email, SMS, and WhatsApp) for the listed states.
+#### 2. Send notifications
 
-2. **Send Message Notifications for** `created` **State:**
-   Once the transaction has been initiated, obtain the generated `session_id` or use the provided `order_no` (in this example, `order_no`: `example_order_no`).
-   To send the message notifications for the `created` state, use the following request payload to specify the message notifications channels:
+Use `session_id` or `order_no` to identify the transaction, and specify the channels:
 
 ```json
 {
@@ -124,10 +95,9 @@ This initiates the transaction and sets up message notifications across the spec
 }
 ```
 
-This request will send message notifications via the specified channels (SMS, email, WhatsApp) for the transaction linked to `order_no`.
+#### 3. Handle the response
 
-3. **Successful Message Notifications Response:**
-   If the customer is successfully notified, the merchant will receive the following response payload:
+Successful notification returns:
 
 ```json
 {
@@ -135,64 +105,89 @@ This request will send message notifications via the specified channels (SMS, em
 }
 ```
 
-4. **Re-send Message Notifications for the Same or Different States:**
-   - Merchants can notify the customer for the same payment state (e.g., `created`) as many times as needed.
-   - To notify the customer for the same or different state, repeat the process outlined in Step 2, using the same `order_no` or `session_id` of the origin transaction.
+#### 4. Resend as needed
+
+You can resend notifications for the same or different payment states as many times as needed — just repeat step 2 with the same `session_id` or `order_no`.
+
+:::info Supported states per channel
+- **Email & SMS**: `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`, `voided`, `refunded`, `captured`
+- **WhatsApp**: `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`
+:::
+
+## API Reference
+
+<Tabs groupId="notification-api" queryString>
+<TabItem value="message" label="Message Notifications">
+
+<ApiDocEmbed path="message-notifications.api.mdx" />
+
+</TabItem>
+<TabItem value="template" label="Template Notifications">
+
+<ApiDocEmbed path="send-notification.api.mdx" />
+
+</TabItem>
+<TabItem value="channel" label="Channel-Specific">
+
+<ApiDocEmbed path="send-specific-notification.api.mdx" />
+
+</TabItem>
+</Tabs>
 
 ## Best Practices
 
-To ensure optimal use of the `Message Notifications API`, follow these best practices to improve efficiency, security, and reliability in your message notifications process:
+#### Complete setup before sending
 
-1. **Ensure Setup Requirements Are Complete:** Before sending message notifications, confirm that:
-   - All necessary message notifications templates (SMS, email, WhatsApp) are configured properly.
-   - Message notification channels are enabled during the transaction setup via the `Checkout API` or **Ottu Dashboard**.
-   - SMS and WhatsApp providers are configured in advance with the help of the [Ottu support team](mailto:support@ottu.com), especially for critical channels like WhatsApp Business.
+Confirm that notification templates are configured, channels are enabled in the transaction, and SMS/WhatsApp providers are set up before attempting to send.
 
-2. **Leverage** [`order_no`](/docs/developers/payments/checkout-api) **for Consistency:** Whenever possible, use the `order_no` to send message notifications, especially if it is consistent across multiple systems. This can help maintain uniformity across different services and databases, ensuring message notifications are tied to a well-understood reference.
-3. **Validate Payment States Before Sending Message Notifications:** Only send message notifications for valid payment states, as per the following rules:
-   - **Email & SMS**: Supported for all payment states such as `created`, `paid`, `canceled`, `failed`, etc.
-   - **WhatsApp**: Supported only for select states (e.g., `created`, `paid`, `authorized`).
+#### Use `order_no` for consistency
 
-   Ensure that the state you're notifying about matches the appropriate channel capabilities.
+When available, use `order_no` to identify transactions — it's consistent across your systems and easier to trace.
 
-4. **Avoid Redundant Message Notifications:** While the API allows you to notify the customer for the same payment state multiple times, it is recommended to avoid redundant notifications unless necessary (e.g., only resend notifications if prior communication failed or needs verification). Overuse can lead to customer frustration and unnecessary SMS or email costs.
-5. **Handle Response and Errors Gracefully:** Always check the API response to ensure the message notifications was successfully sent. If the response indicates an error or failure (e.g., issues with a third-party service like an SMS gateway), build in retry mechanisms or alerts for your team to address the issue promptly.
-6. **Secure the API Requests:**
-   - Use proper authentication (e.g., API keys, public/private key pairs) to safeguard your message notifications API requests.
-   - Ensure HTTPS is used for all API communications to prevent data interception.
+#### Validate payment states per channel
 
-   Security is paramount when sending customer-related message notifications containing sensitive transaction data.
+Only send notifications for states supported by each channel. WhatsApp has a smaller set of supported states than email/SMS.
 
-7. **Test Message Notifications Before Going Live:** Before enabling the `Message Notifications API` in your production environment, thoroughly test message notifications across all intended channels (SMS, email, WhatsApp). Use test transactions and confirm receipt to ensure all message notification templates and channels function as expected.
-8. **Monitor Third-Party Message Notification Services:** Stay proactive by monitoring the health and performance of third-party message notification services (SMS, email, WhatsApp) that your system relies on. Ensure any outages or issues are promptly identified and resolved to prevent missed customer message notifications.
+#### Avoid redundant notifications
+
+The API allows unlimited resends, but overuse can frustrate customers and increase SMS/email costs. Only resend when prior delivery failed.
+
+#### Handle errors gracefully
+
+Check the API response for failures. Build retry mechanisms or alerts for third-party service issues (SMS gateway downtime, email bounces).
+
+#### Secure API requests
+
+Use proper [authentication](/docs/developers/getting-started/authentication) and HTTPS for all API calls. Notification requests contain sensitive transaction data.
+
+#### Test before production
+
+Test notifications across all channels with test transactions before going live. Confirm templates render correctly and messages are received.
+
+#### Monitor third-party services
+
+Proactively monitor SMS, email, and WhatsApp provider health. Identify outages early to trigger manual resends promptly.
 
 ## FAQ
 
-#### 1. **What is the purpose of the Message Notifications API?**
+#### 1. What is the purpose of the Notifications API?
 
-The `Message Notifications API` allows merchants to manually resend message notifications for a specific transaction based on `session_id` or `order_no`. It is useful when message notifications (e.g., SMS, email, WhatsApp) have failed due to issues with third-party providers and need to be resent.
+It lets merchants manually resend notifications for a specific transaction based on `session_id` or `order_no`, useful when automatic notifications failed.
 
-#### 2. **What are the key parameters required to send a message notification?**
+#### 2. What parameters are required?
 
-To send a message notification, you need to provide:
+Either `session_id` or `order_no` to identify the transaction, plus a `channels` array specifying which channels to send (email, sms, whatsapp).
 
-- Either the `session_id` or `order_no` of the transaction.
-- A list of the message notifications channels you want to send (e.g., SMS, email, WhatsApp).
+#### 3. Which payment states can notifications be sent for?
 
-#### 3. **Which payment states can message notifications be sent for?**
+- **Email & SMS**: `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`, `voided`, `refunded`, `captured`
+- **WhatsApp**: `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`
 
-Message notifications can only be sent for certain payment states, depending on the channel:
+#### 4. How many times can I resend?
 
-- **Email & SMS**: Message notifications can be sent for `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`, `voided`, `refunded`, `captured` states.
-- **WhatsApp**: Message notifications can only be sent for `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`.
+No limit, but avoid redundant notifications unless prior delivery failed.
 
-#### 4. **How many times can I send a message notification for the same state?**
-
-There is no limit on how many times you can send a message notification for the same state. However, it's recommended to avoid redundant message notifications unless necessary (e.g., a prior message notification failed).
-
-#### 5. **What happens if the customer is successfully notified?**
-
-If the customer is successfully notified, the API will return the following response:
+#### 5. What does a successful response look like?
 
 ```json
 {
@@ -200,21 +195,21 @@ If the customer is successfully notified, the API will return the following resp
 }
 ```
 
-#### 6. **Can I send message notifications for a transaction if it wasn't created via the Checkout API?**
+#### 6. Can I notify for transactions not created via the Checkout API?
 
-Yes, as long as the `order_no` or `session_id` is available, message notifications can be sent. However, message notifications and channels should have been properly set up during the transaction creation.
+Yes, as long as `session_id` or `order_no` is available and notification channels were configured during creation.
 
-#### 7. **What should I do if the message notification doesn't get delivered?**
+#### 7. What if a notification doesn't get delivered?
 
-If a message notification doesn't get delivered (due to third-party issues with SMS, email, or WhatsApp providers), you can manually send it again using the `Message Notifications API` once the issue is resolved. Additionally, ensure that third-party providers are correctly configured.
+Resend it using the API once the third-party provider issue is resolved. Ensure providers are correctly configured.
 
-#### 8. **How can I configure my SMS or WhatsApp provider?**
+#### 8. How do I configure SMS or WhatsApp providers?
 
-To configure your SMS or WhatsApp provider, contact the [Ottu support team](mailto:support@ottu.com) for assistance. They will help set up the necessary integrations for sending message notifications through these channels.
+Contact the [Ottu support team](mailto:support@ottu.com) for SMS and WhatsApp provider setup.
 
-#### 9. **Is it possible to send message notifications for different channels in a single API call?**
+#### 9. Can I send to multiple channels in one call?
 
-Yes, you can specify multiple channels (e.g., [`sms`, `email`, `whatsapp`]) in a single API call to send message notifications via multiple platforms simultaneously.
+Yes — include multiple channels in the `channels` array (e.g., `["sms", "email", "whatsapp"]`).
 
 ## What's Next?
 

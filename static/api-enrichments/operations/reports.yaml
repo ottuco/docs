@@ -6,8 +6,12 @@ operations:
     permissions:
       - $perm:api_key_admin
       - $perm:basic_auth_view_reports
+    description_replace: |
+      Retrieve a paginated list of completed transaction reports. Returns only finished reports, ordered by creation date (newest first). Each report includes a secure `download_action` URL for downloading.
 
   download_report:
     permissions:
       - $perm:api_key_admin
       - $perm:basic_auth_view_reports
+    description_replace: |
+      Download a report file using the secure token from the list endpoint. Returns the file as binary (CSV or XLSX). Tokens are time-limited, user-bound, and rate-limited.

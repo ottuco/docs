@@ -1,11 +1,11 @@
 ---
 id: list-reports
 title: "List Transaction Reports"
-description: "Retrieve a paginated list of completed transaction reports for reconciliation, accounting, analytics, and compliance purposes."
+description: "Retrieve a paginated list of completed transaction reports. Returns only finished reports, ordered by creation date (newest first). Each report includes a secure `download_action` URL for downloading."
 sidebar_label: "List Transaction Reports"
 hide_title: true
 hide_table_of_contents: true
-api: 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
+api: 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
 sidebar_class_name: "get api-method"
 info_path: docs/developers/apis/ottu-api
 custom_edit_url: null
@@ -37,49 +37,7 @@ import Translate from "@docusaurus/Translate";
 
 
 
-Retrieve a paginated list of completed transaction reports for reconciliation, accounting, analytics, and compliance purposes.
-
-## Authentication
-
-- **API Key** (Recommended): `Api-Key: your_private_api_key`
-- **Basic Auth**: User must have `report.view_report` permission
-
-## Example Request
-
-```bash
-curl -X GET 'https://your-domain.com/b/api/v1/reports/files/?created_after=2025-11-01&limit=50' \
-  -H 'Api-Key: your_private_api_key_here'
-```
-
-## Key Features
-
-- Only returns finished reports (optimized queries)
-- Includes `encrypted_id` for reference (prevents enumeration)
-- Provides `download_action` with ready-to-use secure download URL
-- Ordered by creation date (newest first)
-- Merchant-isolated (each instance sees only their reports)
-
-## Response Fields
-
-- `encrypted_id`: Encrypted report identifier for reference
-- `download_action.url`: Pre-signed download URL with embedded token
-- `download_action.method`: HTTP method to use (always `GET`)
-
-## Integration Walkthrough
-
-**Step 1**: Call this endpoint to list available reports
-
-**Step 2**: From the response, extract `download_action.url` for the desired report
-
-**Step 3**: Make a GET request to that URL (same auth headers) to download the file
-
-
-### Permissions
-
-| Auth Method | Required Permissions |
-|---|---|
-| [API Key](/developers/getting-started/authentication/#api-key-auth) | All permissions (admin access) |
-| [Basic Auth](/developers/getting-started/authentication/#basic-auth) | `report.can_view_report` |
+Retrieve a paginated list of completed transaction reports. Returns only finished reports, ordered by creation date (newest first). Each report includes a secure `download_action` URL for downloading.
 
 
 <Heading

@@ -88,6 +88,7 @@ interface OperationsFile {
 interface SchemaPropertyOverride {
   description?: string;
   properties?: Record<string, SchemaPropertyOverride | string>;
+  remove_enum?: boolean;
 }
 
 interface SchemaFile {
@@ -356,6 +357,13 @@ function enrichSchemaProperties(
           `Property '${fullPath}' not found in schema '${schemaName}'`
         );
       }
+    }
+
+    // Remove enum values
+    if (overrideObj.remove_enum && schemaProps[propName]) {
+      delete schemaProps[propName].enum;
+      delete schemaProps[propName]["x-spec-enum-id"];
+      count++;
     }
 
     // Nested properties override

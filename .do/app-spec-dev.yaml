@@ -16,6 +16,11 @@ ingress:
         path:
           prefix: /mcp
     - component:
+        name: mcp
+      match:
+        path:
+          prefix: /webhook
+    - component:
         name: docs
       match:
         path:

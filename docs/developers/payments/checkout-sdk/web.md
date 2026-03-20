@@ -7,8 +7,6 @@ import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import CheckoutDemo from "@site/src/components/CheckoutDemo";
 
-In this documentation, you will find comprehensive resources and guides to help you seamlessly integrate and leverage the features of SDK Version 3 in your development projects. Whether you're an experienced developer or just starting out, this documentation is designed to assist you at every step. For SDK Version 2 Documentation, please visit the following link: [SDK Version 2 Documentation](https://under-review-docs-ottu.gitbook.io/ottu-web-sdk/)
-
 The [Checkout SDK](./) is a JavaScript library provided by Ottu that allows you to easily integrate an Ottu-powered [checkout process](../#ottu-checkout-sdk-flow) into your web application. With the Checkout SDK, you can customize the look and feel of your checkout process, as well as which forms of payment are accepted.
 
 To use the Checkout SDK, you'll need to include the library in your web application and initialize it with your Ottu merchant_id, session_id, and [API key](../../../getting-started/authentication#public-key). You can also specify additional options such as, which forms of payment to accept, the [theme](#theme-object) styling for the checkout interface, and more.
@@ -20,15 +18,9 @@ Please note that the Checkout SDK requires the implementation of the [Checkout A
 For optimal security, call REST APIs from server-side implementations, not client-side applications such as mobile apps or web browsers.
 :::
 
-### Checkout SDK
-
-### Demo
-
-Below is a demo of the Checkout SDK in action. This demo shows how the Checkout SDK can be used to create a streamlined checkout experience for customers, with support for multiple forms of payment and a customizable interface.
-
 <CheckoutDemo />
 
-### Installation
+## Installation
 
 To install the Checkout SDK, you'll need to include the library in your web application by adding a script tag to your HTML section. You can do this by using the following code snippet:
 
@@ -48,15 +40,15 @@ Replace [errorCallback](#windowerrorcallback), [cancelCallback](#windowcancelcal
 
 You're all set! You can now use the [Checkout SDK ](./)to create a checkout form on your web page and process payments through Ottu.
 
-### Functions
+## Initialization
 
-#### **Checkout.init**
+### Checkout.init
 
 Is the function that initializes the [checkout process](../#ottu-checkout-sdk-flow) and sets up the necessary configuration options for the [Checkout SDK](./). It needs to be called once on your web page to initialize the checkout process, and it must be called with a configuration object that includes all the necessary options for the checkout process.
 
 When you call `Checkout.init`, the SDK will take care of setting up the necessary components for the checkout process, such as creating a form for the customer to enter their payment details, and handling communication with Ottu's servers to process the payment.
 
-#### **Checkout.reload**
+### Checkout.reload
 
 The `Checkout.reload` function in the Checkout SDK is used to refresh the SDK. It's useful when you want to reload the **content** of the SDK after an **error** has occurred or when the content needs to be **refreshed**.
 
@@ -66,7 +58,9 @@ Here's an example of how `Checkout.reload` might be called:
 Checkout.reload();
 ```
 
-### **Properties**
+## Properties
+
+### Required Properties
 
 #### **selector** _`string`_
 
@@ -111,6 +105,8 @@ Ensure that you utilize the public key and refrain from using the [private key](
 The `session_id` is the unique identifier for the payment transaction associated with the checkout process.
 
 This unique identifier is automatically generated when the payment transaction is created. For more information on how to use the `session_id` parameter in the Checkout API, see [session_id](../../checkout-api).
+
+### Display Options
 
 #### **lang** _`string`_
 
@@ -167,6 +163,8 @@ Checkout.init({
 
 <figure><img src="https://lh7-us.googleusercontent.com/AIAlvACaCny1WZdNgUoMmUd-vuDYAyFjUwktZJFtHYfY5ys5FDIqRBWWRRr0spH8Wdz9BImGZ0oqdLF4SZUt9SqlpEBMDDnP_jhm0lkXhk4r8oKfTJsyq4XJsAnjUwty73ogPG3nXIZ0WzbQdsK6m4eK8WsRyrQp" alt="" /><figcaption></figcaption></figure>
 
+### Preloading
+
 #### setupPreload _`object`_
 
 The `setupPreload` feature is designed to optimize the `SDK` loading experience by allowing merchants to pre-fetch transaction details and pass them to the `SDK` during initialization. This eliminates the need for the `SDK` to make an API call, resulting in faster rendering of the UI.
@@ -190,136 +188,7 @@ For more information on how to use the `setupPreload` parameter, see [sdk_setup_
 If the `setupPreload` object passed during `SDK`initialization is not valid or does not adhere to the required structure, the `SDK` will discard it and automatically fall back to its previous functionality. In such cases, the `SDK` will initiate an API call to fetch the necessary transaction details from the backend. It is essential to ensure that the `setupPreload` object follows the specified format to leverage the instant loading feature effectively and avoid fallback scenarios and ensure a seamless integration.
 :::
 
-#### applePayInit _`object`_
-
-The `applePayInit` object enables users to modify the Apple Pay configurations used for generating payment sessions through Apple Pay. By default, all options are pre-configured. However users have the flexibility to customize these configurations using `applePayInit` according to their requirements.
-
-- **buttonLocale**\
-  Users can change Apple Pay Button Locale by using buttonLocale property. \
-  Value of buttonLocale must be a 2 letter language code like `ar`, `en` etc.
-- **version**\
-  Users can change the API version used for creating Apple Pay payment session by using the version property. Values supported by version are written[ here](https://developer.apple.com/documentation/apple_pay_on_the_web/apple_pay_on_the_web_version_history).
-
-In addition to above properties, users have the capability to customize the Apple Pay payment request using properties defined [here](https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypaymentrequest). However, due to backend constraints, not all properties are modifiable. Below is the list of supported and unsupported values:
-
-##### Supported Properties
-
-- `merchantCapabilities`
-- `merchantIdentifier`
-- `supportedNetworks`
-- `countryCode`
-- `supportedCountries`
-- `total`&#x20;
-- `lineItems`
-- `currencyCode`
-
-##### Unsupported Properties
-
-- `requiredBillingContactFields`
-- `billingContact`
-- `requiredShippingContactFields`
-- `shippingContact`
-- `shippingContactEditingMode`&#x20;
-- `supportsCouponCode`
-- `couponCode`
-- `applicationData`
-
-```javascript
-Checkout.init({
-    selector: "checkout",
-    merchant_id: 'domain',
-    session_id: 'session_id',
-    apiKey: 'apiKey',
-    // Default values configured for Apple Pay
-    applePayInit: {
-        version: 6
-        buttonLocale: 'en',
-        supportedNetworks: ['amex', 'masterCard', 'maestro', 'visa', 'mada'],
-        merchantCapabilities: ['supports3DS']
-        // Remaining values are configured via init checkout API
-    }
-});
-```
-
-#### googlePayInit `object`
-
-The `googlePayInit` object enables users to modify the Google Pay configurations used for generating payment sessions through Google Pay. By default, all options are pre-configured. However, developers have the flexibility to customize these configurations using `googlePayInit` according to their requirements.&#x20;
-
-- **buttonLocale**\
-  Users can change Google Pay Button Locale by using `buttonLocale` property. \
-  Value of `buttonLocale` must be a 2 letter language code like `ar`, `en,`etc...&#x20;
-
-In addition to above properties, users have the capability to customize Google Pay payment request by utilizing the options outlined in the documentation[ here](https://developers.google.com/pay/api/web/reference/request-objects#PaymentDataRequest).However, due to backend constraints, not all properties are modifiable. Below is the list of supported and unsupported values:
-
-##### Supported Properties
-
-- `apiVersion`
-- `apiVersionMinor`
-- `environment`
-- `emailRequired`
-- `merchantId`
-- `merchantName`
-- `tokenizationSpecificationType`
-- `publicKey`
-- `gateway`
-- `gatewayMerchantId`
-- `allowedAuthMethods`
-- `allowedCardNetworks`
-- `allowPrepaidCards`
-- `allowCreditCards`
-- `billingAddressRequired`
-- `assuranceDetailsRequired`
-- `billingAddressParameters`
-- `displayItems`
-- `totalPrice`
-- `totalPriceLabel`
-- `totalPriceStatus`
-- `countryCode`
-- `currencyCode`
-
-##### Unsupported Properties
-
-- `shippingAddressRequired`
-- `shippingAddressParameters`
-- `shippingOptionRequired`
-- `shippingOptionParameters`
-- `offerInfo`&#x20;
-- `callbackIntents`
-- `existingPaymentMethodRequired`
-
-**Example**
-
-```javascript
-Checkout.init({
-  // Other parameters
-  googlePayInit: {
-    apiVersion: 2,
-    apiVersionMinor: 0,
-    allowedCardNetworks: [
-      "AMEX",
-      "DISCOVER",
-      "INTERAC",
-      "JCB",
-      "MASTERCARD",
-      "VISA",
-    ],
-    allowedCardAuthMethods: ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-    allowPrepaidCards: true,
-    allowCreditCards: true,
-    billingAddressRequired: false,
-    assuranceDetailsRequired: false,
-    existingPaymentMethodRequired: true,
-    tokenizationSpecificationType: "PAYMENT_GATEWAY",
-    totalPriceStatus: "FINAL",
-    totalPriceLabel: "TOTAL",
-    buttonLocale: "en",
-    // Remaining Values are configured via
-    // init checkout API
-  },
-});
-```
-
-#### theme _`object`_
+### Theme _`object`_
 
 The SDK Theme Customization feature allows you to modify the appearance of elements within the SDK using a `theme` object. This object contains specific `css` properties that are applied to various components, giving you control over their styling. `theme` object consists of key-value pairs, where each key corresponds to a specific component, and the associated value is a set of `css` properties to be applied to that component
 
@@ -697,43 +566,369 @@ Checkout.init({
 });
 ```
 
-#### Checkout.showPopup(type, message, response)
+## Wallet Configuration
 
-Is a function that shows a message in a popup on the screen. The message parameter must be a string, and the optional `pg_response` parameter is an object that displays key-value pairs representing object values within the popup.
+### Apple Pay
+
+#### applePayInit _`object`_
+
+The `applePayInit` object enables users to modify the Apple Pay configurations used for generating payment sessions through Apple Pay. By default, all options are pre-configured. However users have the flexibility to customize these configurations using `applePayInit` according to their requirements.
+
+- **buttonLocale**\
+  Users can change Apple Pay Button Locale by using buttonLocale property. \
+  Value of buttonLocale must be a 2 letter language code like `ar`, `en` etc.
+- **version**\
+  Users can change the API version used for creating Apple Pay payment session by using the version property. Values supported by version are written[ here](https://developer.apple.com/documentation/apple_pay_on_the_web/apple_pay_on_the_web_version_history).
+
+In addition to above properties, users have the capability to customize the Apple Pay payment request using properties defined [here](https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypaymentrequest). However, due to backend constraints, not all properties are modifiable. Below is the list of supported and unsupported values:
+
+##### Supported Properties
+
+- `merchantCapabilities`
+- `merchantIdentifier`
+- `supportedNetworks`
+- `countryCode`
+- `supportedCountries`
+- `total`&#x20;
+- `lineItems`
+- `currencyCode`
+
+##### Unsupported Properties
+
+- `requiredBillingContactFields`
+- `billingContact`
+- `requiredShippingContactFields`
+- `shippingContact`
+- `shippingContactEditingMode`&#x20;
+- `supportsCouponCode`
+- `couponCode`
+- `applicationData`
+
+```javascript
+Checkout.init({
+    selector: "checkout",
+    merchant_id: 'domain',
+    session_id: 'session_id',
+    apiKey: 'apiKey',
+    // Default values configured for Apple Pay
+    applePayInit: {
+        version: 6
+        buttonLocale: 'en',
+        supportedNetworks: ['amex', 'masterCard', 'maestro', 'visa', 'mada'],
+        merchantCapabilities: ['supports3DS']
+        // Remaining values are configured via init checkout API
+    }
+});
+```
+
+If you have completed the [Apple Pay integration](#apple-pay) between Ottu and Apple, the Checkout SDK will automatically make the necessary checks to display the Apple Pay button.
+
+When you initialize the Checkout SDK with your session_id and payment gateway [codes](../../checkout-api), the SDK will automatically verify the following conditions:
+
+- When initializing the Checkout SDK, a session_id with a [pg_codes](../../checkout-api) that was associated with the Apple Pay Payment Service was supplied.
+- The customer has an Apple device that supports Apple Pay payments.
+- The browser being used supports Apple Pay.
+- The customer has a wallet configured on their Apple Pay device.
+
+If all of these conditions are met, the Apple Pay button will be displayed and available for use in your checkout flow. If the wallet is not configured, the Apple Pay button will still appear.Clicking on the button Apple Pay wallet on their device will open, allowing them to configure it and add payment cards.
+
+By default, the type of the Apple Pay button is [pay](https://developer.apple.com/documentation/passkit/pkpaymentbuttontype/instore), which is used to initiate a payment. However, you can override the default button type using the [applePayInit](#applepayinit-object) property of the Checkout SDK.
+
+#### Customize Button
+
+:::warning
+
+If you're using only the Apple Pay button from the Checkout SDK and wish to customize its appearance, it's vital to adhere to the [ Apple Pay guidelines](https://developer.apple.com/design/human-interface-guidelines/technologies/apple-pay/buttons-and-marks) to ensure your design aligns with Apple's specifications. Note that the SDK uses default styles outlined in the guidelines. Using styles not supported by Apple, such as certain background-colors or border-colors, will not take effect. Failure to comply with these guidelines could lead to your app being rejected or even a ban on your developer account by Apple.
+:::
+
+It's the responsibility of the merchant to ensure that their use of the Apple Pay button follows Apple's guidelines, and Ottu cannot be held responsible for any issues that arise from non-compliance. If you have any questions or concerns about using the Apple Pay button, please consult the [Apple Pay guidelines](https://developer.apple.com/design/human-interface-guidelines/technologies/apple-pay/buttons-and-marks) or contact Apple directly for assistance.
+
+If you only want to use Apple Pay with the Ottu Checkout SDK and control the other payment methods yourself, you can customize the Apple Pay button using the Checkout SDK's [formsOfPayment](#formsofpayment-array), [applePayInit](#applepayinit-object) and[ theme](#theme-object) properties.&#x20;
+
+Properties like `buttonColor`, `buttonType` and `css` properties like height, width, margin etc are can be customized using theme while buttonLocale can be customized using `ApplePayInit`&#x20;
+
+To display only the Apple Pay button with default `css`, use the following code:
+
+```javascript
+Checkout.init({
+  // Define the mandatory properties
+  formsOfPayment: ["applePay"],
+});
+```
+
+The [formsOfPayment](#formsofpayment-array) property tells the Checkout SDK to render only the Apple Pay button. If you don't include this property, the SDK will render all available payment options.
+
+To customize the Apple Pay button's appearance, you can use the theme property. The example below adjusts the size of the button and centers it within the Checkout SDK container:
+
+```javascript
+Checkout.init({
+    // Define the mandatory properties
+    formsOfPayment: ["applePay"],
+    theme: {
+        applePay: {
+            "buttonType": 'plain',
+            "buttonColor": 'black'
+            "width": '100%',
+            "height": '50px',
+            "margin-top": '0',
+            "margin-bottom": '0',
+        }
+    }
+});
+```
+
+The Apple Pay button inside the Checkout SDK container can be customized using the ​[theme](#theme-object) property by defining the following:
+
+- `theme.applePay`: This class sets the width,height, margin, and padding of the button.
+- `theme.applePay.buttonType`: This determines the type of the Apple Pay button. \
+  **For example**, setting `buttonType`:
+  - `plain` will render a plain Apple Pay button.
+  - `buy` or `donate` will render buttons with the corresponding labels.
+- `theme.applePay.buttonColor`: This determines the color of the Apple Pay button. \
+  **For example**, setting `buttonColor`:&#x20;
+  - `black` will render a black Apple Pay button.
+  - `white` or `white-outline` will render buttons with the corresponding colors.
+
+By default, the width of the Apple Pay button is 100% of the Checkout SDK container width, gap of 8px from other buttons. The Checkout SDK creates a containerized div with the css class ottu\_\_sdk-main and places the Apple Pay button inside it. This container has no margin or padding added, as shown in below figure. To learn more about the `applePay` property, see the theme.
+
+<figure><img src="/img/checkout-sdk/Apple%20Pay%20button.png" alt="" /><figcaption></figcaption></figure>
+
+#### KNET Integration
+
+Due to compliance requirements, KNET requires a popup displaying the payment result after each failed payment. This is available only on the cancelCallback when there is a response from the payment gateway. As a side effect, the user can not try again the payment without clicking on Apple Pay again.
 
 :::info
 
-Popup will not display null values passed in the response.
+The use of the popup notification described above is specific to the KNET payment gateway. Other payment gateways might have different requirements or notification mechanisms, so be sure to follow the respective documentation for each payment gateway integration.
 :::
 
-- **type**`string`\
-  he type identifies the modal that should be displayed to the customer. Supported values are `error`, `success`&`redirect`
-- **message** `string`\
-  The message for a failed payment can be displayed to the customer.
-- **pg_response** `object`\
-  The raw response data that was received directly from the payment gateway after the transaction attempt. This typically includes transaction status, transaction identifier, and potentially error messages or additional data provided by the gateway. `pg_response` is only supported by type `error`& `success`
+To properly handle the popup notification for KNET, you need to implement the provided code snippet into your payment processing flow. The code looks like this:
 
-##### Example
+```javascript
+window.cancelCallback = function (data) {
+  // If payment fails with the status "canceled," the SDK triggers the cancelCallback.
+  // In cancelCallback, we show an error popup by checking
+  // if pg_name is in data.payment_gateway_info is "kpay" or data.form_of_payment is "token_pay".
 
-`Checkout.showPopup("success","Payment Successful! Redirecting you now. Please hold on.")`
+  if (
+    data.payment_gateway_info &&
+    data.payment_gateway_info.pg_name === "kpay"
+  ) {
+    // Displays a popup with pg_response as key-value pairs.
+    window.Checkout.showPopup(
+      "error",
+      " ",
+      data.payment_gateway_info.pg_response,
+    );
+  } else if (data.form_of_payment === "token_pay" || data.challenge_occurred) {
+    const message =
+      "Oops, something went wrong. Refresh the page and try again.";
+    // Displays a popup with data.message if present, else displays a static message.
+    window.Checkout.showPopup("error", data.message || message);
+  }
 
-<figure><img src="/img/checkout-sdk/image%20%2839%29.png" alt="" /><figcaption></figcaption></figure>
+  console.log("Cancel callback", data);
+};
+```
 
-`Checkout.showPopup(‘error’,'Selected payment method failed. Try again.' , { "merchant":"009057332", "timeOfLastUpdate":"2023-08-01T14:19:00.510Z", "version":"65" })`
+The above code performs the following checks and actions:
 
-<figure><img src="https://lh5.googleusercontent.com/5P3n5FivJZCuxEgvohnsHuU3FB_ii8mEm7qRXX1jRi-B43I3g8rn0HntFw-1CyFz7IP0NFSN9Z7FrzK6OOYBmA3PMmyiQ3ln5yOBGivhxJ5n7KfXz8NlnYsCI2YH5Yy1GaO06nBRs3g3l0T5j8Zo1zM" alt="" /><figcaption></figcaption></figure>
+1. It first verifies if the `cancel` object contains information about the payment gateway (`payment_gateway_info`).
+2. Next, it checks if the `pg_name` property in `payment_gateway_info` is equal to `kpay`, indicating that the payment gateway used is indeed KNET.
+3. If the above conditions are met, it retrieves the payment gateway's response from the `pg_response` property or, if not available, uses a default "Payment was cancelled." error message.
+4. Finally, it displays the error message in a popup using the `window.Checkout.showPopup()` function to notify the user about the failed payment.
 
-`Checkout.showPopup(‘redirect’,’Redirecting to the payment page’)`
+<figure><img src="/img/checkout-sdk/2480DAEF-F1E6-47CE-A271-418F222A0BBD.jpg" alt="" /><figcaption></figcaption></figure>
 
-<figure><img src="https://lh5.googleusercontent.com/4FD7FOGF-xSMf1MtE4B9WxQ3tkANDDcY2YfKJviKaN0oxI1LYfXLXaZLYoGDkXn7G5HXnvlNHSK6C1Rn-3SClCJgL1yVhZi4624M0EtweUrtXhYxX9RZGlFu5I7_djpXZPmFeC5KIuCcjNMek35uTBI" alt="" /><figcaption></figcaption></figure>
+### Google Pay
 
-### Callbacks
+#### googlePayInit _`object`_
+
+The `googlePayInit` object enables users to modify the Google Pay configurations used for generating payment sessions through Google Pay. By default, all options are pre-configured. However, developers have the flexibility to customize these configurations using `googlePayInit` according to their requirements.&#x20;
+
+- **buttonLocale**\
+  Users can change Google Pay Button Locale by using `buttonLocale` property. \
+  Value of `buttonLocale` must be a 2 letter language code like `ar`, `en,`etc...&#x20;
+
+In addition to above properties, users have the capability to customize Google Pay payment request by utilizing the options outlined in the documentation[ here](https://developers.google.com/pay/api/web/reference/request-objects#PaymentDataRequest).However, due to backend constraints, not all properties are modifiable. Below is the list of supported and unsupported values:
+
+##### Supported Properties
+
+- `apiVersion`
+- `apiVersionMinor`
+- `environment`
+- `emailRequired`
+- `merchantId`
+- `merchantName`
+- `tokenizationSpecificationType`
+- `publicKey`
+- `gateway`
+- `gatewayMerchantId`
+- `allowedAuthMethods`
+- `allowedCardNetworks`
+- `allowPrepaidCards`
+- `allowCreditCards`
+- `billingAddressRequired`
+- `assuranceDetailsRequired`
+- `billingAddressParameters`
+- `displayItems`
+- `totalPrice`
+- `totalPriceLabel`
+- `totalPriceStatus`
+- `countryCode`
+- `currencyCode`
+
+##### Unsupported Properties
+
+- `shippingAddressRequired`
+- `shippingAddressParameters`
+- `shippingOptionRequired`
+- `shippingOptionParameters`
+- `offerInfo`&#x20;
+- `callbackIntents`
+- `existingPaymentMethodRequired`
+
+**Example**
+
+```javascript
+Checkout.init({
+  // Other parameters
+  googlePayInit: {
+    apiVersion: 2,
+    apiVersionMinor: 0,
+    allowedCardNetworks: [
+      "AMEX",
+      "DISCOVER",
+      "INTERAC",
+      "JCB",
+      "MASTERCARD",
+      "VISA",
+    ],
+    allowedCardAuthMethods: ["PAN_ONLY", "CRYPTOGRAM_3DS"],
+    allowPrepaidCards: true,
+    allowCreditCards: true,
+    billingAddressRequired: false,
+    assuranceDetailsRequired: false,
+    existingPaymentMethodRequired: true,
+    tokenizationSpecificationType: "PAYMENT_GATEWAY",
+    totalPriceStatus: "FINAL",
+    totalPriceLabel: "TOTAL",
+    buttonLocale: "en",
+    // Remaining Values are configured via
+    // init checkout API
+  },
+});
+```
+
+If you have completed the Google Pay integration between Ottu and Google Pay, the Checkout SDK will handle the necessary checks to display the Google Pay button seamlessly.
+
+When you initialize the Checkout SDK with your [session_id](../../checkout-api) and payment gateway codes [pg_codes](../../checkout-api) , the SDK will automatically verify the following conditions:
+
+- The `session_id` and `pg_codes` provided during SDK initialization must be associated with the Google Pay Payment Service. This ensures that the Google Pay option is available for the customer to choose as a payment method.
+- Web SDK checks if the merchant configuration for Google Pay is correct or not and then show Google Pay button based on it.
+- The Web SDK displays the Google Pay button irrespective of whether the customer's Google Pay wallet is configured. When the customer clicks the button, they are prompted to log in with their email and add their card if their wallet is not set up.
+
+Google Pay configuration is controlled by using [googlePayInit](#googlepayinit-object) object.
+
+#### Customize Button
+
+:::info
+
+If you're using only the Google Pay button from the Checkout SDK and wish to customize its appearance, it's vital to adhere to the [Google Pay guidelines](https://developers.google.com/pay/api/web/guides/brand-guidelines) to ensure your design aligns with Google's specifications. Note that the SDK uses default styles outlined in the guidelines. Using styles not supported by Google, such as certain background-colors or border-colors, will not take effect. Failure to comply with these guidelines could lead to your app being rejected or even a ban on your developer account by Google.&#x20;
+:::
+
+It's the responsibility of the merchant to ensure that their use of the Google Pay button follows Google's guidelines, and Ottu cannot be held responsible for any issues that arise from non-compliance. If you have any questions or concerns about using the Google Pay button, please consult the [Google Pay guidelines](https://developers.google.com/pay/api/web/guides/brand-guidelines) or contact Google directly for assistance.
+
+You can customize the Google Pay button using the Checkout SDK's [formsOfPayment](#formsofpayment-array), googlePayInit and theme . The `formsOfPayment` property tells the Checkout SDK to render only the Google Pay button. If you don't include this property, the SDK will render all available payment options.
+
+Properties like `buttonColor`, `buttonType`, `buttonSizeMode` and `css` properties like height, width, margin etc can be customized using `theme` while `buttonLocale` can be customized using `googlePayInit` .
+
+```javascript
+Checkout.init({
+    // Define the mandatory properties
+    formsOfPayment: ["googlePay"],
+    // Below are the default values configured for googlePay
+    },
+    theme: {
+        googlePay: {
+            "buttonType":"plain",
+            "buttonColor":"black",
+            "width": "100%",
+            "height": "50px",
+            "margin-top": "0",
+            "margin-bottom": "0",
+        }
+    }
+});
+```
+
+<figure><img src="/img/checkout-sdk/Google%20Pay%20Button.png" alt="" /><figcaption></figcaption></figure>
+
+### stc pay
+
+If you have completed the stc pay integration between Ottu and stc pay, the Checkout SDK will handle the necessary checks to display the stc pay button seamlessly. When you initialize the Checkout SDK with your [session_id](../../checkout-api) and payment gateway codes [pg_codes](../../checkout-api), the SDK will automatically verify the following conditions:
+
+1. The `session_id` and `pg_codes` provided during SDK initialization must be associated with the stc pay Payment Service. This ensures that the stc pay option is available for the customer to choose as a payment method.
+2. The Web SDK displays the stc pay button irrespective of whether the customer has provided a mobile number while creating the transaction or not.
+
+#### Customize Button
+
+You can customize the stc pay button using the Checkout SDK's [formsOfPayment](#formsofpayment-array) and [theme](#theme-object) properties. The `formsOfPayment` property tells the Checkout SDK to render only the stc pay button. If you don't include this property, the SDK will render all available payment options.
+
+```javascript
+Checkout.init({
+    // Define the mandatory properties
+    formsOfPayment: ["stcPay"],
+    theme: {
+        "stcPay": {
+            "buttonColor": "black",
+            "width": "100%",
+            "height": "50px",
+            "margin-top": "0",
+            "margin-bottom": "0",
+        }
+    }
+});
+```
+
+<figure><img src="/img/checkout-sdk/stc%20pay%20Button.png" alt="" /><figcaption></figcaption></figure>
+
+### urpay
+
+If you have completed the urpay integration between Ottu and urpay, the Checkout SDK will handle the necessary checks to display the urpay button seamlessly. When you initialize the Checkout SDK with your `session_id` and payment gateway codes `pg_codes`, the SDK will automatically verify the following conditions:
+
+1. The `session_id` and `pg_codes` provided during SDK initialization must be associated with the urpay Payment Service. This ensures that the urpay option is available for the customer to choose as a payment method.
+2. The Web SDK displays the urpay button irrespective of whether the customer has provided a mobile number while creating the transaction or not.
+
+#### Customize Button
+
+You can customize the urpay button using the Checkout SDK's `formsOfPayment` and `theme` properties. The `formsOfPayment` property tells the Checkout SDK to render only the urpay button. If you don't include this property, the SDK will render all available payment options.
+
+```javascript
+Checkout.init({
+  // define the mandatory properties
+  formsOfPayment: ["urPay"],
+  theme: {
+    urPay: {
+      buttonColor: "white",
+      width: "100%",
+      height: "50px",
+      "margin-top": "0",
+      "margin-bottom": "0",
+    },
+  },
+});
+```
+
+<figure><img src="/img/checkout-sdk/urpay%20Button.png" alt="" /><figcaption></figcaption></figure>
+
+## Callbacks
 
 In the Checkout SDK, callback functions play a vital role in providing real-time updates on the status of payment transactions. `Callbacks` enhance the user experience by enabling seamless and efficient handling of various payment scenarios, such as errors, successful payments, and cancellations.
 
 Please note that due to technical constraints associated with off-site redirection during the payment process, the `successCallback` and `cancelCallback` functions are only called for on-site checkouts. However, the `errorCallback` function is called for any kind of payments. On-site checkouts include options such as Apple Pay, Google Pay, payments with saved cards, and on-site card form transactions, which support callback functionality for a seamless user experience.
 
-#### **window.errorCallback**
+### errorCallback
 
 The `errorCallback` is a callback function that is invoked when issues arise during a payment. It is important to handle errors appropriately to ensure a smooth user experience. The recommended best practice in case of an error is to restart the checkout process by creating a new [session_id](../../checkout-api) using the [Checkout API](../../checkout-api).
 
@@ -778,7 +973,7 @@ In this example, the `errorCallback` function is defined and passed as the value
 `errorCallback` function is not required to perform a redirection. It can handle errors in any way that is appropriate for your application.
 :::
 
-#### **window.cancelCallback**
+### cancelCallback
 
 The `cancelCallback` in the Checkout SDK is a callback function that is invoked when a payment is canceled. To define the `cancelCallback` function, you can use the `data-cancel` attribute on the Checkout script tag to specify a global function that will handle cancellations. If a customer cancels a payment, the `cancelCallback` function will be invoked with a[ data object](https://ottu-sandbox.gitbook.io/public/developer/checkout-sdk/web-v3#data-object).with a data.status value of "`canceled`”
 
@@ -824,7 +1019,7 @@ window.cancelCallback = function (data) {
 
 In this example, the `cancelCallback` function is defined and passed as the value of the `data-cancel` attribute on the Checkout script tag. If a customer cancels a payment, the function will be invoked with a[ data object](https://ottu-sandbox.gitbook.io/public/developer/checkout-sdk/web-v3#data-object) containing information about the cancelled transaction. This function will handle cancellation as needed and show error modal using Checkout.showPopup().
 
-#### **window.successCallback**
+### successCallback
 
 In the Checkout SDK, the `successCallback` is a function triggered upon successful completion of the payment process. This callback receives a [data object](#data-object),with a data.status value of `success`
 
@@ -852,7 +1047,7 @@ window.successCallback = function (data) {
 };
 ```
 
-#### windows.beforePayment Hook
+### beforePayment Hook
 
 To ensure the integrity of your transactions, the Checkout SDK provides a `beforePayment` hook that allows you to take necessary precautions before the payment process starts. It's crucial for e-commerce platforms to implement this feature, especially when considering multi-tab operations by users.
 
@@ -901,7 +1096,7 @@ window.beforePayment = function (data) {
 - Always freeze cart updates during ongoing payment processes. This ensures users can't manipulate cart contents in parallel with a transaction, preserving transaction integrity.
 - Ensure that the cart is unfrozen in cases of payment cancellations or errors. This improves user experience, allowing them to adjust their cart if needed.
 
-#### **Example: Apply Discount Based on Card PAN**
+#### Apply Discount Based on Card PAN
 
 In `tokenPay` and `cardPay` payment methods, the SDK passes the card details to the `beforePayment` callback. This allows you to identify the card brand or specific bank (via PAN) and apply a discount dynamically.
 
@@ -1010,7 +1205,7 @@ JSON
 _This implementation ensures that the financial integrity of the transaction is maintained server-side while providing a smooth, responsive discount experience for the user._
 :::
 
-#### **windows.validatePayment Hook**
+### validatePayment Hook
 
 The `validatePayment` hook is a **pre-validation step** in the **Checkout SDK Web**, ensuring that **all required payer information** (e.g., terms acceptance, additional user inputs) is collected and valid **before** proceeding with payment.
 
@@ -1126,7 +1321,9 @@ window.validatePayment = function () {
 };
 ```
 
-#### **data Object**
+## Data Reference
+
+### data Object
 
 The data object received by the [errorCallback](#windowerrorcallback), [cancelCallback](#windowcancelcallback) and [successCallback](#windowsuccesscallback) contains information related to the payment transaction, such as the status of the payment process, the session_id generated for the transaction, any error message associated with the payment, and more. This information can be used to handle the payment process and take appropriate actions based on the status of the transaction.
 
@@ -1197,7 +1394,39 @@ It's important to note that while the `redirect_url` option is typically present
   Default: false\
   This flag indicates if an additional verification, such as 3DS, OTP, PIN, etc., was initiated during the payment process. Use this flag in `cancelCallback` and `errorCallback` to control the presentation of error messages, especially for on-site payments undergoing a challenge flow. For example, after a failed 3DS verification, it's useful to show a custom popup informing the user of the payment failure. However, it's crucial to note that not all on-site failed payments need custom error messaging. In cases like `GooglePay` or `ApplePay`, error messages are inherently handled by the Payment Sheet, which remains open for the user to retry, making this distinction vital.
 
-### Example Without googlePayInit/ApplePayInit
+### showPopup
+
+Is a function that shows a message in a popup on the screen. The message parameter must be a string, and the optional `pg_response` parameter is an object that displays key-value pairs representing object values within the popup.
+
+:::info
+
+Popup will not display null values passed in the response.
+:::
+
+- **type**`string`\
+  he type identifies the modal that should be displayed to the customer. Supported values are `error`, `success`&`redirect`
+- **message** `string`\
+  The message for a failed payment can be displayed to the customer.
+- **pg_response** `object`\
+  The raw response data that was received directly from the payment gateway after the transaction attempt. This typically includes transaction status, transaction identifier, and potentially error messages or additional data provided by the gateway. `pg_response` is only supported by type `error`& `success`
+
+#### Example
+
+`Checkout.showPopup("success","Payment Successful! Redirecting you now. Please hold on.")`
+
+<figure><img src="/img/checkout-sdk/image%20%2839%29.png" alt="" /><figcaption></figcaption></figure>
+
+`Checkout.showPopup('error','Selected payment method failed. Try again.' , { "merchant":"009057332", "timeOfLastUpdate":"2023-08-01T14:19:00.510Z", "version":"65" })`
+
+<figure><img src="https://lh5.googleusercontent.com/5P3n5FivJZCuxEgvohnsHuU3FB_ii8mEm7qRXX1jRi-B43I3g8rn0HntFw-1CyFz7IP0NFSN9Z7FrzK6OOYBmA3PMmyiQ3ln5yOBGivhxJ5n7KfXz8NlnYsCI2YH5Yy1GaO06nBRs3g3l0T5j8Zo1zM" alt="" /><figcaption></figcaption></figure>
+
+`Checkout.showPopup('redirect','Redirecting to the payment page')`
+
+<figure><img src="https://lh5.googleusercontent.com/4FD7FOGF-xSMf1MtE4B9WxQ3tkANDDcY2YfKJviKaN0oxI1LYfXLXaZLYoGDkXn7G5HXnvlNHSK6C1Rn-3SClCJgL1yVhZi4624M0EtweUrtXhYxX9RZGlFu5I7_djpXZPmFeC5KIuCcjNMek35uTBI" alt="" /><figcaption></figcaption></figure>
+
+## Examples
+
+### Basic Example
 
 ```javascript
 window.errorCallback = function (data) {
@@ -1289,7 +1518,7 @@ Checkout.init({
 });
 ```
 
-### **Extended example**
+### Full Example
 
 ##### HTML
 
@@ -1427,232 +1656,7 @@ Checkout.init({
 });
 ```
 
-### Apple Pay
-
-If you have completed the [Apple Pay integration](#apple-pay) between Ottu and Apple, the Checkout SDK will automatically make the necessary checks to display the Apple Pay button.
-
-When you initialize the Checkout SDK with your session_id and payment gateway [codes](../../checkout-api), the SDK will automatically verify the following conditions:
-
-- When initializing the Checkout SDK, a session_id with a [pg_codes](../../checkout-api) that was associated with the Apple Pay Payment Service was supplied.
-- The customer has an Apple device that supports Apple Pay payments.
-- The browser being used supports Apple Pay.
-- The customer has a wallet configured on their Apple Pay device.
-
-If all of these conditions are met, the Apple Pay button will be displayed and available for use in your checkout flow. If the wallet is not configured, the Apple Pay button will still appear.Clicking on the button Apple Pay wallet on their device will open, allowing them to configure it and add payment cards.
-
-By default, the type of the Apple Pay button is [pay](https://developer.apple.com/documentation/passkit/pkpaymentbuttontype/instore), which is used to initiate a payment. However, you can override the default button type using the [applePayInit](#applepayinit-object) property of the Checkout SDK.
-
-#### Customize Apple Pay button
-
-:::warning
-
-If you're using only the Apple Pay button from the Checkout SDK and wish to customize its appearance, it's vital to adhere to the [ Apple Pay guidelines](https://developer.apple.com/design/human-interface-guidelines/technologies/apple-pay/buttons-and-marks) to ensure your design aligns with Apple's specifications. Note that the SDK uses default styles outlined in the guidelines. Using styles not supported by Apple, such as certain background-colors or border-colors, will not take effect. Failure to comply with these guidelines could lead to your app being rejected or even a ban on your developer account by Apple.
-:::
-
-It's the responsibility of the merchant to ensure that their use of the Apple Pay button follows Apple's guidelines, and Ottu cannot be held responsible for any issues that arise from non-compliance. If you have any questions or concerns about using the Apple Pay button, please consult the [Apple Pay guidelines](https://developer.apple.com/design/human-interface-guidelines/technologies/apple-pay/buttons-and-marks) or contact Apple directly for assistance.
-
-If you only want to use Apple Pay with the Ottu Checkout SDK and control the other payment methods yourself, you can customize the Apple Pay button using the Checkout SDK's [formsOfPayment](#formsofpayment-array), [applePayInit](#applepayinit-object) and[ theme](#theme-object) properties.&#x20;
-
-Properties like `buttonColor`, `buttonType` and `css` properties like height, width, margin etc are can be customized using theme while buttonLocale can be customized using `ApplePayInit`&#x20;
-
-To display only the Apple Pay button with default `css`, use the following code:
-
-```javascript
-Checkout.init({
-  // Define the mandatory properties
-  formsOfPayment: ["applePay"],
-});
-```
-
-The [formsOfPayment](#formsofpayment-array) property tells the Checkout SDK to render only the Apple Pay button. If you don't include this property, the SDK will render all available payment options.
-
-To customize the Apple Pay button's appearance, you can use the theme property. The example below adjusts the size of the button and centers it within the Checkout SDK container:
-
-```javascript
-Checkout.init({
-    // Define the mandatory properties
-    formsOfPayment: ["applePay"],
-    theme: {
-        applePay: {
-            “buttonType”: 'plain',
-            “buttonColor”: 'black'
-            "width": '100%',
-            "height": '50px',
-            "margin-top": '0',
-            "margin-bottom": '0',
-        }
-    }
-});
-```
-
-The Apple Pay button inside the Checkout SDK container can be customized using the ​[theme](#theme-object) property by defining the following:
-
-- `theme.applePay`: This class sets the width,height, margin, and padding of the button.
-- `theme.applePay.buttonType`: This determines the type of the Apple Pay button. \
-  **For example**, setting `buttonType`:
-  - `plain` will render a plain Apple Pay button.
-  - `buy` or `donate` will render buttons with the corresponding labels.
-- `theme.applePay.buttonColor`: This determines the color of the Apple Pay button. \
-  **For example**, setting `buttonColor`:&#x20;
-  - `black` will render a black Apple Pay button.
-  - `white` or `white-outline` will render buttons with the corresponding colors.
-
-By default, the width of the Apple Pay button is 100% of the Checkout SDK container width, gap of 8px from other buttons. The Checkout SDK creates a containerized div with the css class ottu\_\_sdk-main and places the Apple Pay button inside it. This container has no margin or padding added, as shown in below figure. To learn more about the `applePay` property, see the theme.
-
-<figure><img src="/img/checkout-sdk/Apple%20Pay%20button.png" alt="" /><figcaption></figcaption></figure>
-
-### Google Pay
-
-If you have completed the Google Pay integration between Ottu and Google Pay, the Checkout SDK will handle the necessary checks to display the Google Pay button seamlessly.
-
-When you initialize the Checkout SDK with your [session_id](../../checkout-api) and payment gateway codes [pg_codes](../../checkout-api) , the SDK will automatically verify the following conditions:
-
-- The `session_id` and `pg_codes` provided during SDK initialization must be associated with the Google Pay Payment Service. This ensures that the Google Pay option is available for the customer to choose as a payment method.
-- Web SDK checks if the merchant configuration for Google Pay is correct or not and then show Google Pay button based on it.
-- The Web SDK displays the Google Pay button irrespective of whether the customer's Google Pay wallet is configured. When the customer clicks the button, they are prompted to log in with their email and add their card if their wallet is not set up.
-
-Google Pay configuration is controlled by using [googlePayInit](#googlepayinit-object) object.
-
-#### **Customize Google Pay button**
-
-:::info
-
-If you're using only the Google Pay button from the Checkout SDK and wish to customize its appearance, it's vital to adhere to the [Google Pay guidelines](https://developers.google.com/pay/api/web/guides/brand-guidelines) to ensure your design aligns with Google's specifications. Note that the SDK uses default styles outlined in the guidelines. Using styles not supported by Google, such as certain background-colors or border-colors, will not take effect. Failure to comply with these guidelines could lead to your app being rejected or even a ban on your developer account by Google.&#x20;
-:::
-
-It's the responsibility of the merchant to ensure that their use of the Google Pay button follows Google's guidelines, and Ottu cannot be held responsible for any issues that arise from non-compliance. If you have any questions or concerns about using the Google Pay button, please consult the [Google Pay guidelines](https://developers.google.com/pay/api/web/guides/brand-guidelines) or contact Google directly for assistance.
-
-You can customize the Google Pay button using the Checkout SDK's [formsOfPayment](#formsofpayment-array), googlePayInit and theme . The `formsOfPayment` property tells the Checkout SDK to render only the Google Pay button. If you don't include this property, the SDK will render all available payment options.
-
-Properties like `buttonColor`, `buttonType`, `buttonSizeMode` and `css` properties like height, width, margin etc can be customized using `theme` while `buttonLocale` can be customized using `googlePayInit` .
-
-```javascript
-Checkout.init({
-    // Define the mandatory properties
-    formsOfPayment: ["googlePay"],
-    // Below are the default values configured for googlePay
-    },
-    theme: {
-        googlePay: {
-            “buttonType”:”plain”,
-            “buttonColor”:”black”,
-            "width": "100%",
-            "height": "50px",
-            "margin-top": "0",
-            "margin-bottom": "0",
-        }
-    }
-});
-```
-
-<figure><img src="/img/checkout-sdk/Google%20Pay%20Button.png" alt="" /><figcaption></figcaption></figure>
-
-### stc pay​
-
-If you have completed the stc pay integration between Ottu and stc pay, the Checkout SDK will handle the necessary checks to display the stc pay button seamlessly. When you initialize the Checkout SDK with your [session_id](../../checkout-api) and payment gateway codes [pg_codes](../../checkout-api), the SDK will automatically verify the following conditions:
-
-1. The `session_id` and `pg_codes` provided during SDK initialization must be associated with the stc pay Payment Service. This ensures that the stc pay option is available for the customer to choose as a payment method.
-2. The Web SDK displays the stc pay button irrespective of whether the customer has provided a mobile number while creating the transaction or not.
-
-#### Customize stc pay Button
-
-You can customize the stc pay button using the Checkout SDK's [formsOfPayment](#formsofpayment-array) and [theme](#theme-object) properties. The `formsOfPayment` property tells the Checkout SDK to render only the stc pay button. If you don't include this property, the SDK will render all available payment options.
-
-```javascript
-Checkout.init({
-    // Define the mandatory properties
-    formsOfPayment: ["stcPay"],
-    theme: {
-        "stcPay": {
-            “buttonColor”: "black",
-            "width": "100%",
-            "height": "50px",
-            "margin-top": "0",
-            "margin-bottom": "0",
-        }
-    }
-});
-```
-
-<figure><img src="/img/checkout-sdk/stc%20pay%20Button.png" alt="" /><figcaption></figcaption></figure>
-
-### urpay​​
-
-If you have completed the urpay integration between Ottu and urpay, the Checkout SDK will handle the necessary checks to display the urpay button seamlessly. When you initialize the Checkout SDK with your `session_id` and payment gateway codes `pg_codes`, the SDK will automatically verify the following conditions:
-
-1. The `session_id` and `pg_codes` provided during SDK initialization must be associated with the urpay Payment Service. This ensures that the urpay option is available for the customer to choose as a payment method.
-2. The Web SDK displays the urpay button irrespective of whether the customer has provided a mobile number while creating the transaction or not.
-
-#### **Customize** urpay **Button**
-
-You can customize the urpay button using the Checkout SDK's `formsOfPayment` and `theme` properties. The `formsOfPayment` property tells the Checkout SDK to render only the urpay button. If you don't include this property, the SDK will render all available payment options.
-
-```javascript
-Checkout.init({
-  // define the mandatory properties
-  formsOfPayment: ["urPay"],
-  theme: {
-    urPay: {
-      buttonColor: "white",
-      width: "100%",
-      height: "50px",
-      "margin-top": "0",
-      "margin-bottom": "0",
-    },
-  },
-});
-```
-
-<figure><img src="/img/checkout-sdk/urpay%20Button.png" alt="" /><figcaption></figcaption></figure>
-
-### **KNET - Apple Pay**
-
-Due to compliance requirements, KNET requires a popup displaying the payment result after each failed payment. This is available only on the cancelCallback when there is a response from the payment gateway. As a side effect, the user can not try again the payment without clicking on Apple Pay again.
-
-:::info
-
-The use of the popup notification described above is specific to the KNET payment gateway. Other payment gateways might have different requirements or notification mechanisms, so be sure to follow the respective documentation for each payment gateway integration.
-:::
-
-To properly handle the popup notification for KNET, you need to implement the provided code snippet into your payment processing flow. The code looks like this:
-
-```javascript
-window.cancelCallback = function (data) {
-  // If payment fails with the status "canceled," the SDK triggers the cancelCallback.
-  // In cancelCallback, we show an error popup by checking
-  // if pg_name is in data.payment_gateway_info is "kpay" or data.form_of_payment is "token_pay".
-
-  if (
-    data.payment_gateway_info &&
-    data.payment_gateway_info.pg_name === "kpay"
-  ) {
-    // Displays a popup with pg_response as key-value pairs.
-    window.Checkout.showPopup(
-      "error",
-      " ",
-      data.payment_gateway_info.pg_response,
-    );
-  } else if (data.form_of_payment === "token_pay" || data.challenge_occurred) {
-    const message =
-      "Oops, something went wrong. Refresh the page and try again.";
-    // Displays a popup with data.message if present, else displays a static message.
-    window.Checkout.showPopup("error", data.message || message);
-  }
-
-  console.log("Cancel callback", data);
-};
-```
-
-The above code performs the following checks and actions:
-
-1. It first verifies if the `cancel` object contains information about the payment gateway (`payment_gateway_info`).
-2. Next, it checks if the `pg_name` property in `payment_gateway_info` is equal to `kpay`, indicating that the payment gateway used is indeed KNET.
-3. If the above conditions are met, it retrieves the payment gateway's response from the `pg_response` property or, if not available, uses a default "Payment was cancelled." error message.
-4. Finally, it displays the error message in a popup using the `window.Checkout.showPopup()` function to notify the user about the failed payment.
-
-<figure><img src="/img/checkout-sdk/2480DAEF-F1E6-47CE-A271-418F222A0BBD.jpg" alt="" /><figcaption></figcaption></figure>
-
-### FAQ
+## FAQ
 
 #### 1 What forms of payments are supported by the SDK?
 
@@ -1699,9 +1703,3 @@ The tooltip indicates certain prerequisites for Apple Pay are not met. Reasons c
 #### 8 What if a merchant wants to perform specific actions before the payment process?
 
 Merchants can utilize the [beforePayment](#windowsbeforepayment-hook) hook. This allows for specific actions or checks to be performed prior to payment/redirection. Once your actions or checks are complete, resolve the promise to proceed with the redirection/payment.
-
-**In conclusion**, this documentation serves as your comprehensive guide to our Web SDK. Here's a quick recap of the key points covered: Information about the fundamental **Checkout SDK**, the backbone of seamless web-based transactions. Practical [demonstrations ](#demo)have provided valuable insights into effective SDK integration. Detailed descriptions of [functions ](#functions)and methods have equipped you to harness the SDK's full potential. Explaining the essential role of [callbacks](#callbacks) in event handling. A rich array of **examples** has guided you through real-world SDK feature implementations. Exploring [Apple Pay](#apple-pay)**,** [Google Pay](#google-pay)**,** and even KNET-Apple Pay for efficient, secure payments.
-
-As you conclude your journey through this documentation, consider exploring the next section: [**Checkout SDK - iOS**](../ios).&#x20;
-
----

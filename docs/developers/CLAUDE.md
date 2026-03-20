@@ -89,6 +89,7 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 ## Guide                          ← ALL walkthrough content lives here
   ### Workflow                    ← mermaid diagram + brief explanation of each step
+  ### Live Demo                   ← (optional) interactive demo component, before written reference
   ### Step-by-Step                ← numbered steps with code examples
   ### Use Cases                   ← (optional) specific scenarios, provider-specific details
 
@@ -106,9 +107,11 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 - **"Guide" is the single walkthrough section** — all tutorial content goes here. No standalone "How it Works", "Integration Flows", "Quick Start", or "Provider Setup" at H2 level. Use these canonical `###` subsections within Guide:
   - `### Workflow` — mermaid diagram showing the flow + brief explanation of each step
+  - `### Live Demo` — (optional) interactive demo component, placed before the written reference so users experience the flow first
   - `### Step-by-Step` — numbered instructions with code examples (the "how to actually call it" section)
   - `### Use Cases` — (optional) specific scenarios, provider-specific details
-- **"API Reference" always has an H2 heading** — never use bare `<ApiDocEmbed>` with `---` separators. If a page covers multiple related endpoints, use `<Tabs>` wrapping multiple `<ApiDocEmbed>` components.
+- **"API Reference" always has an H2 heading** — never use bare `<ApiDocEmbed>` with `---` separators. If a page covers multiple related endpoints, use `<Tabs>` wrapping multiple `<ApiDocEmbed>` components. For unified endpoints with a discriminator parameter (e.g., `operation` = refund/capture/void), use tabs with per-tab example payloads above a shared `<ApiDocEmbed>`.
+- **Layout with API embeds** — Pages with `<ApiDocEmbed>` MUST use `hide_table_of_contents: true`. The API schema renders in the right column where the TOC would normally be. The page layout is: left sidebar + content + API explorer. No right-hand TOC.
 - **Section order is fixed** — Overview → When to Use → Setup → Guide → API Reference → Best Practices → FAQ → What's Next? Skip optional sections, never reorder.
 - **Optional sections** — Setup, Best Practices can be omitted. When to Use, Guide, FAQ, and What's Next? should be on every page.
 

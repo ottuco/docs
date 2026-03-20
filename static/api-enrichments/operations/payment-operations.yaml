@@ -7,6 +7,12 @@ operations:
     permissions:
       - $perm:api_key_admin
       - $perm:basic_auth_operations
+    description_replace: |
+      Perform operations on existing payment transactions. Supports `refund`, `capture`, `void`, `cancel`, `expire`, and `delete`.
+
+      Use `session_id` or `order_no` to identify the target transaction. For `refund` and `capture`, specify `amount` (defaults to full/remaining amount). For `void`, always applies to the full amount.
+
+      Include `Tracking-Key` header on external operations to prevent duplicates and retrieve status.
 
   inquiry:
     permissions:

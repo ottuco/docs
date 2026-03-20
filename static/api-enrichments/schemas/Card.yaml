@@ -1,0 +1,6 @@
+properties:
+  pg_name:
+    remove_enum: true
+    description: >-
+      The payment gateway associated with the user's card.
+      The available values depend on the gateways configured for your merchant account.

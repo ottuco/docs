@@ -12,6 +12,96 @@ const DATA_DIR = path.join(__dirname, "data");
 const DOCS_PATH = path.join(DATA_DIR, "docs.json");
 const INDEX_PATH = path.join(DATA_DIR, "search-index.json");
 
+// ── Webhook Relay ────────────────────────────────────────────────────────────
+// In-memory store for webhook payloads, keyed by orderId.
+// Each entry holds SSE clients and received webhooks, with a 1-hour TTL.
+const webhookStore = new Map();
+const WEBHOOK_TTL_MS = 3600000; // 1 hour
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, entry] of webhookStore) {
+    if (now - entry.createdAt > WEBHOOK_TTL_MS) {
+      entry.clients.forEach((res) => res.end());
+      webhookStore.delete(id);
+    }
+  }
+}, 300000); // cleanup every 5 min
+
+function getOrCreateEntry(orderId) {
+  if (!webhookStore.has(orderId)) {
+    webhookStore.set(orderId, {
+      clients: new Set(),
+      webhooks: [],
+      createdAt: Date.now(),
+    });
+  }
+  return webhookStore.get(orderId);
+}
+
+function parseBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on("data", (chunk) => chunks.push(chunk));
+    req.on("end", () => {
+      try {
+        resolve(JSON.parse(Buffer.concat(chunks).toString()));
+      } catch {
+        reject(new Error("Invalid JSON"));
+      }
+    });
+    req.on("error", reject);
+  });
+}
+
+function handleWebhookPost(orderId, req, res) {
+  parseBody(req)
+    .then((payload) => {
+      const entry = getOrCreateEntry(orderId);
+      const event = { payload, receivedAt: new Date().toISOString() };
+      entry.webhooks.push(event);
+
+      // Push to all SSE clients
+      const data = `data: ${JSON.stringify(event)}\n\n`;
+      for (const client of entry.clients) {
+        client.write(data);
+      }
+
+      console.log(`[Webhook] Received for ${orderId} (${entry.clients.size} SSE clients)`);
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ status: "ok" }));
+    })
+    .catch((err) => {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
+    });
+}
+
+function handleWebhookSSE(orderId, req, res) {
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+    "Access-Control-Allow-Origin": "*",
+  });
+
+  const entry = getOrCreateEntry(orderId);
+
+  // Send any already-received webhooks (catch-up)
+  for (const event of entry.webhooks) {
+    res.write(`data: ${JSON.stringify(event)}\n\n`);
+  }
+
+  // Register this client for future events
+  entry.clients.add(res);
+
+  req.on("close", () => {
+    entry.clients.delete(res);
+  });
+}
+
+// ── MCP Artifacts ────────────────────────────────────────────────────────────
+
 async function fetchArtifacts() {
   console.log(`Fetching MCP artifacts from ${BASE_URL}...`);
 
@@ -49,8 +139,9 @@ async function fetchWithRetry(maxAttempts = 10, delayMs = 15000) {
   }
 }
 
+// ── HTTP Server ──────────────────────────────────────────────────────────────
+
 async function start() {
-  // Start the HTTP server first so health checks pass while artifacts load
   let mcpServer = null;
   let ready = false;
 
@@ -65,6 +156,21 @@ async function start() {
       return;
     }
 
+    // ── Webhook relay routes ──
+    const webhookPostMatch = req.url?.match(/^\/webhook\/([^/]+)\/?$/);
+    const webhookSSEMatch = req.url?.match(/^\/webhook\/([^/]+)\/events\/?$/);
+
+    if (webhookSSEMatch && req.method === "GET") {
+      handleWebhookSSE(webhookSSEMatch[1], req, res);
+      return;
+    }
+
+    if (webhookPostMatch && req.method === "POST") {
+      handleWebhookPost(webhookPostMatch[1], req, res);
+      return;
+    }
+
+    // ── Existing routes ──
     if (req.method === "GET" && req.url === "/health") {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ status: ready ? "ok" : "loading", baseUrl: BASE_URL }));
@@ -101,6 +207,7 @@ async function start() {
   httpServer.listen(PORT, () => {
     console.log(`HTTP server listening on port ${PORT}`);
     console.log(`Base URL: ${BASE_URL}`);
+    console.log(`Webhook relay active at /webhook/:orderId`);
   });
 
   // Fetch artifacts with retry (static site may still be deploying)

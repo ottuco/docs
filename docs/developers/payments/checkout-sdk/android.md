@@ -1,6 +1,6 @@
 ---
 toc_min_heading_level: 2
-toc_max_heading_level: 4
+toc_max_heading_level: 3
 ---
 
 The [Checkout SDK](../) from Ottu is a Kotlin-based library designed to streamline the integration of an Ottu-powered [checkout process](../) into Android applications. This SDK allows for complete customization of the checkout experience, including both appearance and functionality, as well as the selection of accepted payment methods.
@@ -18,14 +18,6 @@ Additionally, various configuration options, such as accepted [payment methods](
 The [API private key](../../../getting-started/authentication#private-key-api-key) should never be utilized on the client side; instead, use the [API public key](../../../getting-started/authentication#public-key). This is essential for maintaining the security of your application and safeguarding sensitive data.
 :::
 
----
-
-## Quick Start
-
-This guide outlines the essential steps for integrating **Ottu Android Checkout SDK** into your mobile application. It provides a concise flow from setup to callback handling, helping developers achieve a seamless checkout experience.
-
-### Video Tutorial: Android SDK Integration
-
 This video guides you step-by-step through the **Android SDK integration process**. Watch it to quickly learn how to set up, configure, and see the key features in action.
 
 <iframe
@@ -36,7 +28,13 @@ This video guides you step-by-step through the **Android SDK integration process
   allow="fullscreen"
 />
 
-### SDK Installation
+## Installation
+
+### Prerequisites
+
+The SDK is compatible with devices running Android 8 or higher (API version 26 or later).
+
+### Gradle Setup
 
 <ol className="stepper">
   <li className="stepper-item">
@@ -62,7 +60,17 @@ This video guides you step-by-step through the **Android SDK integration process
   </li>
 </ol>
 
-### Integrate the Checkout SDK
+## Initialization
+
+### Checkout.init
+
+The function initiates the checkout process and configures the required settings for the Checkout SDK. It should be invoked once by the parent app to start the checkout sequence, called with set of configuration fields that encapsulate all essential options for the process.
+
+When you call `Checkout.init`, the SDK manages the setup of key components for the checkout, like generating a form for customers to input their payment information, and facilitating the communication with Ottu's servers to process the payment.
+
+This function returns a `Fragment` object, which is a native Android UI component that can be integrated into any part of an `Activity` instance (also native to Android).
+
+### Integration Guide
 
 <ol className="stepper">
   <li className="stepper-item">
@@ -252,105 +260,17 @@ The **required** parameters are:
 `setupPreload` is an object taken from the transaction creation response. When passed to the SDK, it prevents it from requesting the transaction details on its own and therefore speed-ups the initialization process by several seconds. This `setupPreload` is a decoded JSON object to a `TransactionDetails` \
 For reference, check the example: [here](https://github.com/ottuco/ottu-android/blob/main/Example/app/src/main/java/com/ottu/CheckoutSampleActivity.kt)&#x20;
 
-### Callbacks
+## Properties
 
-The SDK triggers three main callbacks:
+### Required Properties
 
-- **`successCallback`** – Invoked upon successful payment.
-- **`cancelCallback`** – Triggered when the user cancels the transaction.
-- **`errorCallback`** – Activated on errors during the checkout process.
-
-Developers should customize the logic within these callbacks to handle transaction results appropriately.
-
-### Useful Resources
-
-- [Forms of Payment](#formsofpayment-array-optional)&#x20;
-- [Customization Theme](#customization-theme)&#x20;
-- [Setup Preload](#setuppreload-object-optional)&#x20;
-
----
-
-## Installation
-
-### Minimum Requirements <a href="#minimum-requirements" id="minimum-requirements"></a>
-
-The SDK is compatible with devices running Android 8 or higher (API version 26 or later).
-
-### Installation with dependency <a href="#installation-with-dependency" id="installation-with-dependency"></a>
-
-```groovy
-allprojects {
-    repositories {
-        // Other repositories...
-        maven { url "https://jitpack.io" }
-    }
-}
-
-dependencies {
-    implementation 'com.github.ottuco:ottu-android-checkout:2.1.7'
-}
-```
-
----
-
-## Native UI
-
-The SDK UI is embedded as a Fragment within any part of an Activity in the merchant's application.
-
-**Example:**
-
-<figure className="checkout-sdk-figure">
-  <img src="/img/checkout-sdk/image%20%2894%29.png" alt="Android Native UI embedded as a fragment" />
-</figure>
-
-If a wallet is the only available payment option, the UI is minimized automatically.
-
-<figure className="checkout-sdk-figure">
-  <img src="/img/checkout-sdk/image%20%2895%29.png" alt="Android Native UI minimized for wallet-only payment" />
-</figure>
-
-:::info
-
-To avoid style issues and potential crashes, the parent application's theme must be `Theme.AppCompat` or one of its descendant classes. This theme is specified in the `themes.xml` file located in the `values` directory of the project.
-:::
-
----
-
-## SDK Configuration
-
-### Language <a href="#language" id="language"></a>
-
-The SDK supports two languages, English and Arabic, with English set as the default.
-
-It automatically adopts the language configured in the device settings, requiring no in-app adjustments. However, if a transaction is initiated in a different language and setup preload is utilized, the backend-generated text (such as fee descriptions) will appear in the language of the transaction. Therefore, it is important to ensure that the language code passed to the [Checkout API](../../checkout-api)'s transaction creation request matches the currently selected language on the device or current selected app language.
-
-### Light and dark theme <a href="#light-and-dark-theme" id="light-and-dark-theme"></a>
-
-The SDK supports UI customization to match the device theme—light or dark. This adjustment is applied during the SDK initialization, based on the device's settings. Similarly, for language, no adjustments are made within the app.
-
----
-
-## Functions
-
-Currently, the SDK offers a single [function ](../)that serves as the entry point for the merchant's application. It also includes [callbacks](#callbacks) that must be managed by the parent app, which are detailed in the following [section](#callbacks).
-
-### **Checkout.init**
-
-The function initiates the checkout process and configures the required settings for the Checkout SDK. It should be invoked once by the parent app to start the checkout sequence, called with set of configuration fields that encapsulate all essential options for the process.
-
-When you call `Checkout.init`, the SDK manages the setup of key components for the checkout, like generating a form for customers to input their payment information, and facilitating the communication with Ottu's servers to process the payment.
-
-This function returns a `Fragment` object, which is a native Android UI component that can be integrated into any part of an `Activity` instance (also native to Android).
-
-### Properties <a href="#properties" id="properties"></a>
-
-#### **merchantId** _<span style={{ color: "blue" }}>`string`</span>_ _<span style={{ color: "red" }}>`required`</span>_
+#### **merchantId** _`string`_ _`required`_
 
 The `merchant_id` identifies your Ottu merchant domain. It should be the root domain of your Ottu account, excluding the "https://" or "http://" prefix.
 
 For instance, if your Ottu URL is https://example.ottu.com, then your `merchant_id` would be example.ottu.com. This attribute is utilized to determine which Ottu merchant account to associate with the checkout process.
 
-#### **apiKey** _<span style={{ color: "blue" }}>`string`</span>_ _<span style={{ color: "red" }}>`required`</span>_
+#### **apiKey** _`string`_ _`required`_
 
 The `apiKey` is your Ottu [API public key](../../../getting-started/authentication#public-key), which is essential for authenticating communications with Ottu's servers during the checkout process.
 
@@ -359,13 +279,19 @@ The `apiKey` is your Ottu [API public key](../../../getting-started/authenticati
 Make sure to use the public key and avoid using the private key. The [API private key](../../../getting-started/authentication#private-key-api-key) must be kept confidential at all times and should never be shared with any clients.
 :::
 
-#### **sessionId** _<span style={{ color: "blue" }}>`string`</span>_ _<span style={{ color: "red" }}>`required`</span>_
+#### **sessionId** _`string`_ _`required`_
 
 The `session_id` serves as the unique identifier for the payment transaction linked to the checkout process.
 
 This identifier is automatically generated at the creation of the payment transaction. For additional details on how to utilize the `session_id` parameter in the [Checkout AP](../../checkout-api)I, refer to the [session_id](../../checkout-api) section.&#x20;
 
-#### **formsOfPayment** _<span style={{ color: "blue" }}>`array`</span>_ _<span style={{ color: "blue" }}>`optional`</span>_
+#### **successCallback, errorCallback and cancelCallback** _`Unit`_ _`required`_
+
+Callback functions are used to retrieve the payment status and must be provided directly to the Checkout initialization function. For more details, refer to the [Callbacks](#callbacks) section.
+
+### Display Options
+
+#### **formsOfPayment** _`array`_ _`optional`_
 
 The `formsOfPayment` parameter allows customization of the payment methods displayed in the [checkout process](../). By default, all forms of payment are enabled.
 
@@ -377,29 +303,9 @@ The `formsOfPayment` parameter allows customization of the payment methods displ
 - `stcPay`: Requires customers to enter their mobile number and authenticate with an OTP sent to their device to complete the payment.
 - `flexMethods`: Allows payments to be split into multiple installments. These methods, also known as BNPL (Buy Now, Pay Later), support providers such as Tabby and Tamara.
 
-#### **setupPreload** _<span style={{ color: "blue" }}>`object`</span>_ _<span style={{ color: "blue" }}>`optional`</span>_
-
-The `TransactionDetails` class object stores transaction details.
-
-If this object is provided, the SDK will not need to retrieve transaction details from the backend, thereby reducing processing time and improving efficiency.
-
-#### **theme** _<span style={{ color: "blue" }}>`object`</span>_ _<span style={{ color: "blue" }}>`optional`</span>_
-
-The `Theme` class object is used for UI customization, allowing modifications to background colors, text colors, and fonts for various components.
-
-All fields in the `Theme` class are optional. If a theme is not specified, the default UI settings will be applied. For more details, refer to the [Customization Theme](#customization-theme) section.
-
-#### **displaySettings** _<span style={{ color: "blue" }}>`object`</span>_ _<span style={{ color: "blue" }}>`optional`</span>_
+#### **displaySettings** _`object`_ _`optional`_
 
 The `PaymentOptionsDisplaySettings` struct is used to configure how payment options are displayed.&#x20;
-
-More details can be found in the [Payment Options Display Mode](#payment-options-display-mode) section.
-
-#### **successCallback, errorCallback and successCallback** _<span style={{ color: "blue" }}>`Uint`</span>_ _<span style={{ color: "red" }}>`required`</span>_
-
-Callback functions are used to retrieve the payment status and must be provided directly to the Checkout initialization function. For more details, refer to the [Callbacks](#callbacks) section.
-
-### Payment Options Display Mode <a href="#payment-options-display-mode" id="payment-options-display-mode"></a>
 
 The display of payment options can be adjusted using the SDK with the following settings:
 
@@ -451,112 +357,23 @@ These parameters are passed to the `Checkout.init` builder class via the followi
 .displaySettings(displaySettings)
 ```
 
-To view the full function call, please refer to the [Ottu SDK - Android | Example](#example) chapter in the documentation.
+To view the full function call, please refer to the [Full Example](#full-example) chapter in the documentation.
 
----
+### Preloading
 
-## Callbacks
+#### **setupPreload** _`object`_ _`optional`_
 
-In the Checkout SDK, callback functions are essential for delivering real-time updates on the status of payment transactions. These callbacks improve the user experience by facilitating smooth and effective management of different payment scenarios, including errors, successful transactions, and cancellations.&#x20;
+The `TransactionDetails` class object stores transaction details.
 
-:::info
+If this object is provided, the SDK will not need to retrieve transaction details from the backend, thereby reducing processing time and improving efficiency.
 
-The callbacks outlined below are applicable to any type of payment.
-:::
+### Theme
 
-### **errorCallback**
+#### **theme** _`object`_ _`optional`_
 
-The `errorCallback` is a callback function triggered when issues occur during a payment process. Properly handling these errors is essential for maintaining a smooth user experience.&#x20;
+The `Theme` class object is used for UI customization, allowing modifications to background colors, text colors, and fonts for various components.
 
-:::info
-
-The best practice recommended in the event of an error is to restart the checkout process by generating a new `session_id` through the [Checkout API](../../checkout-api).
-:::
-
-To set up the `errorCallback` function, use the `data-error` attribute on the Checkout script tag to designate a global function that will manage errors. If an error arises during a payment, the `errorCallback` function will be called, receiving a `JSONObject` with a `data.status` value indicating an error.
-
-**Params Available in** `data` **`JSONObject` for** `errorCallback`
-
-- `message` mandatory
-- `form_of_payment` mandatory
-- `status` mandatory
-- `challenge_occurred` optional
-- `session_id` optional
-- `order_no` optional
-- `reference_number` optional
-
-### **cancelCallback**
-
-The `cancelCallback` is a callback function in the Checkout SDK that is activated when a payment is canceled.&#x20;
-
-To configure the `cancelCallback` function, you can use the `data-cancel` attribute on the Checkout script tag to specify a global function that will handle cancellations. If a payment is canceled by a customer, the `cancelCallback` function will be called, and it will receive a `JSONObject` containing a `data.status` value of "canceled".
-
-**Params Available in** `data` **`JSONObject` for** `cancelCallback`
-
-- `message` mandatory
-- `form_of_payment` mandatory
-- `challenge_occurred` optional
-- `session_id` optional
-- `status` mandatory
-- `order_no` optional
-- `reference_number` optional
-- `payment_gateway_info` optional
-
-:::warning
-
-In both `cancelCallback` and `errorCallback`, the SDK must be reinitialized, either on the same session or on a new session.
-:::
-
-### **successCallback**
-
-The `successCallback` is a function that is triggered when the payment process is successfully completed. This callback receives a `JSONObject` containing a `data.status` value of "success."
-
-**Params Available in** `data` `JSONObject` for `successCallback`
-
-- `message` mandatory
-- `form_of_payment` mandatory
-- `challenge_occurred` optional
-- `session_id` optional
-- `status` mandatory
-- `order_no` optional
-- `reference_number` optional
-- `redirect_url` optional
-- `payment_gateway_info` optional
-
-The `successCallback` function is defined and assigned by setting the `data-success` attribute on the Checkout script tag. This attribute specifies a global function that will be invoked when the payment process successfully completes.
-
----
-
-## Example
-
-```swift
-val theme = getCheckoutTheme()
-
-// Builder class is used to construct an object passed to the SDK initializing function
-val builder = Checkout
-  .Builder(merchantId!!, sessionId, apiKey!!, amount!!)
-  .displaySettings(displaySettings)
-  .formsOfPayments(formsOfPayment)
-  .theme(theme)
-  .logger(Checkout.Logger.INFO)
-  .build()
-
-
-// Actual `init` function calling, returning a `Fragment` object
-checkoutFragment = Checkout.init(
-  context = this @CheckoutSampleActivity,
-  builder = builder,
-  transactionResultCallback = object: Checkout.TransactionResultCallback {
-    override fun onTransactionResult(result: TransactionResult) {
-      showResultDialog(result)
-    }
-  }
-)
-```
-
----
-
-## Customization Theme
+All fields in the `Theme` class are optional. If a theme is not specified, the default UI settings will be applied.
 
 The class responsible for defining the theme is called `CheckoutTheme`.
 
@@ -599,7 +416,7 @@ The component names within `Appearance` largely correspond to those described [h
 
 A boolean field that determines whether the "Payment Details" section should be displayed or hidden.
 
-### Properties Description <a href="#properties-description" id="properties-description"></a>
+#### Properties Description
 
 All properties are optional and can be customized by the user.
 
@@ -611,7 +428,7 @@ If a property is not specified, the default value (as defined in the Figma desig
 
 | Property Name   |                            Description                            |              Data Type              |
 | --------------- | :---------------------------------------------------------------: | :---------------------------------: |
-| `mainTitleText` |                 Font and color for all “Captions”                 | [Text](#text) |
+| `mainTitleText` |                 Font and color for all "Captions"                 | [Text](#text) |
 | `titleText`     |          Font and color for payment options in the list           | [Text](#text) |
 | `subtitleText`  | Font and color for payment options details (like expiration date) | [Text](#text) |
 
@@ -626,7 +443,7 @@ If a property is not specified, the default value (as defined in the Figma desig
 
 | Property Name   |                       Description                        |              Data Type              |
 | --------------- | :------------------------------------------------------: | :---------------------------------: |
-| `dataLabelText` | Font and color of payment details fields (like “Amount”) | [Text](#text) |
+| `dataLabelText` | Font and color of payment details fields (like "Amount") | [Text](#text) |
 | `dataValueText` |         Font and color of payment details values         | [Text](#text) |
 
 #### **Other**
@@ -650,7 +467,7 @@ If a property is not specified, the default value (as defined in the Figma desig
 | `modalBackgroundColor`                     |           The background of any modal window           | [Color](#color) |
 | `paymentItemBackgroundColor`               |   The background of an item in payment options list    | [Color](#color) |
 | `selectorIconColor`                        |          The color of the icon of the payment          | [Color](#color) |
-| `savePhoneNumberIconColor`                 | The color of “Diskette” button for saving phone number | [Color](#color) |
+| `savePhoneNumberIconColor`                 | The color of "Diskette" button for saving phone number | [Color](#color) |
 | `selectPaymentMethodHeaderBackgroundColor` |   The background of an item in payment options list    | [Color](#color) |
 
 #### **Buttons**
@@ -658,7 +475,7 @@ If a property is not specified, the default value (as defined in the Figma desig
 | Property Name    |                            Description                            |                     Data Type                     |
 | ---------------- | :---------------------------------------------------------------: | :-----------------------------------------------: |
 | `button`         |          Background, text color and font for any button           |      [Button](#button)      |
-| `backButton`     |               Color of the “Back” navigation button               | [RippleColor](#ripplecolor) |
+| `backButton`     |               Color of the "Back" navigation button               | [RippleColor](#ripplecolor) |
 | `selectorButton` | Background, text color and font for payment item selection button |      [Button](#button)      |
 
 #### **Switch**
@@ -673,16 +490,16 @@ If a property is not specified, the default value (as defined in the Figma desig
 | ------------- | :---------------------------------------------------: | :-----------------------------------------: |
 | margins       | Top, left, bottom and right margins between component | [Margins](#margins-1) |
 
-### Data Types Description <a href="#data-types-description" id="data-types-description"></a>
+#### Data Types Description
 
-#### **Color**
+##### **Color**
 
 | Property Name   |             Description             | Data Type |
 | --------------- | :---------------------------------: | :-------: |
 | `color`         |      Main color integer value       |    Int    |
 | `colorDisabled` | Disabled stated color integer value |    Int    |
 
-#### **RippleColor**
+##### **RippleColor**
 
 | Property Name  |             Description             | Data Type |
 | -------------- | :---------------------------------: | :-------: |
@@ -690,14 +507,14 @@ If a property is not specified, the default value (as defined in the Figma desig
 | `rippleColor`  |     Ripple color integer value      |    Int    |
 | `colorDisaled` | Disabled stated color integer value |    Int    |
 
-#### **Text**
+##### **Text**
 
 | Property Name |       Description        |               Data Type               |
 | ------------- | :----------------------: | :-----------------------------------: |
 | `textColor`   | Main color integer value | [Color](#color) |
 | `fontType`    |     Font resource ID     |                  Int                  |
 
-#### **TextField**
+##### **TextField**
 
 | Property Name  | Description                    |               Data Type               |
 | :------------: | ------------------------------ | :-----------------------------------: |
@@ -707,7 +524,7 @@ If a property is not specified, the default value (as defined in the Figma desig
 |     `text`     | Text value                     |  [Text](#text)  |
 |    `error`     | Text value                     |  [Text](#text)  |
 
-#### Button
+##### Button
 
 | Property Name |       Description       |                     Data Type                     |
 | ------------- | :---------------------: | :-----------------------------------------------: |
@@ -715,7 +532,7 @@ If a property is not specified, the default value (as defined in the Figma desig
 | `fontType`    |   Button text font ID   |                        Int                        |
 | `textColor`   |    Button text color    |       [Color](#color)       |
 
-#### Switch
+##### Switch
 
 | Property Name                   |             Description             | Data Type |
 | ------------------------------- | :---------------------------------: | :-------: |
@@ -726,7 +543,7 @@ If a property is not specified, the default value (as defined in the Figma desig
 | `checkedTrackDecorationColor`   |  Decoration color in checked state  |    Int    |
 | `uncheckedTrackDecorationColor` | Decoration color in unchecked state |    Int    |
 
-#### **Margins**
+##### **Margins**
 
 | Property Name | Data Type |
 | ------------- | :-------: |
@@ -735,7 +552,7 @@ If a property is not specified, the default value (as defined in the Figma desig
 | `right`       |    Int    |
 | `bottom`      |    Int    |
 
-### Example <a href="#example.1" id="example.1"></a>
+#### Theme Example
 
 To build the `theme`, the user must follow steps similar to those outlined in the **test app file**.
 
@@ -773,11 +590,42 @@ return CheckoutTheme(
 )
 ```
 
----
+### SDK Configuration
 
-## Payment Gateway Compliance & Information
+#### Language
 
-### STC Pay <a href="#stc-pay" id="stc-pay"></a>
+The SDK supports two languages, English and Arabic, with English set as the default.
+
+It automatically adopts the language configured in the device settings, requiring no in-app adjustments. However, if a transaction is initiated in a different language and setup preload is utilized, the backend-generated text (such as fee descriptions) will appear in the language of the transaction. Therefore, it is important to ensure that the language code passed to the [Checkout API](../../checkout-api)'s transaction creation request matches the currently selected language on the device or current selected app language.
+
+#### Light and dark theme
+
+The SDK supports UI customization to match the device theme—light or dark. This adjustment is applied during the SDK initialization, based on the device's settings. Similarly, for language, no adjustments are made within the app.
+
+### Native UI
+
+The SDK UI is embedded as a Fragment within any part of an Activity in the merchant's application.
+
+**Example:**
+
+<figure className="checkout-sdk-figure">
+  <img src="/img/checkout-sdk/image%20%2894%29.png" alt="Android Native UI embedded as a fragment" />
+</figure>
+
+If a wallet is the only available payment option, the UI is minimized automatically.
+
+<figure className="checkout-sdk-figure">
+  <img src="/img/checkout-sdk/image%20%2895%29.png" alt="Android Native UI minimized for wallet-only payment" />
+</figure>
+
+:::info
+
+To avoid style issues and potential crashes, the parent application's theme must be `Theme.AppCompat` or one of its descendant classes. This theme is specified in the `themes.xml` file located in the `values` directory of the project.
+:::
+
+## Wallet Configuration
+
+### STC Pay
 
 Once the STC Pay integration between Ottu and STC Pay has been completed, the necessary checks are automatically handled by the Checkout SDK to ensure the seamless display of the STC Pay button.
 
@@ -808,19 +656,124 @@ The SDK supports multiple instances of onsite checkout payments. Therefore, for 
 Fees are not displayed for onsite checkout instances due to the support of multiple card types through omni PG (multi-card) configurations. The presence of multiple payment icons also indicates this multi-card functionality.
 :::
 
----
+## Callbacks
 
-## Error Reporting & Cybersecurity Measures
+In the Checkout SDK, callback functions are essential for delivering real-time updates on the status of payment transactions. These callbacks improve the user experience by facilitating smooth and effective management of different payment scenarios, including errors, successful transactions, and cancellations.&#x20;
 
-### Error Reporting <a href="#error-reporting" id="error-reporting"></a>
+:::info
+
+The callbacks outlined below are applicable to any type of payment.
+:::
+
+### errorCallback
+
+The `errorCallback` is a callback function triggered when issues occur during a payment process. Properly handling these errors is essential for maintaining a smooth user experience.&#x20;
+
+:::info
+
+The best practice recommended in the event of an error is to restart the checkout process by generating a new `session_id` through the [Checkout API](../../checkout-api).
+:::
+
+To set up the `errorCallback` function, use the `data-error` attribute on the Checkout script tag to designate a global function that will manage errors. If an error arises during a payment, the `errorCallback` function will be called, receiving a `JSONObject` with a `data.status` value indicating an error.
+
+**Params Available in** `data` **`JSONObject` for** `errorCallback`
+
+- `message` mandatory
+- `form_of_payment` mandatory
+- `status` mandatory
+- `challenge_occurred` optional
+- `session_id` optional
+- `order_no` optional
+- `reference_number` optional
+
+### cancelCallback
+
+The `cancelCallback` is a callback function in the Checkout SDK that is activated when a payment is canceled.&#x20;
+
+To configure the `cancelCallback` function, you can use the `data-cancel` attribute on the Checkout script tag to specify a global function that will handle cancellations. If a payment is canceled by a customer, the `cancelCallback` function will be called, and it will receive a `JSONObject` containing a `data.status` value of "canceled".
+
+**Params Available in** `data` **`JSONObject` for** `cancelCallback`
+
+- `message` mandatory
+- `form_of_payment` mandatory
+- `challenge_occurred` optional
+- `session_id` optional
+- `status` mandatory
+- `order_no` optional
+- `reference_number` optional
+- `payment_gateway_info` optional
+
+:::warning
+
+In both `cancelCallback` and `errorCallback`, the SDK must be reinitialized, either on the same session or on a new session.
+:::
+
+### successCallback
+
+The `successCallback` is a function that is triggered when the payment process is successfully completed. This callback receives a `JSONObject` containing a `data.status` value of "success."
+
+**Params Available in** `data` `JSONObject` for `successCallback`
+
+- `message` mandatory
+- `form_of_payment` mandatory
+- `challenge_occurred` optional
+- `session_id` optional
+- `status` mandatory
+- `order_no` optional
+- `reference_number` optional
+- `redirect_url` optional
+- `payment_gateway_info` optional
+
+The `successCallback` function is defined and assigned by setting the `data-success` attribute on the Checkout script tag. This attribute specifies a global function that will be invoked when the payment process successfully completes.
+
+## Examples
+
+### Basic Example
+
+The SDK triggers three main callbacks:
+
+- **`successCallback`** – Invoked upon successful payment.
+- **`cancelCallback`** – Triggered when the user cancels the transaction.
+- **`errorCallback`** – Activated on errors during the checkout process.
+
+Developers should customize the logic within these callbacks to handle transaction results appropriately.
+
+### Full Example
+
+```swift
+val theme = getCheckoutTheme()
+
+// Builder class is used to construct an object passed to the SDK initializing function
+val builder = Checkout
+  .Builder(merchantId!!, sessionId, apiKey!!, amount!!)
+  .displaySettings(displaySettings)
+  .formsOfPayments(formsOfPayment)
+  .theme(theme)
+  .logger(Checkout.Logger.INFO)
+  .build()
+
+
+// Actual `init` function calling, returning a `Fragment` object
+checkoutFragment = Checkout.init(
+  context = this @CheckoutSampleActivity,
+  builder = builder,
+  transactionResultCallback = object: Checkout.TransactionResultCallback {
+    override fun onTransactionResult(result: TransactionResult) {
+      showResultDialog(result)
+    }
+  }
+)
+```
+
+## Error Reporting & Security
+
+### Error Reporting
 
 The SDK utilizes Sentry for error logging and reporting, with initialization based on the configuration provided by SDK Studio.
 
 Since the SDK is embedded within the merchant's application, conflicts may arise if Sentry is also integrated into the app. To prevent such conflicts, Sentry can be disabled within the Checkout SDK by setting the `is_enabled` flag to `false` in the configuration.
 
-### Cyber Security Measures <a href="#cyber-security-measures" id="cyber-security-measures"></a>
-
-#### Rooting Detection
+### Rooting Detection
 
 The SDK prevents execution on rooted devices.
 
@@ -838,24 +791,22 @@ After dismissing the alert, the app crashes unexpectedly
 &#x20;`Checkout.init` function needs to be called in a coroutine.
 :::
 
-#### Screen Capture Prevention
+### Screen Capture Prevention
 
 The SDK is designed to protect sensitive data by restricting screen capture functionalities. These restrictions apply to the entire Activity that contains the SDK and operate as follows:
 
 - **Screenshot Attempts:**\
   If a user attempts to take a screenshot, a toast message will appear stating:\
-  &#xNAN;_"This app doesn’t allow screenshots."_
+  &#xNAN;_"This app doesn't allow screenshots."_
 - **Screen Recording After SDK Initialization:**\
   If screen recording is initiated **after** the SDK has been initialized, the following toast message is displayed:\
   &#xNAN;_"Can't record screen due to security policy."_
 - **Screen Recording Before SDK Initialization:**\
   If screen recording begins **before** the SDK is initialized, the entire Activity containing the SDK will appear as a black screen in the recorded video.
 
----
-
 ## FAQ
 
-#### 1 [What forms of payments are supported by the SDK?](../) <a href="#id-1.-what-forms-of-payments-are-supported-by-the-sdk" id="id-1.-what-forms-of-payments-are-supported-by-the-sdk"></a>
+#### 1. What forms of payments are supported by the SDK?
 
 The SDK accommodates various payment forms including`tokenPay`, `redirect`, `StcPay` and `cardOnsite`.&#x20;
 
@@ -863,13 +814,10 @@ Merchants have the flexibility to showcase specific methods based on their requi
 
 For instance, if you wish to exclusively display the STC Pay button, you can achieve this by setting `formsOfPayment` = `[StcPay]`, which will result in only the STC Pay button being displayed. This approach is applicable to other payment methods as well.
 
-#### 2 [What are the minimum system requirements for the SDK integration?](../) <a href="#id-2.-what-are-the-minimum-system-requirements-for-the-sdk-integration" id="id-2.-what-are-the-minimum-system-requirements-for-the-sdk-integration"></a>
+#### 2. What are the minimum system requirements for the SDK integration?
 
 It is required to have a device running Android 8 or higher (Android API level 26 or higher).
 
-#### 3 [Can I customize the appearance beyond the provided themes?](../) <a href="#id-3.-can-i-customize-the-appearance-beyond-the-provided-themes" id="id-3.-can-i-customize-the-appearance-beyond-the-provided-themes"></a>
+#### 3. Can I customize the appearance beyond the provided themes?
 
-Yes, check the [Customization theme](#customization-theme) section.
-
----
-
+Yes, check the [Theme](#theme) section.
