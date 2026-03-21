@@ -137,7 +137,7 @@ Payment transaction **`type`** (e.g., `e_commerce`, `payment_request`) determine
 
 ## State Groups
 
-These groupings are used by the [Operations API](/docs/developers/operations), [Webhooks](/docs/developers/webhooks/), and [Inquiry API](/docs/developers/payments/inquiry) to determine which actions are valid.
+These groupings are used by the [Operations API](/docs/developers/operations), [Webhooks](/docs/developers/webhooks/), and [Payment Status Query API](/docs/developers/payments/psq) to determine which actions are valid.
 
 | Group | States | Used By |
 |-------|--------|---------|
@@ -146,7 +146,7 @@ These groupings are used by the [Operations API](/docs/developers/operations), [
 | **Cancelable** | `created`, `pending`, `attempted`, `cod` | [Cancel operation](/docs/developers/operations#cancel) |
 | **Expirable** | `created`, `pending`, `attempted` | [Expire operation](/docs/developers/operations#expire) or automatic expiration |
 | **Can acknowledge payment** | `created`, `pending`, `attempted`, `failed`, `expired` | Gateway can still report success (delayed callback) |
-| **Inquirable** | `pending`, `attempted`, `failed`, `expired` | [Payment Status (Inquiry)](/docs/developers/payments/inquiry) to check latest status |
+| **Inquirable** | `pending`, `attempted`, `failed`, `expired` | [Payment Status Query](/docs/developers/payments/psq) to check latest status |
 | **Child payment transaction states** | `paid`, `refunded`, `refund_queued`, `refund_rejected`, `voided` | Created by [operations](/docs/developers/operations) on a parent payment transaction |
 
 ## Child Payment Transactions
@@ -157,7 +157,7 @@ When an external [operation](/docs/developers/operations) (refund, capture, void
 - **Capture** → child in `paid` state
 - **Void** → child in `voided` state
 
-Child payment transactions appear in the parent's webhook payload and can be retrieved via the [Payment Status (Inquiry) API](/docs/developers/payments/inquiry). See [Operation Events](/docs/developers/webhooks/operation-events) for webhook payloads.
+Child payment transactions appear in the parent's webhook payload and can be retrieved via the [Payment Status Query API](/docs/developers/payments/psq). See [Operation Events](/docs/developers/webhooks/operation-events) for webhook payloads.
 
 ## FAQ
 
@@ -192,7 +192,7 @@ Child payment transactions are created by [operations](/docs/developers/operatio
 ## What's Next?
 
 - [**Checkout API**](/docs/developers/payments/checkout-api) — Create payment transactions and track their state
-- [**Payment Status (Inquiry)**](/docs/developers/payments/inquiry) — Check the latest payment transaction status with the gateway
+- [**Payment Status Query**](/docs/developers/payments/psq) — Check the latest payment transaction status with the gateway
 - [**Operations**](/docs/developers/operations) — Refund, capture, void, cancel, and expire payment transactions
 - [**Payment Events**](/docs/developers/webhooks/payment-events) — Webhook payloads delivered on state changes
 - [**Error Codes**](/docs/developers/reference/error-codes) — Error responses from the API

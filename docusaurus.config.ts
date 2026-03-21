@@ -46,6 +46,7 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           docItemComponent: "@theme/ApiItem",
+          showLastUpdateTime: true,
         },
         blog: false,
         theme: {

@@ -1,0 +1,580 @@
+import React, { useReducer, useRef, useCallback, useEffect } from "react";
+import Icon from "@mdi/react";
+import { mdiCheck, mdiLoading, mdiAlertCircleOutline } from "@mdi/js";
+import {
+  createSandboxSession,
+  callPaymentMethods,
+  callPaymentStatusQuery,
+  SANDBOX_MERCHANT_ID,
+  SANDBOX_API_KEY,
+  getWebhookBaseUrl,
+} from "@site/src/utils/sandbox";
+import WebhookViewer from "@site/src/components/RecurringDemo/WebhookViewer";
+import styles from "./styles.module.css";
+
+// ── Types ──────────────────────────────────────────────
+
+type Status =
+  | "idle"
+  | "step1_calling"
+  | "step1_done"
+  | "step2_calling"
+  | "step2_done"
+  | "step3_choose"
+  | "step3a_redirect"
+  | "step3b_sdk"
+  | "step3b_ready"
+  | "step4_webhook"
+  | "step4_done"
+  | "step5_pgparams"
+  | "step6_calling"
+  | "step6_done"
+  | "complete"
+  | "error";
+
+interface State {
+  status: Status;
+  pgCodes: string[];
+  sessionId: string;
+  checkoutUrl: string;
+  checkoutResponse: any;
+  paymentMethodsResponse: any;
+  webhookPayload: any;
+  psqResponse: any;
+  orderId: string;
+  chosenPath: "redirect" | "sdk" | null;
+  errorMessage: string;
+}
+
+type Action =
+  | { type: "START" }
+  | { type: "STEP1_DONE"; pgCodes: string[]; response: any }
+  | { type: "STEP2_DONE"; sessionId: string; checkoutUrl: string; response: any }
+  | { type: "CHOOSE_PATH" }
+  | { type: "SELECT_REDIRECT" }
+  | { type: "SELECT_SDK" }
+  | { type: "SDK_READY" }
+  | { type: "WEBHOOK_RECEIVED"; payload: any }
+  | { type: "CONTINUE_PGPARAMS" }
+  | { type: "STEP6_CALLING" }
+  | { type: "STEP6_DONE"; response: any }
+  | { type: "FINISH" }
+  | { type: "ERROR"; message: string }
+  | { type: "RESET" };
+
+const initialState: State = {
+  status: "idle",
+  pgCodes: [],
+  sessionId: "",
+  checkoutUrl: "",
+  checkoutResponse: null,
+  paymentMethodsResponse: null,
+  webhookPayload: null,
+  psqResponse: null,
+  orderId: "",
+  chosenPath: null,
+  errorMessage: "",
+};
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "START":
+      return { ...initialState, status: "step1_calling", orderId: `journey-${Date.now()}-${Math.random().toString(36).slice(2, 7)}` };
+    case "STEP1_DONE":
+      return { ...state, status: "step1_done", pgCodes: action.pgCodes, paymentMethodsResponse: action.response };
+    case "STEP2_DONE":
+      return { ...state, status: "step2_done", sessionId: action.sessionId, checkoutUrl: action.checkoutUrl, checkoutResponse: action.response };
+    case "CHOOSE_PATH":
+      return { ...state, status: "step3_choose" };
+    case "SELECT_REDIRECT":
+      return { ...state, status: "step3a_redirect", chosenPath: "redirect" };
+    case "SELECT_SDK":
+      return { ...state, status: "step3b_sdk", chosenPath: "sdk" };
+    case "SDK_READY":
+      return { ...state, status: "step3b_ready" };
+    case "WEBHOOK_RECEIVED":
+      return { ...state, status: "step4_done", webhookPayload: action.payload };
+    case "CONTINUE_PGPARAMS":
+      return { ...state, status: "step5_pgparams" };
+    case "STEP6_CALLING":
+      return { ...state, status: "step6_calling" };
+    case "STEP6_DONE":
+      return { ...state, status: "step6_done", psqResponse: action.response };
+    case "FINISH":
+      return { ...state, status: "complete" };
+    case "ERROR":
+      return { ...state, status: "error", errorMessage: action.message };
+    case "RESET":
+      return initialState;
+  }
+}
+
+// ── Step metadata ──────────────────────────────────────
+
+const STEPS = [
+  { num: 1, title: "Discover Payment Methods", description: "Call the Payment Methods API to find available gateways for KWD currency. These update automatically when you add or remove gateways in the control panel." },
+  { num: 2, title: "Create Payment Session", description: "Call the Checkout API with the discovered pg_codes to create a payment session. You'll get a session_id and checkout_url." },
+  { num: 3, title: "Accept Payment", description: "Choose how the customer pays: redirect to the hosted checkout page, or embed the Checkout SDK directly on your site." },
+  { num: 4, title: "Webhook Notification", description: "Ottu posts the payment result to your webhook_url. This is the primary way to confirm payment status server-side." },
+  { num: 5, title: "Understand pg_params", description: "The webhook payload includes pg_params — normalized gateway response fields that work consistently across all payment gateways." },
+  { num: 6, title: "Payment Status Query", description: "As a fallback when webhooks don't arrive, query the payment status directly. The response mirrors the webhook payload." },
+];
+
+// ── Helpers ─────────────────────────────────────────────
+
+const SDK_SCRIPT_URL = "https://assets.ottu.net/checkout/v3/checkout.min.js";
+
+function loadScript(): Promise<void> {
+  if ((window as any).Checkout) return Promise.resolve();
+  if (document.querySelector(`script[src="${SDK_SCRIPT_URL}"]`)) {
+    return new Promise((resolve) => {
+      const check = setInterval(() => { if ((window as any).Checkout) { clearInterval(check); resolve(); } }, 100);
+    });
+  }
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = SDK_SCRIPT_URL;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load Checkout SDK"));
+    document.head.appendChild(script);
+    setTimeout(() => reject(new Error("SDK script load timed out")), 15000);
+  });
+}
+
+function getStepStatus(stepNum: number, state: State): "pending" | "active" | "done" {
+  const statusMap: Record<Status, number> = {
+    idle: 0, step1_calling: 1, step1_done: 1,
+    step2_calling: 2, step2_done: 2,
+    step3_choose: 3, step3a_redirect: 3, step3b_sdk: 3, step3b_ready: 3,
+    step4_webhook: 4, step4_done: 4,
+    step5_pgparams: 5,
+    step6_calling: 6, step6_done: 6,
+    complete: 7, error: 0,
+  };
+  const activeStep = statusMap[state.status];
+  const isCallingThis = (
+    (stepNum === 1 && state.status === "step1_calling") ||
+    (stepNum === 2 && state.status === "step2_calling") ||
+    (stepNum === 6 && state.status === "step6_calling")
+  );
+  if (stepNum < activeStep) return "done";
+  if (stepNum === activeStep || isCallingThis) return "active";
+  return "pending";
+}
+
+// ── ApiPanel ────────────────────────────────────────────
+
+function ApiPanel({ label, data }: { label: string; data: any }) {
+  const text = typeof data === "string" ? data : JSON.stringify(data, null, 2);
+  return (
+    <div className={styles.apiPanel}>
+      <div className={styles.apiPanelHeader}>
+        <span>{label}</span>
+        <button className={styles.apiPanelCopy} onClick={() => navigator.clipboard?.writeText(text)}>
+          Copy
+        </button>
+      </div>
+      <div className={styles.apiPanelBody}>
+        <pre>{text}</pre>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Component ──────────────────────────────────────
+
+export default function PaymentJourneyInner() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const sdkContainerRef = useRef<HTMLDivElement>(null);
+  const webhookCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (webhookCheckRef.current) clearInterval(webhookCheckRef.current);
+      if (sdkContainerRef.current) sdkContainerRef.current.innerHTML = "";
+    };
+  }, []);
+
+  // ── Step 1: Payment Methods ─────────────────────────
+
+  const runStep1 = useCallback(async () => {
+    dispatch({ type: "START" });
+    try {
+      const response = await callPaymentMethods({ currencies: ["KWD"], plugin: "payment_request", operation: "purchase" });
+      const pgCodes = response?.payment_methods?.map((m: any) => m.code) ?? response?.pg_codes ?? [];
+      dispatch({ type: "STEP1_DONE", pgCodes, response });
+    } catch (err: any) {
+      dispatch({ type: "ERROR", message: err.message });
+    }
+  }, []);
+
+  // ── Step 2: Checkout API ────────────────────────────
+
+  const runStep2 = useCallback(async () => {
+    dispatch({ type: "STEP2_DONE", sessionId: "", checkoutUrl: "", response: null }); // temp: show loading
+    try {
+      const webhookUrl = `${getWebhookBaseUrl()}/webhook/${state.orderId}`;
+      const response = await createSandboxSession({
+        pg_codes: state.pgCodes.length > 0 ? state.pgCodes : ["direct-payment"],
+        currency_code: "KWD",
+        customer_id: "demo-customer",
+        extra: {
+          include_sdk_setup_preload: true,
+          webhook_url: webhookUrl,
+        },
+      });
+      dispatch({ type: "STEP2_DONE", sessionId: response.session_id, checkoutUrl: (response as any).checkout_url ?? "", response });
+    } catch (err: any) {
+      dispatch({ type: "ERROR", message: err.message });
+    }
+  }, [state.pgCodes, state.orderId]);
+
+  // ── Step 3B: SDK ────────────────────────────────────
+
+  const initSdk = useCallback(async () => {
+    dispatch({ type: "SELECT_SDK" });
+    try {
+      await loadScript();
+      if (sdkContainerRef.current) sdkContainerRef.current.innerHTML = "";
+      (window as any).Checkout.init({
+        selector: "journey-checkout-target",
+        merchant_id: SANDBOX_MERCHANT_ID,
+        session_id: state.sessionId,
+        apiKey: SANDBOX_API_KEY,
+        formsOfPayment: ["applePay", "tokenPay", "ottuPG", "redirect", "googlePay", "stcPay"],
+        theme: {
+          "title-text": { "font-family": "system-ui" },
+          amount: { "font-family": "system-ui" },
+          "pay-button": { "font-family": "system-ui" },
+          "payment-method-name": { "font-family": "system-ui" },
+        },
+      });
+      dispatch({ type: "SDK_READY" });
+    } catch (err: any) {
+      dispatch({ type: "ERROR", message: err.message });
+    }
+  }, [state.sessionId]);
+
+  // ── Step 6: PSQ ─────────────────────────────────────
+
+  const runStep6 = useCallback(async () => {
+    dispatch({ type: "STEP6_CALLING" });
+    try {
+      const response = await callPaymentStatusQuery(state.sessionId);
+      dispatch({ type: "STEP6_DONE", response });
+    } catch (err: any) {
+      dispatch({ type: "ERROR", message: err.message });
+    }
+  }, [state.sessionId]);
+
+  // ── Webhook polling ─────────────────────────────────
+
+  const startWebhookWatch = useCallback(() => {
+    if (webhookCheckRef.current) clearInterval(webhookCheckRef.current);
+    // The WebhookViewer component handles SSE; we just need to wait for the user to confirm
+  }, []);
+
+  // ── Render helpers ──────────────────────────────────
+
+  const renderNode = (stepNum: number) => {
+    const status = getStepStatus(stepNum, state);
+    return (
+      <div className={`${styles.node} ${status === "active" ? styles.nodeActive : status === "done" ? styles.nodeDone : styles.nodePending}`}>
+        {status === "done" ? <Icon path={mdiCheck} size={0.7} /> :
+         status === "active" && (state.status.includes("calling")) ? <Icon path={mdiLoading} size={0.7} /> :
+         stepNum}
+      </div>
+    );
+  };
+
+  const renderStep = (stepNum: number, content: React.ReactNode) => {
+    const status = getStepStatus(stepNum, state);
+    const meta = STEPS[stepNum - 1];
+    const isActive = status === "active";
+    const isDone = status === "done";
+
+    return (
+      <div className={styles.step} key={stepNum}>
+        {renderNode(stepNum)}
+        <div className={`${styles.card} ${isActive ? styles.cardActive : isDone ? styles.cardDone : ""}`}>
+          <div className={`${styles.cardHeader} ${isDone ? styles.cardHeaderDone : ""}`}>
+            <div>
+              <h3 className={`${styles.cardTitle} ${status === "pending" ? styles.cardTitlePending : ""}`}>
+                {meta.title}
+              </h3>
+              {isActive && <p className={styles.cardSubtitle}>Step {stepNum} of 6</p>}
+            </div>
+            {isDone && (
+              <span className={styles.doneBadge}>
+                <Icon path={mdiCheck} size={0.6} /> Done
+              </span>
+            )}
+          </div>
+          {isActive && (
+            <div className={styles.cardBody}>
+              <p className={styles.cardDescription}>{meta.description}</p>
+              {content}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // ── IDLE STATE ──────────────────────────────────────
+
+  if (state.status === "idle") {
+    return (
+      <div className={styles.hero}>
+        <span className={styles.heroTitle}>Payment Integration Journey</span>
+        <p className={styles.heroSubtitle}>
+          Walk through a complete Ottu payment integration with live API calls.
+          Every step runs against our sandbox — no real charges.
+        </p>
+        <button className={styles.primaryBtn} onClick={runStep1}>
+          Start Journey
+        </button>
+      </div>
+    );
+  }
+
+  // ── ERROR STATE ─────────────────────────────────────
+
+  if (state.status === "error") {
+    return (
+      <div className={styles.errorCard}>
+        <Icon path={mdiAlertCircleOutline} size={1.5} className={styles.errorIcon} />
+        <p className={styles.errorMessage}>{state.errorMessage}</p>
+        <div className={styles.actions}>
+          <button className={styles.secondaryBtn} onClick={() => dispatch({ type: "RESET" })}>
+            Start Over
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── COMPLETE STATE ──────────────────────────────────
+
+  if (state.status === "complete") {
+    return (
+      <>
+        <div className={styles.journey}>
+          {STEPS.map((_, i) => renderStep(i + 1, null))}
+        </div>
+        <div className={styles.completeCard}>
+          <span className={styles.completeIcon}>&#x1F389;</span>
+          <h3 className={styles.completeTitle}>Journey Complete</h3>
+          <p className={styles.completeSubtitle}>
+            You've walked through the entire Ottu payment integration flow.
+          </p>
+          <button className={styles.primaryBtn} onClick={() => dispatch({ type: "RESET" })}>
+            Restart Journey
+          </button>
+        </div>
+      </>
+    );
+  }
+
+  // ── JOURNEY TIMELINE ────────────────────────────────
+
+  return (
+    <div className={styles.journey}>
+
+      {/* ── Step 1: Payment Methods ─────────────── */}
+      {renderStep(1, (
+        <>
+          {state.status === "step1_calling" && (
+            <div className={styles.actions}>
+              <button className={styles.primaryBtn} disabled>
+                <span className={styles.spinner} /> Calling Payment Methods API...
+              </button>
+            </div>
+          )}
+          {state.status === "step1_done" && (
+            <>
+              <ApiPanel label="POST /b/pbl/v2/payment-methods/" data={{
+                plugin: "payment_request",
+                operation: "purchase",
+                currencies: ["KWD"],
+              }} />
+              <ApiPanel label="Response — pg_codes" data={state.paymentMethodsResponse} />
+              <div className={styles.actions}>
+                <button className={styles.primaryBtn} onClick={() => { dispatch({ type: "STEP2_DONE", sessionId: "", checkoutUrl: "", response: null }); runStep2(); }}>
+                  Continue to Step 2
+                </button>
+              </div>
+            </>
+          )}
+        </>
+      ))}
+
+      {/* ── Step 2: Checkout API ────────────────── */}
+      {renderStep(2, (
+        <>
+          {state.status === "step2_calling" || (state.status === "step2_done" && !state.sessionId) ? (
+            <div className={styles.actions}>
+              <button className={styles.primaryBtn} disabled>
+                <span className={styles.spinner} /> Creating payment session...
+              </button>
+            </div>
+          ) : state.status === "step2_done" && state.sessionId ? (
+            <>
+              <ApiPanel label="Response" data={state.checkoutResponse} />
+              <div className={styles.actions}>
+                <button className={styles.primaryBtn} onClick={() => dispatch({ type: "CHOOSE_PATH" })}>
+                  Continue — Choose Payment Method
+                </button>
+              </div>
+            </>
+          ) : null}
+        </>
+      ))}
+
+      {/* ── Step 3: Choose Path ─────────────────── */}
+      {renderStep(3, (
+        <>
+          {state.status === "step3_choose" && (
+            <div className={styles.pathSelector}>
+              <div className={styles.pathCard} onClick={() => dispatch({ type: "SELECT_REDIRECT" })}>
+                <span className={styles.pathIcon}>&#x1F517;</span>
+                <p className={styles.pathLabel}>Payment Link</p>
+                <p className={styles.pathDescription}>Redirect the customer to Ottu's hosted checkout page</p>
+              </div>
+              <div className={styles.pathCard} onClick={initSdk}>
+                <span className={styles.pathIcon}>&#x1F4B3;</span>
+                <p className={styles.pathLabel}>On-site Checkout SDK</p>
+                <p className={styles.pathDescription}>Embed the payment form directly on your website</p>
+              </div>
+            </div>
+          )}
+
+          {state.status === "step3a_redirect" && (
+            <>
+              <ApiPanel label="checkout_url" data={state.checkoutUrl} />
+              <p className={styles.cardDescription}>
+                Open the payment link in a new tab, complete the test payment (use card <strong>4111 1111 1111 1111</strong>, any future expiry, any CVV), then come back here to see the webhook.
+              </p>
+              <div className={styles.actions}>
+                <button className={styles.primaryBtn} onClick={() => {
+                  window.open(state.checkoutUrl, "_blank");
+                  startWebhookWatch();
+                  dispatch({ type: "WEBHOOK_RECEIVED", payload: null });
+                }}>
+                  Open Payment Link
+                </button>
+              </div>
+            </>
+          )}
+
+          {(state.status === "step3b_sdk" || state.status === "step3b_ready") && (
+            <>
+              <div
+                className={styles.sdkContainer}
+                style={{ display: state.status === "step3b_ready" ? "block" : "none" }}
+              >
+                <div id="journey-checkout-target" ref={sdkContainerRef} />
+              </div>
+              {state.status === "step3b_sdk" && (
+                <div className={styles.actions}>
+                  <button className={styles.primaryBtn} disabled>
+                    <span className={styles.spinner} /> Loading Checkout SDK...
+                  </button>
+                </div>
+              )}
+              {state.status === "step3b_ready" && (
+                <p className={styles.cardDescription} style={{ marginTop: 16 }}>
+                  Enter test card <strong>4111 1111 1111 1111</strong>, any future expiry, any CVV. After payment, the webhook will arrive below.
+                </p>
+              )}
+            </>
+          )}
+        </>
+      ))}
+
+      {/* ── Step 4: Webhook ─────────────────────── */}
+      {renderStep(4, (
+        <>
+          <WebhookViewer orderId={state.orderId} label="Live Webhook Feed" />
+          {!state.webhookPayload && (
+            <p className={styles.cardDescription} style={{ marginTop: 12 }}>
+              Waiting for the payment to complete. Once Ottu processes the payment, the webhook will appear above in real-time.
+            </p>
+          )}
+          {state.webhookPayload && (
+            <div className={styles.actions}>
+              <button className={styles.primaryBtn} onClick={() => dispatch({ type: "CONTINUE_PGPARAMS" })}>
+                Continue — Understand pg_params
+              </button>
+            </div>
+          )}
+        </>
+      ))}
+
+      {/* ── Step 5: pg_params ──────────────────── */}
+      {renderStep(5, (
+        <>
+          {state.webhookPayload?.pg_params ? (
+            <>
+              <div className={styles.pgParamsGrid}>
+                {[
+                  { name: "result", desc: "Normalized transaction result" },
+                  { name: "card_number", desc: "Masked card number (PAN)" },
+                  { name: "auth_code", desc: "Authorization code from gateway" },
+                  { name: "transaction_id", desc: "Gateway transaction identifier" },
+                  { name: "rrn", desc: "Retrieval Reference Number" },
+                  { name: "decision", desc: "Gateway's final decision" },
+                ].filter(f => state.webhookPayload.pg_params[f.name]).map(field => (
+                  <div className={styles.pgParam} key={field.name}>
+                    <p className={styles.pgParamName}>{field.name}</p>
+                    <p className={styles.pgParamValue}>{String(state.webhookPayload.pg_params[field.name])}</p>
+                    <p className={styles.pgParamDescription}>{field.desc}</p>
+                  </div>
+                ))}
+              </div>
+              <p className={styles.cardDescription}>
+                Use <code>pg_params</code> instead of parsing raw <code>gateway_response</code>. These fields are normalized across all payment gateways — switching gateways requires zero code changes.
+              </p>
+            </>
+          ) : (
+            <p className={styles.cardDescription}>
+              The <code>pg_params</code> object normalizes gateway responses into consistent fields like <code>card_number</code>, <code>auth_code</code>, <code>result</code>, and <code>rrn</code> — regardless of which gateway processed the payment.
+            </p>
+          )}
+          <div className={styles.actions}>
+            <button className={styles.primaryBtn} onClick={runStep6}>
+              Continue — Payment Status Query
+            </button>
+          </div>
+        </>
+      ))}
+
+      {/* ── Step 6: PSQ ────────────────────────── */}
+      {renderStep(6, (
+        <>
+          {state.status === "step6_calling" && (
+            <div className={styles.actions}>
+              <button className={styles.primaryBtn} disabled>
+                <span className={styles.spinner} /> Querying payment status...
+              </button>
+            </div>
+          )}
+          {state.status === "step6_done" && (
+            <>
+              <ApiPanel label="POST /b/pbl/v2/inquiry/" data={{ session_id: state.sessionId }} />
+              <ApiPanel label="Response" data={state.psqResponse} />
+              <p className={styles.cardDescription}>
+                The PSQ response has the same structure as the webhook payload. Use this as a fallback when webhooks don't arrive.
+              </p>
+              <div className={styles.actions}>
+                <button className={styles.primaryBtn} onClick={() => dispatch({ type: "FINISH" })}>
+                  Complete Journey
+                </button>
+              </div>
+            </>
+          )}
+        </>
+      ))}
+    </div>
+  );
+}

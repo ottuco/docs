@@ -1,602 +1,220 @@
+---
+title: Test Cards
+sidebar_label: Sandbox & Test Cards
+toc_max_heading_level: 2
+---
+
 # Test Cards
 
-### Apple Pay
+This page contains test card numbers for various payment methods. Use these cards to test your integration in development and sandbox environments. These test cards will not process real transactions.
 
-<details>
+## Standard Test Cards
 
-<summary><span style={{ color: "orange", fontWeight: 600 }}>Apple Pay</span></summary>
+| Card Number | Expiry | CVV | Brand | Status | 3DS |
+|-------------|--------|-----|-------|--------|-----|
+| `4242 4242 4242 4242` | 12/28 | 123 | | <span class="badge-success">Success</span> | Yes |
+| `3782 822463 10005` | 12/28 | 123 | Mastercard | <span class="badge-success">Success</span> | Yes |
+| `4566 6456 6631 5676` | 12/28 | 123 | | <span class="badge-success">Success</span> | Yes |
+| `1234 1243 1631 1859` | 12/28 | 123 | | <span class="badge-success">Success</span> | Yes |
+| `3782 822463 10005` | 12/28 | 123 | Visa | <span class="badge-success">Success</span> | Yes |
+| `3782 822463 10005` | 12/28 | 123 | | <span class="badge-success">Success</span> | Yes |
 
-To test Apple Pay, it is necessary to use their approved test cards, which can be accessed at [https://developer.apple.com/apple-pay/sandbox-testing/](https://developer.apple.com/apple-pay/sandbox-testing/). \
+## Apple Pay
+
+To test Apple Pay, it is necessary to use their approved test cards, which can be accessed at [developer.apple.com/apple-pay/sandbox-testing/](https://developer.apple.com/apple-pay/sandbox-testing/).
+
 It is important to keep in mind that these cards are only able to be added on Apple developer accounts.
 
-</details>
+## Ottu PG
 
-### Ottu PG
+Use these test card numbers to simulate different card scenarios in your integration.
 
-<details>
+| Card Number | Expiry | CVV | Brand | Status | 3DS |
+|-------------|--------|-----|-------|--------|-----|
+| `4242 4242 4242 4242` | 12/28 | 123 | Visa | <span class="badge-success">Success</span> | Yes |
+| `3782 822463 10005` | 12/28 | 123 | American Express | <span class="badge-success">Success</span> | No |
+| `5555 5555 5555 4444` | 12/28 | 123 | Mastercard | <span class="badge-declined">Declined</span> | No |
+| `4000 0000 0000 9995` | 12/28 | 123 | Mastercard | <span class="badge-declined">Insufficient Funds</span> | No |
 
-<summary><span style={{ color: "orange", fontWeight: 600 }}>Ottu PG</span></summary>
+If you need additional test cards, please refer to the official documentation.
 
-**Payment gateway:** Ottu PG
+[View official documentation ↗](https://docs.ottu.com)
 
-**Card type:** VISA
+## Amazon Pay
 
-**Country:** International
+Use these test cards for Amazon Pay integration testing.
 
-**Card number:** `4030000010001234`
+**Non-3DS:**
 
-**Expiry:** 01/39
+| Card Number | Expiry | CVV | Brand | Status |
+|-------------|--------|-----|-------|--------|
+| `4005 5500 0000 0001` | 05/25 | 123 | Visa | <span class="badge-success">Success</span> |
+| `5123 4567 8901 2346` | 05/25 | 123 | Mastercard | <span class="badge-success">Success</span> |
+| `3456 7890 1234 564` | 05/25 | 1234 | Amex | <span class="badge-success">Success</span> |
 
-**CVV :** 100&#x20;
+**3DS:**
 
-**Note :** Non 3DS
+| Card Number | Expiry | CVV | Brand | Status |
+|-------------|--------|-----|-------|--------|
+| `4557 0123 4567 8902` | 05/25 | 123 | Visa | <span class="badge-success">Success</span> |
+| `5313 5810 0012 3430` | 05/25 | 123 | Mastercard | <span class="badge-success">Success</span> |
+| `3742 0000 0000 004` | 05/25 | 1234 | Amex | <span class="badge-success">Success</span> |
 
-</details>
+## Bambora
 
-### Amazon Pay
+| Card Number | Expiry | CVV | Brand | Status |
+|-------------|--------|-----|-------|--------|
+| `4030 0000 1000 1234` | 05/25 | 123 | Visa | <span class="badge-success">Success</span> |
 
-<details>
+## Bookeey
 
-<summary><span style={{ color: "orange", fontWeight: 600 }}>Amazon Pay</span></summary>
+Test using merchant login credentials: `66333333/1234`
 
-**Payment gateway:** Amazon Pay
+## Burgan
 
-**Non-3DS**
+| Card Number | Expiry | CVV | Brand | Status |
+|-------------|--------|-----|-------|--------|
+| `4012 0000 3333 0026` | 01/39 | 100 | Visa | <span class="badge-success">Success</span> |
 
-**Country:** International
+## Checkout.com
 
-**Card type:** VISA **Card number:** `4005550000000001`
+| Card Number | Expiry | CVV | Brand | Status |
+|-------------|--------|-----|-------|--------|
+| `4242 4242 4242 4242` | 05/25 | 100 | Visa | <span class="badge-success">Success</span> |
 
-**Card Type:** MasterCard **Card number:** `5123456789012346`
+## FSS
 
-**Card type:** AMEX **Card number:** `345678901234564`
+| Card Number | Expiry | CVV | Brand | Status | Note |
+|-------------|--------|-----|-------|--------|------|
+| `4012 0010 3714 1112` | 12/27 | 212 | Visa | <span class="badge-success">Success</span> | Secure Code: 123456, OTP: 123456 |
 
-**3DS**
+## N-Genius
 
-**Card type:** VISA **Card number:** `4557012345678902`
+| Card Number | Expiry | CVV | Brand | Status | Note |
+|-------------|--------|-----|-------|--------|------|
+| `4012 0010 3714 1112` | 05/25 | — | Visa | <span class="badge-success">Success</span> | PIN: 123 |
 
-**Card type:** MasterCard **Card number:** `5313581000123430`
+## MiGS
 
-**Card type:** AMEX **Card number:** `374200000000004`
+| Card Number | Expiry | CVV | Brand | Status |
+|-------------|--------|-----|-------|--------|
+| `5123 4500 0000 0008` | 01/39 | 123 | Mastercard | <span class="badge-success">Success</span> |
 
-**Expiry for all:** 05/25
+## Cybersource
 
-**CVV for VISA, MasterCard, non-3DS & 3DS** : 123
+| Card Number | Expiry | CVV | Brand | Status |
+|-------------|--------|-----|-------|--------|
+| `4111 1111 1111 1111` | Any future | Any 3 digits | Visa | <span class="badge-success">Success</span> |
+| `5555 5555 5555 4444` | Any future | Any 3 digits | Mastercard | <span class="badge-success">Success</span> |
 
-**CVV** **for AMEX, non-3DS & 3DS:** 1234
+## MPGS
 
-</details>
+| Card Number | Expiry | CVV | Brand | Status |
+|-------------|--------|-----|-------|--------|
+| `5123 4500 0000 0008` | 01/39 | 100 | Mastercard | <span class="badge-success">Success</span> |
+| `4508 7500 1574 1019` | 01/39 | 100 | Visa | <span class="badge-success">Success</span> |
+| `5120 3501 0006 4537` | Any future | Any 3 digits | Mastercard | <span class="badge-success">Success</span> |
+| `5120 3501 0006 4545` | Any future | Any 3 digits | Mastercard | <span class="badge-success">Success</span> |
 
-### Bambora
+:::info
+Cards 3 and 4 are specifically for receiving token data during tokenization testing.
+:::
 
-<details>
+## KNET
 
-<summary><span style={{ color: "orange", fontWeight: 600 }}>Bambora</span></summary>
+KNET is a popular payment method in Kuwait. Use these test cards for integration testing.
 
-**Payment gateway:** Bambora
+| Card Number | Expiry | PIN | Brand | Status | Note |
+|-------------|--------|-----|-------|--------|------|
+| `8888 8800 0000 0001` | 09/2030 | Any 4 digits | KNET | <span class="badge-success">Success</span> | For not captured, use expiry 08/21 |
 
-**Card type:** VISA
+## MADA
 
-**Country:** International
+| Card Number | Expiry | CVV | Brand | Status | Note |
+|-------------|--------|-----|-------|--------|------|
+| `5588 4800 0000 0003` | 05/21 | 100 | Mastercard | <span class="badge-success">Success</span> | On 3DS page, click Submit |
 
-**Card number:** `4030000010001234`
+## OmanNet
 
-**Expiry :** 05/25
+| Card Number | Expiry | CVV | Brand | Status | Note |
+|-------------|--------|-----|-------|--------|------|
+| `4837 9150 8285 6089` | 06/27 | 766 | Visa | <span class="badge-success">Success</span> | OTP sent to registered email |
 
-**CVV:** 123 &#x20;
+## CBK
 
-</details>
+| Card Number | Expiry | CVV | Brand | Status |
+|-------------|--------|-----|-------|--------|
+| `5123 4500 0000 0008` | 01/39 | 100 | Mastercard | <span class="badge-success">Success</span> |
 
-### Bookeey
+## PayPal
 
-<details>
+| Card Number | Expiry | CVV | Brand | Status |
+|-------------|--------|-----|-------|--------|
+| `3714 4963 5398 431` | 01/39 | 1000 | American Express | <span class="badge-success">Success</span> |
 
-<summary><span style={{ color: "orange", fontWeight: 600 }}>Bookeey</span></summary>
+## PayU India
 
-**Payment gateway**: Bookeey
+| Card Number | Expiry | CVV | Brand | Status | Note |
+|-------------|--------|-----|-------|--------|------|
+| `5123 4567 8901 2346` | Any future | 123 | Mastercard | <span class="badge-success">Success</span> | OTP: 123456 |
 
-**Method to test :** Merchant login for payment&#x20;
+## NBO
 
-<pre><code><strong>66333333/1234</strong></code></pre>
+| Card Number | Expiry | CVV | Brand | Status |
+|-------------|--------|-----|-------|--------|
+| `5421 6033 0039 7131` | 01/25 | 070 | Mastercard | <span class="badge-success">Success</span> |
 
-</details>
+## QPay
 
-### Burgan
+| Card Number | Expiry | CVV | Brand | Status |
+|-------------|--------|-----|-------|--------|
+| `4215 3755 0088 3243` | 06/26 | 1234 | NAPS | <span class="badge-success">Success</span> |
+| `4151 8012 0000 3960` | Any future | Any 4 digits | NAPS | <span class="badge-declined">Declined</span> |
 
-<details>
+OTP for all QPay cards: `1234`
 
-<summary><span style={{ color: "orange", fontWeight: 600 }}>Burgan</span></summary>
+## HyperPay
 
-**Payment gateway**: Burgan
+| Card Number | Expiry | CVV | Brand | Status |
+|-------------|--------|-----|-------|--------|
+| `4111 1111 1111 1111` | Any future | 123 | Visa | <span class="badge-success">Success</span> |
+| `5204 7300 0000 2514` | Any future | 251 | Mastercard | <span class="badge-declined">Declined</span> |
 
-**Card type:** VISA
+## Benefit
 
-**Country:** Kuwait
+Expiry date for all cards: any future date. CVV: any 4 digits.
 
-**Card number**: `4012000033330026`
+| Card Number | Brand | Status | Response Code |
+|-------------|-------|--------|---------------|
+| `4600 4101 2345 6789` | Benefit | <span class="badge-success">Approved</span> | 00 |
+| `4550 1201 2345 6789` | Benefit | <span class="badge-declined">Expired Card</span> | 54 |
+| `4889 7801 2345 6789` | Benefit | <span class="badge-declined">Limit Exceeded</span> | 61 |
+| `4415 5501 2345 6789` | Benefit | <span class="badge-declined">Insufficient Funds</span> | 51 |
+| `4575 5501 2345 6789` | Benefit | <span class="badge-declined">Refer to Issuer</span> | 78 |
+| `4845 5501 2345 6789` | Benefit | <span class="badge-declined">Invalid PIN</span> | 55 |
+| `4895 5501 2345 6789` | Benefit | <span class="badge-declined">Do Not Honor</span> | 05 |
 
-**Expiry:** 01/39
+## UPG
 
-**CVV:** 100
+| Card Number | Expiry | CVV | Brand | Status | Note |
+|-------------|--------|-----|-------|--------|------|
+| `5078 0362 4660 0381` | 09/25 | 331 | Mastercard | <span class="badge-success">Success</span> | OTP: 111111 |
 
-</details>
+## AlRajhi Bank
 
-### Checkout.com
+| Card Number | Expiry | CVV | Brand | Status | Note |
+|-------------|--------|-----|-------|--------|------|
+| `5105 1051 0510 5100` | 12/23 | 123 | Visa / Mastercard | <span class="badge-success">Success</span> | OTP: 123123 |
 
-<details>
+## Tamara
 
-<summary><span style={{ color: "orange", fontWeight: 600 }}>Checkout.com</span></summary>
+| Card Number | Expiry | CVV | Brand | Status |
+|-------------|--------|-----|-------|--------|
+| `5436 0310 3060 6378` | 01/99 | 257 | Mastercard | <span class="badge-success">Success</span> |
 
-**Card type:** VISA
+## What's Next?
 
-**Country:** GB
-
-**Card number:** `4242424242424242`
-
-**Expiry :** 05/25
-
-**CVV:** 100 &#x20;
-
-</details>
-
-### FSS
-
-<details>
-
-<summary><span style={{ color: "orange", fontWeight: 600 }}>FSS</span></summary>
-
-**Payment gateway**: FSS
-
-**Card type:** VISA
-
-**Country:** International
-
-**Card number**: `4012001037141112`
-
-**Expiry:** 12/27
-
-**CVV:** 212
-
-**Note:** Secure Code: 123456 & OTP: 123456
-
-</details>
-
-### N-Genius
-
-<details>
-
-<summary><span style={{ color: "orange", fontWeight: 600 }}>N-Genius</span></summary>
-
-**Payment gateway**: N-Genius
-
-**Card type:** VISA
-
-**Country:** International
-
-**Card number:** `4012001037141112`
-
-**Expiry:** 05/25 &#x20;
-
-**Note:** Pin: 123
-
-</details>
-
-### MiGS
-
-<details>
-
-<summary><span style={{ color: "orange", fontWeight: 600 }}>MiGS</span></summary>
-
-**Payment gateway:** MiGS (Mastercard Internet Gateway Service)
-
-**Card type:** Mastercard
-
-**Country:** International
-
-**Card number:** 5123450000000008
-
-**Expiry:** 01/39
-
-**CVV:** 123 &#x20;
-
-</details>
-
-### Cybersource
-
-<details>
-
-<summary><span style={{ color: "orange", fontWeight: 600 }}>Cybersource</span></summary>
-
-**Payment gateway:** Cybersource
-
-- **Card type:** VISA
-
-**Country:** International
-
-**Card number:** 4111111111111111&#x20;
-
-**Expiry:** Any future date
-
-**CVV:** Any 3-digit number
-
-- **Card type:** Mastercard
-
-**Country:** International
-
-**Card number:** `5555555555554444`&#x9;
-
-**Expiry:** Any future date
-
-**CVV:** Any 3-digit number
-
-</details>
-
-### MPGS
-
-<details>
-
-<summary><span style={{ color: "orange", fontWeight: 600 }}>MPGS</span></summary>
-
-**Payment gateway:** MPGS
-
-- **Card type:** Mastercard
-
-**Country:** International
-
-**Card number:** `5123450000000008`&#x20;
-
-**Expiry:** 01/39
-
-**CVV:** 100
-
-- **Card type:** VISA
-
-**Country:** International
-
-**Card number:** `4508750015741019`&#x20;
-
-**Expiry:** 01/39
-
-**CVV:** 100
-
-- **Test card to receive token data**
-
-**1- Card number:** `5120350100064537`&#x9;
-
-**Expiry:** Any future date
-
-**CVV:** Any 3 digits
-
-**2- Card number:** 5120350100064545&#x9;
-
-**Expiry:** Any future date
-
-**CVV:** Any 3 digits
-
-</details>
-
-### KNET
-
-<details>
-
-<summary><span style={{ color: "orange", fontWeight: 600 }}>KNET</span></summary>
-
-**Payment gateway:** KNET
-
-**Card type:** KNET test card
-
-**Country:** Kuwait
-
-**Card number:** 888888-0000000001
-
-**Expiry:** 09/2030 (For Approved)
-
-**Note:** Pin: Any 4 digits. For not captured use expiry as 08/21
-
-</details>
-
-### MADA
-
-<details>
-
-<summary><span style={{ color: "orange", fontWeight: 600 }}>MADA</span></summary>
-
-**Payment gateway:** MADA
-
-**Card type:** Mastercard
-
-**Country:** KSA
-
-**Card number:** `5588480000000003`
-
-**Expiry:** 05/21
-
-**CVV:** 100
-
-**Note:** On 3D Auth page just click Submit
-
-</details>
-
-### OmanNet
-
-<details>
-
-<summary><span style={{ color: "orange", fontWeight: 600 }}>OmanNet</span></summary>
-
-**Payment gateway:** Muscat
-
-**Card Type:** VISA
-
-**Country:** Oman
-
-**Card number:** `4837915082856089`
-
-**Expiry:** 06/27
-
-**CVV:** 766
-
-**Note:** OTP Comes to saif@ottu.com &#x20;
-
-</details>
-
-### CBK
-
-<details>
-
-<summary><span style={{ color: "orange", fontWeight: 600 }}>CBK</span></summary>
-
-**Payment gateway:** CBK
-
-**Card type:** Mastercard
-
-**Country:** Kuwait
-
-**Card number:** `5123450000000008`
-
-**Expiry:** 01/39
-
-**CVV:** 100 &#x20;
-
-</details>
-
-### PayPal
-
-<details>
-
-<summary><span style={{ color: "orange", fontWeight: 600 }}>PayPal</span></summary>
-
-**Payment gateway:** Paypal
-
-**Card Type:** American express
-
-**Country:** International
-
-**Card number:** `371449635398431`
-
-**Expiry:** 01/39
-
-**CVV:** 1000 &#x20;
-
-</details>
-
-### PayU India
-
-<details>
-
-<summary><span style={{ color: "orange", fontWeight: 600 }}>PayU India</span></summary>
-
-**Payment gateway:** PayU India
-
-**Card type:** Mastercard
-
-**Country:** International
-
-**Card number:** `5123456789012346`
-
-**Expiry:** Greater than current date
-
-**CVV:** 123
-
-**Note:** OTP: 123456
-
-</details>
-
-### NBO
-
-<details>
-
-<summary><span style={{ color: "orange", fontWeight: 600 }}>NBO</span></summary>
-
-**Payment gateway:** NBO
-
-**Card type:** Mastercard
-
-**Country:** Oman
-
-**Card number:** `5421603300397131`
-
-**Expiry:** 01/25
-
-**CVV:** 070 &#x20;
-
-</details>
-
-### QPay
-
-<details>
-
-<summary><span style={{ color: "orange", fontWeight: 600 }}>QPay</span></summary>
-
-**Payment gateway:** QPay
-
-**Card type:** NAPS
-
-**Country:** Qatar
-
-**Card number:** &#x20;
-
-For success: `4215375500883243`
-
-For failed: `4151801200003960`
-
-**Expiry:**&#x20;
-
-For success: 6/26
-
-For failed: Greater than current date
-
-**OTP:**
-
-1234
-
-**CVV:**&#x20;
-
-For success: 1234
-
-For failed: Any 4 digits
-
-</details>
-
-### HyperPay
-
-<details>
-
-<summary><span style={{ color: "orange", fontWeight: 600 }}>HyperPay</span></summary>
-
-**Payment gateway:** HyperPay
-
-**Card type:** VISA
-
-**Country:** International
-
-**Card number** &#x20;
-
-For success: `4111111111111111`
-
-&#x20;For failed: `5204730000002514` &#x20;
-
-**CVV** &#x20;
-
-For success: 123
-
-For failed: 251
-
-</details>
-
-### Benefit
-
-<details>
-
-<summary><span style={{ color: "orange", fontWeight: 600 }}>Benefit</span></summary>
-
-**Expiry date for all card numbers:** Should be greater than current date.&#x20;
-
-**CVV :** Any 4 digits&#x20;
-
-- **Result:** Approved
-
-**Card number:** `4600410123456789`
-
-**Response code:** 00 &#x20;
-
-- **Result:** Expired card
-
-**Card number:** `4550120123456789`
-
-**Response code:** 54
-
-- **Result:** Limit exceeded
-
-**Card number:** `4889780123456789`
-
-**Response code:** 61
-
-- **Result:** Insufficient funds
-
-**Card number:** `4415550123456789`
-
-**Response code:** 51
-
-- **Result:** Refer to issuer
-
-**Card number:** `4575550123456789`
-
-**Response code:** 78
-
-- **Result:** Invalid pin
-
-**Card number:** `4845550123456789`
-
-**Response code:** 55
-
-- **Result:** Do not honor
-
-**Card number:** `4895550123456789`
-
-**Response code:** 05
-
-</details>
-
-### UPG
-
-<details>
-
-<summary><span style={{ color: "orange", fontWeight: 600 }}>UPG</span></summary>
-
-**Payment gateway:** United Payment Gateway (UPG)
-
-**Card type:** Mastercard
-
-**Country:** Egypt
-
-**Card number:** `5078 0362 4660 0381`
-
-**Expiry:** 09/25
-
-**CVV:** 331
-
-**Note:** OTP: 111111
-
-</details>
-
-### AlRajhi Bank
-
-<details>
-
-<summary><span style={{ color: "orange", fontWeight: 600 }}>AlRajhi</span></summary>
-
-**Payment gateway:** AlRajhi Payment Gateway
-
-**Card type:** Visa / Master
-
-**Country:** KSA
-
-**Card number:** `5105105105105100`
-
-**Expiry:** 23/12
-
-**CVV:** 123
-
-**Note:** OTP: 123123
-
-</details>
-
-### Tamara
-
-<details>
-
-<summary><span style={{ color: "orange", fontWeight: 600 }}>Tamara</span></summary>
-
-**Payment gateway:** Tamara
-
-**Card type:** Mastercard
-
-**Country:** Kuwait
-
-**Card number:** `5436031030606378`
-
-**Expiry:** 01/99
-
-**CVV:** 257
-
-</details>
+- [**Checkout API**](./checkout-api.mdx) — Create payment sessions to test with these cards
+- [**Checkout SDK**](./checkout-sdk/) — Drop-in UI for collecting card details
+- [**Native Payments**](./native-payments) — Direct Apple Pay and Google Pay payments
+- [**Webhooks**](../webhooks/payment-events) — Receive payment result notifications

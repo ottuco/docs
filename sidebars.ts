@@ -59,6 +59,7 @@ const sidebars: SidebarsConfig = {
           link: {type: 'doc', id: 'developers/payments/index'},
           items: [
             {type: 'doc', id: 'developers/payments/index', label: 'Overview'},
+            {type: 'doc', id: 'developers/payments/payment-journey', label: 'Payment Journey'},
             {
               type: 'category',
               label: 'Checkout API',
@@ -86,15 +87,15 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: 'category',
-              label: 'Payment Status (Inquiry)',
-              link: {type: 'doc', id: 'developers/payments/inquiry'},
+              label: 'Payment Status Query',
+              link: {type: 'doc', id: 'developers/payments/psq'},
               items: [
-                {type: 'link', label: 'When to Use', href: '/docs/developers/payments/inquiry#when-to-use'},
-                {type: 'link', label: 'Setup', href: '/docs/developers/payments/inquiry#setup'},
-                {type: 'link', label: 'Guide', href: '/docs/developers/payments/inquiry#guide'},
-                {type: 'link', label: 'API Reference', href: '/docs/developers/payments/inquiry#api-reference'},
-                {type: 'link', label: 'Best Practices', href: '/docs/developers/payments/inquiry#best-practices'},
-                {type: 'link', label: 'FAQ', href: '/docs/developers/payments/inquiry#faq'},
+                {type: 'link', label: 'When to Use', href: '/docs/developers/payments/psq#when-to-use'},
+                {type: 'link', label: 'Setup', href: '/docs/developers/payments/psq#setup'},
+                {type: 'link', label: 'Guide', href: '/docs/developers/payments/psq#guide'},
+                {type: 'link', label: 'API Reference', href: '/docs/developers/payments/psq#api-reference'},
+                {type: 'link', label: 'Best Practices', href: '/docs/developers/payments/psq#best-practices'},
+                {type: 'link', label: 'FAQ', href: '/docs/developers/payments/psq#faq'},
               ],
             },
             {

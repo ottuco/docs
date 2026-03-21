@@ -94,6 +94,70 @@ export async function callAutoDebit(
 }
 
 /**
+ * Call the Payment Methods API to discover available gateways.
+ */
+export async function callPaymentMethods(options: {
+  currencies: string[];
+  plugin?: string;
+  operation?: string;
+}): Promise<any> {
+  const body = {
+    plugin: options.plugin ?? "payment_request",
+    operation: options.operation ?? "purchase",
+    currencies: options.currencies,
+  };
+
+  const response = await fetch(
+    `https://${SANDBOX_MERCHANT_ID}/b/pbl/v2/payment-methods/`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Api-Key ${SANDBOX_AUTH_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    }
+  );
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => "");
+    throw new Error(
+      `Payment Methods failed (${response.status}): ${text || response.statusText}`
+    );
+  }
+
+  return response.json();
+}
+
+/**
+ * Call the Payment Status Query (PSQ) API.
+ */
+export async function callPaymentStatusQuery(
+  sessionId: string
+): Promise<any> {
+  const response = await fetch(
+    `https://${SANDBOX_MERCHANT_ID}/b/pbl/v2/inquiry/`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Api-Key ${SANDBOX_AUTH_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ session_id: sessionId }),
+    }
+  );
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => "");
+    throw new Error(
+      `PSQ failed (${response.status}): ${text || response.statusText}`
+    );
+  }
+
+  return response.json();
+}
+
+/**
  * Get the base URL for webhook relay.
  * In local dev (localhost), uses the ifr.ottu.me tunnel.
  * In production, uses the current origin (docs.ottu.dev or docs.ottu.net).

@@ -1,14 +1,15 @@
 ---
-title: Payment Status Inquiry
-sidebar_label: Payment Status Inquiry
+title: Payment Status Query
+sidebar_label: Payment Status Query
 hide_table_of_contents: true
 ---
 
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
+import GatewayTimingChart from "@site/src/components/GatewayTimingChart";
 
-# Payment Status Inquiry
+# Payment Status Query
 
-The Payment Status Inquiry API lets you manually check the status of a payment transaction. It acts as a confirmation mechanism when your system hasn't received a [webhook notification](/docs/developers/webhooks/payment-events) about a status change — due to network issues, temporary downtime, or third-party service failures.
+The Payment Status Query API lets you manually check the status of a payment transaction. It acts as a confirmation mechanism when your system hasn't received a [webhook notification](/docs/developers/webhooks/payment-events) about a status change — due to network issues, temporary downtime, or third-party service failures.
 
 The response mirrors the structure of a [payment webhook payload](/docs/developers/webhooks/payment-events). For payment transactions in `pending`, `attempted`, `failed`, or `expired` states, Ottu queries the payment gateway for the latest status. For `paid` or `authorized` states, the current status is returned immediately without re-confirming with the gateway.
 
@@ -26,22 +27,19 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 - **Fallback for automatic inquiry** — when Ottu's built-in [automatic inquiry](#automatic-inquiry) hasn't resolved the status yet.
 
 :::warning
-If you've configured [webhook notifications](/docs/developers/webhooks/payment-events), rely on those as the primary mechanism. Use the Inquiry API only when webhooks haven't arrived or you need manual confirmation.
+If you've configured [webhook notifications](/docs/developers/webhooks/payment-events), rely on those as the primary mechanism. Use the Payment Status Query API only when webhooks haven't arrived or you need manual confirmation.
 :::
 
 ## Setup
 
 - **Payment gateway** — at least one gateway that supports status checks must be configured. See [Payment Methods](/docs/developers/payments/payment-methods) for available gateways and their capabilities.
-- **Webhook familiarity** — the Inquiry API response matches the [payment webhook payload](/docs/developers/webhooks/payment-events). Understand the response format before integrating.
+- **Webhook familiarity** — the Payment Status Query API response matches the [payment webhook payload](/docs/developers/webhooks/payment-events). Understand the response format before integrating.
 
-#### Timing is Critical
+#### Gateway Inquiry Timing
 
-Schedule your inquiry calls carefully to avoid missing the latest status. Each payment gateway has a session expiration time after which the status becomes final:
+Each payment gateway has a different session expiration time. Schedule your PSQ calls **after** the gateway's inquiry window closes — calling too early means the gateway may not have finalized the status yet.
 
-- **MPGS** — requires inquiry after ~11 minutes. Recommend calling after **13-14 minutes** (with 2-3 min margin).
-- **KNET** — requires inquiry after ~8 minutes. Recommend calling after **~10 minutes**.
-
-When integrating with multiple gateways, identify the one with the **longest** inquiry time, add a 2-3 minute margin, and use that as the standard for all inquiries. Calling too early (e.g., at 8 minutes for MPGS) means the gateway may not have finalized the status yet.
+<GatewayTimingChart />
 
 ## Guide
 
@@ -50,7 +48,7 @@ When integrating with multiple gateways, identify the one with the **longest** i
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
 flowchart TD
-    A([Merchant]) -->|POST /inquiry/| B[Inquiry API]
+    A([Merchant]) -->|POST /inquiry/| B[Payment Status Query API]
     B --> C{Payment transaction state?}
     C -->|pending / attempted / failed / expired| D[Query Payment Gateway]
     C -->|paid / authorized| E[Return status immediately]
@@ -123,7 +121,7 @@ You can also specify an alternate `webhook_url` to receive the result at a diffe
 
 ### Throttling Rules
 
-The Inquiry API implements throttling to prevent system abuse. Rules are **per payment transaction**:
+The Payment Status Query API implements throttling to prevent system abuse. Rules are **per payment transaction**:
 
 1. **Initial grace period (10 minutes)** — requests within 10 minutes of payment transaction creation are throttled.
 2. **First request** — after the grace period, the first request is allowed. Subsequent requests for the same payment transaction within the next 30 minutes are throttled.
@@ -146,7 +144,7 @@ Respect the [throttling rules](#throttling-rules). Schedule inquiry calls based 
 
 #### Understand the webhook response
 
-The Inquiry API response mirrors the [payment webhook payload](/docs/developers/webhooks/payment-events). Familiarize yourself with the response structure before integrating.
+The Payment Status Query API response mirrors the [payment webhook payload](/docs/developers/webhooks/payment-events). Familiarize yourself with the response structure before integrating.
 
 #### Use the correct identifier
 
@@ -162,7 +160,7 @@ Provide `session_id` (preferred — always present) or `order_no`. At least one 
 
 At least one payment gateway that supports status checks, and familiarity with the [payment webhook response](/docs/developers/webhooks/payment-events) format.
 
-#### 2. What authentication does the Inquiry API support?
+#### 2. What authentication does the Payment Status Query API support?
 
 Both [API Key](/docs/developers/getting-started/authentication#private-key-api-key) and [Basic Authentication](/docs/developers/getting-started/authentication#basic-authentication). No special permissions required for Basic Auth beyond `payment.inquiry`.
 

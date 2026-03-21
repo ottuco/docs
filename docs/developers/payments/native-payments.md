@@ -64,7 +64,7 @@ Never embed [Private API Keys](../getting-started/authentication.md#private-key-
 If the call is made from the client side, the backend must be synchronized with the payment result by ensuring that one of the following actions is performed:
 
 - The API response is forwarded to the backend, **or**
-- The [Payment Status (Inquiry) API](./inquiry) is called by the backend after the client confirms that the payment has been completed.
+- The [Payment Status Query API](./psq) is called by the backend after the client confirms that the payment has been completed.
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
@@ -257,7 +257,7 @@ Always prefer Client → Backend → Ottu using the [Private Key.](../getting-st
 
 #### 3. How do I verify the payment result?
 
-Use the [Payment Status (Inquiry) API](./inquiry).
+Use the [Payment Status Query API](./psq).
 
 #### 4. What if my transaction has multiple gateway codes?
 

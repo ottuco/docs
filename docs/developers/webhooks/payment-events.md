@@ -15,7 +15,7 @@ Payment webhooks are specific to payment events and are triggered on multiple oc
 
 2.  #### Automatic Inquiry by Ottu
 
-    If a payment transaction has an associated [webhook_url](/docs/developers/payments/checkout-api#request-webhook_url), it can be notified during the automatic inquiry process. This can happen immediately after the payer completes the payment process or later if the payment encounters an error. More details about the timings for automatic inquiry can be found [here](/docs/developers/payments/inquiry).
+    If a payment transaction has an associated [webhook_url](/docs/developers/payments/checkout-api#request-webhook_url), it can be notified during the automatic inquiry process. This can happen immediately after the payer completes the payment process or later if the payment encounters an error. More details about the timings for automatic inquiry can be found [here](/docs/developers/payments/psq).
 
 3.  #### Manual Inquiry by Staff
 
@@ -27,7 +27,7 @@ Payment webhooks are specific to payment events and are triggered on multiple oc
 
 5.  #### Merchant-Initiated Inquiry
 
-    When an [inquiry API](/docs/developers/payments/inquiry) call is initiated by the merchant. Optionally, a notification can be sent to the [webhook_url](/docs/developers/payments/checkout-api#request-webhook_url) associated with the payment transaction or to a new one specified during the inquiry API call.
+    When an [inquiry API](/docs/developers/payments/psq) call is initiated by the merchant. Optionally, a notification can be sent to the [webhook_url](/docs/developers/payments/checkout-api#request-webhook_url) associated with the payment transaction or to a new one specified during the inquiry API call.
 
 ## **Setup**
 
