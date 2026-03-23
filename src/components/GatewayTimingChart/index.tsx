@@ -1,7 +1,17 @@
 import React from "react";
+import gatewaysData from "@site/static/data/gateways.json";
+import type { Gateway } from "@site/src/types/gateway";
 import styles from "./styles.module.css";
 
-const MAX_MINUTES = 31;
+const gateways = gatewaysData as Gateway[];
+const MAX_MINUTES = 60;
+
+function getTierClass(minutes: number): string {
+  if (minutes <= 8) return styles.tierFast;
+  if (minutes <= 11) return styles.tierStandard;
+  if (minutes <= 20) return styles.tierModerate;
+  return styles.tierSlow;
+}
 
 interface Tier {
   minutes: number;
@@ -9,25 +19,35 @@ interface Tier {
   className: string;
 }
 
-const TIERS: Tier[] = [
-  { minutes: 6, gateways: ["Amazon Pay"], className: styles.tierFast },
-  { minutes: 8, gateways: ["AlRajhi", "Benefit", "Benefit Pay", "Bookey", "CBK", "FSS", "KNET", "MyFatoorah", "nGenius", "OmanNet", "STC Pay", "Tamara"], className: styles.tierFast },
-  { minutes: 10, gateways: ["Hesabe", "NBO"], className: styles.tierStandard },
-  { minutes: 11, gateways: ["MPGS"], className: styles.tierStandard },
-  { minutes: 15, gateways: ["PayU India"], className: styles.tierModerate },
-  { minutes: 16, gateways: ["SmartPay"], className: styles.tierModerate },
-  { minutes: 20, gateways: ["QPay"], className: styles.tierModerate },
-  { minutes: 28, gateways: ["Beyon Money"], className: styles.tierSlow },
-  { minutes: 30, gateways: ["Tabby"], className: styles.tierSlow },
-  { minutes: 31, gateways: ["HyperPay"], className: styles.tierSlow },
-];
+// Derive tiers from gateways.json
+const tiers: Tier[] = (() => {
+  const grouped = new Map<number, string[]>();
+  for (const gw of gateways) {
+    if (gw.inquiryMinutes && gw.inquiryMinutes > 0) {
+      const names = grouped.get(gw.inquiryMinutes) ?? [];
+      names.push(gw.name);
+      grouped.set(gw.inquiryMinutes, names);
+    }
+  }
+  return Array.from(grouped.entries())
+    .sort(([a], [b]) => a - b)
+    .map(([minutes, names]) => ({
+      minutes,
+      gateways: names.sort(),
+      className: getTierClass(minutes),
+    }));
+})();
 
-const NO_INQUIRY = ["Bambora", "CCAvenue", "Cybersource", "MiGS", "PayPal", "UPG"];
+// Gateways with inquiryMinutes === 0 → no inquiry support
+const noInquiry = gateways
+  .filter((gw) => gw.inquiryMinutes === 0)
+  .map((gw) => gw.name)
+  .sort();
 
 export default function GatewayTimingChart(): React.JSX.Element {
   return (
     <div className={styles.chart}>
-      {TIERS.map((tier) => {
+      {tiers.map((tier) => {
         const barWidth = Math.max(20, (tier.minutes / MAX_MINUTES) * 100);
         return (
           <div key={tier.minutes} className={`${styles.tier} ${tier.className}`}>
@@ -36,10 +56,7 @@ export default function GatewayTimingChart(): React.JSX.Element {
               <span className={styles.minutesUnit}>min</span>
             </div>
             <div className={styles.barTrack}>
-              <div
-                className={styles.bar}
-                style={{ width: `${barWidth}%` }}
-              >
+              <div className={styles.bar} style={{ width: `${barWidth}%` }}>
                 {tier.gateways.map((gw) => (
                   <span key={gw} className={styles.gateway}>{gw}</span>
                 ))}
@@ -56,14 +73,16 @@ export default function GatewayTimingChart(): React.JSX.Element {
         </div>
       </div>
 
-      <div className={styles.noInquiry}>
-        <p className={styles.noInquiryLabel}>No inquiry support — handled by Ottu automatically</p>
-        <div className={styles.noInquiryGateways}>
-          {NO_INQUIRY.map((gw) => (
-            <span key={gw} className={styles.noInquiryPill}>{gw}</span>
-          ))}
+      {noInquiry.length > 0 && (
+        <div className={styles.noInquiry}>
+          <p className={styles.noInquiryLabel}>No inquiry support — handled by Ottu automatically</p>
+          <div className={styles.noInquiryGateways}>
+            {noInquiry.map((gw) => (
+              <span key={gw} className={styles.noInquiryPill}>{gw}</span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

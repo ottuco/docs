@@ -8,7 +8,7 @@ Before diving into the technical details, familiarize yourself with a few concep
 
 #### Payment Gateway
 
-In Ottu, a payment gateway holds the MID (Merchant ID) credentials provided by your bank. Our staff handle gateway configuration and provide you with the [pg_codes](payments/payment-methods.md#activating-payment-gateway-codes) needed for the API. You can also fetch these codes dynamically using the [Payment Methods API](payments/payment-methods.md).
+In Ottu, a payment gateway holds the MID (Merchant Identification Number) credentials provided by your bank. Our staff handle gateway configuration and provide you with the [pg_codes](payments/payment-methods.md#activating-payment-gateway-codes) needed for the API. You can also fetch these codes dynamically using the [Payment Methods API](payments/payment-methods.md).
 
 #### Currency Configuration
 
