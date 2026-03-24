@@ -495,10 +495,25 @@ html {
   background-color: #e5e7eb;
   color: #364153;
   border-radius: 4px;
-  padding: 4px;
+  padding: 4px 8px;
   font-family: var(--ifm-font-family-monospace);
   font-size: 0.875rem;
   font-weight: 400;
+}
+
+/* Inline code in running text — tighter padding */
+.markdown p code {
+  padding: 2px 4px;
+}
+
+.markdown li code,
+.markdown h1 code,
+.markdown h2 code,
+.markdown h3 code,
+.markdown h4 code,
+.markdown h5 code,
+.markdown h6 code {
+  padding: 4px;
 }
 
 /* Inline code dark mode */
