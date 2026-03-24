@@ -323,6 +323,7 @@ html {
 .alert {
   border-left-width: 4px;
   border-radius: 8px;
+  --ifm-link-color: #f27e20;
 }
 
 .alert__title {
@@ -494,7 +495,7 @@ html {
   background-color: #e5e7eb;
   color: #364153;
   border-radius: 4px;
-  padding: 4px 8px;
+  padding: 4px;
   font-family: var(--ifm-font-family-monospace);
   font-size: 0.875rem;
   font-weight: 400;
@@ -635,6 +636,7 @@ article .markdown header {
 article .markdown header h1 {
   flex: 1 1 auto;
   margin: 0;
+  text-transform: capitalize;
 }
 
 .markdown-actions-container {

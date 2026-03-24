@@ -9,7 +9,7 @@ import CheckoutDemo from "@site/src/components/CheckoutDemo";
 
 The [Checkout SDK](./) is a JavaScript library provided by Ottu that allows you to easily integrate an Ottu-powered [checkout process](../#ottu-checkout-sdk-flow) into your web application. With the Checkout SDK, you can customize the look and feel of your checkout process, as well as which forms of payment are accepted.
 
-To use the Checkout SDK, you'll need to include the library in your web application and initialize it with your Ottu merchant_id, session_id, and [API key](../../../getting-started/authentication#public-key). You can also specify additional options such as, which forms of payment to accept, the [theme](#theme-object) styling for the checkout interface, and more.
+To use the Checkout SDK, you'll need to include the library in your web application and initialize it with your Ottu [merchant_id](#merchant_id-string), [session_id](#session_id-string), and [API key](../../../getting-started/authentication#public-key). You can also specify additional options such as, which forms of payment to accept, the [theme](#theme-object) styling for the checkout interface, and more.
 
 :::warning
 
@@ -36,7 +36,7 @@ To install the Checkout SDK, you'll need to include the library in your web appl
 </head>
 ```
 
-Replace [errorCallback](#windowerrorcallback), [cancelCallback](#windowcancelcallback), [successCallback](#windowsuccesscallback), and [beforePayment](#windowsbeforepayment-hook) with the names of your error handling, cancel handling, success handling, and beforePayment handling functions, respectively.
+Replace [errorCallback](#errorcallback), [cancelCallback](#cancelcallback), [successCallback](#successcallback), and [beforePayment](#beforepayment-hook) with the names of your error handling, cancel handling, success handling, and beforePayment handling functions, respectively.
 
 You're all set! You can now use the [Checkout SDK ](./)to create a checkout form on your web page and process payments through Ottu.
 
@@ -59,6 +59,8 @@ Checkout.reload();
 ```
 
 ## Properties
+
+_Configuration options passed to [`Checkout.init()`](#checkoutinit)._
 
 ### Required Properties
 
@@ -238,86 +240,86 @@ Checkout.init({
 
   </TabItem>
   <TabItem value="dark" label="Dark theme">
-    ```
+    ```javascript
     Checkout.init({
-        selector: "checkout",
-        merchant_id: 'domain',
-        session_id: 'session_id',
-        apiKey: 'apiKey',
-        theme: {
-            "main": {
-                "background": "#555555"
-            },
-            "title-text": {
-                "color": "white"
-            },
-            "primary-text": {
-                "color": "white"
-            },
-            "secondary-text": {
-                "color": "white"
-            },
-            "pay-button": {
-                "background": "#333",
-                "color": "white"
-            },
-            "amount-box": {
-                "background": "#333"
-            },
-            "stcPay": {
-                "buttonColor": "black"
-            },
-            "urPay": {
-                "buttonColor": "black"
-            },
-            "payment-modal": {
-                "background": "black"
-            },
-            "mobile-number-input": {
-                "color": "black"
-            },
-            "otp-input": {
-                "color": "black"
-            },
-            "methods": {
-                "background": "#333"
-            },
-            "selected-method": {
-                "background": "black",
-                "border": "2px solid #6e6ef5d4",
-            },
-            "card-removal-modal": {
-                "background": "black"
-            },
-            "keep-card-button": {
-                "color": "black"
-            },
-            "info-modal": {
-                "background": "black"
-            },
-            "error-retry-button": {
-                "color": "black"
-            },
-            "ccv-input": {
-                "background": "black",
-                "color": "white"
-            },
-            "floating-label": {
-                "background": "black"
-            },
-            "payment-error-message": {
-                "color": "red"
-            },
-            "popup-back-button": {
-                "stroke": "red"
-            },
-            "popup-close-button": {
-                "fill": "red"
-            },
-            "otp-resend-button": {
-                "color": "black"
-            }
-        }
+      selector: "checkout",
+      merchant_id: 'domain',
+      session_id: 'session_id',
+      apiKey: 'apiKey',
+      theme: {
+          "main": {
+              "background": "#555555"
+          },
+          "title-text": {
+              "color": "white"
+          },
+          "primary-text": {
+              "color": "white"
+          },
+          "secondary-text": {
+              "color": "white"
+          },
+          "pay-button": {
+              "background": "#333",
+              "color": "white"
+          },
+          "amount-box": {
+              "background": "#333"
+          },
+          "stcPay": {
+              "buttonColor": "black"
+          },
+          "urPay": {
+              "buttonColor": "black"
+          },
+          "payment-modal": {
+              "background": "black"
+          },
+          "mobile-number-input": {
+              "color": "black"
+          },
+          "otp-input": {
+              "color": "black"
+          },
+          "methods": {
+              "background": "#333"
+          },
+          "selected-method": {
+              "background": "black",
+              "border": "2px solid #6e6ef5d4",
+          },
+          "card-removal-modal": {
+              "background": "black"
+          },
+          "keep-card-button": {
+              "color": "black"
+          },
+          "info-modal": {
+              "background": "black"
+          },
+          "error-retry-button": {
+              "color": "black"
+          },
+          "ccv-input": {
+              "background": "black",
+              "color": "white"
+          },
+          "floating-label": {
+              "background": "black"
+          },
+          "payment-error-message": {
+              "color": "red"
+          },
+          "popup-back-button": {
+              "stroke": "red"
+          },
+          "popup-close-button": {
+              "fill": "red"
+          },
+          "otp-resend-button": {
+              "color": "black"
+          }
+      }
     });
     ```
 
@@ -1325,7 +1327,7 @@ window.validatePayment = function () {
 
 ### data Object
 
-The data object received by the [errorCallback](#windowerrorcallback), [cancelCallback](#windowcancelcallback) and [successCallback](#windowsuccesscallback) contains information related to the payment transaction, such as the status of the payment process, the session_id generated for the transaction, any error message associated with the payment, and more. This information can be used to handle the payment process and take appropriate actions based on the status of the transaction.
+The data object received by the [errorCallback](#errorcallback), [cancelCallback](#cancelcallback) and [successCallback](#successcallback) contains information related to the payment transaction, such as the status of the payment process, the session_id generated for the transaction, any error message associated with the payment, and more. This information can be used to handle the payment process and take appropriate actions based on the status of the transaction.
 
 #### Data Object Child Parameters
 
@@ -1350,7 +1352,7 @@ The data object received by the [errorCallback](#windowerrorcallback), [cancelCa
 
 :::warning
 
-It's important to note that while the `redirect_url` option is typically present only in the [successCallback](#windowsuccesscallback), there are specific cases where it may exist in failure scenarios. \
+It's important to note that while the `redirect_url` option is typically present only in the [successCallback](#successcallback), there are specific cases where it may exist in failure scenarios. \
 **For example,** in the event of an MPGS cancel or if the transaction includes a `webhook URL` alongside a `redirect URL`, users may be redirected after cancellation, which is communicated to the webhook. Therefore, the presence of `redirect_url` in such cases is possible.
 :::
 
@@ -1702,4 +1704,4 @@ The tooltip indicates certain prerequisites for Apple Pay are not met. Reasons c
 
 #### 8 What if a merchant wants to perform specific actions before the payment process?
 
-Merchants can utilize the [beforePayment](#windowsbeforepayment-hook) hook. This allows for specific actions or checks to be performed prior to payment/redirection. Once your actions or checks are complete, resolve the promise to proceed with the redirection/payment.
+Merchants can utilize the [beforePayment](#beforepayment-hook) hook. This allows for specific actions or checks to be performed prior to payment/redirection. Once your actions or checks are complete, resolve the promise to proceed with the redirection/payment.

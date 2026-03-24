@@ -41,7 +41,7 @@ function reducer(_state: State, action: Action): State {
   }
 }
 
-const SDK_SCRIPT_URL = "https://assets.ottu.net/checkout/v3/checkout.min.js";
+const SDK_SCRIPT_URL = "https://150330.dd33t4o2i3w1b.amplifyapp.com/checkout/v3/checkout.min.js";
 const CONTAINER_ID = "checkout-demo-target";
 
 const STEPS = [
@@ -126,6 +126,7 @@ export default function CheckoutDemoInner() {
         merchant_id: SANDBOX_MERCHANT_ID,
         session_id,
         apiKey: SANDBOX_API_KEY,
+        displayMode: "split",
         formsOfPayment: [
           "applePay",
           "tokenPay",
