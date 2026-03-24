@@ -1,0 +1,95 @@
+---
+title: Compliance & Security
+sidebar_label: Compliance & Security
+---
+
+# Compliance & Security
+
+Ottu maintains the highest security certifications in the payment industry. This page covers what those certifications mean for your business and how to request compliance documentation.
+
+## PCI DSS Level 1
+
+The **Payment Card Industry Data Security Standard (PCI DSS)** is the global security standard for any organization that handles credit card data. There are four compliance levels — Level 1 is the most stringent.
+
+### What Level 1 Means
+
+- Annual on-site security assessment by a **Qualified Security Assessor (QSA)**
+- Quarterly network vulnerability scans by an **Approved Scanning Vendor (ASV)**
+- Annual penetration testing
+- Continuous monitoring of all systems that store, process, or transmit cardholder data
+
+### How This Protects Your Business
+
+When you use Ottu's hosted checkout page or Checkout SDK, **card data never touches your servers**. Customers enter their card details directly on Ottu's PCI-certified infrastructure. This significantly reduces your own PCI compliance scope:
+
+| Integration Method | Your PCI Scope | What It Means |
+|---|---|---|
+| Hosted Checkout (redirect) | **SAQ A** | Simplest — you don't handle any card data |
+| Checkout SDK (embedded) | **SAQ A-EP** | Card data passes through Ottu's SDK, not your servers |
+| Direct API (server-to-server) | **SAQ D** | Full PCI compliance required on your side |
+
+:::tip
+Most merchants use the Hosted Checkout or SDK approach, which keeps their PCI burden minimal. See the [Developer Documentation](/docs/developers/payments/checkout-sdk/) for integration options.
+:::
+
+## ISO 27001
+
+**ISO/IEC 27001** is the international standard for Information Security Management Systems (ISMS). It covers:
+
+- Risk assessment and treatment
+- Access control and identity management
+- Business continuity and disaster recovery
+- Incident management and response
+- Physical and environmental security
+- Supplier relationship security
+
+### What This Means for Merchants
+
+Ottu operates under a formally audited security management framework. Every process — from how code is deployed to how data is stored — follows documented, reviewed, and certified procedures.
+
+## Data Security Practices
+
+| Practice | Detail |
+|----------|--------|
+| **Encryption in transit** | TLS 1.2+ for all API and dashboard connections |
+| **Encryption at rest** | AES-256 for stored data |
+| **Tokenization** | Card numbers replaced with tokens — original PAN never stored on merchant systems |
+| **Access control** | Role-based access with multi-factor authentication |
+| **Monitoring** | Real-time security monitoring and anomaly detection |
+| **Incident response** | Documented incident response plan with defined notification timelines |
+
+## Requesting Compliance Documentation
+
+Merchants can request the following documents for their own audits, procurement processes, or customer assurance:
+
+| Document | Description | How to Request |
+|----------|-------------|----------------|
+| **Attestation of Compliance (AoC)** | PCI DSS Level 1 compliance attestation | Contact your account manager |
+| **ISO 27001 Certificate** | Current ISO 27001 certification | Contact your account manager |
+| **Security Questionnaire** | SIG, CAIQ, or custom questionnaire completion | Email compliance@ottu.com |
+| **Penetration Test Summary** | Executive summary of latest penetration test (under NDA) | Email compliance@ottu.com |
+| **Data Processing Agreement (DPA)** | GDPR-compliant data processing terms | Email compliance@ottu.com |
+
+## Frequently Asked Questions
+
+### Do I need my own PCI DSS certification?
+
+It depends on your integration method. If you use Ottu's Hosted Checkout or SDK (recommended), your PCI scope is minimal (SAQ A or SAQ A-EP). If you handle card data directly via the API, you'll need full PCI DSS compliance (SAQ D).
+
+### Where is my data stored?
+
+Ottu's infrastructure is hosted in secure, certified data centers. Contact your account manager for specific data residency information relevant to your region.
+
+### What happens during a security incident?
+
+Ottu follows a documented incident response plan. Affected merchants are notified within the timelines specified in their service agreement. The incident response team investigates, contains, and remediates the issue, followed by a post-incident review.
+
+### Can I get a copy of the penetration test results?
+
+Yes — an executive summary of the latest penetration test is available under NDA. Contact compliance@ottu.com.
+
+## What's Next?
+
+- **[Payment Gateways](/docs/business/payments/gateways)** — All gateways meet Ottu's security standards
+- **[Settings](/docs/business/settings/)** — Configure security settings in the dashboard
+- **For developers**: [Webhook Signature Verification](/docs/developers/webhooks/verify-signatures)

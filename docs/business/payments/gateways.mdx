@@ -1,0 +1,60 @@
+---
+title: Payment Gateways
+sidebar_label: Payment Gateways
+---
+
+import GatewayCatalog from '@site/src/components/GatewayCatalog';
+
+# Payment Gateways
+
+Payment gateways are the technologies that process debit and credit card transactions — whether through physical card readers in retail stores or online payment portals on e-commerce platforms.
+
+Ottu connects your business to 50+ payment gateways through a single integration. Configure, monitor, and switch between gateways without changing your code.
+
+## Gateway Catalog
+
+Browse all supported payment gateways. Filter by category, region, or search by name.
+
+<GatewayCatalog />
+
+## Operations
+
+Ottu supports three core payment operations across gateways. Not all gateways support every operation — check the gateway catalog above for details.
+
+:::warning
+Operations only work when the payment currency matches the MID currency. If a customer pays in a different currency via [currency exchange](/docs/business/payments/currencies), operations won't function. See [Operations](/docs/developers/operations/) for technical details.
+:::
+
+### Capture
+
+Collecting a full or partial authorized amount and crediting it to the merchant's bank account.
+
+**Conditions:**
+1. The payment transaction must be authorized
+2. The authorized amount must be sufficient
+
+### Refund
+
+Returning the full or partial amount paid (or captured) to the customer's bank account.
+
+**For Auth transactions:**
+1. A capture operation must be done before refunding
+2. The captured amount must be enough to cover the refund amount
+
+**For Purchase transactions:**
+- The paid amount must be sufficient for the requested refund
+
+### Void
+
+Canceling or rolling back an authorized payment transaction.
+
+**Conditions:**
+1. The payment transaction must be authorized
+2. No capture operation was performed
+
+## What's Next?
+
+- **[Payment Routing](/docs/business/payments/routing)** — Route payments to the best gateway automatically
+- **[Currencies](/docs/business/payments/currencies)** — Multi-currency support and exchange configuration
+- **[Operations & Controls](/docs/business/operations/)** — Refund and void access control, two-step authorization
+- **For developers:** [Payment Status Inquiry](/docs/developers/reference/payment-status-inquiry) — auto-inquiry and transaction reliability

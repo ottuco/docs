@@ -117,7 +117,7 @@ const config: Config = {
             },
             {
               label: 'Business Guide',
-              to: '/docs/business/dashboard-tour',
+              to: '/docs/business/',
             },
           ],
         },
@@ -142,16 +142,16 @@ const config: Config = {
           title: 'Business',
           items: [
             {
-              label: 'Dashboard Tour',
-              to: '/docs/business/dashboard-tour',
-            },
-            {
-              label: 'Merchant Guide',
-              to: '/docs/business/dashboard-tour',
-            },
-            {
               label: 'Getting Started',
-              to: '/docs/overview/about',
+              to: '/docs/business/',
+            },
+            {
+              label: 'Payment Gateways',
+              to: '/docs/business/payments/gateways',
+            },
+            {
+              label: 'Compliance & Security',
+              to: '/docs/business/compliance',
             },
           ],
         },
