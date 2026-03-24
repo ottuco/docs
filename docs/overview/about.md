@@ -1,42 +1,40 @@
 # About Ottu
 
-Ottu is a comprehensive payment processing platform designed to simplify online transactions for businesses of all sizes. Our platform provides a unified interface for managing multiple payment gateways, currencies, and payment methods while ensuring security, compliance, and reliability.
+Ottu is a payment orchestration platform built for the Middle East and expanding globally. It sits between your business and 50+ payment gateways — handling routing, multi-currency exchange, notifications, and compliance so you can focus on your product.
 
-## What is Ottu?
+## What Ottu Does
 
-Ottu serves as a payment orchestration layer that sits between your business and various payment service providers. We handle the complexity of payment processing, allowing you to focus on your core business operations.
+Ottu provides a single integration point for accepting payments across multiple gateways, currencies, and payment methods. Rather than integrating each gateway separately, merchants connect to Ottu once and gain access to the entire payment ecosystem.
 
-### Key Features
+### Core Capabilities
 
-- **Multi-Gateway Support**: Connect to multiple payment gateways through a single integration
-- **Global Coverage**: Support for 100+ currencies and local payment methods worldwide
-- **Advanced Security**: PCI DSS Level 1 compliance with 3-D Secure authentication
-- **Flexible Integration**: RESTful APIs, SDKs, and webhook notifications
-- **Real-time Analytics**: Comprehensive reporting and transaction monitoring
-- **Automated Reconciliation**: Streamlined financial operations
+- **50+ Payment Gateways** — Banks (KNET, MPGS, CyberSource), fintechs (Checkout.com, Tap, MyFatoorah), BNPL (Tabby, Tamara), and digital wallets (STC Pay, BenefitPay). See the full [Payment Gateway catalog](/docs/business/payments/gateways).
+- **Smart Payment Routing** — Route payments by BIN, card country, scheme, amount, and real-time success rate. Automatic fallback when a gateway is down. See [Payment Routing](/docs/business/payments/routing).
+- **Multi-Currency** — Accept payments in multiple currencies with configurable exchange rates and markup fees. See [Currencies](/docs/business/payments/currencies).
+- **Notifications** — Automated Email, SMS, and WhatsApp notifications at every stage of the payment lifecycle. See [Notifications](/docs/business/notifications/).
+- **Plugins** — Payment Request links, E-Commerce checkout, and Bulk Payment processing. See [Plugins](/docs/business/plugins/).
+- **Industry Solutions** — Purpose-built modules for [Real Estate](/docs/business/industry/real-estate/) property management and [Satellite](/docs/business/industry/satellite) multi-installation control.
 
-## Who Uses Ottu?
+### Security & Compliance
+
+Ottu is **PCI DSS Level 1** certified and **ISO 27001** certified. Card data never touches your servers when using Ottu's hosted checkout or SDK — reducing your PCI scope to SAQ A. See [Compliance & Security](/docs/business/compliance).
+
+## Who Uses Ottu
 
 ### Developers
-- **Backend Developers**: Integrate payment processing with minimal code
-- **Frontend Developers**: Implement secure payment flows with our SDKs
-- **Mobile Developers**: Native iOS and Android payment solutions
+
+Integrate Ottu's [Checkout API](/docs/developers/payments/checkout-api), embed the [Checkout SDK](/docs/developers/payments/checkout-sdk/) (Web, iOS, Android, Flutter), and receive real-time [webhook notifications](/docs/developers/webhooks/) for payment events.
 
 ### Business Users
-- **Merchants**: Process payments and manage transactions
-- **Finance Teams**: Handle reconciliation and reporting
-- **Operations Teams**: Configure payment flows and manage disputes
+
+Configure [payment gateways](/docs/business/payments/gateways), track [transactions](/docs/business/payment-management/), manage [notifications](/docs/business/notifications/), and customize [settings](/docs/business/settings/) — all from the Ottu dashboard.
 
 ## Getting Started
 
-Choose your path to get started with Ottu:
-
-- **[Developer Documentation](/docs/developers/)**: Integrate Ottu's payment APIs, SDKs, and webhooks
-- **[Business Guide](/docs/business/dashboard-tour)**: Set up your dashboard and start accepting payments
+- **[Developer Documentation](/docs/developers/getting-started)** — API keys, first API call, SDK setup
+- **[Business Guide](/docs/business/)** — Dashboard, gateways, payment management, notifications
 
 ## Support
 
-Need help? Our support team is available 24/7:
 - **Email**: support@ottu.com
-- **Documentation**: Browse our comprehensive guides
-- **Status Page**: Check system status at status.ottu.com
+- **Status**: [status.ottu.com](https://status.ottu.com)

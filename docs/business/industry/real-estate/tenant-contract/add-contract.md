@@ -1,0 +1,91 @@
+---
+title: Add New Contract
+sidebar_label: Add Contract
+---
+
+# Add New Contract
+
+To add a new contract, there are three methods available, each leading to the [New Contract Form](#new-contract-form).
+
+## From Property Management
+
+From the [Property Management](/docs/business/industry/real-estate/properties) section, each property is listed with details such as address, number of contracts, units, rented units, and available units. Click on the dropdown arrow to expand the property.
+
+![Property dropdown](/img/business/real-estate/placeholder.png)
+
+A dropdown list of units related to the property is displayed along with their full details. After selecting the available units for renting, click the **CREATE CONTRACT** button at the bottom of the unit dropdown list to be redirected to the [New Contract Form](#new-contract-form).
+
+![Create contract from property](/img/business/real-estate/placeholder.png)
+
+## From Tenant Row
+
+Within the [Tenant & Contract Dashboard](/docs/business/industry/real-estate/tenant-contract/dashboard), click the three dots (**...**) beside the tenant's name and select **New Contract**. You will be redirected to the [New Contract Form](#new-contract-form).
+
+![New contract from tenant row](/img/business/real-estate/placeholder.png)
+
+## From Tenant and Contract Management
+
+Navigate to the [Tenant & Contract Management](/docs/business/industry/real-estate/tenant-contract/) section and click the **Add Contract** button to be redirected to the [New Contract Form](#new-contract-form).
+
+![Add contract button](/img/business/real-estate/placeholder.png)
+
+:::tip
+Creating a contract from the [Property Management](/docs/business/industry/real-estate/properties) list is the recommended method, as it provides all the necessary information about the property and available units.
+:::
+
+## New Contract Form
+
+After following one of the three methods above, fill out the following fields:
+
+| Field | Description |
+|---|---|
+| **Tenant Name** | Name of the tenant associated with the contract |
+| **Property Name** | Name of the property related to the contract |
+| **ADD UNIT** | Click to add units to the contract. Provide: **Unit Number** (ID or code), **Unit Type** (auto-filled after choosing unit number), **Amount** (auto-filled after selecting unit number) |
+| **Payment Period** | Frequency of rent payments: Monthly, Quarterly, Semi-annually, or Annually |
+| **Contract Start Date** | Start date of the contract |
+| **Payment Start Date** | Start date for rent payments |
+| **Contract End Date** | End date of the contract |
+| **Amount** | Rent amount, auto-calculated based on the payment period and unit price. Can be modified if necessary |
+| **Original Contract Amount** | The maximum amount the merchant can request per payment period |
+| **Number of Invoices for Advanced Payment** | Total number of invoices issued for advance rent payments, marked as paid during the contracting process |
+| **Insurance Amount** | Amount of insurance associated with the unit |
+| **Contract Reference** | Reference number or code for the contract |
+| **Suspended** | Whether the contract is suspended (check or uncheck) |
+| **Upload Contract** | Option to upload the contract document |
+| **Payment Methods** | Accepted payment methods: Cash, Cheque, Bank Transfer, Payment Link, POS (Debit or Credit) |
+
+:::note
+The difference between the **Contract Start Date** and the **Payment Start Date** is considered the grace period.
+:::
+
+:::note
+To view advance payment invoices created during contracting, click the second tab in the contract view.
+:::
+
+![Advance invoices while contracting](/img/business/real-estate/placeholder.png)
+
+### Suspended Contracts
+
+When the **Suspended** checkbox is checked:
+
+- All [generated invoices](/docs/business/industry/real-estate/generate-invoice) related to this contract are suspended -- no payment links will be created for these invoices.
+- Tenants will not be able to pay these invoices online; payment must be coordinated through legal proceedings.
+
+Merchants can suspend or unsuspend any invoice at any time by navigating to the [Tenant & Contract Dashboard](/docs/business/industry/real-estate/tenant-contract/dashboard), selecting the appropriate tenant and contract, and using the dropdown arrow at the end of the contract row.
+
+:::tip
+To exclude the "Payment Link" option from the payment methods, simply uncheck it from the available options.
+:::
+
+![New contract form](/img/business/real-estate/placeholder.png)
+
+:::note
+Ottu empowers merchants to perform various actions on contracts after creation. For more information, see the [Contract Management](/docs/business/industry/real-estate/tenant-contract/contract-management) page.
+:::
+
+## What's Next?
+
+- [Contract Management](/docs/business/industry/real-estate/tenant-contract/contract-management) -- Manage the full contract lifecycle
+- [Generate Invoice](/docs/business/industry/real-estate/generate-invoice) -- Create invoices for the new contract
+- [Renew Contract](/docs/business/industry/real-estate/tenant-contract/renew-contract) -- Extend a contract when it nears expiration

@@ -249,13 +249,142 @@ const sidebars: SidebarsConfig = {
   // Business user-focused sidebar
   businessSidebar: [
     {
-      type: 'category',
+      type: 'doc',
+      id: 'business/index',
       label: 'Getting Started',
-      link: {type: 'doc', id: 'business/dashboard-tour'},
+    },
+    {
+      type: 'category',
+      label: 'Payments',
+      collapsible: true,
+      collapsed: false,
       items: [
-        'business/dashboard-tour',
+        'business/payments/gateways',
+        'business/payments/routing',
+        'business/payments/currencies',
+        {
+          type: 'category',
+          label: 'Payment Services',
+          link: {type: 'doc', id: 'business/payments/services/index'},
+          items: [
+            {
+              type: 'category',
+              label: 'Apple Pay',
+              link: {type: 'doc', id: 'business/payments/services/apple-pay/index'},
+              items: [
+                'business/payments/services/apple-pay/setup-mpgs',
+                'business/payments/services/apple-pay/setup-cybersource',
+              ],
+            },
+            'business/payments/services/samsung-pay',
+          ],
+        },
       ],
     },
+    {
+      type: 'category',
+      label: 'Payment Management',
+      link: {type: 'doc', id: 'business/payment-management/index'},
+      items: [
+        'business/payment-management/search-and-filter',
+        'business/payment-management/transaction-insights',
+        'business/payment-management/transaction-states',
+        'business/payment-management/notifications-timing',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Plugins',
+      link: {type: 'doc', id: 'business/plugins/index'},
+      items: [
+        'business/plugins/payment-request',
+        'business/plugins/e-commerce',
+        'business/plugins/bulk-payment-request',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Operations & Controls',
+      link: {type: 'doc', id: 'business/operations/index'},
+      items: [
+        'business/operations/refund-void-access-control',
+        'business/operations/two-step-authorization',
+      ],
+    },
+    'business/integrations',
+    {
+      type: 'category',
+      label: 'Notifications',
+      link: {type: 'doc', id: 'business/notifications/index'},
+      items: [
+        'business/notifications/email',
+        'business/notifications/sms',
+        {
+          type: 'category',
+          label: 'WhatsApp',
+          link: {type: 'doc', id: 'business/notifications/whatsapp/index'},
+          items: [
+            'business/notifications/whatsapp/integrated',
+            'business/notifications/whatsapp/manual',
+          ],
+        },
+        'business/notifications/templates',
+        'business/notifications/delivery-process',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Settings',
+      link: {type: 'doc', id: 'business/settings/index'},
+      items: [
+        'business/settings/global',
+        'business/settings/webhooks',
+        'business/settings/transaction-reports',
+        'business/settings/api-keys',
+        'business/settings/url-shortener',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Industry Solutions',
+      collapsible: true,
+      collapsed: true,
+      items: [
+        'business/industry/satellite',
+        {
+          type: 'category',
+          label: 'Real Estate',
+          link: {type: 'doc', id: 'business/industry/real-estate/index'},
+          items: [
+            'business/industry/real-estate/getting-started',
+            'business/industry/real-estate/properties',
+            {
+              type: 'category',
+              label: 'Tenants & Contracts',
+              link: {type: 'doc', id: 'business/industry/real-estate/tenant-contract/index'},
+              items: [
+                'business/industry/real-estate/tenant-contract/dashboard',
+                'business/industry/real-estate/tenant-contract/tenant-management',
+                'business/industry/real-estate/tenant-contract/contract-management',
+                'business/industry/real-estate/tenant-contract/add-contract',
+                'business/industry/real-estate/tenant-contract/renew-contract',
+                'business/industry/real-estate/tenant-contract/terminate-contract',
+                'business/industry/real-estate/tenant-contract/suspend-contract',
+                'business/industry/real-estate/tenant-contract/resume-contract',
+                'business/industry/real-estate/tenant-contract/manual-payment',
+                'business/industry/real-estate/tenant-contract/advance-payment',
+              ],
+            },
+            'business/industry/real-estate/generate-invoice',
+            'business/industry/real-estate/invoices-management',
+            'business/industry/real-estate/maintenance',
+            'business/industry/real-estate/transactions',
+            'business/industry/real-estate/auditing',
+          ],
+        },
+      ],
+    },
+    'business/compliance',
   ],
 
 };
