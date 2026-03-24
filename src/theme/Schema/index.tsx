@@ -115,7 +115,7 @@ const Summary: React.FC<SummaryProps> = ({
         >
           <Icon
             path={mdiLinkVariant}
-            size={0.75}
+            size={1.25}
             style={{ display: "inline-block", verticalAlign: "middle" }}
           />
         </a>

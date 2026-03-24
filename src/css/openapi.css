@@ -44,52 +44,6 @@ pre.openapi__method-endpoint {
   margin-bottom: 32px;
 }
 
-.theme-admonition {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin: 32px 0px;
-  padding: 16px 16px 16px 20px;
-
-  background: var(--ifm-alert-background-color);
-  border-radius: 8px;
-  border-left: 4px solid var(--ifm-alert-border-color);
-
-  div:first-child {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0;
-
-    span {
-      margin: 0;
-
-      svg {
-        fill: var(--ifm-alert-border-color);
-      }
-    }
-
-    color: #1a1a1a;
-    font-family: Poppins;
-    font-size: 18px;
-    font-style: normal;
-    font-weight: 700;
-    line-height: 27px; /* 150% */
-    text-transform: lowercase;
-  }
-
-  div:nth-child(2) p {
-    margin: 0;
-
-    color: var(--Basic-text, #1a1a1a);
-    font-family: Poppins;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 20px; /* 142.857% */
-  }
-}
-
 ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
   display: flex;
   align-items: flex-start;
@@ -123,12 +77,34 @@ ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
   }
 }
 
+[data-theme="dark"]
+  ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime
+  li.tabs__item.openapi-tabs__mime-item {
+  color: var(--title-font-dark-color);
+}
+
+[data-theme="dark"]
+  ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime
+  li.tabs__item.openapi-tabs__mime-item.active {
+  color: #f27e20;
+}
+
 .openapi-markdown__details {
   summary:before {
     top: 0.35rem !important;
   }
 
   summary {
+    h3.openapi-markdown__details-summary-header-params {
+      color: #302f37;
+      font-family: Poppins;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: normal;
+      text-transform: uppercase;
+    }
+
     h3.openapi-markdown__details-summary-header-body {
       margin: 0;
 
@@ -153,6 +129,20 @@ ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
       }
     }
   }
+}
+
+[data-theme="dark"]
+  .openapi-markdown__details
+  summary
+  h3.openapi-markdown__details-summary-header-params {
+  color: var(--title-font-dark-color);
+}
+
+[data-theme="dark"]
+  .openapi-markdown__details
+  summary
+  h3.openapi-markdown__details-summary-header-body {
+  color: var(--title-font-dark-color);
 }
 
 .openapi-tabs__response-header-section {
@@ -198,6 +188,223 @@ ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
   }
 }
 
+[data-theme="dark"] .openapi-tabs__response-header-section {
+  h2.openapi-tabs__heading.openapi-tabs__response-header {
+    color: var(--title-font-dark-color);
+  }
+
+  .openapi-tabs__response-container
+    .openapi-tabs__response-list-container.tabs
+    .tabs__item.openapi-tabs__response-code-item {
+    color: var(--desc-font-dark-color);
+  }
+}
+
+.openapi-tabs__schema-container
+  .openapi-tabs__schema-tabs-container
+  ul.openapi-tabs__schema-list-container.tabs.openapi-tabs__schema {
+  li.tabs__item.openapi-tabs__schema-item {
+    padding: 12px 16px;
+
+    border-radius: 8px;
+    border: 1px solid #f27e20;
+
+    .openapi-tabs__schema-label {
+      color: #302f37;
+
+      /* Buttons */
+      font-family: Poppins;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: normal;
+    }
+
+    .openapi-tabs__schema-label.active {
+      color: #f27e20;
+    }
+  }
+
+  li.tabs__item.openapi-tabs__schema-item.active {
+    .openapi-tabs__schema-label {
+      color: #f27e20;
+    }
+  }
+}
+
+[data-theme="dark"]
+  .openapi-tabs__schema-container
+  .openapi-tabs__schema-tabs-container
+  ul.openapi-tabs__schema-list-container.tabs.openapi-tabs__schema {
+  li.tabs__item.openapi-tabs__schema-item {
+    .openapi-tabs__schema-label {
+      color: var(--title-font-dark-color);
+    }
+  }
+
+  li.tabs__item.openapi-tabs__schema-item.active {
+    .openapi-tabs__schema-label {
+      color: #f27e20;
+    }
+  }
+}
+
+.openapi-tabs__schema-container details.openapi-markdown__details.response {
+  summary:before {
+    top: 0.35 rem !important;
+  }
+
+  strong.openapi-markdown__details-summary-response {
+    color: #302f37;
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    text-transform: uppercase;
+  }
+
+  span.badge.badge--info {
+    padding: 4px 12px;
+
+    background: #0b82be;
+    border-radius: 4px;
+    border-color: #0b82be;
+
+    color: #fff;
+    font-family: Consolas;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20px; /* 142.857% */
+  }
+
+  .openapi-tabs__schema-tabs-container {
+    ul.openapi-tabs__schema-list-container.tabs {
+      li.tabs__item.openapi-tabs__schema-item {
+        display: flex;
+        padding: 12px 16px;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+
+        border-radius: 8px;
+
+        color: #302f37;
+        font-family: Poppins;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: normal;
+        text-transform: uppercase;
+      }
+
+      li.tabs__item.openapi-tabs__schema-item.active {
+        color: #f27e20;
+      }
+    }
+  }
+}
+
+[data-theme="dark"]
+  .openapi-tabs__schema-container
+  details.openapi-markdown__details.response {
+  strong.openapi-markdown__details-summary-response {
+    color: var(--title-font-dark-color);
+  }
+
+  .openapi-tabs__schema-tabs-container
+    ul.openapi-tabs__schema-list-container.tabs {
+    li.tabs__item.openapi-tabs__schema-item {
+      color: var(--title-font-dark-color);
+    }
+    li.tabs__item.openapi-tabs__schema-item.active {
+      color: #f27e20;
+    }
+  }
+}
+
+.openapi-schema__list-item:has(details) {
+  ::before {
+    top: 15px;
+  }
+}
+
+.openapi-schema__container {
+  .openapi-schema__property {
+    color: #302f37;
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+  }
+
+  .openapi-schema__name {
+    color: #4a4a4a;
+
+    /* Description or Notes */
+    font-family: Poppins;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  .openapi-schema__required {
+    color: #f0252b;
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    text-transform: uppercase;
+  }
+}
+
+[data-theme="dark"] .openapi-schema__container {
+  .openapi-schema__property {
+    color: var(--title-font-dark-color);
+  }
+
+  .openapi-schema__name {
+    color: var(--desc-font-dark-color);
+  }
+}
+
+ul .openapi-schema__list-item {
+  p {
+    color: #4a4a4a;
+
+    /* Basic text */
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+
+    strong {
+      color: #302f37;
+
+      font-family: Poppins;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: normal;
+    }
+  }
+}
+
+[data-theme="dark"] ul .openapi-schema__list-item {
+  p {
+    color: var(--desc-font-dark-color);
+
+    strong {
+      color: var(--title-font-dark-color);
+    }
+  }
+}
+
 /* SchemaEmbed response context: change "required" badge to "always present" */
 .schema-embed-response .openapi-schema__required {
   font-size: 0;
@@ -237,34 +444,7 @@ ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
   outline-offset: -2px;
 }
 
-.openapi-tabs__schema-container
-  .openapi-tabs__schema-tabs-container
-  ul.openapi-tabs__schema-list-container.tabs.openapi-tabs__schema {
-  li.tabs__item.openapi-tabs__schema-item {
-    padding: 12px 16px;
-
-    border-radius: 8px;
-    border: 1px solid #f27e20;
-
-    .openapi-tabs__schema-label {
-      color: #302f37;
-
-      /* Buttons */
-      font-family: Poppins;
-      font-size: 16px;
-      font-style: normal;
-      font-weight: 500;
-      line-height: normal;
-    }
-
-    .openapi-tabs__schema-label.active {
-      color: #f27e20;
-    }
-  }
-
-  li.tabs__item.openapi-tabs__schema-item.active {
-    .openapi-tabs__schema-label {
-      color: #f27e20;
-    }
-  }
+.openapi-right-panel__container {
+  overflow-y: visible !important;
+  position: relative !important;
 }

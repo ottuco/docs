@@ -207,7 +207,7 @@ export default function SchemaItem(props: Props) {
         <a ref={anchorRef} href={`#${id}`} onClick={() => copyAnchorUrl(id)}>
           <Icon
             path={mdiLinkVariant}
-            size={0.75}
+            size={1.25}
             style={{ display: "inline-block", verticalAlign: "middle" }}
           />
         </a>
