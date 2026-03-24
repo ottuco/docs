@@ -147,7 +147,7 @@ const Summary: React.FC<SummaryProps> = ({
 interface SchemaProps {
   parentSchemaName?: string;
   schema: SchemaObject;
-  schemaType: "request" | "response";
+  schemaType: string;
 }
 
 const AnyOneOf: React.FC<SchemaProps> = ({
@@ -402,7 +402,7 @@ interface DiscriminatorNodeProps {
   parentSchemaName?: string;
   discriminator: any;
   schema: SchemaObject;
-  schemaType: "request" | "response";
+  schemaType: string;
 }
 
 const DiscriminatorNode: React.FC<DiscriminatorNodeProps> = ({
@@ -619,7 +619,7 @@ const SchemaNodeDetails: React.FC<SchemaEdgeProps> = ({
 const Items: React.FC<{
   parentSchemaName?: string;
   schema: any;
-  schemaType: "request" | "response";
+  schemaType: string;
 }> = ({ parentSchemaName, schema, schemaType }) => {
   // Process schema.items to handle allOf merging
   let itemsSchema = schema.items;
@@ -720,7 +720,7 @@ interface SchemaEdgeProps {
   required?: boolean | string[];
   nullable?: boolean | undefined;
   discriminator?: any;
-  schemaType: "request" | "response";
+  schemaType: string;
 }
 
 const SchemaEdge: React.FC<SchemaEdgeProps> = ({
@@ -732,8 +732,8 @@ const SchemaEdge: React.FC<SchemaEdgeProps> = ({
   schemaType,
 }) => {
   if (
-    (schemaType === "request" && schema.readOnly) ||
-    (schemaType === "response" && schema.writeOnly)
+    (schemaType.endsWith("request") && schema.readOnly) ||
+    (schemaType.endsWith("response") && schema.writeOnly)
   ) {
     return null;
   }
@@ -853,8 +853,8 @@ const SchemaEdge: React.FC<SchemaEdgeProps> = ({
     const mergedSchemas = mergeAllOf(schema) as SchemaObject;
 
     if (
-      (schemaType === "request" && mergedSchemas.readOnly) ||
-      (schemaType === "response" && mergedSchemas.writeOnly)
+      (schemaType.endsWith("request") && mergedSchemas.readOnly) ||
+      (schemaType.endsWith("response") && mergedSchemas.writeOnly)
     ) {
       return null;
     }
@@ -949,7 +949,7 @@ const SchemaEdge: React.FC<SchemaEdgeProps> = ({
 
 function renderChildren(
   schema: SchemaObject,
-  schemaType: "request" | "response",
+  schemaType: string,
   parentSchemaName?: string,
 ) {
   return (
@@ -999,8 +999,8 @@ const SchemaNode: React.FC<SchemaProps> = ({
   schemaType,
 }) => {
   if (
-    (schemaType === "request" && schema.readOnly) ||
-    (schemaType === "response" && schema.writeOnly)
+    (schemaType.endsWith("request") && schema.readOnly) ||
+    (schemaType.endsWith("response") && schema.writeOnly)
   ) {
     return null;
   }
@@ -1022,8 +1022,8 @@ const SchemaNode: React.FC<SchemaProps> = ({
     const mergedSchemas = mergeAllOf(schema) as SchemaObject;
 
     if (
-      (schemaType === "request" && mergedSchemas.readOnly) ||
-      (schemaType === "response" && mergedSchemas.writeOnly)
+      (schemaType.endsWith("request") && mergedSchemas.readOnly) ||
+      (schemaType.endsWith("response") && mergedSchemas.writeOnly)
     ) {
       return null;
     }

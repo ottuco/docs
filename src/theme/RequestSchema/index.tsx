@@ -1,6 +1,7 @@
 import React from "react";
 
 import BrowserOnly from "@docusaurus/BrowserOnly";
+import { useDoc } from "@docusaurus/plugin-content-docs/client";
 import { translate } from "@docusaurus/Translate";
 import SchemaNode from "@site/src/theme/Schema";
 import Details from "@theme/Details";
@@ -27,6 +28,9 @@ interface Props {
 }
 
 const RequestSchemaComponent: React.FC<Props> = ({ title, body, style }) => {
+  const { frontMatter } = useDoc();
+  const rootSchemaName = `${String(frontMatter.id)}-request`;
+
   if (
     body === undefined ||
     body.content === undefined ||
@@ -88,7 +92,10 @@ const RequestSchemaComponent: React.FC<Props> = ({ title, body, style }) => {
                     )}
                   </div>
                   <ul style={{ marginLeft: "1rem" }}>
-                    <SchemaNode schema={firstBody} schemaType="request" />
+                    <SchemaNode
+                      schema={firstBody}
+                      schemaType={rootSchemaName}
+                    />
                   </ul>
                 </Details>
               </div>
@@ -148,7 +155,7 @@ const RequestSchemaComponent: React.FC<Props> = ({ title, body, style }) => {
             )}
           </div>
           <ul style={{ marginLeft: "1rem" }}>
-            <SchemaNode schema={firstBody} schemaType="request" />
+            <SchemaNode schema={firstBody} schemaType={rootSchemaName} />
           </ul>
         </Details>
       </TabItem>

@@ -1,6 +1,7 @@
 import React from "react";
 
 import BrowserOnly from "@docusaurus/BrowserOnly";
+import { useDoc } from "@docusaurus/plugin-content-docs/client";
 import { translate } from "@docusaurus/Translate";
 import SchemaNode from "@site/src/theme/Schema";
 import Details from "@theme/Details";
@@ -37,6 +38,9 @@ const ResponseSchemaComponent: React.FC<Props> = ({
   body,
   style,
 }): any => {
+  const { frontMatter } = useDoc();
+  const rootSchemaName = `${String(frontMatter.id)}-response`;
+
   if (
     body === undefined ||
     body.content === undefined ||
@@ -115,7 +119,10 @@ const ResponseSchemaComponent: React.FC<Props> = ({
                       )}
                     </div>
                     <ul style={{ marginLeft: "1rem" }}>
-                      <SchemaNode schema={firstBody} schemaType="response" />
+                      <SchemaNode
+                        schema={firstBody}
+                        schemaType={rootSchemaName}
+                      />
                     </ul>
                   </Details>
                 </TabItem>
