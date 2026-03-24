@@ -6,6 +6,7 @@
 
 /* Poppins font import */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap");
+@import url("./admonition.css");
 @import url("./markdown.css");
 @import url("./openapi.css");
 
@@ -42,6 +43,9 @@
   --ifm-color-primary-light: #f4913d;
   --ifm-color-primary-lighter: #f59d52;
   --ifm-color-primary-lightest: #f8bc83;
+
+  --title-font-dark-color: #ffffff;
+  --desc-font-dark-color: #d1d5db;
 
   /* Backgrounds */
   --ifm-background-color: #ffffff;
@@ -147,7 +151,6 @@ html {
 
 .markdown h3 {
   font-weight: 600;
-  /* font-size: 1.25rem; */
   color: var(--ifm-heading-color);
 }
 
@@ -453,6 +456,14 @@ html {
 .menu__link--sublist {
   color: #8e8e93;
   padding: 8px 8px;
+}
+
+[data-theme="dark"] .menu__link {
+  color: #fff;
+}
+
+[data-theme="dark"] .menu__link--sublist {
+  color: #fff;
 }
 
 /* Sidebar sub-items: 40px left padding from Figma */

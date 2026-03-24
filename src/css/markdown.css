@@ -57,14 +57,18 @@
   line-height: normal;
 }
 
+.markdown li:not(:first-child) {
+  margin-top: 16px;
+}
+
 [data-theme="dark"] .theme-api-markdown h1,
 [data-theme="dark"] .theme-doc-markdown h1,
 [data-theme="dark"] .theme-api-markdown h2,
 [data-theme="dark"] .theme-doc-markdown h2,
 [data-theme="dark"] .theme-api-markdown h3,
 [data-theme="dark"] .theme-doc-markdown h3 {
-  color: #ffffff;
+  color: var(--title-font-dark-color);
 }
 [data-theme="dark"] .markdown p {
-  color: #d1d5db;
+  color: var(--desc-font-dark-color);
 }
