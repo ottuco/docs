@@ -1396,6 +1396,8 @@ It's important to note that while the `redirect_url` option is typically present
   Default: false\
   This flag indicates if an additional verification, such as 3DS, OTP, PIN, etc., was initiated during the payment process. Use this flag in `cancelCallback` and `errorCallback` to control the presentation of error messages, especially for on-site payments undergoing a challenge flow. For example, after a failed 3DS verification, it's useful to show a custom popup informing the user of the payment failure. However, it's crucial to note that not all on-site failed payments need custom error messaging. In cases like `GooglePay` or `ApplePay`, error messages are inherently handled by the Payment Sheet, which remains open for the user to retry, making this distinction vital.
 
+## Methods
+
 ### showPopup
 
 Is a function that shows a message in a popup on the screen. The message parameter must be a string, and the optional `pg_response` parameter is an object that displays key-value pairs representing object values within the popup.
@@ -1406,7 +1408,7 @@ Popup will not display null values passed in the response.
 :::
 
 - **type**`string`\
-  he type identifies the modal that should be displayed to the customer. Supported values are `error`, `success`&`redirect`
+  The type identifies the modal that should be displayed to the customer. Supported values are `error`, `success`&`redirect`
 - **message** `string`\
   The message for a failed payment can be displayed to the customer.
 - **pg_response** `object`\
@@ -1414,15 +1416,31 @@ Popup will not display null values passed in the response.
 
 #### Example
 
-`Checkout.showPopup("success","Payment Successful! Redirecting you now. Please hold on.")`
+```javascript
+Checkout.showPopup(
+  'success',
+  'Payment Successful! Redirecting you now. Please hold on.',
+);
+```
 
 <figure><img src="/img/checkout-sdk/image%20%2839%29.png" alt="" /><figcaption></figcaption></figure>
 
-`Checkout.showPopup('error','Selected payment method failed. Try again.' , { "merchant":"009057332", "timeOfLastUpdate":"2023-08-01T14:19:00.510Z", "version":"65" })`
+```javascript
+Checkout.showPopup('error', 'Selected payment method failed. Try again.', {
+  merchant: '009057332',
+  timeOfLastUpdate: '2023-08-01T14:19:00.510Z',
+  version: '65',
+});
+```
 
 <figure><img src="https://lh5.googleusercontent.com/5P3n5FivJZCuxEgvohnsHuU3FB_ii8mEm7qRXX1jRi-B43I3g8rn0HntFw-1CyFz7IP0NFSN9Z7FrzK6OOYBmA3PMmyiQ3ln5yOBGivhxJ5n7KfXz8NlnYsCI2YH5Yy1GaO06nBRs3g3l0T5j8Zo1zM" alt="" /><figcaption></figcaption></figure>
 
-`Checkout.showPopup('redirect','Redirecting to the payment page')`
+```javascript
+Checkout.showPopup(
+  'redirect',
+  'Redirecting to the payment page'
+);
+```
 
 <figure><img src="https://lh5.googleusercontent.com/4FD7FOGF-xSMf1MtE4B9WxQ3tkANDDcY2YfKJviKaN0oxI1LYfXLXaZLYoGDkXn7G5HXnvlNHSK6C1Rn-3SClCJgL1yVhZi4624M0EtweUrtXhYxX9RZGlFu5I7_djpXZPmFeC5KIuCcjNMek35uTBI" alt="" /><figcaption></figcaption></figure>
 
