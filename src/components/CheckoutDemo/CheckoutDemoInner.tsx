@@ -41,7 +41,7 @@ function reducer(_state: State, action: Action): State {
   }
 }
 
-const SDK_SCRIPT_URL = "https://assets.ottu.net/checkout/v3/checkout.min.js";
+const SDK_SCRIPT_URL = "https://150330.dd33t4o2i3w1b.amplifyapp.com/checkout/v3/checkout.min.js";
 const CONTAINER_ID = "checkout-demo-target";
 
 const STEPS = [
@@ -126,6 +126,7 @@ export default function CheckoutDemoInner() {
         merchant_id: SANDBOX_MERCHANT_ID,
         session_id,
         apiKey: SANDBOX_API_KEY,
+        displayMode: "column",
         formsOfPayment: [
           "applePay",
           "tokenPay",
@@ -135,12 +136,156 @@ export default function CheckoutDemoInner() {
           "stcPay",
         ],
         theme: {
-          "title-text": { "font-family": "system-ui" },
-          amount: { "font-family": "system-ui" },
-          "amount-label": { "font-family": "system-ui" },
-          "amount-currency": { "font-family": "system-ui" },
-          "pay-button": { "font-family": "system-ui" },
-          "payment-method-name": { "font-family": "system-ui" },
+          main: {
+            padding: '0px',
+            width: '100%',
+          },
+          'title-text': {
+            color: '#1A1A1A',
+            'font-family': 'Poppins',
+            'font-size': '20px',
+            'font-weight': '600',
+          },
+          'secondary-text': {
+            color: '#4a4a4a',
+            'font-family': 'Poppins',
+            'font-size': '16px',
+            'font-weight': '400',
+          },
+          'pay-button': {
+            color: '#FFFFFF',
+            'font-family': 'Poppins',
+            'font-size': '16px',
+            'font-style': 'normal',
+            'font-weight': '500',
+            background: '#0053A4',
+            border: '#0053A4',
+          },
+          'reject-button': {
+            'font-family': 'Poppins',
+            'font-size': '16px',
+            'font-style': 'normal',
+            'font-weight': '500',
+            'background-color': '#fafafa',
+            color: '#B00020',
+            'border-width': '0px',
+            'text-decoration': 'underline',
+          },
+          'terms-container': {
+            margin: '0px 0px 0px 0px',
+          },
+          'checkbox-label': {
+            color: '#1A1A1A',
+            'font-family': 'Poppins',
+            'font-size': '16px',
+            'font-weight': '400',
+          },
+          'terms-link': {
+            color: '#0053A4',
+            'font-family': 'Poppins',
+            'font-size': '16px',
+            'font-weight': '700',
+          },
+          'view-toggle': {
+            color: '#0053A4',
+            'font-family': 'Poppins',
+            'font-size': '16px',
+            'font-weight': '700',
+          },
+          'pci-disclaimer': {
+            color: '#4A4A4A',
+            'font-family': 'Poppins',
+            'font-size': '14px',
+            'font-weight': '400',
+          },
+          'pci-logos': {
+            gap: '12px',
+            margin: '20px 0px 0px 0px',
+          },
+          'wallet-buttons': {
+            margin: '12px 0px -6px 0px',
+          },
+          methods: {
+            border: '#DADADA',
+            'border-style': 'solid',
+            'border-width': '1px',
+            'border-radius': '8px',
+          },
+          'selected-method': {
+            border: '#0053A4',
+          },
+          border: {
+            display: 'none',
+          },
+          'amount-box': {
+            padding: '16px 12px',
+            margin: '0px 0px 0px 0px',
+            'border-color': '#DADADA',
+            'border-style': 'solid',
+            'border-width': '1px',
+            'border-radius': '8px',
+            'background-color': '#ffffff',
+          },
+          'amount-label': {
+            color: '#1A1A1A',
+            'font-family': 'Poppins',
+            'font-size': '20px',
+            'font-weight': '600',
+          },
+          amount: {
+            color: '#1A1A1A',
+            'font-family': 'Poppins',
+            'font-size': '20px',
+            'font-weight': '600',
+          },
+          'card-background': {
+            'background-color': '#ffffff',
+            'border-bottom-radius': '8px',
+            'border-color': '#0053A4',
+            border: 'solid',
+          },
+          'card-input-border': {
+            'border-radius': '8px',
+          },
+          'card-input-fields': {
+            color: '#1A1A1A',
+            'font-family': 'Poppins',
+            'font-size': '16px',
+            'font-weight': '400',
+            'background-color': '#ffffff',
+          },
+          'cvv-input': {
+            color: '#1A1A1A',
+            'font-family': 'Poppins',
+            'font-size': '16px',
+          },
+          'field-error-border': {
+            'border-color': '#dc3545',
+          },
+          'error-message': {
+            color: '#dc3545',
+            'font-family': 'Poppins',
+            'font-size': '12px',
+          },
+          'checkbox-knob': {
+            'background-color': '#FFFFFF',
+            'border-radius': '50%',
+            'box-shadow': '0 0 4px rgba(0, 83, 164, 0.4)',
+          },
+          'selected-checkbox-knob': {
+            'background-color': '#FFFFFF',
+            'box-shadow': '0 0 4px rgba(0, 83, 164, 0.4)',
+          },
+          'selected-checkbox': {
+            'background-color': '#0053A4',
+          },
+          responsive: {
+            450: {
+              'amount-box': {
+                'justify-content': 'space-between',
+              },
+            },
+          },
         },
       });
 

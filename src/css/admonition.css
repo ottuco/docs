@@ -29,7 +29,7 @@
     font-style: normal;
     font-weight: 700;
     line-height: 27px; /* 150% */
-    text-transform: lowercase;
+    text-transform: capitalize;
   }
 
   div:nth-child(2) p {

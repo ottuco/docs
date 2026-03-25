@@ -162,3 +162,8 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+.sdkContainer {
+  max-width: 480px;
+  margin: auto;
+}
