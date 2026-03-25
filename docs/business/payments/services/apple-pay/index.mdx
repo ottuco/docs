@@ -65,68 +65,77 @@ You must have an Apple Developer account to accept Apple Pay payments. If you do
     image: "/img/business/apple-pay/merchant-id-06-review-register.png",
     imageAlt: "Review and register the Merchant ID",
   },
-]} />
+]} nextSectionId="adding-and-verifying-a-domain" />
 
 ## Adding and Verifying a Domain
 
-{/* TODO: Replace this section with <StepGuide> once real images are available.
-    See "Creating Merchant ID" section above for usage example.
-    Images needed: domain-verify-01 through domain-verify-10
-    Source images: current-docs/public-docs/.gitbook/assets/ — see image refs in old README.md */}
-
-### Step 1: Register the domain in Apple
-
-1. From the **Identifiers** section, select the Merchant ID you created (e.g., "Ottu Apple Pay").
-
-   ![Select your Merchant ID](/img/business/placeholder.png)
-
-2. Click **Add Domain**.
-
-   ![Click Add Domain](/img/business/placeholder.png)
-
-3. Enter the domain URL you want to register and click **Save**.
-
-   ![Enter domain URL](/img/business/placeholder.png)
-
-4. Download the `.txt` verification file. Keep it ready — you will upload it to Ottu in the next step.
-
-   ![Download the verification file](/img/business/placeholder.png)
-
-### Step 2: Add the Apple Pay service in Ottu
-
-5. Log in to the **Ottu Dashboard** and click the three dots in the upper-right corner to access the **Administration Panel**.
-6. From the left-hand sidebar, select **Payment Service**.
-
-   ![Payment Service in the Administration Panel](/img/business/placeholder.png)
-
-7. Click **Add payment service**.
-
-   ![Click Add payment service](/img/business/placeholder.png)
-
-8. Fill out the fields and click **Save**.
-
-   ![Apple Pay service configuration form](/img/business/placeholder.png)
-
-   | Field | Description |
-   |-------|-------------|
-   | **Name** | The name displayed in dropdown menus and wherever the service is referenced |
-   | **Code** | A code that identifies the service in APIs and URLs |
-   | **Apple Merchant Identifier** | The unique identifier Apple assigned when you registered your Merchant ID |
-   | **Display Name** | The name shown on the Apple Pay payment sheet during transactions |
-   | **Domain** | The domain configured for Apple Pay (e.g., `merchant.ottu.net`) |
-   | **Domain Verification File** | Upload the `.txt` file you downloaded in step 4 |
-   | **PG** | The [payment gateway](/docs/business/payments/gateways) to use with Apple Pay |
-
-9. The new Apple Pay service has been successfully added.
-
-   ![Apple Pay service added successfully](/img/business/placeholder.png)
-
-### Step 3: Verify the domain in Apple
-
-10. Back in the Apple Developer portal, go to **Certificates, IDs & Profiles** and scroll to the **Merchant Domains** section.
-11. Click **Verify** next to your domain. Apple will confirm the verification.
-
-    ![Verify domain in Apple Developer portal](/img/business/placeholder.png)
+<StepGuide nextSectionId="creating-apple-pay-certificates" steps={[
+  {
+    title: "Select your Merchant ID",
+    description: <>From the <strong>Identifiers</strong> section in Apple Developer, select the Merchant ID you created (e.g., "Ottu Apple Pay").</>,
+    image: "/img/business/apple-pay/domain-01-select-merchant-id.png",
+    imageAlt: "Identifiers section — select Merchant ID",
+  },
+  {
+    title: "Click Add Domain",
+    description: <>In the Merchant ID details, click <strong>Add Domain</strong> to register a new domain for Apple Pay.</>,
+    image: "/img/business/apple-pay/domain-02-add-domain.png",
+    imageAlt: "Add Domain button in Merchant ID details",
+  },
+  {
+    title: "Enter the domain URL",
+    description: <>Enter the domain URL you want to register and click <strong>Save</strong>.</>,
+    image: "/img/business/apple-pay/domain-03-enter-domain-url.png",
+    imageAlt: "Domain URL input field",
+  },
+  {
+    title: "Download the verification file",
+    description: <>Download the <code>.txt</code> verification file. Keep it ready — you will upload it to Ottu in the next step.</>,
+    image: "/img/business/apple-pay/domain-04-download-verification.png",
+    imageAlt: "Download domain verification .txt file",
+  },
+  {
+    title: "Navigate to Payment Service in Ottu",
+    description: <>Log in to the <strong>Ottu Dashboard</strong>, click the three dots in the upper-right corner to access the <strong>Administration Panel</strong>, then select <strong>Payment Service</strong> from the sidebar.</>,
+    image: "/img/business/apple-pay/domain-05-ottu-payment-service.png",
+    imageAlt: "Ottu Administration Panel — Payment Service",
+  },
+  {
+    title: "Add a new payment service",
+    description: <>Click <strong>Add payment service</strong> to create a new Apple Pay service entry.</>,
+    image: "/img/business/apple-pay/domain-06-add-payment-service.png",
+    imageAlt: "Add payment service button",
+  },
+  {
+    title: "Configure the Apple Pay service",
+    description: (
+      <>
+        Fill out the fields and click <strong>Save</strong>:
+        <strong> Name</strong> — display name for the service;
+        <strong> Code</strong> — identifier for APIs/URLs;
+        <strong> Apple Merchant Identifier</strong> — the ID from Apple;
+        <strong> Display Name</strong> — shown on the Apple Pay payment sheet;
+        <strong> Domain</strong> — your Apple Pay domain (e.g., <code>merchant.ottu.net</code>);
+        <strong> Domain Verification File</strong> — upload the <code>.txt</code> file from step 4;
+        <strong> PG</strong> — the <a href="/docs/business/payments/gateways">payment gateway</a> to use.
+      </>
+    ),
+    image: "/img/business/apple-pay/domain-07-service-config-form.png",
+    imageAlt: "Apple Pay service configuration form with fields",
+  },
+  {
+    title: "Service added successfully",
+    description: <>The new Apple Pay service has been created and is now visible in the Payment Service list.</>,
+    image: "/img/business/apple-pay/domain-08-service-added.png",
+    imageAlt: "Apple Pay service successfully added",
+  },
+  {
+    title: "Verify the domain in Apple",
+    description: <>Back in the Apple Developer portal, go to <strong>Certificates, IDs &amp; Profiles</strong>, scroll to <strong>Merchant Domains</strong>, and click <strong>Verify</strong>. Apple will confirm the domain verification.</>,
+    image: "/img/business/apple-pay/domain-09-verify-domain.png",
+    imageAlt: "Verify domain in Apple Developer portal",
+  },
+]} />
 
 :::note
 If you use your own custom domain alongside Ottu, you must also verify that domain. Follow [Apple's domain verification guide](https://developer.apple.com/documentation/apple_pay_on_the_web/configuring_your_environment#3179109) for instructions.

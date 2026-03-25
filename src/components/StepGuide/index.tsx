@@ -12,6 +12,7 @@ export interface Step {
 export interface StepGuideProps {
   steps: Step[];
   startIndex?: number;
+  nextSectionId?: string;
 }
 
 function CheckIcon({ size = 14 }: { size?: number }) {
@@ -42,7 +43,16 @@ function CloseIcon() {
   );
 }
 
-export default function StepGuide({ steps, startIndex = 1 }: StepGuideProps): React.ReactElement {
+function ArrowDownIcon() {
+  return (
+    <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <polyline points="19 12 12 19 5 12" />
+    </svg>
+  );
+}
+
+export default function StepGuide({ steps, startIndex = 1, nextSectionId }: StepGuideProps): React.ReactElement {
   const [active, setActive] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -164,12 +174,15 @@ export default function StepGuide({ steps, startIndex = 1 }: StepGuideProps): Re
             <span className={styles.navArrow}>&#8249;</span> Previous
           </button>
           <button
-            className={`${styles.navButton} ${isLast ? styles.navDone : styles.navNext}`}
-            onClick={isLast ? undefined : next}
-            aria-label={isLast ? "All steps completed" : "Next step"}
+            className={`${styles.navButton} ${isLast ? (nextSectionId ? styles.navNext : styles.navDone) : styles.navNext}`}
+            onClick={isLast ? (nextSectionId ? () => {
+              const el = document.getElementById(nextSectionId);
+              if (el) el.scrollIntoView({ behavior: "smooth" });
+            } : undefined) : next}
+            aria-label={isLast ? (nextSectionId ? "Continue to next section" : "All steps completed") : "Next step"}
           >
             {isLast ? (
-              <><CheckIcon size={13} /> Done</>
+              nextSectionId ? (<>Continue <ArrowDownIcon /></>) : (<><CheckIcon size={13} /> Done</>)
             ) : (
               <>Next <span className={styles.navArrow}>&#8250;</span></>
             )}
