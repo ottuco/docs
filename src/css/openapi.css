@@ -90,7 +90,7 @@ ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
 }
 
 .openapi-markdown__details {
-  summary:before {
+  summary::before {
     top: 0.35rem !important;
   }
 
@@ -250,10 +250,6 @@ ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
 }
 
 .openapi-tabs__schema-container details.openapi-markdown__details.response {
-  summary:before {
-    top: 0.35 rem !important;
-  }
-
   strong.openapi-markdown__details-summary-response {
     color: #302f37;
     font-family: Poppins;
@@ -296,7 +292,6 @@ ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
         font-style: normal;
         font-weight: 500;
         line-height: normal;
-        text-transform: uppercase;
       }
 
       li.tabs__item.openapi-tabs__schema-item.active {
@@ -324,9 +319,9 @@ ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
   }
 }
 
-.openapi-schema__list-item:has(details) {
-  ::before {
-    top: 15px;
+.openapi-schema__list-item:has(> details) {
+  &::before {
+    top: 0.5rem;
   }
 }
 
