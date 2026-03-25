@@ -45,7 +45,7 @@
   --ifm-color-primary-lightest: #f8bc83;
 
   --title-font-dark-color: #ffffff;
-  --desc-font-dark-color: #d1d5db;
+  --desc-font-dark-color: #fafafa;
 
   /* Backgrounds */
   --ifm-background-color: #ffffff;
@@ -650,7 +650,6 @@ article .markdown header {
 
 article .markdown header h1 {
   flex: 1 1 auto;
-  margin: 0;
   text-transform: capitalize;
 }
 
@@ -667,8 +666,8 @@ article .markdown header h1 {
 .markdown-actions-container .dropdown__menu {
   z-index: 1000;
   min-width: 220px;
-  right: auto;
-  left: 0;
+  right: 0;
+  left: auto;
 }
 
 .dropdown__link:hover {

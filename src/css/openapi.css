@@ -8,16 +8,14 @@ pre.openapi__method-endpoint {
   background: #fafafa;
   border-radius: 8px;
 
-  span.badge.badge--success {
+  span.badge {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
     padding: 4px 12px;
 
-    background: #0b82be;
     border-radius: 4px;
-    border-color: #0b82be;
 
     color: #fff;
     font-family: Consolas;
@@ -25,6 +23,21 @@ pre.openapi__method-endpoint {
     font-style: normal;
     font-weight: 700;
     line-height: 20px; /* 142.857% */
+
+    &.badge--primary {
+      background: #f27e20;
+      border-color: #f27e20;
+    }
+
+    &.badge--success {
+      background: #0b82be;
+      border-color: #0b82be;
+    }
+
+    &.badge--warning {
+      background: #ffba00;
+      border-color: #ffba00;
+    }
   }
 
   h2.openapi__method-endpoint-path {
@@ -440,6 +453,6 @@ ul .openapi-schema__list-item {
 }
 
 .openapi-right-panel__container {
-  overflow-y: visible !important;
-  position: relative !important;
+  overflow-y: inherit !important;
+  position: inherit !important;
 }
