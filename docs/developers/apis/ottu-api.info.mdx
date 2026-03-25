@@ -52,7 +52,7 @@ Ottu API
   >
     <TabItem
       label={"HTTP: Basic Auth"}
-      value={"Basic Auth"}
+      value={"SSO_BasicAuth"}
     >
       
       
@@ -78,12 +78,72 @@ Ottu API
         </table>
       </div>
     </TabItem><TabItem
-      label={"API Key: API Key Auth"}
-      value={"API Key Auth"}
+      label={"HTTP: Bearer Auth"}
+      value={"SSO_JWT_Auth"}
     >
       
       
-      API key authentication with required prefix "Api-Key"
+      
+      
+      <div>
+        <table>
+          <tbody>
+            <tr>
+              <th>
+                Security Scheme Type:
+              </th><td>
+                http
+              </td>
+            </tr><tr>
+              <th>
+                HTTP Authorization Scheme:
+              </th><td>
+                bearer
+              </td>
+            </tr><tr>
+              <th>
+                Bearer format:
+              </th><td>
+                JWT
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </TabItem><TabItem
+      label={"HTTP: Basic Auth"}
+      value={"basicAuth"}
+    >
+      
+      
+      
+      
+      <div>
+        <table>
+          <tbody>
+            <tr>
+              <th>
+                Security Scheme Type:
+              </th><td>
+                http
+              </td>
+            </tr><tr>
+              <th>
+                HTTP Authorization Scheme:
+              </th><td>
+                basic
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </TabItem><TabItem
+      label={"API Key: tokenAuth"}
+      value={"tokenAuth"}
+    >
+      
+      
+      Token-based authentication with required prefix "Token"
       
       <div>
         <table>

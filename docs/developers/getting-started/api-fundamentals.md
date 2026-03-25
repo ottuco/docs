@@ -1,376 +1,213 @@
 # API Fundamentals
 
-Learn the core concepts and conventions of Ottu's REST API to build robust payment integrations.
+This page covers the conventions and patterns you'll encounter across all Ottu API endpoints — URL structure, request/response format, authentication, amounts, pagination, and testing. Read this before diving into specific API guides.
 
-## Base URLs
+## Your API URL
 
-| Environment | Base URL |
-|-------------|----------|
-| Sandbox | `https://api.sandbox.ottu.com` |
-| Production | `https://api.ottu.com` |
+Every Ottu merchant gets a dedicated instance with its own URL:
+
+```
+https://<your-domain>.ottu.net
+```
+
+All API paths are relative to this base URL. For example, to create a payment transaction:
+
+```
+POST https://<your-domain>.ottu.net/b/checkout/v1/pymt-txn/
+```
+
+:::info Sandbox vs Production
+There are no separate sandbox and production URLs. The **MID (Merchant Identification Number)** configuration in the Ottu admin panel determines whether a payment gateway runs in sandbox or production mode. You can test with:
+
+- **Your own instance** — configure a MID as sandbox in the admin panel. Recommended for testing your specific gateway configuration.
+- **Shared sandbox** — `sandbox.ottu.net` has all payment gateways active in sandbox mode. Useful for quick tests without configuring your own instance.
+:::
+
+## API Endpoints
+
+| Domain | Endpoint | Method | Purpose |
+|--------|----------|:------:|---------|
+| **Checkout** | `/b/checkout/v1/pymt-txn/` | POST | [Create payment transaction](/docs/developers/payments/checkout-api) |
+| | `/b/checkout/v1/pymt-txn/{session_id}/` | GET | [Retrieve payment transaction](/docs/developers/payments/checkout-api) |
+| | `/b/checkout/v1/pymt-txn/{session_id}/` | PATCH | [Update payment transaction](/docs/developers/payments/checkout-api) |
+| **Payment Methods** | `/b/pbl/v2/payment-methods/` | POST | [Discover available gateways](/docs/developers/payments/payment-methods) |
+| **Operations** | `/b/pbl/v2/operation/` | POST | [Refund, capture, void, cancel, expire, delete](/docs/developers/operations) |
+| **PSQ** | `/b/pbl/v2/inquiry/` | POST | [Check payment status](/docs/developers/payments/psq) |
+| **Native Payments** | `/b/pbl/v2/payment/apple-pay/` | POST | [Apple Pay direct payment](/docs/developers/payments/native-payments) |
+| | `/b/pbl/v2/payment/google-pay/` | POST | [Google Pay direct payment](/docs/developers/payments/native-payments) |
+| | `/b/pbl/v2/payment/auto-debit/` | POST | [Charge saved card](/docs/developers/payments/native-payments) |
+| **User Cards** | `/b/pbl/v2/card/` | GET | [List saved cards](/docs/developers/cards-and-tokens/user-cards) |
+| | `/b/pbl/v2/card/{token}/` | DELETE | [Delete saved card](/docs/developers/cards-and-tokens/user-cards) |
+| **Invoices** | `/b/invoice/v1/invoice/` | POST | [Create invoice](/docs/developers/invoices) |
+| **Notifications** | `/b/pbl/v2/message-notification/` | POST | [Resend payment notification](/docs/developers/notifications) |
+| **Reports** | `/b/api/v1/reports/files/` | GET | [List transaction reports](/docs/developers/reports) |
+| | `/b/api/v1/reports/files/{token}/download/` | GET | [Download report file](/docs/developers/reports) |
 
 ## Authentication
 
-### API Keys
-Ottu uses API keys for authentication. There are two types:
+Ottu supports two authentication methods for API calls:
 
-- **Public Key** (`pk_`): Used for client-side operations
-- **Secret Key** (`sk_`): Used for server-side operations
+| Method | Header | Access Level |
+|--------|--------|-------------|
+| **API Key** | `Authorization: Api-Key <your_private_key>` | Admin — all permissions |
+| **Basic Auth** | `Authorization: Basic <base64(username:password)>` | Granular — explicit permissions per user |
 
-### Authentication Header
-```http
-Authorization: Bearer sk_test_your_secret_key
-```
+A third key type — the **Public Key** — is used only for [Checkout SDK](/docs/developers/payments/checkout-sdk/) initialization, not for API calls.
 
-### Key Management
-- Store secret keys securely (environment variables, key management services)
-- Never expose secret keys in client-side code
-- Rotate keys regularly for security
-- Use different keys for different environments
+For setup instructions and permission details, see [Authentication](./authentication).
 
 ## Request Format
 
-### Content Type
-All requests must include the content type header:
-```http
-Content-Type: application/json
+All API requests use JSON:
+
+```bash
+curl -X POST "https://<your-domain>.ottu.net/b/checkout/v1/pymt-txn/" \
+  -H "Authorization: Api-Key your_private_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "payment_request",
+    "amount": "20.000",
+    "currency_code": "KWD",
+    "pg_codes": ["kpay"],
+    "customer_email": "customer@example.com",
+    "order_no": "ORD-12345"
+  }'
 ```
 
-### Request Body
-Send data as JSON in the request body:
-```json
-{
-  "amount": 2000,
-  "currency": "USD",
-  "customer": {
-    "email": "customer@example.com"
-  }
-}
-```
-
-### URL Parameters
-Use URL parameters for filtering and pagination:
-```http
-GET /v1/payments?limit=10&status=succeeded&created_after=2024-01-01
-```
+**Supported content types:**
+- `application/json` (recommended)
+- `application/x-www-form-urlencoded`
+- `multipart/form-data` (for file uploads)
 
 ## Response Format
 
-### Success Response
-```json
-{
-  "id": "pay_abc123",
-  "amount": 2000,
-  "currency": "USD",
-  "status": "succeeded",
-  "created_at": "2024-01-15T10:30:00Z"
-}
-```
-
-### Error Response
-```json
-{
-  "error": {
-    "type": "validation_error",
-    "code": "invalid_amount",
-    "message": "Amount must be a positive integer",
-    "field": "amount"
-  }
-}
-```
-
-## Error Handling
-
-Ottu APIs return standard HTTP status codes (`2xx` for success, `4xx` for client errors, `5xx` for server errors) and structured JSON error responses with `type`, `code`, and `message` fields.
-
-For the complete reference of all HTTP status codes, error types, error response format, and endpoint-specific errors, see [Error Codes](/docs/developers/reference/error-codes).
-
-```javascript
-async function createPayment(paymentData) {
-  try {
-    const response = await fetch('https://api.ottu.com/v1/payments', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(paymentData)
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(`API Error: ${error.error.message}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Payment creation failed:', error);
-    throw error;
-  }
-}
-```
-
-## Idempotency
-
-Prevent duplicate operations by using idempotency keys:
-
-```http
-POST /v1/payments
-Idempotency-Key: unique_key_123
-```
+**Success** — returns the created or updated object directly (no wrapper):
 
 ```json
 {
-  "amount": 2000,
-  "currency": "USD",
-  "customer": {
-    "email": "customer@example.com"
-  }
-}
-```
-
-If you retry the same request with the same idempotency key, you'll get the same response without creating a duplicate payment.
-
-## Pagination
-
-For endpoints that return lists, use pagination parameters:
-
-```http
-GET /v1/payments?limit=10&starting_after=pay_abc123
-```
-
-### Response
-```json
-{
-  "data": [
+  "session_id": "bb7fc280827c2f177a9690299cfefa4128dbbd60",
+  "checkout_url": "https://<your-domain>.ottu.net/b/checkout/redirect/start/?session_id=bb7fc...",
+  "amount": "20.000",
+  "currency_code": "KWD",
+  "state": "created",
+  "payment_methods": [
     {
-      "id": "pay_def456",
-      "amount": 2000,
-      "currency": "USD"
+      "code": "kpay",
+      "name": "KNET",
+      "amount": "20.000",
+      "currency_code": "KWD",
+      "fee": "0.000",
+      "icon": "https://.../knet_icon.svg"
     }
-  ],
-  "has_more": true,
-  "next_page": "pay_ghi789"
+  ]
 }
 ```
 
-### Parameters
-- `limit`: Number of items to return (max 100)
-- `starting_after`: Pagination cursor for next page
-- `ending_before`: Pagination cursor for previous page
+**Error** — returns field-level errors or a generic message:
 
-## Rate Limiting
-
-### Limits
-- **Sandbox**: 1,000 requests per minute
-- **Production**: 5,000 requests per minute
-
-### Headers
-Check rate limit status in response headers:
-```http
-X-RateLimit-Limit: 5000
-X-RateLimit-Remaining: 4999
-X-RateLimit-Reset: 1642261200
-```
-
-### Handling Rate Limits
-```javascript
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function makeRequest(url, options) {
-  const response = await fetch(url, options);
-  
-  if (response.status === 429) {
-    const resetTime = parseInt(response.headers.get('X-RateLimit-Reset'));
-    const waitTime = (resetTime * 1000) - Date.now();
-    
-    if (waitTime > 0) {
-      await delay(waitTime);
-      return makeRequest(url, options); // Retry
-    }
-  }
-  
-  return response;
-}
-```
-
-## Versioning
-
-### API Version
-Current version: `v1`
-
-### Backward Compatibility
-- Additive changes (new fields, endpoints) don't require version changes
-- Breaking changes will be introduced in new versions
-- Deprecated features will be supported for at least 12 months
-
-### Version Header
-Optionally specify API version:
-```http
-Ottu-Version: 2024-01-15
-```
-
-## Data Types
-
-### Common Fields
-
-#### Amounts
-- Always in smallest currency unit (cents for USD, pence for GBP)
-- Integer type, no decimal places
-- Example: $25.99 = 2599
-
-#### Currencies
-- ISO 4217 currency codes
-- Three-letter uppercase format
-- Example: USD, EUR, GBP
-
-#### Dates
-- ISO 8601 format with UTC timezone
-- Example: `2024-01-15T10:30:00Z`
-
-#### IDs
-- Unique identifiers with type prefix
-- Example: `pay_abc123`, `cust_def456`
-
-### Metadata
-Add custom key-value pairs to objects:
 ```json
 {
-  "amount": 2000,
-  "currency": "USD",
-  "metadata": {
-    "order_id": "order_123",
+  "amount": ["This field is required."],
+  "currency_code": ["This field is required."]
+}
+```
+
+For the complete error reference, see [Error Codes](/docs/developers/reference/error-codes).
+
+## Amounts & Currencies
+
+Amounts are **decimal strings**, not integers in cents. The precision depends on the currency, following [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html):
+
+| Decimal Places | Currencies | Example |
+|:-:|---|---|
+| 3 | KWD, BHD, OMR, IQD, JOD, LYD | `"20.000"` |
+| 2 | USD, EUR, AED, SAR, QAR, EGP | `"20.00"` |
+| 0 | JPY, KRW | `"20"` |
+
+Always send amounts as strings: `"20"`, `"20.00"`, or `"20.000"`. The API returns amounts in the same string format.
+
+:::warning
+Do NOT send integer amounts in the smallest currency unit (e.g., `2000` for $20.00). Send the actual decimal value as a string: `"20.00"`.
+:::
+
+## Identifiers
+
+| Identifier | Format | Who creates it | Used for |
+|-----------|--------|---------------|----------|
+| `session_id` | SHA1 hash (40 chars) | Ottu (auto-generated) | Uniquely identify a payment transaction |
+| `order_no` | String (up to 128 chars) | Merchant (you set this) | Your internal reference — optional but recommended |
+| `encrypted_id` | Encoded string | Ottu (auto-generated) | Report downloads, prevents ID enumeration |
+
+Use `session_id` to retrieve, update, and track payment transactions. Use `order_no` as your internal cross-reference between your system and Ottu.
+
+## Custom Data
+
+Use the `extra` field to attach arbitrary key-value data to a payment transaction:
+
+```json
+{
+  "amount": "20.000",
+  "currency_code": "KWD",
+  "pg_codes": ["kpay"],
+  "extra": {
+    "order_id": "ORD-12345",
+    "department": "sales",
     "customer_tier": "premium"
   }
 }
 ```
 
-## Webhooks
+The `extra` object is stored with the transaction and included in [webhook payloads](/docs/developers/webhooks/payment-events) — use it to pass context your backend needs when processing the payment result.
 
-### Overview
-Webhooks notify your application when events occur:
-- Payment status changes
-- Refund processing
-- Dispute updates
-- Customer actions
+## Pagination
 
-### Webhook Endpoint
-```javascript
-app.post('/webhook', (req, res) => {
-  const event = req.body;
-  
-  // Verify webhook signature
-  const signature = req.headers['ottu-signature'];
-  if (!verifySignature(event, signature)) {
-    return res.status(400).send('Invalid signature');
-  }
-  
-  // Process event
-  handleWebhookEvent(event);
-  
-  res.status(200).send('OK');
-});
+Endpoints that return lists (reports, cards) use `limit` and `offset` parameters:
+
+```
+GET /b/api/v1/reports/files/?limit=50&offset=100
 ```
 
-### Event Structure
+**Response:**
+
 ```json
 {
-  "id": "evt_abc123",
-  "type": "payment.succeeded",
-  "created_at": "2024-01-15T10:30:00Z",
-  "data": {
-    "id": "pay_abc123",
-    "amount": 2000,
-    "currency": "USD",
-    "status": "succeeded"
-  }
+  "count": 243,
+  "next": "?limit=50&offset=150",
+  "previous": "?limit=50&offset=50",
+  "results": [...]
 }
 ```
 
-## Testing
+- `count` — total number of items
+- `next` / `previous` — URL for the next/previous page (`null` when at the end/start)
+- `results` — array of items for the current page
+- Default page size: 10 items
 
-### Test Mode
-- Use test API keys (`sk_test_` prefix)
-- No real money transactions
-- Simulate various scenarios
+## Rate Limiting
 
-### Test Cards
-```
-Success: 4242 4242 4242 4242
-Decline: 4000 0000 0000 0002
-Insufficient Funds: 4000 0000 0000 9995
-```
+| Scope | Limit |
+|-------|-------|
+| General API | 90,000 requests/day per user |
+| Report downloads | 25 requests/hour |
+| Utility endpoints | 10 requests/minute |
 
-### Webhook Testing
-Use tools like ngrok for local development:
-```bash
-ngrok http 3000
-# Use the https URL for webhook endpoints
-```
+When you exceed the limit, the API returns `429 Too Many Requests`. Implement exponential backoff in your retry logic.
 
-## SDK Libraries
+## Sandbox & Testing
 
-### Official SDKs
-- **Node.js**: `npm install @ottu/node`
-- **Python**: `pip install ottu-python`
-- **PHP**: `composer require ottu/ottu-php`
-- **Ruby**: `gem install ottu-ruby`
+| Option | URL | Best for |
+|--------|-----|----------|
+| **Shared sandbox** | `sandbox.ottu.net` | Quick tests — all gateways active, public credentials available |
+| **Your own instance** | `<your-domain>.ottu.net` | Integration testing — verify your specific MID and gateway configuration |
 
-### Community SDKs
-- **Go**: Available on GitHub
-- **Java**: Available on GitHub
-- **.NET**: Available on NuGet
+**Recommended workflow:** Start with the shared sandbox for rapid prototyping, then switch to your own instance to test with your actual gateway configuration before going live.
 
-## Best Practices
+For test card numbers per gateway, see [Sandbox & Test Cards](../payments/sandbox).
 
-### Security
-- Use HTTPS for all requests
-- Validate webhook signatures
-- Store API keys securely
-- Implement proper error handling
+## What's Next?
 
-### Performance
-- Cache responses when appropriate
-- Use appropriate timeout values
-- Implement retry logic with exponential backoff
-- Monitor API response times
-
-### Error Handling
-- Check HTTP status codes
-- Parse error responses
-- Provide meaningful error messages to users
-- Log errors for debugging
-
-### Code Organization
-- Use environment-specific configurations
-- Implement proper logging
-- Write tests for API interactions
-- Use consistent error handling patterns
-
-## Next Steps
-
-Now that you understand the API fundamentals, explore:
-
-- **Checkout API**: Create and manage payments
-- **Webhooks**: Handle real-time events
-- **Operations API**: Refunds, captures, and voids
-- **SDKs**: Use our official libraries
-
-## Support
-
-### Documentation
-- **API Reference**: Complete endpoint documentation
-- **Webhook Reference**: All webhook events
-- **Error Codes**: Troubleshooting guide
-
-### Community
-- **GitHub**: Sample code and examples
-- **Discord**: Developer community
-- **Stack Overflow**: Technical questions
-
-### Direct Support
-- **Email**: dev-support@ottu.com
-- **Chat**: Available in dashboard
-- **Phone**: For enterprise customers
+- [**Authentication**](./authentication) — Set up API keys and permissions
+- [**Payment Journey**](../payments/payment-journey) — Interactive integration walkthrough
+- [**Checkout API**](../payments/checkout-api) — Create your first payment transaction
+- [**Error Codes**](/docs/developers/reference/error-codes) — Error response reference
+- [**Payment States**](/docs/developers/reference/payment-states) — Transaction lifecycle and state machine

@@ -4,8 +4,6 @@ sidebar_label: Invoices
 hide_table_of_contents: true
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 
 # Invoice API
@@ -164,23 +162,7 @@ You cannot provide both `discount_percentage` and `discount_amount` on the same 
 
 ## API Reference
 
-<Tabs groupId="invoice-api" queryString>
-<TabItem value="create" label="Create Invoice">
-
 <ApiDocEmbed path="create-invoice.api.mdx" />
-
-</TabItem>
-<TabItem value="list" label="List Invoices">
-
-<ApiDocEmbed path="api-v-1-unified-ui-invoice-list.api.mdx" />
-
-</TabItem>
-<TabItem value="retrieve" label="Retrieve Invoice">
-
-<ApiDocEmbed path="api-v-1-unified-ui-invoice-retrieve.api.mdx" />
-
-</TabItem>
-</Tabs>
 
 ## Best Practices
 
