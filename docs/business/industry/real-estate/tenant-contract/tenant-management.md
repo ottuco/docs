@@ -81,6 +81,6 @@ The form fields vary depending on the tenant type.
 
 ## What's Next?
 
-- [Dashboard](/docs/business/industry/real-estate/tenant-contract/dashboard) -- View all tenants and contracts
-- [Add Contract](/docs/business/industry/real-estate/tenant-contract/add-contract) -- Create a rental agreement for a tenant
-- [Contract Management](/docs/business/industry/real-estate/tenant-contract/contract-management) -- Manage existing contracts
+- [Dashboard](/business/industry/real-estate/tenant-contract/dashboard) -- View all tenants and contracts
+- [Add Contract](/business/industry/real-estate/tenant-contract/add-contract) -- Create a rental agreement for a tenant
+- [Contract Management](/business/industry/real-estate/tenant-contract/contract-management) -- Manage existing contracts

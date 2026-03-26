@@ -15,7 +15,7 @@ Ottu provides direct integration with your bank accounts. Connect your payment g
 
 ### API Integration
 
-Unlock the full potential of your e-commerce suite with Ottu's RESTful API. Well-organized API documentation supports all types of direct integration. See the [Developer Documentation](/docs/developers/getting-started) for details.
+Unlock the full potential of your e-commerce suite with Ottu's RESTful API. Well-organized API documentation supports all types of direct integration. See the [Developer Documentation](/developers/getting-started) for details.
 
 ### Plug-In Integration
 
@@ -60,10 +60,10 @@ Key metrics available:
 | **Total Received** | Total funds successfully received |
 | **Net Balance** | Current net balance across transactions |
 
-The transaction table shows details for each transaction including its state: `paid`, `failed`, `attempted`, or `created`. See [Transaction States](/docs/business/payment-management/transaction-states) for more information.
+The transaction table shows details for each transaction including its state: `paid`, `failed`, `attempted`, or `created`. See [Transaction States](/business/payment-management/transaction-states) for more information.
 
 ## What's Next?
 
-- **[Plugins](/docs/business/plugins/)** — Payment Request, E-Commerce, and Bulk Payment plugins
-- **[Payment Gateways](/docs/business/payments/gateways)** — Browse all supported gateways
-- **[Satellite](/docs/business/industry/satellite)** — Multi-installation management and Shopify billing automation
+- **[Plugins](/business/plugins/)** — Payment Request, E-Commerce, and Bulk Payment plugins
+- **[Payment Gateways](/business/payments/gateways)** — Browse all supported gateways
+- **[Satellite](/business/industry/satellite)** — Multi-installation management and Shopify billing automation

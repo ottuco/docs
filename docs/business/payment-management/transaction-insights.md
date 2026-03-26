@@ -9,10 +9,10 @@ Ottu provides detailed transaction tables and visual dashboard charts so you can
 
 ## Transaction Table
 
-Every installed [plugin](/docs/business/plugins) includes a transaction table that gives you full visibility into your transaction history. From the transaction table, you can perform payment [operations](/docs/business/operations) such as voiding, refunding, and capturing.
+Every installed [plugin](/business/plugins) includes a transaction table that gives you full visibility into your transaction history. From the transaction table, you can perform payment [operations](/business/operations) such as voiding, refunding, and capturing.
 
 :::note
-To access the transaction table, navigate to the **Transactions** tab located under each installed [plugin](/docs/business/plugins).
+To access the transaction table, navigate to the **Transactions** tab located under each installed [plugin](/business/plugins).
 :::
 
 ### Proxy Fields
@@ -37,7 +37,7 @@ Ottu lets you customize which columns (headers) appear in each plugin's transact
 
 #### Child Table Transactions
 
-[Child transactions](#child-transactions) are generated from capture, refund, or void [operations](/docs/business/operations). These transactions are linked to the original payment transaction (the **parent transaction**) and displayed beneath it. Child transaction headers inherit from the parent transaction's headers for consistency.
+[Child transactions](#child-transactions) are generated from capture, refund, or void [operations](/business/operations). These transactions are linked to the original payment transaction (the **parent transaction**) and displayed beneath it. Child transaction headers inherit from the parent transaction's headers for consistency.
 
 ![Child transaction headers under a parent transaction](/img/business/placeholder.png)
 
@@ -64,7 +64,7 @@ The amount transferred or credited to the merchant's bank account.
 - **For authorize transactions:** The total amount captured by staff.
 
 :::note
-Whether a transaction is a purchase or authorization is determined by the [payment gateway](/docs/business/payments/gateways) configuration -- specifically the gateway settings (MID) operation configuration.
+Whether a transaction is a purchase or authorization is determined by the [payment gateway](/business/payments/gateways) configuration -- specifically the gateway settings (MID) operation configuration.
 :::
 
 #### Remaining Amount
@@ -78,7 +78,7 @@ The difference between the initial [Amount](#amount) and the [Settled Amount](#s
 An additional amount added on top of the initial [amount](#amount), which the customer pays.
 
 :::note
-Depending on [currency configuration](/docs/business/payments/currencies) and the selected [payment gateway](/docs/business/payments/gateways), fees may or may not apply to transactions in the default or foreign currency.
+Depending on [currency configuration](/business/payments/currencies) and the selected [payment gateway](/business/payments/gateways), fees may or may not apply to transactions in the default or foreign currency.
 :::
 
 #### Refunded Amount
@@ -127,7 +127,7 @@ Lists the most recent orders for quick review.
 
 ## What's Next?
 
-- [Transaction States](/docs/business/payment-management/transaction-states) -- Understand what each payment state means
-- [Search & Filter Payments](/docs/business/payment-management/search-and-filter) -- Find specific transactions quickly
-- [Operations](/docs/business/operations) -- Perform refunds, voids, and captures
-- [Transaction Reports](/docs/business/settings/transaction-reports) -- Export your transaction data
+- [Transaction States](/business/payment-management/transaction-states) -- Understand what each payment state means
+- [Search & Filter Payments](/business/payment-management/search-and-filter) -- Find specific transactions quickly
+- [Operations](/business/operations) -- Perform refunds, voids, and captures
+- [Transaction Reports](/business/settings/transaction-reports) -- Export your transaction data

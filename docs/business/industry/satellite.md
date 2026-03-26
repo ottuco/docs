@@ -42,7 +42,7 @@ The **Transactions** section provides an overview of all transactions across rel
 | **Plugin Type** | Plugin category used for the transaction |
 | **Amount** | Transaction amount |
 | **Currency Code** | Currency of the transaction |
-| **Status** | Current state of the transaction. See [Transaction States](/docs/business/payment-management/transaction-states) |
+| **Status** | Current state of the transaction. See [Transaction States](/business/payment-management/transaction-states) |
 | **Created** | Date the transaction was created |
 | **Modified** | Date the transaction was last updated |
 
@@ -80,6 +80,6 @@ Yes — merchants can download invoices and initiate payments. The **Pay Now** b
 
 ## What's Next?
 
-- **[Real Estate](/docs/business/industry/real-estate/)** — Property management, tenant contracts, and invoicing
-- **[Integrations](/docs/business/integrations)** — Shopify and other e-commerce platform integrations
-- **[Payment Management](/docs/business/payment-management/)** — Track transactions across all installations
+- **[Real Estate](/business/industry/real-estate/)** — Property management, tenant contracts, and invoicing
+- **[Integrations](/business/integrations)** — Shopify and other e-commerce platform integrations
+- **[Payment Management](/business/payment-management/)** — Track transactions across all installations

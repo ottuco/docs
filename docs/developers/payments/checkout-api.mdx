@@ -38,7 +38,7 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 ## Upload Attachment
 
-The Upload Attachment API allows merchants to upload a file, generating a `file_url` that can be linked to transactions. Files can be uploaded independently or directly associated with a transaction by including [`session_id`](/docs/developers/payments/checkout-api) or [`order_no`](/docs/developers/payments/checkout-api) in the request.
+The Upload Attachment API allows merchants to upload a file, generating a `file_url` that can be linked to transactions. Files can be uploaded independently or directly associated with a transaction by including [`session_id`](/developers/payments/checkout-api) or [`order_no`](/developers/payments/checkout-api) in the request.
 
 ### Use Cases
 
@@ -50,7 +50,7 @@ The Upload Attachment API allows merchants to upload a file, generating a `file_
 
 - **Single file upload** per request.
 - **Direct transaction linking** by including `session_id` or `order_no`.
-- **Reusable file URLs** for new transactions using [`attachment_upload_url`](/docs/developers/payments/checkout-api) in the [Checkout API](/docs/developers/payments/checkout-api).
+- **Reusable file URLs** for new transactions using [`attachment_upload_url`](/developers/payments/checkout-api) in the [Checkout API](/developers/payments/checkout-api).
 - **Supports URL shortening** for easier access with `shortify_attachment_url` (when `session_id` or `order_no` is provided).
 - **Maximum file size**: Upload limit is 2.5 MB.
 - **Support for various file formats** such as PDF, JPEG, PNG, DOC, DOCX, JPG, XLS, XLSX, and TXT.
@@ -71,13 +71,13 @@ Before using the `Upload Attachment API`, ensure the following conditions and se
 For cases where a file needs to be uploaded to the server before creating any transaction.
 
 - **Upload the file independently** to generate a `file_url`.
-- **Use the generated** `file_url` by adding it to the [`attachment_upload_url`](/docs/developers/payments/checkout-api) parameter in the [Checkout API](/docs/developers/payments/checkout-api) when creating the transaction.
+- **Use the generated** `file_url` by adding it to the [`attachment_upload_url`](/developers/payments/checkout-api) parameter in the [Checkout API](/developers/payments/checkout-api) when creating the transaction.
 
 #### Upload After `session_id` Generation
 
 For cases where a file is uploaded to the server after the transaction has been created:
 
-- **Create Transaction:** Creating a new transaction using [Checkout API](/docs/developers/payments/checkout-api). This will result generated [`session_id`](/docs/developers/payments/checkout-api) and [`order_no`](/docs/developers/payments/checkout-api) (if provided).
+- **Create Transaction:** Creating a new transaction using [Checkout API](/developers/payments/checkout-api). This will result generated [`session_id`](/developers/payments/checkout-api) and [`order_no`](/developers/payments/checkout-api) (if provided).
 - **Include:** `session_id` or `order_no` in the `Upload Attachment API` request payload to link the file directly to an existing transaction.
 - **URL Shortening (Optional)**: When providing `session_id` or `order_no`, you may set `shortify_attachment_url` to `true` to receive a shortened file URL.
 
@@ -85,10 +85,10 @@ For cases where a file is uploaded to the server after the transaction has been 
 
 **Supported Methods**
 
-- [Private API Key](/docs/developers/getting-started/authentication#private-key-api-key)
-- [Basic Authentication](/docs/developers/getting-started/authentication#basic-authentication)
+- [Private API Key](/developers/getting-started/authentication#private-key-api-key)
+- [Basic Authentication](/developers/getting-started/authentication#basic-authentication)
 
-For further information, please refer to the [Authentication](/docs/developers/getting-started/authentication) section.
+For further information, please refer to the [Authentication](/developers/getting-started/authentication) section.
 
 ### How It Works
 
@@ -96,7 +96,7 @@ The `Upload Attachment API` supports two options for uploading the file.
 
 #### Upload Before `session_id` Generation
 
-Upload a file before creating a transaction to generate a `file_url`. This `file_url` can then be included in the [`attachment_upload_url`](/docs/developers/payments/checkout-api) parameter of the [Checkout API](/docs/developers/payments/checkout-api) when the transaction is created. This approach is ideal when the file should be accessible from the start of the transaction process.
+Upload a file before creating a transaction to generate a `file_url`. This `file_url` can then be included in the [`attachment_upload_url`](/developers/payments/checkout-api) parameter of the [Checkout API](/developers/payments/checkout-api) when the transaction is created. This approach is ideal when the file should be accessible from the start of the transaction process.
 
 **1. Request Payload**
 
@@ -112,12 +112,12 @@ Once the upload is complete, the API response includes:
 - `original_filename` (**Mandatory**): The original name of the uploaded file.
 
 :::info
-`file_url` is used to link the uploaded file to a new transaction by adding it to the [`attachment_upload_url`](/docs/developers/payments/checkout-api) parameter in the [Checkout API](/docs/developers/payments/checkout-api) request.
+`file_url` is used to link the uploaded file to a new transaction by adding it to the [`attachment_upload_url`](/developers/payments/checkout-api) parameter in the [Checkout API](/developers/payments/checkout-api) request.
 :::
 
 #### Upload After `session_id` Generation
 
-Upload a file after the transaction is created. Include [`session_id`](/docs/developers/payments/checkout-api) or [`order_no`](/docs/developers/payments/checkout-api) in the upload request to link the file directly to the existing transaction. Optional URL shortening with `shortify_attachment_url` is available when `session_id` or `order_no` is provided. This scenario is helpful when file upload depends on transaction-specific data or upon successful transaction creation.
+Upload a file after the transaction is created. Include [`session_id`](/developers/payments/checkout-api) or [`order_no`](/developers/payments/checkout-api) in the upload request to link the file directly to the existing transaction. Optional URL shortening with `shortify_attachment_url` is available when `session_id` or `order_no` is provided. This scenario is helpful when file upload depends on transaction-specific data or upon successful transaction creation.
 
 **1. Request Payload**
 
@@ -172,7 +172,7 @@ curl --location '<<ottu-url>>/b/checkout/v1/upload-attachment/' \
 }
 ```
 
-After the file is uploaded, the API returns a `file_url`. This URL can be used to link the uploaded file to a new transaction by including it in the [`attachment_upload_url`](/docs/developers/payments/checkout-api) parameter of the [Checkout API](/docs/developers/payments/checkout-api) request payload.
+After the file is uploaded, the API returns a `file_url`. This URL can be used to link the uploaded file to a new transaction by including it in the [`attachment_upload_url`](/developers/payments/checkout-api) parameter of the [Checkout API](/developers/payments/checkout-api) request payload.
 
 **3. Checkout Request Payload**
 
@@ -201,7 +201,7 @@ After the file is uploaded, the API returns a `file_url`. This URL can be used t
 The transaction identifiers must be included in the `Upload Attachment API` request payload.
 
 **1. Create a Payment Transaction**\
-Before uploading an attachment, a payment transaction must be created via the [Checkout API](/docs/developers/payments/checkout-api). This transaction generates a [`session_id`](/docs/developers/payments/checkout-api), which is necessary for the next step.
+Before uploading an attachment, a payment transaction must be created via the [Checkout API](/developers/payments/checkout-api). This transaction generates a [`session_id`](/developers/payments/checkout-api), which is necessary for the next step.
 
 **Checkout Request Payload**
 
@@ -287,13 +287,13 @@ To ensure a smooth and efficient integration with the `Upload Attachment API`, f
 
 **4. Use `session_id` or `order_no` Correctly**
 
-- **Transaction identification**: You can use either the generated [`session_id`](/docs/developers/payments/checkout-api) or the merchant-provided [`order_no`](/docs/developers/payments/checkout-api) to associate the attachment with the transaction. Be sure to use the correct identifier based on your transaction flow.
+- **Transaction identification**: You can use either the generated [`session_id`](/developers/payments/checkout-api) or the merchant-provided [`order_no`](/developers/payments/checkout-api) to associate the attachment with the transaction. Be sure to use the correct identifier based on your transaction flow.
 
 ### Different Way to Upload Attachment
 
 #### Direct File Upload with the Checkout API
 
-Merchants can use the [Checkout API](/docs/developers/payments/checkout-api) to create a new transaction and associate a file with it. This can be achieved by including the file through the [`attachment`](/docs/developers/payments/checkout-api) parameter. However, because `multipart/form-data` does not support adding nested values to parameters (e.g., [`notifications`](/docs/developers/payments/checkout-api) or [`extra`](/docs/developers/payments/checkout-api)), it is often more practical to use the `attachment_upload_url`. This allows for a more flexible and reliable way to link files to transactions while preserving parameter structure.
+Merchants can use the [Checkout API](/developers/payments/checkout-api) to create a new transaction and associate a file with it. This can be achieved by including the file through the [`attachment`](/developers/payments/checkout-api) parameter. However, because `multipart/form-data` does not support adding nested values to parameters (e.g., [`notifications`](/developers/payments/checkout-api) or [`extra`](/developers/payments/checkout-api)), it is often more practical to use the `attachment_upload_url`. This allows for a more flexible and reliable way to link files to transactions while preserving parameter structure.
 
 ![Direct file upload with checkout](/img/payments/upload-attachment-direct-checkout.png)
 

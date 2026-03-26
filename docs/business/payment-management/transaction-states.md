@@ -5,10 +5,10 @@ sidebar_label: Transaction States
 
 # Transaction States
 
-Every payment in Ottu moves through a series of states, from creation to completion. Understanding these states helps you maintain an accurate audit trail, manage [operations](/docs/business/operations) efficiently, and know exactly where each payment stands.
+Every payment in Ottu moves through a series of states, from creation to completion. Understanding these states helps you maintain an accurate audit trail, manage [operations](/business/operations) efficiently, and know exactly where each payment stands.
 
 :::tip
-For the full technical state machine, see [Payment States](/docs/developers/reference/payment-states).
+For the full technical state machine, see [Payment States](/developers/reference/payment-states).
 :::
 
 Transactions in Ottu fall into two categories:
@@ -34,7 +34,7 @@ The parent state reflects the overall status of the original payment transaction
 | **COD** | Cash on Delivery -- the customer chose to pay in cash. | Customer |
 
 :::note
-The **Pending** state is only available when using an Ottu [plugin](/docs/business/plugins) with the checkout page. The **Attempted** state does not exist for single-attempt transactions; those go directly to **Failed** or **Authorized**.
+The **Pending** state is only available when using an Ottu [plugin](/business/plugins) with the checkout page. The **Attempted** state does not exist for single-attempt transactions; those go directly to **Failed** or **Authorized**.
 :::
 
 ## Child Payment States
@@ -50,7 +50,7 @@ Child transactions are created when a merchant performs an operation (capture, r
 | **Voided** | Authorized | The authorized amount has been reversed. The full amount (including any fee) is returned to the customer. |
 
 :::warning
-Voiding can only be performed on authorized transactions that have not been captured. Once a capture occurs (even a partial one), the void option is no longer available -- use a [refund](/docs/business/operations) instead.
+Voiding can only be performed on authorized transactions that have not been captured. Once a capture occurs (even a partial one), the void option is no longer available -- use a [refund](/business/operations) instead.
 :::
 
 The figure below illustrates a payment transaction with both parent and child states. The parent transaction is in the **Authorized** state, and the child transactions show **Paid** (captured) and **Refunded** states for the same payment.
@@ -97,7 +97,7 @@ Understanding how parent transaction states and attempt states interact is key:
 
 ## What's Next?
 
-- [Transaction Insights](/docs/business/payment-management/transaction-insights) -- Review amounts, fees, and dashboard charts
-- [Operations](/docs/business/operations) -- Perform captures, refunds, and voids
-- [Notifications & Timing](/docs/business/payment-management/notifications-timing) -- Configure when notifications are sent for each state change
-- [Search & Filter Payments](/docs/business/payment-management/search-and-filter) -- Find transactions by state, user, or gateway
+- [Transaction Insights](/business/payment-management/transaction-insights) -- Review amounts, fees, and dashboard charts
+- [Operations](/business/operations) -- Perform captures, refunds, and voids
+- [Notifications & Timing](/business/payment-management/notifications-timing) -- Configure when notifications are sent for each state change
+- [Search & Filter Payments](/business/payment-management/search-and-filter) -- Find transactions by state, user, or gateway

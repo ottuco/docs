@@ -20,5 +20,5 @@ Each payment service requires a one-time setup process involving the service pro
 
 - **[Apple Pay](apple-pay/)** — Set up Apple Pay with merchant ID, domain verification, and certificates
 - **[Samsung Pay](samsung-pay)** — Register with Samsung and link your Service ID to Ottu
-- **[Payment Gateways](/docs/business/payments/gateways)** — Browse and configure your payment gateways
-- **[Payment Routing](/docs/business/payments/routing)** — Route payments to the best gateway automatically
+- **[Payment Gateways](/business/payments/gateways)** — Browse and configure your payment gateways
+- **[Payment Routing](/business/payments/routing)** — Route payments to the best gateway automatically

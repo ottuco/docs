@@ -8,7 +8,7 @@ import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 
 # Invoice API
 
-Ottu's Invoice API automates invoice generation for both online and walk-in customers. You create an invoice with line items, taxes, and discounts — Ottu generates a payment link ([checkout_url](/docs/developers/payments/checkout-api)) that customers can use to view the invoice, download it as PDF, and pay directly. The API integrates with the [Checkout API](/docs/developers/payments/checkout-api) under the hood, so invoices benefit from the same payment gateway support, webhooks, and transaction tracking.
+Ottu's Invoice API automates invoice generation for both online and walk-in customers. You create an invoice with line items, taxes, and discounts — Ottu generates a payment link ([checkout_url](/developers/payments/checkout-api)) that customers can use to view the invoice, download it as PDF, and pay directly. The API integrates with the [Checkout API](/developers/payments/checkout-api) under the hood, so invoices benefit from the same payment gateway support, webhooks, and transaction tracking.
 
 :::tip Boost Your Integration
 Ottu offers SDKs and tools to speed up your integration. See [Getting Started](./getting-started/#boost-your-integration) for all available options.
@@ -23,11 +23,11 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 ## Setup
 
-1. **Payment Gateway** — a **Purchase** [Payment Gateway](/docs/developers/payments/payment-methods) must be configured. The Invoice API does not support the Authorize type.
+1. **Payment Gateway** — a **Purchase** [Payment Gateway](/developers/payments/payment-methods) must be configured. The Invoice API does not support the Authorize type.
 
 2. **Optional: `round` function** — when building a frontend for invoice creation, implement the same rounding logic Ottu uses (`ROUND_HALF_UP` per [Python decimal](https://docs.python.org/3.8/library/decimal.html#decimal.ROUND_HALF_UP)) to avoid discrepancy errors. Decimal places follow [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html) currency standards.
 
-3. **Optional: [Payment Methods API](/docs/developers/payments/payment-methods)** — call it to discover available `pg_codes` dynamically. If you already know your `pg_code`, you can skip this step.
+3. **Optional: [Payment Methods API](/developers/payments/payment-methods)** — call it to discover available `pg_codes` dynamically. If you already know your `pg_code`, you can skip this step.
 
 ## Guide
 
@@ -80,7 +80,7 @@ VAL CALC fields are optional validators. If provided, Ottu checks them against i
 
 #### 1. Retrieve `pg_codes` (optional)
 
-Call the [Payment Methods API](/docs/developers/payments/payment-methods) to get available gateway codes, or use a known `pg_code` directly.
+Call the [Payment Methods API](/developers/payments/payment-methods) to get available gateway codes, or use a known `pg_code` directly.
 
 #### 2. Create the invoice
 
@@ -131,7 +131,7 @@ Share the `checkout_url` with the customer. They can view the invoice, download 
 
 #### 4. Handle the webhook
 
-Ottu posts the transaction result to your [webhook_url](/docs/developers/webhooks/payment-events). Use the `session_id` to match the response to the original invoice.
+Ottu posts the transaction result to your [webhook_url](/developers/webhooks/payment-events). Use the `session_id` to match the response to the original invoice.
 
 ### Use Cases
 
@@ -172,7 +172,7 @@ Invoices cannot be modified after creation. If an error is made, create a new in
 
 #### Authentication
 
-Use [Private API Key](/docs/developers/getting-started/authentication#private-key-api-key) or [Basic Authentication](/docs/developers/getting-started/authentication#basic-authentication). Rotate API keys regularly.
+Use [Private API Key](/developers/getting-started/authentication#private-key-api-key) or [Basic Authentication](/developers/getting-started/authentication#basic-authentication). Rotate API keys regularly.
 
 #### VAL CALC Fields
 
@@ -210,7 +210,7 @@ It automates invoicing, saves time, reduces errors, and provides a seamless paym
 
 #### 3. What are the prerequisites?
 
-A **Purchase** [Payment Gateway](/docs/developers/payments/payment-methods) and understanding of the [rounding function](#invoice-generation-logic). Optionally, the [Payment Methods API](/docs/developers/payments/payment-methods) for dynamic `pg_codes`.
+A **Purchase** [Payment Gateway](/developers/payments/payment-methods) and understanding of the [rounding function](#invoice-generation-logic). Optionally, the [Payment Methods API](/developers/payments/payment-methods) for dynamic `pg_codes`.
 
 #### 4. Can I skip the Payment Methods API?
 
@@ -218,7 +218,7 @@ Yes, if you know your `pg_code`. But using it ensures you stay informed about ga
 
 #### 5. How do I handle authentication?
 
-Use [Private API Key](/docs/developers/getting-started/authentication#private-key-api-key) or [Basic Authentication](/docs/developers/getting-started/authentication#basic-authentication). See [Authentication](/docs/developers/getting-started/authentication).
+Use [Private API Key](/developers/getting-started/authentication#private-key-api-key) or [Basic Authentication](/developers/getting-started/authentication#basic-authentication). See [Authentication](/developers/getting-started/authentication).
 
 #### 6. What are VAL CALC fields?
 
@@ -234,7 +234,7 @@ Using `ROUND_HALF_UP` at both item and invoice levels. See [Invoice Generation L
 
 #### 9. Where can I find more technical details?
 
-See the interactive [API Reference](#api-reference) above, or the full [API Schema Reference](/docs/developers/apis/ottu-api).
+See the interactive [API Reference](#api-reference) above, or the full [API Schema Reference](/developers/apis/ottu-api).
 
 ## What's Next?
 

@@ -1,6 +1,6 @@
-import React, { useReducer, useRef, useCallback, useEffect } from "react";
+import React, { useReducer, useRef, useCallback, useEffect, useState } from "react";
 import Icon from "@mdi/react";
-import { mdiCheck, mdiLoading, mdiAlertCircleOutline } from "@mdi/js";
+import { mdiCheck, mdiLoading, mdiAlertCircleOutline, mdiChevronDown, mdiChevronRight } from "@mdi/js";
 import {
   createSandboxSession,
   callPaymentMethods,
@@ -185,6 +185,7 @@ function ApiPanel({ label, data }: { label: string; data: any }) {
 
 export default function PaymentJourneyInner() {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set());
   const sdkContainerRef = useRef<HTMLDivElement>(null);
   const webhookCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -195,12 +196,28 @@ export default function PaymentJourneyInner() {
     };
   }, []);
 
+  useEffect(() => {
+    setExpandedSteps(new Set());
+  }, [state.status]);
+
+  const toggleStep = useCallback((stepNum: number) => {
+    setExpandedSteps(prev => {
+      const next = new Set(prev);
+      if (next.has(stepNum)) next.delete(stepNum);
+      else next.add(stepNum);
+      return next;
+    });
+  }, []);
+
+  const isStepExpanded = (stepNum: number) =>
+    getStepStatus(stepNum, state) === "done" && expandedSteps.has(stepNum);
+
   // ── Step 1: Payment Methods ─────────────────────────
 
   const runStep1 = useCallback(async () => {
     dispatch({ type: "START" });
     try {
-      const response = await callPaymentMethods({ currencies: ["KWD"], plugin: "payment_request", operation: "purchase" });
+      const response = await callPaymentMethods({ currencies: ["KWD"], plugin: "payment_request", operation: "purchase", is_sandbox: true, tags: ["demo"] });
       const pgCodes = response?.payment_methods?.map((m: any) => m.code) ?? response?.pg_codes ?? [];
       dispatch({ type: "STEP1_DONE", pgCodes, response });
     } catch (err: any) {
@@ -292,12 +309,17 @@ export default function PaymentJourneyInner() {
     const meta = STEPS[stepNum - 1];
     const isActive = status === "active";
     const isDone = status === "done";
+    const isExpanded = isDone && expandedSteps.has(stepNum);
+    const showBody = isActive || isExpanded;
 
     return (
       <div className={styles.step} key={stepNum}>
         {renderNode(stepNum)}
-        <div className={`${styles.card} ${isActive ? styles.cardActive : isDone ? styles.cardDone : ""}`}>
-          <div className={`${styles.cardHeader} ${isDone ? styles.cardHeaderDone : ""}`}>
+        <div className={`${styles.card} ${isActive ? styles.cardActive : isDone ? (isExpanded ? styles.cardDoneExpanded : styles.cardDone) : ""}`}>
+          <div
+            className={`${styles.cardHeader} ${isDone ? styles.cardHeaderDone : ""}`}
+            onClick={isDone ? () => toggleStep(stepNum) : undefined}
+          >
             <div>
               <h3 className={`${styles.cardTitle} ${status === "pending" ? styles.cardTitlePending : ""}`}>
                 {meta.title}
@@ -305,12 +327,15 @@ export default function PaymentJourneyInner() {
               {isActive && <p className={styles.cardSubtitle}>Step {stepNum} of 6</p>}
             </div>
             {isDone && (
-              <span className={styles.doneBadge}>
-                <Icon path={mdiCheck} size={0.6} /> Done
-              </span>
+              <div className={styles.doneRight}>
+                <span className={styles.doneBadge}>
+                  <Icon path={mdiCheck} size={0.6} /> Done
+                </span>
+                <Icon path={isExpanded ? mdiChevronDown : mdiChevronRight} size={0.8} className={styles.chevron} />
+              </div>
             )}
           </div>
-          {isActive && (
+          {showBody && (
             <div className={styles.cardBody}>
               <p className={styles.cardDescription}>{meta.description}</p>
               {content}
@@ -391,19 +416,23 @@ export default function PaymentJourneyInner() {
               </button>
             </div>
           )}
-          {state.status === "step1_done" && (
+          {(state.status === "step1_done" || isStepExpanded(1)) && (
             <>
               <ApiPanel label="POST /b/pbl/v2/payment-methods/" data={{
                 plugin: "payment_request",
                 operation: "purchase",
                 currencies: ["KWD"],
+                is_sandbox: true,
+                tags: ["demo"],
               }} />
               <ApiPanel label="Response — pg_codes" data={state.paymentMethodsResponse} />
-              <div className={styles.actions}>
-                <button className={styles.primaryBtn} onClick={() => { dispatch({ type: "STEP2_DONE", sessionId: "", checkoutUrl: "", response: null }); runStep2(); }}>
-                  Continue to Step 2
-                </button>
-              </div>
+              {state.status === "step1_done" && (
+                <div className={styles.actions}>
+                  <button className={styles.primaryBtn} onClick={() => { dispatch({ type: "STEP2_DONE", sessionId: "", checkoutUrl: "", response: null }); runStep2(); }}>
+                    Continue to Step 2
+                  </button>
+                </div>
+              )}
             </>
           )}
         </>
@@ -418,14 +447,16 @@ export default function PaymentJourneyInner() {
                 <span className={styles.spinner} /> Creating payment session...
               </button>
             </div>
-          ) : state.status === "step2_done" && state.sessionId ? (
+          ) : (state.status === "step2_done" || isStepExpanded(2)) && state.sessionId ? (
             <>
               <ApiPanel label="Response" data={state.checkoutResponse} />
-              <div className={styles.actions}>
-                <button className={styles.primaryBtn} onClick={() => dispatch({ type: "CHOOSE_PATH" })}>
-                  Continue — Choose Payment Method
-                </button>
-              </div>
+              {state.status === "step2_done" && (
+                <div className={styles.actions}>
+                  <button className={styles.primaryBtn} onClick={() => dispatch({ type: "CHOOSE_PATH" })}>
+                    Continue — Choose Payment Method
+                  </button>
+                </div>
+              )}
             </>
           ) : null}
         </>
@@ -489,6 +520,17 @@ export default function PaymentJourneyInner() {
               )}
             </>
           )}
+
+          {isStepExpanded(3) && (
+            <>
+              {state.chosenPath === "redirect" && (
+                <ApiPanel label="checkout_url" data={state.checkoutUrl} />
+              )}
+              <p className={styles.cardDescription}>
+                Payment was completed via <strong>{state.chosenPath === "redirect" ? "Payment Link (redirect)" : "On-site Checkout SDK"}</strong>.
+              </p>
+            </>
+          )}
         </>
       ))}
 
@@ -496,12 +538,12 @@ export default function PaymentJourneyInner() {
       {renderStep(4, (
         <>
           <WebhookViewer orderId={state.orderId} label="Live Webhook Feed" />
-          {!state.webhookPayload && (
+          {!state.webhookPayload && !isStepExpanded(4) && (
             <p className={styles.cardDescription} style={{ marginTop: 12 }}>
               Waiting for the payment to complete. Once Ottu processes the payment, the webhook will appear above in real-time.
             </p>
           )}
-          {state.webhookPayload && (
+          {state.webhookPayload && !isStepExpanded(4) && (
             <div className={styles.actions}>
               <button className={styles.primaryBtn} onClick={() => dispatch({ type: "CONTINUE_PGPARAMS" })}>
                 Continue — Understand pg_params
@@ -541,11 +583,13 @@ export default function PaymentJourneyInner() {
               The <code>pg_params</code> object normalizes gateway responses into consistent fields like <code>card_number</code>, <code>auth_code</code>, <code>result</code>, and <code>rrn</code> — regardless of which gateway processed the payment.
             </p>
           )}
-          <div className={styles.actions}>
-            <button className={styles.primaryBtn} onClick={runStep6}>
-              Continue — Payment Status Query
-            </button>
-          </div>
+          {!isStepExpanded(5) && (
+            <div className={styles.actions}>
+              <button className={styles.primaryBtn} onClick={runStep6}>
+                Continue — Payment Status Query
+              </button>
+            </div>
+          )}
         </>
       ))}
 
@@ -559,18 +603,20 @@ export default function PaymentJourneyInner() {
               </button>
             </div>
           )}
-          {state.status === "step6_done" && (
+          {(state.status === "step6_done" || isStepExpanded(6)) && (
             <>
               <ApiPanel label="POST /b/pbl/v2/inquiry/" data={{ session_id: state.sessionId }} />
               <ApiPanel label="Response" data={state.psqResponse} />
               <p className={styles.cardDescription}>
                 The PSQ response has the same structure as the webhook payload. Use this as a fallback when webhooks don't arrive.
               </p>
-              <div className={styles.actions}>
-                <button className={styles.primaryBtn} onClick={() => dispatch({ type: "FINISH" })}>
-                  Complete Journey
-                </button>
-              </div>
+              {state.status === "step6_done" && (
+                <div className={styles.actions}>
+                  <button className={styles.primaryBtn} onClick={() => dispatch({ type: "FINISH" })}>
+                    Complete Journey
+                  </button>
+                </div>
+              )}
             </>
           )}
         </>

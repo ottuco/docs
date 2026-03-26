@@ -9,7 +9,7 @@ Ottu is a multi-currency payment platform. Merchants can accept payments in mult
 
 ## Currency Configurations
 
-Each [payment gateway](/docs/business/payments/gateways) comes with preconfigured currency settings. For example, the default currency for KNET is the Kuwaiti Dinar (KWD). These defaults ensure smooth transactions out of the box.
+Each [payment gateway](/business/payments/gateways) comes with preconfigured currency settings. For example, the default currency for KNET is the Kuwaiti Dinar (KWD). These defaults ensure smooth transactions out of the box.
 
 ## Currency Configuration Page
 
@@ -49,7 +49,7 @@ Merchants may prefer receiving payments in their local currency, even when the c
 
 ### Exchange Configuration
 
-The exchange configuration determines which currency rules apply to payments made through a specific [payment gateway](/docs/business/payments/gateways).
+The exchange configuration determines which currency rules apply to payments made through a specific [payment gateway](/business/payments/gateways).
 
 **To add an exchange configuration:**
 
@@ -72,11 +72,11 @@ The exchange configuration determines which currency rules apply to payments mad
 | **Charge default currency** | When enabled, a fee is added to the original amount even if the payment is in the gateway's default currency |
 
 :::warning
-Foreign currencies are not supported for [operations](/docs/developers/operations/). If a customer pays using a different currency than the MID (e.g., MID is KWD but payment is in USD via currency exchange), refund/void/capture operations won't work.
+Foreign currencies are not supported for [operations](/developers/operations/). If a customer pays using a different currency than the MID (e.g., MID is KWD but payment is in USD via currency exchange), refund/void/capture operations won't work.
 :::
 
 ## What's Next?
 
-- **[Payment Gateways](/docs/business/payments/gateways)** — Browse all supported gateways and their default currencies
-- **[Payment Routing](/docs/business/payments/routing)** — Route payments based on currency and other criteria
-- **[Settings](/docs/business/settings/global)** — Global configuration including currency exchange provider (Fixer.io)
+- **[Payment Gateways](/business/payments/gateways)** — Browse all supported gateways and their default currencies
+- **[Payment Routing](/business/payments/routing)** — Route payments based on currency and other criteria
+- **[Settings](/business/settings/global)** — Global configuration including currency exchange provider (Fixer.io)

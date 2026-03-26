@@ -5,13 +5,13 @@ sidebar_label: Search & Filter
 
 # Search & Filter Payments
 
-This guide explains how to display and filter payment links within the Ottu Dashboard. By following these steps, you can view payment links created by a specific user or processed through a specific [payment gateway](/docs/business/payments/gateways).
+This guide explains how to display and filter payment links within the Ottu Dashboard. By following these steps, you can view payment links created by a specific user or processed through a specific [payment gateway](/business/payments/gateways).
 
 ## Step-by-Step Instructions
 
 ### 1. Access the Transactions Section
 
-From the Ottu Dashboard, open the **Payment Request** [plugin](/docs/business/plugins) and go to the **Transactions** subsection. All transactions performed via the Payment Request plugin are listed here.
+From the Ottu Dashboard, open the **Payment Request** [plugin](/business/plugins) and go to the **Transactions** subsection. All transactions performed via the Payment Request plugin are listed here.
 
 ### 2. Add Payment Link Headers
 
@@ -24,7 +24,7 @@ To display payment links and gateway names in the transactions table:
 When you return to the **Transactions** table, the **Payment URL** and **Gateway Name** columns will be visible.
 
 :::tip
-You can customize which columns appear in any transaction table. See [Proxy Fields](/docs/business/payment-management/transaction-insights#proxy-fields) for details on managing table headers.
+You can customize which columns appear in any transaction table. See [Proxy Fields](/business/payment-management/transaction-insights#proxy-fields) for details on managing table headers.
 :::
 
 ### 3. Filter by User
@@ -52,6 +52,6 @@ A tutorial video is available to provide a visual walkthrough of the filtering p
 
 ## What's Next?
 
-- [Transaction Insights](/docs/business/payment-management/transaction-insights) -- Explore your transaction data and dashboard charts
-- [Transaction States](/docs/business/payment-management/transaction-states) -- Understand the lifecycle of a payment
-- [Plugins](/docs/business/plugins) -- Learn about Payment Request, E-Commerce, and Bulk plugins
+- [Transaction Insights](/business/payment-management/transaction-insights) -- Explore your transaction data and dashboard charts
+- [Transaction States](/business/payment-management/transaction-states) -- Understand the lifecycle of a payment
+- [Plugins](/business/plugins) -- Learn about Payment Request, E-Commerce, and Bulk plugins

@@ -5,7 +5,7 @@ sidebar_label: Generate Invoice
 
 # Generate Invoice
 
-In the Real Estate Plugin, invoices are automatically created and prepared for all rental payments associated with each contract. These payments occur based on the payment frequency defined within the [contract form](/docs/business/industry/real-estate/tenant-contract/add-contract#new-contract-form). Through the **Generate Invoice** section, merchants can explore all prepared invoices and filter them by property, profile, or period.
+In the Real Estate Plugin, invoices are automatically created and prepared for all rental payments associated with each contract. These payments occur based on the payment frequency defined within the [contract form](/business/industry/real-estate/tenant-contract/add-contract#new-contract-form). Through the **Generate Invoice** section, merchants can explore all prepared invoices and filter them by property, profile, or period.
 
 :::note
 Merchants can only choose the period for previewing invoices within the range of the plugin activation date to the current month.
@@ -54,6 +54,6 @@ After clicking the **SHOW** button to [display invoices](#display-invoices), the
 
 ## What's Next?
 
-- [Invoices Management](/docs/business/industry/real-estate/invoices-management) -- Track and manage all generated invoices
-- [Manual Payment](/docs/business/industry/real-estate/tenant-contract/manual-payment) -- Record offline payments for invoices
-- [Add Contract](/docs/business/industry/real-estate/tenant-contract/add-contract) -- Set up contracts that drive invoice generation
+- [Invoices Management](/business/industry/real-estate/invoices-management) -- Track and manage all generated invoices
+- [Manual Payment](/business/industry/real-estate/tenant-contract/manual-payment) -- Record offline payments for invoices
+- [Add Contract](/business/industry/real-estate/tenant-contract/add-contract) -- Set up contracts that drive invoice generation

@@ -5,7 +5,7 @@ sidebar_label: Renew Contract
 
 # Renew Contract
 
-Ottu enables merchants to seamlessly renew existing contracts. To initiate a contract renewal, follow the steps described in [Triggering Contract Actions](/docs/business/industry/real-estate/tenant-contract/contract-management#triggering-contract-actions).
+Ottu enables merchants to seamlessly renew existing contracts. To initiate a contract renewal, follow the steps described in [Triggering Contract Actions](/business/industry/real-estate/tenant-contract/contract-management#triggering-contract-actions).
 
 When you select **Renew Contract**, the system redirects you to the Renewal Contract Form.
 
@@ -25,6 +25,6 @@ Most fields are automatically populated and cannot be modified. The merchant mus
 
 ## What's Next?
 
-- [Contract Management](/docs/business/industry/real-estate/tenant-contract/contract-management) -- Overview of all contract actions
-- [Terminate Contract](/docs/business/industry/real-estate/tenant-contract/terminate-contract) -- End a contract when needed
-- [Auditing](/docs/business/industry/real-estate/auditing) -- Track renewal history and roll back if needed
+- [Contract Management](/business/industry/real-estate/tenant-contract/contract-management) -- Overview of all contract actions
+- [Terminate Contract](/business/industry/real-estate/tenant-contract/terminate-contract) -- End a contract when needed
+- [Auditing](/business/industry/real-estate/auditing) -- Track renewal history and roll back if needed

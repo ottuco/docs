@@ -31,7 +31,7 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 ## Setup
 
-1. **Checkout API integration** — create a payment transaction via the [Checkout API](/docs/developers/payments/checkout-api) first. This captures customer data ([`customer_phone`](/docs/developers/payments/checkout-api) for SMS/WhatsApp, [`customer_email`](/docs/developers/payments/checkout-api) for email) and generates the `session_id`.
+1. **Checkout API integration** — create a payment transaction via the [Checkout API](/developers/payments/checkout-api) first. This captures customer data ([`customer_phone`](/developers/payments/checkout-api) for SMS/WhatsApp, [`customer_email`](/developers/payments/checkout-api) for email) and generates the `session_id`.
 
 2. **Template configuration** — ensure notification templates (SMS, email, WhatsApp) are pre-configured. Contact the [Ottu support team](mailto:support@ottu.com) for template setup.
 
@@ -57,7 +57,7 @@ graph LR
     class B accent
 ```
 
-1. **Merchant obtains `session_id` or `order_no`** from a transaction created via the [Checkout API](/docs/developers/payments/checkout-api) or dashboard.
+1. **Merchant obtains `session_id` or `order_no`** from a transaction created via the [Checkout API](/developers/payments/checkout-api) or dashboard.
 2. **Merchant sends a request** to the Notifications API with the transaction identifier and desired channels.
 3. **Ottu dispatches notifications** via the specified channels (SMS, email, WhatsApp) based on the transaction's current state and configured templates.
 
@@ -65,7 +65,7 @@ graph LR
 
 #### 1. Create a transaction with notification channels
 
-Include the `notifications` parameter when creating the transaction via the [Checkout API](/docs/developers/payments/checkout-api):
+Include the `notifications` parameter when creating the transaction via the [Checkout API](/developers/payments/checkout-api):
 
 ```json
 {
@@ -158,7 +158,7 @@ Check the API response for failures. Build retry mechanisms or alerts for third-
 
 #### Secure API requests
 
-Use proper [authentication](/docs/developers/getting-started/authentication) and HTTPS for all API calls. Notification requests contain sensitive transaction data.
+Use proper [authentication](/developers/getting-started/authentication) and HTTPS for all API calls. Notification requests contain sensitive transaction data.
 
 #### Test before production
 

@@ -48,7 +48,7 @@ Global configuration controls the core identity and behavior of your Ottu instal
 | **Fixer access key** | The API key used to retrieve real-time currency exchange rates from [Fixer.io](https://fixer.io). Obtain your key by creating a Fixer.io account |
 
 :::note
-For the Fixer.io exchange service to work, you must enable online conversion: go to **Administration Panel** > **Currency** > **Currency Exchange Configs** and set the **Work as** field to **Online**. See [Currencies](/docs/business/payments/currencies) for full details.
+For the Fixer.io exchange service to work, you must enable online conversion: go to **Administration Panel** > **Currency** > **Currency Exchange Configs** and set the **Work as** field to **Online**. See [Currencies](/business/payments/currencies) for full details.
 :::
 
 ### Control & Security
@@ -71,7 +71,7 @@ When 2FA is enabled, a one-time passcode (OTP) is sent to your email for every d
 | **Expire payment transaction** | When enabled, payment request URLs expire after a set time period |
 
 :::note
-- When a payment expires, it transitions to the **Expired** state and the payment URL becomes invalid. See [Transaction States](/docs/business/payment-management/transaction-states) for details.
+- When a payment expires, it transitions to the **Expired** state and the payment URL becomes invalid. See [Transaction States](/business/payment-management/transaction-states) for details.
 - The default expiration period is 24 hours. To change it: **Administration Panel** > **Payment Request** > **Payment Request Configuration** > **Transaction Expiration Time**.
 :::
 
@@ -91,7 +91,7 @@ When 2FA is enabled, a one-time passcode (OTP) is sent to your email for every d
 
 | Field | Description |
 |-------|-------------|
-| **Reference prefix** | A unique prefix added to transaction track IDs to prevent duplicates when multiple Ottu installations share the same [payment gateway](/docs/business/payments/gateways) |
+| **Reference prefix** | A unique prefix added to transaction track IDs to prevent duplicates when multiple Ottu installations share the same [payment gateway](/business/payments/gateways) |
 
 :::note
 If you operate multiple Ottu installations connected to a single payment gateway, at least one installation should have a reference prefix. This ensures each installation generates unique track IDs, preventing conflicts in tracking and reporting.
@@ -108,5 +108,5 @@ If you operate multiple Ottu installations connected to a single payment gateway
 
 - **[Webhooks Configuration](./webhooks)** — Set up real-time notifications for payment and operation events
 - **[API Keys](./api-keys)** — Generate API keys for developer integration
-- **[Currencies](/docs/business/payments/currencies)** — Configure currency exchange and multi-currency support
-- **[Plugins](/docs/business/plugins/)** — Manage payment request and e-commerce plugins
+- **[Currencies](/business/payments/currencies)** — Configure currency exchange and multi-currency support
+- **[Plugins](/business/plugins/)** — Manage payment request and e-commerce plugins

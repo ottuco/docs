@@ -67,5 +67,5 @@ After uploading, MPGS will process the certificate. Your Apple Pay integration w
 
 - **[Apple Pay Configuration](./index.md)** — Return to the main Apple Pay setup guide
 - **[Setup Cybersource](setup-cybersource)** — Set up Apple Pay with Cybersource instead
-- **[Payment Gateways](/docs/business/payments/gateways)** — Browse and configure your payment gateways
+- **[Payment Gateways](/business/payments/gateways)** — Browse and configure your payment gateways
 - **[Payment Services](../)** — Overview of all available payment services

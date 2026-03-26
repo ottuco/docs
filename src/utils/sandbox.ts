@@ -100,12 +100,16 @@ export async function callPaymentMethods(options: {
   currencies: string[];
   plugin?: string;
   operation?: string;
+  is_sandbox?: boolean;
+  tags?: string[];
 }): Promise<any> {
-  const body = {
+  const body: Record<string, unknown> = {
     plugin: options.plugin ?? "payment_request",
     operation: options.operation ?? "purchase",
     currencies: options.currencies,
   };
+  if (options.is_sandbox != null) body.is_sandbox = options.is_sandbox;
+  if (options.tags) body.tags = options.tags;
 
   const response = await fetch(
     `https://${SANDBOX_MERCHANT_ID}/b/pbl/v2/payment-methods/`,

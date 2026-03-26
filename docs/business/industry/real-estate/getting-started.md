@@ -19,9 +19,9 @@ Throughout this guide, we use the following example entities:
 
 ## Step 1: Add a Property
 
-1. Navigate to the [Property Management](/docs/business/industry/real-estate/properties) section on the dashboard.
+1. Navigate to the [Property Management](/business/industry/real-estate/properties) section on the dashboard.
 2. Click **Add Property**.
-3. Fill in the [New Property Form](/docs/business/industry/real-estate/properties#new-property-form) with the key details:
+3. Fill in the [New Property Form](/business/industry/real-estate/properties#new-property-form) with the key details:
    - **Name**: Greenfield Towers
    - **Location**: Downtown City
    - **Classification**: Residential Building or Villa
@@ -43,25 +43,25 @@ The merchant can choose to either save the property or add new units to it.
 
 4. Save the property to make it available for actions like tenant assignment or contract creation.
 
-Refer to the [Property Management](/docs/business/industry/real-estate/properties) section for further details on managing property settings and custom fields.
+Refer to the [Property Management](/business/industry/real-estate/properties) section for further details on managing property settings and custom fields.
 
 ## Step 2: Add a Tenant
 
-1. Navigate to the [Tenant & Contract Dashboard](/docs/business/industry/real-estate/tenant-contract/dashboard).
+1. Navigate to the [Tenant & Contract Dashboard](/business/industry/real-estate/tenant-contract/dashboard).
 2. Click **Add Tenant** to register a new tenant.
-3. Provide essential information in the [New Tenant Form](/docs/business/industry/real-estate/tenant-contract/tenant-management#new-tenant-form):
+3. Provide essential information in the [New Tenant Form](/business/industry/real-estate/tenant-contract/tenant-management#new-tenant-form):
    - **Name**: John Doe
    - **Contact Details**: Email and phone number
    - **Assigned Property**: Link the tenant to a specific unit or property
 4. Save the tenant's profile.
 
-For a comprehensive guide, refer to the [Tenant Management](/docs/business/industry/real-estate/tenant-contract/tenant-management) section.
+For a comprehensive guide, refer to the [Tenant Management](/business/industry/real-estate/tenant-contract/tenant-management) section.
 
 ## Step 3: Add a Contract
 
-1. Access the [Tenant & Contract Dashboard](/docs/business/industry/real-estate/tenant-contract/dashboard).
+1. Access the [Tenant & Contract Dashboard](/business/industry/real-estate/tenant-contract/dashboard).
 2. Click **Add Contract** to create a lease agreement.
-3. Fill in the [New Contract Form](/docs/business/industry/real-estate/tenant-contract/add-contract#new-contract-form) details:
+3. Fill in the [New Contract Form](/business/industry/real-estate/tenant-contract/add-contract#new-contract-form) details:
    - **Property Name**: Greenfield Towers
    - **Tenant Name**: John Doe
    - **Unit**: Click **ADD UNIT** and select Unit Number 2
@@ -71,7 +71,7 @@ For a comprehensive guide, refer to the [Tenant Management](/docs/business/indus
    - **Payment Period**: Monthly
 4. Finalize and save the contract.
 
-Refer to the [Contract Management](/docs/business/industry/real-estate/tenant-contract/contract-management) page for additional information on editing and managing contracts.
+Refer to the [Contract Management](/business/industry/real-estate/tenant-contract/contract-management) page for additional information on editing and managing contracts.
 
 **Invoices generated during contracting:**
 
@@ -79,7 +79,7 @@ Refer to the [Contract Management](/docs/business/industry/real-estate/tenant-co
 
 ## Step 4: Print Unit Vacancy Report
 
-1. Access the [Property Management](/docs/business/industry/real-estate/properties) table in the dashboard.
+1. Access the [Property Management](/business/industry/real-estate/properties) table in the dashboard.
 2. Click the **Filter** button to define parameters:
    - Unit Type: **Villa**
    - Property Classification: **Residential Building or Villa**
@@ -91,7 +91,7 @@ Refer to the [Contract Management](/docs/business/industry/real-estate/tenant-co
 
 ## Step 5: Print and Generate Invoices
 
-1. Navigate to the [Generate Invoice](/docs/business/industry/real-estate/generate-invoice) section.
+1. Navigate to the [Generate Invoice](/business/industry/real-estate/generate-invoice) section.
 2. Choose the property as **Greenfield Towers** and specify the desired period (e.g., 2024-12).
 3. Click the **Show** button.
 4. All relevant invoices are displayed.
@@ -108,7 +108,7 @@ Refer to the [Contract Management](/docs/business/industry/real-estate/tenant-co
    1. Click the **GENERATE INVOICES AND SEND PAYMENT LINKS** button to generate the displayed invoices.
    2. The associated payment links are automatically sent to the respective tenants.
 
-Refer to the [Generate Invoice](/docs/business/industry/real-estate/generate-invoice) guide for detailed instructions.
+Refer to the [Generate Invoice](/business/industry/real-estate/generate-invoice) guide for detailed instructions.
 
 ## Step 6: Pay via Invoice Link
 
@@ -121,19 +121,19 @@ Refer to the [Generate Invoice](/docs/business/industry/real-estate/generate-inv
 
 ## Step 7: Record a Manual Payment
 
-1. Access the **Contract Action List**. For instructions on accessing contract actions, see the [Contract Management](/docs/business/industry/real-estate/tenant-contract/contract-management#triggering-contract-actions) page.
+1. Access the **Contract Action List**. For instructions on accessing contract actions, see the [Contract Management](/business/industry/real-estate/tenant-contract/contract-management#triggering-contract-actions) page.
 2. Select **Manual Payment** to record an offline payment.
 
 ![Manual payment option](/img/business/real-estate/placeholder.png)
 
-3. After selecting Manual Payment, a [Manual Payment Form](/docs/business/industry/real-estate/tenant-contract/manual-payment#manual-payment-form) appears. Fill in the required information.
+3. After selecting Manual Payment, a [Manual Payment Form](/business/industry/real-estate/tenant-contract/manual-payment#manual-payment-form) appears. Fill in the required information.
 4. Confirm and save the transaction.
 
-See [Manual Payment](/docs/business/industry/real-estate/tenant-contract/manual-payment) for more details.
+See [Manual Payment](/business/industry/real-estate/tenant-contract/manual-payment) for more details.
 
 ## Step 8: View and Print Invoices and Payments
 
-1. Access the [Invoices Dashboard](/docs/business/industry/real-estate/invoices-management#invoices-management-dashboard).
+1. Access the [Invoices Dashboard](/business/industry/real-estate/invoices-management#invoices-management-dashboard).
 2. Use filters for specific invoices or payments by property, tenant, or date range.
 3. Review the details.
 4. Click the **Print** button to generate a PDF file containing invoice details for easy printing.
@@ -142,7 +142,7 @@ By following these steps, merchants can effectively manage their properties, ten
 
 ## What's Next?
 
-- [Property Management](/docs/business/industry/real-estate/properties) -- Add and manage properties and units in detail
-- [Tenant & Contract Management](/docs/business/industry/real-estate/tenant-contract/) -- Manage tenants and contracts
-- [Generate Invoice](/docs/business/industry/real-estate/generate-invoice) -- Create and send invoices
-- [Invoices Management](/docs/business/industry/real-estate/invoices-management) -- Track and manage all invoices
+- [Property Management](/business/industry/real-estate/properties) -- Add and manage properties and units in detail
+- [Tenant & Contract Management](/business/industry/real-estate/tenant-contract/) -- Manage tenants and contracts
+- [Generate Invoice](/business/industry/real-estate/generate-invoice) -- Create and send invoices
+- [Invoices Management](/business/industry/real-estate/invoices-management) -- Track and manage all invoices

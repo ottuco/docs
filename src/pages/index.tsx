@@ -21,17 +21,17 @@ const STATS = [
 ];
 
 const DEV_LINKS = [
-  { label: "Checkout API", to: "/docs/developers/payments/checkout-api" },
-  { label: "Webhooks", to: "/docs/developers/webhooks/" },
-  { label: "SDK", to: "/docs/developers/payments/checkout-sdk/" },
-  { label: "Test Cards", to: "/docs/developers/reference/test-cards" },
+  { label: "Checkout API", to: "/developers/payments/checkout-api" },
+  { label: "Webhooks", to: "/developers/webhooks/" },
+  { label: "SDK", to: "/developers/payments/checkout-sdk/" },
+  { label: "Test Cards", to: "/developers/reference/test-cards" },
 ];
 
 const BIZ_LINKS = [
-  { label: "Payment Gateways", to: "/docs/business/payments/gateways" },
-  { label: "Payment Management", to: "/docs/business/payment-management/" },
-  { label: "Notifications", to: "/docs/business/notifications/" },
-  { label: "Settings", to: "/docs/business/settings/" },
+  { label: "Payment Gateways", to: "/business/payments/gateways" },
+  { label: "Payment Management", to: "/business/payment-management/" },
+  { label: "Notifications", to: "/business/notifications/" },
+  { label: "Settings", to: "/business/settings/" },
 ];
 
 const HIGHLIGHTS = [
@@ -73,11 +73,11 @@ function Hero() {
         <div className={styles.heroCtas}>
           <Link
             className={styles.ctaPrimary}
-            to="/docs/developers/getting-started"
+            to="/developers/getting-started"
           >
             Developer Docs
           </Link>
-          <Link className={styles.ctaSecondary} to="/docs/business/">
+          <Link className={styles.ctaSecondary} to="/business/">
             Business Guide
           </Link>
         </div>
@@ -120,7 +120,7 @@ function AudienceCards() {
             ))}
           </div>
           <Link
-            to="/docs/developers/getting-started"
+            to="/developers/getting-started"
             className={styles.audienceCta}
           >
             Start Integrating →
@@ -141,7 +141,7 @@ function AudienceCards() {
               </Link>
             ))}
           </div>
-          <Link to="/docs/business/" className={styles.audienceCta}>
+          <Link to="/business/" className={styles.audienceCta}>
             Explore Business Docs →
           </Link>
         </div>

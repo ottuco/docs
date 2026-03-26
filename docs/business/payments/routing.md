@@ -114,6 +114,6 @@ The system triggers the Fallback Routing option to ensure the transaction is pro
 
 ## What's Next?
 
-- **[Payment Gateways](/docs/business/payments/gateways)** — Browse all supported gateways
-- **[Currencies](/docs/business/payments/currencies)** — Multi-currency exchange configuration
-- **[Settings](/docs/business/settings/)** — Configure global settings and webhooks
+- **[Payment Gateways](/business/payments/gateways)** — Browse all supported gateways
+- **[Currencies](/business/payments/currencies)** — Multi-currency exchange configuration
+- **[Settings](/business/settings/)** — Configure global settings and webhooks

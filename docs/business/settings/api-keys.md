@@ -7,7 +7,7 @@ sidebar_label: API Keys
 
 API keys allow your developers to authenticate with the Ottu API and integrate payment functionality into your application. Each key pair consists of a **private key** (for server-side API calls) and a **public key** (for client-side SDK initialization).
 
-For technical details on how API keys are used in authentication, see the [developer authentication guide](/docs/developers/getting-started/authentication).
+For technical details on how API keys are used in authentication, see the [developer authentication guide](/developers/getting-started/authentication).
 
 ## Step 1: Navigate to API Keys
 
@@ -44,8 +44,8 @@ After saving, click on the newly created API key entry (e.g., "Production Backen
 
 You will see two keys:
 
-- **Private key (API key)** — used on your server for [API authentication](/docs/developers/getting-started/authentication). Keep this secret and never expose it in client-side code.
-- **Public key** — used for client-side SDK initialization (e.g., [Checkout SDK](/docs/developers/checkout-sdk/)).
+- **Private key (API key)** — used on your server for [API authentication](/developers/getting-started/authentication). Keep this secret and never expose it in client-side code.
+- **Public key** — used for client-side SDK initialization (e.g., [Checkout SDK](/developers/checkout-sdk/)).
 
 :::danger
 Never share your private API key publicly or include it in client-side code, mobile apps, or version control. If a key is compromised, immediately revoke it and generate a new one.
@@ -54,5 +54,5 @@ Never share your private API key publicly or include it in client-side code, mob
 ## What's Next?
 
 - **[Global Configuration](./global)** — Configure your merchant identity and system-wide settings
-- **[Authentication (Developer Guide)](/docs/developers/getting-started/authentication)** — Learn how to use API keys in your integration
+- **[Authentication (Developer Guide)](/developers/getting-started/authentication)** — Learn how to use API keys in your integration
 - **[Webhooks Configuration](./webhooks)** — Set up webhook notifications for payment events

@@ -158,7 +158,7 @@ These links are mandatory whenever the topic is mentioned:
 | Checkout API / session_id | `payments/checkout-api.mdx` |
 | Operations (refund, capture, void) | `operations.md` |
 
-Use relative links within the developers section (e.g., `../webhooks/payment-events.md`). Use absolute paths when linking outside (e.g., `/docs/glossary/`).
+Use relative links within the developers section (e.g., `../webhooks/payment-events.md`). Use absolute paths when linking outside (e.g., `/glossary/`).
 
 ## Payment Domain Context
 

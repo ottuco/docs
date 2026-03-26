@@ -105,6 +105,11 @@
   opacity: 1;
 }
 
+.cardDoneExpanded {
+  opacity: 1;
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
 /* ── Card header ─────────────────────────────────────── */
 .cardHeader {
   padding: 18px 24px;
@@ -116,6 +121,15 @@
 
 .cardHeaderDone {
   padding: 14px 24px;
+  cursor: pointer;
+}
+
+.cardHeaderDone:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="dark"] .cardHeaderDone:hover {
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .cardTitle {
@@ -137,6 +151,12 @@
   margin: 4px 0 0 0;
 }
 
+.doneRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .doneBadge {
   display: flex;
   align-items: center;
@@ -146,6 +166,12 @@
   color: #22c55e;
   letter-spacing: 0.3px;
   text-transform: uppercase;
+}
+
+.chevron {
+  color: var(--ifm-font-color-base);
+  opacity: 0.4;
+  transition: transform 0.2s ease;
 }
 
 /* ── Card body (collapsible) ─────────────────────────── */

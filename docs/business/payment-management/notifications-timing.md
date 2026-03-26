@@ -9,7 +9,7 @@ Ottu keeps you informed about every stage of a payment's lifecycle through confi
 
 ## Notifications
 
-Ottu's notification system lets you choose your preferred channels -- [Email](/docs/business/notifications/email), [SMS](/docs/business/notifications/sms), and [WhatsApp](/docs/business/notifications/whatsapp) -- and sends alerts automatically when key payment events occur.
+Ottu's notification system lets you choose your preferred channels -- [Email](/business/notifications/email), [SMS](/business/notifications/sms), and [WhatsApp](/business/notifications/whatsapp) -- and sends alerts automatically when key payment events occur.
 
 | Notification Event | Triggered When |
 |---|---|
@@ -24,20 +24,20 @@ Ottu's notification system lets you choose your preferred channels -- [Email](/d
 | **Captured** | The payment is captured. |
 
 :::tip
-Configure which events trigger notifications and through which channels in the [Notification Channels](/docs/business/notifications) settings. You can also customize notification templates -- see [Notification Templates](/docs/business/notifications/templates).
+Configure which events trigger notifications and through which channels in the [Notification Channels](/business/notifications) settings. You can also customize notification templates -- see [Notification Templates](/business/notifications/templates).
 :::
 
 ## Payment Short URL
 
-Ottu's [URL shortener](/docs/business/settings/url-shortener) automatically shortens payment links for SMS delivery, reducing SMS character consumption and making links easier to share. This is especially useful when sending payment links via SMS or WhatsApp, where message length directly affects cost.
+Ottu's [URL shortener](/business/settings/url-shortener) automatically shortens payment links for SMS delivery, reducing SMS character consumption and making links easier to share. This is especially useful when sending payment links via SMS or WhatsApp, where message length directly affects cost.
 
 :::note
-The URL shortener must be configured before short URLs are generated. See [URL Shortener Settings](/docs/business/settings/url-shortener) for setup instructions.
+The URL shortener must be configured before short URLs are generated. See [URL Shortener Settings](/business/settings/url-shortener) for setup instructions.
 :::
 
 ## Payment Expiration Time
 
-The expiration time defines how long a payment link remains active. During this window, a failed transaction can be retried by the customer. Once the expiration time elapses, the payment can no longer be processed and transitions to the `expired` [state](/docs/business/payment-management/transaction-states).
+The expiration time defines how long a payment link remains active. During this window, a failed transaction can be retried by the customer. Once the expiration time elapses, the payment can no longer be processed and transitions to the `expired` [state](/business/payment-management/transaction-states).
 
 Key points about expiration:
 
@@ -53,7 +53,7 @@ Ensure your expiration time is long enough for your use case. For payment links 
 
 ## What's Next?
 
-- [Notification Channels](/docs/business/notifications) -- Set up email, SMS, and WhatsApp notifications
-- [Notification Templates](/docs/business/notifications/templates) -- Customize the content of your notifications
-- [Transaction States](/docs/business/payment-management/transaction-states) -- Understand what each payment state means
-- [URL Shortener Settings](/docs/business/settings/url-shortener) -- Configure short URL generation
+- [Notification Channels](/business/notifications) -- Set up email, SMS, and WhatsApp notifications
+- [Notification Templates](/business/notifications/templates) -- Customize the content of your notifications
+- [Transaction States](/business/payment-management/transaction-states) -- Understand what each payment state means
+- [URL Shortener Settings](/business/settings/url-shortener) -- Configure short URL generation

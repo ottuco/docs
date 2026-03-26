@@ -36,5 +36,5 @@ Click **Add URL Shortener Configuration** to create a new configuration.
 ## What's Next?
 
 - **[Global Configuration](./global)** — Enable the URL shortener and configure other system-wide settings
-- **[Plugins](/docs/business/plugins/)** — Configure the payment request plugin that generates payment links
-- **[Notifications](/docs/business/notifications/)** — Set up SMS and WhatsApp notifications that benefit from shortened URLs
+- **[Plugins](/business/plugins/)** — Configure the payment request plugin that generates payment links
+- **[Notifications](/business/notifications/)** — Set up SMS and WhatsApp notifications that benefit from shortened URLs

@@ -38,7 +38,7 @@ Tenants access the maintenance ticket form by scanning a QR code associated with
 
 **How the merchant obtains the QR code:**
 
-1. Navigate to the [Property Management](/docs/business/industry/real-estate/properties) section within the dashboard.
+1. Navigate to the [Property Management](/business/industry/real-estate/properties) section within the dashboard.
 2. Search for the specific property needing maintenance.
 
 ![Search for property](/img/business/real-estate/placeholder.png)
@@ -151,6 +151,6 @@ By adding tickets manually, merchants can:
 
 ## What's Next?
 
-- [Property Management](/docs/business/industry/real-estate/properties) -- Manage property details and units
-- [Tenant & Contract Management](/docs/business/industry/real-estate/tenant-contract/) -- Manage tenants and their contracts
-- [Transactions](/docs/business/industry/real-estate/transactions) -- Monitor payment transactions
+- [Property Management](/business/industry/real-estate/properties) -- Manage property details and units
+- [Tenant & Contract Management](/business/industry/real-estate/tenant-contract/) -- Manage tenants and their contracts
+- [Transactions](/business/industry/real-estate/transactions) -- Monitor payment transactions

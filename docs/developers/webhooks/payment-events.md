@@ -11,11 +11,11 @@ Payment webhooks are specific to payment events and are triggered on multiple oc
 
 1.  #### Post-Payment Completion
 
-    Once a payer has completed the payment process and awaits redirection. To get notified for this event, the [webhook_url](/docs/developers/payments/checkout-api#request-webhook_url) must either be sent via the [Checkout API ](/docs/developers/payments/checkout-api)when the payment transaction is created or set as the default [webhook_url](/docs/developers/webhooks) in the Ottu dashboard to apply for all transactions.
+    Once a payer has completed the payment process and awaits redirection. To get notified for this event, the [webhook_url](/developers/payments/checkout-api#request-webhook_url) must either be sent via the [Checkout API ](/developers/payments/checkout-api)when the payment transaction is created or set as the default [webhook_url](/developers/webhooks) in the Ottu dashboard to apply for all transactions.
 
 2.  #### Automatic Inquiry by Ottu
 
-    If a payment transaction has an associated [webhook_url](/docs/developers/payments/checkout-api#request-webhook_url), it can be notified during the automatic inquiry process. This can happen immediately after the payer completes the payment process or later if the payment encounters an error. More details about the timings for automatic inquiry can be found [here](/docs/developers/payments/psq).
+    If a payment transaction has an associated [webhook_url](/developers/payments/checkout-api#request-webhook_url), it can be notified during the automatic inquiry process. This can happen immediately after the payer completes the payment process or later if the payment encounters an error. More details about the timings for automatic inquiry can be found [here](/developers/payments/psq).
 
 3.  #### Manual Inquiry by Staff
 
@@ -23,18 +23,18 @@ Payment webhooks are specific to payment events and are triggered on multiple oc
 
 4.  #### Manual Notification by Staff
 
-    When a staff manually triggers a notification to the [webhook_url](/docs/developers/payments/checkout-api#request-webhook_url) from the Ottu dashboard.
+    When a staff manually triggers a notification to the [webhook_url](/developers/payments/checkout-api#request-webhook_url) from the Ottu dashboard.
 
 5.  #### Merchant-Initiated Inquiry
 
-    When an [inquiry API](/docs/developers/payments/psq) call is initiated by the merchant. Optionally, a notification can be sent to the [webhook_url](/docs/developers/payments/checkout-api#request-webhook_url) associated with the payment transaction or to a new one specified during the inquiry API call.
+    When an [inquiry API](/developers/payments/psq) call is initiated by the merchant. Optionally, a notification can be sent to the [webhook_url](/developers/payments/checkout-api#request-webhook_url) associated with the payment transaction or to a new one specified during the inquiry API call.
 
 ## **Setup**
 
 1. **Configuring URLs**:
 
-- **Via Checkout API:** Provide the [webhook_url](/docs/developers/payments/checkout-api#request-webhook_url) and an optional [redirect_url](/docs/developers/payments/checkout-api#request-redirect_url) when calling the [Checkout API](/docs/developers/payments/checkout-api).
-- **Using Plugin Config:** Set the `webhook_url` and `redirect_url` globally via the plugin config, applicable to either [E-Commerce](/docs/developers/payments/payment-methods) or [Payment reques](/docs/developers/payments/payment-methods)t plugins. Even if these values are set globally, they can be overridden for specific transactions when using the `Checkout API`. For more details on this configuration, click [here](/docs/developers/webhooks).
+- **Via Checkout API:** Provide the [webhook_url](/developers/payments/checkout-api#request-webhook_url) and an optional [redirect_url](/developers/payments/checkout-api#request-redirect_url) when calling the [Checkout API](/developers/payments/checkout-api).
+- **Using Plugin Config:** Set the `webhook_url` and `redirect_url` globally via the plugin config, applicable to either [E-Commerce](/developers/payments/payment-methods) or [Payment reques](/developers/payments/payment-methods)t plugins. Even if these values are set globally, they can be overridden for specific transactions when using the `Checkout API`. For more details on this configuration, click [here](/developers/webhooks).
 
 2. **Endpoint Requirements:** \
    Ensure your endpoint adheres to all the stipulations outlined in the Webhook Overview. To review the requirements, click [here](./#endpoint-requirements).
@@ -42,7 +42,7 @@ Payment webhooks are specific to payment events and are triggered on multiple oc
 
 - **Successful Redirect:** If you aim for the payer to be redirected back to your website post-payment, your endpoint should return an HTTP status of 200. Any other status will keep the payer on the Ottu payment details page.
 - **Retaining on Ottu Page:** If you intentionally want the payer to remain on the Ottu page post-payment, return a status code of 201. Ottu will interpret this as a successful notification, and the payer won’t be redirected. Any other status will be deemed as a failed notification by Ottu.
-- **Specific Redirects:** If you have a particular URL to which you wish to redirect the payer after the payment process, ensure you specify the [redirect_url](/docs/developers/payments/checkout-api#request-redirect_url) during the payment setup. Ottu will use this URL to navigate the payer back to your platform or any designated page post-payment.
+- **Specific Redirects:** If you have a particular URL to which you wish to redirect the payer after the payment process, ensure you specify the [redirect_url](/developers/payments/checkout-api#request-redirect_url) during the payment setup. Ottu will use this URL to navigate the payer back to your platform or any designated page post-payment.
 
 ## Params
 
@@ -50,18 +50,18 @@ Payment webhooks are specific to payment events and are triggered on multiple oc
 
 ## **Event Types**
 
-Ottu notifies the [webhook_url](/docs/developers/payments/checkout-api#request-webhook_url) for all payment event types, not just success. This includes statuses like `error`, `failed`, `pending`, `rejected`, etc. The payload provides enough context to identify the status of the event.&#x20;
+Ottu notifies the [webhook_url](/developers/payments/checkout-api#request-webhook_url) for all payment event types, not just success. This includes statuses like `error`, `failed`, `pending`, `rejected`, etc. The payload provides enough context to identify the status of the event.&#x20;
 
 :::info
-&#x20;Events like **Refund**, **Void**, or **Capture** are considered operation events and not payment events. If you’re looking for information on these, please refer to the [Operation Webhook page](/docs/developers/webhooks/operation-events).
+&#x20;Events like **Refund**, **Void**, or **Capture** are considered operation events and not payment events. If you’re looking for information on these, please refer to the [Operation Webhook page](/developers/webhooks/operation-events).
 :::
 
 ## Redirectional Diagram
 
-To ensure a smooth redirection of the payer back to the designated [redirect_url](/docs/developers/payments/checkout-api#request-redirect_url), it is essential that the `redirect_url` is accurately provided during the payment setup. Additionally, the [webhook_url](/docs/developers/payments/checkout-api#request-webhook_url) must respond with a status code of 200. This specific status code serves as a confirmation of successful interaction between the involved systems, ultimately guaranteeing the seamless progression of the redirection process as originally intended.
+To ensure a smooth redirection of the payer back to the designated [redirect_url](/developers/payments/checkout-api#request-redirect_url), it is essential that the `redirect_url` is accurately provided during the payment setup. Additionally, the [webhook_url](/developers/payments/checkout-api#request-webhook_url) must respond with a status code of 200. This specific status code serves as a confirmation of successful interaction between the involved systems, ultimately guaranteeing the seamless progression of the redirection process as originally intended.
 
 **Redirect behavior based on webhook_url response:**\
--[ status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) 200, the customer will be redirected to [redirect_url](/docs/developers/payments/checkout-api#request-redirect_url).\
+-[ status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) 200, the customer will be redirected to [redirect_url](/developers/payments/checkout-api#request-redirect_url).\
 -[ status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) 201, the customer will be redirected to Ottu payment summary page.\
 -[ status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) any other code, the customer will be redirected to Ottu payment summary page. For this particular case, Ottu can notify on the email, when Enable webhook notifications? Activated
 
@@ -142,7 +142,7 @@ The operation field provides insight into the type of transaction:
 #### **4. Verifying the Amount**
 
 - The [amount](#amount-string-mandatory) field provides the value the customer has paid in the currency set during the payment setup.
-- However, the actual amount captured by the [Payment Gateway](/docs/developers/payments/payment-methods) (PG) might differ. This can be due to additional fees, currency conversion, or other factors. To get the exact amount captured by the PG, refer to [amount_details.amount](#amount_details-object-mandatory). The currency in which this amount is denominated can be found in [amount_details.currency_code](#currency_code-string-mandatory).
+- However, the actual amount captured by the [Payment Gateway](/developers/payments/payment-methods) (PG) might differ. This can be due to additional fees, currency conversion, or other factors. To get the exact amount captured by the PG, refer to [amount_details.amount](#amount_details-object-mandatory). The currency in which this amount is denominated can be found in [amount_details.currency_code](#currency_code-string-mandatory).
 - In most scenarios, cross-referencing with the amount field should suffice. But if there are discrepancies or if you’ve set up fees or currency conversions, it’s advisable to verify with `amount_details`.
 
 #### **5. Cash Payments**

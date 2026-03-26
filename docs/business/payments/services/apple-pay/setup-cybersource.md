@@ -93,5 +93,5 @@ After downloading, your Apple Pay integration with Cybersource is complete. The 
 
 - **[Apple Pay Configuration](./index.md)** — Return to the main Apple Pay setup guide
 - **[Setup MPGS](setup-mpgs)** — Set up Apple Pay with MPGS instead
-- **[Payment Gateways](/docs/business/payments/gateways)** — Browse and configure your payment gateways
+- **[Payment Gateways](/business/payments/gateways)** — Browse and configure your payment gateways
 - **[Payment Services](../)** — Overview of all available payment services
