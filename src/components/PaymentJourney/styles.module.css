@@ -202,16 +202,17 @@
 
 .apiPanelBody {
   padding: 16px;
-  background: #0f0f1a;
+  background: var(--ifm-background-surface-color);
   max-height: 320px;
   overflow-y: auto;
 }
 
 .apiPanelBody pre {
   margin: 0;
+  background: var(--ifm-code-background);
   font-size: 12.5px;
   line-height: 1.6;
-  color: #e5e7eb;
+  color: var(--ifm-code-color);
   white-space: pre-wrap;
   word-break: break-word;
   font-family: "Consolas", "Monaco", "Courier New", monospace;

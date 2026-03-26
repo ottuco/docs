@@ -123,6 +123,8 @@ html[data-theme="dark"] {
   --ifm-global-border-color: #1e2939;
   --ifm-menu-color-background-active: #1e2939;
 
+  --ifm-code-color: #e5e7eb;
+
   /* --ifm-link-color: #f27e20;
   --ifm-link-hover-color: #f4913d;
 
