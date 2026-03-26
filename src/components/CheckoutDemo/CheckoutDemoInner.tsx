@@ -127,6 +127,7 @@ export default function CheckoutDemoInner() {
         selector: CONTAINER_ID,
         sessionId: session_id,
         displayMode: "column",
+        formsOfPayment: ["ottuPG"],
         theme: CHECKOUT_SDK_THEME,
       });
 

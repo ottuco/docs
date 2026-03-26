@@ -405,7 +405,7 @@ export default function PaymentJourneyInner() {
                 is_sandbox: true,
                 tags: ["demo"],
               }} />
-              <ApiPanel label="Response — pg_codes" data={state.paymentMethodsResponse} />
+              <ApiPanel label="Response — Payment Methods" data={state.paymentMethodsResponse} />
               {state.status === "step1_done" && (
                 <div className={styles.actions}>
                   <button className={styles.primaryBtn} onClick={() => { dispatch({ type: "STEP2_DONE", sessionId: "", checkoutUrl: "", response: null }); runStep2(); }}>
@@ -429,7 +429,15 @@ export default function PaymentJourneyInner() {
             </div>
           ) : (state.status === "step2_done" || isStepExpanded(2)) && state.sessionId ? (
             <>
-              <ApiPanel label="Response" data={state.checkoutResponse} />
+              <ApiPanel label="POST /b/checkout/v1/pymt-txn/" data={{
+                type: "payment_request",
+                pg_codes: state.pgCodes,
+                amount: "20",
+                currency_code: "KWD",
+                customer_id: "demo-customer",
+                webhook_url: `${getWebhookBaseUrl()}/webhook/${state.orderId}`,
+              }} />
+              <ApiPanel label="Response — Session" data={state.checkoutResponse} />
               {state.status === "step2_done" && (
                 <div className={styles.actions}>
                   <button className={styles.primaryBtn} onClick={() => dispatch({ type: "CHOOSE_PATH" })}>
@@ -586,7 +594,7 @@ export default function PaymentJourneyInner() {
           {(state.status === "step6_done" || isStepExpanded(6)) && (
             <>
               <ApiPanel label="POST /b/pbl/v2/inquiry/" data={{ session_id: state.sessionId }} />
-              <ApiPanel label="Response" data={state.psqResponse} />
+              <ApiPanel label="Response — Payment Status" data={state.psqResponse} />
               <p className={styles.cardDescription}>
                 The PSQ response has the same structure as the webhook payload. Use this as a fallback when webhooks don't arrive.
               </p>
