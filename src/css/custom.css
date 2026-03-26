@@ -100,7 +100,10 @@ html {
 /* ================================
    DARK MODE — from Figma API explorer panel
    ================================ */
-[data-theme="dark"] {
+/* Use html[data-theme="dark"] instead of [data-theme="dark"] to ensure
+   higher specificity (0,1,1) over :root (0,0,1), preventing cssnano from
+   overriding these variables when it merges and repositions :root rules. */
+html[data-theme="dark"] {
   --ifm-background-color: #0f1117;
   --ifm-background-surface-color: #171a21;
 
