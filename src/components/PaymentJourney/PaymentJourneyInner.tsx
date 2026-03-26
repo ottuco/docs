@@ -9,6 +9,12 @@ import {
   SANDBOX_API_KEY,
   getWebhookBaseUrl,
 } from "@site/src/utils/sandbox";
+import {
+  loadCheckoutScript,
+  initCheckout,
+  CHECKOUT_SDK_THEME_MINIMAL,
+  CHECKOUT_SDK_FORMS_OF_PAYMENT,
+} from "@site/src/utils/checkoutSdk";
 import WebhookViewer from "@site/src/components/RecurringDemo/WebhookViewer";
 import styles from "./styles.module.css";
 
@@ -122,25 +128,6 @@ const STEPS = [
 
 // ── Helpers ─────────────────────────────────────────────
 
-const SDK_SCRIPT_URL = "https://assets.ottu.net/checkout/v3/checkout.min.js";
-
-function loadScript(): Promise<void> {
-  if ((window as any).Checkout) return Promise.resolve();
-  if (document.querySelector(`script[src="${SDK_SCRIPT_URL}"]`)) {
-    return new Promise((resolve) => {
-      const check = setInterval(() => { if ((window as any).Checkout) { clearInterval(check); resolve(); } }, 100);
-    });
-  }
-  return new Promise((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = SDK_SCRIPT_URL;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Failed to load Checkout SDK"));
-    document.head.appendChild(script);
-    setTimeout(() => reject(new Error("SDK script load timed out")), 15000);
-  });
-}
-
 function getStepStatus(stepNum: number, state: State): "pending" | "active" | "done" {
   const statusMap: Record<Status, number> = {
     idle: 0, step1_calling: 1, step1_done: 1,
@@ -251,20 +238,13 @@ export default function PaymentJourneyInner() {
   const initSdk = useCallback(async () => {
     dispatch({ type: "SELECT_SDK" });
     try {
-      await loadScript();
+      await loadCheckoutScript();
       if (sdkContainerRef.current) sdkContainerRef.current.innerHTML = "";
-      (window as any).Checkout.init({
+      initCheckout({
         selector: "journey-checkout-target",
-        merchant_id: SANDBOX_MERCHANT_ID,
-        session_id: state.sessionId,
-        apiKey: SANDBOX_API_KEY,
-        formsOfPayment: ["applePay", "tokenPay", "ottuPG", "redirect", "googlePay", "stcPay"],
-        theme: {
-          "title-text": { "font-family": "system-ui" },
-          amount: { "font-family": "system-ui" },
-          "pay-button": { "font-family": "system-ui" },
-          "payment-method-name": { "font-family": "system-ui" },
-        },
+        sessionId: state.sessionId,
+        formsOfPayment: CHECKOUT_SDK_FORMS_OF_PAYMENT,
+        theme: CHECKOUT_SDK_THEME_MINIMAL,
       });
       dispatch({ type: "SDK_READY" });
     } catch (err: any) {

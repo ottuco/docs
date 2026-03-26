@@ -8,6 +8,11 @@ import {
   SANDBOX_MERCHANT_ID,
   SANDBOX_API_KEY,
 } from "@site/src/utils/sandbox";
+import {
+  loadCheckoutScript,
+  initCheckout,
+  CHECKOUT_SDK_THEME_MINIMAL,
+} from "@site/src/utils/checkoutSdk";
 import WebhookViewer, { extractTokenFromWebhook } from "./WebhookViewer";
 import styles from "./styles.module.css";
 
@@ -101,30 +106,10 @@ const initialState: State = {
   mitWebhookEvents: [],
 };
 
-const SDK_SCRIPT_URL = "https://assets.ottu.net/checkout/v3/checkout.min.js";
 const SDK_CONTAINER_ID = "recurring-demo-checkout";
 
 function generateOrderId(): string {
   return `demo-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function loadScript(): Promise<void> {
-  if ((window as any).Checkout) return Promise.resolve();
-  if (document.querySelector(`script[src="${SDK_SCRIPT_URL}"]`)) {
-    return new Promise((resolve) => {
-      const check = setInterval(() => {
-        if ((window as any).Checkout) { clearInterval(check); resolve(); }
-      }, 100);
-    });
-  }
-  return new Promise((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = SDK_SCRIPT_URL;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Failed to load Checkout SDK"));
-    document.head.appendChild(script);
-    setTimeout(() => reject(new Error("SDK load timed out")), 15000);
-  });
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -183,7 +168,7 @@ export default function RecurringDemoInner() {
       });
 
       // Load SDK and init
-      await loadScript();
+      await loadCheckoutScript();
 
       // Register callbacks
       (window as any).errorCallback = (data: any) => {
@@ -205,19 +190,12 @@ export default function RecurringDemoInner() {
         });
       };
 
-      (window as any).Checkout.init({
+      initCheckout({
         selector: SDK_CONTAINER_ID,
-        merchant_id: SANDBOX_MERCHANT_ID,
-        session_id: session.session_id,
-        apiKey: SANDBOX_API_KEY,
+        sessionId: session.session_id,
         setupPreload: (session as any).sdk_setup_preload_payload,
         formsOfPayment: ["tokenPay", "ottuPG", "redirect"],
-        theme: {
-          "title-text": { "font-family": "system-ui" },
-          amount: { "font-family": "system-ui" },
-          "pay-button": { "font-family": "system-ui" },
-          "payment-method-name": { "font-family": "system-ui" },
-        },
+        theme: CHECKOUT_SDK_THEME_MINIMAL,
       });
     } catch (err: any) {
       dispatch({ type: "ERROR", message: err.message || "Failed to start CIT" });
