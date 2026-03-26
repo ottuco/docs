@@ -114,7 +114,8 @@ export default function CheckoutDemoInner() {
 
     try {
       const { session_id } = await createSandboxSession({
-        pg_codes: ["direct-payment"],
+        pg_codes: ["ottu_sdk"],
+        type: 'e_commerce'
       });
       dispatch({ type: "SESSION_CREATED" });
 
@@ -127,14 +128,6 @@ export default function CheckoutDemoInner() {
         session_id,
         apiKey: SANDBOX_API_KEY,
         displayMode: "column",
-        formsOfPayment: [
-          "applePay",
-          "tokenPay",
-          "ottuPG",
-          "redirect",
-          "googlePay",
-          "stcPay",
-        ],
         theme: {
           main: {
             padding: '0px',
