@@ -221,7 +221,7 @@ export default function PaymentJourneyInner() {
       const response = await createSandboxSession({
         pg_codes: state.pgCodes.length > 0 ? state.pgCodes : ["direct-payment"],
         currency_code: "KWD",
-        customer_id: "demo-customer",
+        customer_id: "sandbox",
         extra: {
           include_sdk_setup_preload: true,
           webhook_url: webhookUrl,
@@ -434,7 +434,7 @@ export default function PaymentJourneyInner() {
                 pg_codes: state.pgCodes,
                 amount: "20",
                 currency_code: "KWD",
-                customer_id: "demo-customer",
+                customer_id: "sandbox",
                 webhook_url: `${getWebhookBaseUrl()}/webhook/${state.orderId}`,
               }} />
               <ApiPanel label="Response — Session" data={state.checkoutResponse} />
