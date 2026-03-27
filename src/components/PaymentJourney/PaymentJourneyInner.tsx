@@ -181,6 +181,25 @@ export default function PaymentJourneyInner() {
     setExpandedSteps(new Set());
   }, [state.status]);
 
+  useEffect(() => {
+    if (state.status === "idle" || state.status === "error" || state.status === "complete") return;
+    const statusMap: Record<string, number> = {
+      step1_calling: 1, step1_done: 1,
+      step2_calling: 2, step2_done: 2,
+      step3_choose: 3, step3a_redirect: 3, step3b_sdk: 3, step3b_ready: 3,
+      step4_webhook: 4, step4_done: 4,
+      step5_pgparams: 5,
+      step6_calling: 6, step6_done: 6,
+    };
+    const activeStep = statusMap[state.status] ?? 0;
+    if (activeStep === 0) return;
+    const timer = setTimeout(() => {
+      const el = document.querySelector(`[data-step="${activeStep}"]`);
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [state.status]);
+
   const toggleStep = useCallback((stepNum: number) => {
     setExpandedSteps(prev => {
       const next = new Set(prev);
@@ -261,7 +280,7 @@ export default function PaymentJourneyInner() {
     const showBody = isActive || isExpanded;
 
     return (
-      <div className={styles.step} key={stepNum}>
+      <div className={styles.step} key={stepNum} data-step={stepNum}>
         {renderNode(stepNum)}
         <div className={`${styles.card} ${isActive ? styles.cardActive : isDone ? (isExpanded ? styles.cardDoneExpanded : styles.cardDone) : ""}`}>
           <div
