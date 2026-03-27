@@ -1,5 +1,5 @@
-import React from "react";
 import OriginalResponse from "@theme-original/ApiExplorer/Response";
+import React from "react";
 
 // Optional fallback map (kept only as fallback if no YAML extension is found).
 // Prefer using x-hard-coded-response in static/Ottu_API.yaml.
@@ -32,7 +32,9 @@ function resolveResponseValue(item: any): string | object | undefined {
   );
 }
 
-function hasRenderableResponse(value: string | object | undefined): boolean {
+function hasRenderableResponse(
+  value: string | object | undefined,
+): value is string | object {
   if (value === undefined || value === null) {
     return false;
   }

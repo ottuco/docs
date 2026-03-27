@@ -166,7 +166,9 @@ const AnyOneOf: React.FC<SchemaProps> = ({
     return hash === prefix || hash.startsWith(prefix + "-");
   });
   const defaultValue =
-    defaultIndex >= 0 ? `${defaultIndex}-item-properties` : undefined;
+    defaultIndex !== undefined && defaultIndex >= 0
+      ? `${defaultIndex}-item-properties`
+      : undefined;
 
   return (
     <>

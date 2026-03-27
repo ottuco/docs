@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo } from "react";
-import clsx from "clsx";
 import Link from "@docusaurus/Link";
-import { translate } from "@docusaurus/Translate";
-import useIsBrowser from "@docusaurus/useIsBrowser";
+import {
+  findFirstSidebarItemLink,
+  isActiveSidebarItem,
+  useDocSidebarItemsExpandedState,
+} from "@docusaurus/plugin-content-docs/client";
 import {
   Collapsible,
   ThemeClassNames,
@@ -11,12 +12,11 @@ import {
   useThemeConfig,
 } from "@docusaurus/theme-common";
 import { isSamePath } from "@docusaurus/theme-common/internal";
-import {
-  findFirstSidebarItemLink,
-  isActiveSidebarItem,
-  useDocSidebarItemsExpandedState,
-} from "@docusaurus/plugin-content-docs/client";
+import { translate } from "@docusaurus/Translate";
+import useIsBrowser from "@docusaurus/useIsBrowser";
 import DocSidebarItems from "@theme/DocSidebarItems";
+import clsx from "clsx";
+import React, { useEffect, useMemo } from "react";
 
 type SidebarCategoryItem = {
   items: SidebarCategoryItem[];
@@ -129,7 +129,7 @@ export default function DocSidebarItemCategory({
   } = useThemeConfig();
 
   const hrefWithSSRFallback = useCategoryHrefWithSSRFallback(item);
-  const isActive = isActiveSidebarItem(item as never, activePath);
+  const isActive = isActiveSidebarItem(item as never, activePath ?? "");
   const isCurrentPage = isSamePath(hrefWithSSRFallback, activePath);
 
   const { collapsed, setCollapsed } = useCollapsible({
@@ -137,7 +137,7 @@ export default function DocSidebarItemCategory({
       if (!collapsible) {
         return false;
       }
-      return isActive ? false : item.collapsed ?? false;
+      return isActive ? false : (item.collapsed ?? false);
     },
   });
 
@@ -206,8 +206,12 @@ export default function DocSidebarItemCategory({
           }
           aria-current={isCurrentPage ? "page" : undefined}
           role={collapsible && !hrefWithSSRFallback ? "button" : undefined}
-          aria-expanded={collapsible && !hrefWithSSRFallback ? !collapsed : undefined}
-          href={collapsible ? hrefWithSSRFallback ?? "#" : hrefWithSSRFallback}
+          aria-expanded={
+            collapsible && !hrefWithSSRFallback ? !collapsed : undefined
+          }
+          href={
+            collapsible ? (hrefWithSSRFallback ?? "#") : hrefWithSSRFallback
+          }
           {...props}
         >
           {label}
@@ -229,7 +233,7 @@ export default function DocSidebarItemCategory({
           items={items as never}
           tabIndex={collapsed ? -1 : 0}
           onItemClick={onItemClick as never}
-          activePath={activePath}
+          activePath={activePath ?? ""}
           level={level + 1}
         />
       </Collapsible>

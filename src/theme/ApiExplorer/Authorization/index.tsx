@@ -1,20 +1,23 @@
-import React, { Fragment, useEffect } from "react";
 import { translate } from "@docusaurus/Translate";
+import {
+  setAuthData,
+  setSelectedAuth,
+} from "@theme/ApiExplorer/Authorization/slice";
 import FormItem from "@theme/ApiExplorer/FormItem";
 import FormSelect from "@theme/ApiExplorer/FormSelect";
 import FormTextInput from "@theme/ApiExplorer/FormTextInput";
 import { useTypedDispatch, useTypedSelector } from "@theme/ApiItem/hooks";
 import { OPENAPI_AUTH } from "@theme/translationIds";
-import { setAuthData, setSelectedAuth } from "@theme/ApiExplorer/Authorization/slice";
+import React, { Fragment, useEffect } from "react";
 
 const DEFAULT_USERNAME = "demo_user";
 const DEFAULT_PASSWORD = "WY4Q9I1d5kHH3nJ";
 const DEFAULT_API_KEY = "GYj5Na8H.29g9hqNjm11nORQMa2WiZwIBQQ49MdAL";
 
 export default function Authorization(): React.JSX.Element | null {
-  const data = useTypedSelector((state) => state.auth.data);
-  const options = useTypedSelector((state) => state.auth.options);
-  const selected = useTypedSelector((state) => state.auth.selected);
+  const data = useTypedSelector((state: any) => state.auth.data);
+  const options = useTypedSelector((state: any) => state.auth.options);
+  const selected = useTypedSelector((state: any) => state.auth.selected);
   const dispatch = useTypedDispatch();
 
   if (selected === undefined) {
@@ -25,7 +28,7 @@ export default function Authorization(): React.JSX.Element | null {
   const optionKeys = Object.keys(options);
 
   useEffect(() => {
-    selectedAuth.forEach((a) => {
+    selectedAuth.forEach((a: any) => {
       if (a.type === "http" && a.scheme === "basic") {
         if (!data[a.key]?.username) {
           dispatch(
@@ -33,7 +36,7 @@ export default function Authorization(): React.JSX.Element | null {
               scheme: a.key,
               key: "username",
               value: DEFAULT_USERNAME,
-            })
+            }),
           );
         }
         if (!data[a.key]?.password) {
@@ -42,7 +45,7 @@ export default function Authorization(): React.JSX.Element | null {
               scheme: a.key,
               key: "password",
               value: DEFAULT_PASSWORD,
-            })
+            }),
           );
         }
       }
@@ -53,7 +56,7 @@ export default function Authorization(): React.JSX.Element | null {
               scheme: a.key,
               key: "apiKey",
               value: DEFAULT_API_KEY,
-            })
+            }),
           );
         }
       }
@@ -72,14 +75,14 @@ export default function Authorization(): React.JSX.Element | null {
           <FormSelect
             options={optionKeys}
             value={selected}
-            onChange={(e) => {
+            onChange={(e: any) => {
               dispatch(setSelectedAuth(e.target.value));
             }}
           />
         </FormItem>
       )}
 
-      {selectedAuth.map((a) => {
+      {selectedAuth.map((a: any) => {
         if (a.type === "http" && a.scheme === "bearer") {
           return (
             <FormItem
@@ -96,14 +99,14 @@ export default function Authorization(): React.JSX.Element | null {
                 })}
                 password
                 value={data[a.key].token ?? ""}
-                onChange={(e) => {
+                onChange={(e: any) => {
                   const value = e.target.value;
                   dispatch(
                     setAuthData({
                       scheme: a.key,
                       key: "token",
                       value: value ? value : undefined,
-                    })
+                    }),
                   );
                 }}
               />
@@ -127,14 +130,14 @@ export default function Authorization(): React.JSX.Element | null {
                 })}
                 password
                 value={data[a.key].token ?? ""}
-                onChange={(e) => {
+                onChange={(e: any) => {
                   const value = e.target.value;
                   dispatch(
                     setAuthData({
                       scheme: a.key,
                       key: "token",
                       value: value ? value : undefined,
-                    })
+                    }),
                   );
                 }}
               />
@@ -156,15 +159,15 @@ export default function Authorization(): React.JSX.Element | null {
                     id: OPENAPI_AUTH.USERNAME,
                     message: "Username",
                   })}
-                value={data[a.key].username ?? ""}
-                  onChange={(e) => {
+                  value={data[a.key].username ?? ""}
+                  onChange={(e: any) => {
                     const value = e.target.value;
                     dispatch(
                       setAuthData({
                         scheme: a.key,
                         key: "username",
                         value: value ? value : undefined,
-                      })
+                      }),
                     );
                   }}
                 />
@@ -181,15 +184,15 @@ export default function Authorization(): React.JSX.Element | null {
                     message: "Password",
                   })}
                   password
-                value={data[a.key].password ?? ""}
-                  onChange={(e) => {
+                  value={data[a.key].password ?? ""}
+                  onChange={(e: any) => {
                     const value = e.target.value;
                     dispatch(
                       setAuthData({
                         scheme: a.key,
                         key: "password",
                         value: value ? value : undefined,
-                      })
+                      }),
                     );
                   }}
                 />
@@ -206,14 +209,14 @@ export default function Authorization(): React.JSX.Element | null {
               <FormTextInput
                 placeholder={placeholder}
                 value={data[a.key].apiKey ?? ""}
-                onChange={(e) => {
+                onChange={(e: any) => {
                   const value = e.target.value;
                   dispatch(
                     setAuthData({
                       scheme: a.key,
                       key: "apiKey",
                       value: value ? value : undefined,
-                    })
+                    }),
                   );
                 }}
               />
