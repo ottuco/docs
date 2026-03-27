@@ -18,11 +18,12 @@ export const CHECKOUT_SDK_CDN_URL =
 /** Default forms of payment shown in demos. */
 export const CHECKOUT_SDK_FORMS_OF_PAYMENT = [
   "applePay",
-  "tokenPay",
-  "ottuPG",
-  "redirect",
   "googlePay",
   "stcPay",
+  "ottuPG",
+  "tokenPay",
+  "redirect",
+  "urPay",
 ];
 
 /** Minimal theme — just system-ui fonts for readability. */
@@ -207,7 +208,7 @@ export function initCheckout(options: {
     session_id: options.sessionId,
     apiKey: SANDBOX_API_KEY,
     displayMode: options.displayMode ?? "column",
-    formsOfPayment: options.formsOfPayment ?? ["ottuPG"],
+    formsOfPayment: options.formsOfPayment ?? CHECKOUT_SDK_FORMS_OF_PAYMENT,
     ...(options.setupPreload && { setupPreload: options.setupPreload }),
     theme: options.theme ?? CHECKOUT_SDK_THEME,
   });
