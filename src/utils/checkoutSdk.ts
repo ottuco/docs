@@ -208,7 +208,7 @@ export function initCheckout(options: {
     session_id: options.sessionId,
     apiKey: SANDBOX_API_KEY,
     displayMode: options.displayMode ?? "column",
-    formsOfPayment: options.formsOfPayment ?? CHECKOUT_SDK_FORMS_OF_PAYMENT,
+    ...(options.formsOfPayment && { formsOfPayment: options.formsOfPayment }),
     ...(options.setupPreload && { setupPreload: options.setupPreload }),
     theme: options.theme ?? CHECKOUT_SDK_THEME,
   });
