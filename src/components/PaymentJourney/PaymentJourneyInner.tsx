@@ -1,4 +1,4 @@
-import React, { useReducer, useRef, useCallback, useEffect, useState } from "react";
+import React, { useReducer, useRef, useCallback, useEffect, useState, useMemo } from "react";
 import Icon from "@mdi/react";
 import { mdiCheck, mdiLoading, mdiAlertCircleOutline, mdiChevronDown, mdiChevronRight } from "@mdi/js";
 import {
@@ -7,6 +7,7 @@ import {
   callPaymentStatusQuery,
   getWebhookBaseUrl,
 } from "@site/src/utils/sandbox";
+import { createDemoCallbacks } from "@site/src/utils/checkoutSdk";
 import CheckoutSDKEmbed from "@site/src/components/CheckoutSDKEmbed";
 import WebhookViewer from "@site/src/components/RecurringDemo/WebhookViewer";
 import styles from "./styles.module.css";
@@ -258,6 +259,13 @@ export default function PaymentJourneyInner() {
     }
   }, [state.sessionId]);
 
+  // ── SDK Callbacks ──────────────────────────────────
+
+  const sdkCallbacks = useMemo(
+    () => createDemoCallbacks(() => dispatch({ type: "WAITING_WEBHOOK" })),
+    [],
+  );
+
   // ── Render helpers ──────────────────────────────────
 
   const renderNode = (stepNum: number) => {
@@ -478,6 +486,7 @@ export default function PaymentJourneyInner() {
                 sessionId={state.sessionId}
                 onReady={() => dispatch({ type: "SDK_READY" })}
                 onError={(message) => dispatch({ type: "ERROR", message })}
+                callbacks={sdkCallbacks}
               />
               {state.status === "step3b_ready" && (
                 <p className={styles.cardDescription} style={{ marginTop: 16 }}>

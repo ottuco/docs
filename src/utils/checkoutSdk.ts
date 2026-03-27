@@ -164,6 +164,14 @@ export const CHECKOUT_SDK_THEME: Record<string, any> = {
   },
 };
 
+/** Callback functions passed to the Checkout SDK via data attributes. */
+export interface CheckoutCallbacks {
+  errorCallback?: (data: any) => void;
+  successCallback?: (data: any) => void;
+  cancelCallback?: (data: any) => void;
+  beforePayment?: (data: any) => Promise<void>;
+}
+
 /**
  * Load the Checkout SDK script. Safe to call multiple times —
  * returns immediately if already loaded, waits if loading in progress.
@@ -183,6 +191,10 @@ export function loadCheckoutScript(): Promise<void> {
   return new Promise((resolve, reject) => {
     const script = document.createElement("script");
     script.src = CHECKOUT_SDK_CDN_URL;
+    script.setAttribute("data-error", "errorCallback");
+    script.setAttribute("data-cancel", "cancelCallback");
+    script.setAttribute("data-success", "successCallback");
+    script.setAttribute("data-beforepayment", "beforePayment");
     script.onload = () => resolve();
     script.onerror = () =>
       reject(new Error("Failed to load Checkout SDK script"));
@@ -192,7 +204,86 @@ export function loadCheckoutScript(): Promise<void> {
 }
 
 /**
+ * Register callback functions as window globals for the Checkout SDK.
+ * Call before `Checkout.init()`. Safe to call multiple times — overwrites previous callbacks.
+ */
+export function registerCheckoutCallbacks(callbacks: CheckoutCallbacks): void {
+  if (callbacks.errorCallback) {
+    (window as any).errorCallback = callbacks.errorCallback;
+  }
+  if (callbacks.successCallback) {
+    (window as any).successCallback = callbacks.successCallback;
+  }
+  if (callbacks.cancelCallback) {
+    (window as any).cancelCallback = callbacks.cancelCallback;
+  }
+  if (callbacks.beforePayment) {
+    (window as any).beforePayment = callbacks.beforePayment;
+  }
+}
+
+/**
+ * Create standard demo callbacks for the Checkout SDK.
+ * Shared by CheckoutDemo and PaymentJourney — the only difference is what
+ * happens on success, supplied via `onSuccess`.
+ */
+export function createDemoCallbacks(onSuccess: () => void): CheckoutCallbacks {
+  return {
+    errorCallback(error) {
+      const validFormsOfPayments = ["token_pay", "redirect", "card_onsite"];
+      if (
+        validFormsOfPayments.includes(error.form_of_payment) ||
+        error.challenge_occurred
+      ) {
+        const message =
+          "Oops, something went wrong. Refresh the page and try again.";
+        (window as any).Checkout.showPopup("error", error.message || message);
+      }
+      console.log("Error callback", error);
+    },
+    successCallback(success) {
+      if (success.redirect_url) {
+        window.open(success.redirect_url, "_blank", "noopener");
+      }
+      onSuccess();
+    },
+    cancelCallback(cancel) {
+      if (cancel.payment_gateway_info?.pg_name === "kpay") {
+        (window as any).Checkout.showPopup(
+          "error",
+          "",
+          cancel.payment_gateway_info.pg_response,
+        );
+      } else if (
+        cancel.form_of_payment === "token_pay" ||
+        cancel.form_of_payment === "card_onsite" ||
+        cancel.challenge_occurred
+      ) {
+        const message =
+          "Oops, something went wrong. Refresh the page and try again.";
+        (window as any).Checkout.showPopup("error", cancel.message || message);
+      }
+      console.log("Cancel callback", cancel);
+    },
+    beforePayment(data) {
+      return new Promise((resolve) => {
+        if (data?.redirect_url) {
+          (window as any).Checkout.showPopup(
+            "redirect",
+            data.message || "Redirecting to the payment page",
+            null,
+          );
+        }
+        resolve();
+        console.log("BeforePayment Hook", data);
+      });
+    },
+  };
+}
+
+/**
  * Initialize the Checkout SDK. Call after `loadCheckoutScript()` resolves.
+ * If `callbacks` are provided, they are registered as window globals before init.
  */
 export function initCheckout(options: {
   selector: string;
@@ -201,7 +292,11 @@ export function initCheckout(options: {
   formsOfPayment?: string[];
   displayMode?: string;
   setupPreload?: any;
+  callbacks?: CheckoutCallbacks;
 }): void {
+  if (options.callbacks) {
+    registerCheckoutCallbacks(options.callbacks);
+  }
   (window as any).Checkout.init({
     selector: options.selector,
     merchant_id: SANDBOX_MERCHANT_ID,

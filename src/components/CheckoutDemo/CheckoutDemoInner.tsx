@@ -1,10 +1,11 @@
-import React, { useReducer, useEffect, useRef, useCallback } from "react";
+import React, { useReducer, useEffect, useRef, useCallback, useMemo } from "react";
 import Icon from "@mdi/react";
 import { mdiLoading, mdiCheck, mdiAlertCircleOutline } from "@mdi/js";
 import {
   createSandboxSession,
   callPaymentMethods,
 } from "@site/src/utils/sandbox";
+import { createDemoCallbacks } from "@site/src/utils/checkoutSdk";
 import CheckoutSDKEmbed from "@site/src/components/CheckoutSDKEmbed";
 import styles from "./styles.module.css";
 
@@ -14,6 +15,7 @@ type State =
   | { status: "creating_session"; pgCodes: string[] }
   | { status: "sdk_loading"; sessionId: string }
   | { status: "ready"; sessionId: string }
+  | { status: "complete"; sessionId: string }
   | { status: "error"; message: string };
 
 type Action =
@@ -21,6 +23,7 @@ type Action =
   | { type: "METHODS_FETCHED"; pgCodes: string[] }
   | { type: "SESSION_CREATED"; sessionId: string }
   | { type: "SDK_READY" }
+  | { type: "COMPLETE" }
   | { type: "ERROR"; message: string }
   | { type: "RESET" };
 
@@ -34,6 +37,8 @@ function reducer(state: State, action: Action): State {
       return { status: "sdk_loading", sessionId: action.sessionId };
     case "SDK_READY":
       return { status: "ready", sessionId: (state as any).sessionId ?? "" };
+    case "COMPLETE":
+      return { status: "complete", sessionId: (state as any).sessionId ?? "" };
     case "ERROR":
       return { status: "error", message: action.message };
     case "RESET":
@@ -114,6 +119,11 @@ export default function CheckoutDemoInner() {
     ? (state as any).sessionId
     : null;
 
+  const callbacks = useMemo(
+    () => createDemoCallbacks(() => dispatch({ type: "COMPLETE" })),
+    [],
+  );
+
   return (
     <div className={styles.container}>
       {state.status === "idle" && (
@@ -125,6 +135,23 @@ export default function CheckoutDemoInner() {
           </p>
           <button className={styles.launchButton} onClick={launch}>
             Launch Demo
+          </button>
+        </div>
+      )}
+
+      {state.status === "complete" && (
+        <div className={styles.completeCard}>
+          <span className={styles.completeIcon}>
+            <Icon path={mdiCheck} size={0.8} />
+          </span>
+          <h3 className={styles.completeTitle}>Payment Complete</h3>
+          <p className={styles.completeDescription}>
+            The checkout flow finished successfully. In a real integration, the
+            customer would be redirected to your confirmation page and your
+            server would receive a webhook notification.
+          </p>
+          <button className={styles.restartButton} onClick={() => dispatch({ type: "RESET" })}>
+            Try Again
           </button>
         </div>
       )}
@@ -195,6 +222,7 @@ export default function CheckoutDemoInner() {
           sessionId={sessionId}
           onReady={() => dispatch({ type: "SDK_READY" })}
           onError={(message) => dispatch({ type: "ERROR", message })}
+          callbacks={callbacks}
         />
       )}
     </div>

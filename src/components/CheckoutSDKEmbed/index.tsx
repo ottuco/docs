@@ -1,10 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
-import { loadCheckoutScript, initCheckout } from "@site/src/utils/checkoutSdk";
+import {
+  loadCheckoutScript,
+  initCheckout,
+  type CheckoutCallbacks,
+} from "@site/src/utils/checkoutSdk";
 
 interface CheckoutSDKEmbedProps {
   sessionId: string;
   onReady?: () => void;
   onError?: (message: string) => void;
+  callbacks?: CheckoutCallbacks;
 }
 
 let embedCounter = 0;
@@ -13,14 +18,17 @@ export default function CheckoutSDKEmbed({
   sessionId,
   onReady,
   onError,
+  callbacks,
 }: CheckoutSDKEmbedProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerId] = useState(() => `checkout-sdk-embed-${++embedCounter}`);
   const initedForSession = useRef<string | null>(null);
   const onReadyRef = useRef(onReady);
   const onErrorRef = useRef(onError);
+  const callbacksRef = useRef(callbacks);
   onReadyRef.current = onReady;
   onErrorRef.current = onError;
+  callbacksRef.current = callbacks;
 
   useEffect(() => {
     if (!sessionId || initedForSession.current === sessionId) return;
@@ -36,6 +44,7 @@ export default function CheckoutSDKEmbed({
         initCheckout({
           selector: containerId,
           sessionId,
+          callbacks: callbacksRef.current,
         });
         onReadyRef.current?.();
       } catch (err: any) {
