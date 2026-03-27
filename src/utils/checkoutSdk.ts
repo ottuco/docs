@@ -222,6 +222,19 @@ export function registerCheckoutCallbacks(callbacks: CheckoutCallbacks): void {
   }
 }
 
+/** Forms of payment that support on-site error/cancel popups. */
+const ONSITE_FORMS_OF_PAYMENT = ["token_pay", "redirect", "card_onsite"];
+
+/** Default error message shown when no specific message is available. */
+const FALLBACK_ERROR_MESSAGE =
+  "Oops, something went wrong. Refresh the page and try again.";
+
+/** Default message shown when redirecting to a payment gateway. */
+const FALLBACK_REDIRECT_MESSAGE = "Redirecting to the payment page";
+
+/** Payment gateway name requiring special popup handling. */
+const KPAY_PG_NAME = "kpay";
+
 /**
  * Create standard demo callbacks for the Checkout SDK.
  * Shared by CheckoutDemo and PaymentJourney — the only difference is what
@@ -230,14 +243,14 @@ export function registerCheckoutCallbacks(callbacks: CheckoutCallbacks): void {
 export function createDemoCallbacks(onSuccess: () => void): CheckoutCallbacks {
   return {
     errorCallback(error) {
-      const validFormsOfPayments = ["token_pay", "redirect", "card_onsite"];
       if (
-        validFormsOfPayments.includes(error.form_of_payment) ||
+        ONSITE_FORMS_OF_PAYMENT.includes(error.form_of_payment) ||
         error.challenge_occurred
       ) {
-        const message =
-          "Oops, something went wrong. Refresh the page and try again.";
-        (window as any).Checkout.showPopup("error", error.message || message);
+        (window as any).Checkout.showPopup(
+          "error",
+          error.message || FALLBACK_ERROR_MESSAGE,
+        );
       }
       console.log("Error callback", error);
     },
@@ -248,20 +261,20 @@ export function createDemoCallbacks(onSuccess: () => void): CheckoutCallbacks {
       onSuccess();
     },
     cancelCallback(cancel) {
-      if (cancel.payment_gateway_info?.pg_name === "kpay") {
+      if (cancel.payment_gateway_info?.pg_name === KPAY_PG_NAME) {
         (window as any).Checkout.showPopup(
           "error",
           "",
           cancel.payment_gateway_info.pg_response,
         );
       } else if (
-        cancel.form_of_payment === "token_pay" ||
-        cancel.form_of_payment === "card_onsite" ||
+        ONSITE_FORMS_OF_PAYMENT.includes(cancel.form_of_payment) ||
         cancel.challenge_occurred
       ) {
-        const message =
-          "Oops, something went wrong. Refresh the page and try again.";
-        (window as any).Checkout.showPopup("error", cancel.message || message);
+        (window as any).Checkout.showPopup(
+          "error",
+          cancel.message || FALLBACK_ERROR_MESSAGE,
+        );
       }
       console.log("Cancel callback", cancel);
     },
@@ -270,7 +283,7 @@ export function createDemoCallbacks(onSuccess: () => void): CheckoutCallbacks {
         if (data?.redirect_url) {
           (window as any).Checkout.showPopup(
             "redirect",
-            data.message || "Redirecting to the payment page",
+            data.message || FALLBACK_REDIRECT_MESSAGE,
             null,
           );
         }
