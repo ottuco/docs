@@ -60,6 +60,7 @@ type Action =
   | { type: "SELECT_REDIRECT" }
   | { type: "SELECT_SDK" }
   | { type: "SDK_READY" }
+  | { type: "WAITING_WEBHOOK" }
   | { type: "WEBHOOK_RECEIVED"; payload: any }
   | { type: "CONTINUE_PGPARAMS" }
   | { type: "STEP6_CALLING" }
@@ -98,6 +99,8 @@ function reducer(state: State, action: Action): State {
       return { ...state, status: "step3b_sdk", chosenPath: "sdk" };
     case "SDK_READY":
       return { ...state, status: "step3b_ready" };
+    case "WAITING_WEBHOOK":
+      return { ...state, status: "step4_webhook" };
     case "WEBHOOK_RECEIVED":
       return { ...state, status: "step4_done", webhookPayload: action.payload };
     case "CONTINUE_PGPARAMS":
@@ -263,13 +266,6 @@ export default function PaymentJourneyInner() {
       dispatch({ type: "ERROR", message: err.message });
     }
   }, [state.sessionId]);
-
-  // ── Webhook polling ─────────────────────────────────
-
-  const startWebhookWatch = useCallback(() => {
-    if (webhookCheckRef.current) clearInterval(webhookCheckRef.current);
-    // The WebhookViewer component handles SSE; we just need to wait for the user to confirm
-  }, []);
 
   // ── Render helpers ──────────────────────────────────
 
@@ -477,8 +473,7 @@ export default function PaymentJourneyInner() {
               <div className={styles.actions}>
                 <button className={styles.primaryBtn} onClick={() => {
                   window.open(state.checkoutUrl, "_blank");
-                  startWebhookWatch();
-                  dispatch({ type: "WEBHOOK_RECEIVED", payload: null });
+                  dispatch({ type: "WAITING_WEBHOOK" });
                 }}>
                   Open Payment Link
                 </button>
@@ -525,7 +520,11 @@ export default function PaymentJourneyInner() {
       {/* ── Step 4: Webhook ─────────────────────── */}
       {renderStep(4, (
         <>
-          <WebhookViewer orderId={state.orderId} label="Live Webhook Feed" />
+          <WebhookViewer orderId={state.orderId} label="Live Webhook Feed" onEvent={(event) => {
+            if (!state.webhookPayload) {
+              dispatch({ type: "WEBHOOK_RECEIVED", payload: event.payload });
+            }
+          }} />
           {!state.webhookPayload && !isStepExpanded(4) && (
             <p className={styles.cardDescription} style={{ marginTop: 12 }}>
               Waiting for the payment to complete. Once Ottu processes the payment, the webhook will appear above in real-time.
@@ -557,7 +556,11 @@ export default function PaymentJourneyInner() {
                 ].filter(f => state.webhookPayload.pg_params[f.name]).map(field => (
                   <div className={styles.pgParam} key={field.name}>
                     <p className={styles.pgParamName}>{field.name}</p>
-                    <p className={styles.pgParamValue}>{String(state.webhookPayload.pg_params[field.name])}</p>
+                    <p className={styles.pgParamValue}>{
+                      typeof state.webhookPayload.pg_params[field.name] === 'object'
+                        ? state.webhookPayload.pg_params[field.name]?.value ?? JSON.stringify(state.webhookPayload.pg_params[field.name])
+                        : String(state.webhookPayload.pg_params[field.name])
+                    }</p>
                     <p className={styles.pgParamDescription}>{field.desc}</p>
                   </div>
                 ))}

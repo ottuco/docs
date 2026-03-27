@@ -162,15 +162,29 @@ export async function callPaymentStatusQuery(
 }
 
 /**
- * Get the base URL for webhook relay.
- * In local dev (localhost), uses the ifr.ottu.me tunnel.
- * In production, uses the current origin (docs.ottu.dev or docs.ottu.net).
+ * Get the base URL for webhook_url sent to Ottu (must be reachable from the internet).
+ * In local dev, uses the ifr.ottu.me tunnel.
+ * In production, uses the current origin.
  */
 export function getWebhookBaseUrl(): string {
   if (typeof window === "undefined") return "";
   const { hostname } = window.location;
   if (hostname === "localhost" || hostname === "127.0.0.1") {
     return "https://ifr.ottu.me";
+  }
+  return window.location.origin;
+}
+
+/**
+ * Get the base URL for the browser's SSE connection to the webhook relay.
+ * In local dev, connects directly to localhost:8090 (the webhook server).
+ * In production, uses the current origin (same server handles both).
+ */
+export function getWebhookSSEUrl(): string {
+  if (typeof window === "undefined") return "";
+  const { hostname } = window.location;
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    return "http://localhost:8090";
   }
   return window.location.origin;
 }
