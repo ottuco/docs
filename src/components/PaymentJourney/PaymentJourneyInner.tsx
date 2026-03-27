@@ -5,16 +5,9 @@ import {
   createSandboxSession,
   callPaymentMethods,
   callPaymentStatusQuery,
-  SANDBOX_MERCHANT_ID,
-  SANDBOX_API_KEY,
   getWebhookBaseUrl,
 } from "@site/src/utils/sandbox";
-import {
-  loadCheckoutScript,
-  initCheckout,
-  CHECKOUT_SDK_THEME_MINIMAL,
-  CHECKOUT_SDK_FORMS_OF_PAYMENT,
-} from "@site/src/utils/checkoutSdk";
+import CheckoutSDKEmbed from "@site/src/components/CheckoutSDKEmbed";
 import WebhookViewer from "@site/src/components/RecurringDemo/WebhookViewer";
 import styles from "./styles.module.css";
 
@@ -176,13 +169,11 @@ function ApiPanel({ label, data }: { label: string; data: any }) {
 export default function PaymentJourneyInner() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set());
-  const sdkContainerRef = useRef<HTMLDivElement>(null);
   const webhookCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     return () => {
       if (webhookCheckRef.current) clearInterval(webhookCheckRef.current);
-      if (sdkContainerRef.current) sdkContainerRef.current.innerHTML = "";
     };
   }, []);
 
@@ -235,25 +226,6 @@ export default function PaymentJourneyInner() {
       dispatch({ type: "ERROR", message: err.message });
     }
   }, [state.pgCodes, state.orderId]);
-
-  // ── Step 3B: SDK ────────────────────────────────────
-
-  const initSdk = useCallback(async () => {
-    dispatch({ type: "SELECT_SDK" });
-    try {
-      await loadCheckoutScript();
-      if (sdkContainerRef.current) sdkContainerRef.current.innerHTML = "";
-      initCheckout({
-        selector: "journey-checkout-target",
-        sessionId: state.sessionId,
-        formsOfPayment: CHECKOUT_SDK_FORMS_OF_PAYMENT,
-        theme: CHECKOUT_SDK_THEME_MINIMAL,
-      });
-      dispatch({ type: "SDK_READY" });
-    } catch (err: any) {
-      dispatch({ type: "ERROR", message: err.message });
-    }
-  }, [state.sessionId]);
 
   // ── Step 6: PSQ ─────────────────────────────────────
 
@@ -456,7 +428,7 @@ export default function PaymentJourneyInner() {
                 <p className={styles.pathLabel}>Payment Link</p>
                 <p className={styles.pathDescription}>Redirect the customer to Ottu's hosted checkout page</p>
               </div>
-              <div className={styles.pathCard} onClick={initSdk}>
+              <div className={styles.pathCard} onClick={() => dispatch({ type: "SELECT_SDK" })}>
                 <span className={styles.pathIcon}>&#x1F4B3;</span>
                 <p className={styles.pathLabel}>On-site Checkout SDK</p>
                 <p className={styles.pathDescription}>Embed the payment form directly on your website</p>
@@ -483,19 +455,11 @@ export default function PaymentJourneyInner() {
 
           {(state.status === "step3b_sdk" || state.status === "step3b_ready") && (
             <>
-              <div
-                className={styles.sdkContainer}
-                style={{ display: state.status === "step3b_ready" ? "block" : "none" }}
-              >
-                <div id="journey-checkout-target" ref={sdkContainerRef} />
-              </div>
-              {state.status === "step3b_sdk" && (
-                <div className={styles.actions}>
-                  <button className={styles.primaryBtn} disabled>
-                    <span className={styles.spinner} /> Loading Checkout SDK...
-                  </button>
-                </div>
-              )}
+              <CheckoutSDKEmbed
+                sessionId={state.sessionId}
+                onReady={() => dispatch({ type: "SDK_READY" })}
+                onError={(message) => dispatch({ type: "ERROR", message })}
+              />
               {state.status === "step3b_ready" && (
                 <p className={styles.cardDescription} style={{ marginTop: 16 }}>
                   Enter test card <strong>4111 1111 1111 1111</strong>, any future expiry, any CVV. After payment, the webhook will arrive below.

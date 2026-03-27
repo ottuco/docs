@@ -206,11 +206,9 @@ export function initCheckout(options: {
     merchant_id: SANDBOX_MERCHANT_ID,
     session_id: options.sessionId,
     apiKey: SANDBOX_API_KEY,
-    ...(options.displayMode && { displayMode: options.displayMode }),
-    ...(options.formsOfPayment && {
-      formsOfPayment: options.formsOfPayment,
-    }),
+    displayMode: options.displayMode ?? "column",
+    formsOfPayment: options.formsOfPayment ?? ["ottuPG"],
     ...(options.setupPreload && { setupPreload: options.setupPreload }),
-    theme: options.theme ?? CHECKOUT_SDK_THEME_MINIMAL,
+    theme: options.theme ?? CHECKOUT_SDK_THEME,
   });
 }

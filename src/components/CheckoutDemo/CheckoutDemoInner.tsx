@@ -5,27 +5,21 @@ import {
   createSandboxSession,
   callPaymentMethods,
 } from "@site/src/utils/sandbox";
-import {
-  loadCheckoutScript,
-  initCheckout,
-  CHECKOUT_SDK_THEME,
-} from "@site/src/utils/checkoutSdk";
+import CheckoutSDKEmbed from "@site/src/components/CheckoutSDKEmbed";
 import styles from "./styles.module.css";
 
 type State =
   | { status: "idle" }
   | { status: "fetching_methods" }
   | { status: "creating_session"; pgCodes: string[] }
-  | { status: "loading_script"; pgCodes: string[] }
-  | { status: "initializing" }
-  | { status: "ready" }
+  | { status: "sdk_loading"; sessionId: string }
+  | { status: "ready"; sessionId: string }
   | { status: "error"; message: string };
 
 type Action =
   | { type: "START" }
   | { type: "METHODS_FETCHED"; pgCodes: string[] }
-  | { type: "SESSION_CREATED" }
-  | { type: "SCRIPT_LOADED" }
+  | { type: "SESSION_CREATED"; sessionId: string }
   | { type: "SDK_READY" }
   | { type: "ERROR"; message: string }
   | { type: "RESET" };
@@ -37,11 +31,9 @@ function reducer(state: State, action: Action): State {
     case "METHODS_FETCHED":
       return { status: "creating_session", pgCodes: action.pgCodes };
     case "SESSION_CREATED":
-      return { status: "loading_script", pgCodes: (state as any).pgCodes ?? [] };
-    case "SCRIPT_LOADED":
-      return { status: "initializing" };
+      return { status: "sdk_loading", sessionId: action.sessionId };
     case "SDK_READY":
-      return { status: "ready" };
+      return { status: "ready", sessionId: (state as any).sessionId ?? "" };
     case "ERROR":
       return { status: "error", message: action.message };
     case "RESET":
@@ -49,13 +41,10 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-const CONTAINER_ID = "checkout-demo-target";
-
 const STEPS = [
   "Fetching available payment methods...",
   "Creating payment session...",
   "Loading Checkout SDK...",
-  "Initializing payment form...",
 ];
 
 function getStepState(
@@ -65,9 +54,8 @@ function getStepState(
   const statusToStep: Record<string, number> = {
     fetching_methods: 0,
     creating_session: 1,
-    loading_script: 2,
-    initializing: 3,
-    ready: 4,
+    sdk_loading: 2,
+    ready: 3,
   };
   const activeStep = statusToStep[status] ?? -1;
   if (stepIndex < activeStep) return "done";
@@ -77,29 +65,19 @@ function getStepState(
 
 export default function CheckoutDemoInner() {
   const [state, dispatch] = useReducer(reducer, { status: "idle" });
-  const containerRef = useRef<HTMLDivElement>(null);
   const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [retryDisabled, setRetryDisabled] = React.useState(false);
 
-  const cleanup = useCallback(() => {
-    if (containerRef.current) {
-      containerRef.current.innerHTML = "";
-    }
-  }, []);
-
   useEffect(() => {
     return () => {
-      cleanup();
       if (retryTimer.current) clearTimeout(retryTimer.current);
     };
-  }, [cleanup]);
+  }, []);
 
   const launch = useCallback(async () => {
-    cleanup();
     dispatch({ type: "START" });
 
     try {
-      // Step 1: Fetch payment methods
       const methodsResponse = await callPaymentMethods({
         currencies: ["KWD"],
         is_sandbox: true,
@@ -111,31 +89,15 @@ export default function CheckoutDemoInner() {
         [];
       dispatch({ type: "METHODS_FETCHED", pgCodes });
 
-      // Step 2: Create session
       const { session_id } = await createSandboxSession({
         pg_codes: pgCodes.length > 0 ? pgCodes : ["ottu_sdk"],
         type: "e_commerce",
       });
-      dispatch({ type: "SESSION_CREATED" });
-
-      // Step 3: Load SDK script
-      await loadCheckoutScript();
-      dispatch({ type: "SCRIPT_LOADED" });
-
-      // Step 4: Init SDK
-      initCheckout({
-        selector: CONTAINER_ID,
-        sessionId: session_id,
-        displayMode: "column",
-        formsOfPayment: ["ottuPG"],
-        theme: CHECKOUT_SDK_THEME,
-      });
-
-      dispatch({ type: "SDK_READY" });
+      dispatch({ type: "SESSION_CREATED", sessionId: session_id });
     } catch (err: any) {
       dispatch({ type: "ERROR", message: err.message || "Something went wrong" });
     }
-  }, [cleanup]);
+  }, []);
 
   const handleRetry = useCallback(() => {
     setRetryDisabled(true);
@@ -146,12 +108,14 @@ export default function CheckoutDemoInner() {
   const isProgress =
     state.status === "fetching_methods" ||
     state.status === "creating_session" ||
-    state.status === "loading_script" ||
-    state.status === "initializing";
+    state.status === "sdk_loading";
+
+  const sessionId = (state.status === "sdk_loading" || state.status === "ready")
+    ? (state as any).sessionId
+    : null;
 
   return (
     <div className={styles.container}>
-      {/* Idle state */}
       {state.status === "idle" && (
         <div className={styles.idleCard}>
           <h3 className={styles.idleTitle}>Try the Checkout SDK</h3>
@@ -165,7 +129,6 @@ export default function CheckoutDemoInner() {
         </div>
       )}
 
-      {/* Error state */}
       {state.status === "error" && (
         <div className={styles.errorCard}>
           <Icon
@@ -173,7 +136,7 @@ export default function CheckoutDemoInner() {
             size={1.5}
             className={styles.errorIcon}
           />
-          <p className={styles.errorMessage}>{state.message}</p>
+          <p className={styles.errorMessage}>{(state as any).message}</p>
           <button
             className={styles.retryButton}
             onClick={handleRetry}
@@ -184,7 +147,6 @@ export default function CheckoutDemoInner() {
         </div>
       )}
 
-      {/* Progress stepper */}
       {isProgress && (
         <div className={styles.progressCard}>
           <div className={styles.stepper}>
@@ -228,13 +190,13 @@ export default function CheckoutDemoInner() {
         </div>
       )}
 
-      {/* SDK container — ALWAYS mounted, visibility toggled */}
-      <div
-        className={styles.sdkContainer}
-        style={{ display: state.status === "ready" ? "block" : "none" }}
-      >
-        <div id={CONTAINER_ID} ref={containerRef} />
-      </div>
+      {sessionId && (
+        <CheckoutSDKEmbed
+          sessionId={sessionId}
+          onReady={() => dispatch({ type: "SDK_READY" })}
+          onError={(message) => dispatch({ type: "ERROR", message })}
+        />
+      )}
     </div>
   );
 }
