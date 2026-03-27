@@ -40,6 +40,8 @@ services:
     source_dir: /mcp-server
     environment_slug: node-js
     http_port: 3456
+    health_check:
+      http_path: /health
     instance_size_slug: apps-s-1vcpu-0.5gb
     instance_count: 1
     envs:

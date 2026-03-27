@@ -365,7 +365,7 @@ export default function RecurringDemoInner() {
           <>
             <p className={styles.stepTitle}>Enter test card details</p>
             <p className={styles.stepDescription}>
-              Use test card <strong>4111 1111 1111 1111</strong> with any future expiry and CVV.
+              Use test card <strong>5123 4500 0000 0008</strong>, expiry <strong>01/39</strong>, CVV <strong>100</strong>.
             </p>
             {state.citResponse && renderAPIPanel("Checkout API Response", {
               session_id: state.citSessionId,

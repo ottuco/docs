@@ -459,7 +459,7 @@ export default function PaymentJourneyInner() {
             <>
               <ApiPanel label="checkout_url" data={state.checkoutUrl} />
               <p className={styles.cardDescription}>
-                Open the payment link in a new tab, complete the test payment (use card <strong>4111 1111 1111 1111</strong>, any future expiry, any CVV), then come back here to see the webhook.
+                Open the payment link in a new tab, complete the test payment (use card <strong>5123 4500 0000 0008</strong>, expiry <strong>01/39</strong>, CVV <strong>100</strong>), then come back here to see the webhook.
               </p>
               <div className={styles.actions}>
                 <button className={styles.primaryBtn} onClick={() => {
@@ -481,7 +481,7 @@ export default function PaymentJourneyInner() {
               />
               {state.status === "step3b_ready" && (
                 <p className={styles.cardDescription} style={{ marginTop: 16 }}>
-                  Enter test card <strong>4111 1111 1111 1111</strong>, any future expiry, any CVV. After payment, the webhook will arrive below.
+                  Enter test card <strong>5123 4500 0000 0008</strong>, expiry <strong>01/39</strong>, CVV <strong>100</strong>. After payment, the webhook will arrive below.
                 </p>
               )}
             </>
