@@ -97,21 +97,23 @@ const server = http.createServer((req, res) => {
   }
 
   // ── Webhook relay routes ──
-  const webhookPostMatch = req.url?.match(/^\/webhook\/([^/]+)\/?$/);
-  const webhookSSEMatch = req.url?.match(/^\/webhook\/([^/]+)\/events\/?$/);
+  // Match both /webhook/{id} (full path) and /{id} (DO may strip prefix)
+  const path = req.url?.replace(/^\/webhook/, "") || "";
+  const postMatch = path.match(/^\/([^/]+)\/?$/);
+  const sseMatch = path.match(/^\/([^/]+)\/events\/?$/);
 
-  if (webhookSSEMatch && req.method === "GET") {
-    handleWebhookSSE(webhookSSEMatch[1], req, res);
+  if (sseMatch && req.method === "GET") {
+    handleWebhookSSE(sseMatch[1], req, res);
     return;
   }
 
-  if (webhookPostMatch && req.method === "POST") {
-    handleWebhookPost(webhookPostMatch[1], req, res);
+  if (postMatch && postMatch[1] !== "health" && req.method === "POST") {
+    handleWebhookPost(postMatch[1], req, res);
     return;
   }
 
   // ── Health check ──
-  if (req.method === "GET" && req.url === "/health") {
+  if (req.method === "GET" && (req.url === "/health" || req.url === "/webhook/health" || path === "/health")) {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ status: "ok" }));
     return;
