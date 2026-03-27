@@ -174,7 +174,7 @@ Your user account is authenticated but lacks the specific permission for this en
 
 #### Are error response formats consistent across all endpoints?
 
-Most endpoints follow the standard error format documented above. Gateway-specific operations may include additional fields in the response (e.g., `pg_response` for operation errors). Always check the `message` field for human-readable details.
+Most endpoints follow the standard error format documented above. Gateway-specific operations may include additional fields in the response (e.g., `pg_response` for operation errors). For normalized gateway fields, see [PG Params](/developers/webhooks/pg-params). Always check the `message` field for human-readable details.
 
 ## What's Next?
 

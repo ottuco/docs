@@ -448,7 +448,7 @@ If a customer does not complete the payment, the transaction remains in a `pendi
 
 #### 6. How do I get notified when a payment is completed?
 
-Ottu sends a [payment notification](../webhooks/payment-events.md) webhook to the `webhook_url` you provided in the API request. The webhook contains details like `status`, `amount`, `currency_code`, and `pg_response`. Ensure your server verifies and processes these webhook notifications.
+Ottu sends a [payment notification](../webhooks/payment-events.md) webhook to the `webhook_url` you provided in the API request. The webhook contains details like `status`, `amount`, `currency_code`, and [`pg_params`](../webhooks/pg-params) (normalized gateway response fields). Ensure your server verifies and processes these webhook notifications.
 
 #### 7. What is the difference between `webhook_url` and `redirect_url`?
 

@@ -203,6 +203,7 @@ const sidebars: SidebarsConfig = {
             {type: 'doc', id: 'developers/webhooks/index', label: 'Overview & Setup'},
             {type: 'doc', id: 'developers/webhooks/payment-events', label: 'Payment Events'},
             {type: 'doc', id: 'developers/webhooks/operation-events', label: 'Operation Events'},
+            {type: 'doc', id: 'developers/webhooks/pg-params', label: 'PG Params'},
             {type: 'doc', id: 'developers/webhooks/verify-signatures', label: 'Verify Signatures'},
           ],
         },

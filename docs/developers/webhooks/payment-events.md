@@ -163,25 +163,19 @@ Never process a payment webhook without verifying the signature. An unverified p
 
 #### **7. Using PG Params**
 
-The `pg_params` object contains normalized payment gateway response fields. Instead of parsing the raw `gateway_response` (which varies by gateway), use `pg_params` for consistent field access:
+The `pg_params` object contains normalized payment gateway response fields. Instead of parsing the raw `gateway_response` (which varies by gateway), use `pg_params` for consistent field access across all 60+ gateways.
 
-- **`pg_params.card_number`** — masked card number used for the transaction
-- **`pg_params.auth_code`** — authorization code from the gateway
-- **`pg_params.transaction_id`** — gateway’s transaction identifier
-- **`pg_params.result`** — gateway’s normalized transaction result
-- **`pg_params.rrn`** — retrieval reference number for disputes and reconciliation
-- **`pg_params.decision`** — gateway’s final decision (ACCEPT, REJECT, REVIEW)
+For the complete searchable reference of all fields, see [**PG Params**](./pg-params).
 
 :::tip Why pg_params matters
-Ottu normalizes responses from all payment gateways into these fixed fields. This means you can switch gateways — from KNET to MPGS to Cybersource — without changing a single line of your webhook handling code. Instead of parsing each gateway’s unique response format, just read from `pg_params`.
+Ottu normalizes responses from all payment gateways into fixed fields. This means you can switch gateways — from KNET to MPGS to Cybersource — without changing a single line of your webhook handling code. Instead of parsing each gateway’s unique response format, just read from `pg_params`.
 :::
-
-For the complete list of `pg_params` fields, see the [Params](#params) section above.
 
 For general webhook setup and configuration, see the [Webhooks Overview](./).
 
 ## What's Next?
 
+- [**PG Params**](./pg-params) — Searchable reference for all normalized gateway response fields
 - [**Operation Events**](./operation-events) — Webhook notifications for refunds, captures, and voids
 - [**Verify Signatures**](./verify-signatures) — Validate webhook authenticity with HMAC-SHA256
 - [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration

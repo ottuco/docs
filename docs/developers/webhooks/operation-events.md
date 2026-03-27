@@ -122,6 +122,7 @@ For general webhook setup and configuration, see the [Webhooks Overview](./).
 
 ## What's Next?
 
+- [**PG Params**](./pg-params) — Normalized gateway response fields reference
 - [**Payment Events**](./payment-events) — Webhook notifications for payment transactions
 - [**Verify Signatures**](./verify-signatures) — Validate webhook authenticity with HMAC-SHA256
 - [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration

@@ -18,7 +18,7 @@ This interactive guide walks you through a complete payment integration with Ott
 - **Checkout API** creates payment sessions with a single POST call, returning a `session_id` and `checkout_url`.
 - **Two payment paths** — redirect customers to Ottu's hosted checkout page, or embed the Checkout SDK directly on your site.
 - **Webhooks** deliver payment results to your server in real-time — this is the primary integration mechanism.
-- **pg_params** normalize gateway responses into consistent fields — switch gateways without changing your webhook handling code.
+- **PG Params** normalize gateway responses into consistent fields — switch gateways without changing your webhook handling code.
 - **Payment Status Query** is your fallback when webhooks don't arrive — same response structure, same fields.
 
 ## Dive Deeper
@@ -27,6 +27,7 @@ This interactive guide walks you through a complete payment integration with Ott
 - [**Checkout SDK**](./checkout-sdk/) — SDK integration guides for Web, iOS, Android, and Flutter
 - [**Payment Methods**](./payment-methods) — Gateway discovery, filtering, and dynamic updates
 - [**Webhooks**](../webhooks/payment-events) — Setup, payload reference, and signature verification
+- [**PG Params**](../webhooks/pg-params) — Normalized gateway response fields for consistent webhook handling
 - [**Payment Status Query**](./psq) — Throttling rules, automatic inquiry, and timing guidance
 - [**Recurring Payments**](../cards-and-tokens/recurring-payments) — Tokenization and auto-debit for saved cards
 - [**Operations**](../operations) — Refund, capture, void, cancel, and expire payment transactions

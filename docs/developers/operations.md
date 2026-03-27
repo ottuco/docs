@@ -12,7 +12,7 @@ import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 
 The Operations API lets you perform subsequent actions on existing payment transactions — refund a completed payment, cancel an unpaid link, capture an authorized amount, or void an authorization. Ottu provides a **unified API**: you send the same payload structure regardless of the payment gateway, and Ottu handles the gateway-specific communication.
 
-Ottu supports six operations. Three are **internal** (handled within Ottu's system): [cancel](#cancel), [expire](#expire), and [delete](#delete). Three are **external** (synchronized with the payment gateway): [refund](#refund), [capture](#capture), and [void](#void). When an external operation succeeds, Ottu creates a [child transaction](/developers/reference/payment-states) linked to the original, recording the new state, amount, and gateway response.
+Ottu supports six operations. Three are **internal** (handled within Ottu's system): [cancel](#cancel), [expire](#expire), and [delete](#delete). Three are **external** (synchronized with the payment gateway): [refund](#refund), [capture](#capture), and [void](#void). When an external operation succeeds, Ottu creates a [child transaction](/developers/reference/payment-states) linked to the original, recording the new state, amount, and [gateway response](/developers/webhooks/pg-params).
 
 :::warning
 Operations via the Operations API do not work with **foreign currencies**. If the customer paid using [currency exchange](/developers/getting-started/api-fundamentals) (e.g., MID is KWD but customer paid in USD), external operations will fail. The payment currency must match the MID currency.
