@@ -258,7 +258,7 @@ export function createDemoCallbacks(onSuccess: () => void): CheckoutCallbacks {
       console.log("Error callback", error);
     },
     successCallback() {
-      (window as any).Checkout.showPopup("success");
+      (window as any).Checkout.showPopup("success", '&nbsp;');
       setTimeout(onSuccess, SUCCESS_DELAY_MS);
     },
     cancelCallback(cancel) {
