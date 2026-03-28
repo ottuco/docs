@@ -232,6 +232,9 @@ const FALLBACK_ERROR_MESSAGE =
 /** Default message shown when redirecting to a payment gateway. */
 const FALLBACK_REDIRECT_MESSAGE = "Redirecting to the payment page";
 
+/** Delay (ms) before calling onSuccess after showing the success popup. */
+const SUCCESS_DELAY_MS = 5000;
+
 /** Payment gateway name requiring special popup handling. */
 const KPAY_PG_NAME = "kpay";
 
@@ -254,11 +257,9 @@ export function createDemoCallbacks(onSuccess: () => void): CheckoutCallbacks {
       }
       console.log("Error callback", error);
     },
-    successCallback(success) {
-      if (success.redirect_url) {
-        window.open(success.redirect_url, "_blank", "noopener");
-      }
-      onSuccess();
+    successCallback() {
+      (window as any).Checkout.showPopup("success");
+      setTimeout(onSuccess, SUCCESS_DELAY_MS);
     },
     cancelCallback(cancel) {
       if (cancel.payment_gateway_info?.pg_name === KPAY_PG_NAME) {
