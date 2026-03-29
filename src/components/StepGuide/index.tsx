@@ -5,7 +5,7 @@ import styles from "./styles.module.css";
 export interface Step {
   title: string;
   description?: React.ReactNode;
-  image: string;
+  image?: string;
   imageAlt?: string;
 }
 
@@ -89,7 +89,7 @@ export default function StepGuide({ steps, startIndex = 1, nextSectionId }: Step
     return () => document.removeEventListener("keydown", handler);
   }, [lightboxOpen]);
 
-  const imageUrl = useBaseUrl(step.image);
+  const imageUrl = useBaseUrl(step.image || "");
   const progressPercent = total > 1 ? ((active + 1) / total) * 100 : 100;
   const isFirst = active === 0;
   const isLast = active === total - 1;
@@ -142,18 +142,20 @@ export default function StepGuide({ steps, startIndex = 1, nextSectionId }: Step
         </div>
 
         {/* Image */}
-        <div className={styles.imageArea}>
-          <div className={styles.imageFrame} onClick={() => setLightboxOpen(true)} role="button" tabIndex={0} aria-label="Click to enlarge image" onKeyDown={(e) => { if (e.key === "Enter") setLightboxOpen(true); }}>
-            <img
-              src={imageUrl}
-              alt={step.imageAlt || step.title}
-              loading="lazy"
-            />
-            <div className={styles.zoomHint}>
-              <ZoomIcon />
+        {step.image && (
+          <div className={styles.imageArea}>
+            <div className={styles.imageFrame} onClick={() => setLightboxOpen(true)} role="button" tabIndex={0} aria-label="Click to enlarge image" onKeyDown={(e) => { if (e.key === "Enter") setLightboxOpen(true); }}>
+              <img
+                src={imageUrl}
+                alt={step.imageAlt || step.title}
+                loading="lazy"
+              />
+              <div className={styles.zoomHint}>
+                <ZoomIcon />
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Content */}
         <div className={styles.content}>
@@ -191,7 +193,7 @@ export default function StepGuide({ steps, startIndex = 1, nextSectionId }: Step
       </div>
 
       {/* Lightbox */}
-      {lightboxOpen && typeof window !== "undefined" && (
+      {lightboxOpen && step.image && typeof window !== "undefined" && (
         <div className={styles.lightbox} onClick={() => setLightboxOpen(false)}>
           <button className={styles.lightboxClose} onClick={() => setLightboxOpen(false)} aria-label="Close lightbox">
             <CloseIcon />
