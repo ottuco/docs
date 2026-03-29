@@ -1,7 +1,10 @@
----
+f---
 title: Merchant First Journey
 sidebar_label: Getting Started
+
 ---
+
+import StepGuide from "@site/src/components/StepGuide";
 
 # Merchant First Journey
 
@@ -11,11 +14,11 @@ This guide walks you through a complete end-to-end workflow using the Ottu Real 
 
 Throughout this guide, we use the following example entities:
 
-| Entity | Details |
-|---|---|
+| Entity       | Details                                                                                                         |
+| ------------ | --------------------------------------------------------------------------------------------------------------- |
 | **Property** | Greenfield Towers -- an independent villa with 6 stories (6 units), classified as Residential Building or Villa |
-| **Tenant** | John Doe |
-| **Contract** | Residential Lease Agreement connecting the tenant to a specific unit |
+| **Tenant**   | John Doe                                                                                                        |
+| **Contract** | Residential Lease Agreement connecting the tenant to a specific unit                                            |
 
 ## Step 1: Add a Property
 
@@ -30,20 +33,62 @@ The merchant can choose to either save the property or add new units to it.
 
 ### Add New Unit
 
-1. Click **Add Unit Type with Units** at the bottom of the New Property Form to open the unit details form.
-2. Click **ADD OR EDIT UNITS** to specify the number of units associated with the property.
-
-![Add or edit units](/img/business/real-estate/placeholder.png)
-
-3. Click the **ADD** button to define the details of these units, then fill in the required information.
-
-![Define unit details](/img/business/real-estate/placeholder.png)
-
-![Unit information form](/img/business/real-estate/placeholder.png)
-
-4. Save the property to make it available for actions like tenant assignment or contract creation.
-
-Refer to the [Property Management](/docs/business/industry/real-estate/properties) section for further details on managing property settings and custom fields.
+<StepGuide
+  steps={[
+    {
+      title: "Add or Edit Units",
+      description: (
+        <>
+          <ol>
+            <li>
+              Click <strong>Add Unit Type with Units</strong> at the bottom of
+              the New Property Form to open the unit details form.
+            </li>
+            <li>
+              Click <strong>ADD OR EDIT UNITS</strong> to specify the number of
+              units associated with the property.
+            </li>
+          </ol>
+        </>
+      ),
+      image:
+        "/img/business/real-estate/getting-started/gs-01-add-edit-units.png",
+      imageAlt: "Add or edit units",
+    },
+    {
+      title: "Define Unit Details",
+      description: (
+        <>
+          Click the <strong>ADD</strong> button to define the details of these
+          units, then fill in the required information.
+        </>
+      ),
+      image:
+        "/img/business/real-estate/getting-started/gs-02-define-unit-details.png",
+      imageAlt: "Define unit details",
+    },
+    {
+      title: "Save the Property",
+      description: (
+        <>
+          Save the property to make it available for actions like tenant
+          assignment or contract creation.
+          <br />
+          <br />
+          Refer to the{" "}
+          <a href="/docs/business/industry/real-estate/properties">
+            Property Management
+          </a>{" "}
+          section for further details on managing property settings and custom
+          fields.
+        </>
+      ),
+      image:
+        "/img/business/real-estate/getting-started/gs-03-unit-info-form.png",
+      imageAlt: "Unit information form",
+    },
+  ]}
+/>
 
 ## Step 2: Add a Tenant
 
@@ -75,7 +120,7 @@ Refer to the [Contract Management](/docs/business/industry/real-estate/tenant-co
 
 **Invoices generated during contracting:**
 
-![Invoices while contracting](/img/business/real-estate/placeholder.png)
+![Invoices while contracting](/img/business/real-estate/getting-started/gs-04-invoices-contracting.png)
 
 ## Step 4: Print Unit Vacancy Report
 
@@ -87,7 +132,7 @@ Refer to the [Contract Management](/docs/business/industry/real-estate/tenant-co
 4. The system automatically generates a PDF containing the unit vacancy details for the filtered criteria.
 5. Download the PDF to your device for record-keeping or sharing.
 
-![Unit vacancy report](/img/business/real-estate/placeholder.png)
+![Unit vacancy report](/img/business/real-estate/getting-started/gs-05-vacancy-report.png)
 
 ## Step 5: Print and Generate Invoices
 
@@ -96,13 +141,13 @@ Refer to the [Contract Management](/docs/business/industry/real-estate/tenant-co
 3. Click the **Show** button.
 4. All relevant invoices are displayed.
 
-![Displayed invoices](/img/business/real-estate/placeholder.png)
+![Displayed invoices](/img/business/real-estate/getting-started/gs-06-displayed-invoices.png)
 
 5. **Print Invoices**:
    1. Click the **Print** button to generate a PDF report containing all displayed invoice details.
    2. Download the PDF for record-keeping or printing.
 
-   ![Invoice PDF report](/img/business/real-estate/placeholder.png)
+![Invoice PDF report](/img/business/real-estate/getting-started/gs-07-invoice-pdf.png)
 
 6. **Generate Invoices**:
    1. Click the **GENERATE INVOICES AND SEND PAYMENT LINKS** button to generate the displayed invoices.
@@ -115,7 +160,7 @@ Refer to the [Generate Invoice](/docs/business/industry/real-estate/generate-inv
 1. The invoice link is shared automatically with the tenant via email or SMS.
 2. The tenant accesses the payment page by clicking the link.
 
-![Payment page](/img/business/real-estate/placeholder.png)
+![Payment page](/img/business/real-estate/getting-started/gs-08-payment-page.png)
 
 3. The tenant completes the payment using available methods like cards or wallets.
 
@@ -124,7 +169,7 @@ Refer to the [Generate Invoice](/docs/business/industry/real-estate/generate-inv
 1. Access the **Contract Action List**. For instructions on accessing contract actions, see the [Contract Management](/docs/business/industry/real-estate/tenant-contract/contract-management#triggering-contract-actions) page.
 2. Select **Manual Payment** to record an offline payment.
 
-![Manual payment option](/img/business/real-estate/placeholder.png)
+![Manual payment option](/img/business/real-estate/getting-started/gs-09-manual-payment.png)
 
 3. After selecting Manual Payment, a [Manual Payment Form](/docs/business/industry/real-estate/tenant-contract/manual-payment#manual-payment-form) appears. Fill in the required information.
 4. Confirm and save the transaction.
