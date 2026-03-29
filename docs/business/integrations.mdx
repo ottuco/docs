@@ -3,6 +3,8 @@ title: Integrations
 sidebar_label: Integrations
 ---
 
+import StepGuide from "@site/src/components/StepGuide";
+
 # Integrations
 
 Ottu integrates with e-commerce platforms, direct gateway connections, and custom applications through its API. No matter which integration option you choose, Ottu handles secure and reliable payment processing.
@@ -34,23 +36,62 @@ Ottu provides pre-built plugins for popular e-commerce platforms:
 
 ### Install the Ottu Payment App
 
-**Step 1:** Visit the [Ottu App Listing Page](https://apps.shopify.com/debit-credit-cards) and log in to your Shopify account.
-
-**Step 2:** Select the stores where you want to install the payment app.
-
-**Step 3:** Click **Add app** and then **Install app**.
-
-**Step 4:** You will be redirected to Ottu's configuration page.
-
-**Step 5:** Enter your Ottu installation URL (provided by the Ottu Onboarding team after signing the agreement, e.g., `https://pay.yourdomain.com`).
-
-**Step 6:** Select the payment methods you want to display to your customers, then click **Activate Ottu**.
-
-**Step 7:** The Ottu App now appears in your Shopify payment settings.
+<StepGuide steps={[
+  {
+    title: "Access the Ottu App Listing Page",
+    description: <>Visit the <a href="https://apps.shopify.com/debit-credit-cards">Ottu App Listing Page</a> and log in to your Shopify account.</>,
+    image: "/img/business/integrations/shopify-install-01-listing-page.png",
+    imageAlt: "Ottu App Listing Page on Shopify",
+  },
+  {
+    title: "Select Your Stores",
+    description: <>Once logging in, select the stores where you want to install the payment app.</>,
+    image: "/img/business/integrations/shopify-install-02-select-stores.png",
+    imageAlt: "Select stores to install the payment app",
+  },
+  {
+    title: "Click Add App",
+    description: <>Click on <strong>Add app</strong>.</>,
+    image: "/img/business/integrations/shopify-install-03-add-app.png",
+    imageAlt: "Click Add app button",
+  },
+  {
+    title: "Install the Payment App",
+    description: <>Click on <strong>Install app</strong>.</>,
+    image: "/img/business/integrations/shopify-install-04-install-app.png",
+    imageAlt: "Click Install app button",
+  },
+  {
+    title: "Redirecting to Ottu's Page",
+    description: <>Upon clicking <strong>Install app</strong>, you will be directed to the <strong>Ottu's Page</strong>.</>,
+    image: "/img/business/integrations/shopify-install-05-ottu-page.png",
+    imageAlt: "Ottu configuration page after redirect",
+  },
+  {
+    title: "Enter Your Ottu Installation URL",
+    description: <>Enter your Ottu installation URL, which will be provided by the Ottu Onboarding team after signing the agreement. An example URL would be <code>https://pay.yourdomain.com</code>.</>,
+    image: "/img/business/integrations/shopify-install-06-installation-url.png",
+    imageAlt: "Enter Ottu installation URL",
+  },
+  {
+    title: "Select Preferred Payment Methods",
+    description: <>From the list provided, select the payment methods that you want to display to your customers. Then, click on <strong>Activate Ottu</strong>.</>,
+    image: "/img/business/integrations/shopify-install-07-payment-methods.png",
+    imageAlt: "Select payment methods and activate Ottu",
+  },
+  {
+    title: "Ottu App Integration",
+    description: <>Voilà! The Ottu App now appears in your payment settings.</>,
+    image: "/img/business/integrations/shopify-install-08-complete.png",
+    imageAlt: "Ottu App in Shopify payment settings",
+  },
+]} nextSectionId="shopify-transaction-interface" />
 
 ### Shopify Transaction Interface
 
 Access transaction insights for your Shopify stores from: **Ottu Portal** → **Shopify Tab** → **Transaction Option**.
+
+![Shopify tab navigation in Ottu Portal](/img/business/integrations/shopify-transaction-navigate.png)
 
 Key metrics available:
 
@@ -60,7 +101,11 @@ Key metrics available:
 | **Total Received** | Total funds successfully received |
 | **Net Balance** | Current net balance across transactions |
 
+![Shopify financial metrics dashboard](/img/business/integrations/shopify-transaction-metrics.png)
+
 The transaction table shows details for each transaction including its state: `paid`, `failed`, `attempted`, or `created`. See [Transaction States](/docs/business/payment-management/transaction-states) for more information.
+
+![Shopify transaction details table](/img/business/integrations/shopify-transaction-table.png)
 
 ## What's Next?
 
