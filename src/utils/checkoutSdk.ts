@@ -258,8 +258,7 @@ export function createDemoCallbacks(onSuccess: () => void): CheckoutCallbacks {
       console.log("Error callback", error);
     },
     successCallback() {
-      (window as any).Checkout.showPopup("success", '&nbsp;');
-      setTimeout(onSuccess, SUCCESS_DELAY_MS);
+      onSuccess();
     },
     cancelCallback(cancel) {
       if (cancel.payment_gateway_info?.pg_name === KPAY_PG_NAME) {

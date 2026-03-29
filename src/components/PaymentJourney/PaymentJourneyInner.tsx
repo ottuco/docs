@@ -24,6 +24,7 @@ type Status =
   | "step3a_redirect"
   | "step3b_sdk"
   | "step3b_ready"
+  | "step3b_success"
   | "step4_webhook"
   | "step4_done"
   | "step5_pgparams"
@@ -54,6 +55,7 @@ type Action =
   | { type: "SELECT_REDIRECT" }
   | { type: "SELECT_SDK" }
   | { type: "SDK_READY" }
+  | { type: "PAYMENT_SUCCESS" }
   | { type: "WAITING_WEBHOOK" }
   | { type: "WEBHOOK_RECEIVED"; payload: any }
   | { type: "CONTINUE_PGPARAMS" }
@@ -93,6 +95,8 @@ function reducer(state: State, action: Action): State {
       return { ...state, status: "step3b_sdk", chosenPath: "sdk" };
     case "SDK_READY":
       return { ...state, status: "step3b_ready" };
+    case "PAYMENT_SUCCESS":
+      return { ...state, status: "step3b_success" };
     case "WAITING_WEBHOOK":
       return { ...state, status: "step4_webhook" };
     case "WEBHOOK_RECEIVED":
@@ -129,7 +133,7 @@ function getStepStatus(stepNum: number, state: State): "pending" | "active" | "d
   const statusMap: Record<Status, number> = {
     idle: 0, step1_calling: 1, step1_done: 1,
     step2_calling: 2, step2_done: 2,
-    step3_choose: 3, step3a_redirect: 3, step3b_sdk: 3, step3b_ready: 3,
+    step3_choose: 3, step3a_redirect: 3, step3b_sdk: 3, step3b_ready: 3, step3b_success: 3,
     step4_webhook: 4, step4_done: 4,
     step5_pgparams: 5,
     step6_calling: 6, step6_done: 6,
@@ -187,7 +191,7 @@ export default function PaymentJourneyInner() {
     const statusMap: Record<string, number> = {
       step1_calling: 1, step1_done: 1,
       step2_calling: 2, step2_done: 2,
-      step3_choose: 3, step3a_redirect: 3, step3b_sdk: 3, step3b_ready: 3,
+      step3_choose: 3, step3a_redirect: 3, step3b_sdk: 3, step3b_ready: 3, step3b_success: 3,
       step4_webhook: 4, step4_done: 4,
       step5_pgparams: 5,
       step6_calling: 6, step6_done: 6,
@@ -262,7 +266,7 @@ export default function PaymentJourneyInner() {
   // ── SDK Callbacks ──────────────────────────────────
 
   const sdkCallbacks = useMemo(
-    () => createDemoCallbacks(() => dispatch({ type: "WAITING_WEBHOOK" })),
+    () => createDemoCallbacks(() => dispatch({ type: "PAYMENT_SUCCESS" })),
     [],
   );
 
@@ -494,6 +498,24 @@ export default function PaymentJourneyInner() {
                 </p>
               )}
             </>
+          )}
+
+          {state.status === "step3b_success" && (
+            <div className={styles.successBanner}>
+              <span className={styles.successBannerIcon}>
+                <Icon path={mdiCheck} size={0.8} />
+              </span>
+              <h4 className={styles.successBannerTitle}>Payment Complete</h4>
+              <p className={styles.successBannerDescription}>
+                The checkout flow finished successfully. In a real integration, the
+                customer would be redirected to your confirmation page.
+              </p>
+              <div className={styles.actions}>
+                <button className={styles.primaryBtn} onClick={() => dispatch({ type: "WAITING_WEBHOOK" })}>
+                  Continue — Webhook Notification
+                </button>
+              </div>
+            </div>
           )}
 
           {isStepExpanded(3) && (

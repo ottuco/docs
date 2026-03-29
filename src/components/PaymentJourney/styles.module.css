@@ -496,6 +496,45 @@
   margin: 0 0 24px;
 }
 
+/* ── Success banner (step 3 payment complete) ────────── */
+.successBanner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px 24px;
+  gap: 4px;
+}
+
+.successBannerIcon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #22c55e;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.successBannerTitle {
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ifm-heading-color);
+  margin: 0;
+}
+
+.successBannerDescription {
+  font-size: 14px;
+  color: var(--ifm-font-color-base);
+  margin: 0 0 8px;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
 /* ── Error state ─────────────────────────────────────── */
 .errorCard {
   display: flex;
