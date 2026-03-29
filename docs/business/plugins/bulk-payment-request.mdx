@@ -3,82 +3,93 @@ title: Bulk Payment Request
 sidebar_label: Bulk Payment Request
 ---
 
+import StepGuide from "@site/src/components/StepGuide";
+import Admonition from "@theme/Admonition";
+
 # Bulk Payment Request
 
 The Bulk Payment Request plugin lets you send [payment requests](./payment-request.md) to multiple customers at once by uploading a CSV file. It also supports recurring requests, so you can schedule periodic payment links automatically — no manual effort required.
 
 ## Creating a Bulk Payment Request
 
-### Step 1: Open the Bulk Upload
+<StepGuide steps={[
+  {
+    title: "Open the Bulk Upload",
+    description: <>From the Ottu Dashboard, navigate to the <strong>Bulk</strong> tab and click <strong>Upload</strong>.</>,
+    image: "/img/business/bulk-payment-request/bulk-01-upload.png",
+    imageAlt: "Bulk upload screen",
+  },
+  {
+    title: "Download a Sample File",
+    description: <>Before preparing your data, download one of the sample CSV files to see the required format. The following templates are available:
+      <table>
+        <thead><tr><th>Template</th><th>Use Case</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Required fields</strong></td><td>One-time requests with only mandatory columns</td></tr>
+          <tr><td><strong>All fields</strong></td><td>One-time requests with all available columns</td></tr>
+          <tr><td><strong>[Recurrence] required fields</strong></td><td>Recurring requests with only mandatory columns</td></tr>
+          <tr><td><strong>[Recurrence] all fields</strong></td><td>Recurring requests with all available columns</td></tr>
+        </tbody>
+      </table>
+    </>,
+    image: "/img/business/bulk-payment-request/bulk-02-sample-files.png",
+    imageAlt: "Sample file download options",
+  },
+  {
+    title: "Prepare the CSV File",
+    description: <>Fill in customer details in the CSV file. Required columns include:
+      <ul>
+        <li><strong>Amount</strong> — Payment amount</li>
+        <li><strong>Currency code</strong> — Three-letter currency code (e.g., KWD, SAR, BHD)</li>
+        <li><strong>Language</strong> — Preferred language for the payment page</li>
+        <li><strong>Customer email</strong> — Recipient's email address</li>
+        <li><strong>SMS notification</strong> — Set to <code>TRUE</code> to send an SMS, <code>FALSE</code> to skip</li>
+      </ul>
+    </>,
+    image: "/img/business/bulk-payment-request/bulk-03-csv-data.png",
+    imageAlt: "CSV file example",
+  },
+  {
+    title: "Add Recurrence Fields",
+    description: <>For recurring templates, you also need to specify:
+      <ul>
+        <li><strong>Start date</strong> — When the first payment request is sent</li>
+        <li><strong>End date</strong> — When the recurring cycle stops</li>
+      </ul>
+    </>,
+    image: "/img/business/bulk-payment-request/bulk-04-recurring-csv.png",
+    imageAlt: "Recurring CSV example",
+  },
+  {
+    title: "Import and Verify",
+    description: <>Click the <strong>IMPORT</strong> button and select your prepared CSV file.</>,
+    image: "/img/business/bulk-payment-request/bulk-05-import.png",
+    imageAlt: "Import button",
+  },
+  {
+    title: "Review and Check Errors",
+    description: <>Click on the imported file to review the generated list. Verify that all entries are correct.<br /><br />If errors are detected, Ottu displays an error report. You can download the error file, correct the issues, and re-import.
+      <Admonition type="warning">Always review the imported list before dispatching. Errors in email addresses or amounts cannot be corrected after payment links are sent.</Admonition>
+    </>,
+    image: "/img/business/bulk-payment-request/bulk-06-error-check.png",
+    imageAlt: "Error checking view",
+  },
+  {
+    title: "Dispatch Payment Links",
+    description: <>Once the file looks correct:
+      <ol>
+        <li>In the files window, click the <strong>three-dot menu</strong> in the top-right corner.</li>
+        <li>Select <strong>Dispatch</strong>.</li>
+      </ol>
+      This automatically generates payment links for each row and schedules any recurring payments.
+      <Admonition type="tip">Use the recurring format when you need to collect regular payments — for example, monthly subscription fees or installment plans. The system handles re-sending automatically.</Admonition>
+    </>,
+    image: "/img/business/bulk-payment-request/bulk-07-dispatch.png",
+    imageAlt: "Dispatch bulk file",
+  },
+]} nextSectionId="whats-next" />
 
-From the Ottu Dashboard, navigate to the **Bulk** tab and click **Upload**.
-
-![Bulk upload screen](/img/business/placeholder.png)
-
-### Step 2: Download a Sample File
-
-Before preparing your data, download one of the sample CSV files to see the required format. The following templates are available:
-
-| Template | Use Case |
-|----------|----------|
-| **Required fields** | One-time requests with only mandatory columns |
-| **All fields** | One-time requests with all available columns |
-| **[Recurrence] required fields** | Recurring requests with only mandatory columns |
-| **[Recurrence] all fields** | Recurring requests with all available columns |
-
-![Sample file download options](/img/business/placeholder.png)
-
-### Step 3: Prepare the CSV File
-
-Fill in customer details in the CSV file. Required columns include:
-
-- **Amount** — Payment amount
-- **Currency code** — Three-letter currency code (e.g., KWD, SAR, BHD)
-- **Language** — Preferred language for the payment page
-- **Customer email** — Recipient's email address
-- **SMS notification** — Set to `TRUE` to send an SMS, `FALSE` to skip
-
-![CSV file example](/img/business/placeholder.png)
-
-For recurring templates, you also need to specify:
-
-- **Start date** — When the first payment request is sent
-- **End date** — When the recurring cycle stops
-
-![Recurring CSV example](/img/business/placeholder.png)
-
-### Step 4: Import and Verify
-
-1. Click the **IMPORT** button and select your prepared CSV file.
-
-   ![Import button](/img/business/placeholder.png)
-
-2. Click on the imported file to review the generated list. Verify that all entries are correct.
-
-3. If errors are detected, Ottu displays an error report. You can download the error file, correct the issues, and re-import.
-
-   ![Error checking view](/img/business/placeholder.png)
-
-:::warning
-Always review the imported list before dispatching. Errors in email addresses or amounts cannot be corrected after payment links are sent.
-:::
-
-### Step 5: Dispatch Payment Links
-
-Once the file looks correct:
-
-1. In the files window, click the **three-dot menu** in the top-right corner.
-2. Select **Dispatch**.
-
-This automatically generates payment links for each row and schedules any recurring payments.
-
-![Dispatch bulk file](/img/business/placeholder.png)
-
-:::tip
-Use the recurring format when you need to collect regular payments — for example, monthly subscription fees or installment plans. The system handles re-sending automatically.
-:::
-
-## What's Next?
+## What's Next? {#whats-next}
 
 - [Payment Request](./payment-request.md) — Create individual payment links when bulk isn't needed
 - [Payment Management](../payment-management/index.md) — Track all generated payment links and their statuses
