@@ -1,0 +1,127 @@
+---
+title: Currencies
+sidebar_label: Currencies
+---
+
+import StepGuide from "@site/src/components/StepGuide";
+
+# Currencies
+
+Ottu is a multi-currency payment platform. Merchants can accept payments in multiple currencies, configure exchange rates, and customize markup fees — all from the dashboard.
+
+## Currency Configurations
+
+Each [payment gateway](/docs/business/payments/gateways) comes with preconfigured currency settings. For example, the default currency for KNET is the Kuwaiti Dinar (KWD). These defaults ensure smooth transactions out of the box.
+
+## Currency Configuration Page
+
+To access currency settings:
+
+1. Open the Ottu Dashboard
+2. Click the three dots in the top-right corner to open the **Administration Panel**
+3. Navigate to the **Currency** tab
+
+![Administration Panel — Currency tab](/img/business/currencies/currencies-admin-panel.png)
+
+There are three types of currency configuration:
+
+| Type | Purpose |
+|------|---------|
+| **[Currencies](#currencies-1)** | Adding and managing different currencies |
+| **[Currency Exchanges](#currency-exchanges)** | Setting up currency exchange between currencies |
+| **[Exchange Config](#exchange-configuration)** | Defining currency rules for specific payment gateways |
+
+![Currency configuration types overview](/img/business/currencies/currencies-overview.gif)
+
+### Currencies
+
+In the Ottu dashboard, you can find a wide range of currencies to choose from.
+
+**To add a new currency:**
+
+<StepGuide steps={[
+  {
+    title: "Click Add Currency",
+    description: <>Click the <strong>Add Currency</strong> button.</>,
+    image: "/img/business/currencies/add-currency-01-button.png",
+    imageAlt: "Add Currency button",
+  },
+  {
+    title: "Mark active and save",
+    description: <>Mark the <strong>Active</strong> option and click <strong>Save</strong>.</>,
+    image: "/img/business/currencies/add-currency-02-active-save.png",
+    imageAlt: "Currency form with Active option and Save button",
+  },
+]} nextSectionId="currency-exchanges" />
+
+### Currency Exchanges
+
+Merchants may prefer receiving payments in their local currency, even when the customer resides in a different country. Ottu offers a currency exchange service to facilitate this. When the bank acts as an intermediary, they may impose a markup fee to cover exchange costs.
+
+**To configure currency exchange:**
+
+<StepGuide steps={[
+  {
+    title: "Click Add Currency Exchange",
+    description: <>Click <strong>Add Currency Exchange</strong>.</>,
+    image: "/img/business/currencies/exchange-01-add-button.png",
+    imageAlt: "Add Currency Exchange button",
+  },
+  {
+    title: "Enter the required parameters",
+    description: <>Enter the required parameters (source currency, target currency, rate).</>,
+    image: "/img/business/currencies/exchange-02-parameters.png",
+    imageAlt: "Currency exchange parameters form",
+  },
+  {
+    title: "Save",
+    description: <>Click <strong>Save</strong>.</>,
+    image: "/img/business/currencies/exchange-03-save.png",
+    imageAlt: "Save currency exchange configuration",
+  },
+]} nextSectionId="exchange-configuration" />
+
+### Exchange Configuration
+
+The exchange configuration determines which currency rules apply to payments made through a specific [payment gateway](/docs/business/payments/gateways).
+
+**To add an exchange configuration:**
+
+<StepGuide steps={[
+  {
+    title: "Click Add Exchange Config",
+    description: <>Click <strong>Add Exchange Config</strong>.</>,
+    image: "/img/business/currencies/config-01-add-button.png",
+    imageAlt: "Add Exchange Config button",
+  },
+  {
+    title: "Fill in the required fields and save",
+    description: <>Fill in the required fields (see table below) and click <strong>Save</strong>.</>,
+    image: "/img/business/currencies/config-02-fill-save.png",
+    imageAlt: "Exchange configuration form with fields and Save button",
+  },
+]} />
+
+#### Field Descriptions
+
+| Field | Description |
+|-------|-------------|
+| **Name** | Identifier for this exchange configuration |
+| **Default currency** | The default currency of the payment gateway |
+| **Currencies** | The payment currencies the merchant wants to accept |
+| **Fee type** | **Fixed fee** — a predetermined amount added to the payment. **Percent fee** — an amount calculated as a percentage of the payment |
+| **Fees Description** | Identification of the fee for the merchant's records |
+| **Work as** | **Online** — uses online services to define the exchange rate. **Local** — merchant manually defines the exchange rate |
+| **Fix fee** | Fixed amount added to the transaction |
+| **Percentage fee** | Dynamic amount calculated as a percentage |
+| **Charge default currency** | When enabled, a fee is added to the original amount even if the payment is in the gateway's default currency |
+
+:::warning
+Foreign currencies are not supported for [operations](/docs/developers/operations/). If a customer pays using a different currency than the MID (e.g., MID is KWD but payment is in USD via currency exchange), refund/void/capture operations won't work.
+:::
+
+## What's Next?
+
+- **[Payment Gateways](/docs/business/payments/gateways)** — Browse all supported gateways and their default currencies
+- **[Payment Routing](/docs/business/payments/routing)** — Route payments based on currency and other criteria
+- **[Settings](/docs/business/settings/global)** — Global configuration including currency exchange provider (Fixer.io)
