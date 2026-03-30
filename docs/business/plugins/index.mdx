@@ -3,6 +3,8 @@ title: Plugins
 sidebar_label: Plugins
 ---
 
+import StepGuide from "@site/src/components/StepGuide";
+
 # Plugins
 
 Ottu is a plugin-based online payment management system (OPMS). Plugins let you extend your dashboard with additional capabilities — from generating payment links and managing e-commerce transactions to sending bulk payment requests. Install only what your business needs, and remove anything you don't.
@@ -19,19 +21,26 @@ Ottu is a plugin-based online payment management system (OPMS). Plugins let you 
 
 You can add or remove plugins directly from the dashboard in a few steps:
 
-1. **Open the Administration Panel** — From the Ottu Dashboard, click the three-dot menu in the top-right corner and select **Administration Panel**.
-
-   ![Administration Panel access](/img/business/placeholder.png)
-
-2. **Go to Installed Plugins** — Click on the **Plugins** tab, then open the **Installed Plugins** section to see your currently active plugins.
-
-   ![Installed Plugins section](/img/business/placeholder.png)
-
-3. **Add a plugin** — Click the **Plugins** area to see all available plugins. Select any plugin to install it.
-
-4. **Remove a plugin** — Locate the **X** icon next to the plugin you want to remove and click it.
-
-   ![Add and remove plugins](/img/business/placeholder.png)
+<StepGuide steps={[
+  {
+    title: "Open the Administration Panel",
+    description: <>From the Ottu Dashboard, click the three-dot menu in the top-right corner and select <strong>Administration Panel</strong>.</>,
+    image: "/img/business/plugins/plugins-administration-panel.png",
+    imageAlt: "Administration Panel access",
+  },
+  {
+    title: "Go to Installed Plugins",
+    description: <>Click on the <strong>Plugins</strong> tab, then open the <strong>Installed Plugins</strong> section to see your currently active plugins.</>,
+    image: "/img/business/plugins/plugins-installed-section.png",
+    imageAlt: "Installed Plugins section",
+  },
+  {
+    title: "Add a Plugin",
+    description: <><ul><li><strong>Add a plugin</strong> — Click the <strong>Plugins</strong> area to see all available plugins. Select any plugin to install it.</li><li><strong>Remove a plugin</strong> — Locate the <strong>X</strong> icon next to the plugin you want to remove and click it.</li></ul></>,
+    image: "/img/business/plugins/plugins-add-remove.png",
+    imageAlt: "Add and remove plugins",
+  },
+]} />
 
 :::tip
 Only install the plugins your business actually uses. Fewer plugins means a cleaner dashboard and less configuration overhead.

@@ -3,6 +3,8 @@ title: E-Commerce
 sidebar_label: E-Commerce
 ---
 
+import StepGuide from "@site/src/components/StepGuide";
+
 # E-Commerce
 
 The E-Commerce plugin connects Ottu to your online store, enabling seamless payment processing for your products. Track transactions, customize checkout branding, and settle funds directly to your bank account — all without third-party intermediaries.
@@ -17,17 +19,26 @@ The E-Commerce plugin connects Ottu to your online store, enabling seamless paym
 
 ## Plugin Configuration
 
-1. **Open the Administration Panel** — From the Ottu Dashboard, click the three-dot menu in the top-right corner and select **Administration Panel**.
-
-   ![Administration Panel](/img/business/placeholder.png)
-
-2. **Navigate to E-Commerce** — Go to **E-commerce Plugin > E-commerce Config**.
-
-   ![E-commerce Config](/img/business/placeholder.png)
-
-3. **Configure settings** and click **Save**.
-
-   ![E-commerce settings](/img/business/placeholder.png)
+<StepGuide steps={[
+  {
+    title: "Open the Administration Panel",
+    description: <>From the Ottu Dashboard, click the three-dot menu in the top-right corner and select <strong>Administration Panel</strong>.</>,
+    image: "/img/business/plugins/ecommerce-admin-panel.png",
+    imageAlt: "Administration Panel",
+  },
+  {
+    title: "Navigate to E-Commerce",
+    description: <>Go to <strong>E-commerce Plugin</strong> &gt; <strong>E-commerce Config</strong>.</>,
+    image: "/img/business/plugins/ecommerce-config.png",
+    imageAlt: "E-commerce Config",
+  },
+  {
+    title: "Configure Settings",
+    description: <>Configure settings and click <strong>Save</strong>.</>,
+    image: "/img/business/plugins/ecommerce-settings.png",
+    imageAlt: "E-commerce settings",
+  },
+]} />
 
 ### Configuration Options
 
@@ -50,11 +61,13 @@ The summary view displays:
 - **Total received** — Sum of all successfully completed payments
 - **Net balance** — Difference between generated and received amounts
 
-![E-commerce transaction summary](/img/business/placeholder.png)
+![E-commerce transaction summary](/img/business/plugins/ecommerce-transactions.png)
+
+![E-commerce transactions list](/img/business/plugins/ecommerce-transactions-list.png)
 
 Each individual transaction includes detailed information and a real-time status update:
 
-![Transaction detail view](/img/business/placeholder.png)
+![Transaction detail view](/img/business/plugins/ecommerce-transaction-detail.png)
 
 ### Transaction States
 
