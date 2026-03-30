@@ -30,7 +30,7 @@ Merchants can access further details by clicking the dropdown arrow at the end o
 
 To roll back a new contract, click on the three dots (**...**) at the end of the contract row and select **Rollback**.
 
-![Contract rollback action](/img/business/real-estate/placeholder.png)
+![Contract rollback action](/img/business/real-estate/auditing-contract-rollback.png)
 
 ## Renew Contract List
 
@@ -45,7 +45,7 @@ To roll back a renewal contract operation:
 3. Click the **three dots** (**...**) at the end of the row.
 4. Select **Rollback** from the dropdown menu.
 
-![Renew contract rollback](/img/business/real-estate/placeholder.png)
+![Renew contract rollback](/img/business/real-estate/auditing-renew-rollback.png)
 
 ## Terminate Contract List
 
@@ -71,7 +71,7 @@ To undo a termination:
 3. Click the **three dots** (**...**) at the end of the row.
 4. Select **Rollback** from the dropdown menu.
 
-![Terminate contract rollback](/img/business/real-estate/placeholder.png)
+![Terminate contract rollback](/img/business/real-estate/auditing-terminate-rollback.png)
 
 ## Manual Payment List
 
@@ -96,7 +96,7 @@ To roll back a manual payment:
 3. Click the **Action Button** at the end of the row.
 4. Select **Rollback** from the dropdown menu.
 
-![Manual payment rollback](/img/business/real-estate/placeholder.png)
+![Manual payment rollback](/img/business/real-estate/auditing-manual-payment-rollback.png)
 
 ## Advance Payments List
 
@@ -117,7 +117,7 @@ Clicking on a row opens a popup with two tabs:
 - **Contract Tab** -- Displays detailed information about the selected contract.
 - **Invoices Tab** -- Shows paid advance payments linked to the request.
 
-![Advance payment details](/img/business/real-estate/placeholder.png)
+![Advance payment details](/img/business/real-estate/auditing-advance-payment-details.png)
 
 :::note
 One advance payment request can include more than one invoice.
@@ -130,13 +130,13 @@ To roll back an advance payment:
 1. Click the **three-dot action menu** at the end of the corresponding row.
 2. Select **Rollback** from the dropdown options.
 
-![Advance payment rollback](/img/business/real-estate/placeholder.png)
+![Advance payment rollback](/img/business/real-estate/auditing-advance-payment-rollback.png)
 
 ## Modified Contract List
 
 All modified contracts are displayed in the Modified Contract List. This section provides an organized view of contracts that have undergone changes, allowing merchants to track and review modifications.
 
-![Modified contract list](/img/business/real-estate/placeholder.png)
+![Modified contract list](/img/business/real-estate/auditing-modified-contract-list.png)
 
 ## What's Next?
 
