@@ -204,7 +204,7 @@
   letter-spacing: 0.3px;
 }
 
-.cat_cards {
+.cat_gateway {
   background: rgba(25, 131, 188, 0.1);
   color: #1570a0;
 }
@@ -229,7 +229,7 @@
   color: #4b5563;
 }
 
-.cat_provider {
+.cat_aggregator {
   background: rgba(99, 102, 241, 0.1);
   color: #6366f1;
 }
@@ -384,7 +384,7 @@
   border-color: #1e2939;
 }
 
-[data-theme="dark"] .cat_cards {
+[data-theme="dark"] .cat_gateway {
   background: rgba(25, 131, 188, 0.15);
   color: #7dd3fc;
 }
@@ -409,7 +409,7 @@
   color: #9ca3af;
 }
 
-[data-theme="dark"] .cat_provider {
+[data-theme="dark"] .cat_aggregator {
   background: rgba(99, 102, 241, 0.15);
   color: #a5b4fc;
 }

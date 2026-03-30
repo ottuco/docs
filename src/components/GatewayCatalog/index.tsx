@@ -11,15 +11,15 @@ const gateways = (gatewaysData as Gateway[]).filter(
 type Category = Gateway["category"];
 
 const CATEGORY_LABELS: Record<Category, string> = {
-  cards: "Cards & Acquirers",
+  gateway: "Payment Gateways",
+  aggregator: "Aggregators",
   wallet: "Digital Wallets",
   bnpl: "Buy Now, Pay Later",
   local: "Local Methods",
   bank: "Bank Direct",
-  provider: "Providers",
 };
 
-const CATEGORY_ORDER: Category[] = ["cards", "wallet", "bnpl", "local", "bank", "provider"];
+const CATEGORY_ORDER: Category[] = ["gateway", "aggregator", "wallet", "bnpl", "local", "bank"];
 
 const SERVICE_CONFIG: Record<string, { label: string; icon: JSX.Element }> = {
   "apple-pay": {

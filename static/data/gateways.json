@@ -135,7 +135,7 @@
     "inquiryMinutes": 0,
     "operations": [],
     "type": "redirect",
-    "category": "cards",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "bambora_icon.svg",
     "testCards": [
@@ -344,7 +344,7 @@
     "inquiryMinutes": 0,
     "operations": [],
     "type": "redirect",
-    "category": "cards",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "cc_avenue_icon.svg",
     "testCards": [
@@ -375,7 +375,7 @@
       "refund"
     ],
     "type": "redirect",
-    "category": "cards",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "checkoutcom.svg",
     "testCards": [
@@ -407,7 +407,7 @@
       "refund"
     ],
     "type": "redirect",
-    "category": "cards",
+    "category": "gateway",
     "operationMode": "purchase",
     "logo": "cybersource_icon.svg",
     "testCards": [],
@@ -433,7 +433,7 @@
       "refund"
     ],
     "type": "redirect",
-    "category": "cards",
+    "category": "gateway",
     "operationMode": "purchase",
     "logo": "cybersource_icon.svg",
     "testCards": [
@@ -469,7 +469,7 @@
     "inquiryMinutes": null,
     "operations": [],
     "type": "redirect",
-    "category": "cards",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "dapi.svg",
     "testCards": []
@@ -566,7 +566,7 @@
     "inquiryMinutes": null,
     "operations": [],
     "type": "redirect",
-    "category": "cards",
+    "category": "gateway",
     "operationMode": "purchase",
     "logo": "",
     "testCards": []
@@ -589,7 +589,7 @@
       "refund"
     ],
     "type": "redirect",
-    "category": "cards",
+    "category": "gateway",
     "operationMode": "purchase",
     "logo": "master_visa.svg",
     "testCards": [
@@ -616,7 +616,7 @@
     "inquiryMinutes": null,
     "operations": [],
     "type": "redirect",
-    "category": "cards",
+    "category": "bank",
     "operationMode": "purchase",
     "logo": "geidea.svg",
     "testCards": [
@@ -742,7 +742,7 @@
     "inquiryMinutes": 31,
     "operations": [],
     "type": "redirect",
-    "category": "cards",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "hyperpay.svg",
     "testCards": [
@@ -806,7 +806,7 @@
     "inquiryMinutes": null,
     "operations": [],
     "type": "redirect",
-    "category": "cards",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "",
     "testCards": [
@@ -865,7 +865,7 @@
       "void"
     ],
     "type": "redirect",
-    "category": "cards",
+    "category": "gateway",
     "operationMode": "purchase_authorize",
     "logo": "master_visa.svg",
     "testCards": [
@@ -929,7 +929,7 @@
       "refund"
     ],
     "type": "redirect",
-    "category": "provider",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "myfatoorah_icon.svg",
     "testCards": [
@@ -1026,7 +1026,7 @@
       "refund"
     ],
     "type": "redirect",
-    "category": "cards",
+    "category": "bank",
     "operationMode": "purchase",
     "logo": "n_genius_icon.svg",
     "testCards": [
@@ -1078,7 +1078,7 @@
     "inquiryMinutes": null,
     "operations": [],
     "type": "redirect",
-    "category": "cards",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "paymob.svg",
     "testCards": [
@@ -1121,7 +1121,7 @@
     "inquiryMinutes": 31,
     "operations": [],
     "type": "redirect",
-    "category": "cards",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "",
     "testCards": []
@@ -1164,7 +1164,7 @@
       "refund"
     ],
     "type": "redirect",
-    "category": "provider",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "payu_icon.svg",
     "testCards": [
@@ -1451,7 +1451,7 @@
     "inquiryMinutes": 20,
     "operations": [],
     "type": "redirect",
-    "category": "cards",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "tap.svg",
     "testCards": [
@@ -1525,7 +1525,7 @@
     "inquiryMinutes": null,
     "operations": [],
     "type": "redirect",
-    "category": "cards",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "tess.svg",
     "testCards": []
@@ -1557,7 +1557,7 @@
     "inquiryMinutes": 0,
     "operations": [],
     "type": "redirect",
-    "category": "cards",
+    "category": "gateway",
     "operationMode": "purchase",
     "logo": "upg_icon.svg",
     "testCards": [
