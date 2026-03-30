@@ -174,65 +174,57 @@ function GatewayCard({ gateway }: { gateway: Gateway }) {
 
   return (
     <div className={styles.card}>
-      <div className={styles.cardHeader}>
-        <div className={styles.headerLeft}>
-          <div className={styles.logoWrap}>
-            {gateway.logo ? (
-              <img
-                src={logoSrc}
-                alt={gateway.name}
-                className={styles.logo}
-                loading="lazy"
-              />
-            ) : (
-              <LogoFallback name={gateway.name} />
-            )}
-          </div>
-          <div>
-            <h4 className={styles.cardName}>{gateway.name}</h4>
-            <span className={styles.country}>
-              {gateway.countryFlag} {gateway.country}
-            </span>
-          </div>
+      {/* Zone 1: Top row — logo left, badges right */}
+      <div className={styles.topRow}>
+        <div className={styles.logoWrap}>
+          {gateway.logo ? (
+            <img
+              src={logoSrc}
+              alt={gateway.name}
+              className={styles.logo}
+              loading="lazy"
+            />
+          ) : (
+            <LogoFallback name={gateway.name} />
+          )}
         </div>
-        <div className={styles.headerRight}>
+        <div className={styles.badgesCol}>
           <span className={`${styles.categoryBadge} ${styles[`cat_${gateway.category}`]}`}>
             {CATEGORY_LABELS[gateway.category]}
           </span>
-          {gateway.services && gateway.services.length > 0 &&
-            gateway.services.map((svc) => {
-              const cfg = SERVICE_CONFIG[svc];
-              return (
-                <span key={svc} className={`${styles.serviceBadge} ${styles[`svc_${svc.replace(/-/g, "_")}`] || ""}`}>
-                  {cfg?.icon}
-                  {cfg?.label || svc}
-                </span>
-              );
-            })
-          }
+          {gateway.services?.map((svc) => {
+            const cfg = SERVICE_CONFIG[svc];
+            return (
+              <span key={svc} className={`${styles.serviceBadge} ${styles[`svc_${svc.replace(/-/g, "_")}`] || ""}`}>
+                {cfg?.icon}
+                {cfg?.label || svc}
+              </span>
+            );
+          })}
         </div>
       </div>
 
+      {/* Zone 2: Name + country — full width, never overlaps */}
+      <div className={styles.cardBody}>
+        <h4 className={styles.cardName}>{gateway.name}</h4>
+        <span className={styles.country}>
+          {gateway.countryFlag} {gateway.country}
+        </span>
+      </div>
+
+      {/* Zone 3: Footer — currencies left, operations right */}
       {(gateway.currencies.length > 0 || gateway.operations.length > 0) && (
         <div className={styles.cardFooter}>
-          {gateway.currencies.length > 0 && (
-            <div className={styles.currencies}>
-              {gateway.currencies.map((c) => (
-                <span key={c} className={styles.currencyBadge}>
-                  {c}
-                </span>
-              ))}
-            </div>
-          )}
-          {gateway.operations.length > 0 && (
-            <div className={styles.operations}>
-              {gateway.operations.map((op) => (
-                <span key={op} className={styles.opBadge}>
-                  {op}
-                </span>
-              ))}
-            </div>
-          )}
+          <div className={styles.currencies}>
+            {gateway.currencies.map((c) => (
+              <span key={c} className={styles.currencyBadge}>{c}</span>
+            ))}
+          </div>
+          <div className={styles.operations}>
+            {gateway.operations.map((op) => (
+              <span key={op} className={styles.opBadge}>{op}</span>
+            ))}
+          </div>
         </div>
       )}
     </div>

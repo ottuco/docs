@@ -127,7 +127,8 @@
 .card {
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  min-height: 180px;
+  padding: 18px;
   border-radius: 10px;
   border: 1px solid var(--ifm-global-border-color, #e5e5e5);
   background: var(--ifm-background-color, #fff);
@@ -139,27 +140,13 @@
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
-.cardHeader {
+/* ── Zone 1: Top row — logo + badges ───────────────── */
+.topRow {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
-}
-
-.headerLeft {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.headerRight {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  flex-shrink: 0;
+  margin-bottom: 14px;
 }
 
 .logoWrap {
@@ -191,6 +178,19 @@
   font-size: 18px;
   font-weight: 700;
   color: #fff;
+}
+
+.badgesCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+/* ── Zone 2: Name + country — full width ───────────── */
+.cardBody {
+  flex: 1;
+  margin-bottom: 14px;
 }
 
 /* ── Category badges ────────────────────────────────── */
@@ -236,17 +236,17 @@
 
 /* ── Card content ───────────────────────────────────── */
 .cardName {
-  margin: 0;
-  font-size: 14px;
+  margin: 0 0 4px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--ifm-heading-color);
   line-height: 1.3;
 }
 
 .country {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--ifm-font-color-base);
-  opacity: 0.65;
+  opacity: 0.6;
 }
 
 .serviceBadge {
