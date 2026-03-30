@@ -11,7 +11,7 @@ Ottu provides a seamless workflow for merchants to process advance payments. To 
 
 To generate the advance payment request, select the invoices that should be paid in advance.
 
-![Select advance payment invoices](/img/business/real-estate/placeholder.png)
+![Select advance payment invoices](/img/business/real-estate/advance-payment-select-invoices.png)
 
 ## Sending the Advance Payment Request
 
@@ -20,7 +20,7 @@ After selecting the required invoices, there are two options:
 - **Send payment link to tenant** -- If the merchant saves without checking the Manual Payment option, an email is automatically sent to the tenant requesting them to pay for the advance payment online.
 - **Record as manual payment** -- If the merchant checks the **Manual Payment** box, the advance payment is processed using the same flow as [Manual Payment](/docs/business/industry/real-estate/tenant-contract/manual-payment).
 
-![Advance payment options](/img/business/real-estate/placeholder.png)
+![Advance payment options](/img/business/real-estate/advance-payment-options.png)
 
 ## What's Next?
 

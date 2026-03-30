@@ -13,7 +13,7 @@ Merchants can suspend a contract from the Contract Action list. For instructions
 
 Select **Suspend Contract** from the action menu to suspend the contract immediately.
 
-![Suspend contract action](/img/business/real-estate/placeholder.png)
+![Suspend contract action](/img/business/real-estate/suspend-contract-action.png)
 
 :::warning
 Suspending a contract blocks all online invoice payments. Tenants will not be able to pay any invoices associated with this contract until it is resumed. Payment must be coordinated through legal proceedings or other arrangements.

@@ -26,7 +26,7 @@ Merchants can perform contract actions from the [Tenant & Contract Dashboard](/d
 2. Search for the tenant and property associated with the contract you want to manage.
 3. At the end of the contract's row, click on the **three dots** (**...**).
 
-![Contract action menu](/img/business/real-estate/placeholder.png)
+![Contract action menu](/img/business/real-estate/contract-management-action-menu.png)
 
 The following actions are available:
 

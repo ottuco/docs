@@ -21,7 +21,7 @@ Most fields are automatically populated and cannot be modified. The merchant mus
 | **Contract Reference** | A unique identifier or code assigned to the contract for tracking | Auto-filled, can be modified |
 | **Upload Attachment** | Any relevant documents related to the contract renewal | Optional |
 
-![Renew contract form](/img/business/real-estate/placeholder.png)
+![Renew contract form](/img/business/real-estate/renew-contract-form.png)
 
 ## What's Next?
 

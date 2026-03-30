@@ -19,7 +19,7 @@ Upon selecting **Terminate Contract**, you are directed to the termination page 
 
 After filling in these fields, click **Save** and then confirm to finalize the termination.
 
-![Terminate contract form](/img/business/real-estate/placeholder.png)
+![Terminate contract form](/img/business/real-estate/terminate-contract-form.png)
 
 :::warning
 Terminating a contract is a significant action. Make sure to verify the termination details before confirming. If a termination was made in error, it can be rolled back from the [Auditing](/docs/business/industry/real-estate/auditing#terminate-contract-list) section.
