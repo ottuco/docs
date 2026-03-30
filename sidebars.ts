@@ -240,7 +240,6 @@ const sidebars: SidebarsConfig = {
           items: [
             {type: 'doc', id: 'developers/reference/error-codes', label: 'Error Codes'},
             {type: 'doc', id: 'developers/reference/payment-states', label: 'Payment States'},
-            {type: 'doc', id: 'developers/reference/glossary', label: 'Glossary'},
           ],
         },
       ],
