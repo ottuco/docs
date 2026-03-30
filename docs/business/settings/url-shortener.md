@@ -17,11 +17,11 @@ The URL shortener must be enabled in [Global Configuration](./global) before it 
 2. Click the three dots in the top-right corner to open the **Administration Panel**
 3. Navigate to **Config** > **URL Shortener Configurations**
 
-![URL Shortener Configuration navigation](/img/business/placeholder.png)
+![URL Shortener Configuration navigation](/img/business/settings/url-shortener-navigation.png)
 
 Click **Add URL Shortener Configuration** to create a new configuration.
 
-![URL Shortener Configuration form](/img/business/placeholder.png)
+![URL Shortener Configuration form](/img/business/settings/url-shortener-form.png)
 
 ## Field Descriptions
 

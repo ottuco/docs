@@ -20,11 +20,11 @@ Periodic reports generate automatically on a recurring schedule and can be email
 2. Click the three dots in the top-right corner to open the **Administration Panel**
 3. Navigate to **Report** > **Periodic Transaction Report Config**
 
-![Periodic Transaction Report navigation](/img/business/placeholder.png)
+![Periodic Transaction Report navigation](/img/business/settings/transaction-reports-navigation.png)
 
 Click **Add Periodic Transaction Report**, then fill in the fields below.
 
-![Periodic Transaction Report form](/img/business/placeholder.png)
+![Periodic Transaction Report form](/img/business/settings/transaction-reports-periodic-form.png)
 
 ### Field Descriptions
 
@@ -50,11 +50,11 @@ Flexible reports offer additional delivery options (SFTP) and data granularity (
 2. Click the three dots in the top-right corner to open the **Administration Panel**
 3. Navigate to **Report** > **Flexible Interval Transaction Reports**
 
-![Flexible Transaction Report navigation](/img/business/placeholder.png)
+![Flexible Transaction Report navigation](/img/business/settings/transaction-reports-flexible-navigation.png)
 
 Click **Add Flexible Interval Transaction Reports**, then fill in the fields below.
 
-![Flexible Transaction Report form](/img/business/placeholder.png)
+![Flexible Transaction Report form](/img/business/settings/transaction-reports-flexible-form.png)
 
 ### Field Descriptions
 
