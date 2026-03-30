@@ -20,6 +20,7 @@ export interface Gateway {
   category: "cards" | "wallet" | "bnpl" | "local" | "bank" | "provider";
   operationMode: "purchase" | "purchase_authorize";
   logo: string;
+  services?: string[];
   testCards: TestCard[];
   testCardNotes?: string;
   docsUrl?: string;

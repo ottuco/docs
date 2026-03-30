@@ -21,6 +21,12 @@ const CATEGORY_LABELS: Record<Category, string> = {
 
 const CATEGORY_ORDER: Category[] = ["cards", "wallet", "bnpl", "local", "bank", "provider"];
 
+const SERVICE_LABELS: Record<string, string> = {
+  "apple-pay": "Apple Pay",
+  "google-pay": "Google Pay",
+  "samsung-wallet": "Samsung Wallet",
+};
+
 function getRegion(country: string): string {
   const gcc = new Set([
     "Kuwait",
@@ -173,7 +179,7 @@ function GatewayCard({ gateway }: { gateway: Gateway }) {
           )}
         </div>
         <span className={`${styles.categoryBadge} ${styles[`cat_${gateway.category}`]}`}>
-          {gateway.category === "bnpl" ? "BNPL" : gateway.category}
+          {CATEGORY_LABELS[gateway.category]}
         </span>
       </div>
 
@@ -184,6 +190,16 @@ function GatewayCard({ gateway }: { gateway: Gateway }) {
           {gateway.countryFlag} {gateway.country}
         </span>
       </div>
+
+      {gateway.services && gateway.services.length > 0 && (
+        <div className={styles.services}>
+          {gateway.services.map((svc) => (
+            <span key={svc} className={`${styles.serviceBadge} ${styles[`svc_${svc.replace(/-/g, "_")}`] || ""}`}>
+              {SERVICE_LABELS[svc] || svc}
+            </span>
+          ))}
+        </div>
+      )}
 
       {gateway.currencies.length > 0 && (
         <div className={styles.currencies}>

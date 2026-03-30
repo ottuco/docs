@@ -410,7 +410,10 @@
     "category": "cards",
     "operationMode": "purchase",
     "logo": "cybersource_icon.svg",
-    "testCards": []
+    "testCards": [],
+    "services": [
+      "apple-pay"
+    ]
   },
   {
     "slug": "cybersource",
@@ -450,6 +453,9 @@
         "status": "success",
         "statusLabel": "Success"
       }
+    ],
+    "services": [
+      "apple-pay"
     ]
   },
   {
@@ -784,6 +790,9 @@
         "statusLabel": "Success",
         "note": "For not captured, use expiry 08/21"
       }
+    ],
+    "services": [
+      "apple-pay"
     ]
   },
   {
@@ -895,7 +904,12 @@
         "note": "For tokenization testing"
       }
     ],
-    "testCardNotes": "Cards 3 and 4 are specifically for receiving token data during tokenization testing."
+    "testCardNotes": "Cards 3 and 4 are specifically for receiving token data during tokenization testing.",
+    "services": [
+      "apple-pay",
+      "google-pay",
+      "samsung-wallet"
+    ]
   },
   {
     "slug": "myfatoorah",
@@ -968,7 +982,11 @@
         "statusLabel": "Success"
       }
     ],
-    "testCardNotes": "Cardholder name: use format like \"test test\"."
+    "testCardNotes": "Cardholder name: use format like \"test test\".",
+    "services": [
+      "apple-pay",
+      "google-pay"
+    ]
   },
   {
     "slug": "nbo",
@@ -1195,7 +1213,10 @@
         "statusLabel": "Declined"
       }
     ],
-    "testCardNotes": "OTP for all QPay cards: 1234"
+    "testCardNotes": "OTP for all QPay cards: 1234",
+    "services": [
+      "apple-pay"
+    ]
   },
   {
     "slug": "rajhi",
@@ -1488,7 +1509,10 @@
         "statusLabel": "Success"
       }
     ],
-    "testCardNotes": "CVV values: 100 = MATCH, 101 = NOT_PROCESSED, 102 = NO_MATCH. For AMEX: 1000, 1010, 1020."
+    "testCardNotes": "CVV values: 100 = MATCH, 101 = NOT_PROCESSED, 102 = NO_MATCH. For AMEX: 1000, 1010, 1020.",
+    "services": [
+      "apple-pay"
+    ]
   },
   {
     "slug": "tess",

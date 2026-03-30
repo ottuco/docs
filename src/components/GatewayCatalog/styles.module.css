@@ -235,6 +235,54 @@
   opacity: 0.65;
 }
 
+.services {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.serviceBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+.svc_apple_pay {
+  background: rgba(0, 0, 0, 0.06);
+  color: #1d1d1f;
+}
+
+.svc_google_pay {
+  background: rgba(66, 133, 244, 0.08);
+  color: #4285f4;
+}
+
+.svc_samsung_wallet {
+  background: rgba(20, 40, 160, 0.08);
+  color: #1428a0;
+}
+
+[data-theme="dark"] .svc_apple_pay {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e5e5e5;
+}
+
+[data-theme="dark"] .svc_google_pay {
+  background: rgba(66, 133, 244, 0.15);
+  color: #8ab4f8;
+}
+
+[data-theme="dark"] .svc_samsung_wallet {
+  background: rgba(60, 80, 220, 0.15);
+  color: #a0b0ff;
+}
+
 .currencies {
   display: flex;
   flex-wrap: wrap;
