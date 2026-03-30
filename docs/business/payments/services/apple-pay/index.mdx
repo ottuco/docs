@@ -11,7 +11,7 @@ Apple Pay is a mobile payment and digital wallet service that lets customers pay
 
 Ottu supports Apple Pay in **Kuwait**, **Saudi Arabia (KSA)**, and **Bahrain**.
 
-![Apple Pay overview](/img/business/placeholder.png)
+![Apple Pay overview](/img/business/apple-pay/apple-pay-overview.png)
 
 ## Apple Pay Configuration Guide
 
@@ -143,20 +143,15 @@ If you use your own custom domain alongside Ottu, you must also verify that doma
 
 ## Creating Apple Pay Certificates
 
-{/* TODO: Replace this section with <StepGuide> once real images are available.
-    See "Creating Merchant ID" section above for usage example.
-    Images needed: certificate-01 through certificate-11
-    Source images: current-docs/public-docs/.gitbook/assets/ + Google-hosted URLs in old README.md */}
-
 1. From your Apple Developer account, go to the **Certificates, IDs & Profiles** section.
 
-   ![Certificates, IDs & Profiles](/img/business/placeholder.png)
+   ![Certificates, IDs & Profiles](/img/business/apple-pay/certificate-01-certs-profiles.png)
 
 2. Scroll down to the **Apple Pay Merchant Identity Certificate** section.
 
 3. Click **Create Certificate**.
 
-   ![Create Certificate for Merchant Identity](/img/business/placeholder.png)
+   ![Create Certificate for Merchant Identity](/img/business/apple-pay/certificate-02-create-cert.png)
 
 ### Download the CSR from Ottu
 
@@ -167,21 +162,23 @@ If you use your own custom domain alongside Ottu, you must also verify that doma
    If you have not added the payment service yet, follow the instructions in [Adding and Verifying a Domain](#step-2-add-the-apple-pay-service-in-ottu) above.
    :::
 
-   ![Select the payment service](/img/business/placeholder.png)
+   ![Select the payment service](/img/business/apple-pay/certificate-03-select-payment-service.png)
 
 6. Click **Download CSR file**.
 
-   ![Download CSR file from Ottu](/img/business/placeholder.png)
+   ![Download CSR file from Ottu](/img/business/apple-pay/certificate-04-download-csr.png)
 
 ### Upload the CSR to Apple
 
 7. Back in Apple, upload the CSR file you downloaded from Ottu.
 
-   ![Upload CSR to Apple](/img/business/placeholder.png)
+   ![Upload CSR to Apple](/img/business/apple-pay/certificate-05-upload-csr.png)
 
 8. Click **Continue**, then click **Download** to get the certificate (`.CER`) file.
 
-   ![Download the certificate file](/img/business/placeholder.png)
+   ![Download the certificate file](/img/business/apple-pay/certificate-06-download-cer.png)
+
+   ![Download the certificate file confirmation](/img/business/apple-pay/certificate-06b-download-cer.png)
 
 ### Upload the Certificate to Ottu
 
@@ -189,11 +186,11 @@ If you use your own custom domain alongside Ottu, you must also verify that doma
 10. Select the same Apple Pay service from step 5.
 11. Upload the `.CER` file to the **Apple Pay Identifier CER** field and click **Save**.
 
-    ![Upload CER file to Ottu](/img/business/placeholder.png)
+    ![Upload CER file to Ottu](/img/business/apple-pay/certificate-07-upload-cer.png)
 
 After saving, the **PEM Certificate** and **Key File** are generated automatically.
 
-![PEM Certificate and Key File generated](/img/business/placeholder.png)
+![PEM Certificate and Key File generated](/img/business/apple-pay/certificate-08-pem-key-generated.png)
 
 ## Creating Apple Payment Processing Certificate
 
