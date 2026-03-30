@@ -55,7 +55,7 @@ Voiding can only be performed on authorized transactions that have not been capt
 
 The figure below illustrates a payment transaction with both parent and child states. The parent transaction is in the **Authorized** state, and the child transactions show **Paid** (captured) and **Refunded** states for the same payment.
 
-![Parent and child transaction states](/img/business/placeholder.png)
+![Parent and child transaction states](/img/business/payment-management/states-parent-child.gif)
 
 ## Payment Attempts
 
@@ -91,7 +91,7 @@ Understanding how parent transaction states and attempt states interact is key:
 
 - There is no `attempted` state. The transaction goes directly to either `failed` or `authorized`.
 
-![State combination diagram](/img/business/placeholder.png)
+![State combination diagram](/img/business/payment-management/states-combination-diagram.png)
 
 ---
 
