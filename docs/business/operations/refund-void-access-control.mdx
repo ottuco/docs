@@ -3,6 +3,8 @@ title: Refund & Void Access Control
 sidebar_label: Refund & Void Access Control
 ---
 
+import StepGuide from "@site/src/components/StepGuide";
+
 # Refund & Void Access Control
 
 Ottu uses a permission-based system to control who can perform refund and void operations. **Staff users** must have explicit permissions assigned before they can request refunds or voids, and those requests go through the [Two-Step Authorization](./two-step-authorization.md) approval flow. **Super users** bypass this flow by default.
@@ -21,29 +23,26 @@ When a staff user is granted refund or void permissions, any operation they init
 
 ## Assigning Permissions
 
-### Step 1: Open the Users Section
-
-Navigate to **Ottu Dashboard > Administration Panel > Users > Users**.
-
-![Users section in Administration Panel](/img/business/placeholder.png)
-
-### Step 2: Select the Target User
-
-Click on the user you want to grant permissions to.
-
-![Select user](/img/business/placeholder.png)
-
-### Step 3: Assign Refund and Void Permissions
-
-1. In the user's profile, go to the **Permissions** tab.
-2. Scroll down to the **User Permissions** section.
-3. In the **Available User Permissions** list, find:
-   - `payment | Payment transaction | Can do refund`
-   - `payment | Payment transaction | Can do void`
-4. Move these permissions to the **Chosen User Permissions** list.
-5. Click **Save**.
-
-![Permission assignment](/img/business/placeholder.png)
+<StepGuide steps={[
+  {
+    title: "Open the Users Section",
+    description: <>Navigate to <strong>Ottu Dashboard &gt; Administration Panel &gt; Users &gt; Users</strong>.</>,
+    image: "/img/business/operations/refund-void-users-section.png",
+    imageAlt: "Users section in Administration Panel",
+  },
+  {
+    title: "Select the Target User",
+    description: <>Click on the user you want to grant permissions to.</>,
+    image: "/img/business/operations/refund-void-select-user.png",
+    imageAlt: "Select user",
+  },
+  {
+    title: "Assign Refund and Void Permissions",
+    description: <><ol><li>In the user's profile, go to the <strong>Permissions</strong> tab.</li><li>Scroll down to the <strong>User Permissions</strong> section.</li><li>In the <strong>Available User Permissions</strong> list, find:<ul><li><code>payment | Payment transaction | Can do refund</code></li><li><code>payment | Payment transaction | Can do void</code></li></ul></li><li>Move these permissions to the <strong>Chosen User Permissions</strong> list.</li><li>Click <strong>Save</strong>.</li></ol></>,
+    image: "/img/business/operations/refund-void-permission-assignment.png",
+    imageAlt: "Permission assignment",
+  },
+]} />
 
 After saving, two permission requests (one for void, one for refund) are added to the [Permission Requests Table](#permission-requests-table).
 
@@ -51,7 +50,7 @@ After saving, two permission requests (one for void, one for refund) are added t
 
 The Permission Requests Table is located under the **Tickets** tab on the Ottu Dashboard. This is where the authorized approver (checker) reviews incoming permission requests and either approves or rejects them.
 
-![Permission Requests Table](/img/business/placeholder.png)
+![Permission Requests Table](/img/business/operations/refund-void-permission-requests.png)
 
 When a staff user with the appropriate permissions initiates a refund or void, the request appears here for the checker to act on.
 
