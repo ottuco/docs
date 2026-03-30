@@ -186,14 +186,14 @@
   letter-spacing: 0.3px;
 }
 
-.cat_bank {
-  background: rgba(107, 114, 128, 0.1);
-  color: #4b5563;
-}
-
-.cat_fintech {
+.cat_cards {
   background: rgba(25, 131, 188, 0.1);
   color: #1570a0;
+}
+
+.cat_wallet {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
 }
 
 .cat_bnpl {
@@ -201,9 +201,19 @@
   color: #7c3aed;
 }
 
-.cat_wallet {
-  background: rgba(16, 185, 129, 0.1);
-  color: #059669;
+.cat_local {
+  background: rgba(242, 126, 32, 0.1);
+  color: #d97706;
+}
+
+.cat_bank {
+  background: rgba(107, 114, 128, 0.1);
+  color: #4b5563;
+}
+
+.cat_provider {
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
 }
 
 /* ── Card content ───────────────────────────────────── */
@@ -301,14 +311,14 @@
   border-color: #1e2939;
 }
 
-[data-theme="dark"] .cat_bank {
-  background: rgba(156, 163, 175, 0.15);
-  color: #9ca3af;
-}
-
-[data-theme="dark"] .cat_fintech {
+[data-theme="dark"] .cat_cards {
   background: rgba(25, 131, 188, 0.15);
   color: #7dd3fc;
+}
+
+[data-theme="dark"] .cat_wallet {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
 }
 
 [data-theme="dark"] .cat_bnpl {
@@ -316,9 +326,19 @@
   color: #c4b5fd;
 }
 
-[data-theme="dark"] .cat_wallet {
-  background: rgba(16, 185, 129, 0.15);
-  color: #6ee7b7;
+[data-theme="dark"] .cat_local {
+  background: rgba(242, 126, 32, 0.15);
+  color: #fdba74;
+}
+
+[data-theme="dark"] .cat_bank {
+  background: rgba(156, 163, 175, 0.15);
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .cat_provider {
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
 }
 
 [data-theme="dark"] .opBadge {

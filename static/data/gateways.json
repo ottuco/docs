@@ -66,7 +66,7 @@
     "inquiryMinutes": 6,
     "operations": [],
     "type": "redirect",
-    "category": "fintech",
+    "category": "wallet",
     "operationMode": "purchase",
     "logo": "amazon_pay_icon.svg",
     "testCards": [
@@ -135,7 +135,7 @@
     "inquiryMinutes": 0,
     "operations": [],
     "type": "redirect",
-    "category": "bank",
+    "category": "cards",
     "operationMode": "purchase",
     "logo": "bambora_icon.svg",
     "testCards": [
@@ -162,7 +162,7 @@
       "refund"
     ],
     "type": "redirect",
-    "category": "bank",
+    "category": "local",
     "operationMode": "purchase",
     "logo": "benefit_icon.svg",
     "testCards": [
@@ -344,7 +344,7 @@
     "inquiryMinutes": 0,
     "operations": [],
     "type": "redirect",
-    "category": "fintech",
+    "category": "cards",
     "operationMode": "purchase",
     "logo": "cc_avenue_icon.svg",
     "testCards": [
@@ -375,7 +375,7 @@
       "refund"
     ],
     "type": "redirect",
-    "category": "fintech",
+    "category": "cards",
     "operationMode": "purchase",
     "logo": "checkoutcom.svg",
     "testCards": [
@@ -407,7 +407,7 @@
       "refund"
     ],
     "type": "redirect",
-    "category": "bank",
+    "category": "cards",
     "operationMode": "purchase",
     "logo": "cybersource_icon.svg",
     "testCards": []
@@ -430,7 +430,7 @@
       "refund"
     ],
     "type": "redirect",
-    "category": "bank",
+    "category": "cards",
     "operationMode": "purchase",
     "logo": "cybersource_icon.svg",
     "testCards": [
@@ -463,7 +463,7 @@
     "inquiryMinutes": null,
     "operations": [],
     "type": "redirect",
-    "category": "bank",
+    "category": "cards",
     "operationMode": "purchase",
     "logo": "dapi.svg",
     "testCards": []
@@ -495,7 +495,7 @@
     "inquiryMinutes": 60,
     "operations": [],
     "type": "redirect",
-    "category": "fintech",
+    "category": "local",
     "operationMode": "purchase",
     "logo": "doku.svg",
     "testCards": [
@@ -528,7 +528,7 @@
     "inquiryMinutes": 3,
     "operations": [],
     "type": "redirect",
-    "category": "bank",
+    "category": "local",
     "operationMode": "purchase",
     "logo": "enet_icon.svg",
     "testCards": []
@@ -544,7 +544,7 @@
     "inquiryMinutes": 8,
     "operations": [],
     "type": "redirect",
-    "category": "fintech",
+    "category": "local",
     "operationMode": "purchase",
     "logo": "",
     "testCards": []
@@ -560,7 +560,7 @@
     "inquiryMinutes": null,
     "operations": [],
     "type": "redirect",
-    "category": "bank",
+    "category": "cards",
     "operationMode": "purchase",
     "logo": "",
     "testCards": []
@@ -583,7 +583,7 @@
       "refund"
     ],
     "type": "redirect",
-    "category": "bank",
+    "category": "cards",
     "operationMode": "purchase",
     "logo": "master_visa.svg",
     "testCards": [
@@ -610,7 +610,7 @@
     "inquiryMinutes": null,
     "operations": [],
     "type": "redirect",
-    "category": "bank",
+    "category": "cards",
     "operationMode": "purchase",
     "logo": "geidea.svg",
     "testCards": [
@@ -664,7 +664,7 @@
     "inquiryMinutes": 10,
     "operations": [],
     "type": "redirect",
-    "category": "fintech",
+    "category": "local",
     "operationMode": "purchase",
     "logo": "hesabe.svg",
     "testCards": [
@@ -736,7 +736,7 @@
     "inquiryMinutes": 31,
     "operations": [],
     "type": "redirect",
-    "category": "fintech",
+    "category": "cards",
     "operationMode": "purchase",
     "logo": "hyperpay.svg",
     "testCards": [
@@ -771,7 +771,7 @@
       "refund"
     ],
     "type": "redirect",
-    "category": "bank",
+    "category": "local",
     "operationMode": "purchase",
     "logo": "knet_icon.svg",
     "testCards": [
@@ -797,7 +797,7 @@
     "inquiryMinutes": null,
     "operations": [],
     "type": "redirect",
-    "category": "fintech",
+    "category": "cards",
     "operationMode": "purchase",
     "logo": "",
     "testCards": [
@@ -856,7 +856,7 @@
       "void"
     ],
     "type": "redirect",
-    "category": "bank",
+    "category": "cards",
     "operationMode": "purchase_authorize",
     "logo": "master_visa.svg",
     "testCards": [
@@ -915,7 +915,7 @@
       "refund"
     ],
     "type": "redirect",
-    "category": "fintech",
+    "category": "provider",
     "operationMode": "purchase",
     "logo": "myfatoorah_icon.svg",
     "testCards": [
@@ -1008,7 +1008,7 @@
       "refund"
     ],
     "type": "redirect",
-    "category": "bank",
+    "category": "cards",
     "operationMode": "purchase",
     "logo": "n_genius_icon.svg",
     "testCards": [
@@ -1034,7 +1034,7 @@
     "inquiryMinutes": 8,
     "operations": [],
     "type": "redirect",
-    "category": "bank",
+    "category": "local",
     "operationMode": "purchase",
     "logo": "omannet_icon.svg",
     "testCards": [
@@ -1060,7 +1060,7 @@
     "inquiryMinutes": null,
     "operations": [],
     "type": "redirect",
-    "category": "fintech",
+    "category": "cards",
     "operationMode": "purchase",
     "logo": "paymob.svg",
     "testCards": [
@@ -1103,7 +1103,7 @@
     "inquiryMinutes": 31,
     "operations": [],
     "type": "redirect",
-    "category": "fintech",
+    "category": "cards",
     "operationMode": "purchase",
     "logo": "",
     "testCards": []
@@ -1119,7 +1119,7 @@
     "inquiryMinutes": 0,
     "operations": [],
     "type": "redirect",
-    "category": "fintech",
+    "category": "wallet",
     "operationMode": "purchase",
     "logo": "paypal_icon.svg",
     "testCards": [
@@ -1146,7 +1146,7 @@
       "refund"
     ],
     "type": "redirect",
-    "category": "fintech",
+    "category": "provider",
     "operationMode": "purchase",
     "logo": "payu_icon.svg",
     "testCards": [
@@ -1174,7 +1174,7 @@
       "refund"
     ],
     "type": "redirect",
-    "category": "fintech",
+    "category": "local",
     "operationMode": "purchase",
     "logo": "qpay.svg",
     "testCards": [
@@ -1238,7 +1238,7 @@
     "inquiryMinutes": 30,
     "operations": [],
     "type": "redirect",
-    "category": "fintech",
+    "category": "local",
     "operationMode": "purchase",
     "logo": "skipcash.svg",
     "testCards": []
@@ -1254,7 +1254,7 @@
     "inquiryMinutes": 16,
     "operations": [],
     "type": "redirect",
-    "category": "fintech",
+    "category": "local",
     "operationMode": "purchase",
     "logo": "smartpay.svg",
     "testCards": []
@@ -1430,7 +1430,7 @@
     "inquiryMinutes": 20,
     "operations": [],
     "type": "redirect",
-    "category": "fintech",
+    "category": "cards",
     "operationMode": "purchase",
     "logo": "tap.svg",
     "testCards": [
@@ -1501,7 +1501,7 @@
     "inquiryMinutes": null,
     "operations": [],
     "type": "redirect",
-    "category": "fintech",
+    "category": "cards",
     "operationMode": "purchase",
     "logo": "tess.svg",
     "testCards": []
@@ -1517,7 +1517,7 @@
     "inquiryMinutes": null,
     "operations": [],
     "type": "redirect",
-    "category": "fintech",
+    "category": "local",
     "operationMode": "purchase",
     "logo": "upayments.svg",
     "testCards": []
@@ -1533,7 +1533,7 @@
     "inquiryMinutes": 0,
     "operations": [],
     "type": "redirect",
-    "category": "bank",
+    "category": "cards",
     "operationMode": "purchase",
     "logo": "upg_icon.svg",
     "testCards": [

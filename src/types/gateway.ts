@@ -17,7 +17,7 @@ export interface Gateway {
   inquiryMinutes: number | null;
   operations: string[];
   type: "redirect" | "wallet";
-  category: "bank" | "fintech" | "bnpl" | "wallet";
+  category: "cards" | "wallet" | "bnpl" | "local" | "bank" | "provider";
   operationMode: "purchase" | "purchase_authorize";
   logo: string;
   testCards: TestCard[];

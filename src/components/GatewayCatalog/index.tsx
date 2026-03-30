@@ -11,13 +11,15 @@ const gateways = (gatewaysData as Gateway[]).filter(
 type Category = Gateway["category"];
 
 const CATEGORY_LABELS: Record<Category, string> = {
-  bank: "Banks",
-  fintech: "Fintechs",
-  bnpl: "Buy Now, Pay Later",
+  cards: "Cards & Acquirers",
   wallet: "Digital Wallets",
+  bnpl: "Buy Now, Pay Later",
+  local: "Local Methods",
+  bank: "Bank Direct",
+  provider: "Providers",
 };
 
-const CATEGORY_ORDER: Category[] = ["bank", "fintech", "bnpl", "wallet"];
+const CATEGORY_ORDER: Category[] = ["cards", "wallet", "bnpl", "local", "bank", "provider"];
 
 function getRegion(country: string): string {
   const gcc = new Set([
