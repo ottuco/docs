@@ -44,6 +44,8 @@ Ottu Router runs each payment through four clear stages:
 The Router always logs its decision: which blockers applied, which connections were eligible, which strategy was used, and why the final connection was chosen.
 :::
 
+![Payment routing sequence diagram](/img/business/payments/routing-sequence-diagram.png)
+
 ## Blocker Rules
 
 These rules filter transactions before routing begins.
