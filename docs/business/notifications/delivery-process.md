@@ -25,7 +25,7 @@ Manual notifications are useful when you need to resend a notification that the 
 
 The [Manual WhatsApp channel](./whatsapp/manual.md) does **not** send notifications automatically. Merchants must manually trigger every WhatsApp notification through the [Transaction Table](/business/payment-management/transaction-insights#transaction-table).
 
-<!-- TODO: Screenshot of manual notification trigger in the Transaction Table -->
+![Manual notification trigger in Transaction Table](/img/business/notifications/manual-notification-trigger.png)
 
 ## Delivery Summary
 
