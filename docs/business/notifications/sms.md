@@ -13,13 +13,13 @@ Before SMS notifications can be sent, the following must be in place:
 
 1. **Customer Phone Number** -- The customer's phone number must be collected during payment transaction creation. To make the phone number field mandatory, contact the [Ottu support team](mailto:support@ottu.com).
 
-   <!-- TODO: Screenshot of customer phone number field in transaction creation -->
+   ![Customer phone number field](/img/business/notifications/sms-phone-number-field.png)
 
 2. **SMS Template Configuration** -- SMS templates must be fully configured and reviewed for accuracy before enabling SMS notifications. To configure SMS templates, contact the [Ottu support team](mailto:support@ottu.com).
 
 3. **Enable SMS Templates** -- Merchants activate SMS notifications by selecting the corresponding checkboxes during payment transaction creation. Templates can be enabled for pre-payment, post-payment, or both, depending on the requirement.
 
-   <!-- TODO: Screenshot of SMS template checkboxes in transaction creation -->
+   ![SMS notification checkboxes](/img/business/notifications/sms-notification-checkboxes.png)
 
 4. **SMS Provider** -- A dedicated SMS provider must be configured. Contact the [Ottu support team](mailto:support@ottu.com) to add and set up your SMS provider.
 
