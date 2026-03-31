@@ -90,15 +90,15 @@ Click the **three dots** (**...**) at the beginning of each tenant row to:
 
 Click the **three dots** (**...**) at the end of each contract row to access contract actions such as:
 
-- [Renew Contract](/docs/business/industry/real-estate/tenant-contract/renew-contract)
-- [Terminate Contract](/docs/business/industry/real-estate/tenant-contract/terminate-contract)
-- [Suspend Contract](/docs/business/industry/real-estate/tenant-contract/suspend-contract)
-- [Resume Contract](/docs/business/industry/real-estate/tenant-contract/resume-contract)
-- [Manual Payment](/docs/business/industry/real-estate/tenant-contract/manual-payment)
-- [Advance Payment](/docs/business/industry/real-estate/tenant-contract/advance-payment)
+- [Renew Contract](/business/industry/real-estate/tenant-contract/renew-contract)
+- [Terminate Contract](/business/industry/real-estate/tenant-contract/terminate-contract)
+- [Suspend Contract](/business/industry/real-estate/tenant-contract/suspend-contract)
+- [Resume Contract](/business/industry/real-estate/tenant-contract/resume-contract)
+- [Manual Payment](/business/industry/real-estate/tenant-contract/manual-payment)
+- [Advance Payment](/business/industry/real-estate/tenant-contract/advance-payment)
 
 ## What's Next?
 
-- [Tenant Management](/docs/business/industry/real-estate/tenant-contract/tenant-management) -- Add and edit tenant profiles
-- [Contract Management](/docs/business/industry/real-estate/tenant-contract/contract-management) -- Overview of contract lifecycle and actions
-- [Add Contract](/docs/business/industry/real-estate/tenant-contract/add-contract) -- Create a new rental agreement
+- [Tenant Management](/business/industry/real-estate/tenant-contract/tenant-management) -- Add and edit tenant profiles
+- [Contract Management](/business/industry/real-estate/tenant-contract/contract-management) -- Overview of contract lifecycle and actions
+- [Add Contract](/business/industry/real-estate/tenant-contract/add-contract) -- Create a new rental agreement

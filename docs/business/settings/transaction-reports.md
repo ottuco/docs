@@ -35,7 +35,7 @@ Click **Add Periodic Transaction Report**, then fill in the fields below.
 | **Period** | How often the report is generated (e.g., daily, weekly, monthly) |
 | **Report generation date/time** | The date and time when report generation starts |
 | **Cut-off time** | The time at which transactions are evaluated for inclusion in the next report. Also determines when the report is sent. If not set, the report will not generate even if **Is Active** is enabled |
-| **Plugins** | Which [plugin](/docs/business/plugins/) the report covers |
+| **Plugins** | Which [plugin](/business/plugins/) the report covers |
 | **Send transaction report by email** | When checked, the report is automatically emailed to the specified addresses |
 | **Emails** | The recipient email addresses for report delivery |
 | **File name prefix** | A prefix added to the report filename for easy identification |
@@ -63,7 +63,7 @@ Click **Add Flexible Interval Transaction Reports**, then fill in the fields bel
 | **Is Enabled?** | The report only becomes active once the Cut-off Time is defined and **Is Active** is enabled |
 | **Is active?** | Whether this report configuration is currently active and visible on the dashboard |
 | **Cut-off time** | The time at which transactions are evaluated for inclusion in the next report. Also determines when the report is sent. If not set, the report will not generate even if **Is Active** is enabled |
-| **Plugins** | Which [plugin](/docs/business/plugins/) the report covers |
+| **Plugins** | Which [plugin](/business/plugins/) the report covers |
 | **Send transaction report by email** | When checked, the report is automatically emailed |
 | **Emails** | The recipient email addresses for email delivery |
 | **Send transaction report by SFTP** | When checked, the report is securely transferred via SFTP |
@@ -105,7 +105,7 @@ Static fields contain fixed values that remain the same across all generated rep
 
 ### Gateway Response Fields
 
-Gateway response fields capture data returned by the [payment gateway](/docs/business/payments/gateways) after processing a transaction — such as authorization codes and gateway-specific details.
+Gateway response fields capture data returned by the [payment gateway](/business/payments/gateways) after processing a transaction — such as authorization codes and gateway-specific details.
 
 | Required Information | Description |
 |---------------------|-------------|
@@ -129,6 +129,6 @@ All field types require these additional settings:
 
 ## What's Next?
 
-- **[Payment Management](/docs/business/payment-management/)** — Track and search transactions from the dashboard
+- **[Payment Management](/business/payment-management/)** — Track and search transactions from the dashboard
 - **[Webhooks Configuration](./webhooks)** — Set up real-time event notifications
-- **[Plugins](/docs/business/plugins/)** — Configure the plugins that reports can be scoped to
+- **[Plugins](/business/plugins/)** — Configure the plugins that reports can be scoped to

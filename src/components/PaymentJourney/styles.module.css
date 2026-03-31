@@ -105,6 +105,11 @@
   opacity: 1;
 }
 
+.cardDoneExpanded {
+  opacity: 1;
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
 /* ── Card header ─────────────────────────────────────── */
 .cardHeader {
   padding: 18px 24px;
@@ -116,6 +121,15 @@
 
 .cardHeaderDone {
   padding: 14px 24px;
+  cursor: pointer;
+}
+
+.cardHeaderDone:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="dark"] .cardHeaderDone:hover {
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .cardTitle {
@@ -137,6 +151,12 @@
   margin: 4px 0 0 0;
 }
 
+.doneRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .doneBadge {
   display: flex;
   align-items: center;
@@ -146,6 +166,12 @@
   color: #22c55e;
   letter-spacing: 0.3px;
   text-transform: uppercase;
+}
+
+.chevron {
+  color: var(--ifm-font-color-base);
+  opacity: 0.4;
+  transition: transform 0.2s ease;
 }
 
 /* ── Card body (collapsible) ─────────────────────────── */
@@ -202,16 +228,17 @@
 
 .apiPanelBody {
   padding: 16px;
-  background: #0f0f1a;
+  background: var(--ifm-background-surface-color);
   max-height: 320px;
   overflow-y: auto;
 }
 
 .apiPanelBody pre {
   margin: 0;
+  background: var(--ifm-code-background);
   font-size: 12.5px;
   line-height: 1.6;
-  color: #e5e7eb;
+  color: var(--ifm-code-color);
   white-space: pre-wrap;
   word-break: break-word;
   font-family: "Consolas", "Monaco", "Courier New", monospace;
@@ -279,6 +306,7 @@
   display: flex;
   gap: 12px;
   margin-top: 20px;
+  justify-content: center;
 }
 
 .primaryBtn {
@@ -292,7 +320,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
 }
@@ -466,6 +494,45 @@
   font-size: 14px;
   color: var(--ifm-font-color-base);
   margin: 0 0 24px;
+}
+
+/* ── Success banner (step 3 payment complete) ────────── */
+.successBanner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px 24px;
+  gap: 4px;
+}
+
+.successBannerIcon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #22c55e;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.successBannerTitle {
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ifm-heading-color);
+  margin: 0;
+}
+
+.successBannerDescription {
+  font-size: 14px;
+  color: var(--ifm-font-color-base);
+  margin: 0 0 8px;
+  max-width: 400px;
+  line-height: 1.6;
 }
 
 /* ── Error state ─────────────────────────────────────── */

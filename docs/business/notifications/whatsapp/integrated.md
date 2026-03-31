@@ -31,7 +31,7 @@ Ottu sends integrated WhatsApp notifications to customers at key stages of the p
 
 ### Pre/Post Payment States
 
-WhatsApp notifications are triggered for the following [payment states](/docs/business/payment-management/transaction-states):
+WhatsApp notifications are triggered for the following [payment states](/business/payment-management/transaction-states):
 
 | State | Description |
 |-------|-------------|
@@ -47,7 +47,7 @@ The integrated WhatsApp channel does not support notifications for operation sta
 :::
 
 :::note
-For the [E-Commerce](/docs/business/plugins/e-commerce) plugin, pre-payment WhatsApp notifications are not available. Only post-payment notifications are supported via this channel.
+For the [E-Commerce](/business/plugins/e-commerce) plugin, pre-payment WhatsApp notifications are not available. Only post-payment notifications are supported via this channel.
 :::
 
 ## What's Next?

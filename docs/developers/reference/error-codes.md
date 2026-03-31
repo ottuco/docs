@@ -84,7 +84,7 @@ Returned when credentials are missing or invalid.
 - Missing `Authorization` header
 - Invalid or revoked API key
 - Malformed Basic Auth credentials
-- Using a [Public API Key](/docs/developers/getting-started/authentication#public-key) where a [Private API Key](/docs/developers/getting-started/authentication#private-key-api-key) is required
+- Using a [Public API Key](/developers/getting-started/authentication#public-key) where a [Private API Key](/developers/getting-started/authentication#private-key-api-key) is required
 
 ### Permission Errors (403)
 
@@ -105,7 +105,7 @@ Returned when the user is authenticated but lacks the required permission.
 - Attempting to access another merchant's resources
 - Using staff credentials without the required role
 
-See [Authentication](/docs/developers/getting-started/authentication) for permission configuration.
+See [Authentication](/developers/getting-started/authentication) for permission configuration.
 
 ### Rate Limit Errors (429)
 
@@ -132,7 +132,7 @@ Some endpoints return specific error codes beyond the standard HTTP errors:
 | HTTP | Code | When |
 |:----:|------|------|
 | 400 | Operation not supported | The payment gateway doesn't support this operation (e.g., refund) |
-| 400 | Invalid state for operation | Transaction is not in a valid state for the requested operation (see [State Groups](/docs/developers/reference/payment-states#state-groups)) |
+| 400 | Invalid state for operation | Transaction is not in a valid state for the requested operation (see [State Groups](/developers/reference/payment-states#state-groups)) |
 | 400 | Amount exceeds balance | Refund or capture amount exceeds the available amount |
 
 ### Reports API
@@ -162,7 +162,7 @@ Some endpoints return specific error codes beyond the standard HTTP errors:
 
 #### What should I do when I get a 401 error?
 
-Check your `Authorization` header. Ensure you're using the correct API key format (`Api-Key your_key`) and that the key hasn't been revoked. See [Authentication](/docs/developers/getting-started/authentication).
+Check your `Authorization` header. Ensure you're using the correct API key format (`Api-Key your_key`) and that the key hasn't been revoked. See [Authentication](/developers/getting-started/authentication).
 
 #### How do I handle rate limiting?
 
@@ -174,10 +174,10 @@ Your user account is authenticated but lacks the specific permission for this en
 
 #### Are error response formats consistent across all endpoints?
 
-Most endpoints follow the standard error format documented above. Gateway-specific operations may include additional fields in the response (e.g., `pg_response` for operation errors). Always check the `message` field for human-readable details.
+Most endpoints follow the standard error format documented above. Gateway-specific operations may include additional fields in the response (e.g., `pg_response` for operation errors). For normalized gateway fields, see [PG Params](/developers/webhooks/pg-params). Always check the `message` field for human-readable details.
 
 ## What's Next?
 
-- [**Payment States**](/docs/developers/reference/payment-states) — Transaction and attempt state machine
-- [**Authentication**](/docs/developers/getting-started/authentication) — API key setup and permissions
-- [**API Fundamentals**](/docs/developers/getting-started/api-fundamentals) — Request/response format, pagination, currencies
+- [**Payment States**](/developers/reference/payment-states) — Transaction and attempt state machine
+- [**Authentication**](/developers/getting-started/authentication) — API key setup and permissions
+- [**API Fundamentals**](/developers/getting-started/api-fundamentals) — Request/response format, pagination, currencies

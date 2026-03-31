@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { getWebhookBaseUrl } from "@site/src/utils/sandbox";
+import { getWebhookSSEUrl } from "@site/src/utils/sandbox";
 import styles from "./styles.module.css";
 
 interface WebhookEvent {
@@ -10,17 +10,20 @@ interface WebhookEvent {
 interface WebhookViewerProps {
   orderId: string;
   label?: string;
+  onEvent?: (event: WebhookEvent) => void;
 }
 
-export default function WebhookViewer({ orderId, label }: WebhookViewerProps) {
+export default function WebhookViewer({ orderId, label, onEvent }: WebhookViewerProps) {
   const [events, setEvents] = useState<WebhookEvent[]>([]);
   const [connected, setConnected] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
+  const onEventRef = useRef(onEvent);
+  onEventRef.current = onEvent;
 
   useEffect(() => {
     if (!orderId) return;
 
-    const baseUrl = getWebhookBaseUrl();
+    const baseUrl = getWebhookSSEUrl();
     const url = `${baseUrl}/webhook/${orderId}/events`;
     const es = new EventSource(url);
     eventSourceRef.current = es;
@@ -30,6 +33,7 @@ export default function WebhookViewer({ orderId, label }: WebhookViewerProps) {
       try {
         const event: WebhookEvent = JSON.parse(e.data);
         setEvents((prev) => [...prev, event]);
+        onEventRef.current?.(event);
       } catch {
         // ignore malformed events
       }
@@ -54,7 +58,7 @@ export default function WebhookViewer({ orderId, label }: WebhookViewerProps) {
           <span className={styles.webhookDot} />
           {connected
             ? events.length > 0
-              ? `${events.length} received`
+              ? "Received"
               : "Listening..."
             : "Connecting..."}
         </span>
@@ -68,9 +72,6 @@ export default function WebhookViewer({ orderId, label }: WebhookViewerProps) {
         {events.map((event, i) => (
           <div key={i} className={styles.webhookEvent}>
             <div className={styles.webhookEventHeader}>
-              <span className={styles.webhookEventLabel}>
-                Webhook #{i + 1}
-              </span>
               <span className={styles.webhookTimestamp}>
                 {new Date(event.receivedAt).toLocaleTimeString()}
               </span>

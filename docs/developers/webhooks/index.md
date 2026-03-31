@@ -5,9 +5,9 @@ sidebar_label: Overview & Setup
 
 # Webhooks
 
-Ottu offers an optional end-to-end integration with the [Payment Gateway](/docs/developers/payments/payment-methods) (PG) through webhooks. By default, these webhooks are **disabled**, ensuring merchants only receive notifications if they choose to. These webhooks act as a reactive mechanism, notifying merchants either in real-time or on-demand, depending on the event. Whether it’s a payment being processed or a subsequent payment gateway [operation](/docs/developers/operations#external-operations) taking place, Ottu ensures that the merchant is promptly informed once the webhooks are enabled. Merchants can enable these webhooks in various ways, either directly from the Ottu dashboard or via the [Checkout API](/docs/developers/payments/checkout-api).
+Ottu offers an optional end-to-end integration with the [Payment Gateway](/developers/payments/payment-methods) (PG) through webhooks. By default, these webhooks are **disabled**, ensuring merchants only receive notifications if they choose to. These webhooks act as a reactive mechanism, notifying merchants either in real-time or on-demand, depending on the event. Whether it’s a payment being processed or a subsequent payment gateway [operation](/developers/operations#external-operations) taking place, Ottu ensures that the merchant is promptly informed once the webhooks are enabled. Merchants can enable these webhooks in various ways, either directly from the Ottu dashboard or via the [Checkout API](/developers/payments/checkout-api).
 
-Ottu simplifies the integration process by providing a unified response across all payment gateways. Whether you’re working with MPGS, KNET, PayPal, or any other gateway, you only need to handle Ottu’s standardized response. This ensures a consistent experience, eliminating the need to interpret varied responses from different payment gateways.&#x20;
+Ottu simplifies the integration process by providing a unified response across all payment gateways. Both webhook types include [`pg_params`](./pg-params) — normalized gateway response fields that stay consistent regardless of which gateway processed the transaction. Whether you’re working with MPGS, KNET, PayPal, or any other gateway, you only need to handle Ottu’s standardized response. This ensures a consistent experience, eliminating the need to interpret varied responses from different payment gateways.&#x20;
 
 Moreover, for those who might need it, the original response from the payment gateway, always converted to `JSON` format, is included in Ottu’s webhooks. This means that while Ottu takes on the heavy lifting of interpreting and standardizing payment gateway responses, you still have access to the raw data if required. The beauty of this approach is its extensibility. As you expand and decide to incorporate more payment gateways into your system, there’s no need for additional integration work on your end. Ottu ensures that everything will work seamlessly out of the box, saving you time and effort in the long run.
 
@@ -54,9 +54,9 @@ While Ottu supports endpoints with disabled SSL verification, it’s not recomme
 
 ## Security
 
-Ensuring the integrity and authenticity of webhook data is paramount. To guarantee that the data you receive originates from Ottu and hasn’t been tampered with during transit, we employ a robust [signing mechanism](/docs/developers/webhooks/verify-signatures). Ottu uses the **SHA-256 algorithm** to sign all webhook payloads.&#x20;
+Ensuring the integrity and authenticity of webhook data is paramount. To guarantee that the data you receive originates from Ottu and hasn’t been tampered with during transit, we employ a robust [signing mechanism](/developers/webhooks/verify-signatures). Ottu uses the **SHA-256 algorithm** to sign all webhook payloads.&#x20;
 
-This cryptographic hash function provides a consistent and secure way to verify the data’s integrity. By checking the signature, you can be confident that the payload is genuine and has not been altered since it was sent by Ottu. For a detailed guide on how to verify the signature and implement this security measure in your system, click [here](/docs/developers/webhooks/verify-signatures).
+This cryptographic hash function provides a consistent and secure way to verify the data’s integrity. By checking the signature, you can be confident that the payload is genuine and has not been altered since it was sent by Ottu. For a detailed guide on how to verify the signature and implement this security measure in your system, click [here](/developers/webhooks/verify-signatures).
 
 ## Webhook Notification Mechanism
 
@@ -104,7 +104,7 @@ Webhooks are automated messages sent from Ottu to a specified endpoint when a pa
 
 #### 3. How can I ensure the webhook notifications I receive are genuinely from Ottu?
 
-Ottu uses the **SHA-256** [signing mechanism](/docs/developers/webhooks/verify-signatures) to sign all webhook payloads. By verifying the signature attached to each payload, you can ensure its authenticity and integrity. Detailed steps on how to verify the signature can be found [here](/docs/developers/webhooks/verify-signatures#4-verification-by-merchant).
+Ottu uses the **SHA-256** [signing mechanism](/developers/webhooks/verify-signatures) to sign all webhook payloads. By verifying the signature attached to each payload, you can ensure its authenticity and integrity. Detailed steps on how to verify the signature can be found [here](/developers/webhooks/verify-signatures#4-verification-by-merchant).
 
 #### 4. What should I do if I receive the same webhook notification multiple times?
 

@@ -100,12 +100,16 @@ export async function callPaymentMethods(options: {
   currencies: string[];
   plugin?: string;
   operation?: string;
+  is_sandbox?: boolean;
+  tags?: string[];
 }): Promise<any> {
-  const body = {
+  const body: Record<string, unknown> = {
     plugin: options.plugin ?? "payment_request",
     operation: options.operation ?? "purchase",
     currencies: options.currencies,
   };
+  if (options.is_sandbox != null) body.is_sandbox = options.is_sandbox;
+  if (options.tags) body.tags = options.tags;
 
   const response = await fetch(
     `https://${SANDBOX_MERCHANT_ID}/b/pbl/v2/payment-methods/`,
@@ -158,15 +162,29 @@ export async function callPaymentStatusQuery(
 }
 
 /**
- * Get the base URL for webhook relay.
- * In local dev (localhost), uses the ifr.ottu.me tunnel.
- * In production, uses the current origin (docs.ottu.dev or docs.ottu.net).
+ * Get the base URL for webhook_url sent to Ottu (must be reachable from the internet).
+ * In local dev, uses the ifr.ottu.me tunnel.
+ * In production, uses the current origin.
  */
 export function getWebhookBaseUrl(): string {
   if (typeof window === "undefined") return "";
   const { hostname } = window.location;
   if (hostname === "localhost" || hostname === "127.0.0.1") {
     return "https://ifr.ottu.me";
+  }
+  return window.location.origin;
+}
+
+/**
+ * Get the base URL for the browser's SSE connection to the webhook relay.
+ * In local dev, connects directly to localhost:8090 (the webhook server).
+ * In production, uses the current origin (same server handles both).
+ */
+export function getWebhookSSEUrl(): string {
+  if (typeof window === "undefined") return "";
+  const { hostname } = window.location;
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    return "http://localhost:8090";
   }
   return window.location.origin;
 }

@@ -29,7 +29,7 @@ Ottu sends SMS notifications to customers based on key states in the payment lif
 
 ### Pre/Post Payment States
 
-SMS notifications are triggered for the following [payment states](/docs/business/payment-management/transaction-states):
+SMS notifications are triggered for the following [payment states](/business/payment-management/transaction-states):
 
 | State | Description |
 |-------|-------------|
@@ -42,7 +42,7 @@ SMS notifications are triggered for the following [payment states](/docs/busines
 
 ### Operation States
 
-SMS notifications are also triggered for the following [operation states](/docs/business/operations/):
+SMS notifications are also triggered for the following [operation states](/business/operations/):
 
 | State | Description |
 |-------|-------------|
@@ -51,7 +51,7 @@ SMS notifications are also triggered for the following [operation states](/docs/
 | `voided` | Authorized payment was voided |
 
 :::note
-For the [E-Commerce](/docs/business/plugins/e-commerce) plugin, pre-payment SMS notifications are not available. Only post-payment and post-operation SMS notifications are supported.
+For the [E-Commerce](/business/plugins/e-commerce) plugin, pre-payment SMS notifications are not available. Only post-payment and post-operation SMS notifications are supported.
 :::
 
 ## What's Next?

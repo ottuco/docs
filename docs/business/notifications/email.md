@@ -27,7 +27,7 @@ Ottu sends email notifications to customers based on specific states in the paym
 
 ### Pre/Post Payment States
 
-Email notifications are triggered for the following [payment states](/docs/business/payment-management/transaction-states):
+Email notifications are triggered for the following [payment states](/business/payment-management/transaction-states):
 
 | State | Description |
 |-------|-------------|
@@ -40,7 +40,7 @@ Email notifications are triggered for the following [payment states](/docs/busin
 
 ### Operation States
 
-Email notifications are also triggered for the following [operation states](/docs/business/operations/):
+Email notifications are also triggered for the following [operation states](/business/operations/):
 
 | State | Description |
 |-------|-------------|
@@ -49,7 +49,7 @@ Email notifications are also triggered for the following [operation states](/doc
 | `voided` | Authorized payment was voided |
 
 :::note
-For the [E-Commerce](/docs/business/plugins/e-commerce) plugin, pre-payment email notifications are not available. Only post-payment and post-operation email notifications are supported.
+For the [E-Commerce](/business/plugins/e-commerce) plugin, pre-payment email notifications are not available. Only post-payment and post-operation email notifications are supported.
 :::
 
 ## What's Next?

@@ -12,10 +12,10 @@ import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 
 The Operations API lets you perform subsequent actions on existing payment transactions — refund a completed payment, cancel an unpaid link, capture an authorized amount, or void an authorization. Ottu provides a **unified API**: you send the same payload structure regardless of the payment gateway, and Ottu handles the gateway-specific communication.
 
-Ottu supports six operations. Three are **internal** (handled within Ottu's system): [cancel](#cancel), [expire](#expire), and [delete](#delete). Three are **external** (synchronized with the payment gateway): [refund](#refund), [capture](#capture), and [void](#void). When an external operation succeeds, Ottu creates a [child transaction](/docs/developers/reference/payment-states) linked to the original, recording the new state, amount, and gateway response.
+Ottu supports six operations. Three are **internal** (handled within Ottu's system): [cancel](#cancel), [expire](#expire), and [delete](#delete). Three are **external** (synchronized with the payment gateway): [refund](#refund), [capture](#capture), and [void](#void). When an external operation succeeds, Ottu creates a [child transaction](/developers/reference/payment-states) linked to the original, recording the new state, amount, and [gateway response](/developers/webhooks/pg-params).
 
 :::warning
-Operations via the Operations API do not work with **foreign currencies**. If the customer paid using [currency exchange](/docs/developers/getting-started/api-fundamentals) (e.g., MID is KWD but customer paid in USD), external operations will fail. The payment currency must match the MID currency.
+Operations via the Operations API do not work with **foreign currencies**. If the customer paid using [currency exchange](/developers/getting-started/api-fundamentals) (e.g., MID is KWD but customer paid in USD), external operations will fail. The payment currency must match the MID currency.
 :::
 
 :::tip Boost Your Integration
@@ -35,8 +35,8 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 Before performing any operation, you need an existing payment transaction with a `session_id` or `order_no`:
 
-1. **Via the [Checkout API](/docs/developers/payments/checkout-api)** — create a payment transaction programmatically.
-2. **Via the [Ottu Dashboard](/docs/business/dashboard-tour)** — create a transaction manually.
+1. **Via the [Checkout API](/developers/payments/checkout-api)** — create a payment transaction programmatically.
+2. **Via the [Ottu Dashboard](/business/dashboard-tour)** — create a transaction manually.
 
 Store the `session_id` securely — it's required for all operation requests. Prefer `session_id` over `order_no` as it's always present in the response.
 
@@ -104,14 +104,14 @@ Use the `extra` object field for additional gateway-specific parameters. For exa
 
 #### External Operations
 
-**Capture** — Settles authorized funds. Only applicable to `authorized` transactions. Supports full or partial capture (cannot exceed the authorized amount). Creates a [child transaction](/docs/developers/reference/payment-states) on success.
+**Capture** — Settles authorized funds. Only applicable to `authorized` transactions. Supports full or partial capture (cannot exceed the authorized amount). Creates a [child transaction](/developers/reference/payment-states) on success.
 
-**Refund** — Returns funds to the customer. Applicable to `paid` or captured transactions. For authorized transactions, a capture must be completed first. Supports full or partial refund. Ottu offers an [approval feature](/docs/business/dashboard-tour) for refunds, enabling a checker role to approve or reject requests.
+**Refund** — Returns funds to the customer. Applicable to `paid` or captured transactions. For authorized transactions, a capture must be completed first. Supports full or partial refund. Ottu offers an [approval feature](/business/dashboard-tour) for refunds, enabling a checker role to approve or reject requests.
 
 **Void** — Cancels an authorization before capture. Only applicable to `authorized` transactions. The customer is not charged.
 
 :::info
-Not all payment gateways support all external operations. If a gateway doesn't support an operation, Ottu rejects the API call with an error message. See [supported operations by gateway](/docs/developers/payments/payment-methods#activating-payment-gateway-codes).
+Not all payment gateways support all external operations. If a gateway doesn't support an operation, Ottu rejects the API call with an error message. See [supported operations by gateway](/developers/payments/payment-methods#activating-payment-gateway-codes).
 :::
 
 ## API Reference
@@ -199,7 +199,7 @@ Select the operation to see its example payload and the full interactive API sch
 
 #### 1. What happens if I try to perform an unsupported operation?
 
-The operation is rejected by Ottu with an error message. See [supported operations by gateway](/docs/developers/payments/payment-methods#activating-payment-gateway-codes).
+The operation is rejected by Ottu with an error message. See [supported operations by gateway](/developers/payments/payment-methods#activating-payment-gateway-codes).
 
 #### 2. Can I perform operations on completed transactions?
 
@@ -219,11 +219,11 @@ A sub-transaction created when external operations (refund, capture, void) succe
 
 #### 6. How do I know which operations a gateway supports?
 
-See the [operations supported by each gateway](/docs/developers/payments/payment-methods#activating-payment-gateway-codes).
+See the [operations supported by each gateway](/developers/payments/payment-methods#activating-payment-gateway-codes).
 
 #### 7. What's the difference between API-Key and Basic Authentication?
 
-[API-Key](/docs/developers/getting-started/authentication#private-key-api-key) grants superadmin privileges. [Basic Authentication](/docs/developers/getting-started/authentication#basic-authentication) allows granular permission control per operation. Use Basic Auth for production access control.
+[API-Key](/developers/getting-started/authentication#private-key-api-key) grants superadmin privileges. [Basic Authentication](/developers/getting-started/authentication#basic-authentication) allows granular permission control per operation. Use Basic Auth for production access control.
 
 #### 8. What permissions are required?
 

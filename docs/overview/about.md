@@ -8,31 +8,31 @@ Ottu provides a single integration point for accepting payments across multiple 
 
 ### Core Capabilities
 
-- **50+ Payment Gateways** — Banks (KNET, MPGS, CyberSource), fintechs (Checkout.com, Tap, MyFatoorah), BNPL (Tabby, Tamara), and digital wallets (STC Pay, BenefitPay). See the full [Payment Gateway catalog](/docs/business/payments/gateways).
-- **Smart Payment Routing** — Route payments by BIN, card country, scheme, amount, and real-time success rate. Automatic fallback when a gateway is down. See [Payment Routing](/docs/business/payments/routing).
-- **Multi-Currency** — Accept payments in multiple currencies with configurable exchange rates and markup fees. See [Currencies](/docs/business/payments/currencies).
-- **Notifications** — Automated Email, SMS, and WhatsApp notifications at every stage of the payment lifecycle. See [Notifications](/docs/business/notifications/).
-- **Plugins** — Payment Request links, E-Commerce checkout, and Bulk Payment processing. See [Plugins](/docs/business/plugins/).
-- **Industry Solutions** — Purpose-built modules for [Real Estate](/docs/business/industry/real-estate/) property management and [Satellite](/docs/business/industry/satellite) multi-installation control.
+- **50+ Payment Gateways** — Banks (KNET, MPGS, CyberSource), fintechs (Checkout.com, Tap, MyFatoorah), BNPL (Tabby, Tamara), and digital wallets (STC Pay, BenefitPay). See the full [Payment Gateway catalog](/business/payments/gateways).
+- **Smart Payment Routing** — Route payments by BIN, card country, scheme, amount, and real-time success rate. Automatic fallback when a gateway is down. See [Payment Routing](/business/payments/routing).
+- **Multi-Currency** — Accept payments in multiple currencies with configurable exchange rates and markup fees. See [Currencies](/business/payments/currencies).
+- **Notifications** — Automated Email, SMS, and WhatsApp notifications at every stage of the payment lifecycle. See [Notifications](/business/notifications/).
+- **Plugins** — Payment Request links, E-Commerce checkout, and Bulk Payment processing. See [Plugins](/business/plugins/).
+- **Industry Solutions** — Purpose-built modules for [Real Estate](/business/industry/real-estate/) property management and [Satellite](/business/industry/satellite) multi-installation control.
 
 ### Security & Compliance
 
-Ottu is **PCI DSS Level 1** certified and **ISO 27001** certified. Card data never touches your servers when using Ottu's hosted checkout or SDK — reducing your PCI scope to SAQ A. See [Compliance & Security](/docs/business/compliance).
+Ottu is **PCI DSS Level 1** certified and **ISO 27001** certified. Card data never touches your servers when using Ottu's hosted checkout or SDK — reducing your PCI scope to SAQ A. See [Compliance & Security](/business/compliance).
 
 ## Who Uses Ottu
 
 ### Developers
 
-Integrate Ottu's [Checkout API](/docs/developers/payments/checkout-api), embed the [Checkout SDK](/docs/developers/payments/checkout-sdk/) (Web, iOS, Android, Flutter), and receive real-time [webhook notifications](/docs/developers/webhooks/) for payment events.
+Integrate Ottu's [Checkout API](/developers/payments/checkout-api), embed the [Checkout SDK](/developers/payments/checkout-sdk/) (Web, iOS, Android, Flutter), and receive real-time [webhook notifications](/developers/webhooks/) for payment events.
 
 ### Business Users
 
-Configure [payment gateways](/docs/business/payments/gateways), track [transactions](/docs/business/payment-management/), manage [notifications](/docs/business/notifications/), and customize [settings](/docs/business/settings/) — all from the Ottu dashboard.
+Configure [payment gateways](/business/payments/gateways), track [transactions](/business/payment-management/), manage [notifications](/business/notifications/), and customize [settings](/business/settings/) — all from the Ottu dashboard.
 
 ## Getting Started
 
-- **[Developer Documentation](/docs/developers/getting-started)** — API keys, first API call, SDK setup
-- **[Business Guide](/docs/business/)** — Dashboard, gateways, payment management, notifications
+- **[Developer Documentation](/developers/getting-started)** — API keys, first API call, SDK setup
+- **[Business Guide](/business/)** — Dashboard, gateways, payment management, notifications
 
 ## Support
 

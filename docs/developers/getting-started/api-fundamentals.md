@@ -27,21 +27,21 @@ There are no separate sandbox and production URLs. The **MID (Merchant Identific
 
 | Domain | Endpoint | Method | Purpose |
 |--------|----------|:------:|---------|
-| **Checkout** | `/b/checkout/v1/pymt-txn/` | POST | [Create payment transaction](/docs/developers/payments/checkout-api) |
-| | `/b/checkout/v1/pymt-txn/{session_id}/` | GET | [Retrieve payment transaction](/docs/developers/payments/checkout-api) |
-| | `/b/checkout/v1/pymt-txn/{session_id}/` | PATCH | [Update payment transaction](/docs/developers/payments/checkout-api) |
-| **Payment Methods** | `/b/pbl/v2/payment-methods/` | POST | [Discover available gateways](/docs/developers/payments/payment-methods) |
-| **Operations** | `/b/pbl/v2/operation/` | POST | [Refund, capture, void, cancel, expire, delete](/docs/developers/operations) |
-| **PSQ** | `/b/pbl/v2/inquiry/` | POST | [Check payment status](/docs/developers/payments/psq) |
-| **Native Payments** | `/b/pbl/v2/payment/apple-pay/` | POST | [Apple Pay direct payment](/docs/developers/payments/native-payments) |
-| | `/b/pbl/v2/payment/google-pay/` | POST | [Google Pay direct payment](/docs/developers/payments/native-payments) |
-| | `/b/pbl/v2/payment/auto-debit/` | POST | [Charge saved card](/docs/developers/payments/native-payments) |
-| **User Cards** | `/b/pbl/v2/card/` | GET | [List saved cards](/docs/developers/cards-and-tokens/user-cards) |
-| | `/b/pbl/v2/card/{token}/` | DELETE | [Delete saved card](/docs/developers/cards-and-tokens/user-cards) |
-| **Invoices** | `/b/invoice/v1/invoice/` | POST | [Create invoice](/docs/developers/invoices) |
-| **Notifications** | `/b/pbl/v2/message-notification/` | POST | [Resend payment notification](/docs/developers/notifications) |
-| **Reports** | `/b/api/v1/reports/files/` | GET | [List transaction reports](/docs/developers/reports) |
-| | `/b/api/v1/reports/files/{token}/download/` | GET | [Download report file](/docs/developers/reports) |
+| **Checkout** | `/b/checkout/v1/pymt-txn/` | POST | [Create payment transaction](/developers/payments/checkout-api) |
+| | `/b/checkout/v1/pymt-txn/{session_id}/` | GET | [Retrieve payment transaction](/developers/payments/checkout-api) |
+| | `/b/checkout/v1/pymt-txn/{session_id}/` | PATCH | [Update payment transaction](/developers/payments/checkout-api) |
+| **Payment Methods** | `/b/pbl/v2/payment-methods/` | POST | [Discover available gateways](/developers/payments/payment-methods) |
+| **Operations** | `/b/pbl/v2/operation/` | POST | [Refund, capture, void, cancel, expire, delete](/developers/operations) |
+| **PSQ** | `/b/pbl/v2/inquiry/` | POST | [Check payment status](/developers/payments/psq) |
+| **Native Payments** | `/b/pbl/v2/payment/apple-pay/` | POST | [Apple Pay direct payment](/developers/payments/native-payments) |
+| | `/b/pbl/v2/payment/google-pay/` | POST | [Google Pay direct payment](/developers/payments/native-payments) |
+| | `/b/pbl/v2/payment/auto-debit/` | POST | [Charge saved card](/developers/payments/native-payments) |
+| **User Cards** | `/b/pbl/v2/card/` | GET | [List saved cards](/developers/cards-and-tokens/user-cards) |
+| | `/b/pbl/v2/card/{token}/` | DELETE | [Delete saved card](/developers/cards-and-tokens/user-cards) |
+| **Invoices** | `/b/invoice/v1/invoice/` | POST | [Create invoice](/developers/invoices) |
+| **Notifications** | `/b/pbl/v2/message-notification/` | POST | [Resend payment notification](/developers/notifications) |
+| **Reports** | `/b/api/v1/reports/files/` | GET | [List transaction reports](/developers/reports) |
+| | `/b/api/v1/reports/files/{token}/download/` | GET | [Download report file](/developers/reports) |
 
 ## Authentication
 
@@ -52,7 +52,7 @@ Ottu supports two authentication methods for API calls:
 | **API Key** | `Authorization: Api-Key <your_private_key>` | Admin — all permissions |
 | **Basic Auth** | `Authorization: Basic <base64(username:password)>` | Granular — explicit permissions per user |
 
-A third key type — the **Public Key** — is used only for [Checkout SDK](/docs/developers/payments/checkout-sdk/) initialization, not for API calls.
+A third key type — the **Public Key** — is used only for [Checkout SDK](/developers/payments/checkout-sdk/) initialization, not for API calls.
 
 For setup instructions and permission details, see [Authentication](./authentication).
 
@@ -112,7 +112,7 @@ curl -X POST "https://<your-domain>.ottu.net/b/checkout/v1/pymt-txn/" \
 }
 ```
 
-For the complete error reference, see [Error Codes](/docs/developers/reference/error-codes).
+For the complete error reference, see [Error Codes](/developers/reference/error-codes).
 
 ## Amounts & Currencies
 
@@ -157,7 +157,7 @@ Use the `extra` field to attach arbitrary key-value data to a payment transactio
 }
 ```
 
-The `extra` object is stored with the transaction and included in [webhook payloads](/docs/developers/webhooks/payment-events) — use it to pass context your backend needs when processing the payment result.
+The `extra` object is stored with the transaction and included in [webhook payloads](/developers/webhooks/payment-events) — use it to pass context your backend needs when processing the payment result.
 
 ## Pagination
 
@@ -209,5 +209,5 @@ For test card numbers per gateway, see [Sandbox & Test Cards](../payments/sandbo
 - [**Authentication**](./authentication) — Set up API keys and permissions
 - [**Payment Journey**](../payments/payment-journey) — Interactive integration walkthrough
 - [**Checkout API**](../payments/checkout-api) — Create your first payment transaction
-- [**Error Codes**](/docs/developers/reference/error-codes) — Error response reference
-- [**Payment States**](/docs/developers/reference/payment-states) — Transaction lifecycle and state machine
+- [**Error Codes**](/developers/reference/error-codes) — Error response reference
+- [**Payment States**](/developers/reference/payment-states) — Transaction lifecycle and state machine

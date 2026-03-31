@@ -5,18 +5,18 @@ sidebar_label: Verify Signatures
 
 # Signing Mechanism
 
-To ensure the integrity and authenticity of the [webhook notifications](/docs/developers/webhooks/payment-events) sent to the merchant, Ottu employs a signing mechanism based on HMAC (Hash-based Message Authentication Code). By leveraging HMAC, Ottu can guarantee that the webhook's content remains untampered during transmission.
+To ensure the integrity and authenticity of the [webhook notifications](/developers/webhooks/payment-events) sent to the merchant, Ottu employs a signing mechanism based on HMAC (Hash-based Message Authentication Code). By leveraging HMAC, Ottu can guarantee that the webhook's content remains untampered during transmission.
 
 ## Important Components
 
 #### 1. HMAC Key (Secret Key)
 
-* This is the backbone of the signing and verification process. Merchants can retrieve their unique HMAC Key from the Webhook Configuration panel within Ottu's admin dashboard [here](/docs/developers/webhooks).
+* This is the backbone of the signing and verification process. Merchants can retrieve their unique HMAC Key from the Webhook Configuration panel within Ottu's admin dashboard [here](/developers/webhooks).
 * It's paramount that this key remains confidential. Always store it securely and avoid exposing it to the public.
 
 #### 2. Fields for Signature
 
-The signature is not derived from every field in the webhook payload. See payload example [here](/docs/developers/webhooks/payment-events#payload-example-paid). Only specific fields are considered. These are:
+The signature is not derived from every field in the webhook payload. See payload example [here](/developers/webhooks/payment-events#payload-example-paid). Only specific fields are considered. These are:
 
 * amount
 * currency\_code
@@ -47,12 +47,12 @@ This update ensures that developers understand the significance of field presenc
 #### 3. Signature Creation
 
 * Fields from the payload are extracted based on the aforementioned list, sorted alphabetically by key name, and then concatenated to form a unique message string.
-* This string, combined with the HMAC Key, is used to create the **HMAC-SHA256** signature. This resultant signature is then dispatched with the [webhook notification](/docs/developers/webhooks/payment-events).
+* This string, combined with the HMAC Key, is used to create the **HMAC-SHA256** signature. This resultant signature is then dispatched with the [webhook notification](/developers/webhooks/payment-events).
 
 #### 4. Verification by Merchant
 
 * On receipt of the webhook, merchants should rebuild the message string, using the listed fields.
-* Generate an HMAC signature using their stored [HMAC Key](/docs/developers/webhooks).
+* Generate an HMAC signature using their stored [HMAC Key](/developers/webhooks).
 * If the computed signature corresponds to the provided one, the payload's authenticity is confirmed. Any discrepancies suggest potential tampering.
 
 ## Example

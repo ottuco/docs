@@ -13,7 +13,7 @@ All the lists below are accessible from the **Dashboard** under the **Action Lis
 
 ## New Contract List
 
-This section displays all [contracts](/docs/business/industry/real-estate/tenant-contract/add-contract), providing basic information such as:
+This section displays all [contracts](/business/industry/real-estate/tenant-contract/add-contract), providing basic information such as:
 
 - ID
 - Creation date
@@ -34,7 +34,7 @@ To roll back a new contract, click on the three dots (**...**) at the end of the
 
 ## Renew Contract List
 
-This list displays the same details and functionality as the New Contract List, specifically for contracts that have been [renewed](/docs/business/industry/real-estate/tenant-contract/renew-contract).
+This list displays the same details and functionality as the New Contract List, specifically for contracts that have been [renewed](/business/industry/real-estate/tenant-contract/renew-contract).
 
 ### Renew Contract Rollback
 
@@ -49,7 +49,7 @@ To roll back a renewal contract operation:
 
 ## Terminate Contract List
 
-This list presents basic information for [terminated contracts](/docs/business/industry/real-estate/tenant-contract/terminate-contract), including:
+This list presents basic information for [terminated contracts](/business/industry/real-estate/tenant-contract/terminate-contract), including:
 
 - ID
 - Creation date
@@ -75,7 +75,7 @@ To undo a termination:
 
 ## Manual Payment List
 
-All [manual payments](/docs/business/industry/real-estate/tenant-contract/manual-payment) are listed with the following details:
+All [manual payments](/business/industry/real-estate/tenant-contract/manual-payment) are listed with the following details:
 
 - ID
 - Creation date
@@ -100,7 +100,7 @@ To roll back a manual payment:
 
 ## Advance Payments List
 
-All [advance payment](/docs/business/industry/real-estate/tenant-contract/advance-payment) requests are listed with key details:
+All [advance payment](/business/industry/real-estate/tenant-contract/advance-payment) requests are listed with key details:
 
 - Contract ID
 - Creation date
@@ -140,6 +140,6 @@ All modified contracts are displayed in the Modified Contract List. This section
 
 ## What's Next?
 
-- [Contract Management](/docs/business/industry/real-estate/tenant-contract/contract-management) -- Overview of all contract actions
-- [Manual Payment](/docs/business/industry/real-estate/tenant-contract/manual-payment) -- Record offline payments
-- [Invoices Management](/docs/business/industry/real-estate/invoices-management) -- Track and manage all invoices
+- [Contract Management](/business/industry/real-estate/tenant-contract/contract-management) -- Overview of all contract actions
+- [Manual Payment](/business/industry/real-estate/tenant-contract/manual-payment) -- Record offline payments
+- [Invoices Management](/business/industry/real-estate/invoices-management) -- Track and manage all invoices

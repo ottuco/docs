@@ -1,39 +1,44 @@
-import React, { useReducer, useEffect, useRef, useCallback } from "react";
+import React, { useReducer, useEffect, useRef, useCallback, useMemo } from "react";
 import Icon from "@mdi/react";
 import { mdiLoading, mdiCheck, mdiAlertCircleOutline } from "@mdi/js";
 import {
   createSandboxSession,
-  SANDBOX_MERCHANT_ID,
-  SANDBOX_API_KEY,
+  callPaymentMethods,
 } from "@site/src/utils/sandbox";
+import { createDemoCallbacks } from "@site/src/utils/checkoutSdk";
+import CheckoutSDKEmbed from "@site/src/components/CheckoutSDKEmbed";
 import styles from "./styles.module.css";
 
 type State =
   | { status: "idle" }
-  | { status: "creating_session" }
-  | { status: "loading_script" }
-  | { status: "initializing" }
-  | { status: "ready" }
+  | { status: "fetching_methods" }
+  | { status: "creating_session"; pgCodes: string[] }
+  | { status: "sdk_loading"; sessionId: string }
+  | { status: "ready"; sessionId: string }
+  | { status: "complete"; sessionId: string }
   | { status: "error"; message: string };
 
 type Action =
   | { type: "START" }
-  | { type: "SESSION_CREATED" }
-  | { type: "SCRIPT_LOADED" }
+  | { type: "METHODS_FETCHED"; pgCodes: string[] }
+  | { type: "SESSION_CREATED"; sessionId: string }
   | { type: "SDK_READY" }
+  | { type: "COMPLETE" }
   | { type: "ERROR"; message: string }
   | { type: "RESET" };
 
-function reducer(_state: State, action: Action): State {
+function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "START":
-      return { status: "creating_session" };
+      return { status: "fetching_methods" };
+    case "METHODS_FETCHED":
+      return { status: "creating_session", pgCodes: action.pgCodes };
     case "SESSION_CREATED":
-      return { status: "loading_script" };
-    case "SCRIPT_LOADED":
-      return { status: "initializing" };
+      return { status: "sdk_loading", sessionId: action.sessionId };
     case "SDK_READY":
-      return { status: "ready" };
+      return { status: "ready", sessionId: (state as any).sessionId ?? "" };
+    case "COMPLETE":
+      return { status: "complete", sessionId: (state as any).sessionId ?? "" };
     case "ERROR":
       return { status: "error", message: action.message };
     case "RESET":
@@ -41,46 +46,20 @@ function reducer(_state: State, action: Action): State {
   }
 }
 
-const SDK_SCRIPT_URL = "https://150330.dd33t4o2i3w1b.amplifyapp.com/checkout/v3/checkout.min.js";
-const CONTAINER_ID = "checkout-demo-target";
-
 const STEPS = [
+  "Fetching available payment methods...",
   "Creating payment session...",
   "Loading Checkout SDK...",
-  "Initializing payment form...",
 ];
-
-function loadScript(): Promise<void> {
-  if ((window as any).Checkout) return Promise.resolve();
-  if (document.querySelector(`script[src="${SDK_SCRIPT_URL}"]`)) {
-    return new Promise((resolve) => {
-      const check = setInterval(() => {
-        if ((window as any).Checkout) {
-          clearInterval(check);
-          resolve();
-        }
-      }, 100);
-    });
-  }
-
-  return new Promise((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = SDK_SCRIPT_URL;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Failed to load Checkout SDK script"));
-    document.head.appendChild(script);
-    setTimeout(() => reject(new Error("Script load timed out")), 15000);
-  });
-}
 
 function getStepState(
   stepIndex: number,
   status: string
 ): "pending" | "active" | "done" {
   const statusToStep: Record<string, number> = {
-    creating_session: 0,
-    loading_script: 1,
-    initializing: 2,
+    fetching_methods: 0,
+    creating_session: 1,
+    sdk_loading: 2,
     ready: 3,
   };
   const activeStep = statusToStep[status] ?? -1;
@@ -91,209 +70,39 @@ function getStepState(
 
 export default function CheckoutDemoInner() {
   const [state, dispatch] = useReducer(reducer, { status: "idle" });
-  const containerRef = useRef<HTMLDivElement>(null);
   const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [retryDisabled, setRetryDisabled] = React.useState(false);
 
-  const cleanup = useCallback(() => {
-    if (containerRef.current) {
-      containerRef.current.innerHTML = "";
-    }
-  }, []);
-
   useEffect(() => {
     return () => {
-      cleanup();
       if (retryTimer.current) clearTimeout(retryTimer.current);
     };
-  }, [cleanup]);
+  }, []);
 
   const launch = useCallback(async () => {
-    cleanup();
     dispatch({ type: "START" });
 
     try {
+      const methodsResponse = await callPaymentMethods({
+        currencies: ["KWD"],
+        is_sandbox: true,
+        tags: ["demo"],
+      });
+      const pgCodes =
+        methodsResponse?.payment_methods?.map((m: any) => m.code) ??
+        methodsResponse?.pg_codes ??
+        [];
+      dispatch({ type: "METHODS_FETCHED", pgCodes });
+
       const { session_id } = await createSandboxSession({
-        pg_codes: ["direct-payment"],
+        pg_codes: pgCodes.length > 0 ? pgCodes : ["ottu_sdk"],
+        type: "e_commerce",
       });
-      dispatch({ type: "SESSION_CREATED" });
-
-      await loadScript();
-      dispatch({ type: "SCRIPT_LOADED" });
-
-      (window as any).Checkout.init({
-        selector: CONTAINER_ID,
-        merchant_id: SANDBOX_MERCHANT_ID,
-        session_id,
-        apiKey: SANDBOX_API_KEY,
-        displayMode: "column",
-        formsOfPayment: [
-          "applePay",
-          "tokenPay",
-          "ottuPG",
-          "redirect",
-          "googlePay",
-          "stcPay",
-        ],
-        theme: {
-          main: {
-            padding: '0px',
-            width: '100%',
-          },
-          'title-text': {
-            color: '#1A1A1A',
-            'font-family': 'Poppins',
-            'font-size': '20px',
-            'font-weight': '600',
-          },
-          'secondary-text': {
-            color: '#4a4a4a',
-            'font-family': 'Poppins',
-            'font-size': '16px',
-            'font-weight': '400',
-          },
-          'pay-button': {
-            color: '#FFFFFF',
-            'font-family': 'Poppins',
-            'font-size': '16px',
-            'font-style': 'normal',
-            'font-weight': '500',
-            background: '#0053A4',
-            border: '#0053A4',
-          },
-          'reject-button': {
-            'font-family': 'Poppins',
-            'font-size': '16px',
-            'font-style': 'normal',
-            'font-weight': '500',
-            'background-color': '#fafafa',
-            color: '#B00020',
-            'border-width': '0px',
-            'text-decoration': 'underline',
-          },
-          'terms-container': {
-            margin: '0px 0px 0px 0px',
-          },
-          'checkbox-label': {
-            color: '#1A1A1A',
-            'font-family': 'Poppins',
-            'font-size': '16px',
-            'font-weight': '400',
-          },
-          'terms-link': {
-            color: '#0053A4',
-            'font-family': 'Poppins',
-            'font-size': '16px',
-            'font-weight': '700',
-          },
-          'view-toggle': {
-            color: '#0053A4',
-            'font-family': 'Poppins',
-            'font-size': '16px',
-            'font-weight': '700',
-          },
-          'pci-disclaimer': {
-            color: '#4A4A4A',
-            'font-family': 'Poppins',
-            'font-size': '14px',
-            'font-weight': '400',
-          },
-          'pci-logos': {
-            gap: '12px',
-            margin: '20px 0px 0px 0px',
-          },
-          'wallet-buttons': {
-            margin: '12px 0px -6px 0px',
-          },
-          methods: {
-            border: '#DADADA',
-            'border-style': 'solid',
-            'border-width': '1px',
-            'border-radius': '8px',
-          },
-          'selected-method': {
-            border: '#0053A4',
-          },
-          border: {
-            display: 'none',
-          },
-          'amount-box': {
-            padding: '16px 12px',
-            margin: '0px 0px 0px 0px',
-            'border-color': '#DADADA',
-            'border-style': 'solid',
-            'border-width': '1px',
-            'border-radius': '8px',
-            'background-color': '#ffffff',
-          },
-          'amount-label': {
-            color: '#1A1A1A',
-            'font-family': 'Poppins',
-            'font-size': '20px',
-            'font-weight': '600',
-          },
-          amount: {
-            color: '#1A1A1A',
-            'font-family': 'Poppins',
-            'font-size': '20px',
-            'font-weight': '600',
-          },
-          'card-background': {
-            'background-color': '#ffffff',
-            'border-bottom-radius': '8px',
-            'border-color': '#0053A4',
-            border: 'solid',
-          },
-          'card-input-border': {
-            'border-radius': '8px',
-          },
-          'card-input-fields': {
-            color: '#1A1A1A',
-            'font-family': 'Poppins',
-            'font-size': '16px',
-            'font-weight': '400',
-            'background-color': '#ffffff',
-          },
-          'cvv-input': {
-            color: '#1A1A1A',
-            'font-family': 'Poppins',
-            'font-size': '16px',
-          },
-          'field-error-border': {
-            'border-color': '#dc3545',
-          },
-          'error-message': {
-            color: '#dc3545',
-            'font-family': 'Poppins',
-            'font-size': '12px',
-          },
-          'checkbox-knob': {
-            'background-color': '#FFFFFF',
-            'border-radius': '50%',
-            'box-shadow': '0 0 4px rgba(0, 83, 164, 0.4)',
-          },
-          'selected-checkbox-knob': {
-            'background-color': '#FFFFFF',
-            'box-shadow': '0 0 4px rgba(0, 83, 164, 0.4)',
-          },
-          'selected-checkbox': {
-            'background-color': '#0053A4',
-          },
-          responsive: {
-            450: {
-              'amount-box': {
-                'justify-content': 'space-between',
-              },
-            },
-          },
-        },
-      });
-
-      dispatch({ type: "SDK_READY" });
+      dispatch({ type: "SESSION_CREATED", sessionId: session_id });
     } catch (err: any) {
       dispatch({ type: "ERROR", message: err.message || "Something went wrong" });
     }
-  }, [cleanup]);
+  }, []);
 
   const handleRetry = useCallback(() => {
     setRetryDisabled(true);
@@ -302,13 +111,21 @@ export default function CheckoutDemoInner() {
   }, [launch]);
 
   const isProgress =
+    state.status === "fetching_methods" ||
     state.status === "creating_session" ||
-    state.status === "loading_script" ||
-    state.status === "initializing";
+    state.status === "sdk_loading";
+
+  const sessionId = (state.status === "sdk_loading" || state.status === "ready")
+    ? (state as any).sessionId
+    : null;
+
+  const callbacks = useMemo(
+    () => createDemoCallbacks(() => dispatch({ type: "COMPLETE" })),
+    [],
+  );
 
   return (
     <div className={styles.container}>
-      {/* Idle state */}
       {state.status === "idle" && (
         <div className={styles.idleCard}>
           <h3 className={styles.idleTitle}>Try the Checkout SDK</h3>
@@ -322,7 +139,23 @@ export default function CheckoutDemoInner() {
         </div>
       )}
 
-      {/* Error state */}
+      {state.status === "complete" && (
+        <div className={styles.completeCard}>
+          <span className={styles.completeIcon}>
+            <Icon path={mdiCheck} size={0.8} />
+          </span>
+          <h3 className={styles.completeTitle}>Payment Complete</h3>
+          <p className={styles.completeDescription}>
+            The checkout flow finished successfully. In a real integration, the
+            customer would be redirected to your confirmation page and your
+            server would receive a webhook notification.
+          </p>
+          <button className={styles.restartButton} onClick={() => dispatch({ type: "RESET" })}>
+            Try Again
+          </button>
+        </div>
+      )}
+
       {state.status === "error" && (
         <div className={styles.errorCard}>
           <Icon
@@ -330,7 +163,7 @@ export default function CheckoutDemoInner() {
             size={1.5}
             className={styles.errorIcon}
           />
-          <p className={styles.errorMessage}>{state.message}</p>
+          <p className={styles.errorMessage}>{(state as any).message}</p>
           <button
             className={styles.retryButton}
             onClick={handleRetry}
@@ -341,7 +174,6 @@ export default function CheckoutDemoInner() {
         </div>
       )}
 
-      {/* Progress stepper */}
       {isProgress && (
         <div className={styles.progressCard}>
           <div className={styles.stepper}>
@@ -385,13 +217,14 @@ export default function CheckoutDemoInner() {
         </div>
       )}
 
-      {/* SDK container — ALWAYS mounted, visibility toggled */}
-      <div
-        className={styles.sdkContainer}
-        style={{ display: state.status === "ready" ? "block" : "none" }}
-      >
-        <div id={CONTAINER_ID} ref={containerRef} />
-      </div>
+      {sessionId && (
+        <CheckoutSDKEmbed
+          sessionId={sessionId}
+          onReady={() => dispatch({ type: "SDK_READY" })}
+          onError={(message) => dispatch({ type: "ERROR", message })}
+          callbacks={callbacks}
+        />
+      )}
     </div>
   );
 }

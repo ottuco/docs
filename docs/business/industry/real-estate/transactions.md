@@ -34,6 +34,6 @@ This feature ensures transparency and provides real-time updates on transaction 
 
 ## What's Next?
 
-- [Invoices Management](/docs/business/industry/real-estate/invoices-management) -- View and manage all invoices
-- [Generate Invoice](/docs/business/industry/real-estate/generate-invoice) -- Create new invoices and payment links
-- [Auditing](/docs/business/industry/real-estate/auditing) -- Track and roll back activities
+- [Invoices Management](/business/industry/real-estate/invoices-management) -- View and manage all invoices
+- [Generate Invoice](/business/industry/real-estate/generate-invoice) -- Create new invoices and payment links
+- [Auditing](/business/industry/real-estate/auditing) -- Track and roll back activities

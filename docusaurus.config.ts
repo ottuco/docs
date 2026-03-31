@@ -44,6 +44,7 @@ const config: Config = {
       'classic',
       {
         docs: {
+          routeBasePath: '/',
           sidebarPath: './sidebars.ts',
           docItemComponent: "@theme/ApiItem",
           showLastUpdateTime: true,
@@ -109,15 +110,15 @@ const config: Config = {
           items: [
             {
               label: 'Overview',
-              to: '/docs/overview/about',
+              to: '/overview/about',
             },
             {
               label: 'Developer Docs',
-              to: '/docs/developers/getting-started',
+              to: '/developers/getting-started',
             },
             {
               label: 'Business Guide',
-              to: '/docs/business/',
+              to: '/business/',
             },
           ],
         },
@@ -126,15 +127,15 @@ const config: Config = {
           items: [
             {
               label: 'API Reference',
-              to: '/docs/developers/getting-started/api-fundamentals',
+              to: '/developers/getting-started/api-fundamentals',
             },
             {
               label: 'Quick Start',
-              to: '/docs/developers/getting-started',
+              to: '/developers/getting-started',
             },
             {
               label: 'Developer Guide',
-              to: '/docs/developers/',
+              to: '/developers/',
             },
           ],
         },
@@ -143,15 +144,15 @@ const config: Config = {
           items: [
             {
               label: 'Getting Started',
-              to: '/docs/business/',
+              to: '/business/',
             },
             {
               label: 'Payment Gateways',
-              to: '/docs/business/payments/gateways',
+              to: '/business/payments/gateways',
             },
             {
               label: 'Compliance & Security',
-              to: '/docs/business/compliance',
+              to: '/business/compliance',
             },
           ],
         },
@@ -229,8 +230,8 @@ const config: Config = {
         excludeRoutes: [
           "/404*",
           "/search*",
-          "/docs/business/*",
-          "/docs/developers/reference/*",
+          "/business/*",
+          "/developers/reference/*",
         ],
       },
     ],
@@ -247,7 +248,7 @@ const config: Config = {
         language: ["en"],
         indexDocs: true,
         indexBlog: false,
-        docsRouteBasePath: "/docs",
+        docsRouteBasePath: "/",
       },
     ],
   ],

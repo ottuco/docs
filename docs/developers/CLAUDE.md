@@ -158,7 +158,7 @@ These links are mandatory whenever the topic is mentioned:
 | Checkout API / session_id | `payments/checkout-api.mdx` |
 | Operations (refund, capture, void) | `operations.md` |
 
-Use relative links within the developers section (e.g., `../webhooks/payment-events.md`). Use absolute paths when linking outside (e.g., `/docs/glossary/`).
+Use relative links within the developers section (e.g., `../webhooks/payment-events.md`). Use absolute paths when linking outside (e.g., `/glossary/`).
 
 ## Payment Domain Context
 
@@ -185,9 +185,27 @@ These files exist but are empty (0 bytes). Priority for content creation:
 | `reference/glossary.md` | Developer-focused payment glossary |
 | `cards-and-tokens/recurring-payments.md` | Auto-debit and recurring payment guide |
 
+## Local Development
+
+### Commands
+
+- `npm start` — Dev server with hot reload (port 3000)
+- `npm run build` — Production build
+- `npm run serve -- --port 8089` — Serve production build on custom port
+- `npm run webhook` — Webhook relay server on port 8090 (for interactive demos)
+
+### Webhook Testing (Payment Journey & Recurring Demo)
+
+The interactive demos need a local webhook relay to receive payment notifications.
+
+1. Run `npm run webhook` — starts the relay server on port 8090
+2. Ensure `ifr.ottu.me` tunnel is pointing to `localhost:8090`
+3. Run `npm start` — Docusaurus dev server on port 3000
+4. The demos will use `https://ifr.ottu.me/webhook/{orderId}` as the webhook URL, which tunnels to the local relay server
+
 ## Testing & Sandbox
 
 - Sandbox environment details in `payments/sandbox.md`
 - Test cards documented per payment gateway (Ottu PG, KNET, Apple Pay, etc.)
 - All code examples should use sandbox base URL
-- Webhook testing: developers can use ngrok or webhook.site for local development
+- Webhook testing locally: run `npm run webhook` (see Local Development above)

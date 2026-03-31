@@ -22,7 +22,7 @@ List and delete saved cards for a customer. The API returns only the last 4 digi
 
 - Retrieve all saved cards for a `customer_id`
 - Delete specific cards by token
-- Cards are displayed automatically when using the [Checkout SDK](/docs/developers/payments/checkout-sdk)
+- Cards are displayed automatically when using the [Checkout SDK](/developers/payments/checkout-sdk)
 
 [**Go to User Cards API →**](user-cards.mdx)
 
@@ -55,15 +55,15 @@ flowchart LR
 ```
 
 **Typical flow:**
-1. Merchant creates a payment session via the [Checkout API](/docs/developers/payments/checkout-api) and presents the checkout page to the customer (via [SDK](/docs/developers/payments/checkout-sdk) or redirect)
-2. Customer enters their card details and completes the payment — on success, the card is tokenized and the token is delivered to the merchant via [webhook](/docs/developers/webhooks/payment-events)
+1. Merchant creates a payment session via the [Checkout API](/developers/payments/checkout-api) and presents the checkout page to the customer (via [SDK](/developers/payments/checkout-sdk) or redirect)
+2. Customer enters their card details and completes the payment — on success, the card is tokenized and the token is delivered to the merchant via [webhook](/developers/webhooks/payment-events)
 3. Merchant stores the token and can list/manage saved cards via the [User Cards API](user-cards.mdx)
-4. For subsequent charges, merchant uses the token with the [Auto-Debit API](recurring-payments.md) or [One-Step Checkout](/docs/developers/payments/checkout-api#one-step-checkout)
+4. For subsequent charges, merchant uses the token with the [Auto-Debit API](recurring-payments.md) or [One-Step Checkout](/developers/payments/checkout-api#one-step-checkout)
 
 ## Prerequisites
 
-- A [Payment Gateway](/docs/developers/payments/payment-methods#activating-payment-gateway-codes) that supports tokenization (currently: MasterCard, Visa, STC Pay)
-- The [Checkout API](/docs/developers/payments/checkout-api) for creating payment sessions
+- A [Payment Gateway](/developers/payments/payment-methods#activating-payment-gateway-codes) that supports tokenization (currently: MasterCard, Visa, STC Pay)
+- The [Checkout API](/developers/payments/checkout-api) for creating payment sessions
 - A `customer_id` to associate saved cards with a customer
 - A `webhook_url` to receive token delivery notifications
 

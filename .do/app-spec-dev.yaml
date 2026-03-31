@@ -16,7 +16,7 @@ ingress:
         path:
           prefix: /mcp
     - component:
-        name: mcp
+        name: webhook
       match:
         path:
           prefix: /webhook
@@ -47,3 +47,17 @@ services:
         value: "https://docs.ottu.dev"
       - key: PORT
         value: "3456"
+  - name: webhook
+    github:
+      branch: dev
+      repo: ottuco/docs
+    source_dir: /webhook-server
+    environment_slug: node-js
+    http_port: 3457
+    health_check:
+      http_path: /health
+    instance_size_slug: apps-s-1vcpu-0.5gb
+    instance_count: 1
+    envs:
+      - key: PORT
+        value: "3457"

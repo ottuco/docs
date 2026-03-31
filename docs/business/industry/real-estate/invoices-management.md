@@ -21,7 +21,7 @@ The Invoice Management Dashboard offers a clear view of all generated invoices, 
 - **Generate Reports** -- Export detailed invoice reports in PDF format using the **Generate Report** button.
 
 :::note
-All invoices generated in the [Generate Invoices](/docs/business/industry/real-estate/generate-invoice) section are listed in the Invoices Table, organized by property.
+All invoices generated in the [Generate Invoices](/business/industry/real-estate/generate-invoice) section are listed in the Invoices Table, organized by property.
 :::
 
 ![Invoices management dashboard](/img/business/real-estate/invoices-management-dashboard.png)
@@ -39,7 +39,7 @@ All invoices generated in the [Generate Invoices](/docs/business/industry/real-e
 ## Manual Payment
 
 - **Purpose**: Record or process a payment manually for a specific invoice.
-- **How**: Use the **Manual Payment** option from the **Action Menu** (three dots). For more information, refer to the [Manual Payment](/docs/business/industry/real-estate/tenant-contract/manual-payment) section.
+- **How**: Use the **Manual Payment** option from the **Action Menu** (three dots). For more information, refer to the [Manual Payment](/business/industry/real-estate/tenant-contract/manual-payment) section.
 
 ## Delete Invoice
 
@@ -70,7 +70,7 @@ The report includes the following details for each invoice:
 
 ### Steps to Generate PDF Reports
 
-1. **Generate Necessary Invoices** -- Ensure all required invoices are generated in the [Generate Invoice](/docs/business/industry/real-estate/generate-invoice) section.
+1. **Generate Necessary Invoices** -- Ensure all required invoices are generated in the [Generate Invoice](/business/industry/real-estate/generate-invoice) section.
 2. **Access the Invoice Table** -- Navigate to the Invoice section and scroll down to the Invoice Table.
 3. **Filter Parameters (Optional)** -- Click the **Filter** button to set criteria such as due month, due date range, property, payment date range, invoice status, report profile, tenant, and payment type. Click **Search** to locate the desired invoices.
 4. **Initiate PDF Generation** -- Click the **Print** button in the Invoice Table.
@@ -81,6 +81,6 @@ The report includes the following details for each invoice:
 
 ## What's Next?
 
-- [Generate Invoice](/docs/business/industry/real-estate/generate-invoice) -- Create new invoices and send payment links
-- [Manual Payment](/docs/business/industry/real-estate/tenant-contract/manual-payment) -- Record offline payments
-- [Transactions](/docs/business/industry/real-estate/transactions) -- Monitor all payment transactions
+- [Generate Invoice](/business/industry/real-estate/generate-invoice) -- Create new invoices and send payment links
+- [Manual Payment](/business/industry/real-estate/tenant-contract/manual-payment) -- Record offline payments
+- [Transactions](/business/industry/real-estate/transactions) -- Monitor all payment transactions

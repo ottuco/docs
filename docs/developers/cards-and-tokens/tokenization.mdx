@@ -28,12 +28,12 @@ It offers a streamlined way for merchants to securely add a new card to a specif
 
 To successfully tokenize a card, merchants must adhere to the following requirements when sending a request to the Ottu `Checkout API`:
 
-- **Payment Type**: The [payment_type](/docs/developers/payments/checkout-api) parameter in the request payload must be set to `save_card`. This indicates that the transaction is for the purpose of saving the card information.
-- **Amount**: The [amount](/docs/developers/payments/checkout-api) should be explicitly set to `0`. Setting `amount` to any other value will lead to an API error, as the intention is to tokenize the card, not process a payment.
-- **Customer ID**: Merchants must provide the [customer_id](/docs/developers/payments/checkout-api) parameter.
-- **Webhook URL:** [webhook_url](/docs/developers/payments/checkout-api) should be provided, where the generated [token](/docs/developers/webhooks/payment-events) will be saved.
+- **Payment Type**: The [payment_type](/developers/payments/checkout-api) parameter in the request payload must be set to `save_card`. This indicates that the transaction is for the purpose of saving the card information.
+- **Amount**: The [amount](/developers/payments/checkout-api) should be explicitly set to `0`. Setting `amount` to any other value will lead to an API error, as the intention is to tokenize the card, not process a payment.
+- **Customer ID**: Merchants must provide the [customer_id](/developers/payments/checkout-api) parameter.
+- **Webhook URL:** [webhook_url](/developers/payments/checkout-api) should be provided, where the generated [token](/developers/webhooks/payment-events) will be saved.
 
-In addition, for the tokenization process to be initiated correctly, all other required parameters for the Ottu [Checkout API](/docs/developers/payments/checkout-api) must be provided, including `currency_code`, `type`, and `pg_codes`.
+In addition, for the tokenization process to be initiated correctly, all other required parameters for the Ottu [Checkout API](/developers/payments/checkout-api) must be provided, including `currency_code`, `type`, and `pg_codes`.
 
 :::info
 
@@ -47,17 +47,17 @@ Tokenization involves a series of steps designed to securely capture and convert
 
 1.  **Request Submission**:
 
-    Merchant initiates the tokenization process by sending a request to the Ottu `Checkout API`. This request must specify the `customer_id,` `payment_type` as `save_card`, `amount` as `0`, and any other required parameters. Please refer to the [Checkout API](/docs/developers/payments/checkout-api) section for detailed information on the required `Checkout API` parameters.
+    Merchant initiates the tokenization process by sending a request to the Ottu `Checkout API`. This request must specify the `customer_id,` `payment_type` as `save_card`, `amount` as `0`, and any other required parameters. Please refer to the [Checkout API](/developers/payments/checkout-api) section for detailed information on the required `Checkout API` parameters.
 
 2.  **Payment URL Generation**:
 
-    Upon receiving the tokenization request, Ottu generates a [checkout_url](/docs/developers/payments/checkout-api).
+    Upon receiving the tokenization request, Ottu generates a [checkout_url](/developers/payments/checkout-api).
 
 3.  **User Payment Process**:
 
     Merchant has the two options:&#x20;
-    - **Redirect to the Checkout Page**: Using the [checkout_url](/docs/developers/payments/checkout-api) to redirect the customer to the Checkout page. There, the customer can be redirected to the Save Card page by clicking the **Pay** button, even though no actual payment is processed at this step.
-    - **Redirect to the Save Card Page**: If a [redirect_url](/docs/developers/payments/checkout-api) is provided, the customer can be directly redirected to the Save Card page.
+    - **Redirect to the Checkout Page**: Using the [checkout_url](/developers/payments/checkout-api) to redirect the customer to the Checkout page. There, the customer can be redirected to the Save Card page by clicking the **Pay** button, even though no actual payment is processed at this step.
+    - **Redirect to the Save Card Page**: If a [redirect_url](/developers/payments/checkout-api) is provided, the customer can be directly redirected to the Save Card page.
 
     On the **Save Card** page, the customer enters his card information and completes the process by clicking the **Save** button.
 
@@ -65,7 +65,7 @@ Tokenization involves a series of steps designed to securely capture and convert
 
     Upon the successful completion of the card information submission, Ottu proceeds to tokenize the card details.<br/>
 
-    The tokenized card details are then securely transmitted back to the merchant's system as part of the [webhook payload](/docs/developers/webhooks/payment-events) sent by Ottu. Merchants can locate the tokenized card information in the [token](/docs/developers/webhooks/payment-events) field of the webhook payload.
+    The tokenized card details are then securely transmitted back to the merchant's system as part of the [webhook payload](/developers/webhooks/payment-events) sent by Ottu. Merchants can locate the tokenized card information in the [token](/developers/webhooks/payment-events) field of the webhook payload.
 
 This tokenization process ensures that merchants can securely store card details for future transactions without handling sensitive card information directly, thereby enhancing the overall security and efficiency of the payment process.
 
@@ -76,7 +76,7 @@ Getting started with simplifying your checkout process through tokenization is s
 <StepGuide steps={[
   {
     title: "Create a Payment Link",
-    description: <>Create a payment link through the <a href="/docs/developers/payments/checkout-api">Checkout API</a>, ensuring to include the <a href="/docs/developers/payments/checkout-api">customer_id</a> parameter. Additionally, verify that the <a href="/docs/developers/payments/checkout-api">pg_codes</a> you are using supports tokenization.<br /><br /><strong>Request Payload Example:</strong><pre><code className="language-json">{`{
+    description: <>Create a payment link through the <a href="/developers/payments/checkout-api">Checkout API</a>, ensuring to include the <a href="/developers/payments/checkout-api">customer_id</a> parameter. Additionally, verify that the <a href="/developers/payments/checkout-api">pg_codes</a> you are using supports tokenization.<br /><br /><strong>Request Payload Example:</strong><pre><code className="language-json">{`{
   "type": "payment_request",
   "pg_codes": ["credit-card"],
   "payment_type": "save_card",
@@ -88,7 +88,7 @@ Getting started with simplifying your checkout process through tokenization is s
   },
   {
     title: "Access the Checkout Page",
-    description: <>Share the generated <a href="/docs/developers/payments/checkout-api">checkout_url</a> with the customer. The customer can then click on the <strong>Pay</strong> button to proceed to the Save Card page.</>,
+    description: <>Share the generated <a href="/developers/payments/checkout-api">checkout_url</a> with the customer. The customer can then click on the <strong>Pay</strong> button to proceed to the Save Card page.</>,
     image: "/img/cards-and-tokens/tokenization-access-checkout-page.png",
     imageAlt: "Access the checkout page",
   },
@@ -105,7 +105,7 @@ Getting started with simplifying your checkout process through tokenization is s
   },
   {
     title: "Tokenization",
-    description: <>After successfully submitting card information, Ottu tokenizes the details and securely sends them to the merchant via a <a href="/docs/developers/webhooks/payment-events">webhook payload</a>, where the tokenized information is found in the <a href="/docs/developers/webhooks/payment-events">token</a> field.</>,
+    description: <>After successfully submitting card information, Ottu tokenizes the details and securely sends them to the merchant via a <a href="/developers/webhooks/payment-events">webhook payload</a>, where the tokenized information is found in the <a href="/developers/webhooks/payment-events">token</a> field.</>,
     image: "/img/cards-and-tokens/tokenization-webhook-token.png",
     imageAlt: "Tokenization webhook payload",
   },
@@ -115,7 +115,7 @@ Getting started with simplifying your checkout process through tokenization is s
 
 It empowers merchants a seamless way not only to process transactions but also to securely save customer card details for future use.&#x20;
 
-By leveraging the [Checkout API](/docs/developers/payments/checkout-api), a [payment session](/docs/developers/payments/checkout-api) is created, associated with a [customer ID](/docs/developers/payments/checkout-api) and Merchant Identification Number [MID](/docs/developers/payments/checkout-api) that supports tokenization, thus enhancing the customer experience by providing an option to save card details during the payment process. This can be further streamlined by using the [Checkout SDK](/docs/developers/payments/checkout-sdk). It's important to note that the Card Verification Value (CVV) may be required, depending on your Payment Gateway's configuration; this setting can be adjusted by contacting our technical support team.
+By leveraging the [Checkout API](/developers/payments/checkout-api), a [payment session](/developers/payments/checkout-api) is created, associated with a [customer ID](/developers/payments/checkout-api) and Merchant Identification Number [MID](/developers/payments/checkout-api) that supports tokenization, thus enhancing the customer experience by providing an option to save card details during the payment process. This can be further streamlined by using the [Checkout SDK](/developers/payments/checkout-sdk). It's important to note that the Card Verification Value (CVV) may be required, depending on your Payment Gateway's configuration; this setting can be adjusted by contacting our technical support team.
 
 This method is especially valuable for encouraging repeat business, as it simplifies future transactions by eliminating the need for customers to re-enter their card details.
 
@@ -123,8 +123,8 @@ This method is especially valuable for encouraging repeat business, as it simpli
 
 To ensure the successful tokenization of a card, merchants are required to adhere to the following requirements:
 
-- **Payment Link:** Generate a [payment link](/docs/developers/payments/checkout-api) by utilizing the [Checkout API](/docs/developers/payments/checkout-api), ensuring all necessary parameters for the `Checkout API` are included, along with the [customer_id](/docs/developers/payments/checkout-api) parameter.
-- **Payment Gateway:** Use a [Payment Gateway](/docs/developers/payments/payment-methods#activating-payment-gateway-codes) that supports tokenization.
+- **Payment Link:** Generate a [payment link](/developers/payments/checkout-api) by utilizing the [Checkout API](/developers/payments/checkout-api), ensuring all necessary parameters for the `Checkout API` are included, along with the [customer_id](/developers/payments/checkout-api) parameter.
+- **Payment Gateway:** Use a [Payment Gateway](/developers/payments/payment-methods#activating-payment-gateway-codes) that supports tokenization.
 - **Save Card:** Ensure the **Save Card** option is enabled and selected by the customer during his initial payment to facilitate token creation.
 - **Customer ID:** For subsequent payments utilizing the same token, the same `customer_id` associated with that token must be provided each time it is used.
 - **Successful Payment:** The customer must complete a successful payment.
@@ -134,13 +134,13 @@ To ensure the successful tokenization of a card, merchants are required to adher
 This guide outlines the steps for initiating payment sessions and securely saving customer card details, focusing on efficiency and security.
 
 1. **Initiate the Payment Session:**\
-   Begin by initiating a payment session through the [Checkout API](/docs/developers/payments/checkout-api), generating a session identified by [session_id](/docs/developers/payments/checkout-api) and associated with [customer_id](/docs/developers/payments/checkout-api). Ensure this session connects to a Merchant Identification Number ([MID)](/docs/developers/payments/checkout-api) that supports tokenization, allowing for the secure storage of customer card information for later use.
+   Begin by initiating a payment session through the [Checkout API](/developers/payments/checkout-api), generating a session identified by [session_id](/developers/payments/checkout-api) and associated with [customer_id](/developers/payments/checkout-api). Ensure this session connects to a Merchant Identification Number ([MID)](/developers/payments/checkout-api) that supports tokenization, allowing for the secure storage of customer card information for later use.
 2. **Enable the Save Card Option:**
 
-   Utilize the [Checkout SDK](/docs/developers/payments/checkout-sdk) or manage payments via the [Checkout API](/docs/developers/payments/checkout-api) to enable a **Save Card** option, offering customers the ability to securely store their payment card information for future transactions.\
+   Utilize the [Checkout SDK](/developers/payments/checkout-sdk) or manage payments via the [Checkout API](/developers/payments/checkout-api) to enable a **Save Card** option, offering customers the ability to securely store their payment card information for future transactions.\
    \
    **Key Notes:**
-   - **Choosing Between Checkout SDK and API:** The `Checkout SDK` is preferred for its user-friendly UI implementation and essential support for specific payment methods like [Apple Pay](/docs/developers/payments/checkout-sdk/ios) and [Google Pay](/docs/developers/payments/checkout-sdk/android). Your choice should align with your specific operational needs.
+   - **Choosing Between Checkout SDK and API:** The `Checkout SDK` is preferred for its user-friendly UI implementation and essential support for specific payment methods like [Apple Pay](/developers/payments/checkout-sdk/ios) and [Google Pay](/developers/payments/checkout-sdk/android). Your choice should align with your specific operational needs.
    - **CVV Requirements:** The necessity for Card Verification Value (CVV) may differ based on the Payment Gateway configuration. Adjustments can be made by reaching out to technical support.
 
 3. **Save the Card:**\
@@ -159,7 +159,7 @@ Simplifying your checkout process with tokenization is easy with Ottu. Here’s 
 <StepGuide steps={[
   {
     title: "Create a Payment Link",
-    description: <>The first step involves creating a payment link via the <a href="/docs/developers/payments/checkout-api">Checkout API</a>. Make sure to include the <a href="/docs/developers/payments/checkout-api">customer_id</a> parameter, and the <a href="/docs/developers/payments/checkout-api">pg_codes</a> you’re using is enabled for tokenization. Request Example:<pre><code className="language-json">{`{
+    description: <>The first step involves creating a payment link via the <a href="/developers/payments/checkout-api">Checkout API</a>. Make sure to include the <a href="/developers/payments/checkout-api">customer_id</a> parameter, and the <a href="/developers/payments/checkout-api">pg_codes</a> you’re using is enabled for tokenization. Request Example:<pre><code className="language-json">{`{
   "type": "payment_request",
   "pg_codes": ["mpgs", "credit-card", "stc-pay"],
   "amount": "19.000",
@@ -170,13 +170,13 @@ Simplifying your checkout process with tokenization is easy with Ottu. Here’s 
   },
   {
     title: "Access the Checkout Page",
-    description: <>After generating the <a href="/docs/developers/payments/checkout-api#checkout_url-string-mandatory">checkout_url</a>, the merchant should share it with the customer, who then accesses the <strong>Checkout</strong> page via this link. Here, the <a href="/docs/developers/payments/checkout-sdk">Checkout SDK</a> displays all available payment methods, such as [<code>mpgs</code>, <code>credit-card</code>, <code>stc-pay</code>].<br /><br />To save a card, the customer selects the desired payment method for both the current purchase and future transactions. The customer will then be redirected to the <strong>Payment</strong> page, where he must enter his card details and opt to <strong>Save Card.</strong> Upon completing a successful payment, the card details will be stored, and a token will be linked to the customer_id."<br /><br /><Admonition type="info"><strong>Successful Payment is a Prerequisite:</strong> A saved card, represented by a unique token, can only be created after the customer completes a successful payment transaction. This process ensures the validity of the card and enables tokenization.</Admonition></>,
+    description: <>After generating the <a href="/developers/payments/checkout-api#checkout_url-string-mandatory">checkout_url</a>, the merchant should share it with the customer, who then accesses the <strong>Checkout</strong> page via this link. Here, the <a href="/developers/payments/checkout-sdk">Checkout SDK</a> displays all available payment methods, such as [<code>mpgs</code>, <code>credit-card</code>, <code>stc-pay</code>].<br /><br />To save a card, the customer selects the desired payment method for both the current purchase and future transactions. The customer will then be redirected to the <strong>Payment</strong> page, where he must enter his card details and opt to <strong>Save Card.</strong> Upon completing a successful payment, the card details will be stored, and a token will be linked to the customer_id."<br /><br /><Admonition type="info"><strong>Successful Payment is a Prerequisite:</strong> A saved card, represented by a unique token, can only be created after the customer completes a successful payment transaction. This process ensures the validity of the card and enables tokenization.</Admonition></>,
     image: "/img/cards-and-tokens/tokenization-checkout-page-pre-tokenization-2.png",
     imageAlt: "Checkout page before tokenization",
   },
   {
     title: "Use a Saved Card",
-    description: <>For subsequent transactions, repeat the same API call as in Step 1 using the same <a href="/docs/developers/payments/checkout-api">customer_id</a> and <a href="/docs/developers/payments/checkout-api">pg_code</a>. When reaching the <strong>Checkout</strong> page again, the previously saved card will be available as a new payment method. The customer can simply click on it to process the payment immediately.</>,
+    description: <>For subsequent transactions, repeat the same API call as in Step 1 using the same <a href="/developers/payments/checkout-api">customer_id</a> and <a href="/developers/payments/checkout-api">pg_code</a>. When reaching the <strong>Checkout</strong> page again, the previously saved card will be available as a new payment method. The customer can simply click on it to process the payment immediately.</>,
     image: "/img/cards-and-tokens/tokenized-checkout-page.png",
     imageAlt: "Tokenized checkout page",
   },
@@ -196,7 +196,7 @@ Once you receive the tokenized card information in the webhook payload, you can 
 
 #### 3 What if a customer wants to remove a saved card?
 
-Customers can request the removal of their saved cards at any point. For detailed steps on managing this process, please refer to the [User Cards](/docs/developers/cards-and-tokens/user-cards#delete-card) and [Checkout SDK](/docs/developers/payments/checkout-sdk) sections of our documentation.
+Customers can request the removal of their saved cards at any point. For detailed steps on managing this process, please refer to the [User Cards](/developers/cards-and-tokens/user-cards#delete-card) and [Checkout SDK](/developers/payments/checkout-sdk) sections of our documentation.
 
 #### 4 Is tokenization safe?
 
@@ -204,7 +204,7 @@ Absolutely. Tokenization replaces sensitive card details with a unique token, re
 
 #### 5 Can I use tokenization for recurring payments?
 
-Yes, tokenization is an ideal feature for setting up recurring payments. Please refer to our [Auto Debit](/docs/developers/cards-and-tokens/recurring-payments) documentation section for more details.
+Yes, tokenization is an ideal feature for setting up recurring payments. Please refer to our [Auto Debit](/developers/cards-and-tokens/recurring-payments) documentation section for more details.
 
 #### 6 Can I use tokenization even if I’m not PCI DSS compliant?
 
@@ -219,7 +219,7 @@ You can add a new card using two methods:
 
 #### 8 Can I use the Auto-Debit feature even if I’m not PCI DSS compliant?
 
-Absolutely. With Ottu, you don’t have to worry about PCI DSS compliance. Our platform securely handles all the sensitive data and never exposes this information to the merchant. This means you can safely implement the [auto-debit](/docs/developers/cards-and-tokens/recurring-payments) feature.
+Absolutely. With Ottu, you don’t have to worry about PCI DSS compliance. Our platform securely handles all the sensitive data and never exposes this information to the merchant. This means you can safely implement the [auto-debit](/developers/cards-and-tokens/recurring-payments) feature.
 
 #### 9 Can I store card tokens in my database if I’m not PCI DSS compliant?
 
@@ -229,15 +229,15 @@ This process significantly minimizes the risk of data breaches because the token
 
 #### 10 When should I save the card token in my database?
 
-The optimal time to save the card token in your database is immediately after the first payment against the subscription that you plan to [auto-debit](/docs/developers/cards-and-tokens/recurring-payments). While it’s not strictly necessary—you can always fetch this information through the [User Cards](/docs/developers/cards-and-tokens/user-cards) API and Payment Methods APIs—it does streamline your processes and reduce development complexity.
+The optimal time to save the card token in your database is immediately after the first payment against the subscription that you plan to [auto-debit](/developers/cards-and-tokens/recurring-payments). While it’s not strictly necessary—you can always fetch this information through the [User Cards](/developers/cards-and-tokens/user-cards) API and Payment Methods APIs—it does streamline your processes and reduce development complexity.
 
 #### 11 Do I need to use the Checkout SDK to display payment options to the customer?
 
-No, it’s not mandatory to use the [Checkout SDK](/docs/developers/payments/checkout-sdk). You can control the payment process using the responses from the [Checkout API](/docs/developers/payments/checkout-api). However, it’s worth noting that the `Checkout SDK` simplifies the UI implementation and is necessary for certain payment methods such as `Apple Pay`, `Google Pay`, `STC Pay`, and others. While it’s recommended to use the `Checkout SDK` for its simplicity and comprehensive features, the choice ultimately lies in your hands based on your specific needs.
+No, it’s not mandatory to use the [Checkout SDK](/developers/payments/checkout-sdk). You can control the payment process using the responses from the [Checkout API](/developers/payments/checkout-api). However, it’s worth noting that the `Checkout SDK` simplifies the UI implementation and is necessary for certain payment methods such as `Apple Pay`, `Google Pay`, `STC Pay`, and others. While it’s recommended to use the `Checkout SDK` for its simplicity and comprehensive features, the choice ultimately lies in your hands based on your specific needs.
 
 #### 12 **Can I retrieve a list of saved cards for a customer?**
 
-Yes, you can retrieve a list of a customer's saved cards utilizing the [Fetch Card API](/docs/developers/cards-and-tokens/user-cards#fetch-cards). This powerful API provides merchants secure access to essential saved card information,such as:
+Yes, you can retrieve a list of a customer's saved cards utilizing the [Fetch Card API](/developers/cards-and-tokens/user-cards#fetch-cards). This powerful API provides merchants secure access to essential saved card information,such as:
 
 - **Token**: A unique identifier for the card.
 - **Brand**: The card brand (e.g., Visa, MasterCard).
@@ -245,7 +245,7 @@ Yes, you can retrieve a list of a customer's saved cards utilizing the [Fetch Ca
 - **Name on Card**: The name of the cardholder as it appears on the card.
 - **PG Code**: Payment Gateway code indicating the processing network.
 
-For comprehensive instructions on how to implement this API, including request and response parameters, please consult our detailed documentation [here](/docs/developers/cards-and-tokens/user-cards#fetch-cards).
+For comprehensive instructions on how to implement this API, including request and response parameters, please consult our detailed documentation [here](/developers/cards-and-tokens/user-cards#fetch-cards).
 
 #### 13 **What happens if a tokenized card expires?**
 

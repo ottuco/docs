@@ -1,0 +1,167 @@
+/* ═══════════════════════════════════════════════════════
+   Glossary Search — Searchable Term Definitions
+   ═══════════════════════════════════════════════════════ */
+
+.glossary {
+  margin: 24px 0;
+  font-family: "Poppins", system-ui, sans-serif;
+}
+
+/* ── Search bar ─────────────────────────────────────── */
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--ifm-global-border-color, #e5e5e5);
+  background: var(--ifm-background-color, #fff);
+  color: var(--ifm-font-color-base);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.searchInput::placeholder {
+  color: var(--ifm-font-color-base);
+  opacity: 0.4;
+}
+
+.searchInput:focus {
+  border-color: #f27e20;
+}
+
+.resultCount {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ifm-font-color-base);
+  opacity: 0.5;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+/* ── Term list ──────────────────────────────────────── */
+.termList {
+  margin: 0;
+  padding: 0;
+}
+
+.termEntry {
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid var(--ifm-global-border-color, #e5e5e5);
+  transition: background 0.15s ease;
+}
+
+.termEntry:first-child {
+  border-top: 1px solid var(--ifm-global-border-color, #e5e5e5);
+}
+
+.termEntry:hover {
+  background: var(--ifm-background-surface-color, #fafafa);
+}
+
+/* ── Term name ──────────────────────────────────────── */
+.termName {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.termLink {
+  color: var(--ifm-heading-color);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.termLink:hover {
+  color: #f27e20;
+}
+
+.linkIcon {
+  opacity: 0;
+  transition: opacity 0.15s;
+  font-size: 13px;
+  color: var(--ifm-font-color-base);
+}
+
+.termEntry:hover .linkIcon {
+  opacity: 0.3;
+}
+
+.termLink:hover .linkIcon {
+  opacity: 0.8;
+  color: #f27e20;
+}
+
+/* ── Term definition ────────────────────────────────── */
+.termDefinition {
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ifm-font-color-base);
+  opacity: 0.85;
+}
+
+.termDefinition a {
+  color: #f27e20;
+  text-decoration: none;
+}
+
+.termDefinition a:hover {
+  text-decoration: underline;
+}
+
+.termDefinition code {
+  font-family: "Consolas", "SFMono-Regular", monospace;
+  font-size: 12.5px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--ifm-background-surface-color, #f5f5f5);
+}
+
+/* ── Highlighted term (deep link target) ────────────── */
+.highlighted {
+  background: rgba(242, 126, 32, 0.06);
+}
+
+/* ── Empty state ──────────────────────────────────────  */
+.empty {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--ifm-font-color-base);
+  opacity: 0.5;
+  font-size: 14px;
+  border-radius: 10px;
+  border: 1px dashed var(--ifm-global-border-color, #e5e5e5);
+}
+
+/* ── Dark mode ────────────────────────────────────────  */
+[data-theme="dark"] .searchInput {
+  background: #171a21;
+  border-color: #1e2939;
+}
+
+[data-theme="dark"] .termEntry:hover {
+  background: #171a21;
+}
+
+[data-theme="dark"] .highlighted {
+  background: rgba(242, 126, 32, 0.08);
+}
+
+[data-theme="dark"] .termDefinition code {
+  background: #1e2939;
+}
+
+[data-theme="dark"] .empty {
+  border-color: #1e2939;
+}

@@ -31,20 +31,20 @@ Contracts provide legal protection and help prevent disputes by clearly defining
 
 | Task | Description | Guide |
 |---|---|---|
-| View tenants and contracts | Use the centralized dashboard to see all tenants and their associated contracts | [Dashboard](/docs/business/industry/real-estate/tenant-contract/dashboard) |
-| Add or edit a tenant | Register new tenants or update existing tenant information | [Tenant Management](/docs/business/industry/real-estate/tenant-contract/tenant-management) |
-| Create a new contract | Set up a rental agreement linking a tenant to a property unit | [Add Contract](/docs/business/industry/real-estate/tenant-contract/add-contract) |
-| Manage existing contracts | Overview of contract lifecycle and available actions | [Contract Management](/docs/business/industry/real-estate/tenant-contract/contract-management) |
-| Renew a contract | Extend an existing contract with updated terms | [Renew Contract](/docs/business/industry/real-estate/tenant-contract/renew-contract) |
-| Terminate a contract | End a contract and record termination details | [Terminate Contract](/docs/business/industry/real-estate/tenant-contract/terminate-contract) |
-| Suspend a contract | Temporarily halt all invoice payments on a contract | [Suspend Contract](/docs/business/industry/real-estate/tenant-contract/suspend-contract) |
-| Resume a contract | Reactivate a suspended contract | [Resume Contract](/docs/business/industry/real-estate/tenant-contract/resume-contract) |
-| Record manual payment | Log offline payments against contract invoices | [Manual Payment](/docs/business/industry/real-estate/tenant-contract/manual-payment) |
-| Process advance payment | Request and record advance rent payments | [Advance Payment](/docs/business/industry/real-estate/tenant-contract/advance-payment) |
+| View tenants and contracts | Use the centralized dashboard to see all tenants and their associated contracts | [Dashboard](/business/industry/real-estate/tenant-contract/dashboard) |
+| Add or edit a tenant | Register new tenants or update existing tenant information | [Tenant Management](/business/industry/real-estate/tenant-contract/tenant-management) |
+| Create a new contract | Set up a rental agreement linking a tenant to a property unit | [Add Contract](/business/industry/real-estate/tenant-contract/add-contract) |
+| Manage existing contracts | Overview of contract lifecycle and available actions | [Contract Management](/business/industry/real-estate/tenant-contract/contract-management) |
+| Renew a contract | Extend an existing contract with updated terms | [Renew Contract](/business/industry/real-estate/tenant-contract/renew-contract) |
+| Terminate a contract | End a contract and record termination details | [Terminate Contract](/business/industry/real-estate/tenant-contract/terminate-contract) |
+| Suspend a contract | Temporarily halt all invoice payments on a contract | [Suspend Contract](/business/industry/real-estate/tenant-contract/suspend-contract) |
+| Resume a contract | Reactivate a suspended contract | [Resume Contract](/business/industry/real-estate/tenant-contract/resume-contract) |
+| Record manual payment | Log offline payments against contract invoices | [Manual Payment](/business/industry/real-estate/tenant-contract/manual-payment) |
+| Process advance payment | Request and record advance rent payments | [Advance Payment](/business/industry/real-estate/tenant-contract/advance-payment) |
 
 ## What's Next?
 
-- [Dashboard](/docs/business/industry/real-estate/tenant-contract/dashboard) -- View and manage all tenants and contracts in one place
-- [Tenant Management](/docs/business/industry/real-estate/tenant-contract/tenant-management) -- Add and edit tenant profiles
-- [Add Contract](/docs/business/industry/real-estate/tenant-contract/add-contract) -- Create a new rental agreement
-- [Contract Management](/docs/business/industry/real-estate/tenant-contract/contract-management) -- Manage the full contract lifecycle
+- [Dashboard](/business/industry/real-estate/tenant-contract/dashboard) -- View and manage all tenants and contracts in one place
+- [Tenant Management](/business/industry/real-estate/tenant-contract/tenant-management) -- Add and edit tenant profiles
+- [Add Contract](/business/industry/real-estate/tenant-contract/add-contract) -- Create a new rental agreement
+- [Contract Management](/business/industry/real-estate/tenant-contract/contract-management) -- Manage the full contract lifecycle

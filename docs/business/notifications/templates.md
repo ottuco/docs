@@ -5,11 +5,11 @@ sidebar_label: Templates
 
 # Notification Templates
 
-Notification templates define the content and format of messages sent to customers through each channel. Template availability varies depending on the [plugin](/docs/business/plugins/) being used and the payment phase.
+Notification templates define the content and format of messages sent to customers through each channel. Template availability varies depending on the [plugin](/business/plugins/) being used and the payment phase.
 
 ## Template Availability Matrix
 
-The table below summarizes which notification templates are available for [Payment Request](/docs/business/plugins/payment-request) and [E-Commerce](/docs/business/plugins/e-commerce) across different channels and payment phases.
+The table below summarizes which notification templates are available for [Payment Request](/business/plugins/payment-request) and [E-Commerce](/business/plugins/e-commerce) across different channels and payment phases.
 
 | Payment Phase | Channel | E-Commerce | Payment Request |
 |:---:|:---:|:---:|:---:|
@@ -28,7 +28,7 @@ The table below summarizes which notification templates are available for [Payme
 
 ### Key Takeaways
 
-- **Pre-payment notifications** are only available for the [Payment Request](/docs/business/plugins/payment-request) plugin. The [E-Commerce](/docs/business/plugins/e-commerce) plugin does not support pre-payment notifications on any channel.
+- **Pre-payment notifications** are only available for the [Payment Request](/business/plugins/payment-request) plugin. The [E-Commerce](/business/plugins/e-commerce) plugin does not support pre-payment notifications on any channel.
 - **Post-payment notifications** are available across all channels for both plugins.
 - **Post-operation notifications** (after capture, refund, or void) are supported only through [Email](./email.md) and [SMS](./sms.md). WhatsApp channels do not support post-operation notifications.
 

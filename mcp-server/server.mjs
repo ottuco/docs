@@ -210,21 +210,24 @@ async function start() {
     console.log(`Webhook relay active at /webhook/:orderId`);
   });
 
-  // Fetch artifacts with retry (static site may still be deploying)
-  await fetchWithRetry();
-
-  mcpServer = new McpDocsServer({
-    docsPath: DOCS_PATH,
-    indexPath: INDEX_PATH,
-    name: "ottu-docs",
-    baseUrl: BASE_URL,
-  });
-
-  ready = true;
-  console.log("MCP server ready.");
+  // Fetch artifacts in background — don't block webhook relay
+  fetchWithRetry()
+    .then(() => {
+      mcpServer = new McpDocsServer({
+        docsPath: DOCS_PATH,
+        indexPath: INDEX_PATH,
+        name: "ottu-docs",
+        baseUrl: BASE_URL,
+      });
+      ready = true;
+      console.log("MCP server ready.");
+    })
+    .catch((err) => {
+      console.error("MCP artifacts failed to load (webhook relay still active):", err.message);
+    });
 }
 
 start().catch((err) => {
-  console.error("Failed to start MCP server:", err);
+  console.error("Failed to start server:", err);
   process.exit(1);
 });

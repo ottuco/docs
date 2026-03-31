@@ -11,7 +11,7 @@ Ottu supports two approaches for sending WhatsApp notifications:
 
 ## Integrated WhatsApp Channel
 
-The [Integrated WhatsApp Channel](./integrated.md) automatically sends payment-related notifications to customers using their phone numbers. Integrated with Ottu's [Payment Request](/docs/business/plugins/payment-request) and [E-Commerce](/docs/business/plugins/e-commerce) plugins, it provides a hands-off approach to customer communication -- notifications are triggered automatically when payment states change.
+The [Integrated WhatsApp Channel](./integrated.md) automatically sends payment-related notifications to customers using their phone numbers. Integrated with Ottu's [Payment Request](/business/plugins/payment-request) and [E-Commerce](/business/plugins/e-commerce) plugins, it provides a hands-off approach to customer communication -- notifications are triggered automatically when payment states change.
 
 **Best for:** Merchants who want fully automated WhatsApp notifications without manual intervention.
 
@@ -22,7 +22,7 @@ The [Manual WhatsApp Channel](./manual.md) lets merchants manually trigger Whats
 **Best for:** Merchants who want control over when WhatsApp notifications are sent, or who need to send notifications selectively.
 
 :::note
-WhatsApp notifications are currently supported only for the [Payment Request](/docs/business/plugins/payment-request) and [E-Commerce](/docs/business/plugins/e-commerce) plugins, and are limited to pre-payment and post-payment states. Post-operation notifications (capture, refund, void) are not available via WhatsApp.
+WhatsApp notifications are currently supported only for the [Payment Request](/business/plugins/payment-request) and [E-Commerce](/business/plugins/e-commerce) plugins, and are limited to pre-payment and post-payment states. Post-operation notifications (capture, refund, void) are not available via WhatsApp.
 :::
 
 ## What's Next?

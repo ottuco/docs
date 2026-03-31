@@ -39,7 +39,7 @@ The Manual WhatsApp channel and the [Integrated WhatsApp channel](./integrated.m
 
 When a merchant initiates a manual WhatsApp notification:
 
-1. The merchant clicks the WhatsApp notification action in the [Transaction Table](/docs/business/payment-management/transaction-insights#transaction-table).
+1. The merchant clicks the WhatsApp notification action in the [Transaction Table](/business/payment-management/transaction-insights#transaction-table).
 2. The merchant is redirected to the WhatsApp server.
 3. The pre-configured notification template is displayed.
 4. The merchant reviews and sends the notification to the customer.

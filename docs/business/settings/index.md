@@ -23,11 +23,11 @@ If you are setting up Ottu for the first time, start with **[Global Configuratio
 
 - Set up **[Webhooks](./webhooks)** to receive real-time payment and operation notifications on your server.
 - Configure **[Transaction Reports](./transaction-reports)** to automate financial reporting for your team.
-- Generate **[API Keys](./api-keys)** if your developers need to integrate with the [Ottu API](/docs/developers/).
+- Generate **[API Keys](./api-keys)** if your developers need to integrate with the [Ottu API](/developers/).
 - Enable the **[URL Shortener](./url-shortener)** to create concise payment links for customers.
 
 ## What's Next?
 
-- **[Payment Management](/docs/business/payment-management/)** — Track and manage payment transactions from the dashboard
-- **[Plugins](/docs/business/plugins/)** — Configure payment request plugins and e-commerce integrations
-- **[Notifications](/docs/business/notifications/)** — Set up email, SMS, and WhatsApp notifications for customers
+- **[Payment Management](/business/payment-management/)** — Track and manage payment transactions from the dashboard
+- **[Plugins](/business/plugins/)** — Configure payment request plugins and e-commerce integrations
+- **[Notifications](/business/notifications/)** — Set up email, SMS, and WhatsApp notifications for customers

@@ -25,9 +25,7 @@ export default function ApiDocEmbed({
   Object.assign(Content, mod);
 
   const title =
-    mod.metadata?.title ??
-    Content?.metadata?.title ??
-    mod.frontMatter?.title;
+    mod.metadata?.title ?? Content?.metadata?.title ?? mod.frontMatter?.title;
   const headingId = title ? `api-${slugifyHeading(title)}` : undefined;
 
   // Remove previous/next to hide pagination, and title to prevent document title change
@@ -48,7 +46,7 @@ export default function ApiDocEmbed({
       <div className="api-doc-embed">
         <style>{`.api-doc-embed .openapi__heading{display:none;}`}</style>
         {/* Pass null to hide sidebar breadcrumbs in embedded API docs */}
-        <DocsSidebarProvider name={null} items={null}>
+        <DocsSidebarProvider name={undefined} items={undefined}>
           {/* @ts-expect-error ApiItem works without route in MDX context */}
           <ApiItem content={Content} />
         </DocsSidebarProvider>
