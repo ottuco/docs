@@ -1,40 +1,40 @@
 ---
-title: Samsung Pay
-sidebar_label: Samsung Pay
+title: Samsung Wallet
+sidebar_label: Samsung Wallet
 ---
 
 import StepGuide from "@site/src/components/StepGuide";
 import Admonition from "@theme/Admonition";
 
-# Samsung Pay
+# Samsung Wallet
 
-Samsung Pay allows your customers to complete online payments quickly and securely using their Samsung Wallet. Once enabled, a Samsung Pay button appears on your web checkout page, giving customers a fast, device-authenticated payment option.
+Samsung Wallet allows your customers to complete online payments quickly and securely using their Samsung Wallet. Once enabled, a Samsung Wallet button appears on your web checkout page, giving customers a fast, device-authenticated payment option.
 
-To enable Samsung Pay, you will:
+To enable Samsung Wallet, you will:
 
 1. [Create a Samsung Developer account](#create-your-samsung-developer-account)
-2. [Set up a Samsung Pay service in the Developer Portal](#create-a-samsung-pay-service)
+2. [Set up a Samsung Wallet service in the Developer Portal](#create-a-samsung-wallet-service)
 3. [Request approval from Samsung](#request-service-approval-from-samsung)
 4. [Share your Service ID with Ottu for final configuration](#share-your-service-id-with-ottu)
 
 ## Create Your Samsung Developer Account
 
-1. Visit the Samsung Pay Developer Portal: [https://pay.samsung.com/developer](https://pay.samsung.com/developer)
+1. Visit the Samsung Wallet Developer Portal: [https://pay.samsung.com/developer](https://pay.samsung.com/developer)
 2. Register for a Samsung developer membership.
 3. When asked about company registration:
-   - **If you are the first Samsung Pay member:** Select **"I am the first Samsung Pay member of my company."**
+   - **If you are the first Samsung Wallet member:** Select **"I am the first Samsung Wallet member of my company."**
    - **If your company already has a Partner ID:** Select **"My company is already registered"** and enter your Partner ID.
-4. Contact your Samsung Pay relationship manager to approve your membership.
+4. Contact your Samsung Wallet relationship manager to approve your membership.
 5. After approval, log in again at [https://pay.samsung.com/developer](https://pay.samsung.com/developer).
 
-## Create a Samsung Pay Service
+## Create a Samsung Wallet Service
 
 <StepGuide steps={[
   {
     title: "Navigate to Service Management",
     description: <>Navigate to <strong>My Projects &gt; Service Management</strong>.</>,
     image: "/img/business/samsung-pay/samsung-pay-01-service-management.png",
-    imageAlt: "Service Management section in the Samsung Pay Developer Portal",
+    imageAlt: "Service Management section in the Samsung Wallet Developer Portal",
   },
   {
     title: "Click Create New Service",
@@ -75,7 +75,7 @@ To enable Samsung Pay, you will:
         <li>Click <strong>Request</strong> in the Status column.</li>
       </ol>
       <strong>Message template for approval request:</strong>
-      <blockquote>I would like to request the registration and activation of the Samsung Pay service having the [service id] within the Samsung Developer Portal. Please assist in enabling the required service permissions.</blockquote>
+      <blockquote>I would like to request the registration and activation of the Samsung Wallet service having the [service id] within the Samsung Developer Portal. Please assist in enabling the required service permissions.</blockquote>
       Replace <code>[service id]</code> with your actual Service ID from the portal.</>,
     image: "/img/business/samsung-pay/samsung-pay-05-request-approval.png",
     imageAlt: "Use the Request button to submit your service for review",
@@ -95,10 +95,10 @@ To enable Samsung Pay, you will:
 
 ## Completion {#completion}
 
-After Ottu finishes linking your Service ID, Samsung Pay will be active and ready for use on your online checkout page.
+After Ottu finishes linking your Service ID, Samsung Wallet will be active and ready for use on your online checkout page.
 
 :::tip
-Your customers can now enjoy smooth and secure Samsung Pay payments directly from your checkout page.
+Your customers can now enjoy smooth and secure Samsung Wallet payments directly from your checkout page.
 :::
 
 ## What's Next?

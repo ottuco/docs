@@ -1,0 +1,72 @@
+---
+title: What's New
+description: Latest features, improvements, and changes across the Ottu platform.
+---
+
+import Changelog from "@site/src/components/Changelog";
+
+# What's New
+
+Stay up to date with the latest features, improvements, and changes across the Ottu platform.
+
+<Changelog entries={[
+  {
+    date: "2026-03-16",
+    category: "dashboard",
+    title: "Connect Frontend redesign with updated navigation",
+    description: "Refreshed dashboard interface with improved navigation structure and updated component library.",
+  },
+  {
+    date: "2026-03-12",
+    category: "api",
+    title: "Disable Change Password option in merchant settings",
+    link: "/business/settings/",
+  },
+  {
+    date: "2026-03-12",
+    category: "dashboard",
+    title: "Reset Password moved to admin user details section",
+  },
+  {
+    date: "2026-03-12",
+    category: "payments",
+    title: "Al Dar Exchant: qpay, Apple Pay, and Cybersource now supported",
+    link: "/business/payments/gateways",
+    description: "Three new payment gateway integrations available for Al Dar Exchant merchants.",
+  },
+  {
+    date: "2026-03-11",
+    category: "sdk",
+    title: "Token data available in the pre-payment hook",
+    link: "/developers/payments/checkout-sdk/web/#beforepayment-hook",
+    description: "The beforePayment hook now includes token-related data, enabling card-aware logic before payment submission.",
+  },
+  {
+    date: "2026-03-11",
+    category: "sdk",
+    title: "Fixed CVV field error translations for English and Arabic",
+  },
+  {
+    date: "2026-03-11",
+    category: "sdk",
+    title: "Card form name field is now optional",
+  },
+  {
+    date: "2026-03-11",
+    category: "api",
+    title: "Auto-debit CIT flow updated to use verify instead of pay/authorize",
+    link: "/developers/cards-and-tokens/",
+    breaking: true,
+  },
+  {
+    date: "2026-03-11",
+    category: "security",
+    title: "Migrated to IAM Role-Based authentication for AWS services",
+    description: "Replaced plaintext AWS credentials with IAM role-based authentication across all services.",
+  },
+  {
+    date: "2026-03-11",
+    category: "payments",
+    title: "Removed payment_processing_day from MPGS implementation",
+  },
+]} />

@@ -276,7 +276,7 @@ const sidebars: SidebarsConfig = {
                 'business/payments/services/apple-pay/setup-cybersource',
               ],
             },
-            'business/payments/services/samsung-pay',
+            'business/payments/services/samsung-wallet',
           ],
         },
       ],

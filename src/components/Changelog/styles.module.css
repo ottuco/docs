@@ -1,0 +1,232 @@
+/* ═══════════════════════════════════════════════════════
+   Changelog — Editorial Precision
+   Restrained color, sharp type, generous space
+   ═══════════════════════════════════════════════════════ */
+
+.changelog {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 0 48px;
+}
+
+/* ── Month section ──────────────────────────────────── */
+
+.monthSection {
+  margin-bottom: 48px;
+}
+
+.monthSection:last-child {
+  margin-bottom: 0;
+}
+
+.monthHeader {
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--ifm-font-color-base);
+  opacity: 0.45;
+  margin: 0 0 20px 0;
+  padding: 0 0 12px 0;
+  border-bottom: 1px solid var(--ifm-global-border-color);
+}
+
+/* ── Entry list ─────────────────────────────────────── */
+
+.entriesList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ── Single entry ───────────────────────────────────── */
+
+.entry {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
+  align-items: baseline;
+  padding: 14px 16px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.entry:hover {
+  background: rgba(0, 0, 0, 0.025);
+}
+
+[data-theme="dark"] .entry:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+/* ── Meta column (badges) ───────────────────────────── */
+
+.entryMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 120px;
+}
+
+/* ── Category badge ─────────────────────────────────── */
+
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.badge_api {
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+}
+
+.badge_dashboard {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+
+.badge_sdk {
+  background: rgba(242, 126, 32, 0.1);
+  color: #f27e20;
+}
+
+.badge_payments {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+}
+
+.badge_security {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.badge_infrastructure {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+}
+
+/* ── Dark mode badge adjustments ────────────────────── */
+
+[data-theme="dark"] .badge_api {
+  background: rgba(96, 165, 250, 0.12);
+  color: #93bbfd;
+}
+
+[data-theme="dark"] .badge_dashboard {
+  background: rgba(167, 139, 250, 0.12);
+  color: #c4b5fd;
+}
+
+[data-theme="dark"] .badge_sdk {
+  background: rgba(242, 126, 32, 0.12);
+  color: #f5a623;
+}
+
+[data-theme="dark"] .badge_payments {
+  background: rgba(74, 222, 128, 0.12);
+  color: #86efac;
+}
+
+[data-theme="dark"] .badge_security {
+  background: rgba(248, 113, 113, 0.12);
+  color: #fca5a5;
+}
+
+[data-theme="dark"] .badge_infrastructure {
+  background: rgba(156, 163, 175, 0.12);
+  color: #d1d5db;
+}
+
+/* ── Breaking badge ─────────────────────────────────── */
+
+.breakingBadge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 100px;
+  border: 1.5px solid #dc2626;
+  color: #dc2626;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+[data-theme="dark"] .breakingBadge {
+  border-color: #f87171;
+  color: #f87171;
+}
+
+/* ── Content column ─────────────────────────────────── */
+
+.entryContent {
+  min-width: 0;
+}
+
+.entryTitle {
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--ifm-heading-color);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.entryLink {
+  color: var(--ifm-heading-color);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.entryLink:hover {
+  color: #f27e20;
+}
+
+.entryDescription {
+  font-size: 13px;
+  color: var(--ifm-font-color-base);
+  opacity: 0.65;
+  margin: 4px 0 0 0;
+  line-height: 1.55;
+}
+
+/* ── Date column ────────────────────────────────────── */
+
+.entryDate {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ifm-font-color-base);
+  opacity: 0.4;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Responsive ─────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .entry {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 12px 12px;
+  }
+
+  .entryMeta {
+    min-width: unset;
+  }
+
+  .entryDate {
+    order: -1;
+    font-size: 11px;
+  }
+
+  .monthHeader {
+    font-size: 12px;
+  }
+}
