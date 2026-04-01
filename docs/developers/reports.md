@@ -7,6 +7,7 @@ hide_table_of_contents: true
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
+import FAQ, { FAQItem } from '@site/src/components/FAQ';
 
 # Reports API
 
@@ -164,39 +165,41 @@ On `429 rate_limited`, implement exponential backoff before retrying.
 
 ## FAQ
 
-#### 1. Can I download reports without listing them first?
+<FAQ>
+  <FAQItem question="1. Can I download reports without listing them first?">
+    Technically yes, if you stored the download token previously. But listing first is the safest way to discover available reports and get fresh tokens.
+  </FAQItem>
 
-Technically yes, if you stored the download token previously. But listing first is the safest way to discover available reports and get fresh tokens.
+  <FAQItem question="2. Why don't I see reports that are still generating?">
+    The List Reports API returns **finished reports only** to keep results correct and queries fast.
+  </FAQItem>
 
-#### 2. Why don't I see reports that are still generating?
+  <FAQItem question="3. What happens if I don't pass date filters?">
+    The API returns reports from the **last 30 days**, newest first.
+  </FAQItem>
 
-The List Reports API returns **finished reports only** to keep results correct and queries fast.
+  <FAQItem question="4. Can I share download links publicly?">
+    No. Download URLs are secure, tokenized, time-limited, and require authentication. They are not permanent or public.
+  </FAQItem>
 
-#### 3. What happens if I don't pass date filters?
+  <FAQItem question="5. What errors should I expect?">
+    | HTTP | Code | Message | When |
+    |------|------|---------|------|
+    | 400 | `invalid_parameters` | Bad filters | `created_before` < `created_after` |
+    | 401 | `unauthorized` | Invalid/missing auth | Header missing or wrong |
+    | 403 | `forbidden` | Insufficient permissions | Basic Auth user lacks `report.can_view_report` |
+    | 404 | `not_found` | Report not found | Wrong or inaccessible token |
+    | 429 | `rate_limited` | Too many requests | Rate limit exceeded |
+  </FAQItem>
 
-The API returns reports from the **last 30 days**, newest first.
+  <FAQItem question="6. I'm using Basic Auth but getting 403 — why?">
+    Your user is missing `report.can_view_report`. Ask your admin to enable report API access.
+  </FAQItem>
 
-#### 4. Can I share download links publicly?
-
-No. Download URLs are secure, tokenized, time-limited, and require authentication. They are not permanent or public.
-
-#### 5. What errors should I expect?
-
-| HTTP | Code | Message | When |
-|------|------|---------|------|
-| 400 | `invalid_parameters` | Bad filters | `created_before` < `created_after` |
-| 401 | `unauthorized` | Invalid/missing auth | Header missing or wrong |
-| 403 | `forbidden` | Insufficient permissions | Basic Auth user lacks `report.can_view_report` |
-| 404 | `not_found` | Report not found | Wrong or inaccessible token |
-| 429 | `rate_limited` | Too many requests | Rate limit exceeded |
-
-#### 6. I'm using Basic Auth but getting 403 — why?
-
-Your user is missing `report.can_view_report`. Ask your admin to enable report API access.
-
-#### 7. Are downloads logged even if they fail?
-
-Yes. Every attempt is logged with outcome status for audit compliance.
+  <FAQItem question="7. Are downloads logged even if they fail?">
+    Yes. Every attempt is logged with outcome status for audit compliance.
+  </FAQItem>
+</FAQ>
 
 ## What's Next?
 

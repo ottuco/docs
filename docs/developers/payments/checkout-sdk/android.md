@@ -3,6 +3,8 @@ toc_min_heading_level: 2
 toc_max_heading_level: 3
 ---
 
+import FAQ, { FAQItem } from '@site/src/components/FAQ';
+
 The [Checkout SDK](../) from Ottu is a Kotlin-based library designed to streamline the integration of an Ottu-powered [checkout process](../) into Android applications. This SDK allows for complete customization of the checkout experience, including both appearance and functionality, as well as the selection of accepted payment methods.
 
 To integrate the Checkout SDK, it must be incorporated into the Android application and initialized with the following parameters:
@@ -806,18 +808,18 @@ The SDK is designed to protect sensitive data by restricting screen capture func
 
 ## FAQ
 
-#### 1. What forms of payments are supported by the SDK?
+<FAQ>
+  <FAQItem question="1. What forms of payments are supported by the SDK?">
+    The SDK accommodates various payment forms including`tokenPay`, `redirect`, `StcPay` and `cardOnsite`.&#x20;
 
-The SDK accommodates various payment forms including`tokenPay`, `redirect`, `StcPay` and `cardOnsite`.&#x20;
+    Merchants have the flexibility to showcase specific methods based on their requirements.&#x20;
 
-Merchants have the flexibility to showcase specific methods based on their requirements.&#x20;
-
-For instance, if you wish to exclusively display the STC Pay button, you can achieve this by setting `formsOfPayment` = `[StcPay]`, which will result in only the STC Pay button being displayed. This approach is applicable to other payment methods as well.
-
-#### 2. What are the minimum system requirements for the SDK integration?
-
-It is required to have a device running Android 8 or higher (Android API level 26 or higher).
-
-#### 3. Can I customize the appearance beyond the provided themes?
-
-Yes, check the [Theme](#theme) section.
+    For instance, if you wish to exclusively display the STC Pay button, you can achieve this by setting `formsOfPayment` = `[StcPay]`, which will result in only the STC Pay button being displayed. This approach is applicable to other payment methods as well.
+  </FAQItem>
+  <FAQItem question="2. What are the minimum system requirements for the SDK integration?">
+    It is required to have a device running Android 8 or higher (Android API level 26 or higher).
+  </FAQItem>
+  <FAQItem question="3. Can I customize the appearance beyond the provided themes?">
+    Yes, check the [Theme](#theme) section.
+  </FAQItem>
+</FAQ>

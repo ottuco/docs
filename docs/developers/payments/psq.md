@@ -6,6 +6,7 @@ hide_table_of_contents: true
 
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import GatewayTimingChart from "@site/src/components/GatewayTimingChart";
+import FAQ, { FAQItem } from '@site/src/components/FAQ';
 
 # Payment Status Query
 
@@ -156,33 +157,29 @@ Provide `session_id` (preferred — always present) or `order_no`. At least one 
 
 ## FAQ
 
-#### 1. What are the prerequisites?
-
-At least one payment gateway that supports status checks, and familiarity with the [payment webhook response](/developers/webhooks/payment-events) format.
-
-#### 2. What authentication does the Payment Status Query API support?
-
-Both [API Key](/developers/getting-started/authentication#private-key-api-key) and [Basic Authentication](/developers/getting-started/authentication#basic-authentication). No special permissions required for Basic Auth beyond `payment.inquiry`.
-
-#### 3. Which payment transaction states can I inquire?
-
-You can trigger the inquiry for `pending`, `attempted`, `failed`, or `expired` states. For `paid` or `authorized`, the status is returned immediately without querying the gateway. See [Payment States](/developers/reference/payment-states).
-
-#### 4. How does Ottu handle payment transactions with outdated states?
-
-If a payment transaction is still in `pending`, `attempted`, `failed`, or `expired`, Ottu queries the payment gateway for the latest status and updates accordingly.
-
-#### 5. What if multiple gateways were attempted?
-
-All gateways that support status checks are queried, ensuring you receive the most up-to-date status regardless of which gateway the customer used.
-
-#### 6. Are there throttling limits?
-
-Yes. See [Throttling Rules](#throttling-rules) — per-transaction limits (grace period, 30-min intervals, max 3/day) plus a global rate limit of 30 requests/minute.
-
-#### 7. What identifiers do I need?
-
-At least one of `session_id` or `order_no`. Prefer `session_id` as it's always available in the [Checkout API](/developers/payments/checkout-api) response.
+<FAQ>
+  <FAQItem question="1. What are the prerequisites?">
+    At least one payment gateway that supports status checks, and familiarity with the [payment webhook response](/developers/webhooks/payment-events) format.
+  </FAQItem>
+  <FAQItem question="2. What authentication does the Payment Status Query API support?">
+    Both [API Key](/developers/getting-started/authentication#private-key-api-key) and [Basic Authentication](/developers/getting-started/authentication#basic-authentication). No special permissions required for Basic Auth beyond `payment.inquiry`.
+  </FAQItem>
+  <FAQItem question="3. Which payment transaction states can I inquire?">
+    You can trigger the inquiry for `pending`, `attempted`, `failed`, or `expired` states. For `paid` or `authorized`, the status is returned immediately without querying the gateway. See [Payment States](/developers/reference/payment-states).
+  </FAQItem>
+  <FAQItem question="4. How does Ottu handle payment transactions with outdated states?">
+    If a payment transaction is still in `pending`, `attempted`, `failed`, or `expired`, Ottu queries the payment gateway for the latest status and updates accordingly.
+  </FAQItem>
+  <FAQItem question="5. What if multiple gateways were attempted?">
+    All gateways that support status checks are queried, ensuring you receive the most up-to-date status regardless of which gateway the customer used.
+  </FAQItem>
+  <FAQItem question="6. Are there throttling limits?">
+    Yes. See [Throttling Rules](#throttling-rules) — per-transaction limits (grace period, 30-min intervals, max 3/day) plus a global rate limit of 30 requests/minute.
+  </FAQItem>
+  <FAQItem question="7. What identifiers do I need?">
+    At least one of `session_id` or `order_no`. Prefer `session_id` as it's always available in the [Checkout API](/developers/payments/checkout-api) response.
+  </FAQItem>
+</FAQ>
 
 ## What's Next?
 

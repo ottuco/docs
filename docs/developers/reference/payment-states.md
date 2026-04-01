@@ -3,6 +3,8 @@ title: Payment States
 sidebar_label: Payment States
 ---
 
+import FAQ, { FAQItem } from '@site/src/components/FAQ';
+
 # Payment States
 
 Every payment in Ottu has two levels: a **payment transaction** (the top-level entity with amount, currency, customer data) and one or more **payment attempts** (individual interactions with the payment gateway). The payment transaction tracks the overall lifecycle — from `created` through `paid`, `expired`, or `refunded`. Each payment attempt tracks a single gateway interaction — from `pending` through `success` or `failed`.
@@ -161,33 +163,35 @@ Child payment transactions appear in the parent's webhook payload and can be ret
 
 ## FAQ
 
-#### What state should I check to confirm a payment succeeded?
+<FAQ>
+  <FAQItem question="What state should I check to confirm a payment succeeded?">
+    Check the `state` field in the webhook payload or API response. Success states are `paid` (funds collected), `authorized` (funds reserved, capture needed), and `cod` (offline payment). For most integrations, treat `paid` as the primary success indicator.
+  </FAQItem>
 
-Check the `state` field in the webhook payload or API response. Success states are `paid` (funds collected), `authorized` (funds reserved, capture needed), and `cod` (offline payment). For most integrations, treat `paid` as the primary success indicator.
+  <FAQItem question="Can a `failed` or `expired` payment transaction become `paid`?">
+    Yes. If a delayed gateway response arrives (e.g., via automatic inquiry), a `failed` or `expired` payment transaction can transition to `paid`, `authorized`, or `cod`. Always handle webhook updates for payment transactions you consider "failed."
+  </FAQItem>
 
-#### Can a `failed` or `expired` payment transaction become `paid`?
+  <FAQItem question="What is the difference between `failed` and `attempted`?">
+    `attempted` means the customer tried to pay but the payment attempt failed, and the payment transaction is still open for retry (when [multi-attempt](#multi-attempt-logic) is enabled). `failed` is terminal — no more retries. When multi-attempt is disabled, the payment transaction skips `attempted` and goes directly to `failed`.
+  </FAQItem>
 
-Yes. If a delayed gateway response arrives (e.g., via automatic inquiry), a `failed` or `expired` payment transaction can transition to `paid`, `authorized`, or `cod`. Always handle webhook updates for payment transactions you consider "failed."
+  <FAQItem question="What is the difference between `canceled` and `expired`?">
+    `canceled` is an explicit action by a staff member or [API call](/developers/operations#cancel). `expired` happens automatically when the expiration date passes, or when the customer cancels on the gateway page (when multi-attempt is disabled).
+  </FAQItem>
 
-#### What is the difference between `failed` and `attempted`?
+  <FAQItem question="What does `invalided` mean?">
+    A configuration change made the payment transaction unprocessable after creation — for example, the currency was removed or the payment gateway was disabled. This is rare and indicates a backend configuration issue.
+  </FAQItem>
 
-`attempted` means the customer tried to pay but the payment attempt failed, and the payment transaction is still open for retry (when [multi-attempt](#multi-attempt-logic) is enabled). `failed` is terminal — no more retries. When multi-attempt is disabled, the payment transaction skips `attempted` and goes directly to `failed`.
+  <FAQItem question="What does `refund_queued` mean?">
+    The refund request was sent to the payment gateway, but the gateway hasn't confirmed it yet. Some gateways process refunds asynchronously — they accept the request, return a pending status, and later send a webhook to confirm the refund. The state transitions to `refunded` on confirmation or `refund_rejected` if the gateway rejects it.
+  </FAQItem>
 
-#### What is the difference between `canceled` and `expired`?
-
-`canceled` is an explicit action by a staff member or [API call](/developers/operations#cancel). `expired` happens automatically when the expiration date passes, or when the customer cancels on the gateway page (when multi-attempt is disabled).
-
-#### What does `invalided` mean?
-
-A configuration change made the payment transaction unprocessable after creation — for example, the currency was removed or the payment gateway was disabled. This is rare and indicates a backend configuration issue.
-
-#### What does `refund_queued` mean?
-
-The refund request was sent to the payment gateway, but the gateway hasn't confirmed it yet. Some gateways process refunds asynchronously — they accept the request, return a pending status, and later send a webhook to confirm the refund. The state transitions to `refunded` on confirmation or `refund_rejected` if the gateway rejects it.
-
-#### How do child payment transactions relate to the parent?
-
-Child payment transactions are created by [operations](/developers/operations) (refund, capture, void). They have their own state and amount but are linked to the parent. The parent's [webhook payload](/developers/webhooks/operation-events) includes child payment transaction details.
+  <FAQItem question="How do child payment transactions relate to the parent?">
+    Child payment transactions are created by [operations](/developers/operations) (refund, capture, void). They have their own state and amount but are linked to the parent. The parent's [webhook payload](/developers/webhooks/operation-events) includes child payment transaction details.
+  </FAQItem>
+</FAQ>
 
 ## What's Next?
 

@@ -1,0 +1,154 @@
+/* FAQ accordion container */
+.faq {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  counter-reset: faq-counter;
+  margin: 1.5rem 0;
+}
+
+/* Individual item card */
+.item {
+  counter-increment: faq-counter;
+  border: 1px solid #dadada;
+  border-radius: 8px;
+  background: #ffffff;
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+[data-theme="dark"] .item {
+  background: #171a21;
+  border-color: #1e2939;
+}
+
+/* Trigger button — full-width clickable row */
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+/* Number prefix via CSS counter */
+.trigger::before {
+  content: counter(faq-counter) ".";
+  flex-shrink: 0;
+  font-family: "Poppins", system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #302f37;
+  min-width: 1.75rem;
+  transition: color 0.15s ease;
+}
+
+[data-theme="dark"] .trigger::before {
+  color: #e5e7eb;
+}
+
+/* Question text */
+.question {
+  flex: 1;
+  font-family: "Poppins", system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #302f37;
+  line-height: 1.5;
+  transition: color 0.15s ease;
+}
+
+.question strong {
+  font-weight: 700;
+  color: inherit;
+}
+
+.question code {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.875em;
+  font-weight: 600;
+  background: rgba(48, 47, 55, 0.08);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: inherit;
+}
+
+[data-theme="dark"] .question {
+  color: #e5e7eb;
+}
+
+[data-theme="dark"] .question code {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Chevron icon — CSS triangle */
+.chevron {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #302f37;
+  transition:
+    transform 0.2s ease,
+    color 0.15s ease;
+}
+
+.chevron::before {
+  content: "";
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-top: 2px solid currentColor;
+  transform: rotate(45deg) translate(-2px, 2px);
+}
+
+[data-theme="dark"] .chevron {
+  color: #e5e7eb;
+}
+
+/* Open state — question and counter turn orange, chevron rotates */
+.open .trigger::before,
+.open .question {
+  color: #f27e20;
+}
+
+.open .chevron {
+  transform: rotate(90deg);
+}
+
+/* Answer content */
+.answer {
+  padding: 16px 20px 18px 20px;
+  /* indent to align with question text (counter width + gap) */
+  padding-left: calc(20px + 1.75rem + 12px);
+  font-family: "Poppins", system-ui, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #4a4a4a;
+  line-height: 1.6;
+  border-top: 1px solid #dadada;
+  background: #f9fafb;
+}
+
+[data-theme="dark"] .answer {
+  color: #e5e7eb;
+  border-top-color: #1e2939;
+  background: #171a21;
+}
+
+/* Override .markdown p global rule */
+.answer p {
+  font-size: 0.875rem;
+}
+
+/* Inline code inside answers */
+.answer code {
+  font-size: 0.875rem;
+}

@@ -1,3 +1,5 @@
+import FAQ, { FAQItem } from '@site/src/components/FAQ';
+
 # Tokenization
 
 Tokenization significantly reduces the risk associated with handling sensitive customer card data. Instead of storing the actual card details, a unique token is generated and used for future transactions, thus enhancing the security of your payment processes. This feature is currently compatible with MasterCard, Visa, and STC Pay, with further options planned for future inclusion.
@@ -197,70 +199,60 @@ By following these steps, you can easily streamline your payment process, ensuri
 
 ## [FAQ](#faq)
 
-#### :digit_one: Can I use tokenization if my payment gateway doesn’t support it?
+<FAQ>
+  <FAQItem question=":digit_one: Can I use tokenization if my payment gateway doesn’t support it?">
+    Tokenization is supported by specific payment gateways. If your current gateway doesn’t support it, please reach out to our support team at [support@ottu.com](mailto:support@ottu.com) for the latest information and possible alternatives.
+  </FAQItem>
+  <FAQItem question=":digit_two: **How do I handle the token received in the webhook payload for future transactions?**">
+    Once you receive the tokenized card information in the webhook payload, you can use this token to process future transactions without needing to store sensitive card details. To do this, store the token securely in your system and reference it in subsequent payment requests as the payment method. This approach not only simplifies transaction processing but also enhances security by minimizing the exposure of sensitive card information.
+  </FAQItem>
+  <FAQItem question=":digit_three: What if a customer wants to remove a saved card?">
+    Customers can request the removal of their saved cards at any point. For detailed steps on managing this process, please refer to the [User Cards](/developers/cards-and-tokens/user-cards#delete-card) and [Checkout SDK](/developers/payments/checkout-sdk) sections of our documentation.
+  </FAQItem>
+  <FAQItem question=":digit_four: Is tokenization safe?">
+    Absolutely. Tokenization replaces sensitive card details with a unique token, reducing the risk of card information exposure and enhancing payment security.
+  </FAQItem>
+  <FAQItem question=":digit_five: Can I use tokenization for recurring payments?">
+    Yes, tokenization is an ideal feature for setting up recurring payments. Please refer to our [Auto Debit](/developers/cards-and-tokens/recurring-payments) documentation section for more details.
+  </FAQItem>
+  <FAQItem question=":digit_six: Can I use tokenization even if I’m not PCI DSS compliant?">
+    Yes, one of the major benefits of tokenization is that it allows you to securely process transactions without needing to be PCI DSS compliant. Ottu handles the complexities of compliance for you.
+  </FAQItem>
+  <FAQItem question=":digit_seven: **How can I add a new card for a customer?**">
+    You can add a new card using two methods:
 
-Tokenization is supported by specific payment gateways. If your current gateway doesn't support it, please reach out to our support team at [support@ottu.com](mailto:support@ottu.com) for the latest information and possible alternatives.
+    1. **Without Making a Payment**: Add a customer’s card details directly without the need to process a payment. For more details, please click [here](#tokenization-without-payment).
+    2. **During a Payment Transaction**: Save the customer’s card details while processing an actual payment. For further information, please click [here](#tokenization-with-payment).
+  </FAQItem>
+  <FAQItem question=":digit_eight: Can I use the Auto-Debit feature even if I’m not PCI DSS compliant?">
+    Absolutely. With Ottu, you don’t have to worry about PCI DSS compliance. Our platform securely handles all the sensitive data and never exposes this information to the merchant. This means you can safely implement the [auto-debit](/developers/cards-and-tokens/recurring-payments) feature.
+  </FAQItem>
+  <FAQItem question=":digit_nine: Can I store card tokens in my database if I’m not PCI DSS compliant?">
+    Yes, storing tokenized card details is safe and compliant without PCI DSS compliance. Tokens are secure substitutes for sensitive card information, specifically designed to reduce security risks. When Ottu tokenizes a card, it replaces the card’s Primary Account Number (PAN) with a unique identifier or token. This token can be safely stored in your database because it cannot be used outside of the secure payment environment set up by Ottu.
 
-#### :digit_two: **How do I handle the token received in the webhook payload for future transactions?**
+    This process significantly minimizes the risk of data breaches because the tokens themselves are not valuable to attackers without access to the decryption mechanism, which is securely managed by Ottu. Additionally, since these tokens do not carry the card’s actual details, they fall outside the scope of PCI DSS requirements for data protection, making it easier for merchants to securely process payments while adhering to compliance standards. Please, check out this [Wikipedia article](<https://en.wikipedia.org/wiki/Tokenization_(data_security)>) for a deeper dive.
+  </FAQItem>
+  <FAQItem question=":digit_one::digit_zero: When should I save the card token in my database?">
+    The optimal time to save the card token in your database is immediately after the first payment against the subscription that you plan to [auto-debit](/developers/cards-and-tokens/recurring-payments). While it’s not strictly necessary—you can always fetch this information through the [User Cards](/developers/cards-and-tokens/user-cards) API and Payment Methods APIs—it does streamline your processes and reduce development complexity.
+  </FAQItem>
+  <FAQItem question=":digit_one::digit_one: Do I need to use the Checkout SDK to display payment options to the customer?">
+    No, it’s not mandatory to use the [Checkout SDK](/developers/payments/checkout-sdk). You can control the payment process using the responses from the [Checkout API](/developers/payments/checkout-api). However, it’s worth noting that the `Checkout SDK` simplifies the UI implementation and is necessary for certain payment methods such as `Apple Pay`, `Google Pay`, `STC Pay`, and others. While it’s recommended to use the `Checkout SDK` for its simplicity and comprehensive features, the choice ultimately lies in your hands based on your specific needs.
+  </FAQItem>
+  <FAQItem question=":digit_one::digit_two: **Can I retrieve a list of saved cards for a customer?**">
+    Yes, you can retrieve a list of a customer’s saved cards utilizing the [Fetch Card API](/developers/cards-and-tokens/user-cards#fetch-cards). This powerful API provides merchants secure access to essential saved card information,such as:
 
-Once you receive the tokenized card information in the webhook payload, you can use this token to process future transactions without needing to store sensitive card details. To do this, store the token securely in your system and reference it in subsequent payment requests as the payment method. This approach not only simplifies transaction processing but also enhances security by minimizing the exposure of sensitive card information.
+    - **Token**: A unique identifier for the card.
+    - **Brand**: The card brand (e.g., Visa, MasterCard).
+    - **Expiry Year**: The year the card expires.
+    - **Name on Card**: The name of the cardholder as it appears on the card.
+    - **PG Code**: Payment Gateway code indicating the processing network.
 
-#### :digit_three: What if a customer wants to remove a saved card?
-
-Customers can request the removal of their saved cards at any point. For detailed steps on managing this process, please refer to the [User Cards](/developers/cards-and-tokens/user-cards#delete-card) and [Checkout SDK](/developers/payments/checkout-sdk) sections of our documentation.
-
-#### :digit_four: Is tokenization safe?
-
-Absolutely. Tokenization replaces sensitive card details with a unique token, reducing the risk of card information exposure and enhancing payment security.
-
-#### :digit_five: Can I use tokenization for recurring payments?
-
-Yes, tokenization is an ideal feature for setting up recurring payments. Please refer to our [Auto Debit](/developers/cards-and-tokens/recurring-payments) documentation section for more details.
-
-#### :digit_six: Can I use tokenization even if I’m not PCI DSS compliant?
-
-Yes, one of the major benefits of tokenization is that it allows you to securely process transactions without needing to be PCI DSS compliant. Ottu handles the complexities of compliance for you.
-
-#### :digit_seven: **How can I add a new card for a customer?**
-
-You can add a new card using two methods:
-
-1. **Without Making a Payment**: Add a customer's card details directly without the need to process a payment. For more details, please click [here](#tokenization-without-payment).
-2. **During a Payment Transaction**: Save the customer's card details while processing an actual payment. For further information, please click [here](#tokenization-with-payment).
-
-#### :digit_eight: Can I use the Auto-Debit feature even if I’m not PCI DSS compliant?
-
-Absolutely. With Ottu, you don’t have to worry about PCI DSS compliance. Our platform securely handles all the sensitive data and never exposes this information to the merchant. This means you can safely implement the [auto-debit](/developers/cards-and-tokens/recurring-payments) feature.
-
-#### :digit_nine: Can I store card tokens in my database if I’m not PCI DSS compliant?
-
-Yes, storing tokenized card details is safe and compliant without PCI DSS compliance. Tokens are secure substitutes for sensitive card information, specifically designed to reduce security risks. When Ottu tokenizes a card, it replaces the card's Primary Account Number (PAN) with a unique identifier or token. This token can be safely stored in your database because it cannot be used outside of the secure payment environment set up by Ottu.
-
-This process significantly minimizes the risk of data breaches because the tokens themselves are not valuable to attackers without access to the decryption mechanism, which is securely managed by Ottu. Additionally, since these tokens do not carry the card's actual details, they fall outside the scope of PCI DSS requirements for data protection, making it easier for merchants to securely process payments while adhering to compliance standards. Please, check out this [Wikipedia article](<https://en.wikipedia.org/wiki/Tokenization_(data_security)>) for a deeper dive.
-
-#### :digit_one::digit_zero: When should I save the card token in my database?
-
-The optimal time to save the card token in your database is immediately after the first payment against the subscription that you plan to [auto-debit](/developers/cards-and-tokens/recurring-payments). While it’s not strictly necessary—you can always fetch this information through the [User Cards](/developers/cards-and-tokens/user-cards) API and Payment Methods APIs—it does streamline your processes and reduce development complexity.
-
-#### :digit_one::digit_one: Do I need to use the Checkout SDK to display payment options to the customer?
-
-No, it’s not mandatory to use the [Checkout SDK](/developers/payments/checkout-sdk). You can control the payment process using the responses from the [Checkout API](/developers/payments/checkout-api). However, it’s worth noting that the `Checkout SDK` simplifies the UI implementation and is necessary for certain payment methods such as `Apple Pay`, `Google Pay`, `STC Pay`, and others. While it’s recommended to use the `Checkout SDK` for its simplicity and comprehensive features, the choice ultimately lies in your hands based on your specific needs.
-
-#### :digit_one::digit_two: **Can I retrieve a list of saved cards for a customer?**
-
-Yes, you can retrieve a list of a customer's saved cards utilizing the [Fetch Card API](/developers/cards-and-tokens/user-cards#fetch-cards). This powerful API provides merchants secure access to essential saved card information,such as:
-
-- **Token**: A unique identifier for the card.
-- **Brand**: The card brand (e.g., Visa, MasterCard).
-- **Expiry Year**: The year the card expires.
-- **Name on Card**: The name of the cardholder as it appears on the card.
-- **PG Code**: Payment Gateway code indicating the processing network.
-
-For comprehensive instructions on how to implement this API, including request and response parameters, please consult our detailed documentation [here](/developers/cards-and-tokens/user-cards#fetch-cards).
-
-#### :digit_one::digit_three: **What happens if a tokenized card expires?**
-
-When a tokenized card expires, transactions using that token will not be processed. Merchants can set up notifications for upcoming card expirations to prompt customers to update their card details, ensuring uninterrupted service.
+    For comprehensive instructions on how to implement this API, including request and response parameters, please consult our detailed documentation [here](/developers/cards-and-tokens/user-cards#fetch-cards).
+  </FAQItem>
+  <FAQItem question=":digit_one::digit_three: **What happens if a tokenized card expires?**">
+    When a tokenized card expires, transactions using that token will not be processed. Merchants can set up notifications for upcoming card expirations to prompt customers to update their card details, ensuring uninterrupted service.
+  </FAQItem>
+</FAQ>
 
 ## What's Next?
 
