@@ -58,6 +58,8 @@
   /* Navbar */
   --ifm-navbar-background-color: #ffffff;
   --ifm-navbar-shadow: none;
+  --ifm-navbar-padding-horizontal: 1rem;
+  --ifm-navbar-item-padding-horizontal: 0.6rem;
 
   /* Footer */
   --ifm-footer-background-color: #f7f7f7;
@@ -263,6 +265,148 @@ html[data-theme="dark"] {
 :target {
   scroll-margin-top: calc(var(--ifm-navbar-height));
 }
+
+/* ================================
+   NAVBAR RESPONSIVE FIXES
+   ================================ */
+
+/* Medium screens: tighten item spacing to delay early hamburger collapse */
+@media (max-width: 1280px) and (min-width: 997px) {
+  .navbar__item {
+    padding: 0 0.4rem;
+  }
+  .navbar__link {
+    font-size: 0.875rem;
+  }
+}
+
+/* Mobile (hamburger active): fix right-side layout so items don't overlap */
+@media (max-width: 996px) {
+  /* Right items: explicit flex row, no overlap */
+  .navbar__items--right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  /* Keep every right item in normal flow */
+  .navbar__items--right > * {
+    flex-shrink: 0;
+    position: static;
+  }
+
+  /* Hide GitHub and Ottu.com from the bar — reachable via hamburger sidebar */
+  .navbar__items--right > .navbar__item.navbar__link {
+    display: none;
+  }
+
+  /* Search bar: stay in flow, don't let plugin's position:relative escape flex */
+  .navbar__search {
+    position: static !important;
+    flex-shrink: 1;
+    min-width: 2rem;
+  }
+
+  /* Hide the ctrl+K search hint on mobile — the plugin only hides it at ≤576px
+     but the kbd badges overflow the input at 577px–996px too.
+     Attribute selector matches the CSS-module hashed class (e.g. searchHintContainer_AbC). */
+  .navbar__search [class*="searchHintContainer"] {
+    display: none;
+  }
+}
+
+/* ≥400px: MCP button shows icon + label */
+@media (min-width: 400px) {
+  .mcp-install-dropdown__button {
+    font-size: inherit;
+    padding: 6px 12px;
+    line-height: inherit;
+  }
+}
+
+/* <400px: MCP button shows icon only — hide label text, keep SVG */
+@media (max-width: 399px) {
+  .mcp-install-dropdown__button {
+    font-size: 0;
+    padding: 6px 8px;
+    line-height: 0;
+  }
+  .mcp-install-dropdown__button svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* When mobile sidebar is open: hide right-side items from the top bar
+   so they don't render over the open sidebar panel */
+.navbar-sidebar--show .navbar__items--right {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ================================
+   MCP DROPDOWN RESPONSIVE FIXES
+   ================================ */
+
+/* The plugin injects width:520px as inline <style> — override it so the
+   dropdown never overflows the viewport on narrow screens.
+   With Infima's .dropdown--right, the menu's right edge aligns with the
+   button's right edge and extends leftward; capping the width keeps it
+   within the viewport. */
+.mcp-install-dropdown__menu {
+  width: min(520px, calc(100vw - 1rem)) !important;
+  max-width: calc(100vw - 1rem) !important;
+  box-sizing: border-box;
+}
+
+/* Inside the mobile sidebar: switch to static layout so the dropdown
+   flows inline within the sidebar panel instead of escaping it absolutely.
+   Replace Infima's visibility/opacity/transform toggle with a max-height
+   collapse so the button still controls open/closed state. */
+.navbar-sidebar .mcp-install-dropdown {
+  position: static;
+  display: block;
+  width: 100%;
+}
+
+/* Base (collapsed) — override Infima's visibility mechanism entirely */
+.navbar-sidebar .mcp-install-dropdown__menu {
+  position: static !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-shadow: none;
+  border-radius: var(--ifm-global-radius);
+  transform: none !important;
+  /* Force visible so Infima's hidden state doesn't fight us */
+  visibility: visible !important;
+  opacity: 1 !important;
+  /* Height-based collapse owns the show/hide instead */
+  max-height: 0;
+  overflow: hidden;
+  margin-top: 0;
+  pointer-events: none;
+  transition: max-height 0.2s ease, margin-top 0.15s ease;
+}
+
+/* Expanded — only when dropdown--show is present */
+.navbar-sidebar .dropdown--show .mcp-install-dropdown__menu {
+  max-height: 800px;
+  overflow-y: auto;
+  margin-top: 0.5rem;
+  pointer-events: all;
+  border: 1px solid var(--ifm-toc-border-color);
+}
+
+/* ================================
+   END MCP DROPDOWN RESPONSIVE FIXES
+   ================================ */
+
+/* ================================
+   END NAVBAR RESPONSIVE FIXES
+   ================================ */
 
 /* Admonition colors — from Figma design (rgba backgrounds, 8px radius) */
 [data-theme="light"] .alert--note {
