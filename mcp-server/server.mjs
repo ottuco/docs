@@ -136,6 +136,16 @@ async function fetchWithRetry(maxAttempts = 10, delayMs = 15000) {
 }
 
 // ── HTTP Server ──────────────────────────────────────────────────────────────
+// DO App Platform strips the ingress prefix before forwarding to the service.
+// - Requests to /mcp/* arrive here as /*
+// - Requests to /webhook/* arrive here as /*
+//
+// Routing after prefix stripping:
+//   POST /          → MCP protocol (from /mcp)
+//   POST /refresh   → re-fetch MCP artifacts (from /mcp/refresh)
+//   GET  /health    → health check (from /mcp/health or /webhook/health)
+//   POST /:id       → webhook relay (from /webhook/:id)
+//   GET  /:id/events → webhook SSE (from /webhook/:id/events)
 
 async function start() {
   let mcpServer = null;
@@ -153,48 +163,18 @@ async function start() {
     }
 
     const url = req.url || "";
-    console.log(`[REQ] ${req.method} ${url}`);
 
-    // ── Health check (works with or without ingress prefix) ──
-    if (
-      req.method === "GET" &&
-      (url === "/health" ||
-        url === "/mcp/health" ||
-        url === "/webhook/health")
-    ) {
+    // ── Health check ──
+    if (req.method === "GET" && url === "/health") {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(
-        JSON.stringify({
-          status: ready ? "ok" : "loading",
-          baseUrl: BASE_URL,
-        })
+        JSON.stringify({ status: ready ? "ok" : "loading", baseUrl: BASE_URL })
       );
       return;
     }
 
-    // ── Webhook relay routes ──
-    // DO ingress sends /webhook/... — strip the prefix for matching
-    const webhookPath = url.startsWith("/webhook")
-      ? url.replace(/^\/webhook/, "")
-      : null;
-
-    if (webhookPath !== null) {
-      const sseMatch = webhookPath.match(/^\/([^/]+)\/events\/?$/);
-      const postMatch = webhookPath.match(/^\/([^/]+)\/?$/);
-
-      if (sseMatch && req.method === "GET") {
-        handleWebhookSSE(sseMatch[1], req, res);
-        return;
-      }
-
-      if (postMatch && req.method === "POST") {
-        handleWebhookPost(postMatch[1], req, res);
-        return;
-      }
-    }
-
     // ── MCP refresh ──
-    if (req.method === "POST" && (url === "/refresh" || url === "/mcp/refresh")) {
+    if (req.method === "POST" && url === "/refresh") {
       try {
         await fetchArtifacts();
         res.writeHead(200, { "Content-Type": "application/json" });
@@ -206,8 +186,15 @@ async function start() {
       return;
     }
 
-    // ── MCP protocol ──
-    if (req.method === "POST") {
+    // ── Webhook SSE: GET /:orderId/events ──
+    const sseMatch = url.match(/^\/([^/]+)\/events\/?$/);
+    if (sseMatch && req.method === "GET") {
+      handleWebhookSSE(sseMatch[1], req, res);
+      return;
+    }
+
+    // ── MCP protocol: POST / ──
+    if (req.method === "POST" && (url === "/" || url === "")) {
       if (!ready || !mcpServer) {
         res.writeHead(503, { "Content-Type": "application/json" });
         res.end(
@@ -217,8 +204,14 @@ async function start() {
         );
         return;
       }
-
       await mcpServer.handleHttpRequest(req, res);
+      return;
+    }
+
+    // ── Webhook relay: POST /:orderId ──
+    const postMatch = url.match(/^\/([^/]+)\/?$/);
+    if (postMatch && req.method === "POST") {
+      handleWebhookPost(postMatch[1], req, res);
       return;
     }
 
@@ -229,8 +222,6 @@ async function start() {
   httpServer.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
     console.log(`Base URL: ${BASE_URL}`);
-    console.log(`MCP protocol: POST /mcp`);
-    console.log(`Webhook relay: /webhook/:orderId`);
   });
 
   // Fetch artifacts in background — don't block webhook relay
