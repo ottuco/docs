@@ -36,7 +36,7 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 Before performing any operation, you need an existing payment transaction with a `session_id` or `order_no`:
 
 1. **Via the [Checkout API](/developers/payments/checkout-api)** — create a payment transaction programmatically.
-2. **Via the [Ottu Dashboard](/business/dashboard-tour)** — create a transaction manually.
+2. **Via the [Ottu Dashboard](/business/payment-management)** — create a transaction manually.
 
 Store the `session_id` securely — it's required for all operation requests. Prefer `session_id` over `order_no` as it's always present in the response.
 
@@ -106,7 +106,7 @@ Use the `extra` object field for additional gateway-specific parameters. For exa
 
 **Capture** — Settles authorized funds. Only applicable to `authorized` transactions. Supports full or partial capture (cannot exceed the authorized amount). Creates a [child transaction](/developers/reference/payment-states) on success.
 
-**Refund** — Returns funds to the customer. Applicable to `paid` or captured transactions. For authorized transactions, a capture must be completed first. Supports full or partial refund. Ottu offers an [approval feature](/business/dashboard-tour) for refunds, enabling a checker role to approve or reject requests.
+**Refund** — Returns funds to the customer. Applicable to `paid` or captured transactions. For authorized transactions, a capture must be completed first. Supports full or partial refund. Ottu offers an [approval feature](/business/operations/refund-void-access-control) for refunds, enabling a checker role to approve or reject requests.
 
 **Void** — Cancels an authorization before capture. Only applicable to `authorized` transactions. The customer is not charged.
 
