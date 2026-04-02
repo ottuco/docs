@@ -9,6 +9,7 @@ __IGNORED__
 
 # Generated files
 .docusaurus
+mcp-server/data/
 .cache-loader
 static/Ottu_API_enriched.yaml
 

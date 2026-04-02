@@ -41,11 +41,11 @@ function getOrCreateEntry(orderId) {
 
 function parseBody(req) {
   return new Promise((resolve, reject) => {
-    const chunks = [];
-    req.on("data", (chunk) => chunks.push(chunk));
+    let body = "";
+    req.on("data", (chunk) => (body += chunk));
     req.on("end", () => {
       try {
-        resolve(JSON.parse(Buffer.concat(chunks).toString()));
+        resolve(JSON.parse(body));
       } catch {
         reject(new Error("Invalid JSON"));
       }
@@ -60,14 +60,11 @@ function handleWebhookPost(orderId, req, res) {
       const entry = getOrCreateEntry(orderId);
       const event = { payload, receivedAt: new Date().toISOString() };
       entry.webhooks.push(event);
-
-      // Push to all SSE clients
       const data = `data: ${JSON.stringify(event)}\n\n`;
-      for (const client of entry.clients) {
-        client.write(data);
-      }
-
-      console.log(`[Webhook] Received for ${orderId} (${entry.clients.size} SSE clients)`);
+      entry.clients.forEach((client) => client.write(data));
+      console.log(
+        `[Webhook] Received for ${orderId} (${entry.clients.size} SSE clients)`
+      );
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ status: "ok" }));
     })
@@ -92,22 +89,19 @@ function handleWebhookSSE(orderId, req, res) {
     res.write(`data: ${JSON.stringify(event)}\n\n`);
   }
 
-  // Register this client for future events
   entry.clients.add(res);
-
-  req.on("close", () => {
-    entry.clients.delete(res);
-  });
+  req.on("close", () => entry.clients.delete(res));
 }
 
 // ── MCP Artifacts ────────────────────────────────────────────────────────────
 
 async function fetchArtifacts() {
-  console.log(`Fetching MCP artifacts from ${BASE_URL}...`);
+  const dataUrl = `${BASE_URL}/_mcp-data`;
+  console.log(`Fetching MCP artifacts from ${dataUrl}...`);
 
   const [docsRes, indexRes] = await Promise.all([
-    fetch(`${BASE_URL}/mcp/docs.json`),
-    fetch(`${BASE_URL}/mcp/search-index.json`),
+    fetch(`${dataUrl}/docs.json`),
+    fetch(`${dataUrl}/search-index.json`),
   ]);
 
   if (!docsRes.ok || !indexRes.ok) {
@@ -122,7 +116,9 @@ async function fetchArtifacts() {
 
   const docsSize = (fs.statSync(DOCS_PATH).size / 1024).toFixed(0);
   const indexSize = (fs.statSync(INDEX_PATH).size / 1024).toFixed(0);
-  console.log(`Artifacts loaded: docs.json (${docsSize}KB), search-index.json (${indexSize}KB)`);
+  console.log(
+    `Artifacts loaded: docs.json (${docsSize}KB), search-index.json (${indexSize}KB)`
+  );
 }
 
 async function fetchWithRetry(maxAttempts = 10, delayMs = 15000) {
@@ -156,28 +152,48 @@ async function start() {
       return;
     }
 
-    // ── Webhook relay routes ──
-    const webhookPostMatch = req.url?.match(/^\/webhook\/([^/]+)\/?$/);
-    const webhookSSEMatch = req.url?.match(/^\/webhook\/([^/]+)\/events\/?$/);
+    const url = req.url || "";
 
-    if (webhookSSEMatch && req.method === "GET") {
-      handleWebhookSSE(webhookSSEMatch[1], req, res);
-      return;
-    }
-
-    if (webhookPostMatch && req.method === "POST") {
-      handleWebhookPost(webhookPostMatch[1], req, res);
-      return;
-    }
-
-    // ── Existing routes ──
-    if (req.method === "GET" && req.url === "/health") {
+    // ── Health check (works with or without ingress prefix) ──
+    if (
+      req.method === "GET" &&
+      (url === "/health" ||
+        url === "/mcp/health" ||
+        url === "/webhook/health")
+    ) {
       res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ status: ready ? "ok" : "loading", baseUrl: BASE_URL }));
+      res.end(
+        JSON.stringify({
+          status: ready ? "ok" : "loading",
+          baseUrl: BASE_URL,
+        })
+      );
       return;
     }
 
-    if (req.method === "POST" && req.url === "/refresh") {
+    // ── Webhook relay routes ──
+    // DO ingress sends /webhook/... — strip the prefix for matching
+    const webhookPath = url.startsWith("/webhook")
+      ? url.replace(/^\/webhook/, "")
+      : null;
+
+    if (webhookPath !== null) {
+      const sseMatch = webhookPath.match(/^\/([^/]+)\/events\/?$/);
+      const postMatch = webhookPath.match(/^\/([^/]+)\/?$/);
+
+      if (sseMatch && req.method === "GET") {
+        handleWebhookSSE(sseMatch[1], req, res);
+        return;
+      }
+
+      if (postMatch && req.method === "POST") {
+        handleWebhookPost(postMatch[1], req, res);
+        return;
+      }
+    }
+
+    // ── MCP refresh ──
+    if (req.method === "POST" && (url === "/refresh" || url === "/mcp/refresh")) {
       try {
         await fetchArtifacts();
         res.writeHead(200, { "Content-Type": "application/json" });
@@ -189,25 +205,31 @@ async function start() {
       return;
     }
 
-    if (!ready || !mcpServer) {
-      res.writeHead(503, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "MCP server is loading artifacts, please retry shortly" }));
+    // ── MCP protocol ──
+    if (req.method === "POST") {
+      if (!ready || !mcpServer) {
+        res.writeHead(503, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            error: "MCP server is loading artifacts, please retry shortly",
+          })
+        );
+        return;
+      }
+
+      await mcpServer.handleHttpRequest(req, res);
       return;
     }
 
-    if (req.method !== "POST") {
-      res.writeHead(405);
-      res.end();
-      return;
-    }
-
-    await mcpServer.handleHttpRequest(req, res);
+    res.writeHead(404, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Not found" }));
   });
 
   httpServer.listen(PORT, () => {
-    console.log(`HTTP server listening on port ${PORT}`);
+    console.log(`Server listening on port ${PORT}`);
     console.log(`Base URL: ${BASE_URL}`);
-    console.log(`Webhook relay active at /webhook/:orderId`);
+    console.log(`MCP protocol: POST /mcp`);
+    console.log(`Webhook relay: /webhook/:orderId`);
   });
 
   // Fetch artifacts in background — don't block webhook relay
@@ -223,7 +245,10 @@ async function start() {
       console.log("MCP server ready.");
     })
     .catch((err) => {
-      console.error("MCP artifacts failed to load (webhook relay still active):", err.message);
+      console.error(
+        "MCP artifacts failed to load (webhook relay still active):",
+        err.message
+      );
     });
 }
 
