@@ -208,31 +208,31 @@ The invoice calculation uses `ROUND_HALF_UP` at both item and invoice levels:
 ## FAQ
 
 <FAQ>
-  <FAQItem question="1. What is Ottu's Invoice API?">
+  <FAQItem question="What is Ottu's Invoice API?">
     A tool for businesses and developers to automate invoice generation. It creates itemized invoices with payment links for both online and walk-in customers.
   </FAQItem>
-  <FAQItem question="2. Why should I use it?">
+  <FAQItem question="Why should I use it?">
     It automates invoicing, saves time, reduces errors, and provides a seamless payment experience — customers receive a link, view the invoice, and pay directly.
   </FAQItem>
-  <FAQItem question="3. What are the prerequisites?">
+  <FAQItem question="What are the prerequisites?">
     A **Purchase** [Payment Gateway](/developers/payments/payment-methods) and understanding of the [rounding function](#invoice-generation-logic). Optionally, the [Payment Methods API](/developers/payments/payment-methods) for dynamic `pg_codes`.
   </FAQItem>
-  <FAQItem question="4. Can I skip the Payment Methods API?">
+  <FAQItem question="Can I skip the Payment Methods API?">
     Yes, if you know your `pg_code`. But using it ensures you stay informed about gateway changes.
   </FAQItem>
-  <FAQItem question="5. How do I handle authentication?">
+  <FAQItem question="How do I handle authentication?">
     Use [Private API Key](/developers/getting-started/authentication#private-key-api-key) or [Basic Authentication](/developers/getting-started/authentication#basic-authentication). See [Authentication](/developers/getting-started/authentication).
   </FAQItem>
-  <FAQItem question="6. What are VAL CALC fields?">
+  <FAQItem question="What are VAL CALC fields?">
     Optional validation fields that check your frontend calculations against Ottu's backend. Include them to catch discrepancies before invoice creation.
   </FAQItem>
-  <FAQItem question="7. Can I modify an invoice after creation?">
+  <FAQItem question="Can I modify an invoice after creation?">
     No. Invoices are immutable — the API does not support `PATCH`. Create a new invoice for any updates.
   </FAQItem>
-  <FAQItem question="8. How does Ottu calculate totals and taxes?">
+  <FAQItem question="How does Ottu calculate totals and taxes?">
     Using `ROUND_HALF_UP` at both item and invoice levels. See [Invoice Generation Logic](#invoice-generation-logic).
   </FAQItem>
-  <FAQItem question="9. Where can I find more technical details?">
+  <FAQItem question="Where can I find more technical details?">
     See the interactive [API Reference](#api-reference) above, or the full [API Schema Reference](/developers/apis/ottu-api).
   </FAQItem>
 </FAQ>

@@ -1175,7 +1175,7 @@ Since the implementation differs between the two platforms, please refer to the 
 ## FAQ
 
 <FAQ>
-  <FAQItem question="1. What forms of payment are supported by the SDK?">
+  <FAQItem question="What forms of payment are supported by the SDK?">
     The SDK supports the following [forms of payment](#formsofpayment-array-optional):
 
     - `tokenPay`
@@ -1194,13 +1194,13 @@ Since the implementation differs between the two platforms, please refer to the 
 
     This ensures that only the **STC Pay** button is shown. The same approach applies to other payment methods.
   </FAQItem>
-  <FAQItem question="2. What are the minimum system requirements for SDK integration?">
+  <FAQItem question="What are the minimum system requirements for SDK integration?">
     The SDK requires a device running:
 
     - **Android 8** or higher (**API level 26** or higher)
     - **iOS 14** or higher
   </FAQItem>
-  <FAQItem question="3. Can I customize the appearance beyond the provided themes?">
+  <FAQItem question="Can I customize the appearance beyond the provided themes?">
     Yes, customization is supported. For more details, refer to the [Theme](#theme) section.
   </FAQItem>
 </FAQ>

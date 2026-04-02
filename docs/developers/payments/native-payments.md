@@ -249,27 +249,27 @@ Select the payment provider to see its full interactive API schema:
 ## FAQ
 
 <FAQ>
-  <FAQItem question="1. Can I call Native Payments directly from the client?">
+  <FAQItem question="Can I call Native Payments directly from the client?">
     Yes, but only with the [Public Key,](../getting-started/authentication.md#public-key) and your backend must remain synchronized.
   </FAQItem>
 
-  <FAQItem question="2. Which model should I use in production?">
+  <FAQItem question="Which model should I use in production?">
     Always prefer Client → Backend → Ottu using the [Private Key.](../getting-started/authentication.md#private-key-api-key)
   </FAQItem>
 
-  <FAQItem question="3. How do I verify the payment result?">
+  <FAQItem question="How do I verify the payment result?">
     Use the [Payment Status Query API](./psq).
   </FAQItem>
 
-  <FAQItem question="4. What if my transaction has multiple gateway codes?">
+  <FAQItem question="What if my transaction has multiple gateway codes?">
     Include the `pg_code` for the MID that has the corresponding payment service enabled (e.g., Apple Pay, Google Pay).
   </FAQItem>
 
-  <FAQItem question="5. What happens if I modify wallet data?">
+  <FAQItem question="What happens if I modify wallet data?">
     The payment will fail — wallet tokens must be sent unmodified.
   </FAQItem>
 
-  <FAQItem question="6. Can I charge saved tokens automatically?">
+  <FAQItem question="Can I charge saved tokens automatically?">
     Yes, use **Native Payments** for tokenized or recurring payments.
   </FAQItem>
 </FAQ>

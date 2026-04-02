@@ -5,7 +5,7 @@ hide_table_of_contents: true
 ---
 
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
-import FAQ, { FAQItem } from '@site/src/components/FAQ';
+import FAQ, { FAQItem } from "@site/src/components/FAQ";
 
 Ottu provides a comprehensive collection of APIs that offer a seamless and efficient way to test payments and enable merchants to accept and process transactions instantly. The Checkout API is the cornerstone of any payment initiation, whether it's [API-based](./checkout-api) or [SDK-based](./checkout-sdk).
 
@@ -414,11 +414,11 @@ When a valid [payment_instrument](./checkout-api) is provided, Ottu creates the 
 ## FAQ
 
 <FAQ>
-  <FAQItem question="1. What is the Ottu Checkout API used for?">
+  <FAQItem question="What is the Ottu Checkout API used for?">
     The **Checkout API** is used to create and manage payment transactions. It enables merchants to generate a **payment session** (`session_id`), redirect users to a payment gateway, and receive payment updates via [webhooks](../webhooks/).
   </FAQItem>
 
-  <FAQItem question="2. How do I create a payment transaction?">
+  <FAQItem question="How do I create a payment transaction?">
     To create a payment transaction, send a POST request to the Checkout API with the required parameters:
 
     - `amount` – Payment amount
@@ -427,9 +427,10 @@ When a valid [payment_instrument](./checkout-api) is provided, Ottu creates the 
     - `type` - `e_commerce` or `payment_request`
 
     After submission, the API returns a `session_id`, which is required for processing the transaction.
+
   </FAQItem>
 
-  <FAQItem question="3. How can I ensure that the payer cannot make a payment after a certain amount of time since redirection?">
+  <FAQItem question="How can I ensure that the payer cannot make a payment after a certain amount of time since redirection?">
     Configure the `expiration_time` parameter based on the payment gateway (PG) auto inquiry time:
 
     `expiration_time` = auto inquiry time + max(PG auto inquiry time)
@@ -438,36 +439,50 @@ When a valid [payment_instrument](./checkout-api) is provided, Ottu creates the 
     - **PG auto inquiry time:** The maximum duration the payment gateway allows before timing out a payment session. More information about payment gateway setup is accessible [here](./payment-methods.md#activating-payment-gateway-codes).
 
     **Example:** If your auto inquiry time is **5 minutes**, then for MPGS (11 min PG timeout): 5 + 11 = **16 minutes**. For KNET (8 min PG timeout): 5 + 8 = **13 minutes**. After this time, the payer will not be able to complete the transaction.
+
   </FAQItem>
 
-  <FAQItem question="4. Can I update an existing transaction?">
-    Yes! You can update a transaction **before** it is completed by sending a PUT request to the Checkout API, referencing the `session_id`. Updates might include modifying the `amount`, `currency_code`, or allowed `pg_codes`.
-  </FAQItem>
+<FAQItem question="Can I update an existing transaction?">
+  Yes! You can update a transaction **before** it is completed by sending a PUT
+  request to the Checkout API, referencing the `session_id`. Updates might
+  include modifying the `amount`, `currency_code`, or allowed `pg_codes`.
+</FAQItem>
 
-  <FAQItem question="5. What happens if a customer abandons the payment?">
-    If a customer does not complete the payment, the transaction remains in a `pending` state until it expires. Ottu's automatic inquiry will check the status based on the configured timing and update the state accordingly.
-  </FAQItem>
+<FAQItem question="What happens if a customer abandons the payment?">
+  If a customer does not complete the payment, the transaction remains in a
+  `pending` state until it expires. Ottu's automatic inquiry will check the
+  status based on the configured timing and update the state accordingly.
+</FAQItem>
 
-  <FAQItem question="6. How do I get notified when a payment is completed?">
-    Ottu sends a [payment notification](../webhooks/payment-events.md) webhook to the `webhook_url` you provided in the API request. The webhook contains details like `status`, `amount`, `currency_code`, and [`pg_params`](../webhooks/pg-params) (normalized gateway response fields). Ensure your server verifies and processes these webhook notifications.
-  </FAQItem>
+<FAQItem question="How do I get notified when a payment is completed?">
+  Ottu sends a [payment notification](../webhooks/payment-events.md) webhook to
+  the `webhook_url` you provided in the API request. The webhook contains
+  details like `status`, `amount`, `currency_code`, and
+  [`pg_params`](../webhooks/pg-params) (normalized gateway response fields).
+  Ensure your server verifies and processes these webhook notifications.
+</FAQItem>
 
-  <FAQItem question="7. What is the difference between `webhook_url` and `redirect_url`?">
+  <FAQItem question="What is the difference between `webhook_url` and `redirect_url`?">
     - **`webhook_url`** – Ottu sends real-time payment updates to it (for backend processing).
     - **`redirect_url`** – After payment, the customer is redirected to it (for UI redirection).
 
     For more details on redirection behavior, please refer to [Payment Webhooks](../webhooks/payment-events.md). Both are optional but recommended for a seamless experience.
+
   </FAQItem>
 
-  <FAQItem question="8. Can I retry a failed payment?">
-    Yes, if a transaction fails, you can reuse the same `session_id`. The payment state will be `attempted`. For more information, please refer to [Payment States](../reference/payment-states.md).
-  </FAQItem>
+<FAQItem question="Can I retry a failed payment?">
+  Yes, if a transaction fails, you can reuse the same `session_id`. The payment
+  state will be `attempted`. For more information, please refer to [Payment
+  States](../reference/payment-states.md).
+</FAQItem>
 
-  <FAQItem question="9. Can I set up recurring payments using the Checkout API?">
-    Yes! Use [Auto-Debit](../cards-and-tokens/recurring-payments.md) with `payment_type` set to `auto_debit` to create agreements for recurring transactions.
-  </FAQItem>
+<FAQItem question="Can I set up recurring payments using the Checkout API?">
+  Yes! Use [Auto-Debit](../cards-and-tokens/recurring-payments.md) with
+  `payment_type` set to `auto_debit` to create agreements for recurring
+  transactions.
+</FAQItem>
 
-  <FAQItem question="10. How do I integrate the Checkout API with the SDK?">
+  <FAQItem question="How do I integrate the Checkout API with the SDK?">
     The Checkout SDK ([Web](./checkout-sdk/web), [Android](./checkout-sdk/android), [iOS](./checkout-sdk/ios)) requires a `session_id` from the Checkout API. Your backend should:
 
     1. Call the Checkout API to create a transaction.
@@ -475,26 +490,32 @@ When a valid [payment_instrument](./checkout-api) is provided, Ottu creates the 
     3. Handle [webhooks](../webhooks/) for transaction updates.
 
     **One-Step Checkout**
+
   </FAQItem>
 
-  <FAQItem question="11. What are the benefits of One-Step Checkout?">
+  <FAQItem question="What are the benefits of One-Step Checkout?">
     - Single backend call → lower latency and simpler logic.
     - Consistent structure with [Native Payments](./native-payments).
     - Unified handling of session creation + payment execution.
     - Ideal for wallets and tokenized recurring payments.
 
     **Upload Attachment**
+
   </FAQItem>
 
-  <FAQItem question="12. Can the `file_url` from an upload be reused for other transactions?">
-    Yes, Ottu allows merchants to use a `file_url` generated from any upload for different and multiple transactions.
-  </FAQItem>
+<FAQItem question="Can the `file_url` from an upload be reused for other transactions?">
+  Yes, Ottu allows merchants to use a `file_url` generated from any upload for
+  different and multiple transactions.
+</FAQItem>
 
-  <FAQItem question="13. How do I handle errors from the Upload Attachment API?">
-    The API will return detailed error messages in the response body when an issue occurs, such as unsupported file types, invalid `session_id`, or file size limits being exceeded. Implement error handling in your code to display appropriate messages to users.
-  </FAQItem>
+<FAQItem question="How do I handle errors from the Upload Attachment API?">
+  The API will return detailed error messages in the response body when an issue
+  occurs, such as unsupported file types, invalid `session_id`, or file size
+  limits being exceeded. Implement error handling in your code to display
+  appropriate messages to users.
+</FAQItem>
 
-  <FAQItem question="14. What is `file_url`, and where can I use it?">
+  <FAQItem question="What is `file_url`, and where can I use it?">
     The `file_url` is the relative URL of an uploaded file generated by the Upload Attachment API. It can be used to attach the same file to other transactions by including it in the `attachment_upload_url` parameter of the Checkout API request payload.
   </FAQItem>
 </FAQ>

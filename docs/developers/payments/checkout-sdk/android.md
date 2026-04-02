@@ -809,17 +809,17 @@ The SDK is designed to protect sensitive data by restricting screen capture func
 ## FAQ
 
 <FAQ>
-  <FAQItem question="1. What forms of payments are supported by the SDK?">
+  <FAQItem question="What forms of payments are supported by the SDK?">
     The SDK accommodates various payment forms including`tokenPay`, `redirect`, `StcPay` and `cardOnsite`.&#x20;
 
     Merchants have the flexibility to showcase specific methods based on their requirements.&#x20;
 
     For instance, if you wish to exclusively display the STC Pay button, you can achieve this by setting `formsOfPayment` = `[StcPay]`, which will result in only the STC Pay button being displayed. This approach is applicable to other payment methods as well.
   </FAQItem>
-  <FAQItem question="2. What are the minimum system requirements for the SDK integration?">
+  <FAQItem question="What are the minimum system requirements for the SDK integration?">
     It is required to have a device running Android 8 or higher (Android API level 26 or higher).
   </FAQItem>
-  <FAQItem question="3. Can I customize the appearance beyond the provided themes?">
+  <FAQItem question="Can I customize the appearance beyond the provided themes?">
     Yes, check the [Theme](#theme) section.
   </FAQItem>
 </FAQ>

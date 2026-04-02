@@ -172,36 +172,36 @@ Proactively monitor SMS, email, and WhatsApp provider health. Identify outages e
 ## FAQ
 
 <FAQ>
-  <FAQItem question="1. What is the purpose of the Notifications API?">
+  <FAQItem question="What is the purpose of the Notifications API?">
     It lets merchants manually resend notifications for a specific transaction based on `session_id` or `order_no`, useful when automatic notifications failed.
   </FAQItem>
-  <FAQItem question="2. What parameters are required?">
+  <FAQItem question="What parameters are required?">
     Either `session_id` or `order_no` to identify the transaction, plus a `channels` array specifying which channels to send (email, sms, whatsapp).
   </FAQItem>
-  <FAQItem question="3. Which payment states can notifications be sent for?">
+  <FAQItem question="Which payment states can notifications be sent for?">
     - **Email & SMS**: `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`, `voided`, `refunded`, `captured`
     - **WhatsApp**: `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`
   </FAQItem>
-  <FAQItem question="4. How many times can I resend?">
+  <FAQItem question="How many times can I resend?">
     No limit, but avoid redundant notifications unless prior delivery failed.
   </FAQItem>
-  <FAQItem question="5. What does a successful response look like?">
+  <FAQItem question="What does a successful response look like?">
     ```json
     {
       "message": "Customer notified."
     }
     ```
   </FAQItem>
-  <FAQItem question="6. Can I notify for transactions not created via the Checkout API?">
+  <FAQItem question="Can I notify for transactions not created via the Checkout API?">
     Yes, as long as `session_id` or `order_no` is available and notification channels were configured during creation.
   </FAQItem>
-  <FAQItem question="7. What if a notification doesn't get delivered?">
+  <FAQItem question="What if a notification doesn't get delivered?">
     Resend it using the API once the third-party provider issue is resolved. Ensure providers are correctly configured.
   </FAQItem>
-  <FAQItem question="8. How do I configure SMS or WhatsApp providers?">
+  <FAQItem question="How do I configure SMS or WhatsApp providers?">
     Contact the [Ottu support team](mailto:support@ottu.com) for SMS and WhatsApp provider setup.
   </FAQItem>
-  <FAQItem question="9. Can I send to multiple channels in one call?">
+  <FAQItem question="Can I send to multiple channels in one call?">
     Yes — include multiple channels in the `channels` array (e.g., `["sms", "email", "whatsapp"]`).
   </FAQItem>
 </FAQ>

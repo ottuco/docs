@@ -123,10 +123,10 @@ Implement a mechanism to clear the cache on demand. When a MID change is made in
 ## FAQ
 
 <FAQ>
-  <FAQItem question="1. What is the main purpose of the Payment Methods API?">
+  <FAQItem question="What is the main purpose of the Payment Methods API?">
     The Payment Methods API discovers which payment gateways and methods are available for a given transaction, based on filters like currency, plugin, and tokenization support.
   </FAQItem>
-  <FAQItem question="2. Do I need to make changes to my existing environment when integrating?">
+  <FAQItem question="Do I need to make changes to my existing environment when integrating?">
     No. You only need to call the API with the relevant filters (`operation`, `customer_id`, `currencies`, `plugin`). Any changes to gateway settings are automatically reflected in the API response.
   </FAQItem>
 </FAQ>

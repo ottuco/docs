@@ -78,16 +78,16 @@ graph LR
 ## FAQ
 
 <FAQ>
-  <FAQItem question="1. Can I save a card without making a successful payment?">
+  <FAQItem question="Can I save a card without making a successful payment?">
     Not currently. A card can only be tokenized after a successful payment transaction. This ensures the card's validity.
   </FAQItem>
-  <FAQItem question="2. How can I delete a card?">
+  <FAQItem question="How can I delete a card?">
     Two options: call the User Cards API [delete endpoint](#api-reference) directly, or use the [Checkout SDK](../payments/checkout-sdk/) which handles card management for you.
   </FAQItem>
-  <FAQItem question="3. Can I trigger auto-debit payments?">
+  <FAQItem question="Can I trigger auto-debit payments?">
     Yes, but only if the customer has agreed and their card is enabled for auto-debit. See the [Recurring Payments](./recurring-payments) documentation.
   </FAQItem>
-  <FAQItem question="4. Does Ottu store cards internally?">
+  <FAQItem question="Does Ottu store cards internally?">
     No. Card details are stored in an external PCI-compliant vault, typically at the [payment gateway](../payments/payment-methods) with which the merchant has a contract.
   </FAQItem>
 </FAQ>

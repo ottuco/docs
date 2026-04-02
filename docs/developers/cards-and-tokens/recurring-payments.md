@@ -268,28 +268,28 @@ For recurring billing, notify customers before each charge:
 ## FAQ
 
 <FAQ>
-  <FAQItem question="1. Do I need PCI DSS compliance for auto-debit?">
+  <FAQItem question="Do I need PCI DSS compliance for auto-debit?">
     No. Ottu handles all sensitive card data securely and never exposes it to merchants. You only store tokens, which are safe to keep in your database.
   </FAQItem>
-  <FAQItem question="2. Can I store card tokens in my database?">
+  <FAQItem question="Can I store card tokens in my database?">
     Yes. Tokens are not actual card numbers — they are secure identifiers generated through [tokenization](./tokenization). They cannot be used outside of Ottu's payment environment.
   </FAQItem>
-  <FAQItem question="3. What if I don't have an agreement ID?">
+  <FAQItem question="What if I don't have an agreement ID?">
     Create a unique identifier for your use case. You can use an existing identifier from your system (e.g., subscription ID, order ID) or generate one specifically for the agreement.
   </FAQItem>
-  <FAQItem question="4. When should I save the card token?">
+  <FAQItem question="When should I save the card token?">
     Immediately after the first successful payment. While you can always retrieve tokens via the [User Cards API](./user-cards), storing them locally reduces API calls and simplifies your implementation.
   </FAQItem>
-  <FAQItem question="5. Can I recover a missed token?">
+  <FAQItem question="Can I recover a missed token?">
     Yes. Use the [User Cards API](./user-cards) with the `agreement.id` to retrieve saved cards associated with the agreement.
   </FAQItem>
-  <FAQItem question="6. Can I update an existing agreement?">
+  <FAQItem question="Can I update an existing agreement?">
     This functionality is not currently available via API. Contact [support@ottu.com](mailto:support@ottu.com) for assistance.
   </FAQItem>
-  <FAQItem question="7. What happens if the customer's card expires?">
+  <FAQItem question="What happens if the customer's card expires?">
     Transactions using an expired token will fail. Set up card expiration monitoring and proactively notify customers to update their card details. See [Updating Card Information](#updating-card-information).
   </FAQItem>
-  <FAQItem question="8. Must I use the Checkout SDK?">
+  <FAQItem question="Must I use the Checkout SDK?">
     No, but it's recommended. You can control the payment flow using [Checkout API](../payments/checkout-api) responses directly. However, the SDK simplifies UI implementation and is required for certain payment methods like Apple Pay and Google Pay.
   </FAQItem>
 </FAQ>
