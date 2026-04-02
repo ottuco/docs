@@ -13,13 +13,13 @@ Before email notifications can be sent, the following must be in place:
 
 1. **Customer Email** -- The customer's email address must be collected during payment transaction creation. To make the email field mandatory, contact the [Ottu support team](mailto:support@ottu.com).
 
-   <!-- TODO: Screenshot of customer email field in transaction creation -->
+   ![Customer email field](/img/business/notifications/email-customer-email-field.png)
 
 2. **Template Configured** -- The email template must be fully configured and reviewed for accuracy before enabling email notifications. To configure email templates, contact the [Ottu support team](mailto:support@ottu.com).
 
 3. **Enable Email Templates** -- Merchants activate email notifications by selecting the appropriate checkboxes during payment transaction creation. Templates can be enabled for pre-payment, post-payment, or both, depending on the requirement.
 
-   <!-- TODO: Screenshot of email template checkboxes in transaction creation -->
+   ![Email notification checkboxes](/img/business/notifications/email-notification-checkboxes.png)
 
 ## Notification Availability
 

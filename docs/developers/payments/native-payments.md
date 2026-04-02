@@ -7,6 +7,7 @@ hide_table_of_contents: true
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
+import FAQ, { FAQItem } from '@site/src/components/FAQ';
 
 # Native Payments
 
@@ -247,29 +248,31 @@ Select the payment provider to see its full interactive API schema:
 
 ## FAQ
 
-#### 1. Can I call Native Payments directly from the client?
+<FAQ>
+  <FAQItem question="Can I call Native Payments directly from the client?">
+    Yes, but only with the [Public Key,](../getting-started/authentication.md#public-key) and your backend must remain synchronized.
+  </FAQItem>
 
-Yes, but only with the [Public Key,](../getting-started/authentication.md#public-key) and your backend must remain synchronized.
+  <FAQItem question="Which model should I use in production?">
+    Always prefer Client → Backend → Ottu using the [Private Key.](../getting-started/authentication.md#private-key-api-key)
+  </FAQItem>
 
-#### 2. Which model should I use in production?
+  <FAQItem question="How do I verify the payment result?">
+    Use the [Payment Status Query API](./psq).
+  </FAQItem>
 
-Always prefer Client → Backend → Ottu using the [Private Key.](../getting-started/authentication.md#private-key-api-key)
+  <FAQItem question="What if my transaction has multiple gateway codes?">
+    Include the `pg_code` for the MID that has the corresponding payment service enabled (e.g., Apple Pay, Google Pay).
+  </FAQItem>
 
-#### 3. How do I verify the payment result?
+  <FAQItem question="What happens if I modify wallet data?">
+    The payment will fail — wallet tokens must be sent unmodified.
+  </FAQItem>
 
-Use the [Payment Status Query API](./psq).
-
-#### 4. What if my transaction has multiple gateway codes?
-
-Include the `pg_code` for the MID that has the corresponding payment service enabled (e.g., Apple Pay, Google Pay).
-
-#### 5. What happens if I modify wallet data?
-
-The payment will fail — wallet tokens must be sent unmodified.
-
-#### 6. Can I charge saved tokens automatically?
-
-Yes, use **Native Payments** for tokenized or recurring payments.
+  <FAQItem question="Can I charge saved tokens automatically?">
+    Yes, use **Native Payments** for tokenized or recurring payments.
+  </FAQItem>
+</FAQ>
 
 ## What's Next?
 

@@ -13,9 +13,9 @@ Global configuration controls the core identity and behavior of your Ottu instal
 2. Click the three dots in the top-right corner to open the **Administration Panel**
 3. Navigate to **Config** > **Configuration**
 
-![Global Configuration navigation](/img/business/placeholder.png)
+![Global Configuration navigation](/img/business/settings/global-navigation.png)
 
-![Global Configuration page](/img/business/placeholder.png)
+![Global Configuration page](/img/business/settings/global-configuration.png)
 
 ## Configuration Fields
 

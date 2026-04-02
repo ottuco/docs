@@ -3,6 +3,8 @@ title: Payment Routing
 sidebar_label: Payment Routing
 ---
 
+import FAQ, { FAQItem } from '@site/src/components/FAQ';
+
 # Payment Routing
 
 **Route every card payment to the best path.** Ottu Router evaluates each payment in real time — BIN, country, scheme, amount, recent health, and fees — and sends it through the payment connection most likely to succeed at the best cost, with a safe fallback.
@@ -43,6 +45,8 @@ Ottu Router runs each payment through four clear stages:
 :::warning
 The Router always logs its decision: which blockers applied, which connections were eligible, which strategy was used, and why the final connection was chosen.
 :::
+
+![Payment routing sequence diagram](/img/business/payments/routing-sequence-diagram.png)
 
 ## Blocker Rules
 
@@ -94,23 +98,26 @@ These narrow immediately to one best payment connection.
 
 ## FAQ
 
-**What happens when a transaction exceeds the set maximum amount?**
-It will be rerouted according to the configured routing rules or fallback option.
-
-**How does Round Robin distribute transactions?**
-It distributes transactions evenly across multiple payment connections, ensuring balanced load by sequentially cycling through available gateways.
-
-**What is the purpose of a Fallback option?**
-The Fallback option ensures transactions still get processed by sending them to a default payment connection if no other connections are available.
-
-**How does BIN-Based Routing work?**
-It directs a transaction to a specific payment connection based on the card's BIN (Bank Identification Number). If a match is found, the transaction is routed accordingly.
-
-**How does Country-Based Routing work?**
-It uses the issuing country of the card to determine the payment connection. Transactions are routed to gateways configured for that specific country.
-
-**What happens if no routing rule matches?**
-The system triggers the Fallback Routing option to ensure the transaction is processed by a default connection.
+<FAQ>
+  <FAQItem question="What happens when a transaction exceeds the set maximum amount?">
+    It will be rerouted according to the configured routing rules or fallback option.
+  </FAQItem>
+  <FAQItem question="How does Round Robin distribute transactions?">
+    It distributes transactions evenly across multiple payment connections, ensuring balanced load by sequentially cycling through available gateways.
+  </FAQItem>
+  <FAQItem question="What is the purpose of a Fallback option?">
+    The Fallback option ensures transactions still get processed by sending them to a default payment connection if no other connections are available.
+  </FAQItem>
+  <FAQItem question="How does BIN-Based Routing work?">
+    It directs a transaction to a specific payment connection based on the card's BIN (Bank Identification Number). If a match is found, the transaction is routed accordingly.
+  </FAQItem>
+  <FAQItem question="How does Country-Based Routing work?">
+    It uses the issuing country of the card to determine the payment connection. Transactions are routed to gateways configured for that specific country.
+  </FAQItem>
+  <FAQItem question="What happens if no routing rule matches?">
+    The system triggers the Fallback Routing option to ensure the transaction is processed by a default connection.
+  </FAQItem>
+</FAQ>
 
 ## What's Next?
 

@@ -115,7 +115,7 @@ When **Type** is set to `Custom`, the **Field** dropdown is replaced with these 
 | **Label [en]** | Display label in English |
 | **Label [ar]** | Display label in Arabic |
 
-![Plugin fields configuration](/img/business/placeholder.png)
+![Plugin fields configuration](/img/business/plugins/payment-request-plugin-fields.gif)
 
 :::tip
 Use custom fields to capture order-specific information (e.g., delivery address, reference number) directly on the payment page without any development work.

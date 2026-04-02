@@ -3,6 +3,8 @@ title: Satellite
 sidebar_label: Satellite
 ---
 
+import FAQ, { FAQItem } from '@site/src/components/FAQ';
+
 # Satellite
 
 Ottu Satellite is a multi-installation management dashboard. It provides a centralized view of all your Ottu installations, automates Shopify billing, and manages subscriptions — all from one place.
@@ -31,6 +33,8 @@ From the **Overview** section on the Satellite Dashboard, you get a centralized 
 
 **Search and Filter:** Find installations by plugin type, installation name, and creation/modification dates.
 
+![Installments Overview](/img/business/satellite/installments-overview.png)
+
 ### Transactions
 
 The **Transactions** section provides an overview of all transactions across related installations:
@@ -47,6 +51,8 @@ The **Transactions** section provides an overview of all transactions across rel
 | **Modified** | Date the transaction was last updated |
 
 **Search and Filter:** Find transactions by plugin type, installation name, payment gateway name/code, status, and creation/modification dates.
+
+![Transactions Overview](/img/business/satellite/transactions-overview.png)
 
 ## Shopify Billing Automation
 
@@ -65,18 +71,26 @@ The **Subscriptions** tab provides an overview of all active subscriptions and b
 - **Shopify Invoices** — Review invoices with a breakdown for each billing cycle
 - **Yearly Subscription Management** — Manage your Ottu subscription
 - **Invoice Operations** — Download invoices or click **Pay Now** to be redirected to the Ottu checkout page
+
+![Subscription Invoice Operations](/img/business/satellite/subscription-invoice-operations.png)
+
 - **Subscription History** — Complete view of all past payments through the subscription board
+
+![Subscription History](/img/business/satellite/subscription-history.png)
 
 ## FAQ
 
-**What kind of transaction insights does Satellite provide?**
-Satellite provides granular data on transactions across all installations, including plugin type, amount, currency, and status — enabling informed business decisions.
-
-**What advantages does Shopify billing automation bring?**
-It eliminates manual effort, reduces processing time, and ensures transparent, timely communication with merchants through automated invoice generation and email notifications.
-
-**Can merchants perform operations on their invoices?**
-Yes — merchants can download invoices and initiate payments. The **Pay Now** button redirects to the Ottu checkout page for seamless payment.
+<FAQ>
+  <FAQItem question="What kind of transaction insights does Satellite provide?">
+    Satellite provides granular data on transactions across all installations, including plugin type, amount, currency, and status — enabling informed business decisions.
+  </FAQItem>
+  <FAQItem question="What advantages does Shopify billing automation bring?">
+    It eliminates manual effort, reduces processing time, and ensures transparent, timely communication with merchants through automated invoice generation and email notifications.
+  </FAQItem>
+  <FAQItem question="Can merchants perform operations on their invoices?">
+    Yes — merchants can download invoices and initiate payments. The **Pay Now** button redirects to the Ottu checkout page for seamless payment.
+  </FAQItem>
+</FAQ>
 
 ## What's Next?
 

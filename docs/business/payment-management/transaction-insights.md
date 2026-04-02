@@ -25,7 +25,7 @@ Ottu lets you customize which columns (headers) appear in each plugin's transact
 2. Access the **Plugin Config** for the desired transaction table.
 3. Enable the **Individual Proxy Fields** option by ticking the checkbox.
 
-![Activating proxy fields in Plugin Config](/img/business/placeholder.png)
+![Activating proxy fields in Plugin Config](/img/business/payment-management/insights-activate-proxy-fields.png)
 
 #### Managing the Header List
 
@@ -33,13 +33,13 @@ Ottu lets you customize which columns (headers) appear in each plugin's transact
 2. Access **Settings**.
 3. In the **Table Headers** section, add or remove headers by dragging them between the available and selected columns (right to left or vice versa).
 
-![Adding or removing transaction table headers](/img/business/placeholder.png)
+![Adding or removing transaction table headers](/img/business/payment-management/insights-add-remove-headers.png)
 
 #### Child Table Transactions
 
 [Child transactions](#child-transactions) are generated from capture, refund, or void [operations](/business/operations). These transactions are linked to the original payment transaction (the **parent transaction**) and displayed beneath it. Child transaction headers inherit from the parent transaction's headers for consistency.
 
-![Child transaction headers under a parent transaction](/img/business/placeholder.png)
+![Child transaction headers under a parent transaction](/img/business/payment-management/insights-child-headers.png)
 
 ### Amounts Breakdown
 
@@ -103,25 +103,25 @@ The Ottu Dashboard provides visual charts so you can track transactions and sale
 
 Shows the total transaction value and overall success rate across different time periods.
 
-![Total Transactions chart](/img/business/placeholder.png)
+![Total Transactions chart](/img/business/payment-management/insights-total-transactions.png)
 
 ### Average Transaction
 
 Displays the average transaction value over the selected period.
 
-![Average Transaction chart](/img/business/placeholder.png)
+![Average Transaction chart](/img/business/payment-management/insights-average-transaction.png)
 
 ### Product-Wise Sales
 
 Breaks down sales by product, helping you identify top performers.
 
-![Product-Wise Sales chart](/img/business/placeholder.png)
+![Product-Wise Sales chart](/img/business/payment-management/insights-product-wise-sales.png)
 
 ### Recent Orders Report
 
 Lists the most recent orders for quick review.
 
-![Recent Orders Report](/img/business/placeholder.png)
+![Recent Orders Report](/img/business/payment-management/insights-recent-orders.png)
 
 ---
 

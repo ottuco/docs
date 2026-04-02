@@ -13,7 +13,7 @@ Before integrated WhatsApp notifications can be sent, the following must be in p
 
 1. **Customer Phone Number** -- The customer's phone number must be collected during transaction creation. To add the customer phone number field, contact the [Ottu support team](mailto:support@ottu.com).
 
-   <!-- TODO: Screenshot of customer phone number field in transaction creation -->
+   ![Customer phone number field](/img/business/notifications/sms-phone-number-field.png)
 
 2. **WhatsApp Business Account and Template Approval** -- The merchant must have a WhatsApp Business account. All notification templates and their content must be approved by Meta/WhatsApp before they can be used.
 
@@ -23,7 +23,7 @@ Before integrated WhatsApp notifications can be sent, the following must be in p
 
 5. **Enable WhatsApp Templates** -- Activate WhatsApp notifications by selecting the checkbox designated for WhatsApp templates during payment transaction creation. Templates can be enabled for pre-payment, post-payment, or both, depending on your requirements.
 
-   <!-- TODO: Screenshot of WhatsApp template checkboxes in transaction creation -->
+   ![WhatsApp notification checkboxes](/img/business/notifications/whatsapp-notification-checkboxes.png)
 
 ## Notification Availability
 

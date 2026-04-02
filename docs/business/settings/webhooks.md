@@ -15,11 +15,11 @@ For technical details on webhook payloads, signatures, and integration, see the 
 2. Click the three dots in the top-right corner to open the **Administration Panel**
 3. Navigate to **Webhook** > **Webhook Config**
 
-![Webhook Configuration navigation](/img/business/placeholder.png)
+![Webhook Configuration navigation](/img/business/settings/webhooks-navigation.png)
 
 ## General Settings
 
-![Webhook general settings](/img/business/placeholder.png)
+![Webhook general settings](/img/business/settings/webhooks-general-settings.png)
 
 | Field | Description |
 |-------|-------------|
@@ -72,7 +72,7 @@ The HTTP status code your server returns in response to a webhook determines whe
 
 You can define webhook behavior for specific [plugins](/business/plugins/), routing notifications for different plugins to different URLs.
 
-![Webhook plugin configuration](/img/business/placeholder.png)
+![Webhook plugin configuration](/img/business/settings/webhooks-plugin-config.png)
 
 | Field | Description |
 |-------|-------------|

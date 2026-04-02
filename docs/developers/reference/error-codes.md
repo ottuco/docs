@@ -3,6 +3,8 @@ title: Error Codes
 sidebar_label: Error Codes
 ---
 
+import FAQ, { FAQItem } from '@site/src/components/FAQ';
+
 # Error Codes
 
 Ottu's APIs return standard HTTP status codes and structured error responses. This page is the canonical reference for all error codes across the platform.
@@ -160,21 +162,23 @@ Some endpoints return specific error codes beyond the standard HTTP errors:
 
 ## FAQ
 
-#### What should I do when I get a 401 error?
+<FAQ>
+  <FAQItem question="What should I do when I get a 401 error?">
+    Check your `Authorization` header. Ensure you're using the correct API key format (`Api-Key your_key`) and that the key hasn't been revoked. See [Authentication](/developers/getting-started/authentication).
+  </FAQItem>
 
-Check your `Authorization` header. Ensure you're using the correct API key format (`Api-Key your_key`) and that the key hasn't been revoked. See [Authentication](/developers/getting-started/authentication).
+  <FAQItem question="How do I handle rate limiting?">
+    Implement exponential backoff: wait 1s after the first `429`, then 2s, then 4s. For Reports API downloads, respect per-user rate limits.
+  </FAQItem>
 
-#### How do I handle rate limiting?
+  <FAQItem question="Why am I getting 403 with valid credentials?">
+    Your user account is authenticated but lacks the specific permission for this endpoint. Check the Permissions table in the API Reference for the required permission code. Contact your admin to grant access.
+  </FAQItem>
 
-Implement exponential backoff: wait 1s after the first `429`, then 2s, then 4s. For Reports API downloads, respect per-user rate limits.
-
-#### Why am I getting 403 with valid credentials?
-
-Your user account is authenticated but lacks the specific permission for this endpoint. Check the Permissions table in the API Reference for the required permission code. Contact your admin to grant access.
-
-#### Are error response formats consistent across all endpoints?
-
-Most endpoints follow the standard error format documented above. Gateway-specific operations may include additional fields in the response (e.g., `pg_response` for operation errors). For normalized gateway fields, see [PG Params](/developers/webhooks/pg-params). Always check the `message` field for human-readable details.
+  <FAQItem question="Are error response formats consistent across all endpoints?">
+    Most endpoints follow the standard error format documented above. Gateway-specific operations may include additional fields in the response (e.g., `pg_response` for operation errors). For normalized gateway fields, see [PG Params](/developers/webhooks/pg-params). Always check the `message` field for human-readable details.
+  </FAQItem>
+</FAQ>
 
 ## What's Next?
 

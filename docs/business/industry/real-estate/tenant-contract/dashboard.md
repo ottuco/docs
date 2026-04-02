@@ -24,7 +24,7 @@ Tenant 2
   - Contract 3
 ```
 
-![Expanded view of tenants and contracts](/img/business/real-estate/placeholder.png)
+![Expanded view of tenants and contracts](/img/business/real-estate/dashboard-expanded-view.png)
 
 ## Collapsed View (Unexpanded)
 
@@ -49,7 +49,7 @@ Tenant 2
 Tenant 3
 ```
 
-![Collapsed view of tenants](/img/business/real-estate/placeholder.png)
+![Collapsed view of tenants](/img/business/real-estate/dashboard-collapsed-view.png)
 
 ## Information Displayed
 
@@ -75,7 +75,7 @@ Each contract row displays:
 
 Click the dropdown arrow at the end of a contract's row to access more information about that contract.
 
-![Contract details expanded](/img/business/real-estate/placeholder.png)
+![Contract details expanded](/img/business/real-estate/dashboard-contract-details.png)
 
 ## Available Actions
 

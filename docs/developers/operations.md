@@ -7,6 +7,7 @@ hide_table_of_contents: true
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
+import FAQ, { FAQItem } from '@site/src/components/FAQ';
 
 # Operations
 
@@ -36,7 +37,7 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 Before performing any operation, you need an existing payment transaction with a `session_id` or `order_no`:
 
 1. **Via the [Checkout API](/developers/payments/checkout-api)** — create a payment transaction programmatically.
-2. **Via the [Ottu Dashboard](/business/dashboard-tour)** — create a transaction manually.
+2. **Via the [Ottu Dashboard](/business/payment-management)** — create a transaction manually.
 
 Store the `session_id` securely — it's required for all operation requests. Prefer `session_id` over `order_no` as it's always present in the response.
 
@@ -106,7 +107,7 @@ Use the `extra` object field for additional gateway-specific parameters. For exa
 
 **Capture** — Settles authorized funds. Only applicable to `authorized` transactions. Supports full or partial capture (cannot exceed the authorized amount). Creates a [child transaction](/developers/reference/payment-states) on success.
 
-**Refund** — Returns funds to the customer. Applicable to `paid` or captured transactions. For authorized transactions, a capture must be completed first. Supports full or partial refund. Ottu offers an [approval feature](/business/dashboard-tour) for refunds, enabling a checker role to approve or reject requests.
+**Refund** — Returns funds to the customer. Applicable to `paid` or captured transactions. For authorized transactions, a capture must be completed first. Supports full or partial refund. Ottu offers an [approval feature](/business/operations/refund-void-access-control) for refunds, enabling a checker role to approve or reject requests.
 
 **Void** — Cancels an authorization before capture. Only applicable to `authorized` transactions. The customer is not charged.
 
@@ -197,41 +198,35 @@ Select the operation to see its example payload and the full interactive API sch
 
 ## FAQ
 
-#### 1. What happens if I try to perform an unsupported operation?
-
-The operation is rejected by Ottu with an error message. See [supported operations by gateway](/developers/payments/payment-methods#activating-payment-gateway-codes).
-
-#### 2. Can I perform operations on completed transactions?
-
-For [refund](#refund), yes — you can refund paid or captured transactions. For [cancel](#cancel) or [expire](#expire), only incomplete transactions are eligible.
-
-#### 3. Can I partially refund or capture?
-
-Yes. Specify the `amount` in the request. If omitted, Ottu attempts the operation on the full transaction amount.
-
-#### 4. What's the difference between soft delete and hard delete?
-
-**Soft delete** applies to `paid`, `authorized`, or `cod`/`cash` transactions — removed from reports but recoverable from Deleted Transactions. **Hard delete** applies to all other states — permanent removal.
-
-#### 5. What is a child transaction?
-
-A sub-transaction created when external operations (refund, capture, void) succeed. It holds the operation details: new state, amount, and gateway response. Linked to the parent transaction.
-
-#### 6. How do I know which operations a gateway supports?
-
-See the [operations supported by each gateway](/developers/payments/payment-methods#activating-payment-gateway-codes).
-
-#### 7. What's the difference between API-Key and Basic Authentication?
-
-[API-Key](/developers/getting-started/authentication#private-key-api-key) grants superadmin privileges. [Basic Authentication](/developers/getting-started/authentication#basic-authentication) allows granular permission control per operation. Use Basic Auth for production access control.
-
-#### 8. What permissions are required?
-
-Depends on the operation: `payment.capture` for capture, `payment.expire` for expire, etc. See [permission codes](#permission-codes-for-each-operation).
-
-#### 9. What happens when a refund is requested via the API?
-
-The request goes directly to the payment gateway — the maker-checker approval flow is not activated for API refunds. The maker-checker flow only applies to refunds initiated via the Ottu dashboard.
+<FAQ>
+  <FAQItem question="What happens if I try to perform an unsupported operation?">
+    The operation is rejected by Ottu with an error message. See [supported operations by gateway](/developers/payments/payment-methods#activating-payment-gateway-codes).
+  </FAQItem>
+  <FAQItem question="Can I perform operations on completed transactions?">
+    For [refund](#refund), yes — you can refund paid or captured transactions. For [cancel](#cancel) or [expire](#expire), only incomplete transactions are eligible.
+  </FAQItem>
+  <FAQItem question="Can I partially refund or capture?">
+    Yes. Specify the `amount` in the request. If omitted, Ottu attempts the operation on the full transaction amount.
+  </FAQItem>
+  <FAQItem question="What's the difference between soft delete and hard delete?">
+    **Soft delete** applies to `paid`, `authorized`, or `cod`/`cash` transactions — removed from reports but recoverable from Deleted Transactions. **Hard delete** applies to all other states — permanent removal.
+  </FAQItem>
+  <FAQItem question="What is a child transaction?">
+    A sub-transaction created when external operations (refund, capture, void) succeed. It holds the operation details: new state, amount, and gateway response. Linked to the parent transaction.
+  </FAQItem>
+  <FAQItem question="How do I know which operations a gateway supports?">
+    See the [operations supported by each gateway](/developers/payments/payment-methods#activating-payment-gateway-codes).
+  </FAQItem>
+  <FAQItem question="What's the difference between API-Key and Basic Authentication?">
+    [API-Key](/developers/getting-started/authentication#private-key-api-key) grants superadmin privileges. [Basic Authentication](/developers/getting-started/authentication#basic-authentication) allows granular permission control per operation. Use Basic Auth for production access control.
+  </FAQItem>
+  <FAQItem question="What permissions are required?">
+    Depends on the operation: `payment.capture` for capture, `payment.expire` for expire, etc. See [permission codes](#permission-codes-for-each-operation).
+  </FAQItem>
+  <FAQItem question="What happens when a refund is requested via the API?">
+    The request goes directly to the payment gateway — the maker-checker approval flow is not activated for API refunds. The maker-checker flow only applies to refunds initiated via the Ottu dashboard.
+  </FAQItem>
+</FAQ>
 
 ## What's Next?
 

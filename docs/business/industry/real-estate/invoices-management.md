@@ -24,7 +24,7 @@ The Invoice Management Dashboard offers a clear view of all generated invoices, 
 All invoices generated in the [Generate Invoices](/business/industry/real-estate/generate-invoice) section are listed in the Invoices Table, organized by property.
 :::
 
-![Invoices management dashboard](/img/business/real-estate/placeholder.png)
+![Invoices management dashboard](/img/business/real-estate/invoices-management-dashboard.png)
 
 ## Single Notification
 
@@ -77,7 +77,7 @@ The report includes the following details for each invoice:
 5. **Automatic PDF Creation** -- The PDF generates automatically after clicking Print.
 6. **Download the Report** -- Once the PDF is ready, download it to your device.
 
-![Generated invoice report](/img/business/real-estate/placeholder.png)
+![Generated invoice report](/img/business/real-estate/invoices-generated-report.png)
 
 ## What's Next?
 

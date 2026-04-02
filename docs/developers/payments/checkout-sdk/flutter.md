@@ -3,6 +3,8 @@ toc_min_heading_level: 2
 toc_max_heading_level: 3
 ---
 
+import FAQ, { FAQItem } from '@site/src/components/FAQ';
+
 The Checkout SDK is a Flutter framework (library) developed by Ottu, designed to seamlessly integrate an Ottu-powered [checkout process](../) into Flutter applications for both iOS and Android platforms. This framework functions as a wrapper over the corresponding native SDKs, ensuring a smooth and efficient payment experience.
 
 With the Checkout SDK, both the visual appearance and the forms of payment available during the checkout process can be fully customized to meet specific requirements.
@@ -1172,33 +1174,33 @@ Since the implementation differs between the two platforms, please refer to the 
 
 ## FAQ
 
-#### 1. What forms of payment are supported by the SDK?
+<FAQ>
+  <FAQItem question="What forms of payment are supported by the SDK?">
+    The SDK supports the following [forms of payment](#formsofpayment-array-optional):
 
-The SDK supports the following [forms of payment](#formsofpayment-array-optional):
+    - `tokenPay`
+    - `redirect`
+    - `StcPay` &#x20;
+    - `cardOnsite`
+    - `applePay` _(iOS only)_
 
-- `tokenPay`
-- `redirect`
-- `StcPay` &#x20;
-- `cardOnsite`
-- `applePay` _(iOS only)_
+    Merchants can configure the forms of payment displayed according to their needs.
 
-Merchants can configure the forms of payment displayed according to their needs.
+    For example, to **display only the STC Pay button**, use:
 
-For example, to **display only the STC Pay button**, use:
+    ```
+    formsOfPayment = ["stcPay"]
+    ```
 
-```
-formsOfPayment = ["stcPay"]
-```
+    This ensures that only the **STC Pay** button is shown. The same approach applies to other payment methods.
+  </FAQItem>
+  <FAQItem question="What are the minimum system requirements for SDK integration?">
+    The SDK requires a device running:
 
-This ensures that only the **STC Pay** button is shown. The same approach applies to other payment methods.
-
-#### 2. What are the minimum system requirements for SDK integration?
-
-The SDK requires a device running:
-
-- **Android 8** or higher (**API level 26** or higher)
-- **iOS 14** or higher
-
-#### 3. Can I customize the appearance beyond the provided themes?
-
-Yes, customization is supported. For more details, refer to the [Theme](#theme) section.
+    - **Android 8** or higher (**API level 26** or higher)
+    - **iOS 14** or higher
+  </FAQItem>
+  <FAQItem question="Can I customize the appearance beyond the provided themes?">
+    Yes, customization is supported. For more details, refer to the [Theme](#theme) section.
+  </FAQItem>
+</FAQ>

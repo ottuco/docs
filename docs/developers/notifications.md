@@ -7,6 +7,7 @@ hide_table_of_contents: true
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
+import FAQ, { FAQItem } from '@site/src/components/FAQ';
 
 # Notifications
 
@@ -170,46 +171,40 @@ Proactively monitor SMS, email, and WhatsApp provider health. Identify outages e
 
 ## FAQ
 
-#### 1. What is the purpose of the Notifications API?
-
-It lets merchants manually resend notifications for a specific transaction based on `session_id` or `order_no`, useful when automatic notifications failed.
-
-#### 2. What parameters are required?
-
-Either `session_id` or `order_no` to identify the transaction, plus a `channels` array specifying which channels to send (email, sms, whatsapp).
-
-#### 3. Which payment states can notifications be sent for?
-
-- **Email & SMS**: `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`, `voided`, `refunded`, `captured`
-- **WhatsApp**: `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`
-
-#### 4. How many times can I resend?
-
-No limit, but avoid redundant notifications unless prior delivery failed.
-
-#### 5. What does a successful response look like?
-
-```json
-{
-  "message": "Customer notified."
-}
-```
-
-#### 6. Can I notify for transactions not created via the Checkout API?
-
-Yes, as long as `session_id` or `order_no` is available and notification channels were configured during creation.
-
-#### 7. What if a notification doesn't get delivered?
-
-Resend it using the API once the third-party provider issue is resolved. Ensure providers are correctly configured.
-
-#### 8. How do I configure SMS or WhatsApp providers?
-
-Contact the [Ottu support team](mailto:support@ottu.com) for SMS and WhatsApp provider setup.
-
-#### 9. Can I send to multiple channels in one call?
-
-Yes — include multiple channels in the `channels` array (e.g., `["sms", "email", "whatsapp"]`).
+<FAQ>
+  <FAQItem question="What is the purpose of the Notifications API?">
+    It lets merchants manually resend notifications for a specific transaction based on `session_id` or `order_no`, useful when automatic notifications failed.
+  </FAQItem>
+  <FAQItem question="What parameters are required?">
+    Either `session_id` or `order_no` to identify the transaction, plus a `channels` array specifying which channels to send (email, sms, whatsapp).
+  </FAQItem>
+  <FAQItem question="Which payment states can notifications be sent for?">
+    - **Email & SMS**: `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`, `voided`, `refunded`, `captured`
+    - **WhatsApp**: `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`
+  </FAQItem>
+  <FAQItem question="How many times can I resend?">
+    No limit, but avoid redundant notifications unless prior delivery failed.
+  </FAQItem>
+  <FAQItem question="What does a successful response look like?">
+    ```json
+    {
+      "message": "Customer notified."
+    }
+    ```
+  </FAQItem>
+  <FAQItem question="Can I notify for transactions not created via the Checkout API?">
+    Yes, as long as `session_id` or `order_no` is available and notification channels were configured during creation.
+  </FAQItem>
+  <FAQItem question="What if a notification doesn't get delivered?">
+    Resend it using the API once the third-party provider issue is resolved. Ensure providers are correctly configured.
+  </FAQItem>
+  <FAQItem question="How do I configure SMS or WhatsApp providers?">
+    Contact the [Ottu support team](mailto:support@ottu.com) for SMS and WhatsApp provider setup.
+  </FAQItem>
+  <FAQItem question="Can I send to multiple channels in one call?">
+    Yes — include multiple channels in the `channels` array (e.g., `["sms", "email", "whatsapp"]`).
+  </FAQItem>
+</FAQ>
 
 ## What's Next?
 

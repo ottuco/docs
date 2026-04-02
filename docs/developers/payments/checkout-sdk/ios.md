@@ -3,6 +3,8 @@ toc_min_heading_level: 2
 toc_max_heading_level: 3
 ---
 
+import FAQ, { FAQItem } from '@site/src/components/FAQ';
+
 The [Checkout SDK](../) is a Swift framework (library) provided by Ottu, designed to facilitate the seamless integration of an Ottu-powered checkout process into iOS applications.
 
 With the Checkout SDK, both the visual appearance and the forms of payment available during the [checkout process](../#ottu-checkout-sdk-flow) can be fully customized.
@@ -936,28 +938,27 @@ This technique works in two ways:
 
 ## FAQ
 
-#### 1 What forms of payments are supported by the SDK?
+<FAQ>
+  <FAQItem question="1 What forms of payments are supported by the SDK?">
+    The SDK supports the following payment forms: `tokenPay`, `ottuPG`, `redirect` `applePay` and `stcPay`. Merchants can display specific methods according to their needs.
 
-The SDK supports the following payment forms: `tokenPay`, `ottuPG`, `redirect` `applePay` and `stcPay`. Merchants can display specific methods according to their needs.
+    **For example,** if you want to only show the STC Pay button, you can do so using formsOfPayment = `stcPay`, and only the STC Pay button will be displayed. The same applies for `applePay` and other methods.
+  </FAQItem>
+  <FAQItem question="2 What are the minimum system requirements for the SDK integration?">
+    It is required to have a device running iOS 13 or higher.
+  </FAQItem>
+  <FAQItem question="3 Can I customize the appearance beyond the provided themes?">
+    Yes, see the Customization theme section.
+  </FAQItem>
+  <FAQItem question="4 How do I customize the payment request for Apple Pay?">
+    The payment request for Apple Pay can be customized using its initialization methods. These methods allow the configuration of various properties, including:
 
-**For example,** if you want to only show the STC Pay button, you can do so using formsOfPayment = `stcPay`, and only the STC Pay button will be displayed. The same applies for `applePay` and other methods.
+    - API version
+    - Supported card types
+    - Accepted networks
+    - Applicable countries
+    - Merchant capabilities
 
-#### 2 What are the minimum system requirements for the SDK integration?
-
-It is required to have a device running iOS 13 or higher.
-
-#### 3 Can I customize the appearance beyond the provided themes?
-
-Yes, see the Customization theme section.
-
-#### 4 How do I customize the payment request for Apple Pay?
-
-The payment request for Apple Pay can be customized using its initialization methods. These methods allow the configuration of various properties, including:
-
-- API version
-- Supported card types
-- Accepted networks
-- Applicable countries
-- Merchant capabilities
-
-For a complete list of supported properties, refer to the [Apple Pay](https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypaymentrequest) documentation.
+    For a complete list of supported properties, refer to the [Apple Pay](https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypaymentrequest) documentation.
+  </FAQItem>
+</FAQ>
