@@ -43,7 +43,11 @@ export default function PGParamsReference(): React.JSX.Element {
         setHighlightedField(fieldName);
         // Scroll after render
         requestAnimationFrame(() => {
-          const el = document.getElementById(hash);
+          const desktopEl = document.getElementById(hash);
+          const mobileEl = document.getElementById(`mobile-${hash}`);
+          // Pick the visible element: offsetParent is null for display:none ancestors
+          const el =
+            desktopEl?.offsetParent !== null ? desktopEl : mobileEl;
           if (el) {
             el.scrollIntoView({ behavior: "smooth", block: "center" });
           }

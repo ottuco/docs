@@ -1,0 +1,108 @@
+---
+title: Samsung Wallet
+sidebar_label: Samsung Wallet
+---
+
+import StepGuide from "@site/src/components/StepGuide";
+import Admonition from "@theme/Admonition";
+
+# Samsung Wallet
+
+Samsung Wallet allows your customers to complete online payments quickly and securely using their Samsung Wallet. Once enabled, a Samsung Wallet button appears on your web checkout page, giving customers a fast, device-authenticated payment option.
+
+To enable Samsung Wallet, you will:
+
+1. [Create a Samsung Developer account](#create-your-samsung-developer-account)
+2. [Set up a Samsung Wallet service in the Developer Portal](#create-a-samsung-wallet-service)
+3. [Request approval from Samsung](#request-service-approval-from-samsung)
+4. [Share your Service ID with Ottu for final configuration](#share-your-service-id-with-ottu)
+
+## Create Your Samsung Developer Account
+
+1. Visit the Samsung Wallet Developer Portal: [https://pay.samsung.com/developer](https://pay.samsung.com/developer)
+2. Register for a Samsung developer membership.
+3. When asked about company registration:
+   - **If you are the first Samsung Wallet member:** Select **"I am the first Samsung Wallet member of my company."**
+   - **If your company already has a Partner ID:** Select **"My company is already registered"** and enter your Partner ID.
+4. Contact your Samsung Wallet relationship manager to approve your membership.
+5. After approval, log in again at [https://pay.samsung.com/developer](https://pay.samsung.com/developer).
+
+## Create a Samsung Wallet Service
+
+<StepGuide steps={[
+  {
+    title: "Navigate to Service Management",
+    description: <>Navigate to <strong>My Projects &gt; Service Management</strong>.</>,
+    image: "/img/business/samsung-wallet/samsung-wallet-01-service-management.png",
+    imageAlt: "Service Management section in the Samsung Wallet Developer Portal",
+  },
+  {
+    title: "Click Create New Service",
+    description: <>Click <strong>Create New Service</strong>.</>,
+    image: "/img/business/samsung-wallet/samsung-wallet-02-create-new-service.png",
+    imageAlt: "Click \"Create New Service\" to begin setup",
+  },
+  {
+    title: "Choose Web Online Payment",
+    description: <>Choose <strong>Web Online Payment</strong> as the service type.</>,
+    image: "/img/business/samsung-wallet/samsung-wallet-03-web-online-payment.png",
+    imageAlt: "Select Web Online Payment as the service type",
+  },
+  {
+    title: "Fill in Service Details",
+    description: <>Fill in the required fields:
+      <table>
+        <thead><tr><th>Field</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Service Name</strong></td><td>A name to identify this service in the Samsung portal</td></tr>
+          <tr><td><strong>Service Country</strong></td><td>The country where this service will operate</td></tr>
+          <tr><td><strong>Payment Gateway</strong></td><td>The payment gateway connected to this service</td></tr>
+          <tr><td><strong>CSR File</strong></td><td>Upload the Certificate Signing Request file provided by Ottu</td></tr>
+          <tr><td><strong>Service Domain</strong></td><td>Your Ottu installation domain (e.g., <code>merchant.ottu.net</code>)</td></tr>
+        </tbody>
+      </table>
+      Click <strong>Save and Next</strong>. Leave the debugging fields empty and click <strong>Done</strong>.
+      <Admonition type="tip">Your service is now created. Next, you need Samsung's approval before it can go live.</Admonition>
+    </>,
+    image: "/img/business/samsung-wallet/samsung-wallet-04-service-details.png",
+    imageAlt: "Upload the CSR file and enter your service domain",
+  },
+  {
+    title: "Request Service Approval",
+    description: <><ol>
+        <li>Return to the <strong>Service Management</strong> page.</li>
+        <li>Find the service you created.</li>
+        <li>Click <strong>Request</strong> in the Status column.</li>
+      </ol>
+      <strong>Message template for approval request:</strong>
+      <blockquote>I would like to request the registration and activation of the Samsung Wallet service having the [service id] within the Samsung Developer Portal. Please assist in enabling the required service permissions.</blockquote>
+      Replace <code>[service id]</code> with your actual Service ID from the portal.</>,
+    image: "/img/business/samsung-wallet/samsung-wallet-05-request-approval.png",
+    imageAlt: "Use the Request button to submit your service for review",
+  },
+  {
+    title: "Share Your Service ID With Ottu",
+    description: <><ol>
+        <li>Open your <strong>Service Details</strong> page in the Samsung Developer Portal.</li>
+        <li>Copy the <strong>Service ID</strong>.</li>
+        <li>Share it with the Ottu team.</li>
+      </ol>
+      Once provided, Ottu will finalize the configuration on their side.</>,
+    image: "/img/business/samsung-wallet/samsung-wallet-06-service-id.png",
+    imageAlt: "Copy your Service ID from the Service Details page",
+  },
+]} nextSectionId="completion" />
+
+## Completion {#completion}
+
+After Ottu finishes linking your Service ID, Samsung Wallet will be active and ready for use on your online checkout page.
+
+:::tip
+Your customers can now enjoy smooth and secure Samsung Wallet payments directly from your checkout page.
+:::
+
+## What's Next?
+
+- **[Apple Pay](apple-pay/)** — Set up Apple Pay for customers on iPhone, iPad, and Mac
+- **[Payment Services](./)** — Overview of all available payment services
+- **[Payment Gateways](/business/payments/gateways)** — Browse and configure your payment gateways

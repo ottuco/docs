@@ -33,6 +33,8 @@ From the **Overview** section on the Satellite Dashboard, you get a centralized 
 
 **Search and Filter:** Find installations by plugin type, installation name, and creation/modification dates.
 
+![Installments Overview](/img/business/satellite/installments-overview.png)
+
 ### Transactions
 
 The **Transactions** section provides an overview of all transactions across related installations:
@@ -49,6 +51,8 @@ The **Transactions** section provides an overview of all transactions across rel
 | **Modified** | Date the transaction was last updated |
 
 **Search and Filter:** Find transactions by plugin type, installation name, payment gateway name/code, status, and creation/modification dates.
+
+![Transactions Overview](/img/business/satellite/transactions-overview.png)
 
 ## Shopify Billing Automation
 
@@ -67,7 +71,12 @@ The **Subscriptions** tab provides an overview of all active subscriptions and b
 - **Shopify Invoices** — Review invoices with a breakdown for each billing cycle
 - **Yearly Subscription Management** — Manage your Ottu subscription
 - **Invoice Operations** — Download invoices or click **Pay Now** to be redirected to the Ottu checkout page
+
+![Subscription Invoice Operations](/img/business/satellite/subscription-invoice-operations.png)
+
 - **Subscription History** — Complete view of all past payments through the subscription board
+
+![Subscription History](/img/business/satellite/subscription-history.png)
 
 ## FAQ
 

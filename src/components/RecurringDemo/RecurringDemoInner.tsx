@@ -485,6 +485,9 @@ export default function RecurringDemoInner() {
           <WebhookViewer
             orderId={state.orderId}
             label="Live Webhook Notifications"
+            onEvent={(event) => {
+              webhookEventsRef.current = [...webhookEventsRef.current, event];
+            }}
           />
         </div>
       )}

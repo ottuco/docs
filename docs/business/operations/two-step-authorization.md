@@ -23,11 +23,11 @@ A merchant can have **multiple makers**, but only **one checker**. The checker h
 1. From the Ottu Dashboard, open the **Administration Panel**.
 2. Navigate to **Plugins > Installed Plugins**.
 
-   ![Installed Plugins](/img/business/placeholder.png)
+   ![Installed Plugins](/img/business/operations/two-step-installed-plugins.png)
 
 3. Add the **Operations Approval** plugin.
 
-   ![Add Operations Approval plugin](/img/business/placeholder.png)
+   ![Add Operations Approval plugin](/img/business/operations/two-step-add-plugin.png)
 
 ## Assigning the Checker
 
@@ -36,7 +36,7 @@ Only one authorized user can designate the checker:
 1. Go to **Ottu Dashboard > Administration Panel > Operations Approval Plugin > Operations Approval Plugin Config**.
 2. Select the user who will serve as the checker.
 
-![Assign checker](/img/business/placeholder.png)
+![Assign checker](/img/business/operations/two-step-assign-checker.png)
 
 ## How the Workflow Operates
 
@@ -105,7 +105,7 @@ To include the maker in "Done" notification emails, enable the **BCC initiator**
 
 The Operation Request Table is located under the **Tickets** tab on the Ottu Dashboard. It provides a centralized view of all refund and void requests with filtering by state, operation type, date, payment gateway, and currency.
 
-![Operation Request Table](/img/business/placeholder.png)
+![Operation Request Table](/img/business/operations/two-step-operation-requests.png)
 
 ### Table Columns
 

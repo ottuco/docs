@@ -13,13 +13,13 @@ Before manual WhatsApp notifications can be sent, the following must be in place
 
 1. **Customer Phone Number** -- The customer's phone number must be collected during transaction creation. To add the customer phone number field, contact the [Ottu support team](mailto:support@ottu.com).
 
-   <!-- TODO: Screenshot of customer phone number field in transaction creation -->
+   ![Customer phone number field](/img/business/notifications/sms-phone-number-field.png)
 
 2. **WhatsApp Template Configuration** -- WhatsApp notification templates must be fully configured. To set up the required templates, contact the [Ottu support team](mailto:support@ottu.com).
 
 3. **Enable WhatsApp Notification** -- Merchants activate the manual WhatsApp channel by selecting the corresponding checkbox during payment transaction creation.
 
-   <!-- TODO: Screenshot of WhatsApp notification checkbox in transaction creation -->
+   ![WhatsApp notification checkboxes](/img/business/notifications/whatsapp-notification-checkboxes.png)
 
 ## Notification Availability
 

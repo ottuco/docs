@@ -13,7 +13,7 @@ To resume a suspended contract, follow the steps described in [Triggering Contra
 
 Select **Resume Contract** from the action menu to reactivate the contract immediately.
 
-![Resume contract action](/img/business/real-estate/placeholder.png)
+![Resume contract action](/img/business/real-estate/resume-contract-action.png)
 
 ## What's Next?
 

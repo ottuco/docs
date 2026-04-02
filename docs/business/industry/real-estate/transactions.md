@@ -13,7 +13,7 @@ The Transaction Dashboard is accessible through the Ottu Real Estate Dashboard i
 - **Total Received Amount** -- The amount successfully collected from transactions.
 - **Net Balance** -- The difference between the generated and received amounts.
 
-![Transaction dashboard summary](/img/business/real-estate/placeholder.png)
+![Transaction dashboard summary](/img/business/real-estate/transactions-dashboard-summary.png)
 
 A **detailed transaction table** displays a comprehensive history of each transaction, including:
 
@@ -22,7 +22,7 @@ A **detailed transaction table** displays a comprehensive history of each transa
 - Order number
 - And more
 
-![Transaction table](/img/business/real-estate/placeholder.png)
+![Transaction table](/img/business/real-estate/transactions-table.png)
 
 These details allow merchants to monitor and track transaction performance effectively.
 

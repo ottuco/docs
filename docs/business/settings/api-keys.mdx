@@ -1,0 +1,88 @@
+---
+title: How to Get API Keys
+sidebar_label: API Keys
+---
+
+import StepGuide from "@site/src/components/StepGuide";
+import Admonition from "@theme/Admonition";
+
+# How to Get API Keys
+
+API keys allow your developers to authenticate with the Ottu API and integrate payment functionality into your application. Each key pair consists of a **private key** (for server-side API calls) and a **public key** (for client-side SDK initialization).
+
+For technical details on how API keys are used in authentication, see the [developer authentication guide](/developers/getting-started/authentication).
+
+<StepGuide steps={[
+  {
+    title: "Navigate to API Keys",
+    description: (
+      <>
+        <ol>
+          <li>Open the Ottu Dashboard</li>
+          <li>Click the three dots in the top-right corner to open the <strong>Administration Panel</strong></li>
+          <li>Navigate to <strong>API Auth</strong> &gt; <strong>API Keys</strong></li>
+        </ol>
+      </>
+    ),
+    image: "/img/business/settings/api-keys-01-navigate.png",
+    imageAlt: "Ottu Dashboard — Administration Panel navigation to API Auth > API Keys",
+  },
+  {
+    title: "Click Add API Key",
+    description: <>Click <strong>Add API Key</strong></>,
+    image: "/img/business/settings/api-keys-02-add-button.png",
+    imageAlt: "Add API Key button in the API Keys section",
+  },
+  {
+    title: "Fill in Key Details",
+    description: (
+      <>
+        <p>Complete the required fields and click <strong>Save</strong>.</p>
+        <table>
+          <thead>
+            <tr><th>Field</th><th>Required</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Name</strong></td><td>Yes</td><td>A descriptive name for this API key (max 50 characters). Use something meaningful like "Production Backend" or "Staging Server"</td></tr>
+            <tr><td><strong>Revoke</strong></td><td>No</td><td>When checked, the API key is permanently deactivated and can no longer be used</td></tr>
+            <tr><td><strong>Expires</strong></td><td>No</td><td>An optional expiration date. Once expired, the key can no longer be used</td></tr>
+          </tbody>
+        </table>
+        <Admonition type="tip">
+          <p>Use descriptive names for your API keys so you can easily identify which key is used by which application or environment. Create separate keys for production and staging.</p>
+        </Admonition>
+      </>
+    ),
+    image: "/img/business/settings/api-keys-03-fill-form.png",
+    imageAlt: "API Key creation form with Name, Revoke, and Expires fields",
+  },
+  {
+    title: "Click on the created API key",
+    description: <>After saving, click on the newly created API key entry (e.g., "Production Backend") to view the generated keys.</>,
+    image: "/img/business/settings/api-keys-04-click-created.png",
+    imageAlt: "Newly created API key entry in the API Keys list",
+  },
+  {
+    title: "Retrieve Your Keys",
+    description: (
+      <>
+        <p>You will see two keys:</p>
+        <ul>
+          <li><strong>Private key (API key)</strong> — used on your server for <a href="/developers/getting-started/authentication">API authentication</a>. Keep this secret and never expose it in client-side code.</li>
+          <li><strong>Public key</strong> — used for client-side SDK initialization (e.g., <a href="/developers/payments/checkout-sdk/">Checkout SDK</a>).</li>
+        </ul>
+        <Admonition type="danger">
+          <p>Never share your private API key publicly or include it in client-side code, mobile apps, or version control. If a key is compromised, immediately revoke it and generate a new one.</p>
+        </Admonition>
+      </>
+    ),
+    image: "/img/business/settings/api-keys-05-view-keys.png",
+    imageAlt: "API key details showing private and public keys",
+  },
+]} />
+
+## What's Next?
+
+- **[Global Configuration](./global)** — Configure your merchant identity and system-wide settings
+- **[Authentication (Developer Guide)](/developers/getting-started/authentication)** — Learn how to use API keys in your integration
+- **[Webhooks Configuration](./webhooks)** — Set up webhook notifications for payment events

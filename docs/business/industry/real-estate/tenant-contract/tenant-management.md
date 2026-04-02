@@ -9,7 +9,7 @@ sidebar_label: Tenant Management
 
 To add a new tenant, click the **+ADD TENANT** button within the Tenant and Contract Management section.
 
-![Add tenant button](/img/business/real-estate/placeholder.png)
+![Add tenant button](/img/business/real-estate/tenant-add-button.png)
 
 ### New Tenant Form
 
@@ -32,7 +32,7 @@ The form fields vary depending on the tenant type.
 | **Select Notification Language** | Preferred language for notifications |
 | **Is Married** | Whether the tenant is married (Yes/No) |
 
-![Residential tenant form](/img/business/real-estate/placeholder.png)
+![Residential tenant form](/img/business/real-estate/tenant-residential-form.png)
 
 **When the tenant is married**, additional fields appear for the spouse's information:
 
@@ -48,7 +48,7 @@ The form fields vary depending on the tenant type.
 | **Email Address** | Email address of the spouse |
 | **Upload Marriage Certificate** | Scanned copy of the marriage certificate |
 
-![Spouse information form](/img/business/real-estate/placeholder.png)
+![Spouse information form](/img/business/real-estate/tenant-spouse-form.png)
 
 #### For Limited Liability Company or Listed Company Tenant Type
 
@@ -67,7 +67,7 @@ The form fields vary depending on the tenant type.
 | **Upload Authorized Signatory Name** | Name of the authorized signatory |
 | **Upload Attachment 1-3** | Additional attachments (if applicable) |
 
-![Company tenant form](/img/business/real-estate/placeholder.png)
+![Company tenant form](/img/business/real-estate/tenant-company-form.png)
 
 ## Edit Tenant
 
@@ -77,7 +77,7 @@ The form fields vary depending on the tenant type.
 4. **Update Details** -- Modify the editable fields as needed.
 5. **Save Changes** -- Click **Save** to apply the changes.
 
-![Edit tenant dropdown](/img/business/real-estate/placeholder.png)
+![Edit tenant dropdown](/img/business/real-estate/tenant-edit-dropdown.png)
 
 ## What's Next?
 

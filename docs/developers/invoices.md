@@ -71,6 +71,8 @@ Invoices have two levels of detail:
 VAL CALC fields are optional validators. If provided, Ottu checks them against its own calculations and rejects the request if they don't match — preventing frontend/backend discrepancies.
 :::
 
+<img src="/img/developers/invoices/invoice-structure.png" alt="Invoice structure" width="450" />
+
 :::warning
 - Exclude optional fields entirely if not relevant — don't send `null` or `0`.
 - Rate/percentage fields are limited to 2 decimal places. Monetary fields follow [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html).
@@ -126,6 +128,8 @@ Call the [Payment Methods API](/developers/payments/payment-methods) to get avai
 }
 ```
 
+![Sample invoice](/img/developers/invoices/invoice-sample.png)
+
 #### 3. Send the payment link
 
 Share the `checkout_url` with the customer. They can view the invoice, download the PDF, and pay.
@@ -158,6 +162,8 @@ Apply a `discount_percentage` at the item level:
   ]
 }
 ```
+
+![Invoice with discount](/img/developers/invoices/invoice-with-discount.png)
 
 You cannot provide both `discount_percentage` and `discount_amount` on the same item or invoice — the API will reject the request.
 

@@ -28,7 +28,7 @@ Upon triggering the manual payment action, the Manual Payment Form is presented.
 | **Price** | Automatically populated based on the selected unpaid invoices |
 | **Receipt Voucher Reference** | Reference number of the receipt voucher associated with the payment |
 
-![Manual payment form](/img/business/real-estate/placeholder.png)
+![Manual payment form](/img/business/real-estate/manual-payment-form.png)
 
 ## What's Next?
 
