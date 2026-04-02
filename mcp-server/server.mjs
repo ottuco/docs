@@ -153,6 +153,7 @@ async function start() {
     }
 
     const url = req.url || "";
+    console.log(`[REQ] ${req.method} ${url}`);
 
     // ── Health check (works with or without ingress prefix) ──
     if (
