@@ -16,28 +16,30 @@ const gateways = (gatewaysData as Gateway[]).filter(
 const STATS = [
   { value: "50+", label: "Payment Gateways" },
   { value: "15+", label: "Countries" },
+  { value: "1", label: "Unified API" },
   { value: "L1", label: "PCI DSS Certified" },
-  { value: "ISO", label: "27001 Certified" },
 ];
 
 const DEV_LINKS = [
   { label: "Checkout API", to: "/developers/payments/checkout-api" },
-  { label: "Webhooks", to: "/developers/webhooks/" },
   { label: "SDK", to: "/developers/payments/checkout-sdk/" },
+  { label: "Webhooks", to: "/developers/webhooks/" },
+  { label: "Tokenization", to: "/developers/cards-and-tokens/tokenization" },
+  { label: "Apple Pay", to: "/business/payments/services/apple-pay/" },
   { label: "Test Cards", to: "/developers/reference/test-cards" },
 ];
 
 const BIZ_LINKS = [
-  { label: "Payment Gateways", to: "/business/payments/gateways" },
-  { label: "Payment Management", to: "/business/payment-management/" },
+  { label: "Routing Rules", to: "/business/payments/routing" },
+  { label: "Gateway Management", to: "/business/payments/gateways" },
+  { label: "Transactions", to: "/business/payment-management/" },
   { label: "Notifications", to: "/business/notifications/" },
-  { label: "Settings", to: "/business/settings/" },
 ];
 
 const HIGHLIGHTS = [
   {
     title: "Smart Payment Routing",
-    desc: "Route every payment to the best gateway based on BIN, country, cost, and real-time success rate.",
+    desc: "Route every payment to the best gateway based on BIN, country, cost, and real-time success rate. Automatic failover when a provider drops.",
     icon: "↗",
   },
   {
@@ -57,28 +59,85 @@ const HIGHLIGHTS = [
   },
 ];
 
+const WHY_OTTU = [
+  {
+    title: "Payment Portability",
+    desc: "Switch banks or acquirers without rebuilding your integration. Your payment stack stays intact when your strategy changes.",
+    icon: "⇄",
+  },
+  {
+    title: "Multi-Gateway Orchestration",
+    desc: "Connect and manage multiple payment providers from one platform. No duplicate integrations, no fragmented operations.",
+    icon: "⊞",
+  },
+  {
+    title: "Merchant-Owned Stack",
+    desc: "Process through your own merchant relationships and MIDs. Ottu orchestrates — you keep ownership and control.",
+    icon: "◉",
+  },
+  {
+    title: "Smart Routing & Failover",
+    desc: "Route transactions by BIN, geography, cost, or success rate. Automatic failover keeps payments flowing when a provider drops.",
+    icon: "↗",
+  },
+  {
+    title: "PCI-Ready Foundation",
+    desc: "L1 PCI DSS and ISO 27001 certified infrastructure. Built for compliance-heavy environments so you don't have to be.",
+    icon: "◆",
+  },
+  {
+    title: "Regional Expertise",
+    desc: "Built for Middle East payment realities — KNET, mada, Benefit, local acquiring — not generic global assumptions.",
+    icon: "◈",
+  },
+];
+
+const HOW_IT_WORKS = [
+  {
+    step: 1,
+    title: "Integrate Ottu",
+    desc: "Connect your application through one API with SDKs, webhooks, and sandbox testing.",
+  },
+  {
+    step: 2,
+    title: "Connect Gateways",
+    desc: "Add your payment providers and acquirer relationships. Use your own MIDs.",
+  },
+  {
+    step: 3,
+    title: "Configure Logic",
+    desc: "Set routing rules, failover paths, currency handling, and notification preferences.",
+  },
+  {
+    step: 4,
+    title: "Process Payments",
+    desc: "Transactions flow through optimized paths. Switch providers anytime without code changes.",
+  },
+];
+
 function Hero() {
   return (
     <header className={styles.hero}>
       <div className={styles.heroInner}>
         <div className={styles.heroLabel}>Documentation</div>
         <Heading as="h1" className={styles.heroTitle}>
-          Build and manage payments{" "}
-          <span className={styles.heroAccent}>with Ottu</span>
+          Integrate once. Route anywhere.{" "}
+          <span className={styles.heroAccent}>Switch freely.</span>
         </Heading>
         <p className={styles.heroSub}>
-          Everything you need to integrate, configure, and manage payments
-          across the Middle East and beyond.
+          Ottu connects your business to 50+ payment gateways through one API.
+          Configure routing, add providers, and change acquirers — without
+          rebuilding your integration.
         </p>
         <div className={styles.heroCtas}>
           <Link
             className={styles.ctaPrimary}
             to="/developers/getting-started"
           >
-            Developer Docs
+            Start Integrating
           </Link>
           <Link className={styles.ctaSecondary} to="/business/">
-            Business Guide
+            Explore Platform
           </Link>
         </div>
       </div>
@@ -109,8 +168,8 @@ function AudienceCards() {
           <div className={styles.audienceIcon}>{"</>"}</div>
           <h2 className={styles.audienceTitle}>For Developers</h2>
           <p className={styles.audienceDesc}>
-            Integrate Ottu's payment APIs, SDKs, and webhooks into your
-            application.
+            Build against one API for cards, wallets, and gateways. Add
+            providers and payment methods without changing your code.
           </p>
           <div className={styles.quickLinks}>
             {DEV_LINKS.map((l) => (
@@ -131,8 +190,9 @@ function AudienceCards() {
           <div className={styles.audienceIcon}>☰</div>
           <h2 className={styles.audienceTitle}>For Business Users</h2>
           <p className={styles.audienceDesc}>
-            Configure gateways, track transactions, and manage your payment
-            operations.
+            Control your payment stack from one dashboard — routing rules,
+            gateway connections, transaction monitoring, and provider switching
+            on your terms.
           </p>
           <div className={styles.quickLinks}>
             {BIZ_LINKS.map((l) => (
@@ -142,7 +202,7 @@ function AudienceCards() {
             ))}
           </div>
           <Link to="/business/" className={styles.audienceCta}>
-            Explore Business Docs →
+            Explore Platform →
           </Link>
         </div>
       </div>
@@ -161,6 +221,48 @@ function ProductHighlights() {
               <span className={styles.highlightIcon}>{h.icon}</span>
               <h3 className={styles.highlightTitle}>{h.title}</h3>
               <p className={styles.highlightDesc}>{h.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function WhyOttu() {
+  return (
+    <section className={styles.whyOttu}>
+      <div className={styles.whyOttuInner}>
+        <h2 className={styles.sectionTitle}>Why Ottu</h2>
+        <p className={styles.whyOttuIntro}>
+          A unified payment layer that keeps merchants independent from
+          single-provider lock-in.
+        </p>
+        <div className={styles.whyOttuGrid}>
+          {WHY_OTTU.map((item) => (
+            <div key={item.title} className={styles.whyOttuCard}>
+              <span className={styles.whyOttuIcon}>{item.icon}</span>
+              <h3 className={styles.whyOttuTitle}>{item.title}</h3>
+              <p className={styles.whyOttuDesc}>{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function HowItWorks() {
+  return (
+    <section className={styles.howItWorks}>
+      <div className={styles.howItWorksInner}>
+        <h2 className={styles.sectionTitle}>How It Works</h2>
+        <div className={styles.howItWorksGrid}>
+          {HOW_IT_WORKS.map((item) => (
+            <div key={item.step} className={styles.howItWorksStep}>
+              <span className={styles.stepNumber}>{item.step}</span>
+              <h3 className={styles.stepTitle}>{item.title}</h3>
+              <p className={styles.stepDesc}>{item.desc}</p>
             </div>
           ))}
         </div>
@@ -203,12 +305,14 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title="Payment Processing Documentation"
-      description="Integrate, configure, and manage payments with Ottu. 50+ payment gateways, smart routing, multi-currency support. PCI DSS Level 1 certified."
+      description="Own your payment stack with Ottu. One API, 50+ gateways, smart routing, zero lock-in. PCI DSS Level 1 certified."
     >
       <main>
         <Hero />
         <StatsBar />
         <AudienceCards />
+        <WhyOttu />
+        <HowItWorks />
         <ProductHighlights />
         <GatewayStrip />
       </main>
