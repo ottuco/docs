@@ -1,6 +1,6 @@
 import React, { useReducer, useRef, useCallback, useEffect, useState, useMemo } from "react";
 import Icon from "@mdi/react";
-import { mdiCheck, mdiLoading, mdiAlertCircleOutline, mdiChevronDown, mdiChevronRight } from "@mdi/js";
+import { mdiCheck, mdiLoading, mdiAlertCircleOutline, mdiChevronDown, mdiChevronRight, mdiChevronLeft } from "@mdi/js";
 import {
   createSandboxSession,
   callPaymentMethods,
@@ -10,12 +10,14 @@ import {
 import { createDemoCallbacks } from "@site/src/utils/checkoutSdk";
 import CheckoutSDKEmbed from "@site/src/components/CheckoutSDKEmbed";
 import WebhookViewer from "@site/src/components/RecurringDemo/WebhookViewer";
+import { COUNTRIES, DEFAULT_COUNTRY_INDEX } from "./countries";
 import styles from "./styles.module.css";
 
 // ── Types ──────────────────────────────────────────────
 
 type Status =
   | "idle"
+  | "step0_country"
   | "step1_calling"
   | "step1_done"
   | "step2_calling"
@@ -35,6 +37,8 @@ type Status =
 
 interface State {
   status: Status;
+  selectedCountryIndex: number;
+  selectedCurrency: string;
   pgCodes: string[];
   sessionId: string;
   checkoutUrl: string;
@@ -49,6 +53,8 @@ interface State {
 
 type Action =
   | { type: "START" }
+  | { type: "SELECT_COUNTRY"; index: number }
+  | { type: "COUNTRY_CONFIRMED" }
   | { type: "STEP1_DONE"; pgCodes: string[]; response: any }
   | { type: "STEP2_DONE"; sessionId: string; checkoutUrl: string; response: any }
   | { type: "CHOOSE_PATH" }
@@ -67,6 +73,8 @@ type Action =
 
 const initialState: State = {
   status: "idle",
+  selectedCountryIndex: DEFAULT_COUNTRY_INDEX,
+  selectedCurrency: COUNTRIES[DEFAULT_COUNTRY_INDEX].currency,
   pgCodes: [],
   sessionId: "",
   checkoutUrl: "",
@@ -82,7 +90,11 @@ const initialState: State = {
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "START":
-      return { ...initialState, status: "step1_calling", orderId: `journey-${Date.now()}-${Math.random().toString(36).slice(2, 7)}` };
+      return { ...initialState, status: "step0_country", selectedCountryIndex: state.selectedCountryIndex, selectedCurrency: state.selectedCurrency, orderId: `journey-${Date.now()}-${Math.random().toString(36).slice(2, 7)}` };
+    case "SELECT_COUNTRY":
+      return { ...state, selectedCountryIndex: action.index, selectedCurrency: COUNTRIES[action.index].currency };
+    case "COUNTRY_CONFIRMED":
+      return { ...state, status: "step1_calling" };
     case "STEP1_DONE":
       return { ...state, status: "step1_done", pgCodes: action.pgCodes, paymentMethodsResponse: action.response };
     case "STEP2_DONE":
@@ -119,31 +131,34 @@ function reducer(state: State, action: Action): State {
 // ── Step metadata ──────────────────────────────────────
 
 const STEPS = [
-  { num: 1, title: "Discover Payment Methods", description: "Call the Payment Methods API to find available gateways for KWD currency. These update automatically when you add or remove gateways in the control panel." },
-  { num: 2, title: "Create Payment Session", description: "Call the Checkout API with the discovered pg_codes to create a payment session. You'll get a session_id and checkout_url." },
-  { num: 3, title: "Accept Payment", description: "Choose how the customer pays: redirect to the hosted checkout page, or embed the Checkout SDK directly on your site." },
-  { num: 4, title: "Webhook Notification", description: "Ottu posts the payment result to your webhook_url. This is the primary way to confirm payment status server-side." },
-  { num: 5, title: "Understand pg_params", description: "The webhook payload includes pg_params — normalized gateway response fields that work consistently across all payment gateways." },
-  { num: 6, title: "Payment Status Query", description: "As a fallback when webhooks don't arrive, query the payment status directly. The response mirrors the webhook payload." },
+  { num: 1, title: "Select Country", description: "Choose the customer's country to set the currency for this payment. The selected currency determines which payment methods are available." },
+  { num: 2, title: "Discover Payment Methods", description: "Call the Payment Methods API to find available gateways for the selected currency. These update automatically when you add or remove gateways in the control panel." },
+  { num: 3, title: "Create Payment Session", description: "Call the Checkout API with the discovered pg_codes to create a payment session. You'll get a session_id and checkout_url." },
+  { num: 4, title: "Accept Payment", description: "Choose how the customer pays: redirect to the hosted checkout page, or embed the Checkout SDK directly on your site." },
+  { num: 5, title: "Webhook Notification", description: "Ottu posts the payment result to your webhook_url. This is the primary way to confirm payment status server-side." },
+  { num: 6, title: "Understand pg_params", description: "The webhook payload includes pg_params — normalized gateway response fields that work consistently across all payment gateways." },
+  { num: 7, title: "Payment Status Query", description: "As a fallback when webhooks don't arrive, query the payment status directly. The response mirrors the webhook payload." },
 ];
 
 // ── Helpers ─────────────────────────────────────────────
 
 function getStepStatus(stepNum: number, state: State): "pending" | "active" | "done" {
   const statusMap: Record<Status, number> = {
-    idle: 0, step1_calling: 1, step1_done: 1,
-    step2_calling: 2, step2_done: 2,
-    step3_choose: 3, step3a_redirect: 3, step3b_sdk: 3, step3b_ready: 3, step3b_success: 3,
-    step4_webhook: 4, step4_done: 4,
-    step5_pgparams: 5,
-    step6_calling: 6, step6_done: 6,
-    complete: 7, error: 0,
+    idle: 0,
+    step0_country: 1,
+    step1_calling: 2, step1_done: 2,
+    step2_calling: 3, step2_done: 3,
+    step3_choose: 4, step3a_redirect: 4, step3b_sdk: 4, step3b_ready: 4, step3b_success: 4,
+    step4_webhook: 5, step4_done: 5,
+    step5_pgparams: 6,
+    step6_calling: 7, step6_done: 7,
+    complete: 8, error: 0,
   };
   const activeStep = statusMap[state.status];
   const isCallingThis = (
-    (stepNum === 1 && state.status === "step1_calling") ||
-    (stepNum === 2 && state.status === "step2_calling") ||
-    (stepNum === 6 && state.status === "step6_calling")
+    (stepNum === 2 && state.status === "step1_calling") ||
+    (stepNum === 3 && state.status === "step2_calling") ||
+    (stepNum === 7 && state.status === "step6_calling")
   );
   if (stepNum < activeStep) return "done";
   if (stepNum === activeStep || isCallingThis) return "active";
@@ -169,6 +184,91 @@ function ApiPanel({ label, data }: { label: string; data: any }) {
   );
 }
 
+// ── Country Carousel ────────────────────────────────────
+
+function CountryCarousel({ selectedIndex, onSelect, onConfirm }: {
+  selectedIndex: number;
+  onSelect: (index: number) => void;
+  onConfirm: () => void;
+}) {
+  const total = COUNTRIES.length;
+  const wrap = (i: number) => ((i % total) + total) % total;
+  const country = COUNTRIES[selectedIndex];
+
+  const visibleOffsets = [-2, -1, 0, 1, 2];
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "ArrowLeft") onSelect(wrap(selectedIndex - 1));
+    else if (e.key === "ArrowRight") onSelect(wrap(selectedIndex + 1));
+    else if (e.key === "Enter") onConfirm();
+  }, [selectedIndex, onSelect, onConfirm]);
+
+  return (
+    <div className={styles.countryCarousel} onKeyDown={handleKeyDown} tabIndex={0}>
+      <span className={styles.carouselRegion}>{country.region}</span>
+
+      <div className={styles.carouselViewport}>
+        <button
+          className={styles.carouselArrow}
+          onClick={() => onSelect(wrap(selectedIndex - 1))}
+          aria-label="Previous country"
+        >
+          <Icon path={mdiChevronLeft} size={0.9} />
+        </button>
+
+        <div className={styles.carouselTrack}>
+          {visibleOffsets.map((offset) => {
+            const idx = wrap(selectedIndex + offset);
+            const c = COUNTRIES[idx];
+            const absOffset = Math.abs(offset);
+            const scale = offset === 0 ? 1 : absOffset === 1 ? 0.7 : 0.5;
+            const opacity = offset === 0 ? 1 : absOffset === 1 ? 0.5 : 0.25;
+            const translateX = offset * 90;
+
+            return (
+              <div
+                key={`${offset}-${idx}`}
+                className={styles.carouselItem}
+                style={{
+                  transform: `translateX(${translateX}px) scale(${scale})`,
+                  opacity,
+                  zIndex: 3 - absOffset,
+                }}
+                onClick={() => offset !== 0 && onSelect(idx)}
+              >
+                <div className={`${styles.carouselFlag} ${offset === 0 ? styles.carouselFlagActive : ""}`}>
+                  {c.flag}
+                </div>
+                {offset === 0 && (
+                  <>
+                    <p className={styles.carouselCountryName}>{c.name}</p>
+                    <span className={styles.carouselCurrencyBadge}>{c.currency}</span>
+                  </>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <button
+          className={styles.carouselArrow}
+          onClick={() => onSelect(wrap(selectedIndex + 1))}
+          aria-label="Next country"
+        >
+          <Icon path={mdiChevronRight} size={0.9} />
+        </button>
+      </div>
+
+      <div className={styles.carouselConfirm}>
+        <button className={styles.primaryBtn} onClick={onConfirm}>
+          Continue with {country.currency}
+        </button>
+        <p className={styles.carouselHint}>Use arrows to browse countries</p>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Component ──────────────────────────────────────
 
 export default function PaymentJourneyInner() {
@@ -189,12 +289,13 @@ export default function PaymentJourneyInner() {
   useEffect(() => {
     if (state.status === "idle" || state.status === "error" || state.status === "complete") return;
     const statusMap: Record<string, number> = {
-      step1_calling: 1, step1_done: 1,
-      step2_calling: 2, step2_done: 2,
-      step3_choose: 3, step3a_redirect: 3, step3b_sdk: 3, step3b_ready: 3, step3b_success: 3,
-      step4_webhook: 4, step4_done: 4,
-      step5_pgparams: 5,
-      step6_calling: 6, step6_done: 6,
+      step0_country: 1,
+      step1_calling: 2, step1_done: 2,
+      step2_calling: 3, step2_done: 3,
+      step3_choose: 4, step3a_redirect: 4, step3b_sdk: 4, step3b_ready: 4, step3b_success: 4,
+      step4_webhook: 5, step4_done: 5,
+      step5_pgparams: 6,
+      step6_calling: 7, step6_done: 7,
     };
     const activeStep = statusMap[state.status] ?? 0;
     if (activeStep === 0) return;
@@ -220,15 +321,15 @@ export default function PaymentJourneyInner() {
   // ── Step 1: Payment Methods ─────────────────────────
 
   const runStep1 = useCallback(async () => {
-    dispatch({ type: "START" });
+    dispatch({ type: "COUNTRY_CONFIRMED" });
     try {
-      const response = await callPaymentMethods({ currencies: ["KWD"], plugin: "payment_request", operation: "purchase", is_sandbox: true, tags: ["demo"] });
+      const response = await callPaymentMethods({ currencies: [state.selectedCurrency], plugin: "payment_request", operation: "purchase", is_sandbox: true, tags: ["demo"] });
       const pgCodes = response?.payment_methods?.map((m: any) => m.code) ?? response?.pg_codes ?? [];
       dispatch({ type: "STEP1_DONE", pgCodes, response });
     } catch (err: any) {
       dispatch({ type: "ERROR", message: err.message });
     }
-  }, []);
+  }, [state.selectedCurrency]);
 
   // ── Step 2: Checkout API ────────────────────────────
 
@@ -238,7 +339,7 @@ export default function PaymentJourneyInner() {
       const webhookUrl = `${getWebhookBaseUrl()}/webhook/${state.orderId}`;
       const response = await createSandboxSession({
         pg_codes: state.pgCodes.length > 0 ? state.pgCodes : ["direct-payment"],
-        currency_code: "KWD",
+        currency_code: state.selectedCurrency,
         customer_id: "sandbox",
         extra: {
           include_sdk_setup_preload: true,
@@ -249,7 +350,7 @@ export default function PaymentJourneyInner() {
     } catch (err: any) {
       dispatch({ type: "ERROR", message: err.message });
     }
-  }, [state.pgCodes, state.orderId]);
+  }, [state.pgCodes, state.orderId, state.selectedCurrency]);
 
   // ── Step 6: PSQ ─────────────────────────────────────
 
@@ -303,7 +404,7 @@ export default function PaymentJourneyInner() {
               <h3 className={`${styles.cardTitle} ${status === "pending" ? styles.cardTitlePending : ""}`}>
                 {meta.title}
               </h3>
-              {isActive && <p className={styles.cardSubtitle}>Step {stepNum} of 6</p>}
+              {isActive && <p className={styles.cardSubtitle}>Step {stepNum} of 7</p>}
             </div>
             {isDone && (
               <div className={styles.doneRight}>
@@ -335,7 +436,7 @@ export default function PaymentJourneyInner() {
           Walk through a complete Ottu payment integration with live API calls.
           Every step runs against our sandbox — no real charges.
         </p>
-        <button className={styles.primaryBtn} onClick={runStep1}>
+        <button className={styles.primaryBtn} onClick={() => dispatch({ type: "START" })}>
           Start Journey
         </button>
       </div>
@@ -385,8 +486,21 @@ export default function PaymentJourneyInner() {
   return (
     <div className={styles.journey}>
 
-      {/* ── Step 1: Payment Methods ─────────────── */}
+      {/* ── Step 1: Country Selector ──────────────── */}
       {renderStep(1, (
+        <>
+          {(state.status === "step0_country" || isStepExpanded(1)) && (
+            <CountryCarousel
+              selectedIndex={state.selectedCountryIndex}
+              onSelect={(index) => dispatch({ type: "SELECT_COUNTRY", index })}
+              onConfirm={runStep1}
+            />
+          )}
+        </>
+      ))}
+
+      {/* ── Step 2: Payment Methods ─────────────── */}
+      {renderStep(2, (
         <>
           {state.status === "step1_calling" && (
             <div className={styles.actions}>
@@ -395,12 +509,12 @@ export default function PaymentJourneyInner() {
               </button>
             </div>
           )}
-          {(state.status === "step1_done" || isStepExpanded(1)) && (
+          {(state.status === "step1_done" || isStepExpanded(2)) && (
             <>
               <ApiPanel label="POST /b/pbl/v2/payment-methods/" data={{
                 plugin: "payment_request",
                 operation: "purchase",
-                currencies: ["KWD"],
+                currencies: [state.selectedCurrency],
                 is_sandbox: true,
                 tags: ["demo"],
               }} />
@@ -408,7 +522,7 @@ export default function PaymentJourneyInner() {
               {state.status === "step1_done" && (
                 <div className={styles.actions}>
                   <button className={styles.primaryBtn} onClick={() => { dispatch({ type: "STEP2_DONE", sessionId: "", checkoutUrl: "", response: null }); runStep2(); }}>
-                    Continue to Step 2
+                    Continue to Step 3
                   </button>
                 </div>
               )}
@@ -417,8 +531,8 @@ export default function PaymentJourneyInner() {
         </>
       ))}
 
-      {/* ── Step 2: Checkout API ────────────────── */}
-      {renderStep(2, (
+      {/* ── Step 3: Checkout API ────────────────── */}
+      {renderStep(3, (
         <>
           {state.status === "step2_calling" || (state.status === "step2_done" && !state.sessionId) ? (
             <div className={styles.actions}>
@@ -426,13 +540,13 @@ export default function PaymentJourneyInner() {
                 <span className={styles.spinner} /> Creating payment session...
               </button>
             </div>
-          ) : (state.status === "step2_done" || isStepExpanded(2)) && state.sessionId ? (
+          ) : (state.status === "step2_done" || isStepExpanded(3)) && state.sessionId ? (
             <>
               <ApiPanel label="POST /b/checkout/v1/pymt-txn/" data={{
                 type: "payment_request",
                 pg_codes: state.pgCodes,
                 amount: "20",
-                currency_code: "KWD",
+                currency_code: state.selectedCurrency,
                 customer_id: "sandbox",
                 webhook_url: `${getWebhookBaseUrl()}/webhook/${state.orderId}`,
               }} />
@@ -449,8 +563,8 @@ export default function PaymentJourneyInner() {
         </>
       ))}
 
-      {/* ── Step 3: Choose Path ─────────────────── */}
-      {renderStep(3, (
+      {/* ── Step 4: Choose Path ─────────────────── */}
+      {renderStep(4, (
         <>
           {state.status === "step3_choose" && (
             <div className={styles.pathSelector}>
@@ -518,7 +632,7 @@ export default function PaymentJourneyInner() {
             </div>
           )}
 
-          {isStepExpanded(3) && (
+          {isStepExpanded(4) && (
             <>
               {state.chosenPath === "redirect" && (
                 <ApiPanel label="checkout_url" data={state.checkoutUrl} />
@@ -531,20 +645,20 @@ export default function PaymentJourneyInner() {
         </>
       ))}
 
-      {/* ── Step 4: Webhook ─────────────────────── */}
-      {renderStep(4, (
+      {/* ── Step 5: Webhook ─────────────────────── */}
+      {renderStep(5, (
         <>
           <WebhookViewer orderId={state.orderId} label="Live Webhook Feed" onEvent={(event) => {
             if (!state.webhookPayload) {
               dispatch({ type: "WEBHOOK_RECEIVED", payload: event.payload });
             }
           }} />
-          {!state.webhookPayload && !isStepExpanded(4) && (
+          {!state.webhookPayload && !isStepExpanded(5) && (
             <p className={styles.cardDescription} style={{ marginTop: 12 }}>
               Waiting for the payment to complete. Once Ottu processes the payment, the webhook will appear above in real-time.
             </p>
           )}
-          {state.webhookPayload && !isStepExpanded(4) && (
+          {state.webhookPayload && !isStepExpanded(5) && (
             <div className={styles.actions}>
               <button className={styles.primaryBtn} onClick={() => dispatch({ type: "CONTINUE_PGPARAMS" })}>
                 Continue — Understand pg_params
@@ -554,8 +668,8 @@ export default function PaymentJourneyInner() {
         </>
       ))}
 
-      {/* ── Step 5: pg_params ──────────────────── */}
-      {renderStep(5, (
+      {/* ── Step 6: pg_params ──────────────────── */}
+      {renderStep(6, (
         <>
           {state.webhookPayload?.pg_params ? (
             <>
@@ -588,7 +702,7 @@ export default function PaymentJourneyInner() {
               The <code>pg_params</code> object normalizes gateway responses into consistent fields like <code>card_number</code>, <code>auth_code</code>, <code>result</code>, and <code>rrn</code> — regardless of which gateway processed the payment.
             </p>
           )}
-          {!isStepExpanded(5) && (
+          {!isStepExpanded(6) && (
             <div className={styles.actions}>
               <button className={styles.primaryBtn} onClick={runStep6}>
                 Continue — Payment Status Query
@@ -598,8 +712,8 @@ export default function PaymentJourneyInner() {
         </>
       ))}
 
-      {/* ── Step 6: PSQ ────────────────────────── */}
-      {renderStep(6, (
+      {/* ── Step 7: PSQ ────────────────────────── */}
+      {renderStep(7, (
         <>
           {state.status === "step6_calling" && (
             <div className={styles.actions}>
@@ -608,7 +722,7 @@ export default function PaymentJourneyInner() {
               </button>
             </div>
           )}
-          {(state.status === "step6_done" || isStepExpanded(6)) && (
+          {(state.status === "step6_done" || isStepExpanded(7)) && (
             <>
               <ApiPanel label="POST /b/pbl/v2/inquiry/" data={{ session_id: state.sessionId }} />
               <ApiPanel label="Response — Payment Status" data={state.psqResponse} />
