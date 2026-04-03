@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   loadCheckoutScript,
   initCheckout,
+  CHECKOUT_SDK_THEME,
   type CheckoutCallbacks,
 } from "@site/src/utils/checkoutSdk";
 
@@ -11,8 +12,6 @@ interface CheckoutSDKEmbedProps {
   onError?: (message: string) => void;
   callbacks?: CheckoutCallbacks;
   setupPreload?: any;
-  formsOfPayment?: string[];
-  theme?: Record<string, any>;
 }
 
 let embedCounter = 0;
@@ -23,8 +22,6 @@ export default function CheckoutSDKEmbed({
   onError,
   callbacks,
   setupPreload,
-  formsOfPayment,
-  theme,
 }: CheckoutSDKEmbedProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerId] = useState(() => `checkout-sdk-embed-${++embedCounter}`);
@@ -33,14 +30,10 @@ export default function CheckoutSDKEmbed({
   const onErrorRef = useRef(onError);
   const callbacksRef = useRef(callbacks);
   const setupPreloadRef = useRef(setupPreload);
-  const formsOfPaymentRef = useRef(formsOfPayment);
-  const themeRef = useRef(theme);
   onReadyRef.current = onReady;
   onErrorRef.current = onError;
   callbacksRef.current = callbacks;
   setupPreloadRef.current = setupPreload;
-  formsOfPaymentRef.current = formsOfPayment;
-  themeRef.current = theme;
 
   useEffect(() => {
     if (!sessionId || initedForSession.current === sessionId) return;
@@ -58,8 +51,7 @@ export default function CheckoutSDKEmbed({
           sessionId,
           callbacks: callbacksRef.current,
           setupPreload: setupPreloadRef.current,
-          formsOfPayment: formsOfPaymentRef.current,
-          theme: themeRef.current,
+          theme: CHECKOUT_SDK_THEME,
         });
         onReadyRef.current?.();
       } catch (err: any) {

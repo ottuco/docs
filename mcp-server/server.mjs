@@ -77,8 +77,9 @@ function handleWebhookPost(orderId, req, res) {
 function handleWebhookSSE(orderId, req, res) {
   res.writeHead(200, {
     "Content-Type": "text/event-stream",
-    "Cache-Control": "no-cache",
+    "Cache-Control": "no-cache, no-transform",
     Connection: "keep-alive",
+    "X-Accel-Buffering": "no",
     "Access-Control-Allow-Origin": "*",
   });
 
@@ -90,7 +91,13 @@ function handleWebhookSSE(orderId, req, res) {
   }
 
   entry.clients.add(res);
-  req.on("close", () => entry.clients.delete(res));
+
+  // Send keepalive comments every 15s to prevent proxy/Cloudflare from closing the connection
+  const keepalive = setInterval(() => res.write(": keepalive\n\n"), 15000);
+  req.on("close", () => {
+    clearInterval(keepalive);
+    entry.clients.delete(res);
+  });
 }
 
 // ── MCP Artifacts ────────────────────────────────────────────────────────────

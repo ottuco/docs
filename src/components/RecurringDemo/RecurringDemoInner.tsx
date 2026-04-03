@@ -8,7 +8,6 @@ import {
   extractPgCodes,
   getWebhookBaseUrl,
 } from "@site/src/utils/sandbox";
-import { CHECKOUT_SDK_THEME_MINIMAL } from "@site/src/utils/checkoutSdk";
 import ApiPanel from "@site/src/components/ApiPanel";
 import CheckoutSDKEmbed from "@site/src/components/CheckoutSDKEmbed";
 import { TEST_CARD } from "@site/src/components/TestCardCallout";
@@ -537,7 +536,6 @@ export default function RecurringDemoInner() {
                   sessionId={state.citSessionId}
                   callbacks={sdkCallbacksRef.current}
                   setupPreload={(state.citResponse as any)?.sdk_setup_preload_payload}
-                  theme={CHECKOUT_SDK_THEME_MINIMAL}
                 />
               </>
             )}

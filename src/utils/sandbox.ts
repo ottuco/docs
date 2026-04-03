@@ -33,6 +33,7 @@ export async function createSandboxSession(
     amount: options.amount ?? "20",
     currency_code: options.currency_code ?? "KWD",
     customer_id: options.customer_id ?? "sandbox",
+    include_sdk_setup_preload: true,
     ...options.extra,
   };
 
