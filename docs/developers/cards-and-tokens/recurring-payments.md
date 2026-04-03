@@ -6,6 +6,7 @@ hide_table_of_contents: true
 
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import RecurringDemo from "@site/src/components/RecurringDemo";
+import TestCardCallout from "@site/src/components/TestCardCallout";
 import FAQ, { FAQItem } from '@site/src/components/FAQ';
 
 # Recurring Payments & Auto-Debit
@@ -89,9 +90,7 @@ graph LR
 
 Experience the complete recurring payment lifecycle. Save a test card, watch the webhook deliver the token in real time, then charge the card automatically — choose between Two-Step or One-Step checkout.
 
-:::info Test Card
-Use card number **4111 1111 1111 1111** with any future expiry date and any CVV.
-:::
+<TestCardCallout />
 
 <RecurringDemo />
 
@@ -99,9 +98,24 @@ Use card number **4111 1111 1111 1111** with any future expiry date and any CVV.
 
 #### First Payment (CIT)
 
+**Step 0: Discover Payment Methods**
+
+Before creating a session, call the [Payment Methods API](../payments/payment-methods) with `auto_debit: true` to discover which gateways support tokenization and auto-debit:
+
+```json title="POST /b/pbl/v2/payment-methods/ — Discover Auto-Debit Gateways"
+{
+  "plugin": "payment_request",
+  "operation": "purchase",
+  "currencies": ["KWD"],
+  "auto_debit": true
+}
+```
+
+Use the returned `pg_codes` in the next step.
+
 **Step 1: Create Payment Session**
 
-Create a session with `payment_type: auto_debit` and the `agreement` object:
+Create a session with `payment_type: auto_debit` and the `agreement` object. Use a unique `customer_id` per customer — all future MIT charges and saved cards are associated with this ID.
 
 ```json title="POST /b/checkout/v1/pymt-txn/ — Create CIT Session"
 {
@@ -116,8 +130,8 @@ Create a session with `payment_type: auto_debit` and the `agreement` object:
     "id": "A123456789",
     "type": "recurring",
     "amount_variability": "fixed",
-    "start_date": "13/12/2023",
-    "expiry_date": "01/10/2024",
+    "start_date": "01/04/2026",
+    "expiry_date": "01/04/2027",
     "cycle_interval_days": 30,
     "total_cycles": 12,
     "frequency": "monthly",

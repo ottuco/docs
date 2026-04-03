@@ -8,8 +8,10 @@ import {
   getWebhookBaseUrl,
 } from "@site/src/utils/sandbox";
 import { createDemoCallbacks } from "@site/src/utils/checkoutSdk";
+import ApiPanel from "@site/src/components/ApiPanel";
 import CheckoutSDKEmbed from "@site/src/components/CheckoutSDKEmbed";
 import WebhookViewer from "@site/src/components/RecurringDemo/WebhookViewer";
+import { TEST_CARD } from "@site/src/components/TestCardCallout";
 import { COUNTRIES, DEFAULT_COUNTRY_INDEX } from "./countries";
 import styles from "./styles.module.css";
 
@@ -165,25 +167,6 @@ function getStepStatus(stepNum: number, state: State): "pending" | "active" | "d
   return "pending";
 }
 
-// ── ApiPanel ────────────────────────────────────────────
-
-function ApiPanel({ label, data }: { label: string; data: any }) {
-  const text = typeof data === "string" ? data : JSON.stringify(data, null, 2);
-  return (
-    <div className={styles.apiPanel}>
-      <div className={styles.apiPanelHeader}>
-        <span>{label}</span>
-        <button className={styles.apiPanelCopy} onClick={() => navigator.clipboard?.writeText(text)}>
-          Copy
-        </button>
-      </div>
-      <div className={styles.apiPanelBody}>
-        <pre>{text}</pre>
-      </div>
-    </div>
-  );
-}
-
 // ── Country Carousel ────────────────────────────────────
 
 function CountryCarousel({ selectedIndex, onSelect, onConfirm }: {
@@ -323,7 +306,7 @@ export default function PaymentJourneyInner() {
   const runStep1 = useCallback(async () => {
     dispatch({ type: "COUNTRY_CONFIRMED" });
     try {
-      const response = await callPaymentMethods({ currencies: [state.selectedCurrency], plugin: "payment_request", operation: "purchase", is_sandbox: true, tags: ["demo"] });
+      const response = await callPaymentMethods({ currencies: [state.selectedCurrency], plugin: "payment_request", operation: "purchase", type: "sandbox", tags: ["demo"] });
       const pgCodes = response?.payment_methods?.map((m: any) => m.code) ?? response?.pg_codes ?? [];
       dispatch({ type: "STEP1_DONE", pgCodes, response });
     } catch (err: any) {
@@ -515,7 +498,7 @@ export default function PaymentJourneyInner() {
                 plugin: "payment_request",
                 operation: "purchase",
                 currencies: [state.selectedCurrency],
-                is_sandbox: true,
+                type: "sandbox",
                 tags: ["demo"],
               }} />
               <ApiPanel label="Response — Payment Methods" data={state.paymentMethodsResponse} />
@@ -585,7 +568,7 @@ export default function PaymentJourneyInner() {
             <>
               <ApiPanel label="checkout_url" data={state.checkoutUrl} />
               <p className={styles.cardDescription}>
-                Open the payment link in a new tab, complete the test payment (use card <strong>5123 4500 0000 0008</strong>, expiry <strong>01/39</strong>, CVV <strong>100</strong>), then come back here to see the webhook.
+                Open the payment link in a new tab, complete the test payment (use card <strong>{TEST_CARD.number}</strong>, expiry <strong>{TEST_CARD.expiry}</strong>, CVV <strong>{TEST_CARD.cvv}</strong>), then come back here to see the webhook.
               </p>
               <div className={styles.actions}>
                 <button className={styles.primaryBtn} onClick={() => {
@@ -608,7 +591,7 @@ export default function PaymentJourneyInner() {
               />
               {state.status === "step3b_ready" && (
                 <p className={styles.cardDescription} style={{ marginTop: 16 }}>
-                  Enter test card <strong>5123 4500 0000 0008</strong>, expiry <strong>01/39</strong>, CVV <strong>100</strong>. After payment, the webhook will arrive below.
+                  Enter test card <strong>{TEST_CARD.number}</strong>, expiry <strong>{TEST_CARD.expiry}</strong>, CVV <strong>{TEST_CARD.cvv}</strong>. After payment, the webhook will arrive below.
                 </p>
               )}
             </>
