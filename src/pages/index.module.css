@@ -158,6 +158,23 @@
   margin-top: 4px;
 }
 
+/* ── Position Statement ────────────────────────────── */
+.positionStatement {
+  padding: 2.5rem 2rem 0;
+  text-align: center;
+}
+
+.positionText {
+  max-width: 640px;
+  margin: 0 auto;
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.6;
+  color: var(--ifm-font-color-base);
+  opacity: 0.6;
+  letter-spacing: -0.2px;
+}
+
 /* ── Audience Cards ─────────────────────────────────── */
 .audience {
   padding: 4rem 2rem;

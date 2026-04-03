@@ -38,18 +38,18 @@ const BIZ_LINKS = [
 
 const HIGHLIGHTS = [
   {
-    title: "Smart Payment Routing",
-    desc: "Route every payment to the best gateway based on BIN, country, cost, and real-time success rate. Automatic failover when a provider drops.",
-    icon: "↗",
-  },
-  {
-    title: "Multi-Currency",
-    desc: "Accept payments in multiple currencies with automatic exchange and configurable markup fees.",
+    title: "Tokenization & Vaulting",
+    desc: "Store cards securely and enable recurring payments, auto-debit, and one-click checkout. PCI-compliant by default.",
     icon: "◎",
   },
   {
-    title: "Notifications",
-    desc: "Email, SMS, and WhatsApp notifications at every stage of the payment lifecycle.",
+    title: "Checkout Experience",
+    desc: "Pre-built SDKs for web, iOS, Android, Flutter, and React Native. Customize the payment flow or use hosted checkout.",
+    icon: "▤",
+  },
+  {
+    title: "Multi-Currency",
+    desc: "Accept payments in multiple currencies with automatic exchange, configurable markup, and cross-border settlement.",
     icon: "◈",
   },
   {
@@ -61,18 +61,18 @@ const HIGHLIGHTS = [
 
 const WHY_OTTU = [
   {
-    title: "Payment Portability",
+    title: "Payment Portability (OPP)",
     desc: "Switch banks or acquirers without rebuilding your integration. Your payment stack stays intact when your strategy changes.",
     icon: "⇄",
   },
   {
     title: "Multi-Gateway Orchestration",
-    desc: "Connect and manage multiple payment providers from one platform. No duplicate integrations, no fragmented operations.",
+    desc: "Connect multiple payment providers from one platform. No duplicate integrations. No fragmented operations.",
     icon: "⊞",
   },
   {
     title: "Merchant-Owned Stack",
-    desc: "Process through your own merchant relationships and MIDs. Ottu orchestrates — you keep ownership and control.",
+    desc: "Process through your own merchant relationships and MIDs. Ottu orchestrates. You keep control.",
     icon: "◉",
   },
   {
@@ -86,7 +86,7 @@ const WHY_OTTU = [
     icon: "◆",
   },
   {
-    title: "Regional Expertise",
+    title: "Regional Payment Realities",
     desc: "Built for Middle East payment realities — KNET, mada, Benefit, local acquiring — not generic global assumptions.",
     icon: "◈",
   },
@@ -96,12 +96,12 @@ const HOW_IT_WORKS = [
   {
     step: 1,
     title: "Integrate Ottu",
-    desc: "Connect your application through one API with SDKs, webhooks, and sandbox testing.",
+    desc: "Connect your application through one unified API with SDKs, webhooks, and sandbox testing.",
   },
   {
     step: 2,
-    title: "Connect Gateways",
-    desc: "Add your payment providers and acquirer relationships. Use your own MIDs.",
+    title: "Connect Providers",
+    desc: "Add payment providers, acquirers, and wallet services. Use your own MIDs.",
   },
   {
     step: 3,
@@ -125,9 +125,9 @@ function Hero() {
           <span className={styles.heroAccent}>Switch freely.</span>
         </Heading>
         <p className={styles.heroSub}>
-          Ottu connects your business to 50+ payment gateways through one API.
-          Configure routing, add providers, and change acquirers — without
-          rebuilding your integration.
+          Ottu connects your business to 50+ payment gateways through one
+          unified API. Configure routing, add providers, and change acquirers —
+          without rebuilding your integration.
         </p>
         <div className={styles.heroCtas}>
           <Link
@@ -156,6 +156,17 @@ function StatsBar() {
           </div>
         ))}
       </div>
+    </section>
+  );
+}
+
+function PositionStatement() {
+  return (
+    <section className={styles.positionStatement}>
+      <p className={styles.positionText}>
+        The unified payment layer for merchants who want control, portability,
+        and scale.
+      </p>
     </section>
   );
 }
@@ -190,7 +201,7 @@ function AudienceCards() {
           <div className={styles.audienceIcon}>☰</div>
           <h2 className={styles.audienceTitle}>For Business Users</h2>
           <p className={styles.audienceDesc}>
-            Control your payment stack from one dashboard — routing rules,
+            Control your payment stack from one platform — routing rules,
             gateway connections, transaction monitoring, and provider switching
             on your terms.
           </p>
@@ -235,7 +246,7 @@ function WhyOttu() {
       <div className={styles.whyOttuInner}>
         <h2 className={styles.sectionTitle}>Why Ottu</h2>
         <p className={styles.whyOttuIntro}>
-          A unified payment layer that keeps merchants independent from
+          A unified payment layer that gives merchants control without
           single-provider lock-in.
         </p>
         <div className={styles.whyOttuGrid}>
@@ -310,6 +321,7 @@ export default function Home(): ReactNode {
       <main>
         <Hero />
         <StatsBar />
+        <PositionStatement />
         <AudienceCards />
         <WhyOttu />
         <HowItWorks />
