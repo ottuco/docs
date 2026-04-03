@@ -62,10 +62,10 @@ const config: Config = {
     // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
     navbar: {
-      title: 'Ottu',
+      title: '',
       logo: {
         alt: 'Ottu Logo',
-        src: 'img/ottu_logo.avif',
+        src: 'img/ottu_logo.webp',
       },
       items: [
         {
