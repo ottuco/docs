@@ -60,7 +60,7 @@
   --ifm-navbar-background-color: #ffffff;
   --ifm-navbar-shadow: none;
   --ifm-navbar-padding-horizontal: 1rem;
-  --ifm-navbar-item-padding-horizontal: 0.6rem;
+  --ifm-navbar-item-padding-horizontal: 0.75rem;
 
   /* Footer */
   --ifm-footer-background-color: #f7f7f7;
@@ -307,7 +307,7 @@ html[data-theme="dark"] {
 /* Medium screens: tighten item spacing to delay early hamburger collapse */
 @media (max-width: 1280px) and (min-width: 997px) {
   .navbar__item {
-    padding: 0 0.4rem;
+    padding: 0 0.5rem;
   }
   .navbar__link {
     font-size: 0.875rem;
@@ -322,7 +322,7 @@ html[data-theme="dark"] {
     flex-direction: row;
     align-items: center;
     flex-wrap: nowrap;
-    gap: 4px;
+    gap: 8px;
     flex-shrink: 0;
   }
 
@@ -337,11 +337,21 @@ html[data-theme="dark"] {
     display: none;
   }
 
-  /* Search bar: stay in flow, don't let plugin's position:relative escape flex */
+  /* Search bar: render after MCP (rightmost).
+     When the input expands on focus, overlay the navbar instead of
+     pushing MCP aside. */
   .navbar__search {
     position: static !important;
-    flex-shrink: 1;
+    flex-shrink: 0;
     min-width: 2rem;
+    order: 10;
+  }
+
+  /* Expanded search: overlay the navbar from the right edge */
+  .navbar__search:has(:global(.navbar__search-input):focus) {
+    position: absolute !important;
+    right: var(--ifm-navbar-padding-horizontal, 1rem);
+    z-index: 10;
   }
 
   /* Hide the ctrl+K search hint on mobile — the plugin only hides it at ≤576px
@@ -349,6 +359,24 @@ html[data-theme="dark"] {
      Attribute selector matches the CSS-module hashed class (e.g. searchHintContainer_AbC). */
   .navbar__search [class*="searchHintContainer"] {
     display: none;
+  }
+}
+
+/* Desktop: even spacing between right-side navbar items */
+@media (min-width: 997px) {
+  .navbar__items--right {
+    gap: 0.25rem;
+    align-items: center;
+  }
+
+  /* Add breathing room between MCP button and adjacent links */
+  .mcp-install-dropdown {
+    margin-right: 0.25rem;
+  }
+
+  /* Consistent left margin before search to separate it from theme toggle */
+  .navbar__search {
+    margin-left: 0.5rem;
   }
 }
 
