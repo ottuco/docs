@@ -316,47 +316,53 @@ html[data-theme="dark"] {
 
 /* Mobile (hamburger active): fix right-side layout so items don't overlap */
 @media (max-width: 996px) {
-  /* Right items: explicit flex row, no overlap */
+  /* Allow right container to shrink so expanded search doesn't push logo off-screen.
+     Infima sets flex: 0 0 auto — override flex-shrink to 1. */
   .navbar__items--right {
     display: flex;
     flex-direction: row;
     align-items: center;
     flex-wrap: nowrap;
     gap: 8px;
-    flex-shrink: 0;
+    flex: 0 1 auto;
   }
 
-  /* Keep every right item in normal flow */
+  /* MCP button keeps its size */
   .navbar__items--right > * {
     flex-shrink: 0;
     position: static;
   }
 
-  /* Hide GitHub and Ottu.com from the bar — reachable via hamburger sidebar */
+  /* Hide GitHub and Ottu.com — reachable via hamburger sidebar */
   .navbar__items--right > .navbar__item.navbar__link {
     display: none;
   }
 
-  /* Search bar: render after MCP (rightmost).
-     When the input expands on focus, overlay the navbar instead of
-     pushing MCP aside. */
+  /* Swap order: search first (left), MCP last (right) */
   .navbar__search {
     position: static !important;
-    flex-shrink: 0;
+    flex-shrink: 1;
     min-width: 2rem;
+    overflow: hidden;
+    order: -1;
+  }
+
+  .mcp-install-dropdown {
     order: 10;
   }
 
-  /* Expanded search: overlay the navbar from the right edge */
-  .navbar__search:has(:global(.navbar__search-input):focus) {
-    position: absolute !important;
-    right: var(--ifm-navbar-padding-horizontal, 1rem);
-    z-index: 10;
+  /* Override Infima's 9rem (144px) width — too wide for mobile.
+     Use a fluid width that leaves room for hamburger + logo + MCP. */
+  .navbar__search-input {
+    width: 2rem; /* collapsed by default (matches search plugin) */
+  }
+  .navbar__search-input:focus {
+    width: calc(100vw - 250px);
+    min-width: 5rem;
+    max-width: 9rem;
   }
 
-  /* Hide the ctrl+K search hint on mobile — the plugin only hides it at ≤576px
-     but the kbd badges overflow the input at 577px–996px too.
-     Attribute selector matches the CSS-module hashed class (e.g. searchHintContainer_AbC). */
+  /* Hide ctrl+K hint on mobile (plugin only hides at ≤576px) */
   .navbar__search [class*="searchHintContainer"] {
     display: none;
   }
