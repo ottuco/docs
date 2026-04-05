@@ -11,7 +11,7 @@ import FAQ, { FAQItem } from "@site/src/components/FAQ";
 
 Tokenization significantly reduces the risk associated with handling sensitive customer card data. Instead of storing the actual card details, a unique token is generated and used for future transactions, thus enhancing the security of your payment processes. This feature is currently compatible with MasterCard, Visa, and STC Pay, with further options planned for future inclusion.
 
-## [What is Tokenization?](#what-is-tokenization)
+## What is Tokenization?
 
 Consider tokenization as a powerful security vault where all sensitive data is replaced with a secure code, or [token](https://en.wikipedia.org/wiki/Security_token).&#x20;
 
@@ -19,18 +19,18 @@ Just like a vault secures precious jewels by keeping them out of sight and repla
 
 With Ottu, we handle this complexity, so you don’t have to! To activate tokenization or for any inquiries, KSA merchants can reach us at [support@ottu.com](mailto:support@ottu.com).
 
-## [How to Add New Card](#how-to-add-new-card)
+## How to Add New Card
 
 Ottu provides two distinct methods for merchants to add a new card to a customer's profile, catering to different scenarios and requirements. These methods are:
 
 1. **Adding a New Card Without Payment**: This approach is designed for situations where you want to store a customer's card details for future transactions without charging them at the moment of addition. It's especially useful for streamlining the checkout process for repeat customers, enhancing the user experience by removing the need to enter card details for every purchase. Please check [here](#tokenization-without-payment) for more details.
 2. **Adding a New Card With Payment**: Conversely, this method allows merchants to add a customer's card details to their profile while simultaneously processing a payment. This is suitable for instances where immediate payment is required, but the customer also prefers to save their card details for future convenience. Please check [here](#tokenization-with-payment) for more information.
 
-## [Tokenization without Payment](#tokenization-without-payment)
+## Tokenization without Payment
 
 It offers a streamlined way for merchants to securely add a new card to a specific customer's profile without conducting an actual payment transaction. This capability is particularly useful for creating a more efficient and user-friendly payment process, allowing for the future use of saved card details without requiring customers to re-enter their information for every transaction.
 
-### [**Requirements**](#requirements)
+### Requirements
 
 To successfully tokenize a card, merchants must adhere to the following requirements when sending a request to the Ottu `Checkout API`:
 
@@ -47,7 +47,7 @@ The merchant must ensure that the selected Payment Gateway `pg_codes` supports t
 
 :::
 
-### [The Process](#the-process)
+### The Process
 
 Tokenization involves a series of steps designed to securely capture and convert card details into a `token`. Here is a detailed overview of the process:
 
@@ -75,7 +75,7 @@ Tokenization involves a series of steps designed to securely capture and convert
 
 This tokenization process ensures that merchants can securely store card details for future transactions without handling sensitive card information directly, thereby enhancing the overall security and efficiency of the payment process.
 
-### [Implementation](#implementation)
+### Implementation
 
 Getting started with simplifying your checkout process through tokenization is straightforward with Ottu. Here's a detailed guide to help you begin:
 
@@ -156,7 +156,7 @@ Getting started with simplifying your checkout process through tokenization is s
   nextSectionId="tokenization-with-payment"
 />
 
-## [**Tokenization with Payment**](#tokenization-with-payment)
+## Tokenization with Payment
 
 It empowers merchants a seamless way not only to process transactions but also to securely save customer card details for future use.&#x20;
 
@@ -164,7 +164,7 @@ By leveraging the [Checkout API](/developers/payments/checkout-api), a [payment 
 
 This method is especially valuable for encouraging repeat business, as it simplifies future transactions by eliminating the need for customers to re-enter their card details.
 
-### [Requirements](#requirements-1)
+### Requirements {#requirements-1}
 
 To ensure the successful tokenization of a card, merchants are required to adhere to the following requirements:
 
@@ -174,7 +174,7 @@ To ensure the successful tokenization of a card, merchants are required to adher
 - **Customer ID:** For subsequent payments utilizing the same token, the same `customer_id` associated with that token must be provided each time it is used.
 - **Successful Payment:** The customer must complete a successful payment.
 
-### [The Process](#the-process-1)
+### The Process {#the-process-1}
 
 This guide outlines the steps for initiating payment sessions and securely saving customer card details, focusing on efficiency and security.
 
@@ -197,7 +197,7 @@ This guide outlines the steps for initiating payment sessions and securely savin
 
 By adhering to these streamlined steps, merchants are equipped to offer a superior and secure payment experience, fostering customer loyalty and encouraging repeat business through the ease of saved payment details.
 
-### [Implementation](#implementation-1)
+### Implementation {#implementation-1}
 
 Simplifying your checkout process with tokenization is easy with Ottu. Here’s a step-by-step guide on how to get started:
 
@@ -282,7 +282,7 @@ Simplifying your checkout process with tokenization is easy with Ottu. Here’s 
 
 By following these steps, you can easily streamline your payment process, ensuring that customers have a seamless checkout experience. As mentioned, we’ll be providing visual aids between each step to further guide you in implementing this feature. Remember, at Ottu, we are always here to assist you in navigating the complexities of online transactions, so don’t hesitate to reach out if you need any help.
 
-## [FAQ](#faq)
+## FAQ
 
 <FAQ>
   <FAQItem question="Can I use tokenization if my payment gateway doesn’t support it?">
