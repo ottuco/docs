@@ -65,7 +65,7 @@ To ensure a smooth redirection of the payer back to the designated [redirect_url
 -[ status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) 201, the customer will be redirected to Ottu payment summary page.\
 -[ status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) any other code, the customer will be redirected to Ottu payment summary page. For this particular case, Ottu can notify on the email, when Enable webhook notifications? Activated
 
-<figure><img src="/img/webhooks/payment-redirect-diagram.png" alt="" /><figcaption></figcaption></figure>
+<figure><img src="/img/webhooks/payment-redirect-diagram.png" alt="Payment redirect behavior based on webhook status code" /><figcaption></figcaption></figure>
 
 ## Payload example (paid)
 
