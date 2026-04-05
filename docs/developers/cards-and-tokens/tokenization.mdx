@@ -13,7 +13,7 @@ Tokenization significantly reduces the risk associated with handling sensitive c
 
 ## What is Tokenization?
 
-Consider tokenization as a powerful security vault where all sensitive data is replaced with a secure code, or [token](https://en.wikipedia.org/wiki/Security_token).&#x20;
+Consider tokenization as a powerful security vault where all sensitive data is replaced with a secure code, or [token](https://en.wikipedia.org/wiki/Security_token).
 
 Just like a vault secures precious jewels by keeping them out of sight and replacing them with a secure code, tokenization replaces sensitive card data with unique identifiers, protecting it from prying eyes. This process is paramount for securing payments, offering merchants the luxury of securely processing transactions without having to be PCI DSS compliant. For more details, please check [here](<https://en.wikipedia.org/wiki/Tokenization_(data_security)>).
 
@@ -61,7 +61,7 @@ Tokenization involves a series of steps designed to securely capture and convert
 
 3.  **User Payment Process**:
 
-    Merchant has the two options:&#x20;
+    Merchant has the two options:
     - **Redirect to the Checkout Page**: Using the [checkout_url](/developers/payments/checkout-api) to redirect the customer to the Checkout page. There, the customer can be redirected to the Save Card page by clicking the **Pay** button, even though no actual payment is processed at this step.
     - **Redirect to the Save Card Page**: If a [redirect_url](/developers/payments/checkout-api) is provided, the customer can be directly redirected to the Save Card page.
 
@@ -158,7 +158,7 @@ Getting started with simplifying your checkout process through tokenization is s
 
 ## Tokenization with Payment
 
-It empowers merchants a seamless way not only to process transactions but also to securely save customer card details for future use.&#x20;
+It empowers merchants a seamless way not only to process transactions but also to securely save customer card details for future use.
 
 By leveraging the [Checkout API](/developers/payments/checkout-api), a [payment session](/developers/payments/checkout-api) is created, associated with a [customer ID](/developers/payments/checkout-api) and Merchant Identification Number [MID](/developers/payments/checkout-api) that supports tokenization, thus enhancing the customer experience by providing an option to save card details during the payment process. This can be further streamlined by using the [Checkout SDK](/developers/payments/checkout-sdk). It's important to note that the Card Verification Value (CVV) may be required, depending on your Payment Gateway's configuration; this setting can be adjusted by contacting our technical support team.
 
