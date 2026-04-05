@@ -456,3 +456,23 @@ ul .openapi-schema__list-item {
   overflow-y: inherit !important;
   position: inherit !important;
 }
+
+/* Links in OpenAPI field descriptions — use Ottu orange, underline matches text color */
+.openapi-schema__list-item a,
+.openapi-schema__container a,
+.openapi-markdown__details a {
+  color: var(--ifm-link-color);
+  text-decoration-color: currentColor;
+}
+
+.openapi-schema__list-item a:hover,
+.openapi-schema__container a:hover,
+.openapi-markdown__details a:hover {
+  color: var(--ifm-link-hover-color);
+}
+
+[data-theme="dark"] .openapi-schema__list-item a,
+[data-theme="dark"] .openapi-schema__container a,
+[data-theme="dark"] .openapi-markdown__details a {
+  color: var(--ifm-link-color);
+}
