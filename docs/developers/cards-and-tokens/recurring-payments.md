@@ -6,6 +6,8 @@ hide_table_of_contents: true
 
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import RecurringDemo from "@site/src/components/RecurringDemo";
+import TestCardCallout from "@site/src/components/TestCardCallout";
+import FAQ, { FAQItem } from '@site/src/components/FAQ';
 
 # Recurring Payments & Auto-Debit
 
@@ -88,9 +90,7 @@ graph LR
 
 Experience the complete recurring payment lifecycle. Save a test card, watch the webhook deliver the token in real time, then charge the card automatically — choose between Two-Step or One-Step checkout.
 
-:::info Test Card
-Use card number **4111 1111 1111 1111** with any future expiry date and any CVV.
-:::
+<TestCardCallout />
 
 <RecurringDemo />
 
@@ -98,9 +98,24 @@ Use card number **4111 1111 1111 1111** with any future expiry date and any CVV.
 
 #### First Payment (CIT)
 
+**Step 0: Discover Payment Methods**
+
+Before creating a session, call the [Payment Methods API](../payments/payment-methods) with `auto_debit: true` to discover which gateways support tokenization and auto-debit:
+
+```json title="POST /b/pbl/v2/payment-methods/ — Discover Auto-Debit Gateways"
+{
+  "plugin": "payment_request",
+  "operation": "purchase",
+  "currencies": ["KWD"],
+  "auto_debit": true
+}
+```
+
+Use the returned `pg_codes` in the next step.
+
 **Step 1: Create Payment Session**
 
-Create a session with `payment_type: auto_debit` and the `agreement` object:
+Create a session with `payment_type: auto_debit` and the `agreement` object. Use a unique `customer_id` per customer — all future MIT charges and saved cards are associated with this ID.
 
 ```json title="POST /b/checkout/v1/pymt-txn/ — Create CIT Session"
 {
@@ -115,8 +130,8 @@ Create a session with `payment_type: auto_debit` and the `agreement` object:
     "id": "A123456789",
     "type": "recurring",
     "amount_variability": "fixed",
-    "start_date": "13/12/2023",
-    "expiry_date": "01/10/2024",
+    "start_date": "01/04/2026",
+    "expiry_date": "01/04/2027",
     "cycle_interval_days": 30,
     "total_cycles": 12,
     "frequency": "monthly",
@@ -266,37 +281,32 @@ For recurring billing, notify customers before each charge:
 
 ## FAQ
 
-#### 1. Do I need PCI DSS compliance for auto-debit?
-
-No. Ottu handles all sensitive card data securely and never exposes it to merchants. You only store tokens, which are safe to keep in your database.
-
-#### 2. Can I store card tokens in my database?
-
-Yes. Tokens are not actual card numbers — they are secure identifiers generated through [tokenization](./tokenization). They cannot be used outside of Ottu's payment environment.
-
-#### 3. What if I don't have an agreement ID?
-
-Create a unique identifier for your use case. You can use an existing identifier from your system (e.g., subscription ID, order ID) or generate one specifically for the agreement.
-
-#### 4. When should I save the card token?
-
-Immediately after the first successful payment. While you can always retrieve tokens via the [User Cards API](./user-cards), storing them locally reduces API calls and simplifies your implementation.
-
-#### 5. Can I recover a missed token?
-
-Yes. Use the [User Cards API](./user-cards) with the `agreement.id` to retrieve saved cards associated with the agreement.
-
-#### 6. Can I update an existing agreement?
-
-This functionality is not currently available via API. Contact [support@ottu.com](mailto:support@ottu.com) for assistance.
-
-#### 7. What happens if the customer's card expires?
-
-Transactions using an expired token will fail. Set up card expiration monitoring and proactively notify customers to update their card details. See [Updating Card Information](#updating-card-information).
-
-#### 8. Must I use the Checkout SDK?
-
-No, but it's recommended. You can control the payment flow using [Checkout API](../payments/checkout-api) responses directly. However, the SDK simplifies UI implementation and is required for certain payment methods like Apple Pay and Google Pay.
+<FAQ>
+  <FAQItem question="Do I need PCI DSS compliance for auto-debit?">
+    No. Ottu handles all sensitive card data securely and never exposes it to merchants. You only store tokens, which are safe to keep in your database.
+  </FAQItem>
+  <FAQItem question="Can I store card tokens in my database?">
+    Yes. Tokens are not actual card numbers — they are secure identifiers generated through [tokenization](./tokenization). They cannot be used outside of Ottu's payment environment.
+  </FAQItem>
+  <FAQItem question="What if I don't have an agreement ID?">
+    Create a unique identifier for your use case. You can use an existing identifier from your system (e.g., subscription ID, order ID) or generate one specifically for the agreement.
+  </FAQItem>
+  <FAQItem question="When should I save the card token?">
+    Immediately after the first successful payment. While you can always retrieve tokens via the [User Cards API](./user-cards), storing them locally reduces API calls and simplifies your implementation.
+  </FAQItem>
+  <FAQItem question="Can I recover a missed token?">
+    Yes. Use the [User Cards API](./user-cards) with the `agreement.id` to retrieve saved cards associated with the agreement.
+  </FAQItem>
+  <FAQItem question="Can I update an existing agreement?">
+    This functionality is not currently available via API. Contact [support@ottu.com](mailto:support@ottu.com) for assistance.
+  </FAQItem>
+  <FAQItem question="What happens if the customer's card expires?">
+    Transactions using an expired token will fail. Set up card expiration monitoring and proactively notify customers to update their card details. See [Updating Card Information](#updating-card-information).
+  </FAQItem>
+  <FAQItem question="Must I use the Checkout SDK?">
+    No, but it's recommended. You can control the payment flow using [Checkout API](../payments/checkout-api) responses directly. However, the SDK simplifies UI implementation and is required for certain payment methods like Apple Pay and Google Pay.
+  </FAQItem>
+</FAQ>
 
 ## What's Next?
 

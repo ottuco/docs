@@ -26,11 +26,12 @@
   --ifm-heading-font-family: "Poppins", system-ui, -apple-system, sans-serif;
   --ifm-font-family-monospace: "Consolas", "Monaco", "Courier New", monospace;
 
-  /* Font sizes matching Figma design */
+  /* Font sizes — 4-level heading hierarchy */
   --ifm-h1-font-size: 2rem; /* 32px — Headline 1 */
-  --ifm-h2-font-size: 1.5rem; /* 24px — Subheading 3 */
-  --ifm-h3-font-size: 1.25rem; /* 20px — Subheading 4 */
-  --ifm-font-size-base: 1rem; /* 16px — Basic text */
+  --ifm-h2-font-size: 1.5rem; /* 24px — Section title */
+  --ifm-h3-font-size: 1.25rem; /* 20px — Step / subsection title */
+  --ifm-h4-font-size: 1.125rem; /* 18px — Minor heading */
+  --ifm-font-size-base: 1rem; /* 16px — Body text */
 
   /* Font weights */
   --ifm-heading-font-weight: 700;
@@ -59,7 +60,7 @@
   --ifm-navbar-background-color: #ffffff;
   --ifm-navbar-shadow: none;
   --ifm-navbar-padding-horizontal: 1rem;
-  --ifm-navbar-item-padding-horizontal: 0.6rem;
+  --ifm-navbar-item-padding-horizontal: 0.75rem;
 
   /* Footer */
   --ifm-footer-background-color: #f7f7f7;
@@ -145,6 +146,12 @@ html[data-theme="dark"] {
   color: var(--ifm-link-hover-color);
 }
 
+/* Panel links use the panel's own accent color — beats .markdown a (0,2,1 > 0,1,1) */
+.markdown .theme-admonition a,
+.markdown .theme-admonition a:hover {
+  color: var(--ifm-alert-border-color);
+}
+
 /* Style markdown headings — Figma uses #302f37 for all headings */
 .markdown h1 {
   font-weight: 700;
@@ -152,18 +159,45 @@ html[data-theme="dark"] {
 }
 
 .markdown h2 {
+  font-size: 1.5rem; /* 24px */
   font-weight: 600;
   color: var(--ifm-heading-color);
+  line-height: 1.4;
+  margin-top: 4rem;
+  margin-bottom: 1rem;
 }
 
 .markdown h3 {
+  font-size: 1.25rem; /* 20px */
   font-weight: 600;
   color: var(--ifm-heading-color);
+  line-height: 1.4;
+  margin-top: 4rem;
+  margin-bottom: 1rem;
 }
 
 .markdown h4 {
+  font-size: 1.125rem; /* 18px */
   font-weight: 600;
   color: var(--ifm-heading-color);
+  line-height: 1.4;
+  margin-top: 4rem;
+  margin-bottom: 1rem;
+}
+
+/* List item spacing — 16px between items, remove double margin from loose list <p> tags */
+.markdown li {
+  margin-bottom: 1rem; /* 16px */
+}
+
+.markdown li p {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* Bold text — semibold (600) instead of heavy bold (700) for inline descriptions */
+.markdown strong {
+  font-weight: 600;
 }
 
 /* Table cells: align content to top */
@@ -273,7 +307,7 @@ html[data-theme="dark"] {
 /* Medium screens: tighten item spacing to delay early hamburger collapse */
 @media (max-width: 1280px) and (min-width: 997px) {
   .navbar__item {
-    padding: 0 0.4rem;
+    padding: 0 0.5rem;
   }
   .navbar__link {
     font-size: 0.875rem;
@@ -282,39 +316,73 @@ html[data-theme="dark"] {
 
 /* Mobile (hamburger active): fix right-side layout so items don't overlap */
 @media (max-width: 996px) {
-  /* Right items: explicit flex row, no overlap */
+  /* Allow right container to shrink so expanded search doesn't push logo off-screen.
+     Infima sets flex: 0 0 auto — override flex-shrink to 1. */
   .navbar__items--right {
     display: flex;
     flex-direction: row;
     align-items: center;
     flex-wrap: nowrap;
-    gap: 4px;
-    flex-shrink: 0;
+    gap: 8px;
+    flex: 0 1 auto;
   }
 
-  /* Keep every right item in normal flow */
+  /* MCP button keeps its size */
   .navbar__items--right > * {
     flex-shrink: 0;
     position: static;
   }
 
-  /* Hide GitHub and Ottu.com from the bar — reachable via hamburger sidebar */
+  /* Hide GitHub and Ottu.com — reachable via hamburger sidebar */
   .navbar__items--right > .navbar__item.navbar__link {
     display: none;
   }
 
-  /* Search bar: stay in flow, don't let plugin's position:relative escape flex */
+  /* Swap order: search first (left), MCP last (right) */
   .navbar__search {
     position: static !important;
     flex-shrink: 1;
     min-width: 2rem;
+    overflow: hidden;
+    order: -1;
   }
 
-  /* Hide the ctrl+K search hint on mobile — the plugin only hides it at ≤576px
-     but the kbd badges overflow the input at 577px–996px too.
-     Attribute selector matches the CSS-module hashed class (e.g. searchHintContainer_AbC). */
+  .mcp-install-dropdown {
+    order: 10;
+  }
+
+  /* Override Infima's 9rem (144px) width — too wide for mobile.
+     Use a fluid width that leaves room for hamburger + logo + MCP. */
+  .navbar__search-input {
+    width: 2rem; /* collapsed by default (matches search plugin) */
+  }
+  .navbar__search-input:focus {
+    width: calc(100vw - 250px);
+    min-width: 5rem;
+    max-width: 9rem;
+  }
+
+  /* Hide ctrl+K hint on mobile (plugin only hides at ≤576px) */
   .navbar__search [class*="searchHintContainer"] {
     display: none;
+  }
+}
+
+/* Desktop: even spacing between right-side navbar items */
+@media (min-width: 997px) {
+  .navbar__items--right {
+    gap: 0.25rem;
+    align-items: center;
+  }
+
+  /* Add breathing room between MCP button and adjacent links */
+  .mcp-install-dropdown {
+    margin-right: 0.25rem;
+  }
+
+  /* Consistent left margin before search to separate it from theme toggle */
+  .navbar__search {
+    margin-left: 0.5rem;
   }
 }
 
@@ -388,7 +456,9 @@ html[data-theme="dark"] {
   overflow: hidden;
   margin-top: 0;
   pointer-events: none;
-  transition: max-height 0.2s ease, margin-top 0.15s ease;
+  transition:
+    max-height 0.2s ease,
+    margin-top 0.15s ease;
 }
 
 /* Expanded — only when dropdown--show is present */
@@ -408,61 +478,78 @@ html[data-theme="dark"] {
    END NAVBAR RESPONSIVE FIXES
    ================================ */
 
-/* Admonition colors — from Figma design (rgba backgrounds, 8px radius) */
+/* Admonition colors — from Figma Info Panels system.
+   Docusaurus maps: note→alert--secondary, tip→alert--success, others match name.
+   Both old aliases (.alert--note / .alert--tip) and correct names are listed. */
+
+/* Note panel — light */
+[data-theme="light"] .alert--secondary,
 [data-theme="light"] .alert--note {
   --ifm-alert-background-color: #f7f7f7;
-  --ifm-alert-border-color: #d9d9d9;
+  --ifm-alert-border-color: #302f37;
   color: #1a1a1a;
 }
 
+/* Info panel — light */
 [data-theme="light"] .alert--info {
   --ifm-alert-background-color: rgba(11, 130, 190, 0.08);
   --ifm-alert-border-color: #0b82be;
   color: #1a1a1a;
 }
 
+/* Tip panel — light */
+[data-theme="light"] .alert--success,
 [data-theme="light"] .alert--tip {
   --ifm-alert-background-color: #eaf7f0;
   --ifm-alert-border-color: #22c55e;
   color: #1a1a1a;
 }
 
+/* Warning panel — light */
 [data-theme="light"] .alert--warning {
   --ifm-alert-background-color: #fff4ed;
   --ifm-alert-border-color: #f27e20;
   color: #1a1a1a;
 }
 
+/* Danger panel — light */
 [data-theme="light"] .alert--danger {
   --ifm-alert-background-color: #fde8ea;
   --ifm-alert-border-color: #ed2833;
   color: #1a1a1a;
 }
 
+/* Note panel — dark */
+[data-theme="dark"] .alert--secondary,
 [data-theme="dark"] .alert--note {
   --ifm-alert-background-color: #151821;
   --ifm-alert-border-color: #6b7280;
   color: #e5e7eb;
 }
 
+/* Info panel — dark */
 [data-theme="dark"] .alert--info {
   --ifm-alert-background-color: #0f1f2e;
   --ifm-alert-border-color: #1983bc;
   color: #e5e7eb;
 }
 
+/* Tip panel — dark */
+[data-theme="dark"] .alert--success,
 [data-theme="dark"] .alert--tip {
   --ifm-alert-background-color: #102026;
   --ifm-alert-border-color: #22c55e;
   color: #e5e7eb;
 }
 
+/* Warning panel — dark */
 [data-theme="dark"] .alert--warning {
   --ifm-alert-background-color: #241a0f;
   --ifm-alert-border-color: #f27e20;
   color: #fef3c7;
 }
 
+/* Danger panel — dark */
 [data-theme="dark"] .alert--danger {
   --ifm-alert-background-color: #2a1113;
   --ifm-alert-border-color: #ed2833;
@@ -648,6 +735,8 @@ html[data-theme="dark"] {
   font-family: var(--ifm-font-family-monospace);
   font-size: 0.875rem;
   font-weight: 400;
+  /* Remove default code element borders for better appearance with custom background and padding */
+  border: none;
 }
 
 /* Inline code in running text — tighter padding */
@@ -721,14 +810,17 @@ html[data-theme="dark"] {
 /* Table styling — from Figma */
 .markdown table thead tr {
   background-color: var(--ifm-background-surface-color);
+  border-bottom-width: 1px;
 }
 table tr:nth-child(2n) {
-  background-color: var(--ifm-background-surface-color) !important;
+  background-color: var(--ifm-background-color) !important;
 }
 
 .markdown table thead th {
   font-weight: 600;
   color: var(--ifm-heading-color);
+  /* Figma uses left-aligned text for all table cells */
+  text-align: left;
 }
 
 /* OpenAPI response status code tabs — from Figma */

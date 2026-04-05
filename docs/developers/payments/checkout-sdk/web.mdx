@@ -3,6 +3,8 @@ toc_min_heading_level: 2
 toc_max_heading_level: 3
 ---
 
+import FAQ, { FAQItem } from '@site/src/components/FAQ';
+
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import CheckoutDemo from "@site/src/components/CheckoutDemo";
@@ -1678,48 +1680,43 @@ Checkout.init({
 
 ## FAQ
 
-#### 1 What forms of payments are supported by the SDK?
+<FAQ>
+  <FAQItem question="1 What forms of payments are supported by the SDK?">
+    The SDK supports the following payment forms: `applePay`, `tokenPay`, `ottuPG`, `redirect`, `googlePay`, and `stcPay`. Merchants can display specific methods according to their needs. \
+    **For example,** if you want to only show the Apple Pay button, you can do so using \
+    [formsOfPayment](#formsofpayment-array) = \[`applePay`], and only the Apple Pay button will be displayed. The same applies for `stcPay`, `googlePay`, and other methods.
+  </FAQItem>
+  <FAQItem question="2 How do I migrate from an older version of the SDK to the new version?">
+    To migrate from an older version to the latest version, please refer to the [Installation](#installation) section of the Ottu SDK docs. There you can find the SDK script with the latest version.
+  </FAQItem>
+  <FAQItem question="3 How can I customize the appearance of the checkout page using themes?">
+    The SDK offers various predefined [themes ](#theme-object)that merchants can use to easily change the checkout page’s appearance. Themes such as [dark theme](../), [minimal theme](../), hide headers, and hide amount are available. Each theme is predefined by specific `css` classes with unique properties.
+  </FAQItem>
+  <FAQItem question="4 Can I customize the appearance beyond the provided themes?">
+    Yes, after familiarizing yourself with the supported `css` classes, you can use the `theme` object to customize the appearance of any component you want.\
+    **Example:** If you want to change Pay Button color to blue, you can use below class in theme
 
-The SDK supports the following payment forms: `applePay`, `tokenPay`, `ottuPG`, `redirect`, `googlePay`, and `stcPay`. Merchants can display specific methods according to their needs. \
-**For example,** if you want to only show the Apple Pay button, you can do so using \
-[formsOfPayment](#formsofpayment-array) = \[`applePay`], and only the Apple Pay button will be displayed. The same applies for `stcPay`, `googlePay`, and other methods.
-
-#### 2 How do I migrate from an older version of the SDK to the new version?
-
-To migrate from an older version to the latest version, please refer to the [Installation](#installation) section of the Ottu SDK docs. There you can find the SDK script with the latest version.
-
-#### 3 How can I customize the appearance of the checkout page using themes?
-
-The SDK offers various predefined [themes ](#theme-object)that merchants can use to easily change the checkout page’s appearance. Themes such as [dark theme](../), [minimal theme](../), hide headers, and hide amount are available. Each theme is predefined by specific `css` classes with unique properties.
-
-#### 4 Can I customize the appearance beyond the provided themes?
-
-Yes, after familiarizing yourself with the supported `css` classes, you can use the `theme` object to customize the appearance of any component you want.\
-**Example:** If you want to change Pay Button color to blue, you can use below class in theme
-
-```javascript
-theme: {
-    "pay-button": {
-        "background": "blue"
+    ```javascript
+    theme: {
+        "pay-button": {
+            "background": "blue"
+        }
     }
-}
-```
+    ```
+  </FAQItem>
+  <FAQItem question="5 Are there any known compatibility issues with browsers or platforms?">
+    Yes, there are some compatibility nuances to be aware of:
 
-#### 5 Are there any known compatibility issues with browsers or platforms?
-
-Yes, there are some compatibility nuances to be aware of:
-
-- For the Apple Pay button, it is mainly displayed on Apple devices and the Safari browser. For Chrome, it will only be displayed on the latest iOS 16.
-- For and Google Pay, stc pay & other payments methods, always refer to their official documentation for the most recent information about compatibility issues.
-
-#### 6 How do I customize the payment request for Apple Pay and Google Pay?
-
-You can tailor the payment request for both Apple Pay and Google Pay using their respective initialization methods. These methods allow you to set various properties like API version, supported cards, networks, countries, and merchant capabilities etc.You can check the list of properties supported by [ApplePay](https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypaymentrequest) & [GooglePay](https://developers.google.com/pay/api/web/reference/request-objects#PaymentDataRequest).
-
-#### 7 Why am I seeing a tooltip related to Apple Pay’s unavailability on the Apple Pay button?
-
-The tooltip indicates certain prerequisites for Apple Pay are not met. Reasons could include a pending iOS update, cards not added to the Wallet, invalid merchant configurations, domain not verified by Apple, or the device being unsupported or old. Ensure all Apple Pay requirements are met for a smooth payment experience.
-
-#### 8 What if a merchant wants to perform specific actions before the payment process?
-
-Merchants can utilize the [beforePayment](#beforepayment-hook) hook. This allows for specific actions or checks to be performed prior to payment/redirection. Once your actions or checks are complete, resolve the promise to proceed with the redirection/payment.
+    - For the Apple Pay button, it is mainly displayed on Apple devices and the Safari browser. For Chrome, it will only be displayed on the latest iOS 16.
+    - For and Google Pay, stc pay & other payments methods, always refer to their official documentation for the most recent information about compatibility issues.
+  </FAQItem>
+  <FAQItem question="6 How do I customize the payment request for Apple Pay and Google Pay?">
+    You can tailor the payment request for both Apple Pay and Google Pay using their respective initialization methods. These methods allow you to set various properties like API version, supported cards, networks, countries, and merchant capabilities etc.You can check the list of properties supported by [ApplePay](https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypaymentrequest) & [GooglePay](https://developers.google.com/pay/api/web/reference/request-objects#PaymentDataRequest).
+  </FAQItem>
+  <FAQItem question="7 Why am I seeing a tooltip related to Apple Pay’s unavailability on the Apple Pay button?">
+    The tooltip indicates certain prerequisites for Apple Pay are not met. Reasons could include a pending iOS update, cards not added to the Wallet, invalid merchant configurations, domain not verified by Apple, or the device being unsupported or old. Ensure all Apple Pay requirements are met for a smooth payment experience.
+  </FAQItem>
+  <FAQItem question="8 What if a merchant wants to perform specific actions before the payment process?">
+    Merchants can utilize the [beforePayment](#beforepayment-hook) hook. This allows for specific actions or checks to be performed prior to payment/redirection. Once your actions or checks are complete, resolve the promise to proceed with the redirection/payment.
+  </FAQItem>
+</FAQ>

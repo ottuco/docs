@@ -1,97 +1,139 @@
 import React, { useReducer, useRef, useCallback, useEffect } from "react";
 import Icon from "@mdi/react";
-import { mdiAlertCircleOutline } from "@mdi/js";
+import { mdiCheck, mdiAlertCircleOutline, mdiChevronDown } from "@mdi/js";
 import {
   createSandboxSession,
   callAutoDebit,
+  callPaymentMethods,
+  extractPgCodes,
   getWebhookBaseUrl,
-  SANDBOX_MERCHANT_ID,
-  SANDBOX_API_KEY,
 } from "@site/src/utils/sandbox";
-import {
-  loadCheckoutScript,
-  initCheckout,
-  CHECKOUT_SDK_THEME_MINIMAL,
-} from "@site/src/utils/checkoutSdk";
+import ApiPanel from "@site/src/components/ApiPanel";
+import CheckoutSDKEmbed from "@site/src/components/CheckoutSDKEmbed";
+import { TEST_CARD } from "@site/src/components/TestCardCallout";
 import WebhookViewer, { extractTokenFromWebhook } from "./WebhookViewer";
 import styles from "./styles.module.css";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-type MITMode = "two-step" | "one-step";
-
 type Phase =
   | "idle"
-  | "cit_creating"
-  | "cit_sdk"
-  | "cit_waiting_webhook"
-  | "cit_done"
-  | "mit_select"
-  | "mit_step1"
-  | "mit_step1_done"
-  | "mit_step2"
-  | "mit_waiting_webhook"
-  | "mit_done"
-  | "complete"
-  | "error";
+  | "step1_calling" | "step1_done"
+  | "step2_calling" | "step2_done"
+  | "step3_sdk"     | "step3_success"
+  | "step4_waiting" | "step4_done"
+  | "step5_select"  | "step5_calling" | "step5_done"
+  | "step6_waiting" | "step6_done"
+  | "complete" | "error";
 
 interface State {
   phase: Phase;
   orderId: string;
+  customerId: string;
+  // Step 1: Payment Methods
+  pgCodes: string[];
+  pmRequest?: any;
+  pmResponse?: any;
+  // Step 2: CIT session
   citSessionId?: string;
+  citRequest?: any;
   citResponse?: any;
+  agreementId?: string;
+  // Step 3: SDK
+  // Step 4: Webhook + token
   citToken?: string;
-  citWebhookEvents: any[];
-  mitMode?: MITMode;
+  citPgCode?: string;
+  webhookPayload?: any;
+  // Step 5: MIT
+  mitMode?: "one-step" | "two-step";
   mitSessionId?: string;
+  mitRequest?: any;
   mitResponse?: any;
+  mitAutoDebitRequest?: any;
   mitAutoDebitResponse?: any;
-  mitWebhookEvents: any[];
+  // Step 6: MIT webhook
+  mitWebhookPayload?: any;
+  // UI
+  expandedDoneSteps: Set<number>;
   errorMessage?: string;
 }
 
 type Action =
-  | { type: "START"; orderId: string }
-  | { type: "CIT_SESSION_CREATED"; sessionId: string; response: any }
-  | { type: "CIT_SDK_READY" }
-  | { type: "CIT_PAYMENT_DONE" }
-  | { type: "CIT_WEBHOOK_RECEIVED"; events: any[]; token: string }
-  | { type: "SELECT_MIT"; mode: MITMode }
-  | { type: "MIT_SESSION_CREATED"; sessionId: string; response: any }
-  | { type: "MIT_STEP1_NEXT" }
-  | { type: "MIT_AUTO_DEBIT_DONE"; response: any }
-  | { type: "MIT_ONE_STEP_DONE"; response: any }
-  | { type: "MIT_WEBHOOK_RECEIVED"; events: any[] }
+  | { type: "START"; orderId: string; customerId: string }
+  | { type: "STEP1_DONE"; pgCodes: string[]; pmRequest: any; pmResponse: any }
+  | { type: "STEP2_CALLING" }
+  | { type: "STEP2_DONE"; sessionId: string; citRequest: any; citResponse: any; agreementId: string }
+  | { type: "STEP3_SDK" }
+  | { type: "STEP3_SUCCESS" }
+  | { type: "STEP4_WAITING" }
+  | { type: "STEP4_DONE"; token: string; pgCode: string; webhookPayload: any }
+  | { type: "STEP5_SELECT" }
+  | { type: "STEP5_CALLING"; mitMode: "one-step" | "two-step"; mitRequest: any }
+  | { type: "STEP5_SESSION_DONE"; mitSessionId: string; mitResponse: any }
+  | { type: "STEP5_AUTO_DEBIT"; mitAutoDebitRequest: any }
+  | { type: "STEP5_DONE"; mitResponse?: any; mitAutoDebitResponse?: any }
+  | { type: "STEP6_WAITING" }
+  | { type: "STEP6_DONE"; mitWebhookPayload: any }
   | { type: "COMPLETE" }
   | { type: "ERROR"; message: string }
+  | { type: "TOGGLE_STEP"; stepNum: number }
   | { type: "RESET" };
+
+const initialState: State = {
+  phase: "idle",
+  orderId: "",
+  customerId: "",
+  pgCodes: [],
+  expandedDoneSteps: new Set(),
+};
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "START":
-      return { ...initialState, phase: "cit_creating", orderId: action.orderId };
-    case "CIT_SESSION_CREATED":
-      return { ...state, phase: "cit_sdk", citSessionId: action.sessionId, citResponse: action.response };
-    case "CIT_PAYMENT_DONE":
-      return { ...state, phase: "cit_waiting_webhook" };
-    case "CIT_WEBHOOK_RECEIVED":
-      return { ...state, phase: "cit_done", citWebhookEvents: action.events, citToken: action.token };
-    case "SELECT_MIT":
-      return { ...state, phase: "mit_select", mitMode: action.mode };
-    case "MIT_SESSION_CREATED":
-      return { ...state, phase: "mit_step1_done", mitSessionId: action.sessionId, mitResponse: action.response };
-    case "MIT_STEP1_NEXT":
-      return { ...state, phase: "mit_step2" };
-    case "MIT_AUTO_DEBIT_DONE":
-      return { ...state, phase: "mit_waiting_webhook", mitAutoDebitResponse: action.response };
-    case "MIT_ONE_STEP_DONE":
-      return { ...state, phase: "mit_waiting_webhook", mitResponse: action.response };
-    case "MIT_WEBHOOK_RECEIVED":
-      return { ...state, phase: "mit_done", mitWebhookEvents: action.events };
+      return { ...initialState, phase: "step1_calling", orderId: action.orderId, customerId: action.customerId };
+    case "STEP1_DONE":
+      return { ...state, phase: "step1_done", pgCodes: action.pgCodes, pmRequest: action.pmRequest, pmResponse: action.pmResponse };
+    case "STEP2_CALLING":
+      return { ...state, phase: "step2_calling" };
+    case "STEP2_DONE":
+      return { ...state, phase: "step2_done", citSessionId: action.sessionId, citRequest: action.citRequest, citResponse: action.citResponse, agreementId: action.agreementId };
+    case "STEP3_SDK":
+      return { ...state, phase: "step3_sdk" };
+    case "STEP3_SUCCESS":
+      return { ...state, phase: "step3_success" };
+    case "STEP4_WAITING":
+      return { ...state, phase: "step4_waiting" };
+    case "STEP4_DONE":
+      return { ...state, phase: "step4_done", citToken: action.token, citPgCode: action.pgCode, webhookPayload: action.webhookPayload };
+    case "STEP5_SELECT":
+      return { ...state, phase: "step5_select" };
+    case "STEP5_CALLING":
+      return { ...state, phase: "step5_calling", mitMode: action.mitMode, mitRequest: action.mitRequest };
+    case "STEP5_SESSION_DONE":
+      return { ...state, phase: "step5_done", mitSessionId: action.mitSessionId, mitResponse: action.mitResponse };
+    case "STEP5_AUTO_DEBIT":
+      return { ...state, phase: "step5_calling", mitAutoDebitRequest: action.mitAutoDebitRequest };
+    case "STEP5_DONE":
+      return {
+        ...state,
+        phase: "step5_done",
+        ...(action.mitResponse && { mitResponse: action.mitResponse }),
+        ...(action.mitAutoDebitResponse && { mitAutoDebitResponse: action.mitAutoDebitResponse }),
+      };
+    case "STEP6_WAITING":
+      return { ...state, phase: "step6_waiting" };
+    case "STEP6_DONE":
+      return { ...state, phase: "step6_done", mitWebhookPayload: action.mitWebhookPayload };
     case "COMPLETE":
       return { ...state, phase: "complete" };
     case "ERROR":
       return { ...state, phase: "error", errorMessage: action.message };
+    case "TOGGLE_STEP": {
+      const next = new Set(state.expandedDoneSteps);
+      if (next.has(action.stepNum)) next.delete(action.stepNum);
+      else next.add(action.stepNum);
+      return { ...state, expandedDoneSteps: next };
+    }
     case "RESET":
       return { ...initialState };
     default:
@@ -99,36 +141,101 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-const initialState: State = {
-  phase: "idle",
-  orderId: "",
-  citWebhookEvents: [],
-  mitWebhookEvents: [],
-};
+// ── Step metadata ────────────────────────────────────────────────────────────
 
-const SDK_CONTAINER_ID = "recurring-demo-checkout";
+const STEPS = [
+  { num: 1, title: "Discover Payment Methods", subtitle: "Payment Methods API (optional)" },
+  { num: 2, title: "Create Payment Session", subtitle: "Checkout API — CIT" },
+  { num: 3, title: "Accept Payment", subtitle: "Checkout SDK" },
+  { num: 4, title: "Webhook Notification", subtitle: "Token received" },
+  { num: 5, title: "Charge Saved Card", subtitle: "MIT — Auto-Debit" },
+  { num: 6, title: "Payment Confirmation", subtitle: "MIT Webhook" },
+];
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function getStepStatus(stepNum: number, phase: Phase): "pending" | "active" | "done" {
+  const activeStep = phase.startsWith("step1") ? 1
+    : phase.startsWith("step2") ? 2
+    : phase.startsWith("step3") ? 3
+    : phase.startsWith("step4") ? 4
+    : phase.startsWith("step5") ? 5
+    : phase.startsWith("step6") ? 6
+    : phase === "complete" ? 7
+    : 0;
+  if (stepNum < activeStep) return "done";
+  if (stepNum === activeStep) return "active";
+  return "pending";
+}
 
 function generateOrderId(): string {
   return `demo-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function generateCustomerId(): string {
+  return `cust_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function formatDateDDMMYYYY(date: Date): string {
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = date.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+}
+
+function buildAgreement(orderId: string) {
+  const today = new Date();
+  const oneYearLater = new Date(today);
+  oneYearLater.setFullYear(today.getFullYear() + 1);
+  return {
+    id: `AGR-${orderId}`,
+    type: "recurring",
+    amount_variability: "fixed",
+    frequency: "monthly",
+    start_date: formatDateDDMMYYYY(today),
+    expiry_date: formatDateDDMMYYYY(oneYearLater),
+    cycle_interval_days: 30,
+    total_cycles: 12,
+    seller: {
+      name: "Ottu Demo Store",
+      short_name: "ODS",
+      category_code: "5411",
+    },
+  };
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function RecurringDemoInner() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const sdkContainerRef = useRef<HTMLDivElement>(null);
   const webhookEventsRef = useRef<any[]>([]);
   const webhookCheckInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+  const mitWebhookStartCount = useRef(0);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (webhookCheckInterval.current) clearInterval(webhookCheckInterval.current);
     };
   }, []);
 
-  // Poll webhook events from WebhookViewer via a shared ref
-  // (WebhookViewer manages the SSE connection; we check for new events)
+  // Scroll to active step
+  useEffect(() => {
+    if (state.phase === "idle" || state.phase === "error" || state.phase === "complete") return;
+    const activeStep = state.phase.startsWith("step1") ? 1
+      : state.phase.startsWith("step2") ? 2
+      : state.phase.startsWith("step3") ? 3
+      : state.phase.startsWith("step4") ? 4
+      : state.phase.startsWith("step5") ? 5
+      : state.phase.startsWith("step6") ? 6
+      : 0;
+    if (activeStep === 0) return;
+    const timer = setTimeout(() => {
+      const el = document.querySelector(`[data-recurring-step="${activeStep}"]`);
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [state.phase]);
+
   const startWebhookWatch = useCallback(
     (onReceived: (events: any[]) => void) => {
       if (webhookCheckInterval.current) clearInterval(webhookCheckInterval.current);
@@ -140,357 +247,572 @@ export default function RecurringDemoInner() {
         }
       }, 500);
     },
-    []
+    [],
   );
 
-  // ── CIT: Create session ──
-  const startCIT = useCallback(async () => {
+  // ── Step 1: Payment Methods ──
+  const startDemo = useCallback(async () => {
     const orderId = generateOrderId();
-    dispatch({ type: "START", orderId });
+    const customerId = generateCustomerId();
+    dispatch({ type: "START", orderId, customerId });
+    webhookEventsRef.current = [];
+
+    const pmRequest = {
+      plugin: "e_commerce",
+      currencies: ["KWD"],
+      auto_debit: true,
+      type: "sandbox",
+      tags: ["demo"],
+    };
 
     try {
-      const webhookUrl = `${getWebhookBaseUrl()}/webhook/${orderId}`;
+      const pmResult = await callPaymentMethods(pmRequest);
+      const pgCodes = extractPgCodes(pmResult);
+
+      if (pgCodes.length === 0) {
+        dispatch({ type: "ERROR", message: "No auto-debit eligible payment methods found." });
+        return;
+      }
+
+      dispatch({ type: "STEP1_DONE", pgCodes, pmRequest, pmResponse: pmResult });
+    } catch (err: any) {
+      dispatch({ type: "ERROR", message: err.message || "Payment Methods API failed" });
+    }
+  }, []);
+
+  // Step 1 done — user clicks Continue to start Step 2
+
+  // ── Step 2: CIT Session ──
+  const startCIT = useCallback(async () => {
+    dispatch({ type: "STEP2_CALLING" });
+    try {
+      const webhookUrl = `${getWebhookBaseUrl()}/webhook/${state.orderId}`;
+      const agreement = buildAgreement(state.orderId);
+      const citRequest = {
+        type: "e_commerce",
+        pg_codes: state.pgCodes,
+        amount: "20",
+        currency_code: "KWD",
+        customer_id: state.customerId,
+        payment_type: "auto_debit",
+        include_sdk_setup_preload: true,
+        webhook_url: webhookUrl,
+        order_no: state.orderId,
+        agreement,
+      };
+
       const session = await createSandboxSession({
-        pg_codes: ["pg_auto_debit"],
+        pg_codes: state.pgCodes,
+        customer_id: state.customerId,
         extra: {
           payment_type: "auto_debit",
           include_sdk_setup_preload: true,
           webhook_url: webhookUrl,
-          order_no: orderId,
-          agreement: { type: "recurring" },
+          order_no: state.orderId,
+          agreement,
         },
       });
 
       dispatch({
-        type: "CIT_SESSION_CREATED",
+        type: "STEP2_DONE",
         sessionId: session.session_id,
-        response: session,
-      });
-
-      // Load SDK and init
-      await loadCheckoutScript();
-
-      // Register callbacks
-      (window as any).errorCallback = (data: any) => {
-        dispatch({ type: "ERROR", message: data.message || "Payment failed" });
-      };
-      (window as any).cancelCallback = (data: any) => {
-        dispatch({ type: "ERROR", message: data.message || "Payment cancelled" });
-      };
-      (window as any).successCallback = () => {
-        dispatch({ type: "CIT_PAYMENT_DONE" });
-        // Watch for webhook
-        startWebhookWatch((events) => {
-          const token = extractTokenFromWebhook(events);
-          dispatch({
-            type: "CIT_WEBHOOK_RECEIVED",
-            events,
-            token: token || "unknown",
-          });
-        });
-      };
-
-      initCheckout({
-        selector: SDK_CONTAINER_ID,
-        sessionId: session.session_id,
-        setupPreload: (session as any).sdk_setup_preload_payload,
-        formsOfPayment: ["tokenPay", "ottuPG", "redirect"],
-        theme: CHECKOUT_SDK_THEME_MINIMAL,
+        citRequest,
+        citResponse: session,
+        agreementId: agreement.id,
       });
     } catch (err: any) {
-      dispatch({ type: "ERROR", message: err.message || "Failed to start CIT" });
+      dispatch({ type: "ERROR", message: err.message || "Failed to create CIT session" });
     }
-  }, [startWebhookWatch]);
+  }, [state.orderId, state.customerId, state.pgCodes]);
 
-  // ── MIT Two-Step: Step 1 — Create session ──
-  const startMITTwoStep1 = useCallback(async () => {
-    dispatch({ type: "SELECT_MIT", mode: "two-step" });
-    try {
-      const webhookUrl = `${getWebhookBaseUrl()}/webhook/${state.orderId}`;
-      const session = await createSandboxSession({
-        pg_codes: ["pg_auto_debit"],
-        amount: "15",
-        extra: {
-          webhook_url: webhookUrl,
-          order_no: `${state.orderId}-mit`,
-        },
-      });
+  // Step 2 done — user clicks Continue to show SDK
+
+  // SDK callbacks
+  const sdkCallbacksRef = useRef({
+    errorCallback(data: any) {
+      console.log("SDK error", data);
+    },
+    successCallback() {
+      dispatch({ type: "STEP3_SUCCESS" });
+    },
+    cancelCallback(data: any) {
+      console.log("SDK cancel", data);
+    },
+  });
+
+  // Step 3 done — user clicks Continue to start watching webhooks
+  const continueToWebhook = useCallback(() => {
+    dispatch({ type: "STEP4_WAITING" });
+    startWebhookWatch((events) => {
+      const token = extractTokenFromWebhook(events);
+      const lastEvent = events[events.length - 1];
+      const pgCode = lastEvent?.payload?.token?.pg_code ?? state.pgCodes[0];
       dispatch({
-        type: "MIT_SESSION_CREATED",
-        sessionId: session.session_id,
-        response: session,
+        type: "STEP4_DONE",
+        token: token || "unknown",
+        pgCode,
+        webhookPayload: lastEvent?.payload,
       });
-    } catch (err: any) {
-      dispatch({ type: "ERROR", message: err.message || "MIT session failed" });
-    }
-  }, [state.orderId]);
+    });
+  }, [startWebhookWatch, state.pgCodes]);
 
-  // ── MIT Two-Step: Step 2 — Call auto-debit ──
-  const startMITTwoStep2 = useCallback(async () => {
-    dispatch({ type: "MIT_STEP1_NEXT" });
-    try {
-      const result = await callAutoDebit(state.mitSessionId!, state.citToken!);
-      dispatch({ type: "MIT_AUTO_DEBIT_DONE", response: result });
-      startWebhookWatch((events) => {
-        dispatch({ type: "MIT_WEBHOOK_RECEIVED", events });
-      });
-    } catch (err: any) {
-      dispatch({ type: "ERROR", message: err.message || "Auto-debit failed" });
-    }
-  }, [state.mitSessionId, state.citToken, startWebhookWatch]);
+  // Step 4 done — user clicks Continue to show MIT selector
 
-  // ── MIT One-Step: Create + charge ──
+  // ── Step 5: MIT One-Step ──
   const startMITOneStep = useCallback(async () => {
-    dispatch({ type: "SELECT_MIT", mode: "one-step" });
+    const webhookUrl = `${getWebhookBaseUrl()}/webhook/${state.orderId}`;
+    const mitRequest = {
+      type: "e_commerce",
+      pg_codes: [state.citPgCode],
+      amount: "15",
+      currency_code: "KWD",
+      customer_id: state.customerId,
+      payment_type: "auto_debit",
+      webhook_url: webhookUrl,
+      order_no: `${state.orderId}-mit`,
+      agreement: { id: state.agreementId, type: "recurring" },
+      payment_instrument: { instrument_type: "token", payload: { token: state.citToken } },
+    };
+
+    dispatch({ type: "STEP5_CALLING", mitMode: "one-step", mitRequest });
+
     try {
-      const webhookUrl = `${getWebhookBaseUrl()}/webhook/${state.orderId}`;
       const result = await createSandboxSession({
-        pg_codes: ["pg_auto_debit"],
-        amount: "10",
+        pg_codes: [state.citPgCode || state.pgCodes[0]],
+        amount: "15",
+        customer_id: state.customerId,
         extra: {
           payment_type: "auto_debit",
           webhook_url: webhookUrl,
-          order_no: `${state.orderId}-mit1s`,
+          order_no: `${state.orderId}-mit`,
+          agreement: { id: state.agreementId, type: "recurring" },
           payment_instrument: {
             instrument_type: "token",
             payload: { token: state.citToken },
           },
         },
       });
-      dispatch({ type: "MIT_ONE_STEP_DONE", response: result });
-      startWebhookWatch((events) => {
-        dispatch({ type: "MIT_WEBHOOK_RECEIVED", events });
-      });
+
+      dispatch({ type: "STEP5_DONE", mitResponse: result });
     } catch (err: any) {
       dispatch({ type: "ERROR", message: err.message || "One-step MIT failed" });
     }
-  }, [state.orderId, state.citToken, startWebhookWatch]);
+  }, [state.orderId, state.customerId, state.citToken, state.citPgCode, state.pgCodes, state.agreementId]);
 
-  // ── Render helpers ──
+  // ── Step 5: MIT Two-Step — Step 1 (create session) ──
+  const startMITTwoStep = useCallback(async () => {
+    const webhookUrl = `${getWebhookBaseUrl()}/webhook/${state.orderId}`;
+    const mitRequest = {
+      type: "e_commerce",
+      pg_codes: [state.citPgCode],
+      amount: "15",
+      currency_code: "KWD",
+      customer_id: state.customerId,
+      payment_type: "auto_debit",
+      webhook_url: webhookUrl,
+      order_no: `${state.orderId}-mit`,
+      agreement: { id: state.agreementId, type: "recurring" },
+    };
 
-  const renderAPIPanel = (label: string, data: any) => (
-    <div className={styles.apiPanel}>
-      <div className={styles.apiPanelHeader}>{label}</div>
-      <div className={styles.apiPanelBody}>
-        <pre>{JSON.stringify(data, null, 2)}</pre>
-      </div>
-    </div>
-  );
+    dispatch({ type: "STEP5_CALLING", mitMode: "two-step", mitRequest });
 
-  // ── Idle ──
+    try {
+      const session = await createSandboxSession({
+        pg_codes: [state.citPgCode || state.pgCodes[0]],
+        amount: "15",
+        customer_id: state.customerId,
+        extra: {
+          payment_type: "auto_debit",
+          webhook_url: webhookUrl,
+          order_no: `${state.orderId}-mit`,
+          agreement: { id: state.agreementId, type: "recurring" },
+        },
+      });
+
+      dispatch({ type: "STEP5_SESSION_DONE", mitSessionId: session.session_id, mitResponse: session });
+    } catch (err: any) {
+      dispatch({ type: "ERROR", message: err.message || "MIT session creation failed" });
+    }
+  }, [state.orderId, state.customerId, state.citPgCode, state.pgCodes, state.agreementId]);
+
+  // ── Step 5: MIT Two-Step — Step 2 (auto-debit) ──
+  const callMITAutoDebit = useCallback(async () => {
+    const mitAutoDebitRequest = {
+      session_id: state.mitSessionId,
+      token: state.citToken,
+    };
+
+    dispatch({ type: "STEP5_AUTO_DEBIT", mitAutoDebitRequest });
+
+    try {
+      const result = await callAutoDebit(state.mitSessionId!, state.citToken!);
+      dispatch({ type: "STEP5_DONE", mitAutoDebitResponse: result });
+    } catch (err: any) {
+      dispatch({ type: "ERROR", message: err.message || "Auto-debit failed" });
+    }
+  }, [state.mitSessionId, state.citToken]);
+
+  // Step 5 done — user clicks Continue to watch MIT webhook
+  const continueToMITWebhook = useCallback(() => {
+    mitWebhookStartCount.current = webhookEventsRef.current.length;
+    dispatch({ type: "STEP6_WAITING" });
+    startWebhookWatch((events) => {
+      const newEvents = events.slice(mitWebhookStartCount.current);
+      if (newEvents.length > 0) {
+        dispatch({ type: "STEP6_DONE", mitWebhookPayload: newEvents[newEvents.length - 1]?.payload });
+      }
+    });
+  }, [startWebhookWatch]);
+
+  // Step 6 done — user clicks Complete
+
+  // ── Render step content ──
+  const renderStepContent = (stepNum: number) => {
+    switch (stepNum) {
+      case 1:
+        return (
+          <>
+            {state.phase === "step1_calling" && (
+              <div className={styles.actions}>
+                <button className={styles.primaryBtn} disabled>
+                  <span className={styles.spinner} /> Calling Payment Methods API...
+                </button>
+              </div>
+            )}
+            {(state.phase === "step1_done" || state.expandedDoneSteps.has(1)) && (
+              <>
+                <ApiPanel label="POST /b/pbl/v2/payment-methods/" data={state.pmRequest} />
+                <ApiPanel label="Response — Payment Methods" data={state.pmResponse} />
+                <p className={styles.cardDescription}>
+                  Found {state.pgCodes.length} auto-debit eligible gateway{state.pgCodes.length !== 1 ? "s" : ""}: <code>{state.pgCodes.join(", ")}</code>
+                </p>
+                {state.phase === "step1_done" && (
+                  <div className={styles.actions}>
+                    <button className={styles.primaryBtn} onClick={() => startCIT()}>
+                      Continue — Create Payment Session
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        );
+
+      case 2:
+        return (
+          <>
+            {state.phase === "step2_calling" && (
+              <div className={styles.actions}>
+                <button className={styles.primaryBtn} disabled>
+                  <span className={styles.spinner} /> Creating payment session...
+                </button>
+              </div>
+            )}
+            {(state.phase === "step2_done" || state.expandedDoneSteps.has(2)) && state.citSessionId && (
+              <>
+                <ApiPanel label="POST /b/checkout/v1/pymt-txn/" data={state.citRequest} />
+                <ApiPanel label="Response — Session" data={state.citResponse} />
+                {state.phase === "step2_done" && (
+                  <div className={styles.actions}>
+                    <button className={styles.primaryBtn} onClick={() => dispatch({ type: "STEP3_SDK" })}>
+                      Continue — Accept Payment
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        );
+
+      case 3:
+        return (
+          <>
+            {state.phase === "step3_sdk" && state.citSessionId && (
+              <>
+                <p className={styles.cardDescription}>
+                  Enter test card <strong>{TEST_CARD.number}</strong>, expiry <strong>{TEST_CARD.expiry}</strong>, CVV <strong>{TEST_CARD.cvv}</strong>.
+                </p>
+                <CheckoutSDKEmbed
+                  sessionId={state.citSessionId}
+                  callbacks={sdkCallbacksRef.current}
+                  setupPreload={(state.citResponse as any)?.sdk_setup_preload_payload}
+                />
+              </>
+            )}
+            {state.phase === "step3_success" && (
+              <>
+                <p className={styles.cardDescription}>
+                  Payment completed successfully via the Checkout SDK.
+                </p>
+                <div className={styles.actions}>
+                  <button className={styles.primaryBtn} onClick={continueToWebhook}>
+                    Continue — Webhook Notification
+                  </button>
+                </div>
+              </>
+            )}
+            {state.expandedDoneSteps.has(3) && (
+              <p className={styles.cardDescription}>
+                Payment was completed via the Checkout SDK.
+              </p>
+            )}
+          </>
+        );
+
+      case 4:
+        return (
+          <>
+            {(state.phase === "step4_waiting" || state.phase === "step4_done" || state.expandedDoneSteps.has(4)) && state.orderId && (
+              <WebhookViewer
+                orderId={state.orderId}
+                label="CIT Webhook Notifications"
+                onEvent={(event) => {
+                  webhookEventsRef.current = [...webhookEventsRef.current, event];
+                }}
+              />
+            )}
+            {state.phase === "step4_waiting" && (
+              <p className={styles.cardDescription} style={{ marginTop: 12 }}>
+                Waiting for the payment webhook. Once Ottu processes the payment, the token will be extracted automatically.
+              </p>
+            )}
+            {(state.phase === "step4_done" || state.expandedDoneSteps.has(4)) && state.citToken && (
+              <>
+                <p className={styles.cardDescription} style={{ marginTop: 12 }}>
+                  Token received: <code>{state.citToken}</code>
+                </p>
+                {state.phase === "step4_done" && (
+                  <div className={styles.actions}>
+                    <button className={styles.primaryBtn} onClick={() => dispatch({ type: "STEP5_SELECT" })}>
+                      Continue — Charge Saved Card
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        );
+
+      case 5:
+        return (
+          <>
+            {state.phase === "step5_select" && (
+              <>
+                <p className={styles.cardDescription}>
+                  Choose how to charge the saved card without customer interaction:
+                </p>
+                <div className={styles.pathSelector}>
+                  <div className={styles.pathCard} onClick={startMITOneStep}>
+                    <p className={styles.pathLabel}>One-Step Checkout</p>
+                    <p className={styles.pathDescription}>Checkout API with payment_instrument — session created and charged in one call</p>
+                  </div>
+                  <div className={styles.pathCard} onClick={startMITTwoStep}>
+                    <p className={styles.pathLabel}>Two-Step</p>
+                    <p className={styles.pathDescription}>Checkout API + Auto-Debit API — create session first, then charge separately</p>
+                  </div>
+                </div>
+              </>
+            )}
+            {state.phase === "step5_calling" && (
+              <div className={styles.actions}>
+                <button className={styles.primaryBtn} disabled>
+                  <span className={styles.spinner} /> {state.mitMode === "one-step" ? "Creating session + charging..." : "Processing..."}
+                </button>
+              </div>
+            )}
+            {(state.phase === "step5_done" || state.expandedDoneSteps.has(5)) && (
+              <>
+                <ApiPanel label={state.mitMode === "one-step" ? "POST /b/checkout/v1/pymt-txn/ (One-Step)" : "POST /b/checkout/v1/pymt-txn/ (Create Session)"} data={state.mitRequest} />
+                {state.mitResponse && (
+                  <ApiPanel label={state.mitMode === "one-step" ? "Response — One-Step MIT" : "Response — MIT Session"} data={state.mitResponse} />
+                )}
+                {state.mitMode === "two-step" && state.phase === "step5_done" && !state.mitAutoDebitResponse && (
+                  <div className={styles.actions}>
+                    <button className={styles.primaryBtn} onClick={callMITAutoDebit}>
+                      Call Auto-Debit API
+                    </button>
+                  </div>
+                )}
+                {state.mitAutoDebitRequest && (
+                  <ApiPanel label="POST /b/pbl/v2/payment/auto-debit/" data={state.mitAutoDebitRequest} />
+                )}
+                {state.mitAutoDebitResponse && (
+                  <ApiPanel label="Response — Auto-Debit" data={state.mitAutoDebitResponse} />
+                )}
+                {state.phase === "step5_done" && (state.mitMode === "one-step" || state.mitAutoDebitResponse) && (
+                  <div className={styles.actions}>
+                    <button className={styles.primaryBtn} onClick={continueToMITWebhook}>
+                      Continue — Payment Confirmation
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        );
+
+      case 6:
+        return (
+          <>
+            {(state.phase === "step6_waiting" || state.phase === "step6_done" || state.expandedDoneSteps.has(6)) && state.orderId && (
+              <WebhookViewer
+                orderId={state.orderId}
+                label="MIT Webhook Notifications"
+              />
+            )}
+            {state.phase === "step6_waiting" && (
+              <p className={styles.cardDescription} style={{ marginTop: 12 }}>
+                Waiting for the MIT payment webhook to confirm the charge...
+              </p>
+            )}
+            {(state.phase === "step6_done" || state.expandedDoneSteps.has(6)) && state.mitWebhookPayload && (
+              <>
+                <p className={styles.cardDescription} style={{ marginTop: 12 }}>
+                  MIT payment confirmed. The saved card was charged without any customer interaction.
+                </p>
+                {state.phase === "step6_done" && (
+                  <div className={styles.actions}>
+                    <button className={styles.primaryBtn} onClick={() => dispatch({ type: "COMPLETE" })}>
+                      Complete
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  // ── Idle state ──
   if (state.phase === "idle") {
     return (
-      <div className={styles.container}>
-        <div className={styles.idleCard}>
-          <h3 className={styles.idleTitle}>Try Recurring Payments</h3>
-          <p className={styles.idleDescription}>
-            Experience the full CIT/MIT flow: save a card with a test payment,
-            then charge it automatically — all in sandbox mode. No real charges.
-          </p>
-          <button className={styles.primaryButton} onClick={startCIT}>
-            Start Demo
-          </button>
-        </div>
+      <div className={styles.hero}>
+        <h2 className={styles.heroTitle}>Try Recurring Payments</h2>
+        <p className={styles.heroSubtitle}>
+          Experience the full CIT/MIT flow: save a card with a test payment,
+          then charge it automatically — all in sandbox mode.
+        </p>
+        <button className={styles.primaryBtn} onClick={startDemo}>
+          Start Demo
+        </button>
       </div>
     );
   }
 
-  // ── Error ──
+  // ── Error state ──
   if (state.phase === "error") {
     return (
-      <div className={styles.container}>
-        <div className={styles.errorCard}>
-          <Icon path={mdiAlertCircleOutline} size={1.5} className={styles.errorIcon} />
-          <p className={styles.errorMessage}>{state.errorMessage}</p>
-          <button className={styles.secondaryButton} onClick={() => dispatch({ type: "RESET" })}>
-            Restart Demo
-          </button>
-        </div>
+      <div className={styles.errorCard}>
+        <Icon path={mdiAlertCircleOutline} size={1.5} className={styles.errorIcon} />
+        <p className={styles.errorMessage}>{state.errorMessage}</p>
+        <button className={styles.secondaryBtn} onClick={() => dispatch({ type: "RESET" })}>
+          Restart
+        </button>
       </div>
     );
   }
 
-  // ── Complete ──
-  if (state.phase === "complete" || state.phase === "mit_done") {
+  // ── Complete state ──
+  if (state.phase === "complete") {
     return (
-      <div className={styles.container}>
+      <>
+        <div className={styles.journey}>
+          {STEPS.map((step) => {
+            const isExpanded = state.expandedDoneSteps.has(step.num);
+            return (
+              <div key={step.num} className={styles.step} data-recurring-step={step.num}>
+                <div className={`${styles.node} ${styles.nodeDone}`}>
+                  <Icon path={mdiCheck} size={0.7} />
+                </div>
+                <div className={`${styles.card} ${isExpanded ? styles.cardDoneExpanded : styles.cardDone}`}>
+                  <div
+                    className={`${styles.cardHeader} ${styles.cardHeaderDone}`}
+                    onClick={() => dispatch({ type: "TOGGLE_STEP", stepNum: step.num })}
+                  >
+                    <div>
+                      <p className={styles.cardTitle}>{step.title}</p>
+                    </div>
+                    <div className={styles.doneRight}>
+                      <span className={styles.doneBadge}><Icon path={mdiCheck} size={0.55} /> Done</span>
+                      <Icon path={mdiChevronDown} size={0.8} className={styles.chevron} style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0)" }} />
+                    </div>
+                  </div>
+                  {isExpanded && (
+                    <div className={styles.cardBody}>
+                      {renderStepContent(step.num)}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
         <div className={styles.completeCard}>
           <h3 className={styles.completeTitle}>Recurring Payment Complete</h3>
-          <p className={styles.completeDescription}>
+          <p className={styles.completeSubtitle}>
             The card was charged without any customer interaction.
             {state.mitMode === "one-step"
               ? " Using One-Step Checkout, the session was created and charged in a single API call."
               : " Using Two-Step flow, a new session was created, then the auto-debit endpoint charged the saved token."}
           </p>
-          <button className={styles.secondaryButton} onClick={() => dispatch({ type: "RESET" })}>
-            Restart Demo
+          <button className={styles.secondaryBtn} onClick={() => dispatch({ type: "RESET" })}>
+            Restart
           </button>
         </div>
-        <div style={{ padding: "0 20px 20px" }}>
-          <WebhookViewer orderId={state.orderId} label="All Webhook Notifications" />
-        </div>
-      </div>
+      </>
     );
   }
 
-  // ── Active phases ──
-  const isCIT = state.phase.startsWith("cit_");
-  const phaseLabel = isCIT ? "Step 1: First Payment (CIT)" : `Step 2: Auto-Debit (MIT) — ${state.mitMode === "one-step" ? "One-Step" : "Two-Step"}`;
-
+  // ── Active timeline ──
   return (
-    <div className={styles.container}>
-      <div className={styles.phaseHeader}>
-        <span className={styles.phaseLabel}>{phaseLabel}</span>
-        <span className={styles.stepIndicator}>
-          {isCIT ? "Step 1 of 2" : "Step 2 of 2"}
-        </span>
-      </div>
+    <div className={styles.journey}>
+      {STEPS.map((step) => {
+        const status = getStepStatus(step.num, state.phase);
+        const isDone = status === "done";
+        const isActive = status === "active";
+        const isPending = status === "pending";
+        const isExpanded = isDone && state.expandedDoneSteps.has(step.num);
 
-      <div className={styles.stepContent}>
-        {/* CIT: Creating session */}
-        {state.phase === "cit_creating" && (
-          <>
-            <p className={styles.stepTitle}>
-              <span className={styles.spinner} />
-              Creating payment session...
-            </p>
-            <p className={styles.stepDescription}>
-              Calling the Checkout API with <code>payment_type: "auto_debit"</code> and an agreement object.
-            </p>
-          </>
-        )}
-
-        {/* CIT: SDK showing */}
-        {state.phase === "cit_sdk" && (
-          <>
-            <p className={styles.stepTitle}>Enter test card details</p>
-            <p className={styles.stepDescription}>
-              Use test card <strong>5123 4500 0000 0008</strong>, expiry <strong>01/39</strong>, CVV <strong>100</strong>.
-            </p>
-            {state.citResponse && renderAPIPanel("Checkout API Response", {
-              session_id: state.citSessionId,
-              payment_type: state.citResponse.payment_type,
-              amount: state.citResponse.amount,
-              currency_code: state.citResponse.currency_code,
-            })}
-          </>
-        )}
-
-        {/* CIT: Waiting for webhook */}
-        {state.phase === "cit_waiting_webhook" && (
-          <>
-            <p className={styles.stepTitle}>
-              <span className={styles.spinner} />
-              Payment submitted — waiting for webhook...
-            </p>
-            <p className={styles.stepDescription}>
-              The payment is being processed. The webhook notification will appear below when Ottu confirms the result.
-            </p>
-          </>
-        )}
-
-        {/* CIT: Done — show token + webhook + MIT selector */}
-        {state.phase === "cit_done" && (
-          <>
-            <p className={styles.stepTitle}>Token received!</p>
-            <p className={styles.stepDescription}>
-              The card has been saved. Token: <code>{state.citToken}</code>
-            </p>
-            <p className={styles.stepDescription}>
-              Choose how to charge this saved card:
-            </p>
-            <div className={styles.tabSelector}>
-              <button
-                className={`${styles.tabButton}`}
-                onClick={startMITTwoStep1}
-              >
-                <span className={styles.tabButtonLabel}>Two-Step MIT</span>
-                <span className={styles.tabButtonDescription}>Checkout API + Auto-Debit API</span>
-              </button>
-              <button
-                className={`${styles.tabButton}`}
-                onClick={startMITOneStep}
-              >
-                <span className={styles.tabButtonLabel}>One-Step MIT</span>
-                <span className={styles.tabButtonDescription}>Checkout API with payment_instrument</span>
-              </button>
+        return (
+          <div key={step.num} className={styles.step} data-recurring-step={step.num}>
+            {/* Node */}
+            <div className={`${styles.node} ${isDone ? styles.nodeDone : isActive ? styles.nodeActive : styles.nodePending}`}>
+              {isDone ? <Icon path={mdiCheck} size={0.7} /> : step.num}
             </div>
-          </>
-        )}
 
-        {/* MIT select (loading) */}
-        {state.phase === "mit_select" && (
-          <p className={styles.stepTitle}>
-            <span className={styles.spinner} />
-            {state.mitMode === "two-step" ? "Creating new session..." : "Creating session + charging..."}
-          </p>
-        )}
+            {/* Card */}
+            <div className={`${styles.card} ${isActive ? styles.cardActive : ""} ${isDone ? (isExpanded ? styles.cardDoneExpanded : styles.cardDone) : ""}`}>
+              {/* Header */}
+              <div
+                className={`${styles.cardHeader} ${isDone ? styles.cardHeaderDone : ""}`}
+                onClick={isDone ? () => dispatch({ type: "TOGGLE_STEP", stepNum: step.num }) : undefined}
+              >
+                <div>
+                  <p className={`${styles.cardTitle} ${isPending ? styles.cardTitlePending : ""}`}>{step.title}</p>
+                  {(isActive || isPending) && <p className={styles.cardSubtitle}>{step.subtitle}</p>}
+                </div>
+                {isDone && (
+                  <div className={styles.doneRight}>
+                    <span className={styles.doneBadge}><Icon path={mdiCheck} size={0.55} /> Done</span>
+                    <Icon path={mdiChevronDown} size={0.8} className={styles.chevron} style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0)" }} />
+                  </div>
+                )}
+              </div>
 
-        {/* MIT Two-Step: Step 1 done — show response, next button */}
-        {state.phase === "mit_step1_done" && (
-          <>
-            <p className={styles.stepTitle}>New session created</p>
-            <p className={styles.stepDescription}>
-              A new payment session was created with a different amount. Now call the Auto-Debit API with the saved token.
-            </p>
-            {renderAPIPanel("New Session Response", {
-              session_id: state.mitSessionId,
-              amount: state.mitResponse?.amount,
-              currency_code: state.mitResponse?.currency_code,
-            })}
-            <div className={styles.stepActions}>
-              <button className={styles.primaryButton} onClick={startMITTwoStep2}>
-                Call Auto-Debit API →
-              </button>
+              {/* Body */}
+              {(isActive || isExpanded) && (
+                <div className={styles.cardBody}>
+                  {renderStepContent(step.num)}
+                </div>
+              )}
             </div>
-          </>
-        )}
-
-        {/* MIT Two-Step: Step 2 — charging */}
-        {state.phase === "mit_step2" && (
-          <p className={styles.stepTitle}>
-            <span className={styles.spinner} />
-            Charging saved card via Auto-Debit API...
-          </p>
-        )}
-
-        {/* MIT: Waiting for webhook */}
-        {state.phase === "mit_waiting_webhook" && (
-          <>
-            <p className={styles.stepTitle}>
-              <span className={styles.spinner} />
-              Card charged — waiting for webhook...
-            </p>
-            {state.mitAutoDebitResponse && renderAPIPanel("Auto-Debit Response", state.mitAutoDebitResponse)}
-            {state.mitMode === "one-step" && state.mitResponse && renderAPIPanel("One-Step Response", {
-              session_id: state.mitResponse.session_id,
-              state: state.mitResponse.state,
-              amount: state.mitResponse.amount,
-            })}
-          </>
-        )}
-      </div>
-
-      {/* SDK container — always in DOM for CIT */}
-      <div
-        className={styles.sdkContainer}
-        style={{ display: state.phase === "cit_sdk" ? "block" : "none" }}
-      >
-        <div id={SDK_CONTAINER_ID} ref={sdkContainerRef} />
-      </div>
-
-      {/* Webhook viewer — always visible once started */}
-      {state.orderId && (
-        <div style={{ padding: "0 20px 20px" }}>
-          <WebhookViewer
-            orderId={state.orderId}
-            label="Live Webhook Notifications"
-            onEvent={(event) => {
-              webhookEventsRef.current = [...webhookEventsRef.current, event];
-            }}
-          />
-        </div>
-      )}
+          </div>
+        );
+      })}
     </div>
   );
 }

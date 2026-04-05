@@ -10,14 +10,14 @@
     "gen-api": "npm run enrich-api && npx docusaurus clean-api-docs ottuApi && npx docusaurus gen-api-docs ottuApi && npm run extract-schemas",
     "update-api": "npm run fetch-api && npm run gen-api",
     "start": "docusaurus start",
-    "build": "docusaurus build",
+    "build": "docusaurus build && cp -r build/mcp build/_mcp-data",
     "swizzle": "docusaurus swizzle",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "typecheck": "tsc",
-    "webhook": "PORT=8090 node webhook-server/server.mjs"
+    "webhook": "PORT=8090 node mcp-server/server.mjs"
   },
   "dependencies": {
     "@docusaurus/core": "^3.9.2",

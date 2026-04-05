@@ -7,6 +7,7 @@ description: Unified payment gateway response fields — search and browse all p
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import PGParamsReference from "@site/src/components/PGParamsReference";
+import FAQ, { FAQItem } from '@site/src/components/FAQ';
 
 # PG Params
 
@@ -185,25 +186,23 @@ echo 'OK';
 
 ## FAQ
 
-#### What if a field I need is not in pg_params?
-
-Contact us at **csd@ottu.com** with the field you need and which gateway returns it. We'll add it to the normalized `pg_params` set. New parameters are added regularly.
-
-#### Are pg_params available for all gateways?
-
-Yes. Ottu normalizes responses from all [60+ supported payment gateways](https://enc.ottu.me/business/payments/gateways/). The same `pg_params` fields are available regardless of which gateway processed the transaction.
-
-#### Can pg_params fields be empty?
-
-Yes. Not all gateways return all fields. For example, `dcc_payer_amount` is only present when Dynamic Currency Conversion is active, and `card_holder` depends on whether the gateway includes cardholder details in its response. Only fields available from the gateway's response are populated — empty fields are omitted from the object.
-
-#### Should I still store the raw gateway_response?
-
-Yes — store it for audit and debugging purposes. If you ever need to open a support ticket with a payment gateway, they'll want to see their original response. But don't build your processing logic on it.
-
-#### Do operation webhooks include pg_params too?
-
-Yes. [Operation webhooks](./operation-events) (refunds, captures, voids) include `pg_params` with the same normalized fields.
+<FAQ>
+  <FAQItem question="What if a field I need is not in pg_params?">
+    Contact us at **csd@ottu.com** with the field you need and which gateway returns it. We'll add it to the normalized `pg_params` set. New parameters are added regularly.
+  </FAQItem>
+  <FAQItem question="Are pg_params available for all gateways?">
+    Yes. Ottu normalizes responses from all [60+ supported payment gateways](https://enc.ottu.me/business/payments/gateways/). The same `pg_params` fields are available regardless of which gateway processed the transaction.
+  </FAQItem>
+  <FAQItem question="Can pg_params fields be empty?">
+    Yes. Not all gateways return all fields. For example, `dcc_payer_amount` is only present when Dynamic Currency Conversion is active, and `card_holder` depends on whether the gateway includes cardholder details in its response. Only fields available from the gateway's response are populated — empty fields are omitted from the object.
+  </FAQItem>
+  <FAQItem question="Should I still store the raw gateway_response?">
+    Yes — store it for audit and debugging purposes. If you ever need to open a support ticket with a payment gateway, they'll want to see their original response. But don't build your processing logic on it.
+  </FAQItem>
+  <FAQItem question="Do operation webhooks include pg_params too?">
+    Yes. [Operation webhooks](./operation-events) (refunds, captures, voids) include `pg_params` with the same normalized fields.
+  </FAQItem>
+</FAQ>
 
 ## What's Next?
 

@@ -4,6 +4,7 @@ import { mdiLoading, mdiCheck, mdiAlertCircleOutline } from "@mdi/js";
 import {
   createSandboxSession,
   callPaymentMethods,
+  extractPgCodes,
 } from "@site/src/utils/sandbox";
 import { createDemoCallbacks } from "@site/src/utils/checkoutSdk";
 import CheckoutSDKEmbed from "@site/src/components/CheckoutSDKEmbed";
@@ -85,13 +86,10 @@ export default function CheckoutDemoInner() {
     try {
       const methodsResponse = await callPaymentMethods({
         currencies: ["KWD"],
-        is_sandbox: true,
+        type: "sandbox",
         tags: ["demo"],
       });
-      const pgCodes =
-        methodsResponse?.payment_methods?.map((m: any) => m.code) ??
-        methodsResponse?.pg_codes ??
-        [];
+      const pgCodes = extractPgCodes(methodsResponse);
       dispatch({ type: "METHODS_FETCHED", pgCodes });
 
       const { session_id } = await createSandboxSession({

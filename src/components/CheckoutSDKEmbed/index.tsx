@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   loadCheckoutScript,
   initCheckout,
+  CHECKOUT_SDK_THEME,
   type CheckoutCallbacks,
 } from "@site/src/utils/checkoutSdk";
 
@@ -10,6 +11,7 @@ interface CheckoutSDKEmbedProps {
   onReady?: () => void;
   onError?: (message: string) => void;
   callbacks?: CheckoutCallbacks;
+  setupPreload?: any;
 }
 
 let embedCounter = 0;
@@ -19,6 +21,7 @@ export default function CheckoutSDKEmbed({
   onReady,
   onError,
   callbacks,
+  setupPreload,
 }: CheckoutSDKEmbedProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerId] = useState(() => `checkout-sdk-embed-${++embedCounter}`);
@@ -26,9 +29,11 @@ export default function CheckoutSDKEmbed({
   const onReadyRef = useRef(onReady);
   const onErrorRef = useRef(onError);
   const callbacksRef = useRef(callbacks);
+  const setupPreloadRef = useRef(setupPreload);
   onReadyRef.current = onReady;
   onErrorRef.current = onError;
   callbacksRef.current = callbacks;
+  setupPreloadRef.current = setupPreload;
 
   useEffect(() => {
     if (!sessionId || initedForSession.current === sessionId) return;
@@ -45,6 +50,8 @@ export default function CheckoutSDKEmbed({
           selector: containerId,
           sessionId,
           callbacks: callbacksRef.current,
+          setupPreload: setupPreloadRef.current,
+          theme: CHECKOUT_SDK_THEME,
         });
         onReadyRef.current?.();
       } catch (err: any) {

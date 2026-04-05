@@ -32,6 +32,12 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
+      - name: Test MCP + Webhook server
+        run: |
+          cd mcp-server
+          npm install
+          npm test
+
       - name: Generate API docs
         run: npm run gen-api
 

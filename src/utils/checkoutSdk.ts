@@ -26,13 +26,6 @@ export const CHECKOUT_SDK_FORMS_OF_PAYMENT = [
   "urPay",
 ];
 
-/** Minimal theme — just system-ui fonts for readability. */
-export const CHECKOUT_SDK_THEME_MINIMAL: Record<string, any> = {
-  "title-text": { "font-family": "system-ui" },
-  amount: { "font-family": "system-ui" },
-  "pay-button": { "font-family": "system-ui" },
-  "payment-method-name": { "font-family": "system-ui" },
-};
 
 /** Full branded theme used in the CheckoutDemo on the SDK docs page. */
 export const CHECKOUT_SDK_THEME: Record<string, any> = {

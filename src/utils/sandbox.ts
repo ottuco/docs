@@ -33,6 +33,7 @@ export async function createSandboxSession(
     amount: options.amount ?? "20",
     currency_code: options.currency_code ?? "KWD",
     customer_id: options.customer_id ?? "sandbox",
+    include_sdk_setup_preload: true,
     ...options.extra,
   };
 
@@ -100,16 +101,20 @@ export async function callPaymentMethods(options: {
   currencies: string[];
   plugin?: string;
   operation?: string;
-  is_sandbox?: boolean;
+  type?: string;
   tags?: string[];
+  tokenizable?: boolean;
+  auto_debit?: boolean;
 }): Promise<any> {
   const body: Record<string, unknown> = {
     plugin: options.plugin ?? "payment_request",
     operation: options.operation ?? "purchase",
     currencies: options.currencies,
   };
-  if (options.is_sandbox != null) body.is_sandbox = options.is_sandbox;
+  if (options.type) body.type = options.type;
   if (options.tags) body.tags = options.tags;
+  if (options.tokenizable != null) body.tokenizable = options.tokenizable;
+  if (options.auto_debit != null) body.auto_debit = options.auto_debit;
 
   const response = await fetch(
     `https://${SANDBOX_MERCHANT_ID}/b/pbl/v2/payment-methods/`,
@@ -187,4 +192,11 @@ export function getWebhookSSEUrl(): string {
     return "http://localhost:8090";
   }
   return window.location.origin;
+}
+
+/**
+ * Extract PG codes from a Payment Methods API response.
+ */
+export function extractPgCodes(pmResponse: any): string[] {
+  return (pmResponse?.payment_methods ?? []).map((pg: any) => pg.code);
 }
