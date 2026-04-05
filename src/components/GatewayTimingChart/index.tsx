@@ -1,4 +1,5 @@
 import React from "react";
+import AdmonitionIconWarning from "@theme/Admonition/Icon/Warning";
 import gatewaysData from "@site/static/data/gateways.json";
 import type { Gateway } from "@site/src/types/gateway";
 import styles from "./styles.module.css";
@@ -66,10 +67,17 @@ export default function GatewayTimingChart(): React.JSX.Element {
         );
       })}
 
-      <div className={styles.callout}>
-        <span className={styles.calloutIcon}>&#x26A0;&#xFE0F;</span>
+      <div className="alert alert--warning theme-admonition">
         <div>
-          <strong>Add 2-3 minutes margin</strong> to these values when scheduling your PSQ call. If you integrate with multiple gateways, use the longest time + margin as your standard. Calling too early means the gateway may not have finalized the status yet.
+          <span>
+            <AdmonitionIconWarning />
+          </span>
+          Warning
+        </div>
+        <div>
+          <p>
+            <strong>Add 2-3 minutes margin</strong> to these values when scheduling your PSQ call. If you integrate with multiple gateways, use the longest time + margin as your standard. Calling too early means the gateway may not have finalized the status yet.
+          </p>
         </div>
       </div>
 
