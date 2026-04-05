@@ -200,10 +200,13 @@ html[data-theme="dark"] {
   font-weight: 600;
 }
 
-/* Table cells: align content to top */
+/* Table cells: align content to top, with generous row spacing */
 .markdown table td,
 .markdown table th {
   vertical-align: top;
+  line-height: 1.6;
+  padding-top: 14px; /* or adjust to taste */
+  padding-bottom: 14px;
 }
 
 /* Checkout SDK: align Payment Options Display Mode images like old docs */
@@ -754,10 +757,24 @@ html[data-theme="dark"] {
   padding: 4px;
 }
 
+/* Inline code in table cells — compact padding so wrapped lines don't spread apart */
+.markdown table td code,
+.markdown table th code {
+  padding: 2px 6px;
+  line-height: 1.4;
+  display: inline;
+}
+
 /* Inline code dark mode */
 [data-theme="dark"] .markdown code {
   background-color: #1e2939;
   color: #d1d5dc;
+}
+
+/* Remove gray background from the API explorer code block. target the pre directly. */
+.openapi-explorer__code-block pre,
+.openapi-explorer__code-block code {
+  background: transparent !important;
 }
 
 /* Premium code blocks — constrained width, subtle borders */
