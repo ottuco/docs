@@ -2,7 +2,7 @@
 
 Navigating the digital commerce and financial transactions landscape requires a keen understanding of security, specifically authentication methods. At Ottu, we support three distinct types of authentication to help ensure the safe and seamless operation of your payment system: [Basic Authentication](authentication.md#basic-authentication), [Private Key (API-Key)](authentication.md#private-key-api-key), and [Public Key](authentication.md#public-key).
 
-## [**Basic Authentication**](authentication.md#basic-authentication)
+## Basic Authentication
 
 Basic Authentication employs a username and password combination. The access permissions associated with the username must be explicitly defined.
 
@@ -10,7 +10,7 @@ Basic Authentication employs a username and password combination. The access per
 
 Please ensure that you follow best practices for credential security. Never **store** passwords in your code or on the client side. It’s recommended not to assign super-admin permissions via this method, but to carefully regulate the access permissions for each user. Securely store the credentials within the server environment.
 
-## [**Private Key (API-Key)**](authentication.md#private-key-api-key)
+## Private Key (API-Key)
 
 This key is a high-privilege access token used for server-side communication between your server and Ottu’s API. The private API key should be closely guarded and never shared.
 
@@ -25,7 +25,7 @@ It should NEVER be embedded in SDKs or made public. Ensure it’s used on the se
 
 :::
 
-## [**Public Key**](authentication.md#public-key)
+## Public Key
 
 The Public Key is used to initialize the [Checkout SDK](../payments/checkout-sdk/index.md) and can safely be shared with clients. This key doesn’t provide access to public API endpoints, making it secure for client-side use.
 
@@ -35,11 +35,11 @@ For detailed instructions on generating API keys for both [Public ](authenticati
 
 :::
 
-## [**Token Authentication**](authentication.md#token-authentication)
+## Token Authentication
 
 Please note that Token Authentication, an earlier method, is now considered obsolete and isn’t recommended.
 
-## [Permissions](authentication.md#permissions)
+## Permissions
 
 Permissions control what actions an authenticated user or application can perform. The permission model depends on which authentication method you use.
 

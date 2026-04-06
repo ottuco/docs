@@ -634,11 +634,11 @@ The SDK UI is embedded as a `fragment` within any part of an `activity` in the m
 
 **Example:**
 
-<figure><img src="/img/checkout-sdk/image%20%284%29%20%281%29.png" alt="" width="375" /><figcaption></figcaption></figure>
+<figure><img src="/img/checkout-sdk/image%20%284%29%20%281%29.png" alt="Android SDK embedded as fragment in activity" width="375" /><figcaption></figcaption></figure>
 
 If only one payment option is available and it is a wallet, the UI is automatically minimized.
 
-<figure><img src="/img/checkout-sdk/image%20%281%29%20%281%29%20%281%29%20%281%29%20%281%29.png" alt="" width="375" /><figcaption></figcaption></figure>
+<figure><img src="/img/checkout-sdk/image%20%281%29%20%281%29%20%281%29%20%281%29%20%281%29.png" alt="Minimized SDK UI with single wallet payment option" width="375" /><figcaption></figcaption></figure>
 
 :::info
 
