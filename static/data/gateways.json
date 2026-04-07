@@ -2,12 +2,14 @@
   {
     "slug": "standard",
     "name": "Standard Test Cards",
-    "country": "Global",
-    "countryFlag": "🌎",
+    "countries": [
+      "Global"
+    ],
+    "providerType": "Test",
     "currencies": [],
     "inquiryMinutes": null,
     "operations": [],
-    "type": "redirect",
+    "integrationType": "redirect",
     "category": "bank",
     "operationMode": "purchase",
     "logo": "",
@@ -41,15 +43,19 @@
   {
     "slug": "abapayway",
     "name": "ABA PayWay",
-    "country": "Cambodia",
-    "countryFlag": "🇰🇭",
+    "countries": [
+      "Cambodia"
+    ],
+    "providerType": "Cambodia",
     "currencies": [
       "USD",
       "KHR"
     ],
     "inquiryMinutes": 12,
-    "operations": [],
-    "type": "redirect",
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "sdk",
     "category": "bank",
     "operationMode": "purchase",
     "logo": "",
@@ -58,14 +64,16 @@
   {
     "slug": "amazon_pay",
     "name": "Amazon Pay",
-    "country": "Global",
-    "countryFlag": "🌎",
+    "countries": [
+      "UAE"
+    ],
+    "providerType": "Global",
     "currencies": [
       "AED"
     ],
     "inquiryMinutes": 6,
     "operations": [],
-    "type": "redirect",
+    "integrationType": "wallet",
     "category": "wallet",
     "operationMode": "purchase",
     "logo": "amazon_pay_icon.svg",
@@ -126,16 +134,18 @@
   {
     "slug": "bambora",
     "name": "Bambora",
-    "country": "Canada",
-    "countryFlag": "🇨🇦",
+    "countries": [
+      "Canada"
+    ],
+    "providerType": "Royal Bank",
     "currencies": [
       "USD",
       "CAD"
     ],
     "inquiryMinutes": 0,
     "operations": [],
-    "type": "redirect",
-    "category": "aggregator",
+    "integrationType": "redirect",
+    "category": "bank",
     "operationMode": "purchase",
     "logo": "bambora_icon.svg",
     "testCards": [
@@ -150,10 +160,33 @@
     ]
   },
   {
+    "slug": "bede",
+    "name": "Bede",
+    "countries": [
+      "Kuwait"
+    ],
+    "providerType": "Aggregator",
+    "currencies": [
+      "KWD"
+    ],
+    "inquiryMinutes": null,
+    "operations": [],
+    "integrationType": "wallet",
+    "category": "aggregator",
+    "operationMode": "purchase",
+    "logo": "",
+    "services": [
+      "apple-pay"
+    ],
+    "testCards": []
+  },
+  {
     "slug": "benefit",
     "name": "Benefit",
-    "country": "Bahrain",
-    "countryFlag": "🇧🇭",
+    "countries": [
+      "Bahrain"
+    ],
+    "providerType": "All Bahrain Banks",
     "currencies": [
       "BHD"
     ],
@@ -161,8 +194,8 @@
     "operations": [
       "refund"
     ],
-    "type": "redirect",
-    "category": "local",
+    "integrationType": "redirect",
+    "category": "bank",
     "operationMode": "purchase",
     "logo": "benefit_icon.svg",
     "testCards": [
@@ -235,14 +268,18 @@
   {
     "slug": "benefit_pay",
     "name": "BenefitPay",
-    "country": "Bahrain",
-    "countryFlag": "🇧🇭",
+    "countries": [
+      "Bahrain"
+    ],
+    "providerType": "All Bahrain Banks",
     "currencies": [
       "BHD"
     ],
     "inquiryMinutes": 8,
-    "operations": [],
-    "type": "wallet",
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "wallet",
     "category": "wallet",
     "operationMode": "purchase",
     "logo": "benefitpay.svg",
@@ -251,8 +288,10 @@
   {
     "slug": "beyon_money",
     "name": "BeyonMoney",
-    "country": "Bahrain",
-    "countryFlag": "🇧🇭",
+    "countries": [
+      "Bahrain"
+    ],
+    "providerType": "Beyon Money",
     "currencies": [
       "BHD"
     ],
@@ -260,93 +299,36 @@
     "operations": [
       "refund"
     ],
-    "type": "redirect",
-    "category": "bank",
+    "integrationType": "wallet",
+    "category": "wallet",
     "operationMode": "purchase",
     "logo": "",
     "testCards": []
   },
   {
-    "slug": "bookeey",
-    "name": "Bookeey",
-    "country": "Kuwait",
-    "countryFlag": "🇰🇼",
-    "currencies": [
-      "KWD"
-    ],
-    "inquiryMinutes": 8,
-    "operations": [],
-    "type": "wallet",
-    "category": "wallet",
-    "operationMode": "purchase",
-    "logo": "bookey_icon.svg",
-    "testCards": [],
-    "testCardNotes": "Test using merchant login credentials: 66333333/1234"
-  },
-  {
-    "slug": "burgan",
-    "name": "Burgan",
-    "country": "Kuwait",
-    "countryFlag": "🇰🇼",
-    "currencies": [
-      "KWD"
-    ],
-    "inquiryMinutes": null,
-    "operations": [],
-    "type": "redirect",
-    "category": "bank",
-    "operationMode": "purchase",
-    "logo": "burgan_icon.svg",
-    "testCards": [
-      {
-        "cardNumber": "4012 0000 3333 0026",
-        "expiry": "01/39",
-        "cvv": "100",
-        "brand": "Visa",
-        "status": "success",
-        "statusLabel": "Success"
-      }
-    ]
-  },
-  {
-    "slug": "cbk",
-    "name": "CBK",
-    "country": "Kuwait",
-    "countryFlag": "🇰🇼",
-    "currencies": [
-      "KWD"
-    ],
-    "inquiryMinutes": 8,
-    "operations": [],
-    "type": "redirect",
-    "category": "bank",
-    "operationMode": "purchase",
-    "logo": "cbk_icon.svg",
-    "testCards": [
-      {
-        "cardNumber": "5123 4500 0000 0008",
-        "expiry": "01/39",
-        "cvv": "100",
-        "brand": "Mastercard",
-        "status": "success",
-        "statusLabel": "Success"
-      }
-    ]
-  },
-  {
     "slug": "ccavenues",
     "name": "CCAvenue",
-    "country": "India",
-    "countryFlag": "🇮🇳",
+    "countries": [
+      "Kuwait",
+      "Bahrain",
+      "Qatar",
+      "Oman",
+      "UAE",
+      "KSA"
+    ],
+    "providerType": "GCC",
     "currencies": [
       "INR"
     ],
     "inquiryMinutes": 0,
     "operations": [],
-    "type": "redirect",
-    "category": "aggregator",
+    "integrationType": "redirect",
+    "category": "gateway",
     "operationMode": "purchase",
     "logo": "cc_avenue_icon.svg",
+    "services": [
+      "apple-pay"
+    ],
     "testCards": [
       {
         "cardNumber": "4111 1111 1111 1111",
@@ -362,8 +344,15 @@
   {
     "slug": "checkoutcom",
     "name": "Checkout.com",
-    "country": "Global",
-    "countryFlag": "🌎",
+    "countries": [
+      "Kuwait",
+      "Bahrain",
+      "Qatar",
+      "Oman",
+      "UAE",
+      "KSA"
+    ],
+    "providerType": "GCC",
     "currencies": [
       "AED",
       "USD",
@@ -374,10 +363,13 @@
     "operations": [
       "refund"
     ],
-    "type": "redirect",
-    "category": "aggregator",
+    "integrationType": "redirect",
+    "category": "gateway",
     "operationMode": "purchase",
     "logo": "checkoutcom.svg",
+    "services": [
+      "apple-pay"
+    ],
     "testCards": [
       {
         "cardNumber": "4242 4242 4242 4242",
@@ -390,36 +382,17 @@
     ]
   },
   {
-    "slug": "csuc",
-    "name": "Cybersource Unified Checkout",
-    "country": "GCC",
-    "countryFlag": "🌍",
-    "currencies": [
-      "AED",
-      "SAR",
-      "KWD",
-      "BHD",
-      "OMR",
-      "QAR"
-    ],
-    "inquiryMinutes": 8,
-    "operations": [
-      "refund"
-    ],
-    "type": "redirect",
-    "category": "gateway",
-    "operationMode": "purchase",
-    "logo": "cybersource_icon.svg",
-    "testCards": [],
-    "services": [
-      "apple-pay"
-    ]
-  },
-  {
     "slug": "cybersource",
     "name": "Cybersource",
-    "country": "GCC",
-    "countryFlag": "🌍",
+    "countries": [
+      "Kuwait",
+      "Bahrain",
+      "Qatar",
+      "Oman",
+      "UAE",
+      "KSA"
+    ],
+    "providerType": "Global",
     "currencies": [
       "AED",
       "SAR",
@@ -430,12 +403,19 @@
     ],
     "inquiryMinutes": null,
     "operations": [
-      "refund"
+      "refund",
+      "auth",
+      "capture",
+      "void"
     ],
-    "type": "redirect",
+    "integrationType": "redirect/sdk",
     "category": "gateway",
     "operationMode": "purchase",
     "logo": "cybersource_icon.svg",
+    "services": [
+      "apple-pay",
+      "google-pay"
+    ],
     "testCards": [
       {
         "cardNumber": "4111 1111 1111 1111",
@@ -453,23 +433,22 @@
         "status": "success",
         "statusLabel": "Success"
       }
-    ],
-    "services": [
-      "apple-pay"
     ]
   },
   {
     "slug": "dapi",
     "name": "Dapi",
-    "country": "UAE",
-    "countryFlag": "🇦🇪",
+    "countries": [
+      "UAE"
+    ],
+    "providerType": "Openbanking",
     "currencies": [
       "AED"
     ],
     "inquiryMinutes": null,
     "operations": [],
-    "type": "redirect",
-    "category": "aggregator",
+    "integrationType": "a2a",
+    "category": "openbanking",
     "operationMode": "purchase",
     "logo": "dapi.svg",
     "testCards": []
@@ -477,14 +456,18 @@
   {
     "slug": "deema",
     "name": "Deema",
-    "country": "GCC",
-    "countryFlag": "🌍",
+    "countries": [
+      "Kuwait"
+    ],
+    "providerType": "BNPL",
     "currencies": [
       "SAR"
     ],
     "inquiryMinutes": 8,
-    "operations": [],
-    "type": "redirect",
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "redirect",
     "category": "bnpl",
     "operationMode": "purchase",
     "logo": "deema.svg",
@@ -493,15 +476,19 @@
   {
     "slug": "doku",
     "name": "Doku",
-    "country": "Indonesia",
-    "countryFlag": "🇮🇩",
+    "countries": [
+      "Indonesia"
+    ],
+    "providerType": "Aggregator",
     "currencies": [
       "IDR"
     ],
     "inquiryMinutes": 60,
-    "operations": [],
-    "type": "redirect",
-    "category": "local",
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "redirect/sdk",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "doku.svg",
     "testCards": [
@@ -526,15 +513,19 @@
   {
     "slug": "enet",
     "name": "Enet",
-    "country": "Egypt",
-    "countryFlag": "🇪🇬",
+    "countries": [
+      "Kuwait"
+    ],
+    "providerType": "Aggregator",
     "currencies": [
       "EGP"
     ],
     "inquiryMinutes": 3,
-    "operations": [],
-    "type": "redirect",
-    "category": "local",
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "enet_icon.svg",
     "testCards": []
@@ -542,15 +533,19 @@
   {
     "slug": "fawry",
     "name": "Fawry",
-    "country": "Egypt",
-    "countryFlag": "🇪🇬",
+    "countries": [
+      "Egypt"
+    ],
+    "providerType": "PSP",
     "currencies": [
       "EGP"
     ],
     "inquiryMinutes": 8,
-    "operations": [],
-    "type": "redirect",
-    "category": "local",
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "psp",
     "operationMode": "purchase",
     "logo": "",
     "testCards": []
@@ -558,15 +553,19 @@
   {
     "slug": "fiserv",
     "name": "Fiserv",
-    "country": "Global",
-    "countryFlag": "🌎",
+    "countries": [
+      "UAE"
+    ],
+    "providerType": "Payment Processor",
     "currencies": [
       "USD"
     ],
     "inquiryMinutes": null,
-    "operations": [],
-    "type": "redirect",
-    "category": "gateway",
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "processor",
     "operationMode": "purchase",
     "logo": "",
     "testCards": []
@@ -574,8 +573,15 @@
   {
     "slug": "fss",
     "name": "FSS",
-    "country": "GCC",
-    "countryFlag": "🌍",
+    "countries": [
+      "Kuwait",
+      "Bahrain",
+      "Qatar",
+      "Oman",
+      "UAE",
+      "KSA"
+    ],
+    "providerType": "Payment Processor",
     "currencies": [
       "AED",
       "SAR",
@@ -588,8 +594,8 @@
     "operations": [
       "refund"
     ],
-    "type": "redirect",
-    "category": "gateway",
+    "integrationType": "redirect",
+    "category": "processor",
     "operationMode": "purchase",
     "logo": "master_visa.svg",
     "testCards": [
@@ -607,16 +613,20 @@
   {
     "slug": "geidea",
     "name": "Geidea",
-    "country": "KSA / UAE",
-    "countryFlag": "🇸🇦",
+    "countries": [
+      "KSA"
+    ],
+    "providerType": "Aggregator",
     "currencies": [
       "SAR",
       "AED"
     ],
     "inquiryMinutes": null,
-    "operations": [],
-    "type": "redirect",
-    "category": "bank",
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "geidea.svg",
     "testCards": [
@@ -662,15 +672,17 @@
   {
     "slug": "hesabe",
     "name": "Hesabe",
-    "country": "Kuwait",
-    "countryFlag": "🇰🇼",
+    "countries": [
+      "Kuwait"
+    ],
+    "providerType": "Aggregator",
     "currencies": [
       "KWD"
     ],
     "inquiryMinutes": 10,
     "operations": [],
-    "type": "redirect",
-    "category": "local",
+    "integrationType": "redirect",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "hesabe.svg",
     "testCards": [
@@ -732,8 +744,11 @@
   {
     "slug": "hyperpay",
     "name": "HyperPay",
-    "country": "MENA",
-    "countryFlag": "🌍",
+    "countries": [
+      "Iraq",
+      "KSA"
+    ],
+    "providerType": "Aggregator",
     "currencies": [
       "SAR",
       "AED",
@@ -741,7 +756,7 @@
     ],
     "inquiryMinutes": 31,
     "operations": [],
-    "type": "redirect",
+    "integrationType": "redirect",
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "hyperpay.svg",
@@ -765,10 +780,28 @@
     ]
   },
   {
+    "slug": "ifg",
+    "name": "IFG",
+    "countries": [
+      "Global"
+    ],
+    "providerType": "Airline Industry",
+    "currencies": [],
+    "inquiryMinutes": null,
+    "operations": [],
+    "integrationType": "iata-sdk",
+    "category": "specialty",
+    "operationMode": "purchase",
+    "logo": "",
+    "testCards": []
+  },
+  {
     "slug": "kpay",
     "name": "KNET",
-    "country": "Kuwait",
-    "countryFlag": "🇰🇼",
+    "countries": [
+      "Kuwait"
+    ],
+    "providerType": "Kuwait Banks",
     "currencies": [
       "KWD"
     ],
@@ -776,10 +809,13 @@
     "operations": [
       "refund"
     ],
-    "type": "redirect",
-    "category": "local",
+    "integrationType": "redirect",
+    "category": "bank",
     "operationMode": "purchase",
     "logo": "knet_icon.svg",
+    "services": [
+      "apple-pay"
+    ],
     "testCards": [
       {
         "cardNumber": "8888 8800 0000 0001",
@@ -790,25 +826,29 @@
         "statusLabel": "Success",
         "note": "For not captured, use expiry 08/21"
       }
-    ],
-    "services": [
-      "apple-pay"
     ]
   },
   {
     "slug": "moyasar",
     "name": "Moyasar",
-    "country": "KSA",
-    "countryFlag": "🇸🇦",
+    "countries": [
+      "KSA"
+    ],
+    "providerType": "Aggregator",
     "currencies": [
       "SAR"
     ],
     "inquiryMinutes": null,
-    "operations": [],
-    "type": "redirect",
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "redirect",
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "",
+    "services": [
+      "apple-pay"
+    ],
     "testCards": [
       {
         "cardNumber": "4201 3201 1111 1010",
@@ -848,8 +888,10 @@
   {
     "slug": "mpgs",
     "name": "MPGS",
-    "country": "GCC",
-    "countryFlag": "🌍",
+    "countries": [
+      "Global"
+    ],
+    "providerType": "All Banks",
     "currencies": [
       "AED",
       "SAR",
@@ -861,13 +903,20 @@
     "inquiryMinutes": 11,
     "operations": [
       "refund",
+      "auth",
       "capture",
-      "void"
+      "void",
+      "tokenization"
     ],
-    "type": "redirect",
+    "integrationType": "redirect/direct",
     "category": "gateway",
     "operationMode": "purchase_authorize",
     "logo": "master_visa.svg",
+    "services": [
+      "apple-pay",
+      "google-pay",
+      "samsung-wallet"
+    ],
     "testCards": [
       {
         "cardNumber": "5123 4500 0000 0008",
@@ -904,18 +953,20 @@
         "note": "For tokenization testing"
       }
     ],
-    "testCardNotes": "Cards 3 and 4 are specifically for receiving token data during tokenization testing.",
-    "services": [
-      "apple-pay",
-      "google-pay",
-      "samsung-wallet"
-    ]
+    "testCardNotes": "Cards 3 and 4 are specifically for receiving token data during tokenization testing."
   },
   {
     "slug": "myfatoorah",
     "name": "MyFatoorah",
-    "country": "GCC",
-    "countryFlag": "🌍",
+    "countries": [
+      "Kuwait",
+      "Bahrain",
+      "Qatar",
+      "Oman",
+      "UAE",
+      "KSA"
+    ],
+    "providerType": "Aggregator",
     "currencies": [
       "KWD",
       "SAR",
@@ -928,10 +979,14 @@
     "operations": [
       "refund"
     ],
-    "type": "redirect",
+    "integrationType": "redirect/direct",
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "myfatoorah_icon.svg",
+    "services": [
+      "apple-pay",
+      "google-pay"
+    ],
     "testCards": [
       {
         "cardNumber": "4508 7500 1574 1019",
@@ -982,26 +1037,29 @@
         "statusLabel": "Success"
       }
     ],
-    "testCardNotes": "Cardholder name: use format like \"test test\".",
-    "services": [
-      "apple-pay",
-      "google-pay"
-    ]
+    "testCardNotes": "Cardholder name: use format like \"test test\"."
   },
   {
     "slug": "nbo",
     "name": "NBO",
-    "country": "Oman",
-    "countryFlag": "🇴🇲",
+    "countries": [
+      "Oman"
+    ],
+    "providerType": "National Bank of Oman",
     "currencies": [
       "OMR"
     ],
     "inquiryMinutes": 10,
-    "operations": [],
-    "type": "redirect",
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "redirect",
     "category": "bank",
     "operationMode": "purchase",
     "logo": "nbo.svg",
+    "services": [
+      "apple-pay"
+    ],
     "testCards": [
       {
         "cardNumber": "5421 6033 0039 7131",
@@ -1016,8 +1074,11 @@
   {
     "slug": "ngenius",
     "name": "N-Genius",
-    "country": "UAE",
-    "countryFlag": "🇦🇪",
+    "countries": [
+      "Kuwait",
+      "UAE"
+    ],
+    "providerType": "ABK and All UAE Banks",
     "currencies": [
       "AED"
     ],
@@ -1025,10 +1086,14 @@
     "operations": [
       "refund"
     ],
-    "type": "redirect",
+    "integrationType": "redirect",
     "category": "bank",
     "operationMode": "purchase",
     "logo": "n_genius_icon.svg",
+    "services": [
+      "apple-pay",
+      "samsung-wallet"
+    ],
     "testCards": [
       {
         "cardNumber": "4012 0010 3714 1112",
@@ -1044,15 +1109,19 @@
   {
     "slug": "omannet",
     "name": "OmanNet",
-    "country": "Oman",
-    "countryFlag": "🇴🇲",
+    "countries": [
+      "Oman"
+    ],
+    "providerType": "All Oman Banks",
     "currencies": [
       "OMR"
     ],
     "inquiryMinutes": 8,
-    "operations": [],
-    "type": "redirect",
-    "category": "local",
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "bank",
     "operationMode": "purchase",
     "logo": "omannet_icon.svg",
     "testCards": [
@@ -1068,19 +1137,59 @@
     ]
   },
   {
+    "slug": "ottu_pg",
+    "name": "Ottu PG",
+    "countries": [
+      "Kuwait",
+      "Bahrain",
+      "Qatar",
+      "Oman",
+      "UAE"
+    ],
+    "providerType": "Ottu Service",
+    "currencies": [
+      "KWD",
+      "BHD",
+      "QAR",
+      "OMR",
+      "AED"
+    ],
+    "inquiryMinutes": null,
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "direct",
+    "category": "ottu",
+    "operationMode": "purchase",
+    "logo": "",
+    "testCards": []
+  },
+  {
     "slug": "paymob",
     "name": "PayMob",
-    "country": "Egypt",
-    "countryFlag": "🇪🇬",
+    "countries": [
+      "UAE",
+      "KSA",
+      "Egypt"
+    ],
+    "providerType": "Aggregator",
     "currencies": [
       "EGP"
     ],
     "inquiryMinutes": null,
-    "operations": [],
-    "type": "redirect",
+    "operations": [
+      "refund",
+      "auth",
+      "capture",
+      "void"
+    ],
+    "integrationType": "redirect",
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "paymob.svg",
+    "services": [
+      "apple-pay"
+    ],
     "testCards": [
       {
         "cardNumber": "5123 4567 8901 2346",
@@ -1112,15 +1221,19 @@
   {
     "slug": "payon",
     "name": "PayOn",
-    "country": "MENA",
-    "countryFlag": "🌍",
+    "countries": [
+      "Bahrain"
+    ],
+    "providerType": "Aggregator",
     "currencies": [
       "SAR",
       "AED"
     ],
     "inquiryMinutes": 31,
-    "operations": [],
-    "type": "redirect",
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "sdk",
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "",
@@ -1129,15 +1242,17 @@
   {
     "slug": "paypal",
     "name": "PayPal",
-    "country": "Global",
-    "countryFlag": "🌎",
+    "countries": [
+      "Global"
+    ],
+    "providerType": "PSP",
     "currencies": [
       "USD"
     ],
     "inquiryMinutes": 0,
     "operations": [],
-    "type": "redirect",
-    "category": "wallet",
+    "integrationType": "redirect",
+    "category": "psp",
     "operationMode": "purchase",
     "logo": "paypal_icon.svg",
     "testCards": [
@@ -1154,8 +1269,10 @@
   {
     "slug": "payu_india",
     "name": "PayU India",
-    "country": "India",
-    "countryFlag": "🇮🇳",
+    "countries": [
+      "India"
+    ],
+    "providerType": "Aggregator",
     "currencies": [
       "INR"
     ],
@@ -1163,7 +1280,7 @@
     "operations": [
       "refund"
     ],
-    "type": "redirect",
+    "integrationType": "redirect",
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "payu_icon.svg",
@@ -1182,8 +1299,10 @@
   {
     "slug": "qpay",
     "name": "QPay",
-    "country": "Qatar",
-    "countryFlag": "🇶🇦",
+    "countries": [
+      "Qatar"
+    ],
+    "providerType": "All Qatar Banks",
     "currencies": [
       "QAR"
     ],
@@ -1191,10 +1310,13 @@
     "operations": [
       "refund"
     ],
-    "type": "redirect",
-    "category": "local",
+    "integrationType": "redirect",
+    "category": "bank",
     "operationMode": "purchase",
     "logo": "qpay.svg",
+    "services": [
+      "apple-pay"
+    ],
     "testCards": [
       {
         "cardNumber": "4215 3755 0088 3243",
@@ -1213,29 +1335,30 @@
         "statusLabel": "Declined"
       }
     ],
-    "testCardNotes": "OTP for all QPay cards: 1234",
-    "services": [
-      "apple-pay"
-    ]
+    "testCardNotes": "OTP for all QPay cards: 1234"
   },
   {
     "slug": "rajhi",
     "name": "AlRajhi Bank",
-    "country": "KSA",
-    "countryFlag": "🇸🇦",
+    "countries": [
+      "KSA"
+    ],
+    "providerType": "AlRajhi Bank",
     "currencies": [
       "SAR"
     ],
     "inquiryMinutes": 8,
     "operations": [
       "refund",
-      "capture",
-      "void"
+      "tokenization"
     ],
-    "type": "redirect",
+    "integrationType": "redirect",
     "category": "bank",
     "operationMode": "purchase_authorize",
     "logo": "rajhi.svg",
+    "services": [
+      "apple-pay"
+    ],
     "testCards": [
       {
         "cardNumber": "5105 1051 0510 5100",
@@ -1251,15 +1374,19 @@
   {
     "slug": "skipcash",
     "name": "Skip Cash",
-    "country": "Qatar",
-    "countryFlag": "🇶🇦",
+    "countries": [
+      "Qatar"
+    ],
+    "providerType": "Aggregator",
     "currencies": [
       "QAR"
     ],
     "inquiryMinutes": 30,
-    "operations": [],
-    "type": "redirect",
-    "category": "local",
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "skipcash.svg",
     "testCards": []
@@ -1267,40 +1394,57 @@
   {
     "slug": "smart_pay",
     "name": "SmartPay",
-    "country": "Oman",
-    "countryFlag": "🇴🇲",
+    "countries": [
+      "Oman"
+    ],
+    "providerType": "Bank Muscat",
     "currencies": [
       "OMR"
     ],
     "inquiryMinutes": 16,
-    "operations": [],
-    "type": "redirect",
-    "category": "local",
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "bank",
     "operationMode": "purchase",
     "logo": "smartpay.svg",
+    "services": [
+      "apple-pay"
+    ],
     "testCards": []
   },
   {
     "slug": "sohar",
     "name": "Sohar International",
-    "country": "Oman",
-    "countryFlag": "🇴🇲",
+    "countries": [
+      "Oman"
+    ],
+    "providerType": "Sohar International Bank",
     "currencies": [
       "OMR"
     ],
     "inquiryMinutes": 16,
-    "operations": [],
-    "type": "redirect",
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "redirect",
     "category": "bank",
     "operationMode": "purchase",
     "logo": "sohar.svg",
+    "services": [
+      "apple-pay"
+    ],
     "testCards": []
   },
   {
     "slug": "stc_pay",
     "name": "STC Pay",
-    "country": "KSA",
-    "countryFlag": "🇸🇦",
+    "countries": [
+      "KSA",
+      "Bahrain"
+    ],
+    "providerType": "STC BANK",
     "currencies": [
       "SAR"
     ],
@@ -1308,7 +1452,7 @@
     "operations": [
       "refund"
     ],
-    "type": "wallet",
+    "integrationType": "wallet",
     "category": "wallet",
     "operationMode": "purchase",
     "logo": "stcpay.svg",
@@ -1316,26 +1460,12 @@
     "testCardNotes": "Wallet testing — use test phone: 548220713 (country code 966). OTP: 123456 (success), 111111 (insufficient balance), 222222 (daily limit exceeded)."
   },
   {
-    "slug": "stcbahrain",
-    "name": "STC Bahrain",
-    "country": "Bahrain",
-    "countryFlag": "🇧🇭",
-    "currencies": [
-      "BHD"
-    ],
-    "inquiryMinutes": 8,
-    "operations": [],
-    "type": "wallet",
-    "category": "wallet",
-    "operationMode": "purchase",
-    "logo": "",
-    "testCards": []
-  },
-  {
     "slug": "tabby",
     "name": "Tabby",
-    "country": "GCC",
-    "countryFlag": "🌍",
+    "countries": [
+      "KSA"
+    ],
+    "providerType": "BNPL",
     "currencies": [
       "AED",
       "SAR",
@@ -1346,7 +1476,7 @@
     "operations": [
       "refund"
     ],
-    "type": "redirect",
+    "integrationType": "redirect",
     "category": "bnpl",
     "operationMode": "purchase",
     "logo": "tabby-logo-charcoal.svg",
@@ -1356,14 +1486,18 @@
   {
     "slug": "taly",
     "name": "Taly",
-    "country": "GCC",
-    "countryFlag": "🌍",
+    "countries": [
+      "Kuwait"
+    ],
+    "providerType": "BNPL",
     "currencies": [
       "SAR"
     ],
     "inquiryMinutes": 30,
-    "operations": [],
-    "type": "redirect",
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "redirect",
     "category": "bnpl",
     "operationMode": "purchase",
     "logo": "taly.svg",
@@ -1372,8 +1506,10 @@
   {
     "slug": "tamara",
     "name": "Tamara",
-    "country": "GCC",
-    "countryFlag": "🌍",
+    "countries": [
+      "KSA"
+    ],
+    "providerType": "BNPL",
     "currencies": [
       "SAR",
       "AED",
@@ -1384,7 +1520,7 @@
     "operations": [
       "refund"
     ],
-    "type": "redirect",
+    "integrationType": "redirect",
     "category": "bnpl",
     "operationMode": "purchase",
     "logo": "tamara.svg",
@@ -1438,8 +1574,15 @@
   {
     "slug": "tap",
     "name": "Tap Payments",
-    "country": "MENA",
-    "countryFlag": "🌍",
+    "countries": [
+      "Kuwait",
+      "Bahrain",
+      "Qatar",
+      "Oman",
+      "UAE",
+      "KSA"
+    ],
+    "providerType": "PSP/Aggregator",
     "currencies": [
       "AED",
       "SAR",
@@ -1449,11 +1592,17 @@
       "QAR"
     ],
     "inquiryMinutes": 20,
-    "operations": [],
-    "type": "redirect",
+    "operations": [
+      "refund",
+      "tokenization"
+    ],
+    "integrationType": "redirect/direct",
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "tap.svg",
+    "services": [
+      "apple-pay"
+    ],
     "testCards": [
       {
         "cardNumber": "4508 7500 1574 1019",
@@ -1509,39 +1658,73 @@
         "statusLabel": "Success"
       }
     ],
-    "testCardNotes": "CVV values: 100 = MATCH, 101 = NOT_PROCESSED, 102 = NO_MATCH. For AMEX: 1000, 1010, 1020.",
-    "services": [
-      "apple-pay"
-    ]
+    "testCardNotes": "CVV values: 100 = MATCH, 101 = NOT_PROCESSED, 102 = NO_MATCH. For AMEX: 1000, 1010, 1020."
   },
   {
     "slug": "tess",
     "name": "Tess Payments",
-    "country": "Global",
-    "countryFlag": "🌎",
+    "countries": [
+      "Qatar"
+    ],
+    "providerType": "Aggregator",
     "currencies": [
       "USD"
     ],
     "inquiryMinutes": null,
-    "operations": [],
-    "type": "redirect",
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "redirect",
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "tess.svg",
     "testCards": []
   },
   {
-    "slug": "upayments",
-    "name": "UPayments",
-    "country": "Kuwait",
-    "countryFlag": "🇰🇼",
+    "slug": "tpay",
+    "name": "Tpay",
+    "countries": [
+      "Kuwait"
+    ],
+    "providerType": "CBK",
     "currencies": [
       "KWD"
     ],
     "inquiryMinutes": null,
-    "operations": [],
-    "type": "redirect",
-    "category": "local",
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "bank",
+    "operationMode": "purchase",
+    "logo": "cbk_icon.svg",
+    "testCards": [
+      {
+        "cardNumber": "5123 4500 0000 0008",
+        "expiry": "01/39",
+        "cvv": "100",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success"
+      }
+    ]
+  },
+  {
+    "slug": "upayments",
+    "name": "UPayments",
+    "countries": [
+      "Kuwait"
+    ],
+    "providerType": "Aggregator",
+    "currencies": [
+      "KWD"
+    ],
+    "inquiryMinutes": null,
+    "operations": [
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "upayments.svg",
     "testCards": []
@@ -1549,15 +1732,17 @@
   {
     "slug": "upg",
     "name": "UPG",
-    "country": "Egypt",
-    "countryFlag": "🇪🇬",
+    "countries": [
+      "Egypt"
+    ],
+    "providerType": "Aggregator",
     "currencies": [
       "EGP"
     ],
     "inquiryMinutes": 0,
     "operations": [],
-    "type": "redirect",
-    "category": "gateway",
+    "integrationType": "redirect",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "upg_icon.svg",
     "testCards": [
@@ -1575,14 +1760,16 @@
   {
     "slug": "urpay",
     "name": "URPay",
-    "country": "KSA",
-    "countryFlag": "🇸🇦",
+    "countries": [
+      "KSA"
+    ],
+    "providerType": "Alrajhi Bank",
     "currencies": [
       "SAR"
     ],
     "inquiryMinutes": null,
     "operations": [],
-    "type": "wallet",
+    "integrationType": "wallet",
     "category": "wallet",
     "operationMode": "purchase",
     "logo": "urpay.svg",
