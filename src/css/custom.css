@@ -327,10 +327,13 @@ html[data-theme="dark"] {
     flex: 0 1 auto;
   }
 
-  /* MCP button keeps its size */
+  /* MCP button keeps its size.
+     !important is required: the search plugin loads its own CSS after custom.css
+     and sets position:absolute on its CSS-module class (.navbarSearchContainer_*),
+     which would otherwise win the cascade and overlay the MCP button. */
   .navbar__items--right > * {
     flex-shrink: 0;
-    position: static;
+    position: static !important;
   }
 
   /* Hide GitHub and Ottu.com — reachable via hamburger sidebar */
