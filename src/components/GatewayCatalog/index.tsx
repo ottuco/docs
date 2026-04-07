@@ -1,25 +1,54 @@
 import React, { useState, useMemo } from "react";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 import gatewaysData from "@site/static/data/gateways.json";
-import type { Gateway } from "@site/src/types/gateway";
+import type { Gateway, GatewayCategory } from "@site/src/types/gateway";
 import styles from "./styles.module.css";
 
 const gateways = (gatewaysData as Gateway[]).filter(
   (gw) => gw.slug !== "standard"
 );
 
-type Category = Gateway["category"];
-
-const CATEGORY_LABELS: Record<Category, string> = {
-  gateway: "Payment Gateways",
-  aggregator: "Aggregators",
-  wallet: "Digital Wallets",
-  bnpl: "Buy Now, Pay Later",
-  local: "Local Methods",
-  bank: "Bank Direct",
+const CATEGORY_LABELS: Record<GatewayCategory, string> = {
+  aggregator: "Aggregator",
+  gateway: "Payment Gateway",
+  wallet: "Wallet",
+  bnpl: "BNPL",
+  psp: "PSP",
+  processor: "Processor",
+  bank: "Bank",
+  openbanking: "Open Banking",
+  ottu: "Ottu Service",
+  specialty: "Specialty",
 };
 
-const CATEGORY_ORDER: Category[] = ["gateway", "aggregator", "wallet", "bnpl", "local", "bank"];
+const CATEGORY_ORDER: GatewayCategory[] = [
+  "gateway", "aggregator", "psp", "processor", "wallet", "bnpl", "bank", "openbanking", "ottu", "specialty",
+];
+
+const REGION_CONFIG = {
+  gcc: {
+    label: "GCC",
+    countries: ["Kuwait", "Bahrain", "Qatar", "Oman", "UAE", "KSA"],
+  },
+  apac: {
+    label: "APAC",
+    countries: ["Cambodia", "Indonesia", "India"],
+  },
+  global: {
+    label: "Global",
+    countries: ["Egypt", "Iraq", "Canada"],
+  },
+} as const;
+
+type RegionKey = keyof typeof REGION_CONFIG;
+const REGION_ORDER: RegionKey[] = ["global", "gcc", "apac"];
+
+const COUNTRY_FLAGS: Record<string, string> = {
+  Kuwait: "\u{1F1F0}\u{1F1FC}", Bahrain: "\u{1F1E7}\u{1F1ED}", Qatar: "\u{1F1F6}\u{1F1E6}", Oman: "\u{1F1F4}\u{1F1F2}",
+  UAE: "\u{1F1E6}\u{1F1EA}", KSA: "\u{1F1F8}\u{1F1E6}", Egypt: "\u{1F1EA}\u{1F1EC}", Iraq: "\u{1F1EE}\u{1F1F6}",
+  India: "\u{1F1EE}\u{1F1F3}", Indonesia: "\u{1F1EE}\u{1F1E9}", Cambodia: "\u{1F1F0}\u{1F1ED}", Canada: "\u{1F1E8}\u{1F1E6}",
+  Global: "\u{1F30E}",
+};
 
 const SERVICE_CONFIG: Record<string, { label: string; icon: React.ReactNode }> = {
   "apple-pay": {
@@ -36,24 +65,23 @@ const SERVICE_CONFIG: Record<string, { label: string; icon: React.ReactNode }> =
   },
 };
 
-function getRegion(country: string): string {
-  const gcc = new Set([
-    "Kuwait",
-    "Bahrain",
-    "Qatar",
-    "Oman",
-    "UAE",
-    "KSA",
-    "KSA / UAE",
-    "GCC",
-  ]);
-  if (gcc.has(country)) return "GCC";
-  if (country === "Egypt" || country === "MENA") return "MENA";
-  if (country === "Global") return "Global";
-  return "Other";
+function gatewayMatchesRegion(gw: Gateway, region: RegionKey): boolean {
+  const regionCountries = REGION_CONFIG[region].countries;
+  if (gw.countries.includes("Global")) return true;
+  return gw.countries.some((c) => (regionCountries as readonly string[]).includes(c));
 }
 
-const REGIONS = ["All Regions", "GCC", "MENA", "Global", "Other"] as const;
+function gatewayMatchesCountry(gw: Gateway, country: string): boolean {
+  if (gw.countries.includes("Global")) return true;
+  return gw.countries.includes(country);
+}
+
+function getCountriesForRegion(region: RegionKey | "all"): string[] {
+  if (region === "all") {
+    return Object.values(REGION_CONFIG).flatMap((r) => [...r.countries]);
+  }
+  return [...REGION_CONFIG[region].countries];
+}
 
 function LogoFallback({ name }: { name: string }) {
   const hue = [...name].reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
@@ -69,32 +97,38 @@ function LogoFallback({ name }: { name: string }) {
 
 export default function GatewayCatalog(): React.JSX.Element {
   const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<Category | "all">(
-    "all"
-  );
-  const [selectedRegion, setSelectedRegion] = useState<string>("All Regions");
+  const [selectedCategory, setSelectedCategory] = useState<GatewayCategory | "all">("all");
+  const [selectedRegion, setSelectedRegion] = useState<RegionKey | "all">("all");
+  const [selectedCountry, setSelectedCountry] = useState<string>("all");
+
+  // Reset country when region changes
+  const handleRegionChange = (region: RegionKey | "all") => {
+    setSelectedRegion(region);
+    setSelectedCountry("all");
+  };
+
+  // If selected country isn't in the current region's countries, reset to "all"
+  const effectiveCountry = useMemo(() => {
+    if (selectedCountry === "all") return "all";
+    const countries = getCountriesForRegion(selectedRegion);
+    return countries.includes(selectedCountry) ? selectedCountry : "all";
+  }, [selectedCountry, selectedRegion]);
 
   const filtered = useMemo(() => {
     return gateways.filter((gw) => {
-      if (
-        selectedCategory !== "all" &&
-        gw.category !== selectedCategory
-      )
-        return false;
-      if (
-        selectedRegion !== "All Regions" &&
-        getRegion(gw.country) !== selectedRegion
-      )
-        return false;
-      if (
-        search &&
-        !gw.name.toLowerCase().includes(search.toLowerCase()) &&
-        !gw.country.toLowerCase().includes(search.toLowerCase())
-      )
-        return false;
+      if (selectedCategory !== "all" && gw.category !== selectedCategory) return false;
+      if (selectedRegion !== "all" && !gatewayMatchesRegion(gw, selectedRegion)) return false;
+      if (effectiveCountry !== "all" && !gatewayMatchesCountry(gw, effectiveCountry)) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        const nameMatch = gw.name.toLowerCase().includes(q);
+        const countryMatch = gw.countries.some((c) => c.toLowerCase().includes(q));
+        const providerMatch = gw.providerType.toLowerCase().includes(q);
+        if (!nameMatch && !countryMatch && !providerMatch) return false;
+      }
       return true;
     });
-  }, [search, selectedCategory, selectedRegion]);
+  }, [search, selectedCategory, selectedRegion, effectiveCountry]);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: gateways.length };
@@ -104,10 +138,15 @@ export default function GatewayCatalog(): React.JSX.Element {
     return c;
   }, []);
 
+  const availableCountries = useMemo(() => {
+    return getCountriesForRegion(selectedRegion);
+  }, [selectedRegion]);
+
   return (
     <div className={styles.catalog}>
       {/* Filter bar */}
       <div className={styles.filters}>
+        {/* Row 1: Category pills */}
         <div className={styles.categoryPills}>
           <button
             className={`${styles.pill} ${selectedCategory === "all" ? styles.pillActive : ""}`}
@@ -115,7 +154,7 @@ export default function GatewayCatalog(): React.JSX.Element {
           >
             All <span className={styles.pillCount}>{counts.all}</span>
           </button>
-          {CATEGORY_ORDER.map((cat) => (
+          {CATEGORY_ORDER.filter((cat) => (counts[cat] || 0) > 0).map((cat) => (
             <button
               key={cat}
               className={`${styles.pill} ${selectedCategory === cat ? styles.pillActive : ""}`}
@@ -126,6 +165,27 @@ export default function GatewayCatalog(): React.JSX.Element {
             </button>
           ))}
         </div>
+
+        {/* Row 2: Region pills */}
+        <div className={styles.regionPills}>
+          <button
+            className={`${styles.pill} ${selectedRegion === "all" ? styles.pillActive : ""}`}
+            onClick={() => handleRegionChange("all")}
+          >
+            All Regions
+          </button>
+          {REGION_ORDER.map((region) => (
+            <button
+              key={region}
+              className={`${styles.pill} ${selectedRegion === region ? styles.pillActive : ""}`}
+              onClick={() => handleRegionChange(region)}
+            >
+              {REGION_CONFIG[region].label}
+            </button>
+          ))}
+        </div>
+
+        {/* Row 3: Search + Country dropdown */}
         <div className={styles.filterRow}>
           <input
             type="text"
@@ -136,12 +196,13 @@ export default function GatewayCatalog(): React.JSX.Element {
           />
           <select
             className={styles.regionSelect}
-            value={selectedRegion}
-            onChange={(e) => setSelectedRegion(e.target.value)}
+            value={effectiveCountry}
+            onChange={(e) => setSelectedCountry(e.target.value)}
           >
-            {REGIONS.map((r) => (
-              <option key={r} value={r}>
-                {r}
+            <option value="all">All Countries</option>
+            {availableCountries.map((c) => (
+              <option key={c} value={c}>
+                {COUNTRY_FLAGS[c] || ""} {c}
               </option>
             ))}
           </select>
@@ -169,8 +230,28 @@ export default function GatewayCatalog(): React.JSX.Element {
   );
 }
 
+function CountryDisplay({ countries }: { countries: string[] }) {
+  const MAX_SHOW = 3;
+  const shown = countries.slice(0, MAX_SHOW);
+  const remaining = countries.length - MAX_SHOW;
+
+  return (
+    <span className={styles.country}>
+      {shown.map((c, i) => (
+        <span key={c}>
+          {i > 0 && ", "}
+          {COUNTRY_FLAGS[c] || ""} {c}
+        </span>
+      ))}
+      {remaining > 0 && <span> +{remaining}</span>}
+    </span>
+  );
+}
+
 function GatewayCard({ gateway }: { gateway: Gateway }) {
   const logoSrc = useBaseUrl(`/img/gateways/${gateway.logo}`);
+  const categoryLabel = CATEGORY_LABELS[gateway.category];
+  const showProviderType = gateway.providerType && gateway.providerType !== categoryLabel;
 
   return (
     <div className={styles.card}>
@@ -190,7 +271,7 @@ function GatewayCard({ gateway }: { gateway: Gateway }) {
         </div>
         <div className={styles.badgesCol}>
           <span className={`${styles.categoryBadge} ${styles[`cat_${gateway.category}`]}`}>
-            {CATEGORY_LABELS[gateway.category]}
+            {categoryLabel}
           </span>
           {gateway.services?.map((svc) => {
             const cfg = SERVICE_CONFIG[svc];
@@ -204,12 +285,13 @@ function GatewayCard({ gateway }: { gateway: Gateway }) {
         </div>
       </div>
 
-      {/* Zone 2: Name + country — full width, never overlaps */}
+      {/* Zone 2: Name + provider type + countries — full width */}
       <div className={styles.cardBody}>
         <h4 className={styles.cardName}>{gateway.name}</h4>
-        <span className={styles.country}>
-          {gateway.countryFlag} {gateway.country}
-        </span>
+        {showProviderType && (
+          <span className={styles.providerType}>{gateway.providerType}</span>
+        )}
+        <CountryDisplay countries={gateway.countries} />
       </div>
 
       {/* Zone 3: Footer — currencies left, operations right */}

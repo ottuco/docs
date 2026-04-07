@@ -19,6 +19,13 @@
   margin-bottom: 12px;
 }
 
+.regionPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
 .pill {
   display: inline-flex;
   align-items: center;
@@ -234,6 +241,31 @@
   color: #6366f1;
 }
 
+.cat_psp {
+  background: rgba(13, 148, 136, 0.1);
+  color: #0d9488;
+}
+
+.cat_processor {
+  background: rgba(71, 85, 105, 0.1);
+  color: #475569;
+}
+
+.cat_openbanking {
+  background: rgba(8, 145, 178, 0.1);
+  color: #0891b2;
+}
+
+.cat_ottu {
+  background: rgba(242, 126, 32, 0.1);
+  color: #f27e20;
+}
+
+.cat_specialty {
+  background: rgba(225, 29, 72, 0.1);
+  color: #e11d48;
+}
+
 /* ── Card content ───────────────────────────────────── */
 .cardName {
   margin: 0 0 4px;
@@ -247,6 +279,15 @@
   font-size: 12px;
   color: var(--ifm-font-color-base);
   opacity: 0.6;
+}
+
+.providerType {
+  display: block;
+  font-size: 11px;
+  color: var(--ifm-font-color-base);
+  opacity: 0.45;
+  margin-bottom: 2px;
+  font-style: italic;
 }
 
 .serviceBadge {
@@ -414,6 +455,31 @@
   color: #a5b4fc;
 }
 
+[data-theme="dark"] .cat_psp {
+  background: rgba(13, 148, 136, 0.15);
+  color: #5eead4;
+}
+
+[data-theme="dark"] .cat_processor {
+  background: rgba(71, 85, 105, 0.15);
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .cat_openbanking {
+  background: rgba(8, 145, 178, 0.15);
+  color: #67e8f9;
+}
+
+[data-theme="dark"] .cat_ottu {
+  background: rgba(242, 126, 32, 0.15);
+  color: #fdba74;
+}
+
+[data-theme="dark"] .cat_specialty {
+  background: rgba(225, 29, 72, 0.15);
+  color: #fda4af;
+}
+
 [data-theme="dark"] .opBadge {
   background: rgba(242, 126, 32, 0.15);
   color: #fdba74;
@@ -443,6 +509,10 @@
   }
 
   .categoryPills {
+    gap: 6px;
+  }
+
+  .regionPills {
     gap: 6px;
   }
 
