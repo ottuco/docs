@@ -8,16 +8,28 @@ export interface TestCard {
   note?: string;
 }
 
+export type GatewayCategory =
+  | "aggregator"
+  | "gateway"
+  | "wallet"
+  | "bnpl"
+  | "psp"
+  | "processor"
+  | "bank"
+  | "openbanking"
+  | "ottu"
+  | "specialty";
+
 export interface Gateway {
   slug: string;
   name: string;
-  country: string;
-  countryFlag: string;
+  countries: string[];
+  providerType: string;
   currencies: string[];
   inquiryMinutes: number | null;
   operations: string[];
-  type: "redirect" | "wallet";
-  category: "gateway" | "aggregator" | "wallet" | "bnpl" | "local" | "bank";
+  integrationType: string;
+  category: GatewayCategory;
   operationMode: "purchase" | "purchase_authorize";
   logo: string;
   services?: string[];
