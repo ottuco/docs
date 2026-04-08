@@ -54,7 +54,7 @@ graph LR
     D -->|PG response| B
     B --> E{{Child Transaction}}
 
-    classDef accent fill:#1983BC,color:#FFFFFF,stroke:#302F37
+    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
     class B accent
 ```
 

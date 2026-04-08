@@ -195,6 +195,11 @@ html[data-theme="dark"] {
   margin-bottom: 0;
 }
 
+/* Descriptive paragraph text — 14px per Figma (base is 16px, descriptions use 14px) */
+.markdown p {
+  font-size: 0.875rem; /* 14px */
+}
+
 /* Bold text — semibold (600) instead of heavy bold (700) for inline descriptions */
 .markdown strong {
   font-weight: 600;
@@ -209,6 +214,12 @@ html[data-theme="dark"] {
   padding-bottom: 14px;
 }
 
+/*Table data rows: font-size (14px)*/
+.markdown table td,
+.markdown table td span {
+  font-size: 14px;
+}
+
 /* Checkout SDK: align Payment Options Display Mode images like old docs */
 .checkout-sdk-image-row {
   display: flex;
@@ -221,6 +232,11 @@ html[data-theme="dark"] {
   margin: 0;
   flex: 1 1 240px;
   max-width: 320px;
+}
+
+/* Center figure caption within each figure */
+.checkout-sdk-image-row figure figcaption {
+  text-align: center;
 }
 
 .checkout-sdk-image-row img {
@@ -240,10 +256,10 @@ html[data-theme="dark"] {
   display: block;
 }
 
-/* Checkout SDK page images — 40% smaller + centered */
+/* Checkout SDK page images — slightly reduced + centered */
 .theme-doc-markdown figure img[src*="checkout-sdk"],
 .theme-doc-markdown figure img[src*="googleusercontent"] {
-  max-width: 60%;
+  max-width: 85%;
   height: auto;
   display: block;
   margin: 0 auto;
@@ -533,7 +549,7 @@ html[data-theme="dark"] {
 /* Info panel — dark */
 [data-theme="dark"] .alert--info {
   --ifm-alert-background-color: #0f1f2e;
-  --ifm-alert-border-color: #1983bc;
+  --ifm-alert-border-color: #0b82be;
   color: #e5e7eb;
 }
 
@@ -824,20 +840,45 @@ html[data-theme="dark"] {
   font-family: "trebuchet ms", verdana, arial, sans-serif;
 }
 
+/* Mermaid node label color isolation.
+   Docusaurus page CSS (color: var(--ifm-font-color-base)) cascades into SVG foreignObject
+   HTML content, overriding Mermaid's own primaryTextColor themeVariable.
+   In light mode: dark page color (#4a4a4a) makes accent nodes unreadable on blue.
+   In dark mode: light page color (#e5e7eb) makes all normal nodes invisible on #FAFAFA.
+   Fix: pin .nodeLabel to the intended dark text color, then override for accent nodes. */
+.docusaurus-mermaid-container .nodeLabel {
+  color: #302f37 !important;
+}
+.docusaurus-mermaid-container .accent .nodeLabel {
+  color: #ffffff !important;
+}
+/* SVG <text> fallback (non-foreignObject rendering path) */
+.docusaurus-mermaid-container text {
+  fill: #302f37;
+}
+.docusaurus-mermaid-container .accent text {
+  fill: #ffffff !important;
+}
+
 /* Table styling — from Figma */
 .markdown table thead tr {
   background-color: var(--ifm-background-surface-color);
-  border-bottom-width: 1px;
+  border-bottom-width: 1px; /* overrides Infima's default 2px header border */
 }
-table tr:nth-child(2n) {
+
+/* All body rows: white background — overrides Infima's zebra stripe on odd rows */
+.markdown table tbody tr,
+.markdown table tbody tr:nth-child(2n) {
   background-color: var(--ifm-background-color) !important;
 }
 
 .markdown table thead th {
+  font-size: 16px;
   font-weight: 600;
   color: var(--ifm-heading-color);
-  /* Figma uses left-aligned text for all table cells */
   text-align: left;
+  opacity: 1;
+  border-bottom-width: 1px; /* match body row border thickness */
 }
 
 /* OpenAPI response status code tabs — from Figma */

@@ -43,7 +43,7 @@ graph LR
     C -->|Views & pays| D[Checkout Page]
     D -->|Webhook| A
 
-    classDef accent fill:#1983BC,color:#FFFFFF,stroke:#302F37
+    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
     class B accent
 ```
 

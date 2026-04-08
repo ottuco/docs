@@ -57,12 +57,12 @@
 }
 
 .openapi-schema__nullable {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   font-size: 10.5px;
   font-weight: bold;
   text-transform: uppercase;
-  color: var(--openapi-nullable);
+  color: #0b82be;
   margin-left: 1%;
   background-color: transparent;
 }

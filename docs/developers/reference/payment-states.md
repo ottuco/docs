@@ -60,7 +60,7 @@ flowchart TD
     RQ --> RR([refund_rejected])
     AUTH --> VOIDED([voided])
 
-    classDef accent fill:#1983BC,color:#FFFFFF,stroke:#302F37
+    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
     class PAID,AUTH accent
 ```
 
@@ -93,7 +93,7 @@ flowchart TD
     FAILED -.->|Refund succeeds| SUCCESS
     ERROR -.->|Refund succeeds| SUCCESS
 
-    classDef accent fill:#1983BC,color:#FFFFFF,stroke:#302F37
+    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
     class SUCCESS accent
 ```
 

@@ -91,7 +91,7 @@
 }
 /* Standard: 10-11 min — Ottu blue */
 .tierStandard .minutes {
-  background: #1983bc;
+  background: #0b82be;
   color: #fff;
 }
 /* Moderate: 15-20 min — Ottu orange */
@@ -165,7 +165,7 @@
   background: #0d9488;
 }
 [data-theme="dark"] .tierStandard .minutes {
-  background: #1983bc;
+  background: #0b82be;
 }
 [data-theme="dark"] .tierModerate .minutes {
   background: #f27e20;

@@ -227,7 +227,7 @@ ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
 
       /* Buttons */
       font-family: Poppins;
-      font-size: 16px;
+      font-size: 12px;
       font-style: normal;
       font-weight: 500;
       line-height: normal;
@@ -368,6 +368,12 @@ ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
     line-height: normal;
     text-transform: uppercase;
   }
+
+  .openapi-schema__nullable {
+    color: #0b82be;
+    font-size: 16px;
+    font-weight: 500;
+  }
 }
 
 [data-theme="dark"] .openapi-schema__container {
@@ -384,9 +390,9 @@ ul .openapi-schema__list-item {
   p {
     color: #4a4a4a;
 
-    /* Basic text */
+    /* Description text */
     font-family: Poppins;
-    font-size: 16px;
+    font-size: 14px;
     font-style: normal;
     font-weight: 400;
     line-height: normal;
@@ -395,7 +401,7 @@ ul .openapi-schema__list-item {
       color: #302f37;
 
       font-family: Poppins;
-      font-size: 16px;
+      font-size: 14px;
       font-style: normal;
       font-weight: 600;
       line-height: normal;
@@ -429,6 +435,16 @@ ul .openapi-schema__list-item {
    auth is documented in getting-started/authentication.md */
 .openapi-security__details {
   display: none;
+}
+
+/* API Explorer right panel — section summary titles: 12px to match Figma small text */
+.openapi-explorer__details-summary {
+  font-size: 12px;
+}
+
+/* Schema list items — spacing between property rows (order_no, session_id, etc.) */
+.openapi-schema__list-item {
+  padding-bottom: 12px !important;
 }
 
 /* Language selector dropdown (replaces horizontal carousel) */
