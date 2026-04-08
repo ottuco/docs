@@ -206,12 +206,11 @@ html[data-theme="dark"] {
 .markdown table th {
   vertical-align: top;
   line-height: 1.6;
+  font-size: 14px;
   padding-top: 14px;
   padding-bottom: 14px;
 }
 
-/*Table data rows: font-size (14px)*/
-.markdown table td,
 .markdown table td span {
   font-size: 14px;
 }
@@ -870,7 +869,6 @@ html[data-theme="dark"] {
 .docusaurus-mermaid-container .edgeLabels rect,
 .docusaurus-mermaid-container .label rect {
   fill: transparent !important;
-  opacity: 0 !important;
 }
 .docusaurus-mermaid-container .edgeLabel div,
 .docusaurus-mermaid-container .edgeLabel p,
