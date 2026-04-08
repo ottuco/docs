@@ -206,7 +206,7 @@ html[data-theme="dark"] {
 .markdown table th {
   vertical-align: top;
   line-height: 1.6;
-  padding-top: 14px; /* or adjust to taste */
+  padding-top: 14px;
   padding-bottom: 14px;
 }
 

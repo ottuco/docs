@@ -342,8 +342,8 @@
   position: relative;
 }
 
-.heroSubtitle {
-  font-size: 14px !important;
+.hero .heroSubtitle {
+  font-size: 14px;
   color: var(--ifm-font-color-base);
   margin: 0 0 28px;
   max-width: 480px;

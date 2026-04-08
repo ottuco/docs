@@ -70,12 +70,13 @@ To ensure a smooth redirection of the payer back to the designated [redirect_url
 flowchart TD
     M([Merchant Server]) -->|1. Sends payment details| OTTU[Ottu Checkout API]
     OTTU -->|2. Returns processed information| M
-    M -->|3. Redirects customer to gateway| CUST([Customer])
-    CUST -->|4. Completes payment| PG([Payment Gateway])
-    PG -->|5. Sends payment result| OTTU
-    OTTU -->|6. POSTs result to webhook_url| WEBHOOK[Merchant webhook_url]
+    M -->|3. Presents checkout UI| CUST([Customer])
+    CUST -->|4. Submits payment| OTTU
+    OTTU -->|5. Processes payment| PG([Payment Gateway])
+    PG -->|6. Returns payment result| OTTU
+    OTTU -->|7. POSTs result to webhook_url| WEBHOOK[Merchant webhook_url]
     WEBHOOK -->|HTTP 200| R200[Redirect to merchant redirect_url]
-    WEBHOOK -->|HTTP 201| RSUM[Ottu payment details page]
+    WEBHOOK -->|HTTP 201| RSUM[Ottu payment summary page]
     WEBHOOK -->|Other status| RSUM
 
     classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
