@@ -392,7 +392,7 @@ ul .openapi-schema__list-item {
 
     /* Description text */
     font-family: Poppins;
-    font-size: 14px;
+    font-size: 16px;
     font-style: normal;
     font-weight: 400;
     line-height: normal;
@@ -401,7 +401,7 @@ ul .openapi-schema__list-item {
       color: #302f37;
 
       font-family: Poppins;
-      font-size: 14px;
+      font-size: 16px;
       font-style: normal;
       font-weight: 600;
       line-height: normal;

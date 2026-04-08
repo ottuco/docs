@@ -195,10 +195,6 @@ html[data-theme="dark"] {
   margin-bottom: 0;
 }
 
-/* Descriptive paragraph text — 14px per Figma (base is 16px, descriptions use 14px) */
-.markdown p {
-  font-size: 0.875rem; /* 14px */
-}
 
 /* Bold text — semibold (600) instead of heavy bold (700) for inline descriptions */
 .markdown strong {
