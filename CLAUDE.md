@@ -185,10 +185,10 @@ All sidebars defined in `sidebars.ts`. Auto-generated API reference uses `{type:
 
 ## Mermaid Diagrams
 
-**Monochrome + one accent.** Most nodes are neutral (no fill, gray border). Only the 1-2 key nodes get Ottu blue (`#1983BC`). Do NOT color every node — a diagram with 7 nodes should have 1-2 colored, not 5-7.
+**Monochrome + one accent.** Most nodes are neutral (no fill, gray border). Only the 1-2 key nodes get Ottu blue (`#0B82BE`). Do NOT color every node — a diagram with 7 nodes should have 1-2 colored, not 5-7.
 
 - **Default nodes** — `#FAFAFA` fill, `#BFBFBF` border, `#302F37` text (set via theme config, no classDef needed)
-- **Accent** (`#1983BC`) — the key Ottu service or API the diagram is about (1-2 nodes max)
+- **Accent** (`#0B82BE`) — the key Ottu service or API the diagram is about (1-2 nodes max)
 - **Danger** (`#ED2833`) — genuine risk only: PCI boundary, encryption, failure path (0-1 nodes)
 - **Extended palette** (orange, pink, dark) — architecture diagrams only, never in simple workflows
 

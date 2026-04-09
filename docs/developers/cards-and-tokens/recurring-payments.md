@@ -76,7 +76,7 @@ graph LR
     A -->|MIT: charge token| D[Auto-Debit API]
     D -->|Result webhook| A
 
-    classDef accent fill:#1983BC,color:#FFFFFF,stroke:#302F37
+    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
     class D accent
 ```
 

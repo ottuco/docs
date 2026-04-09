@@ -1,177 +1,174 @@
-import {themes as prismThemes} from 'prism-react-renderer';
-import type {Config} from '@docusaurus/types';
-import type * as Preset from '@docusaurus/preset-classic';
+import { themes as prismThemes } from "prism-react-renderer";
+import type { Config } from "@docusaurus/types";
+import type * as Preset from "@docusaurus/preset-classic";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'Ottu Documentation',
-  tagline: 'Payment processing made simple',
-  favicon: 'img/ottu_logo.avif',
-  
+  title: "Ottu Documentation",
+  tagline: "Payment processing made simple",
+  favicon: "img/ottu_logo.avif",
+
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
   },
 
   // Production URL (docs.ottu.net)
-  url: 'https://docs.ottu.net',
-  baseUrl: '/',
+  url: "https://docs.ottu.net",
+  baseUrl: "/",
 
   trailingSlash: true,
 
-  clientModules: [
-    './src/clientModules/sidebarHashActiveLink.ts',
-  ],
+  clientModules: ["./src/clientModules/sidebarHashActiveLink.ts"],
 
-  onBrokenLinks: 'warn',
+  onBrokenLinks: "warn",
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
   // may want to replace "en" with "zh-Hans".
   i18n: {
-    defaultLocale: 'en',
-    locales: ['en'],
+    defaultLocale: "en",
+    locales: ["en"],
   },
 
   markdown: {
     mermaid: true,
     hooks: {
-      onBrokenMarkdownLinks: 'warn',
+      onBrokenMarkdownLinks: "warn",
     },
   },
 
   presets: [
     [
-      'classic',
+      "classic",
       {
         docs: {
-          routeBasePath: '/',
-          sidebarPath: './sidebars.ts',
+          routeBasePath: "/",
+          sidebarPath: "./sidebars.ts",
           docItemComponent: "@theme/ApiItem",
           showLastUpdateTime: true,
         },
         blog: false,
         theme: {
-          customCss: './src/css/custom.css',
+          customCss: "./src/css/custom.css",
         },
       } satisfies Preset.Options,
     ],
   ],
 
-
   themeConfig: {
     // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
+    image: "img/docusaurus-social-card.jpg",
     navbar: {
-      title: '',
+      title: "",
       logo: {
-        alt: 'Ottu Logo',
-        src: 'img/ottu_logo.webp',
+        alt: "Ottu Logo",
+        src: "img/ottu_logo.webp",
       },
       items: [
         {
-          type: 'docSidebar',
-          sidebarId: 'mainSidebar',
-          position: 'left',
-          label: 'Overview',
+          type: "docSidebar",
+          sidebarId: "mainSidebar",
+          position: "left",
+          label: "Overview",
         },
         {
-          type: 'docSidebar',
-          sidebarId: 'developerSidebar',
-          position: 'left',
-          label: 'Developers',
+          type: "docSidebar",
+          sidebarId: "developerSidebar",
+          position: "left",
+          label: "Developers",
         },
         {
-          type: 'docSidebar',
-          sidebarId: 'businessSidebar',
-          position: 'left',
-          label: 'Business',
+          type: "docSidebar",
+          sidebarId: "businessSidebar",
+          position: "left",
+          label: "Business",
         },
         {
-          type: 'custom-mcpButton' as any,
-          position: 'right',
+          type: "custom-mcpButton" as any,
+          position: "right",
         },
         {
-          href: 'https://github.com/ottuco',
-          label: 'GitHub',
-          position: 'right',
+          href: "https://github.com/ottuco",
+          label: "GitHub",
+          position: "right",
         },
         {
-          href: 'https://ottu.com',
-          label: 'Ottu.com',
-          position: 'right',
+          href: "https://ottu.com",
+          label: "Ottu.com",
+          position: "right",
         },
       ],
     },
     footer: {
-      style: 'dark',
+      style: "dark",
       links: [
         {
-          title: 'Documentation',
+          title: "Documentation",
           items: [
             {
-              label: 'Overview',
-              to: '/overview/about',
+              label: "Overview",
+              to: "/overview/about",
             },
             {
-              label: 'Developer Docs',
-              to: '/developers/getting-started',
+              label: "Developer Docs",
+              to: "/developers/getting-started",
             },
             {
-              label: 'Business Guide',
-              to: '/business/',
+              label: "Business Guide",
+              to: "/business/",
             },
           ],
         },
         {
-          title: 'Developers',
+          title: "Developers",
           items: [
             {
-              label: 'API Reference',
-              to: '/developers/getting-started/api-fundamentals',
+              label: "API Reference",
+              to: "/developers/getting-started/api-fundamentals",
             },
             {
-              label: 'Quick Start',
-              to: '/developers/getting-started',
+              label: "Quick Start",
+              to: "/developers/getting-started",
             },
             {
-              label: 'Developer Guide',
-              to: '/developers/',
+              label: "Developer Guide",
+              to: "/developers/",
             },
           ],
         },
         {
-          title: 'Business',
+          title: "Business",
           items: [
             {
-              label: 'Getting Started',
-              to: '/business/',
+              label: "Getting Started",
+              to: "/business/",
             },
             {
-              label: 'Payment Gateways',
-              to: '/business/payments/gateways',
+              label: "Payment Gateways",
+              to: "/business/payments/gateways",
             },
             {
-              label: 'Compliance & Security',
-              to: '/business/compliance',
+              label: "Compliance & Security",
+              to: "/business/compliance",
             },
           ],
         },
         {
-          title: 'Resources',
+          title: "Resources",
           items: [
             {
-              label: 'Support',
-              href: 'https://ottu.com/support',
+              label: "Support",
+              href: "https://ottu.com/support",
             },
             {
-              label: 'Status',
-              href: 'https://status.ottu.com',
+              label: "Status",
+              href: "https://status.ottu.com",
             },
             {
-              label: 'GitHub',
-              href: 'https://github.com/ottuco',
+              label: "GitHub",
+              href: "https://github.com/ottuco",
             },
           ],
         },
@@ -220,7 +217,7 @@ const config: Config = {
             sidebarOptions: {
               groupPathsBy: "tag",
             },
-            downloadUrl: 'https://example.com/ottu_api.yaml',
+            downloadUrl: "https://example.com/ottu_api.yaml",
           },
         },
       },
@@ -237,7 +234,7 @@ const config: Config = {
         ],
       },
     ],
-    "docusaurus-markdown-source-plugin",
+    ["docusaurus-markdown-source-plugin", { docsPath: "/" }],
   ],
 
   themes: [

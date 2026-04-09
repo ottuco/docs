@@ -44,7 +44,7 @@ graph LR
     A -->|GET download URL| C[Download Report API]
     C -->|Binary file| A
 
-    classDef accent fill:#1983BC,color:#FFFFFF,stroke:#302F37
+    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
     class B accent
 ```
 
