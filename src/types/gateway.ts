@@ -13,18 +13,16 @@ export type GatewayCategory =
   | "gateway"
   | "wallet"
   | "bnpl"
-  | "psp"
   | "processor"
-  | "bank"
+  | "local_debit"
+  | "acquirer"
   | "openbanking"
-  | "ottu"
   | "specialty";
 
 export interface Gateway {
   slug: string;
   name: string;
   countries: string[];
-  providerType: string;
   currencies: string[];
   inquiryMinutes: number | null;
   operations: string[];
@@ -32,7 +30,9 @@ export interface Gateway {
   category: GatewayCategory;
   operationMode: "purchase" | "purchase_authorize";
   logo: string;
-  services?: string[];
+  acceptedAt: string[];
+  cardBrands: string[];
+  digitalWallets: string[];
   testCards: TestCard[];
   testCardNotes?: string;
   docsUrl?: string;

@@ -5,14 +5,18 @@
     "countries": [
       "Global"
     ],
-    "providerType": "Test",
     "currencies": [],
     "inquiryMinutes": null,
-    "operations": [],
+    "operations": [
+      "purchase"
+    ],
     "integrationType": "redirect",
-    "category": "bank",
+    "category": "local_debit",
     "operationMode": "purchase",
     "logo": "",
+    "acceptedAt": [],
+    "cardBrands": [],
+    "digitalWallets": [],
     "testCards": [
       {
         "cardNumber": "4242 4242 4242 4242",
@@ -46,37 +50,68 @@
     "countries": [
       "Cambodia"
     ],
-    "providerType": "Cambodia",
     "currencies": [
-      "USD",
-      "KHR"
+      "KHR",
+      "USD"
     ],
     "inquiryMinutes": 12,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "sdk",
-    "category": "bank",
+    "category": "gateway",
     "operationMode": "purchase",
     "logo": "",
+    "acceptedAt": [
+      "ABA Bank"
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "UnionPay",
+      "JCB"
+    ],
+    "digitalWallets": [
+      "Alipay",
+      "WeChat Pay",
+      "ABA PAY"
+    ],
     "testCards": []
   },
   {
     "slug": "amazon_pay",
-    "name": "Amazon Pay",
+    "name": "Amazon Payment Services",
     "countries": [
-      "UAE"
+      "UAE",
+      "Egypt",
+      "Iraq"
     ],
-    "providerType": "Global",
     "currencies": [
-      "AED"
+      "AED",
+      "EGP",
+      "IQD"
     ],
     "inquiryMinutes": 6,
-    "operations": [],
+    "operations": [
+      "purchase"
+    ],
     "integrationType": "wallet",
-    "category": "wallet",
+    "category": "gateway",
     "operationMode": "purchase",
     "logo": "amazon_pay_icon.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "Maestro",
+      "mada"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Amazon Pay"
+    ],
     "testCards": [
       {
         "cardNumber": "4005 5500 0000 0001",
@@ -133,21 +168,32 @@
   },
   {
     "slug": "bambora",
-    "name": "Bambora",
+    "name": "Worldline",
     "countries": [
-      "Canada"
+      "Canada",
+      "Global"
     ],
-    "providerType": "Royal Bank",
     "currencies": [
-      "USD",
       "CAD"
     ],
     "inquiryMinutes": 0,
-    "operations": [],
+    "operations": [
+      "purchase"
+    ],
     "integrationType": "redirect",
-    "category": "bank",
+    "category": "processor",
     "operationMode": "purchase",
     "logo": "bambora_icon.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay",
+      "PayPal"
+    ],
     "testCards": [
       {
         "cardNumber": "4030 0000 1000 1234",
@@ -165,18 +211,29 @@
     "countries": [
       "Kuwait"
     ],
-    "providerType": "Aggregator",
     "currencies": [
       "KWD"
     ],
     "inquiryMinutes": null,
-    "operations": [],
+    "operations": [
+      "purchase"
+    ],
     "integrationType": "wallet",
-    "category": "aggregator",
+    "category": "wallet",
     "operationMode": "purchase",
     "logo": "",
-    "services": [
-      "apple-pay"
+    "acceptedAt": [
+      "KNET",
+      "Apple Pay"
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "KNET"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Bede Wallet"
     ],
     "testCards": []
   },
@@ -186,18 +243,43 @@
     "countries": [
       "Bahrain"
     ],
-    "providerType": "All Bahrain Banks",
     "currencies": [
       "BHD"
     ],
     "inquiryMinutes": 8,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
-    "category": "bank",
+    "category": "local_debit",
     "operationMode": "purchase",
     "logo": "benefit_icon.svg",
+    "acceptedAt": [
+      "NBB",
+      "BBK",
+      "Al Salam",
+      "KFH",
+      "BisB",
+      "Khaleeji",
+      "Ithmaar",
+      "BDB",
+      "HBTF",
+      "Ahli United",
+      "AlBaraka",
+      "Arab Bank",
+      "Citi",
+      "ICICI",
+      "Mashreq",
+      "NBK",
+      "Standard Chartered",
+      "SBI",
+      "UBL"
+    ],
+    "cardBrands": [
+      "Benefit"
+    ],
+    "digitalWallets": [],
     "testCards": [
       {
         "cardNumber": "4600 4101 2345 6789",
@@ -271,38 +353,79 @@
     "countries": [
       "Bahrain"
     ],
-    "providerType": "All Bahrain Banks",
     "currencies": [
       "BHD"
     ],
     "inquiryMinutes": 8,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "wallet",
     "category": "wallet",
     "operationMode": "purchase",
     "logo": "benefitpay.svg",
+    "acceptedAt": [],
+    "cardBrands": [],
+    "digitalWallets": [
+      "BenefitPay"
+    ],
     "testCards": []
   },
   {
     "slug": "beyon_money",
-    "name": "BeyonMoney",
+    "name": "Beyon Money",
     "countries": [
       "Bahrain"
     ],
-    "providerType": "Beyon Money",
     "currencies": [
       "BHD"
     ],
     "inquiryMinutes": 28,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "wallet",
     "category": "wallet",
     "operationMode": "purchase",
     "logo": "",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa"
+    ],
+    "digitalWallets": [
+      "Beyon Money"
+    ],
+    "testCards": []
+  },
+  {
+    "slug": "cbk",
+    "name": "CBK",
+    "countries": [
+      "Kuwait"
+    ],
+    "currencies": [
+      "KWD"
+    ],
+    "inquiryMinutes": null,
+    "operations": [
+      "purchase"
+    ],
+    "integrationType": "Redirect",
+    "category": "gateway",
+    "operationMode": "purchase",
+    "logo": "",
+    "acceptedAt": [
+      "STC Kuwait",
+      "Zain",
+      "Ooredoo",
+      "CBK"
+    ],
+    "cardBrands": [
+      "KNET"
+    ],
+    "digitalWallets": [],
     "testCards": []
   },
   {
@@ -316,18 +439,30 @@
       "UAE",
       "KSA"
     ],
-    "providerType": "GCC",
     "currencies": [
-      "INR"
+      "KWD",
+      "BHD",
+      "QAR",
+      "OMR",
+      "AED",
+      "SAR"
     ],
     "inquiryMinutes": 0,
-    "operations": [],
+    "operations": [
+      "purchase"
+    ],
     "integrationType": "redirect",
-    "category": "gateway",
+    "category": "aggregator",
     "operationMode": "purchase",
     "logo": "cc_avenue_icon.svg",
-    "services": [
-      "apple-pay"
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
     ],
     "testCards": [
       {
@@ -350,25 +485,40 @@
       "Qatar",
       "Oman",
       "UAE",
-      "KSA"
+      "KSA",
+      "Global"
     ],
-    "providerType": "GCC",
     "currencies": [
+      "KWD",
+      "BHD",
+      "QAR",
+      "OMR",
       "AED",
-      "USD",
-      "EUR",
-      "GBP"
+      "SAR"
     ],
     "inquiryMinutes": 8,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
-    "category": "gateway",
+    "category": "acquirer",
     "operationMode": "purchase",
     "logo": "checkoutcom.svg",
-    "services": [
-      "apple-pay"
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "mada",
+      "KNET",
+      "OmanNet"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay",
+      "PayPal",
+      "Alipay"
     ],
     "testCards": [
       {
@@ -390,19 +540,20 @@
       "Qatar",
       "Oman",
       "UAE",
-      "KSA"
+      "KSA",
+      "Global"
     ],
-    "providerType": "Global",
     "currencies": [
-      "AED",
-      "SAR",
       "KWD",
       "BHD",
+      "QAR",
       "OMR",
-      "QAR"
+      "AED",
+      "SAR"
     ],
     "inquiryMinutes": null,
     "operations": [
+      "purchase",
       "refund",
       "auth",
       "capture",
@@ -412,9 +563,18 @@
     "category": "gateway",
     "operationMode": "purchase",
     "logo": "cybersource_icon.svg",
-    "services": [
-      "apple-pay",
-      "google-pay"
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "JCB",
+      "Discover"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay",
+      "Samsung Pay"
     ],
     "testCards": [
       {
@@ -441,56 +601,88 @@
     "countries": [
       "UAE"
     ],
-    "providerType": "Openbanking",
     "currencies": [
       "AED"
     ],
     "inquiryMinutes": null,
-    "operations": [],
+    "operations": [
+      "purchase"
+    ],
     "integrationType": "a2a",
     "category": "openbanking",
     "operationMode": "purchase",
     "logo": "dapi.svg",
+    "acceptedAt": [],
+    "cardBrands": [],
+    "digitalWallets": [],
     "testCards": []
   },
   {
     "slug": "deema",
-    "name": "Deema",
+    "name": "deema",
     "countries": [
       "Kuwait"
     ],
-    "providerType": "BNPL",
     "currencies": [
-      "SAR"
+      "KWD"
     ],
     "inquiryMinutes": 8,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
     "category": "bnpl",
     "operationMode": "purchase",
     "logo": "deema.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "KNET"
+    ],
+    "digitalWallets": [],
     "testCards": []
   },
   {
     "slug": "doku",
-    "name": "Doku",
+    "name": "DOKU",
     "countries": [
       "Indonesia"
     ],
-    "providerType": "Aggregator",
     "currencies": [
       "IDR"
     ],
     "inquiryMinutes": 60,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect/sdk",
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "doku.svg",
+    "acceptedAt": [
+      "Mandiri",
+      "BNI",
+      "BCA",
+      "BRI",
+      "CIMB Niaga",
+      "Danamon."
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "JCB",
+      "Amex"
+    ],
+    "digitalWallets": [
+      "DOKU",
+      "OVO",
+      "ShopeePay",
+      "DANA",
+      "LinkAja"
+    ],
     "testCards": [
       {
         "cardNumber": "4000 0000 0000 0044",
@@ -512,22 +704,31 @@
   },
   {
     "slug": "enet",
-    "name": "Enet",
+    "name": "eNet",
     "countries": [
       "Kuwait"
     ],
-    "providerType": "Aggregator",
     "currencies": [
-      "EGP"
+      "KWD"
     ],
     "inquiryMinutes": 3,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "enet_icon.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "KNET"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
+    ],
     "testCards": []
   },
   {
@@ -536,38 +737,67 @@
     "countries": [
       "Egypt"
     ],
-    "providerType": "PSP",
     "currencies": [
       "EGP"
     ],
     "inquiryMinutes": 8,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
-    "category": "psp",
+    "category": "acquirer",
     "operationMode": "purchase",
     "logo": "",
+    "acceptedAt": [
+      "Egyptian retail banks",
+      "Meeza network",
+      "physical cash-collection points."
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Meeza"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Vodafone Cash",
+      "Orange"
+    ],
     "testCards": []
   },
   {
     "slug": "fiserv",
     "name": "Fiserv",
     "countries": [
-      "UAE"
+      "UAE",
+      "Global"
     ],
-    "providerType": "Payment Processor",
     "currencies": [
-      "USD"
+      "AED"
     ],
     "inquiryMinutes": null,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
     "category": "processor",
     "operationMode": "purchase",
     "logo": "",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "JCB",
+      "Discover",
+      "UnionPay"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay"
+    ],
     "testCards": []
   },
   {
@@ -579,25 +809,33 @@
       "Qatar",
       "Oman",
       "UAE",
-      "KSA"
+      "KSA",
+      "Global"
     ],
-    "providerType": "Payment Processor",
     "currencies": [
-      "AED",
-      "SAR",
       "KWD",
       "BHD",
+      "QAR",
       "OMR",
-      "QAR"
+      "AED",
+      "SAR"
     ],
     "inquiryMinutes": 8,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
     "category": "processor",
     "operationMode": "purchase",
     "logo": "master_visa.svg",
+    "acceptedAt": [
+      "Backs major acquiring banks across Oman",
+      "Kuwait",
+      "and Bahrain"
+    ],
+    "cardBrands": [],
+    "digitalWallets": [],
     "testCards": [
       {
         "cardNumber": "4012 0010 3714 1112",
@@ -616,19 +854,32 @@
     "countries": [
       "KSA"
     ],
-    "providerType": "Aggregator",
     "currencies": [
-      "SAR",
-      "AED"
+      "SAR"
     ],
     "inquiryMinutes": null,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
-    "category": "aggregator",
+    "category": "acquirer",
     "operationMode": "purchase",
     "logo": "geidea.svg",
+    "acceptedAt": [
+      "Underwrites and aggregates Mada",
+      "Visa",
+      "Mastercard",
+      "Apple Pay."
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "mada"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
+    ],
     "testCards": [
       {
         "cardNumber": "5123 4500 0000 0008",
@@ -675,16 +926,31 @@
     "countries": [
       "Kuwait"
     ],
-    "providerType": "Aggregator",
     "currencies": [
       "KWD"
     ],
     "inquiryMinutes": 10,
-    "operations": [],
+    "operations": [
+      "purchase"
+    ],
     "integrationType": "redirect",
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "hesabe.svg",
+    "acceptedAt": [
+      "Aggregates KNET and Credit Cards",
+      "primarily for the SME sector."
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "KNET"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay"
+    ],
     "testCards": [
       {
         "cardNumber": "8888 8800 0000 0001",
@@ -748,18 +1014,35 @@
       "Iraq",
       "KSA"
     ],
-    "providerType": "Aggregator",
     "currencies": [
-      "SAR",
-      "AED",
-      "IQD"
+      "IQD",
+      "SAR"
     ],
     "inquiryMinutes": 31,
-    "operations": [],
+    "operations": [
+      "purchase"
+    ],
     "integrationType": "redirect",
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "hyperpay.svg",
+    "acceptedAt": [
+      "Integrates with Mada",
+      "STC Bank",
+      "Apple Pay",
+      "and local acquiring banks."
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "mada"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Samsung Pay",
+      "STC Pay"
+    ],
     "testCards": [
       {
         "cardNumber": "4111 1111 1111 1111",
@@ -781,18 +1064,33 @@
   },
   {
     "slug": "ifg",
-    "name": "IFG",
+    "name": "IATA Financial Gateway (IFG)",
     "countries": [
       "Global"
     ],
-    "providerType": "Airline Industry",
-    "currencies": [],
+    "currencies": [
+      "USD"
+    ],
     "inquiryMinutes": null,
-    "operations": [],
+    "operations": [
+      "purchase"
+    ],
     "integrationType": "iata-sdk",
     "category": "specialty",
     "operationMode": "purchase",
     "logo": "",
+    "acceptedAt": [
+      "IATA member airlines",
+      "BSP",
+      "and ICH clearing banks"
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "UATP"
+    ],
+    "digitalWallets": [],
     "testCards": []
   },
   {
@@ -801,20 +1099,44 @@
     "countries": [
       "Kuwait"
     ],
-    "providerType": "Kuwait Banks",
     "currencies": [
       "KWD"
     ],
     "inquiryMinutes": 8,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
-    "category": "bank",
+    "category": "local_debit",
     "operationMode": "purchase",
     "logo": "knet_icon.svg",
-    "services": [
-      "apple-pay"
+    "acceptedAt": [
+      "NBK",
+      "CBK",
+      "Gulf",
+      "ABK",
+      "KIB",
+      "Burgan",
+      "KFH",
+      "Boubyan",
+      "Warba",
+      "BBK",
+      "HSBC",
+      "FAB",
+      "Citi",
+      "QNB",
+      "Mashreq",
+      "Al Rajhi",
+      "Bank Muscat",
+      "ICBC",
+      "Doha Bank"
+    ],
+    "cardBrands": [
+      "KNET"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
     ],
     "testCards": [
       {
@@ -834,20 +1156,34 @@
     "countries": [
       "KSA"
     ],
-    "providerType": "Aggregator",
     "currencies": [
       "SAR"
     ],
     "inquiryMinutes": null,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "",
-    "services": [
-      "apple-pay"
+    "acceptedAt": [
+      "Aggregates Mada",
+      "STC Bank",
+      "Apple Pay",
+      "and Credit Cards"
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "mada"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Samsung Pay",
+      "STC Pay"
     ],
     "testCards": [
       {
@@ -891,17 +1227,12 @@
     "countries": [
       "Global"
     ],
-    "providerType": "All Banks",
     "currencies": [
-      "AED",
-      "SAR",
-      "KWD",
-      "BHD",
-      "OMR",
-      "QAR"
+      "USD"
     ],
     "inquiryMinutes": 11,
     "operations": [
+      "purchase",
       "refund",
       "auth",
       "capture",
@@ -911,11 +1242,20 @@
     "integrationType": "redirect/direct",
     "category": "gateway",
     "operationMode": "purchase_authorize",
-    "logo": "master_visa.svg",
-    "services": [
-      "apple-pay",
-      "google-pay",
-      "samsung-wallet"
+    "logo": "mpgs.png",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "JCB",
+      "Discover",
+      "UnionPay"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay",
+      "Samsung Pay"
     ],
     "testCards": [
       {
@@ -966,26 +1306,45 @@
       "UAE",
       "KSA"
     ],
-    "providerType": "Aggregator",
     "currencies": [
       "KWD",
-      "SAR",
-      "AED",
       "BHD",
+      "QAR",
       "OMR",
-      "QAR"
+      "AED",
+      "SAR"
     ],
     "inquiryMinutes": 8,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect/direct",
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "myfatoorah_icon.svg",
-    "services": [
-      "apple-pay",
-      "google-pay"
+    "acceptedAt": [
+      "Aggregates KNET",
+      "Mada",
+      "OmanNet",
+      "Benefit",
+      "QPay",
+      "Credit Cards."
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "mada",
+      "KNET",
+      "Benefit",
+      "Meeza"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay",
+      "Samsung Pay",
+      "STC Pay"
     ],
     "testCards": [
       {
@@ -1041,24 +1400,31 @@
   },
   {
     "slug": "nbo",
-    "name": "NBO",
+    "name": "NBO Gateway",
     "countries": [
       "Oman"
     ],
-    "providerType": "National Bank of Oman",
     "currencies": [
       "OMR"
     ],
     "inquiryMinutes": 10,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
-    "category": "bank",
+    "category": "gateway",
     "operationMode": "purchase",
     "logo": "nbo.svg",
-    "services": [
-      "apple-pay"
+    "acceptedAt": [
+      "National Bank of Oman  account holders."
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
     ],
     "testCards": [
       {
@@ -1073,26 +1439,45 @@
   },
   {
     "slug": "ngenius",
-    "name": "N-Genius",
+    "name": "Network International (NI)",
     "countries": [
       "Kuwait",
       "UAE"
     ],
-    "providerType": "ABK and All UAE Banks",
     "currencies": [
+      "KWD",
       "AED"
     ],
     "inquiryMinutes": 8,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
-    "category": "bank",
+    "category": "gateway",
     "operationMode": "purchase",
     "logo": "n_genius_icon.svg",
-    "services": [
-      "apple-pay",
-      "samsung-wallet"
+    "acceptedAt": [
+      "ADCB",
+      "ADIB",
+      "DIB",
+      "Emirates NBD",
+      "Emirates Islamic",
+      "FAB",
+      "Mashreq",
+      "CBD"
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "JCB",
+      "UnionPay"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay",
+      "Samsung Pay"
     ],
     "testCards": [
       {
@@ -1112,18 +1497,40 @@
     "countries": [
       "Oman"
     ],
-    "providerType": "All Oman Banks",
     "currencies": [
       "OMR"
     ],
     "inquiryMinutes": 8,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
-    "category": "bank",
+    "category": "local_debit",
     "operationMode": "purchase",
     "logo": "omannet_icon.svg",
+    "acceptedAt": [
+      "Bank Muscat",
+      "Bank Dhofar",
+      "NBO",
+      "Oman Arab Bank",
+      "Sohar",
+      "Ahli",
+      "Bank Nizwa",
+      "Alizz",
+      "FAB",
+      "QNB",
+      "Standard Chartered",
+      "SBI",
+      "Habib Bank",
+      "Bank of Beirut",
+      "Bank Melli Iran",
+      "Bank Saderat Iran"
+    ],
+    "cardBrands": [
+      "OmanNet"
+    ],
+    "digitalWallets": [],
     "testCards": [
       {
         "cardNumber": "4837 9150 8285 6089",
@@ -1137,47 +1544,21 @@
     ]
   },
   {
-    "slug": "ottu_pg",
-    "name": "Ottu PG",
-    "countries": [
-      "Kuwait",
-      "Bahrain",
-      "Qatar",
-      "Oman",
-      "UAE"
-    ],
-    "providerType": "Ottu Service",
-    "currencies": [
-      "KWD",
-      "BHD",
-      "QAR",
-      "OMR",
-      "AED"
-    ],
-    "inquiryMinutes": null,
-    "operations": [
-      "refund"
-    ],
-    "integrationType": "direct",
-    "category": "ottu",
-    "operationMode": "purchase",
-    "logo": "",
-    "testCards": []
-  },
-  {
     "slug": "paymob",
-    "name": "PayMob",
+    "name": "Paymob",
     "countries": [
       "UAE",
       "KSA",
       "Egypt"
     ],
-    "providerType": "Aggregator",
     "currencies": [
+      "AED",
+      "SAR",
       "EGP"
     ],
     "inquiryMinutes": null,
     "operations": [
+      "purchase",
       "refund",
       "auth",
       "capture",
@@ -1187,8 +1568,22 @@
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "paymob.svg",
-    "services": [
-      "apple-pay"
+    "acceptedAt": [
+      "Aggregates Meeza",
+      "Vodafone Cash",
+      "Fawry",
+      "Mada",
+      "Visa/Mastercard."
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Meeza",
+      "mada"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Vodafone Cash"
     ],
     "testCards": [
       {
@@ -1220,23 +1615,29 @@
   },
   {
     "slug": "payon",
-    "name": "PayOn",
+    "name": "Payon",
     "countries": [
       "Bahrain"
     ],
-    "providerType": "Aggregator",
     "currencies": [
-      "SAR",
-      "AED"
+      "BHD"
     ],
     "inquiryMinutes": 31,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "sdk",
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Benefit"
+    ],
+    "digitalWallets": [],
     "testCards": []
   },
   {
@@ -1245,16 +1646,27 @@
     "countries": [
       "Global"
     ],
-    "providerType": "PSP",
     "currencies": [
       "USD"
     ],
     "inquiryMinutes": 0,
-    "operations": [],
+    "operations": [
+      "purchase"
+    ],
     "integrationType": "redirect",
-    "category": "psp",
+    "category": "wallet",
     "operationMode": "purchase",
     "logo": "paypal_icon.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "Discover"
+    ],
+    "digitalWallets": [
+      "PayPal"
+    ],
     "testCards": [
       {
         "cardNumber": "3714 4963 5398 431",
@@ -1268,22 +1680,39 @@
   },
   {
     "slug": "payu_india",
-    "name": "PayU India",
+    "name": "PayU",
     "countries": [
       "India"
     ],
-    "providerType": "Aggregator",
     "currencies": [
       "INR"
     ],
     "inquiryMinutes": 15,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "payu_icon.svg",
+    "acceptedAt": [
+      "Aggregates UPI",
+      "RuPay",
+      "and major Net Banking rails ."
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "RuPay",
+      "Diners"
+    ],
+    "digitalWallets": [
+      "PayTM",
+      "PhonePe",
+      "Google Pay",
+      "Apple Pay"
+    ],
     "testCards": [
       {
         "cardNumber": "5123 4567 8901 2346",
@@ -1298,24 +1727,48 @@
   },
   {
     "slug": "qpay",
-    "name": "QPay",
+    "name": "QPay (NAPS)",
     "countries": [
       "Qatar"
     ],
-    "providerType": "All Qatar Banks",
     "currencies": [
       "QAR"
     ],
     "inquiryMinutes": 20,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
-    "category": "bank",
+    "category": "local_debit",
     "operationMode": "purchase",
     "logo": "qpay.svg",
-    "services": [
-      "apple-pay"
+    "acceptedAt": [
+      "QNB",
+      "CBQ",
+      "Doha Bank",
+      "Ahli",
+      "QIB",
+      "Dukhan",
+      "QIIB",
+      "Masraf Al Rayan",
+      "Lesha",
+      "Arab Bank",
+      "Mashreq",
+      "Standard Chartered",
+      "HSBC",
+      "UBL",
+      "Bank Saderat Iran",
+      "BNP Paribas",
+      "Abu Dhabi Islamic Bank",
+      "Bank Audi",
+      "BLOM Bank"
+    ],
+    "cardBrands": [
+      "NAPS"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
     ],
     "testCards": [
       {
@@ -1339,25 +1792,35 @@
   },
   {
     "slug": "rajhi",
-    "name": "AlRajhi Bank",
+    "name": "Al Rajhi Bank",
     "countries": [
       "KSA"
     ],
-    "providerType": "AlRajhi Bank",
     "currencies": [
       "SAR"
     ],
     "inquiryMinutes": 8,
     "operations": [
+      "purchase",
       "refund",
       "tokenization"
     ],
     "integrationType": "redirect",
-    "category": "bank",
+    "category": "gateway",
     "operationMode": "purchase_authorize",
     "logo": "rajhi.svg",
-    "services": [
-      "apple-pay"
+    "acceptedAt": [
+      "Al Rajhi Bank."
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "mada"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay",
+      "urpay"
     ],
     "testCards": [
       {
@@ -1373,44 +1836,68 @@
   },
   {
     "slug": "skipcash",
-    "name": "Skip Cash",
+    "name": "SkipCash",
     "countries": [
       "Qatar"
     ],
-    "providerType": "Aggregator",
     "currencies": [
       "QAR"
     ],
     "inquiryMinutes": 30,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "skipcash.svg",
+    "acceptedAt": [
+      "Aggregates QPay",
+      "Apple Pay",
+      "and Google Pay for local merchants."
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "mada"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay",
+      "SkipCash"
+    ],
     "testCards": []
   },
   {
     "slug": "smart_pay",
-    "name": "SmartPay",
+    "name": "Smartpay",
     "countries": [
       "Oman"
     ],
-    "providerType": "Bank Muscat",
     "currencies": [
       "OMR"
     ],
     "inquiryMinutes": 16,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
-    "category": "bank",
+    "category": "gateway",
     "operationMode": "purchase",
     "logo": "smartpay.svg",
-    "services": [
-      "apple-pay"
+    "acceptedAt": [
+      "Bank Muscat."
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "OmanNet"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "bm Wallet"
     ],
     "testCards": []
   },
@@ -1420,42 +1907,59 @@
     "countries": [
       "Oman"
     ],
-    "providerType": "Sohar International Bank",
     "currencies": [
       "OMR"
     ],
     "inquiryMinutes": 16,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
-    "category": "bank",
+    "category": "gateway",
     "operationMode": "purchase",
     "logo": "sohar.svg",
-    "services": [
-      "apple-pay"
+    "acceptedAt": [
+      "Sohar International Bank."
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
     ],
     "testCards": []
   },
   {
     "slug": "stc_pay",
-    "name": "STC Pay",
+    "name": "STC Bank",
     "countries": [
       "KSA",
       "Bahrain"
     ],
-    "providerType": "STC BANK",
     "currencies": [
-      "SAR"
+      "SAR",
+      "BHD"
     ],
     "inquiryMinutes": 8,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "wallet",
     "category": "wallet",
     "operationMode": "purchase",
     "logo": "stcpay.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "mada"
+    ],
+    "digitalWallets": [
+      "STC Pay"
+    ],
     "testCards": [],
     "testCardNotes": "Wallet testing — use test phone: 548220713 (country code 966). OTP: 123456 (success), 111111 (insufficient balance), 222222 (daily limit exceeded)."
   },
@@ -1463,23 +1967,39 @@
     "slug": "tabby",
     "name": "Tabby",
     "countries": [
-      "KSA"
+      "KSA",
+      "Kuwait",
+      "Bahrain",
+      "Qatar",
+      "Oman",
+      "UAE"
     ],
-    "providerType": "BNPL",
     "currencies": [
-      "AED",
       "SAR",
       "KWD",
-      "BHD"
+      "BHD",
+      "QAR",
+      "OMR",
+      "AED"
     ],
     "inquiryMinutes": 16,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
     "category": "bnpl",
     "operationMode": "purchase",
     "logo": "tabby-logo-charcoal.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "mada"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
+    ],
     "testCards": [],
     "testCardNotes": "BNPL testing — use test email: otp.success@tabby.ai, phone: 500000001, OTP: 8888. Tabby uses its own checkout flow, not card entry."
   },
@@ -1489,41 +2009,67 @@
     "countries": [
       "Kuwait"
     ],
-    "providerType": "BNPL",
     "currencies": [
-      "SAR"
+      "KWD"
     ],
     "inquiryMinutes": 30,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
     "category": "bnpl",
     "operationMode": "purchase",
     "logo": "taly.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "KNET"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay"
+    ],
     "testCards": []
   },
   {
     "slug": "tamara",
     "name": "Tamara",
     "countries": [
-      "KSA"
+      "KSA",
+      "Kuwait",
+      "Bahrain",
+      "Qatar",
+      "Oman",
+      "UAE"
     ],
-    "providerType": "BNPL",
     "currencies": [
       "SAR",
-      "AED",
       "KWD",
-      "BHD"
+      "BHD",
+      "QAR",
+      "OMR",
+      "AED"
     ],
     "inquiryMinutes": 8,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
     "category": "bnpl",
     "operationMode": "purchase",
     "logo": "tamara.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "mada"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
+    ],
     "testCards": [
       {
         "cardNumber": "5436 0310 3060 6378",
@@ -1582,26 +2128,47 @@
       "UAE",
       "KSA"
     ],
-    "providerType": "PSP/Aggregator",
     "currencies": [
-      "AED",
-      "SAR",
       "KWD",
       "BHD",
+      "QAR",
       "OMR",
-      "QAR"
+      "AED",
+      "SAR"
     ],
     "inquiryMinutes": 20,
     "operations": [
+      "purchase",
       "refund",
       "tokenization"
     ],
     "integrationType": "redirect/direct",
-    "category": "aggregator",
+    "category": "acquirer",
     "operationMode": "purchase",
     "logo": "tap.svg",
-    "services": [
-      "apple-pay"
+    "acceptedAt": [
+      "Integrates KNET",
+      "Mada",
+      "OmanNet",
+      "Benefit",
+      "NAPS",
+      "and Fawry"
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "mada",
+      "KNET",
+      "OmanNet",
+      "Benefit"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay",
+      "Samsung Pay",
+      "STC Pay",
+      "urpay"
     ],
     "testCards": [
       {
@@ -1662,52 +2229,37 @@
   },
   {
     "slug": "tess",
-    "name": "Tess Payments",
+    "name": "TESS Payments",
     "countries": [
       "Qatar"
     ],
-    "providerType": "Aggregator",
     "currencies": [
-      "USD"
+      "QAR"
     ],
     "inquiryMinutes": null,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "tess.svg",
+    "acceptedAt": [
+      "Aggregates QPay/NAPS",
+      "Visa",
+      "and Mastercard"
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "NAPS"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay"
+    ],
     "testCards": []
-  },
-  {
-    "slug": "tpay",
-    "name": "Tpay",
-    "countries": [
-      "Kuwait"
-    ],
-    "providerType": "CBK",
-    "currencies": [
-      "KWD"
-    ],
-    "inquiryMinutes": null,
-    "operations": [
-      "refund"
-    ],
-    "integrationType": "redirect",
-    "category": "bank",
-    "operationMode": "purchase",
-    "logo": "cbk_icon.svg",
-    "testCards": [
-      {
-        "cardNumber": "5123 4500 0000 0008",
-        "expiry": "01/39",
-        "cvv": "100",
-        "brand": "Mastercard",
-        "status": "success",
-        "statusLabel": "Success"
-      }
-    ]
   },
   {
     "slug": "upayments",
@@ -1715,36 +2267,56 @@
     "countries": [
       "Kuwait"
     ],
-    "providerType": "Aggregator",
     "currencies": [
       "KWD"
     ],
     "inquiryMinutes": null,
     "operations": [
+      "purchase",
       "refund"
     ],
     "integrationType": "redirect",
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "upayments.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "KNET"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
+    ],
     "testCards": []
   },
   {
     "slug": "upg",
-    "name": "UPG",
+    "name": "UPG (EBC)",
     "countries": [
       "Egypt"
     ],
-    "providerType": "Aggregator",
     "currencies": [
       "EGP"
     ],
     "inquiryMinutes": 0,
-    "operations": [],
+    "operations": [
+      "purchase"
+    ],
     "integrationType": "redirect",
-    "category": "aggregator",
+    "category": "local_debit",
     "operationMode": "purchase",
     "logo": "upg_icon.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Meeza"
+    ],
+    "digitalWallets": [
+      "Tahweel",
+      "Mobile Wallets"
+    ],
     "testCards": [
       {
         "cardNumber": "5078 0362 4660 0381",
@@ -1759,20 +2331,31 @@
   },
   {
     "slug": "urpay",
-    "name": "URPay",
+    "name": "urpay",
     "countries": [
       "KSA"
     ],
-    "providerType": "Alrajhi Bank",
     "currencies": [
       "SAR"
     ],
     "inquiryMinutes": null,
-    "operations": [],
+    "operations": [
+      "purchase"
+    ],
     "integrationType": "wallet",
     "category": "wallet",
     "operationMode": "purchase",
     "logo": "urpay.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "mada"
+    ],
+    "digitalWallets": [
+      "urpay",
+      "Apple Pay"
+    ],
     "testCards": []
   }
 ]
