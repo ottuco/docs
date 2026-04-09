@@ -297,7 +297,7 @@ function HeaderBadges({
           key={b}
           src={`${baseUrl}${BRAND_ICONS[b]}`}
           alt={b}
-          className={b === "Mastercard" ? styles.badgeIconSmall : styles.badgeIcon}
+          className={styles.badgeIcon}
           loading="lazy"
         />
       ))}
