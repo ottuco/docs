@@ -1456,7 +1456,7 @@
     "integrationType": "redirect",
     "category": "gateway",
     "operationMode": "purchase",
-    "logo": "n_genius_icon.svg",
+    "logo": "ni.svg",
     "acceptedAt": [
       "ADCB",
       "ADIB",
