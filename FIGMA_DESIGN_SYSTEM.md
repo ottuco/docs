@@ -309,7 +309,7 @@ Located in `static/img/`:
 |-------|---------|-------|
 | Global tokens & overrides | `src/css/custom.css` | Site-wide |
 | Component styles | `*.module.css` alongside component | Scoped per component |
-| Schema styles | `src/theme/SchemaItem/_SchemaItem.scss` | SCSS with nesting |
+| Schema styles | `src/css/openapi.css` | CSS with nesting |
 
 ### Dark Mode
 

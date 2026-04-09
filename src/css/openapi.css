@@ -370,11 +370,16 @@ ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
   }
 
   /* Override plugin's _SchemaItem.scss defaults (loaded earlier via getClientModules).
-   Same specificity wins here because custom.css is injected after the plugin bundle. */
+   Wins due to higher specificity: .openapi-schema__container .openapi-schema__nullable
+   is a two-class selector (0,2,0) vs the plugin's flat .openapi-schema__nullable (0,1,0). */
   .openapi-schema__nullable {
     color: #0b82be;
     font-size: 16px;
     font-weight: 500;
+  }
+
+  .openapi-schema__deprecated {
+    font-size: 16px;
   }
 }
 

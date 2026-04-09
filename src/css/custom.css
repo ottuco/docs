@@ -211,6 +211,8 @@ html[data-theme="dark"] {
   padding-bottom: 14px;
 }
 
+/* Explicitly pin spans inside table cells to 14px in case a component or plugin
+   injects a span with its own font-size that would otherwise override the td value. */
 .markdown table td span {
   font-size: 14px;
 }
