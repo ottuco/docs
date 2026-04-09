@@ -369,6 +369,8 @@ ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
     text-transform: uppercase;
   }
 
+  /* Override plugin's _SchemaItem.scss defaults (loaded earlier via getClientModules).
+   Same specificity wins here because custom.css is injected after the plugin bundle. */
   .openapi-schema__nullable {
     color: #0b82be;
     font-size: 16px;
