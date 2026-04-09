@@ -380,6 +380,7 @@ ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
 
   .openapi-schema__deprecated {
     font-size: 16px;
+    font-weight: 500;
   }
 }
 
