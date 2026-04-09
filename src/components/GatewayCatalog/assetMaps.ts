@@ -96,6 +96,7 @@ export const BRAND_ICONS: Record<string, string> = {
 export const WALLET_ICONS: Record<string, string> = {
   "Apple Pay": "apple-pay.png",
   "Google Pay": "google-pay.png",
+  "Samsung Pay": "samsung-pay.png",
 };
 
 /** Payment network name → logo path (relative to site root) */

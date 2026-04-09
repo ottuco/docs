@@ -274,12 +274,9 @@ function HeaderBadges({
 
   const walletItems = wallets
     .filter((w) => WALLET_ICONS[w])
-    .slice(0, 3);
-  const brandItems = brands
-    .filter((b) => BRAND_ICONS[b])
-    .slice(0, 3);
+    .slice(0, 4);
 
-  if (walletItems.length === 0 && brandItems.length === 0) return null;
+  if (walletItems.length === 0) return null;
 
   return (
     <div className={styles.headerBadges}>
@@ -288,15 +285,6 @@ function HeaderBadges({
           key={w}
           src={`${baseUrl}${WALLET_ICONS[w]}`}
           alt={w}
-          className={styles.badgeIcon}
-          loading="lazy"
-        />
-      ))}
-      {brandItems.map((b) => (
-        <img
-          key={b}
-          src={`${baseUrl}${BRAND_ICONS[b]}`}
-          alt={b}
           className={styles.badgeIcon}
           loading="lazy"
         />
