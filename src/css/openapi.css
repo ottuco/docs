@@ -339,6 +339,14 @@ ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
 }
 
 .openapi-schema__container {
+  /* Allow badges (required, nullable, deprecated) to wrap on narrow screens
+     instead of overflowing the viewport edge */
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 4px;
+  max-width: 100%;
+
   .openapi-schema__property {
     color: #302f37;
     font-family: Poppins;
@@ -453,6 +461,7 @@ ul .openapi-schema__list-item {
 /* Schema list items — spacing between property rows (order_no, session_id, etc.) */
 .openapi-schema__list-item {
   padding-bottom: 12px !important;
+  overflow-x: hidden; /* prevent badges from overflowing on narrow viewports */
 }
 
 /* Language selector dropdown (replaces horizontal carousel) */
