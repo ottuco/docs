@@ -687,6 +687,7 @@
   color: #4a4a4a;
   white-space: nowrap;
   line-height: 20px;
+  flex-shrink: 0;
 }
 
 /* Figma: 16×15 SVG icons */

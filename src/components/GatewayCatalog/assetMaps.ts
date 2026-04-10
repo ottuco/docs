@@ -157,7 +157,7 @@ export const OPERATION_ICONS: Record<string, string> = {
   void: "void.svg",
   auth: "authorize.svg",
   tokenization: "authorize.svg",
-  autodebit: "authorize.svg",
+  autodebit: "autodebit.svg",
 };
 
 export const CATEGORY_LABELS: Record<GatewayCategory, string> = {
