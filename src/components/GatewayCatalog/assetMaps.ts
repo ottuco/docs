@@ -103,11 +103,20 @@ export const WALLET_ICONS: Record<string, string> = {
 export const NETWORK_LOGOS: Record<string, string> = {
   Visa: "/img/brands/visa.png",
   Mastercard: "/img/brands/mastercard.png",
+  Amex: "/img/networks/amex.png",
+  Diners: "/img/networks/diners.svg",
+  Discover: "/img/networks/discover.jpg",
+  JCB: "/img/networks/jcb.png",
+  Maestro: "/img/networks/maestro.png",
+  Meeza: "/img/networks/meeza.png",
+  mada: "/img/networks/mada.svg",
+  RuPay: "/img/networks/rupay.png",
+  UATP: "/img/networks/uatp.svg",
+  UnionPay: "/img/networks/unionpay.png",
   KNET: "/img/gateways/knet_icon.svg",
   Benefit: "/img/gateways/benefit_icon.svg",
   OmanNet: "/img/gateways/omannet_icon.svg",
   NAPS: "/img/gateways/qpay.svg",
-  mada: "/img/gateways/geidea.svg",
 };
 
 /** Currency code → flag image filename in /img/flags/ */
