@@ -211,7 +211,14 @@ function parseList(text: string): string[] {
 }
 
 // ── Main ─────────────────────────────────────────────
-const csvPath = resolve(process.env.HOME!, "Downloads/pgs.csv");
+// Usage: npx tsx scripts/merge-gateway-csv.ts <path-to-csv>
+const csvArg = process.argv[2];
+if (!csvArg) {
+  console.error("Usage: npx tsx scripts/merge-gateway-csv.ts <path-to-csv>");
+  console.error("Example: npx tsx scripts/merge-gateway-csv.ts ./data/pgs.csv");
+  process.exit(1);
+}
+const csvPath = resolve(csvArg);
 const jsonPath = resolve(__dirname, "../static/data/gateways.json");
 
 const csvText = readFileSync(csvPath, "utf-8");

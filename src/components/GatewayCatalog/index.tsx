@@ -9,6 +9,7 @@ import {
   CATEGORY_LABELS,
   CATEGORY_ORDER,
   CURRENCY_FLAGS,
+  CURRENCY_FLAGS_BY_COUNTRY,
   OPERATION_LABELS,
   OPERATION_ICONS,
   REGION_CONFIG,
@@ -23,22 +24,6 @@ const gateways = (gatewaysData as Gateway[]).filter(
   (gw) => gw.slug !== "standard",
 );
 
-/** Country name → flag image filename in /img/flags/ */
-const CURRENCY_FLAGS_BY_COUNTRY: Record<string, string> = {
-  Kuwait: "kw.png",
-  Bahrain: "bh.png",
-  Qatar: "qa.png",
-  Oman: "om.png",
-  UAE: "ae.png",
-  KSA: "sa.png",
-  Egypt: "eg.png",
-  Iraq: "iq.png",
-  India: "in.png",
-  Indonesia: "id.png",
-  Cambodia: "kh.png",
-  Canada: "ca.png",
-};
-
 // ── Filter helpers ───────────────────────────────────
 
 function gatewayMatchesRegion(gw: Gateway, region: RegionKey): boolean {
@@ -52,13 +37,6 @@ function gatewayMatchesRegion(gw: Gateway, region: RegionKey): boolean {
 function gatewayMatchesCountry(gw: Gateway, country: string): boolean {
   if (gw.countries.includes("Global")) return true;
   return gw.countries.includes(country);
-}
-
-function getCountriesForRegion(region: RegionKey | "all"): string[] {
-  if (region === "all") {
-    return Object.values(REGION_CONFIG).flatMap((r) => [...r.countries]);
-  }
-  return [...REGION_CONFIG[region].countries];
 }
 
 // ── Logo fallback ────────────────────────────────────
@@ -81,15 +59,15 @@ function LogoFallback({ name }: { name: string }) {
 
 // Names to exclude from bank row (credit cards are shown in header badges)
 const NON_BANK_NAMES = new Set([
-  // Card brands
+  // Card brands / networks
   "Visa", "Mastercard", "Amex", "JCB", "Discover", "UnionPay", "Maestro",
-  "mada", "Diners", "UATP", "RuPay", "Meeza", "KNET", "Benefit", "OmanNet",
-  "NAPS", "Knet Supported cards scheme", "Linked Bank Accounts / Cards",
+  "mada", "Mada", "Diners", "UATP", "RuPay", "Meeza", "KNET", "Benefit",
+  "OmanNet", "NAPS", "QPay", "Knet Supported cards scheme",
+  "Linked Bank Accounts / Cards", "Credit Cards.", "Visa/Mastercard.",
   // Digital wallets
   "Apple Pay", "Apple Pay.", "Google Pay", "PayPal", "Samsung Pay",
   "STC Pay", "urpay", "Alipay", "WeChat Pay", "ABA PAY", "Vodafone Cash",
-  "Orange", "Fawry", "Mada", "OmanNet", "QPay", "Credit Cards.",
-  "Visa/Mastercard.",
+  "Orange", "Fawry",
 ]);
 
 // Filter out non-bank entries (descriptions, card brands, N/A values)
@@ -114,7 +92,19 @@ const MAX_BANKS = 3;
 
 function BankRow({ banks }: { banks: string[] }) {
   const [popupOpen, setPopupOpen] = useState(false);
+  const overflowRef = useRef<HTMLDivElement>(null);
   const baseUrl = useBaseUrl("/img/banks/");
+
+  useEffect(() => {
+    if (!popupOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (overflowRef.current && !overflowRef.current.contains(e.target as Node)) {
+        setPopupOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [popupOpen]);
 
   if (banks.length === 0) {
     return <div className={styles.bankSectionPlaceholder} aria-hidden="true" />;
@@ -150,7 +140,7 @@ function BankRow({ banks }: { banks: string[] }) {
           {shown.map(renderBank)}
         </div>
         {overflow > 0 && (
-          <div className={styles.bankOverflowWrap}>
+          <div className={styles.bankOverflowWrap} ref={overflowRef}>
             <button
               type="button"
               className={styles.bankOverflow}
@@ -450,11 +440,10 @@ function IconCheck({ className }: { className?: string }) {
   );
 }
 
-function IconRadio({ checked, className }: { checked: boolean; className?: string }) {
+function IconFilter({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="8" cy="8" r="7" stroke={checked ? "#4A4A4A" : "#dadada"} strokeWidth="1.5" />
-      {checked && <circle cx="8" cy="8" r="4" fill="#4A4A4A" />}
+    <svg className={className} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2.5 5.833h15M5 10h10M7.5 14.167h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );
 }
@@ -543,6 +532,8 @@ function FilterDropdown({
         type="button"
         className={`${styles.dropdown} ${open ? styles.dropdownOpen : ""}`}
         onClick={() => { setOpen(!open); setQuery(""); }}
+        aria-expanded={open}
+        aria-haspopup="listbox"
         style={minWidth ? { width: minWidth } : undefined}
       >
         <span className={styles.dropdownIcon}>{icon}</span>
@@ -572,9 +563,16 @@ function FilterDropdown({
                   onChange(opt.value);
                   if (!multi) { setOpen(false); setQuery(""); }
                 }}
-                role="button"
+                role="option"
+                aria-selected={active}
                 tabIndex={0}
-                onKeyDown={(e) => { if (e.key === "Enter") onChange(opt.value); }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onChange(opt.value);
+                    if (!multi) { setOpen(false); setQuery(""); }
+                  }
+                }}
               >
                 {opt.icon && <span className={styles.dropdownOptionIcon}>{opt.icon}</span>}
                 {opt.label}
@@ -610,6 +608,7 @@ export default function GatewayCatalog(): React.JSX.Element {
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [selectedGatewayTypes, setSelectedGatewayTypes] = useState<GatewayCategory[]>([]);
   const [selectedNetworks, setSelectedNetworks] = useState<string[]>([]);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Cascading: region change resets countries
   const handleRegionChange = (value: string) => {
@@ -653,7 +652,7 @@ export default function GatewayCatalog(): React.JSX.Element {
       value: c,
       label: c,
       icon: CURRENCY_FLAGS_BY_COUNTRY[c] ? (
-        <img src={`${flagBaseUrl}${CURRENCY_FLAGS_BY_COUNTRY[c]}`} alt="" style={{ width: 20, height: 15, objectFit: "cover", borderRadius: 2 }} />
+        <img src={`${flagBaseUrl}${CURRENCY_FLAGS_BY_COUNTRY[c]}`} alt="" className={styles.dropdownFlagIcon} />
       ) : undefined,
     }));
   }, [selectedRegion, flagBaseUrl]);
@@ -674,7 +673,7 @@ export default function GatewayCatalog(): React.JSX.Element {
       value: n,
       label: n,
       icon: NETWORK_LOGOS[n] ? (
-        <img src={`${brandsBaseUrl}${NETWORK_LOGOS[n].replace(/^\//, "")}`} alt="" style={{ width: 24, height: 16, objectFit: "contain" }} />
+        <img src={`${brandsBaseUrl}${NETWORK_LOGOS[n].replace(/^\//, "")}`} alt="" className={styles.dropdownNetworkIcon} />
       ) : undefined,
     }));
   }, [brandsBaseUrl]);
@@ -719,6 +718,12 @@ export default function GatewayCatalog(): React.JSX.Element {
       return true;
     });
   }, [search, selectedRegion, selectedCountries, selectedGatewayTypes, selectedNetworks]);
+
+  const activeFilterCount =
+    (selectedRegion ? 1 : 0) +
+    selectedCountries.length +
+    selectedGatewayTypes.length +
+    selectedNetworks.length;
 
   // Build tags from all active filters
   const tags = useMemo(() => {
@@ -773,8 +778,26 @@ export default function GatewayCatalog(): React.JSX.Element {
           />
         </div>
 
+        {/* Mobile-only filter toggle button */}
+        <button
+          type="button"
+          className={styles.filtersToggle}
+          onClick={() => setFiltersOpen(!filtersOpen)}
+          aria-expanded={filtersOpen}
+          aria-controls="gateway-catalog-filters"
+        >
+          <IconFilter className={styles.filtersToggleIcon} />
+          <span>Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}</span>
+          <IconChevronDown
+            className={`${styles.filtersToggleArrow} ${filtersOpen ? styles.filtersToggleArrowOpen : ""}`}
+          />
+        </button>
+
         {/* Dropdown filters */}
-        <div className={styles.dropdownRow}>
+        <div
+          id="gateway-catalog-filters"
+          className={`${styles.dropdownRow} ${filtersOpen ? styles.dropdownRowOpen : ""}`}
+        >
           <FilterDropdown
             icon={<IconGlobe className={styles.dropdownIcon} />}
             label="Region"
@@ -789,7 +812,7 @@ export default function GatewayCatalog(): React.JSX.Element {
                 <img
                   src={`${flagBaseUrl}${CURRENCY_FLAGS_BY_COUNTRY[selectedCountries[0]]}`}
                   alt=""
-                  style={{ width: 27, height: 20, objectFit: "cover", borderRadius: 2, background: "#f7f7f7" }}
+                  className={styles.countryFlagDropdown}
                 />
               ) : (
                 <IconGlobe className={styles.dropdownIcon} />

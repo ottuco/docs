@@ -49,13 +49,10 @@ export const BANK_LOGOS: Record<string, string> = {
   // UAE & KSA
   "Al Rajhi": "al-rajhi.png",
   "Al Rajhi Bank.": "al-rajhi.png",
-  ADCB: "adib.png",
   ADIB: "adib.png",
   "Abu Dhabi Islamic Bank": "adib.png",
   FAB: "fab.png",
   Mashreq: "mashreq.png",
-  "Emirates NBD": "fab.png",
-  "Emirates Islamic": "fab.png",
   // International banks
   ICBC: "icbc.png",
   Citi: "citi.png",
@@ -71,19 +68,8 @@ export const BANK_LOGOS: Record<string, string> = {
   "Bank Melli Iran": "bank-melli-iran.png",
   "Bank Saderat Iran": "bank-saderat-iran.png",
   "Habib Bank": "habib-bank.png",
-  // Indonesia
-  Mandiri: "nbb.png",
-  BNI: "nbb.png",
-  BCA: "nbb.png",
-  BRI: "nbb.png",
   // Egypt
   Meeza: "meeza.png",
-  // Telecom (Kuwait)
-  "STC Kuwait": "stcpay.png",
-  Zain: "cbk.png",
-  Ooredoo: "cbk.png",
-  // Misc
-  "ABA Bank": "nbb.png",
 };
 
 /** Brand name → image filename in /img/brands/ */
@@ -237,4 +223,20 @@ export const COUNTRY_FLAGS: Record<string, string> = {
   Cambodia: "\u{1F1F0}\u{1F1ED}",
   Canada: "\u{1F1E8}\u{1F1E6}",
   Global: "\u{1F30E}",
+};
+
+/** Country name → flag image filename in /img/flags/ */
+export const CURRENCY_FLAGS_BY_COUNTRY: Record<string, string> = {
+  Kuwait: "kw.png",
+  Bahrain: "bh.png",
+  Qatar: "qa.png",
+  Oman: "om.png",
+  UAE: "ae.png",
+  KSA: "sa.png",
+  Egypt: "eg.png",
+  Iraq: "iq.png",
+  India: "in.png",
+  Indonesia: "id.png",
+  Cambodia: "kh.png",
+  Canada: "ca.png",
 };

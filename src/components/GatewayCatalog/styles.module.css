@@ -6,6 +6,8 @@
 .catalog {
   margin: 24px 0;
   font-family: "Poppins", system-ui, sans-serif;
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* ── Filter bar ─────────────────────────────────────── */
@@ -65,6 +67,11 @@
   flex-wrap: wrap;
   gap: 12px;
   align-items: center;
+}
+
+/* Mobile filter toggle button — hidden on desktop */
+.filtersToggle {
+  display: none;
 }
 
 /* ── Dropdown trigger — Figma: h40, bg #F2F2F2, r8 ── */
@@ -184,10 +191,25 @@
   flex-shrink: 0;
 }
 
-.dropdownOptionRadio {
-  width: 16px;
+.dropdownFlagIcon {
+  width: 20px;
+  height: 15px;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.dropdownNetworkIcon {
+  width: 24px;
   height: 16px;
-  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.countryFlagDropdown {
+  width: 27px;
+  height: 20px;
+  object-fit: cover;
+  border-radius: 2px;
+  background: #f7f7f7;
 }
 
 .dropdownOptionCheck {
@@ -289,12 +311,14 @@
   display: flex;
   flex-direction: column;
   min-height: 325px;
+  min-width: 0;
   padding: 16px;
   border-radius: 8px;
   border: 1px solid #dadada;
   background: #ffffff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .card:hover {
@@ -752,6 +776,20 @@
   color: #9ca3af;
 }
 
+[data-theme="dark"] .filtersToggle {
+  background: #1e2939;
+  border-color: #2a3444;
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .filtersToggle:hover {
+  background: #263345;
+}
+
+[data-theme="dark"] .filtersToggleArrow {
+  color: #9ca3af;
+}
+
 [data-theme="dark"] .dropdown:hover {
   background: #263345;
 }
@@ -860,13 +898,27 @@
 
 /* ── Responsive ─────────────────────────────────────── */
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
   }
 
   .card {
     min-height: auto;
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Allow bank logos to wrap if they don't fit the narrower card */
+  .bankRow {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
+  .bankLogoGroup {
+    flex-wrap: wrap;
+    row-gap: 8px;
   }
 
   .topSection {
@@ -881,14 +933,80 @@
     max-width: 100%;
   }
 
+  /* Filter toggle button — visible only on mobile */
+  .filtersToggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    height: 44px;
+    padding: 0 16px;
+    border-radius: 8px;
+    border: 1px solid #dadada;
+    background: #f2f2f2;
+    color: #4a4a4a;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .filtersToggle:hover {
+    background: #e8e8e8;
+  }
+
+  .filtersToggleIcon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  .filtersToggleArrow {
+    width: 16px;
+    height: 16px;
+    margin-left: auto;
+    flex-shrink: 0;
+    color: #4a4a4a;
+    transition: transform 0.2s;
+  }
+
+  .filtersToggleArrowOpen {
+    transform: rotate(180deg);
+  }
+
+  /* Dropdown row — hidden by default, shown as vertical stack when open */
   .dropdownRow {
+    display: none;
+    flex-direction: column;
     gap: 8px;
+    overflow: visible;
+  }
+
+  .dropdownRowOpen {
+    display: flex;
+  }
+
+  /* Each dropdown takes full width in the stack */
+  .dropdownWrap {
+    width: 100%;
   }
 
   .dropdown {
-    font-size: 11px;
-    padding: 0 12px;
-    height: 36px;
+    width: 100% !important;
+    justify-content: flex-start;
+    height: 44px;
+    font-size: 13px;
+    padding: 0 16px;
+  }
+
+  /* Popup: full width within the stacked dropdown */
+  .dropdownPopup {
+    max-width: calc(100vw - 32px);
+    left: 0;
+    right: 0;
+    min-width: unset;
+    width: 100%;
   }
 
   .tagsRow {
