@@ -1034,7 +1034,8 @@
     ],
     "inquiryMinutes": null,
     "operations": [
-      "purchase"
+      "purchase",
+      "refund"
     ],
     "integrationType": "iata-sdk",
     "category": "specialty",
