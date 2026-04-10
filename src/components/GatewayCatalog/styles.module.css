@@ -407,8 +407,8 @@
 
 /* Figma: wallet/brand badges — 36×24, Mastercard 24×16 */
 .badgeIcon {
-  width: 36px;
-  height: 24px;
+  width: 44px;
+  height: 28px;
   object-fit: contain;
 }
 
