@@ -63,9 +63,7 @@
     "category": "gateway",
     "operationMode": "purchase",
     "logo": "",
-    "acceptedAt": [
-      "ABA Bank"
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard",
@@ -222,10 +220,7 @@
     "category": "wallet",
     "operationMode": "purchase",
     "logo": "",
-    "acceptedAt": [
-      "KNET",
-      "Apple Pay"
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard",
@@ -657,14 +652,7 @@
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "doku.svg",
-    "acceptedAt": [
-      "Mandiri",
-      "BNI",
-      "BCA",
-      "BRI",
-      "CIMB Niaga",
-      "Danamon."
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard",
@@ -744,11 +732,7 @@
     "category": "acquirer",
     "operationMode": "purchase",
     "logo": "",
-    "acceptedAt": [
-      "Egyptian retail banks",
-      "Meeza network",
-      "physical cash-collection points."
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard",
@@ -824,11 +808,7 @@
     "category": "processor",
     "operationMode": "purchase",
     "logo": "master_visa.svg",
-    "acceptedAt": [
-      "Backs major acquiring banks across Oman",
-      "Kuwait",
-      "and Bahrain"
-    ],
+    "acceptedAt": [],
     "cardBrands": [],
     "digitalWallets": [],
     "testCards": [
@@ -861,12 +841,7 @@
     "category": "acquirer",
     "operationMode": "purchase",
     "logo": "geidea.svg",
-    "acceptedAt": [
-      "Underwrites and aggregates Mada",
-      "Visa",
-      "Mastercard",
-      "Apple Pay."
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard",
@@ -932,10 +907,7 @@
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "hesabe.svg",
-    "acceptedAt": [
-      "Aggregates KNET and Credit Cards",
-      "primarily for the SME sector."
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard",
@@ -1021,12 +993,7 @@
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "hyperpay.svg",
-    "acceptedAt": [
-      "Integrates with Mada",
-      "STC Bank",
-      "Apple Pay",
-      "and local acquiring banks."
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard",
@@ -1073,11 +1040,7 @@
     "category": "specialty",
     "operationMode": "purchase",
     "logo": "",
-    "acceptedAt": [
-      "IATA member airlines",
-      "BSP",
-      "and ICH clearing banks"
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard",
@@ -1162,12 +1125,7 @@
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "",
-    "acceptedAt": [
-      "Aggregates Mada",
-      "STC Bank",
-      "Apple Pay",
-      "and Credit Cards"
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard",
@@ -1316,14 +1274,7 @@
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "myfatoorah_icon.svg",
-    "acceptedAt": [
-      "Aggregates KNET",
-      "Mada",
-      "OmanNet",
-      "Benefit",
-      "QPay",
-      "Credit Cards."
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard",
@@ -1408,9 +1359,7 @@
     "category": "gateway",
     "operationMode": "purchase",
     "logo": "nbo.svg",
-    "acceptedAt": [
-      "National Bank of Oman  account holders."
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard"
@@ -1449,16 +1398,7 @@
     "category": "gateway",
     "operationMode": "purchase",
     "logo": "ni.svg",
-    "acceptedAt": [
-      "ADCB",
-      "ADIB",
-      "DIB",
-      "Emirates NBD",
-      "Emirates Islamic",
-      "FAB",
-      "Mashreq",
-      "CBD"
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard",
@@ -1559,13 +1499,7 @@
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "paymob.svg",
-    "acceptedAt": [
-      "Aggregates Meeza",
-      "Vodafone Cash",
-      "Fawry",
-      "Mada",
-      "Visa/Mastercard."
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard",
@@ -1687,11 +1621,7 @@
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "payu_icon.svg",
-    "acceptedAt": [
-      "Aggregates UPI",
-      "RuPay",
-      "and major Net Banking rails ."
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard",
@@ -1800,9 +1730,7 @@
     "category": "gateway",
     "operationMode": "purchase_authorize",
     "logo": "rajhi.svg",
-    "acceptedAt": [
-      "Al Rajhi Bank."
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard",
@@ -1843,11 +1771,7 @@
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "skipcash.svg",
-    "acceptedAt": [
-      "Aggregates QPay",
-      "Apple Pay",
-      "and Google Pay for local merchants."
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard",
@@ -1878,9 +1802,7 @@
     "category": "gateway",
     "operationMode": "purchase",
     "logo": "smartpay.svg",
-    "acceptedAt": [
-      "Bank Muscat."
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard",
@@ -1910,9 +1832,7 @@
     "category": "gateway",
     "operationMode": "purchase",
     "logo": "sohar.svg",
-    "acceptedAt": [
-      "Sohar International Bank."
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard"
@@ -2137,14 +2057,7 @@
     "category": "acquirer",
     "operationMode": "purchase",
     "logo": "tap.svg",
-    "acceptedAt": [
-      "Integrates KNET",
-      "Mada",
-      "OmanNet",
-      "Benefit",
-      "NAPS",
-      "and Fawry"
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard",
@@ -2235,11 +2148,7 @@
     "category": "aggregator",
     "operationMode": "purchase",
     "logo": "tess.svg",
-    "acceptedAt": [
-      "Aggregates QPay/NAPS",
-      "Visa",
-      "and Mastercard"
-    ],
+    "acceptedAt": [],
     "cardBrands": [
       "Visa",
       "Mastercard",
