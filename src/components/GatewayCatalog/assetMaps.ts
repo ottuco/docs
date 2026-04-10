@@ -156,7 +156,7 @@ export const OPERATION_ICONS: Record<string, string> = {
   capture: "capture.svg",
   void: "void.svg",
   auth: "authorize.svg",
-  tokenization: "authorize.svg",
+  tokenization: "tokenization.svg",
   autodebit: "autodebit.svg",
 };
 
