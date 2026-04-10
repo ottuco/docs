@@ -146,6 +146,7 @@ export const OPERATION_LABELS: Record<string, string> = {
   void: "Void",
   purchase: "Purchase",
   tokenization: "Tokenization",
+  autodebit: "AutoDebit",
 };
 
 /** Operation slug → icon filename in /img/operations/ */
@@ -156,6 +157,7 @@ export const OPERATION_ICONS: Record<string, string> = {
   void: "void.svg",
   auth: "authorize.svg",
   tokenization: "authorize.svg",
+  autodebit: "authorize.svg",
 };
 
 export const CATEGORY_LABELS: Record<GatewayCategory, string> = {

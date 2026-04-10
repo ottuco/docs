@@ -238,26 +238,64 @@ function CurrencyChips({ currencies }: { currencies: string[] }) {
 function OperationBadges({ operations }: { operations: string[] }) {
   if (operations.length === 0) return null;
   const baseUrl = useBaseUrl("/img/operations/");
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 2);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 2);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    checkScroll();
+    el.addEventListener("scroll", checkScroll, { passive: true });
+    return () => el.removeEventListener("scroll", checkScroll);
+  }, [checkScroll, operations]);
+
+  const scroll = (dir: "left" | "right") => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === "left" ? -100 : 100, behavior: "smooth" });
+  };
 
   return (
     <>
       <div className={styles.divider} />
-      <div className={styles.operationRow}>
-        {operations.map((op) => {
-          const iconFile = OPERATION_ICONS[op];
-          return (
-            <span key={op} className={styles.opBadge}>
-              {iconFile && (
-                <img
-                  src={`${baseUrl}${iconFile}`}
-                  alt=""
-                  className={styles.opIcon}
-                />
-              )}
-              {OPERATION_LABELS[op] || op}
-            </span>
-          );
-        })}
+      <div className={styles.currencyWrap}>
+        {canScrollLeft && (
+          <>
+            <div className={styles.currencyFadeLeft} />
+            <button type="button" className={`${styles.currencyArrow} ${styles.currencyArrowLeft}`} onClick={() => scroll("left")} aria-label="Scroll left">&#8249;</button>
+          </>
+        )}
+        <div className={styles.operationRow} ref={scrollRef}>
+          {operations.map((op) => {
+            const iconFile = OPERATION_ICONS[op];
+            return (
+              <span key={op} className={styles.opBadge}>
+                {iconFile && (
+                  <img
+                    src={`${baseUrl}${iconFile}`}
+                    alt=""
+                    className={styles.opIcon}
+                  />
+                )}
+                {OPERATION_LABELS[op] || op}
+              </span>
+            );
+          })}
+        </div>
+        {canScrollRight && (
+          <>
+            <div className={styles.currencyFadeRight} />
+            <button type="button" className={`${styles.currencyArrow} ${styles.currencyArrowRight}`} onClick={() => scroll("right")} aria-label="Scroll right">&#8250;</button>
+          </>
+        )}
       </div>
     </>
   );

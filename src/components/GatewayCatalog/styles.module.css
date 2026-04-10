@@ -661,10 +661,17 @@
 
 .operationRow {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 4px;
-  min-height: 60px;
-  align-content: flex-start;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.operationRow::-webkit-scrollbar {
+  display: none;
 }
 
 /* Figma: badge — row, center, gap 4px, pad 4 10, bg #F6F6F6 */
