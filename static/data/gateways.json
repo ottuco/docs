@@ -57,7 +57,9 @@
     "inquiryMinutes": 12,
     "operations": [
       "purchase",
-      "refund"
+      "refund",
+      "auth",
+      "capture"
     ],
     "integrationType": "sdk",
     "category": "gateway",
@@ -619,7 +621,9 @@
     "inquiryMinutes": 8,
     "operations": [
       "purchase",
-      "refund"
+      "refund",
+      "auth",
+      "capture"
     ],
     "integrationType": "redirect",
     "category": "bnpl",
@@ -1120,7 +1124,9 @@
     "inquiryMinutes": null,
     "operations": [
       "purchase",
-      "refund"
+      "refund",
+      "auth",
+      "capture"
     ],
     "integrationType": "redirect",
     "category": "aggregator",
@@ -1551,7 +1557,9 @@
     "inquiryMinutes": 31,
     "operations": [
       "purchase",
-      "refund"
+      "refund",
+      "auth",
+      "capture"
     ],
     "integrationType": "sdk",
     "category": "aggregator",
@@ -1725,6 +1733,8 @@
     "operations": [
       "purchase",
       "refund",
+      "auth",
+      "capture",
       "tokenization"
     ],
     "integrationType": "redirect",
@@ -2052,6 +2062,8 @@
     "operations": [
       "purchase",
       "refund",
+      "auth",
+      "capture",
       "tokenization"
     ],
     "integrationType": "redirect/direct",
