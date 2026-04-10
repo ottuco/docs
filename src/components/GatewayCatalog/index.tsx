@@ -187,11 +187,11 @@ function NetworkRow({ networks }: { networks: string[] }) {
   function renderNetwork(network: string) {
     const logoPath = NETWORK_LOGOS[network];
     return logoPath ? (
-      <div key={network} className={styles.bankLogo}>
+      <div key={network} className={styles.networkLogo}>
         <img
           src={withBaseUrl(logoPath)}
           alt={network}
-          className={styles.bankImg}
+          className={styles.networkImg}
           loading="lazy"
         />
       </div>
