@@ -989,8 +989,24 @@ html[data-theme="dark"] .docusaurus-mermaid-container marker path {
   color: var(--ifm-font-color-base);
 } */
 
-/* TOC (table of contents) sidebar — Figma: 14px */
-/* .table-of-contents__link {
+/* TOC (table of contents) sidebar — narrower, Figma-matched styles */
+@media (min-width: 997px) {
+  .theme-doc-toc-desktop {
+    max-width: 185px;
+  }
+
+  .col--3:has(.theme-doc-toc-desktop) {
+    flex: 0 0 185px !important;
+    max-width: 185px !important;
+  }
+
+  /* Let main content column grow into the space freed by narrower TOC */
+  .row:has(.theme-doc-toc-desktop) > [class*="docItemCol"] {
+    max-width: none !important;
+  }
+}
+
+.table-of-contents__link {
   font-size: 14px;
   font-weight: 400;
   color: #4a4a4a;
@@ -1003,7 +1019,7 @@ html[data-theme="dark"] .docusaurus-mermaid-container marker path {
 .table-of-contents__link--active {
   color: #f27e20;
   font-weight: 500;
-} */
+}
 
 /* Markdown source plugin — dropdown in article headers */
 article .markdown header {

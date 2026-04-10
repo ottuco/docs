@@ -1,74 +1,36 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 import gatewaysData from "@site/static/data/gateways.json";
 import type { Gateway, GatewayCategory } from "@site/src/types/gateway";
+import {
+  BANK_LOGOS,
+  WALLET_ICONS,
+  CATEGORY_LABELS,
+  CATEGORY_ORDER,
+  CURRENCY_FLAGS,
+  CURRENCY_FLAGS_BY_COUNTRY,
+  OPERATION_LABELS,
+  OPERATION_ICONS,
+  REGION_CONFIG,
+  REGION_ORDER,
+  COUNTRY_FLAGS,
+  NETWORK_LOGOS,
+} from "./assetMaps";
+import type { RegionKey } from "./assetMaps";
 import styles from "./styles.module.css";
 
 const gateways = (gatewaysData as Gateway[]).filter(
-  (gw) => gw.slug !== "standard"
+  (gw) => gw.slug !== "standard",
 );
 
-const CATEGORY_LABELS: Record<GatewayCategory, string> = {
-  aggregator: "Aggregator",
-  gateway: "Payment Gateway",
-  wallet: "Wallet",
-  bnpl: "BNPL",
-  psp: "PSP",
-  processor: "Processor",
-  bank: "Bank",
-  openbanking: "Open Banking",
-  ottu: "Ottu Service",
-  specialty: "Specialty",
-};
-
-const CATEGORY_ORDER: GatewayCategory[] = [
-  "gateway", "aggregator", "psp", "processor", "wallet", "bnpl", "bank", "openbanking", "ottu", "specialty",
-];
-
-const REGION_CONFIG = {
-  gcc: {
-    label: "GCC",
-    countries: ["Kuwait", "Bahrain", "Qatar", "Oman", "UAE", "KSA"],
-  },
-  apac: {
-    label: "APAC",
-    countries: ["Cambodia", "Indonesia", "India"],
-  },
-  global: {
-    label: "Global",
-    countries: ["Egypt", "Iraq", "Canada"],
-  },
-} as const;
-
-type RegionKey = keyof typeof REGION_CONFIG;
-const REGION_ORDER: RegionKey[] = ["global", "gcc", "apac"];
-
-const COUNTRY_FLAGS: Record<string, string> = {
-  Kuwait: "\u{1F1F0}\u{1F1FC}", Bahrain: "\u{1F1E7}\u{1F1ED}", Qatar: "\u{1F1F6}\u{1F1E6}", Oman: "\u{1F1F4}\u{1F1F2}",
-  UAE: "\u{1F1E6}\u{1F1EA}", KSA: "\u{1F1F8}\u{1F1E6}", Egypt: "\u{1F1EA}\u{1F1EC}", Iraq: "\u{1F1EE}\u{1F1F6}",
-  India: "\u{1F1EE}\u{1F1F3}", Indonesia: "\u{1F1EE}\u{1F1E9}", Cambodia: "\u{1F1F0}\u{1F1ED}", Canada: "\u{1F1E8}\u{1F1E6}",
-  Global: "\u{1F30E}",
-};
-
-const SERVICE_CONFIG: Record<string, { label: string; icon: React.ReactNode }> = {
-  "apple-pay": {
-    label: "Apple Pay",
-    icon: <svg className={styles.svcIcon} viewBox="0 0 170 170" fill="currentColor"><path d="M150.4 130.3c-2.4 5.6-5.2 10.7-8.4 15.4-4.4 6.4-7.9 10.8-10.7 13.3-4.3 4.1-8.8 6.2-13.7 6.3-3.5 0-7.7-1-12.6-3-4.9-2-9.4-3-13.6-3-4.4 0-9.1 1-14.2 3-5.1 2-9.1 3-12.2 3.1-4.7.2-9.3-1.9-13.7-6.3-3-2.7-6.7-7.3-11.2-13.8-4.8-7-8.8-15-11.9-24.2-3.3-9.9-5-19.4-5-28.7 0-10.6 2.3-19.7 6.8-27.4 3.6-6.1 8.3-11 14.2-14.6 5.9-3.6 12.3-5.5 19.1-5.6 3.7 0 8.6 1.1 14.7 3.4 6 2.3 9.9 3.4 11.7 3.4 1.3 0 5.6-1.3 12.8-3.9 6.9-2.4 12.6-3.4 17.3-3 12.8 1 22.4 6.1 28.7 15.2-11.4 6.9-17.1 16.6-17 29.1.1 9.7 3.6 17.8 10.6 24.2 3.1 3 6.6 5.3 10.5 6.9-0.8 2.5-1.7 4.8-2.7 7.1zM119.2 7c0 7.6-2.8 14.8-8.3 21.3-6.6 7.8-14.7 12.3-23.4 11.6-.1-1-.2-2-.2-3 0-7.3 3.2-15.2 8.8-21.6 2.8-3.2 6.4-5.9 10.7-8 4.3-2 8.4-3.1 12.2-3.3.1 1 .2 2 .2 3z"/></svg>,
-  },
-  "google-pay": {
-    label: "Google Pay",
-    icon: <svg className={styles.svcIcon} viewBox="0 0 24 24"><path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.993 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0 5.48 0 0 5.373 0 12s5.48 12 12.24 12c7.07 0 11.76-4.972 11.76-11.97 0-.804-.086-1.418-.19-2.03H12.24z" fill="#4285F4"/></svg>,
-  },
-  "samsung-wallet": {
-    label: "Samsung",
-    icon: <svg className={styles.svcIcon} viewBox="0 0 24 24" fill="currentColor"><path d="M6.2 2C3.9 2 2 3.9 2 6.2v11.6C2 20.1 3.9 22 6.2 22h11.6c2.3 0 4.2-1.9 4.2-4.2V6.2C22 3.9 20.1 2 17.8 2H6.2zm1.3 5.5h1.2c1 0 1.4.5 1.4 1.1 0 .5-.3.9-.7 1 .5.1.8.6.8 1.1 0 .7-.5 1.2-1.5 1.2H7.5V7.5zm1.2 1.8c.4 0 .6-.2.6-.5s-.2-.5-.6-.5h-.4v1h.4zm.1 1.9c.4 0 .7-.2.7-.6 0-.3-.2-.6-.7-.6h-.5v1.2h.5z"/></svg>,
-  },
-};
+// ── Filter helpers ───────────────────────────────────
 
 function gatewayMatchesRegion(gw: Gateway, region: RegionKey): boolean {
   const regionCountries = REGION_CONFIG[region].countries;
   if (gw.countries.includes("Global")) return true;
-  return gw.countries.some((c) => (regionCountries as readonly string[]).includes(c));
+  return gw.countries.some((c) =>
+    (regionCountries as readonly string[]).includes(c),
+  );
 }
 
 function gatewayMatchesCountry(gw: Gateway, country: string): boolean {
@@ -76,145 +38,838 @@ function gatewayMatchesCountry(gw: Gateway, country: string): boolean {
   return gw.countries.includes(country);
 }
 
-function getCountriesForRegion(region: RegionKey | "all"): string[] {
-  if (region === "all") {
-    return Object.values(REGION_CONFIG).flatMap((r) => [...r.countries]);
-  }
-  return [...REGION_CONFIG[region].countries];
-}
+// ── Logo fallback ────────────────────────────────────
 
 function LogoFallback({ name }: { name: string }) {
-  const hue = [...name].reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
+  const hue =
+    [...name].reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
   return (
     <div
       className={styles.logoFallback}
-      style={{ backgroundColor: `hsl(${hue}, 45%, 55%)` }}
+      style={{
+        backgroundColor: `hsl(${hue}, 65%, 94%)`,
+        color: `hsl(${hue}, 45%, 42%)`,
+      }}
     >
       {name.charAt(0).toUpperCase()}
     </div>
   );
 }
 
-export default function GatewayCatalog(): React.JSX.Element {
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<GatewayCategory | "all">("all");
-  const [selectedRegion, setSelectedRegion] = useState<RegionKey | "all">("all");
-  const [selectedCountry, setSelectedCountry] = useState<string>("all");
+// Names to exclude from bank row (credit cards are shown in header badges)
+const NON_BANK_NAMES = new Set([
+  // Card brands / networks
+  "Visa", "Mastercard", "Amex", "JCB", "Discover", "UnionPay", "Maestro",
+  "mada", "Mada", "Diners", "UATP", "RuPay", "Meeza", "KNET", "Benefit",
+  "OmanNet", "NAPS", "QPay", "Knet Supported cards scheme",
+  "Linked Bank Accounts / Cards", "Credit Cards.", "Visa/Mastercard.",
+  // Digital wallets
+  "Apple Pay", "Apple Pay.", "Google Pay", "PayPal", "Samsung Pay",
+  "STC Pay", "urpay", "Alipay", "WeChat Pay", "ABA PAY", "Vodafone Cash",
+  "Orange", "Fawry",
+]);
 
-  // Reset country when region changes
-  const handleRegionChange = (region: RegionKey | "all") => {
-    setSelectedRegion(region);
-    setSelectedCountry("all");
+// Filter out non-bank entries (descriptions, card brands, N/A values)
+function filterBanks(banks: string[]): string[] {
+  return banks.filter((b) =>
+    !NON_BANK_NAMES.has(b) &&
+    b.length < 30 &&
+    !b.startsWith("N/A") &&
+    !b.startsWith("Aggregates") &&
+    !b.startsWith("Interfaces") &&
+    !b.startsWith("Underwrites") &&
+    !b.startsWith("Egyptian") &&
+    !b.startsWith("physical") &&
+    !b.startsWith("primarily") &&
+    !b.startsWith("and "),
+  );
+}
+
+// ── Sub-components ───────────────────────────────────
+
+const MAX_BANKS = 3;
+
+function BankRow({ banks }: { banks: string[] }) {
+  const [popupOpen, setPopupOpen] = useState(false);
+  const overflowRef = useRef<HTMLDivElement>(null);
+  const baseUrl = useBaseUrl("/img/banks/");
+
+  useEffect(() => {
+    if (!popupOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (overflowRef.current && !overflowRef.current.contains(e.target as Node)) {
+        setPopupOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [popupOpen]);
+
+  if (banks.length === 0) {
+    return <div className={styles.bankSectionPlaceholder} aria-hidden="true" />;
+  }
+
+  const shown = banks.slice(0, MAX_BANKS);
+  const overflow = banks.length - MAX_BANKS;
+  const overflowBanks = banks.slice(MAX_BANKS);
+
+  function renderBank(bank: string) {
+    const logoFile = BANK_LOGOS[bank];
+    return logoFile ? (
+      <div key={bank} className={styles.bankLogo}>
+        <img
+          src={`${baseUrl}${logoFile}`}
+          alt={bank}
+          className={styles.bankImg}
+          loading="lazy"
+        />
+      </div>
+    ) : (
+      <span key={bank} className={styles.bankPill}>
+        {bank}
+      </span>
+    );
+  }
+
+  return (
+    <div className={styles.partnerBanks}>
+      <div className={styles.sectionLabel}>Partner Banks:</div>
+      <div className={styles.bankRow}>
+        <div className={styles.bankLogoGroup}>
+          {shown.map(renderBank)}
+        </div>
+        {overflow > 0 && (
+          <div className={styles.bankOverflowWrap} ref={overflowRef}>
+            <button
+              type="button"
+              className={styles.bankOverflow}
+              onClick={() => setPopupOpen(!popupOpen)}
+            >
+              +{overflow}
+            </button>
+            {popupOpen && (
+              <div className={styles.bankPopup}>
+                {overflowBanks.map(renderBank)}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CurrencyChips({ currencies }: { currencies: string[] }) {
+  if (currencies.length === 0) return null;
+  const flagBaseUrl = useBaseUrl("/img/flags/");
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 2);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 2);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    checkScroll();
+    el.addEventListener("scroll", checkScroll, { passive: true });
+    return () => el.removeEventListener("scroll", checkScroll);
+  }, [checkScroll, currencies]);
+
+  const scroll = (dir: "left" | "right") => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === "left" ? -100 : 100, behavior: "smooth" });
   };
 
-  // If selected country isn't in the current region's countries, reset to "all"
-  const effectiveCountry = useMemo(() => {
-    if (selectedCountry === "all") return "all";
-    const countries = getCountriesForRegion(selectedRegion);
-    return countries.includes(selectedCountry) ? selectedCountry : "all";
-  }, [selectedCountry, selectedRegion]);
+  return (
+    <div className={styles.section}>
+      <div className={styles.sectionLabel}>Currencies</div>
+      <div className={styles.currencyWrap}>
+        {canScrollLeft && (
+          <>
+            <div className={styles.currencyFadeLeft} />
+            <button type="button" className={`${styles.currencyArrow} ${styles.currencyArrowLeft}`} onClick={() => scroll("left")} aria-label="Scroll left">&#8249;</button>
+          </>
+        )}
+        <div className={styles.currencyRow} ref={scrollRef}>
+          {currencies.map((code) => (
+            <span key={code} className={styles.currencyChip}>
+              {CURRENCY_FLAGS[code] && (
+                <span className={styles.currencyFlag}>
+                  <img
+                    src={`${flagBaseUrl}${CURRENCY_FLAGS[code]}`}
+                    alt=""
+                    className={styles.flagImg}
+                  />
+                </span>
+              )}
+              {code}
+            </span>
+          ))}
+        </div>
+        {canScrollRight && (
+          <>
+            <div className={styles.currencyFadeRight} />
+            <button type="button" className={`${styles.currencyArrow} ${styles.currencyArrowRight}`} onClick={() => scroll("right")} aria-label="Scroll right">&#8250;</button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
 
+function OperationBadges({ operations }: { operations: string[] }) {
+  if (operations.length === 0) return null;
+  const baseUrl = useBaseUrl("/img/operations/");
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 2);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 2);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    checkScroll();
+    el.addEventListener("scroll", checkScroll, { passive: true });
+    return () => el.removeEventListener("scroll", checkScroll);
+  }, [checkScroll, operations]);
+
+  const scroll = (dir: "left" | "right") => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === "left" ? -100 : 100, behavior: "smooth" });
+  };
+
+  return (
+    <>
+      <div className={styles.divider} />
+      <div className={styles.currencyWrap}>
+        {canScrollLeft && (
+          <>
+            <div className={styles.currencyFadeLeft} />
+            <button type="button" className={`${styles.currencyArrow} ${styles.currencyArrowLeft}`} onClick={() => scroll("left")} aria-label="Scroll left">&#8249;</button>
+          </>
+        )}
+        <div className={styles.operationRow} ref={scrollRef}>
+          {operations.map((op) => {
+            const iconFile = OPERATION_ICONS[op];
+            return (
+              <span key={op} className={styles.opBadge}>
+                {iconFile && (
+                  <img
+                    src={`${baseUrl}${iconFile}`}
+                    alt=""
+                    className={styles.opIcon}
+                  />
+                )}
+                {OPERATION_LABELS[op] || op}
+              </span>
+            );
+          })}
+        </div>
+        {canScrollRight && (
+          <>
+            <div className={styles.currencyFadeRight} />
+            <button type="button" className={`${styles.currencyArrow} ${styles.currencyArrowRight}`} onClick={() => scroll("right")} aria-label="Scroll right">&#8250;</button>
+          </>
+        )}
+      </div>
+    </>
+  );
+}
+
+function HeaderBadges({
+  wallets,
+}: {
+  wallets: string[];
+}) {
+  const baseUrl = useBaseUrl("/img/brands/");
+
+  const walletItems = wallets
+    .filter((w) => WALLET_ICONS[w])
+    .slice(0, 4);
+
+  if (walletItems.length === 0) return null;
+
+  return (
+    <div className={styles.headerBadges}>
+      {walletItems.map((w) => (
+        <img
+          key={w}
+          src={`${baseUrl}${WALLET_ICONS[w]}`}
+          alt={w}
+          className={styles.badgeIcon}
+          loading="lazy"
+        />
+      ))}
+    </div>
+  );
+}
+
+// ── Gateway Card ─────────────────────────────────────
+
+function GatewayCard({ gateway }: { gateway: Gateway }) {
+  const logoSrc = useBaseUrl(`/img/gateways/${gateway.logo}`);
+
+  return (
+    <div className={styles.card}>
+      {/* Top section: left column (logo+banks) + right badges */}
+      <div className={styles.topSection}>
+        <div className={styles.leftColumn}>
+          <div className={styles.logoNameRow}>
+            <div className={styles.logoWrap}>
+              {gateway.logo ? (
+                <img
+                  src={logoSrc}
+                  alt={gateway.name}
+                  className={styles.logo}
+                  loading="lazy"
+                />
+              ) : (
+                <LogoFallback name={gateway.name} />
+              )}
+            </div>
+            <div className={styles.nameCol}>
+              <div className={styles.name}>{gateway.name}</div>
+              <div className={styles.subtitle}>
+                {CATEGORY_LABELS[gateway.category]}
+              </div>
+            </div>
+          </div>
+          <BankRow banks={filterBanks(gateway.acceptedAt)} />
+        </div>
+        <HeaderBadges
+          wallets={gateway.digitalWallets}
+        />
+      </div>
+
+      {/* Currencies */}
+      <CurrencyChips currencies={gateway.currencies} />
+
+      {/* Divider + Operations */}
+      <OperationBadges operations={gateway.operations} />
+    </div>
+  );
+}
+
+// ── SVG Icons (exact Figma vuesax/linear paths) ─────
+
+function IconSearch({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9.58366 17.5C13.9559 17.5 17.5003 13.9556 17.5003 9.58332C17.5003 5.21107 13.9559 1.66666 9.58366 1.66666C5.2114 1.66666 1.66699 5.21107 1.66699 9.58332C1.66699 13.9556 5.2114 17.5 9.58366 17.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M18.3337 18.3333L16.667 16.6667" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function IconGlobe({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10.0003 18.3333C14.6027 18.3333 18.3337 14.6024 18.3337 9.99999C18.3337 5.39762 14.6027 1.66666 10.0003 1.66666C5.39795 1.66666 1.66699 5.39762 1.66699 9.99999C1.66699 14.6024 5.39795 18.3333 10.0003 18.3333Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M6.66667 2.5H7.5C5.875 7.36667 5.875 12.6333 7.5 17.5H6.66667" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M12.5 2.5C14.125 7.36667 14.125 12.6333 12.5 17.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M2.5 13.3333V12.5C7.36667 14.125 12.6333 14.125 17.5 12.5V13.3333" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M2.5 7.5C7.36667 5.875 12.6333 5.875 17.5 7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function IconChevronDown({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M13.2797 5.96667L8.93306 10.3133C8.41973 10.8267 7.57973 10.8267 7.06639 10.3133L2.71973 5.96667" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function IconHierarchy({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4.16602 6.66666C5.54673 6.66666 6.66602 5.54737 6.66602 4.16666C6.66602 2.78594 5.54673 1.66666 4.16602 1.66666C2.7853 1.66666 1.66602 2.78594 1.66602 4.16666C1.66602 5.54737 2.7853 6.66666 4.16602 6.66666Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M15.834 12.5C17.2147 12.5 18.334 11.3807 18.334 10C18.334 8.61929 17.2147 7.5 15.834 7.5C14.4533 7.5 13.334 8.61929 13.334 10C13.334 11.3807 14.4533 12.5 15.834 12.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M4.16602 18.3333C5.54673 18.3333 6.66602 17.2141 6.66602 15.8333C6.66602 14.4526 5.54673 13.3333 4.16602 13.3333C2.7853 13.3333 1.66602 14.4526 1.66602 15.8333C1.66602 17.2141 2.7853 18.3333 4.16602 18.3333Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M13.3327 9.99999H7.49935C5.66602 9.99999 4.16602 9.16666 4.16602 6.66666V13.3333" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function IconCards({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M1.66602 10.5083H15.8327" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M15.8327 8.56668V14.525C15.8077 16.9 15.1577 17.5 12.6827 17.5H4.81604C2.29937 17.5 1.66602 16.875 1.66602 14.3917V8.56668C1.66602 6.31668 2.19102 5.59168 4.16602 5.47501C4.36602 5.46668 4.58271 5.45834 4.81604 5.45834H12.6827C15.1993 5.45834 15.8327 6.08334 15.8327 8.56668Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M18.3327 5.60833V11.4333C18.3327 13.6833 17.8077 14.4083 15.8327 14.525V8.56667C15.8327 6.08333 15.1993 5.45833 12.6827 5.45833H4.81604C4.58271 5.45833 4.36602 5.46667 4.16602 5.475C4.19102 3.1 4.84104 2.5 7.31604 2.5H15.1827C17.6993 2.5 18.3327 3.125 18.3327 5.60833Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M4.375 14.8417H5.80831" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M7.5918 14.8417H10.4585" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function IconCloseCircle({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7.99967 14.6667C11.6663 14.6667 14.6663 11.6667 14.6663 8.00001C14.6663 4.33334 11.6663 1.33334 7.99967 1.33334C4.33301 1.33334 1.33301 4.33334 1.33301 8.00001C1.33301 11.6667 4.33301 14.6667 7.99967 14.6667Z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M6.11328 9.88668L9.88661 6.11334" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M9.88661 9.88668L6.11328 6.11334" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function IconCheck({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 8l3.5 3.5L13 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconFilter({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2.5 5.833h15M5 10h10M7.5 14.167h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+// ── Filter Dropdown ─────────────────────────────────
+
+interface DropdownOption {
+  value: string;
+  label: string;
+  icon?: React.ReactNode;
+}
+
+function FilterDropdown({
+  icon,
+  label,
+  options,
+  selected,
+  onChange,
+  multi = false,
+  searchable = false,
+  minWidth,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  options: DropdownOption[];
+  selected: string | string[] | null;
+  onChange: (value: string) => void;
+  multi?: boolean;
+  searchable?: boolean;
+  minWidth?: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  const handleClickOutside = useCallback((e: MouseEvent) => {
+    if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+      setOpen(false);
+      setQuery("");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [open, handleClickOutside]);
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { setOpen(false); setQuery(""); }
+    };
+    if (open) {
+      document.addEventListener("keydown", handleEsc);
+      return () => document.removeEventListener("keydown", handleEsc);
+    }
+  }, [open]);
+
+  const isSelected = (value: string) => {
+    if (Array.isArray(selected)) return selected.includes(value);
+    return selected === value;
+  };
+
+  const hasSelection = Array.isArray(selected) ? selected.length > 0 : selected !== null;
+
+  const filteredOptions = searchable && query
+    ? options.filter((o) => o.label.toLowerCase().includes(query.toLowerCase()))
+    : options;
+
+  const displayLabel = (() => {
+    if (!hasSelection) return label;
+    // Single-select: show selected value
+    if (!Array.isArray(selected)) {
+      const opt = options.find((o) => o.value === selected);
+      return opt ? opt.label : label;
+    }
+    // Multi-select: keep original label, add count
+    if (selected.length === 0) return label;
+    return `${label} (${selected.length})`;
+  })();
+
+  return (
+    <div className={styles.dropdownWrap} ref={wrapRef}>
+      <button
+        type="button"
+        className={`${styles.dropdown} ${open ? styles.dropdownOpen : ""}`}
+        onClick={() => { setOpen(!open); setQuery(""); }}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        style={minWidth ? { width: minWidth } : undefined}
+      >
+        <span className={styles.dropdownIcon}>{icon}</span>
+        {displayLabel}
+        <IconChevronDown className={styles.dropdownArrow} />
+      </button>
+      {open && (
+        <div className={styles.dropdownPopup} role="listbox">
+          {searchable && (
+            <input
+              type="text"
+              className={styles.dropdownSearch}
+              placeholder="Search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              // eslint-disable-next-line jsx-a11y/no-autofocus
+              autoFocus
+            />
+          )}
+          {filteredOptions.map((opt) => {
+            const active = isSelected(opt.value);
+            return (
+              <div
+                key={opt.value}
+                className={`${styles.dropdownOption} ${active ? styles.dropdownOptionActive : ""}`}
+                onClick={() => {
+                  onChange(opt.value);
+                  if (!multi) { setOpen(false); setQuery(""); }
+                }}
+                role="option"
+                aria-selected={active}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onChange(opt.value);
+                    if (!multi) { setOpen(false); setQuery(""); }
+                  }
+                }}
+              >
+                {opt.icon && <span className={styles.dropdownOptionIcon}>{opt.icon}</span>}
+                {opt.label}
+                <IconCheck className={`${styles.dropdownOptionCheck} ${!active ? styles.dropdownOptionCheckFaint : ""}`} />
+              </div>
+            );
+          })}
+          {filteredOptions.length === 0 && (
+            <div className={styles.dropdownOption} style={{ opacity: 0.5, cursor: "default" }}>
+              No results
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Catalog (parent) ─────────────────────────────────
+
+// Derive unique payment networks (card brands/schemes only, NOT digital wallets)
+const allNetworks = (() => {
+  const set = new Set<string>();
+  for (const gw of gateways) {
+    gw.cardBrands.forEach((b) => set.add(b));
+  }
+  return [...set].sort();
+})();
+
+export default function GatewayCatalog(): React.JSX.Element {
+  const [search, setSearch] = useState("");
+  const [selectedRegion, setSelectedRegion] = useState<RegionKey | null>(null);
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+  const [selectedGatewayTypes, setSelectedGatewayTypes] = useState<GatewayCategory[]>([]);
+  const [selectedNetworks, setSelectedNetworks] = useState<string[]>([]);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  // Cascading: region change resets countries
+  const handleRegionChange = (value: string) => {
+    const region = value as RegionKey;
+    if (selectedRegion === region) {
+      setSelectedRegion(null);
+      setSelectedCountries([]);
+    } else {
+      setSelectedRegion(region);
+      setSelectedCountries([]);
+    }
+  };
+
+  const handleCountryToggle = (value: string) => {
+    setSelectedCountries((prev) =>
+      prev.includes(value) ? prev.filter((c) => c !== value) : [...prev, value],
+    );
+  };
+
+  const handleGatewayTypeToggle = (value: string) => {
+    const cat = value as GatewayCategory;
+    setSelectedGatewayTypes((prev) =>
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
+    );
+  };
+
+  const handleNetworkToggle = (value: string) => {
+    setSelectedNetworks((prev) =>
+      prev.includes(value) ? prev.filter((n) => n !== value) : [...prev, value],
+    );
+  };
+
+  const flagBaseUrl = useBaseUrl("/img/flags/");
+
+  // Country options depend on selected region, with flag icons
+  const countryOptions = useMemo(() => {
+    const countries = selectedRegion
+      ? [...REGION_CONFIG[selectedRegion].countries]
+      : Object.values(REGION_CONFIG).flatMap((r) => [...r.countries]);
+    return countries.map((c) => ({
+      value: c,
+      label: c,
+      icon: CURRENCY_FLAGS_BY_COUNTRY[c] ? (
+        <img src={`${flagBaseUrl}${CURRENCY_FLAGS_BY_COUNTRY[c]}`} alt="" className={styles.dropdownFlagIcon} />
+      ) : undefined,
+    }));
+  }, [selectedRegion, flagBaseUrl]);
+
+  // Gateway type options
+  const gatewayTypeOptions = useMemo(() => {
+    return CATEGORY_ORDER.map((cat) => ({
+      value: cat,
+      label: CATEGORY_LABELS[cat],
+    }));
+  }, []);
+
+  const brandsBaseUrl = useBaseUrl("/");
+
+  // Network options with logos
+  const networkOptions = useMemo(() => {
+    return allNetworks.map((n) => ({
+      value: n,
+      label: n,
+      icon: NETWORK_LOGOS[n] ? (
+        <img src={`${brandsBaseUrl}${NETWORK_LOGOS[n].replace(/^\//, "")}`} alt="" className={styles.dropdownNetworkIcon} />
+      ) : undefined,
+    }));
+  }, [brandsBaseUrl]);
+
+  // Region options
+  const regionOptions = useMemo(() => {
+    return REGION_ORDER.map((r) => ({
+      value: r,
+      label: REGION_CONFIG[r].label,
+    }));
+  }, []);
+
+  // Filtering
   const filtered = useMemo(() => {
     return gateways.filter((gw) => {
-      if (selectedCategory !== "all" && gw.category !== selectedCategory) return false;
-      if (selectedRegion !== "all" && !gatewayMatchesRegion(gw, selectedRegion)) return false;
-      if (effectiveCountry !== "all" && !gatewayMatchesCountry(gw, effectiveCountry)) return false;
+      if (selectedRegion && !gatewayMatchesRegion(gw, selectedRegion))
+        return false;
+      if (
+        selectedCountries.length > 0 &&
+        !selectedCountries.some((c) => gatewayMatchesCountry(gw, c))
+      )
+        return false;
+      if (
+        selectedGatewayTypes.length > 0 &&
+        !selectedGatewayTypes.includes(gw.category)
+      )
+        return false;
+      if (selectedNetworks.length > 0) {
+        if (!selectedNetworks.some((n) => gw.cardBrands.includes(n))) return false;
+      }
       if (search) {
         const q = search.toLowerCase();
-        const nameMatch = gw.name.toLowerCase().includes(q);
-        const countryMatch = gw.countries.some((c) => c.toLowerCase().includes(q));
-        const providerMatch = gw.providerType.toLowerCase().includes(q);
-        if (!nameMatch && !countryMatch && !providerMatch) return false;
+        const fields = [
+          gw.name,
+          ...gw.countries,
+          ...gw.acceptedAt,
+          ...gw.cardBrands,
+          ...gw.digitalWallets,
+        ];
+        if (!fields.some((f) => f.toLowerCase().includes(q))) return false;
       }
       return true;
     });
-  }, [search, selectedCategory, selectedRegion, effectiveCountry]);
+  }, [search, selectedRegion, selectedCountries, selectedGatewayTypes, selectedNetworks]);
 
-  const counts = useMemo(() => {
-    const c: Record<string, number> = { all: gateways.length };
-    for (const gw of gateways) {
-      c[gw.category] = (c[gw.category] || 0) + 1;
+  const activeFilterCount =
+    (selectedRegion ? 1 : 0) +
+    selectedCountries.length +
+    selectedGatewayTypes.length +
+    selectedNetworks.length;
+
+  // Build tags from all active filters
+  const tags = useMemo(() => {
+    const t: { key: string; category?: string; value: string; onRemove: () => void }[] = [];
+    if (selectedRegion) {
+      t.push({
+        key: `region-${selectedRegion}`,
+        category: "Region:",
+        value: REGION_CONFIG[selectedRegion].label,
+        onRemove: () => { setSelectedRegion(null); setSelectedCountries([]); },
+      });
     }
-    return c;
-  }, []);
-
-  const availableCountries = useMemo(() => {
-    return getCountriesForRegion(selectedRegion);
-  }, [selectedRegion]);
+    for (const c of selectedCountries) {
+      t.push({
+        key: `country-${c}`,
+        category: "Country:",
+        value: c,
+        onRemove: () => setSelectedCountries((prev) => prev.filter((x) => x !== c)),
+      });
+    }
+    for (const gt of selectedGatewayTypes) {
+      t.push({
+        key: `type-${gt}`,
+        category: "Gateway Type:",
+        value: CATEGORY_LABELS[gt],
+        onRemove: () => setSelectedGatewayTypes((prev) => prev.filter((x) => x !== gt)),
+      });
+    }
+    for (const n of selectedNetworks) {
+      t.push({
+        key: `network-${n}`,
+        value: n,
+        onRemove: () => setSelectedNetworks((prev) => prev.filter((x) => x !== n)),
+      });
+    }
+    return t;
+  }, [selectedRegion, selectedCountries, selectedGatewayTypes, selectedNetworks]);
 
   return (
     <div className={styles.catalog}>
       {/* Filter bar */}
       <div className={styles.filters}>
-        {/* Row 1: Category pills */}
-        <div className={styles.categoryPills}>
-          <button
-            className={`${styles.pill} ${selectedCategory === "all" ? styles.pillActive : ""}`}
-            onClick={() => setSelectedCategory("all")}
-          >
-            All <span className={styles.pillCount}>{counts.all}</span>
-          </button>
-          {CATEGORY_ORDER.filter((cat) => (counts[cat] || 0) > 0).map((cat) => (
-            <button
-              key={cat}
-              className={`${styles.pill} ${selectedCategory === cat ? styles.pillActive : ""}`}
-              onClick={() => setSelectedCategory(cat)}
-            >
-              {CATEGORY_LABELS[cat]}{" "}
-              <span className={styles.pillCount}>{counts[cat] || 0}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Row 2: Region pills */}
-        <div className={styles.regionPills}>
-          <button
-            className={`${styles.pill} ${selectedRegion === "all" ? styles.pillActive : ""}`}
-            onClick={() => handleRegionChange("all")}
-          >
-            All Regions
-          </button>
-          {REGION_ORDER.map((region) => (
-            <button
-              key={region}
-              className={`${styles.pill} ${selectedRegion === region ? styles.pillActive : ""}`}
-              onClick={() => handleRegionChange(region)}
-            >
-              {REGION_CONFIG[region].label}
-            </button>
-          ))}
-        </div>
-
-        {/* Row 3: Search + Country dropdown */}
-        <div className={styles.filterRow}>
+        {/* Search */}
+        <div className={styles.searchBar}>
+          <IconSearch className={styles.searchIcon} />
           <input
             type="text"
             className={styles.searchInput}
-            placeholder="Search gateways..."
+            placeholder="Search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <select
-            className={styles.regionSelect}
-            value={effectiveCountry}
-            onChange={(e) => setSelectedCountry(e.target.value)}
-          >
-            <option value="all">All Countries</option>
-            {availableCountries.map((c) => (
-              <option key={c} value={c}>
-                {COUNTRY_FLAGS[c] || ""} {c}
-              </option>
-            ))}
-          </select>
+        </div>
+
+        {/* Mobile-only filter toggle button */}
+        <button
+          type="button"
+          className={styles.filtersToggle}
+          onClick={() => setFiltersOpen(!filtersOpen)}
+          aria-expanded={filtersOpen}
+          aria-controls="gateway-catalog-filters"
+        >
+          <IconFilter className={styles.filtersToggleIcon} />
+          <span>Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}</span>
+          <IconChevronDown
+            className={`${styles.filtersToggleArrow} ${filtersOpen ? styles.filtersToggleArrowOpen : ""}`}
+          />
+        </button>
+
+        {/* Dropdown filters */}
+        <div
+          id="gateway-catalog-filters"
+          className={`${styles.dropdownRow} ${filtersOpen ? styles.dropdownRowOpen : ""}`}
+        >
+          <FilterDropdown
+            icon={<IconGlobe className={styles.dropdownIcon} />}
+            label="Region"
+            options={regionOptions}
+            selected={selectedRegion}
+            onChange={handleRegionChange}
+            minWidth={130}
+          />
+          <FilterDropdown
+            icon={
+              selectedCountries.length === 1 && CURRENCY_FLAGS_BY_COUNTRY[selectedCountries[0]] ? (
+                <img
+                  src={`${flagBaseUrl}${CURRENCY_FLAGS_BY_COUNTRY[selectedCountries[0]]}`}
+                  alt=""
+                  className={styles.countryFlagDropdown}
+                />
+              ) : (
+                <IconGlobe className={styles.dropdownIcon} />
+              )
+            }
+            label="Country"
+            options={countryOptions}
+            selected={selectedCountries}
+            onChange={handleCountryToggle}
+            multi
+            searchable
+            minWidth={150}
+          />
+          <FilterDropdown
+            icon={<IconHierarchy className={styles.dropdownIcon} />}
+            label="Gateway Type"
+            options={gatewayTypeOptions}
+            selected={selectedGatewayTypes}
+            onChange={handleGatewayTypeToggle}
+            multi
+            minWidth={190}
+          />
+          <FilterDropdown
+            icon={<IconCards className={styles.dropdownIcon} />}
+            label="Payment Network"
+            options={networkOptions}
+            selected={selectedNetworks}
+            onChange={handleNetworkToggle}
+            multi
+            searchable
+            minWidth={210}
+          />
+        </div>
+
+        {/* Selected filter tags — always rendered to reserve layout space and prevent shift */}
+        <div className={styles.tagsRow} aria-live="polite">
+          {tags.map((tag) => (
+            <span key={tag.key} className={styles.tag}>
+              <span className={styles.tagContent}>
+                {tag.category && (
+                  <span className={styles.tagLabel}>{tag.category}</span>
+                )}
+                <span className={styles.tagValue}>{tag.value}</span>
+              </span>
+              <button
+                type="button"
+                className={styles.tagClose}
+                onClick={tag.onRemove}
+                aria-label={`Remove ${tag.value}`}
+              >
+                <IconCloseCircle />
+              </button>
+            </span>
+          ))}
         </div>
       </div>
 
-      {/* Results count */}
       <div className={styles.resultCount}>
         {filtered.length} gateway{filtered.length !== 1 ? "s" : ""}
       </div>
 
-      {/* Gateway grid */}
       {filtered.length > 0 ? (
         <div className={styles.grid}>
           {filtered.map((gw) => (
@@ -223,90 +878,8 @@ export default function GatewayCatalog(): React.JSX.Element {
         </div>
       ) : (
         <div className={styles.empty}>
-          No gateways match your filters. Try adjusting your search or filters.
-        </div>
-      )}
-    </div>
-  );
-}
-
-function CountryDisplay({ countries }: { countries: string[] }) {
-  const MAX_SHOW = 3;
-  const shown = countries.slice(0, MAX_SHOW);
-  const remaining = countries.length - MAX_SHOW;
-
-  return (
-    <span className={styles.country}>
-      {shown.map((c, i) => (
-        <span key={c}>
-          {i > 0 && ", "}
-          {COUNTRY_FLAGS[c] || ""} {c}
-        </span>
-      ))}
-      {remaining > 0 && <span> +{remaining}</span>}
-    </span>
-  );
-}
-
-function GatewayCard({ gateway }: { gateway: Gateway }) {
-  const logoSrc = useBaseUrl(`/img/gateways/${gateway.logo}`);
-  const categoryLabel = CATEGORY_LABELS[gateway.category];
-  const showProviderType = gateway.providerType && gateway.providerType !== categoryLabel;
-
-  return (
-    <div className={styles.card}>
-      {/* Zone 1: Top row — logo left, badges right */}
-      <div className={styles.topRow}>
-        <div className={styles.logoWrap}>
-          {gateway.logo ? (
-            <img
-              src={logoSrc}
-              alt={gateway.name}
-              className={styles.logo}
-              loading="lazy"
-            />
-          ) : (
-            <LogoFallback name={gateway.name} />
-          )}
-        </div>
-        <div className={styles.badgesCol}>
-          <span className={`${styles.categoryBadge} ${styles[`cat_${gateway.category}`]}`}>
-            {categoryLabel}
-          </span>
-          {gateway.services?.map((svc) => {
-            const cfg = SERVICE_CONFIG[svc];
-            return (
-              <span key={svc} className={`${styles.serviceBadge} ${styles[`svc_${svc.replace(/-/g, "_")}`] || ""}`}>
-                {cfg?.icon}
-                {cfg?.label || svc}
-              </span>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Zone 2: Name + provider type + countries — full width */}
-      <div className={styles.cardBody}>
-        <h4 className={styles.cardName}>{gateway.name}</h4>
-        {showProviderType && (
-          <span className={styles.providerType}>{gateway.providerType}</span>
-        )}
-        <CountryDisplay countries={gateway.countries} />
-      </div>
-
-      {/* Zone 3: Footer — currencies left, operations right */}
-      {(gateway.currencies.length > 0 || gateway.operations.length > 0) && (
-        <div className={styles.cardFooter}>
-          <div className={styles.currencies}>
-            {gateway.currencies.map((c) => (
-              <span key={c} className={styles.currencyBadge}>{c}</span>
-            ))}
-          </div>
-          <div className={styles.operations}>
-            {gateway.operations.map((op) => (
-              <span key={op} className={styles.opBadge}>{op}</span>
-            ))}
-          </div>
+          No gateways match your filters. Try adjusting your search or
+          filters.
         </div>
       )}
     </div>
