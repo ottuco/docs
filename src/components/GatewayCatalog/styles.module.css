@@ -233,6 +233,7 @@
   flex-wrap: wrap;
   gap: 12px;
   align-items: center;
+  min-height: 36px; /* reserves space for 1 row of tags so catalog doesn't shift */
 }
 
 .tag {
@@ -242,6 +243,7 @@
   height: 36px;
   padding: 0 16px;
   border-radius: 8px;
+  animation: tagFadeIn 0.18s ease;
   background: rgba(11, 130, 190, 0.12);
   border: 1px solid #0b82be;
   font-family: inherit;
@@ -284,6 +286,17 @@
 
 .tagClose:hover {
   opacity: 1;
+}
+
+@keyframes tagFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── Results count ──────────────────────────────────── */
@@ -1012,6 +1025,7 @@
 
   .tagsRow {
     gap: 8px;
+    min-height: 32px;
   }
 
   .tag {

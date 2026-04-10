@@ -843,29 +843,27 @@ export default function GatewayCatalog(): React.JSX.Element {
           />
         </div>
 
-        {/* Selected filter tags */}
-        {tags.length > 0 && (
-          <div className={styles.tagsRow}>
-            {tags.map((tag) => (
-              <span key={tag.key} className={styles.tag}>
-                <span className={styles.tagContent}>
-                  {tag.category && (
-                    <span className={styles.tagLabel}>{tag.category}</span>
-                  )}
-                  <span className={styles.tagValue}>{tag.value}</span>
-                </span>
-                <button
-                  type="button"
-                  className={styles.tagClose}
-                  onClick={tag.onRemove}
-                  aria-label={`Remove ${tag.value}`}
-                >
-                  <IconCloseCircle />
-                </button>
+        {/* Selected filter tags — always rendered to reserve layout space and prevent shift */}
+        <div className={styles.tagsRow} aria-live="polite">
+          {tags.map((tag) => (
+            <span key={tag.key} className={styles.tag}>
+              <span className={styles.tagContent}>
+                {tag.category && (
+                  <span className={styles.tagLabel}>{tag.category}</span>
+                )}
+                <span className={styles.tagValue}>{tag.value}</span>
               </span>
-            ))}
-          </div>
-        )}
+              <button
+                type="button"
+                className={styles.tagClose}
+                onClick={tag.onRemove}
+                aria-label={`Remove ${tag.value}`}
+              >
+                <IconCloseCircle />
+              </button>
+            </span>
+          ))}
+        </div>
       </div>
 
       <div className={styles.resultCount}>
