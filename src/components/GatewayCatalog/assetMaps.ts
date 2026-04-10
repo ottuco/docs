@@ -37,17 +37,14 @@ export const BANK_LOGOS: Record<string, string> = {
   Lesha: "lesha.png",
   // Oman
   "Bank Muscat": "bank-muscat.png",
-  "Bank Muscat.": "bank-muscat.png",
   NBO: "nbo.png",
   "Bank Dhofar": "bank-dhofar.png",
   "Bank Nizwa": "bank-nizwa.png",
   Alizz: "alizz.png",
   Sohar: "sohar.png",
-  "Sohar International Bank.": "sohar.png",
   Ahli: "ahli.png",
   // UAE & KSA
   "Al Rajhi": "al-rajhi.png",
-  "Al Rajhi Bank.": "al-rajhi.png",
   ADIB: "adib.png",
   "Abu Dhabi Islamic Bank": "adib.png",
   FAB: "fab.png",

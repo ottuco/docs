@@ -4,7 +4,6 @@ import gatewaysData from "@site/static/data/gateways.json";
 import type { Gateway, GatewayCategory } from "@site/src/types/gateway";
 import {
   BANK_LOGOS,
-  BRAND_ICONS,
   WALLET_ICONS,
   CATEGORY_LABELS,
   CATEGORY_ORDER,
@@ -293,10 +292,8 @@ function OperationBadges({ operations }: { operations: string[] }) {
 
 function HeaderBadges({
   wallets,
-  brands,
 }: {
   wallets: string[];
-  brands: string[];
 }) {
   const baseUrl = useBaseUrl("/img/brands/");
 
@@ -355,7 +352,6 @@ function GatewayCard({ gateway }: { gateway: Gateway }) {
         </div>
         <HeaderBadges
           wallets={gateway.digitalWallets}
-          brands={gateway.cardBrands}
         />
       </div>
 
@@ -541,7 +537,7 @@ function FilterDropdown({
         <IconChevronDown className={styles.dropdownArrow} />
       </button>
       {open && (
-        <div className={styles.dropdownPopup}>
+        <div className={styles.dropdownPopup} role="listbox">
           {searchable && (
             <input
               type="text"
