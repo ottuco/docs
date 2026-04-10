@@ -491,7 +491,8 @@
     "inquiryMinutes": 8,
     "operations": [
       "purchase",
-      "refund"
+      "refund",
+      "tokenization"
     ],
     "integrationType": "redirect",
     "category": "acquirer",
@@ -549,7 +550,8 @@
       "refund",
       "auth",
       "capture",
-      "void"
+      "void",
+      "tokenization"
     ],
     "integrationType": "redirect/sdk",
     "category": "gateway",
@@ -1867,7 +1869,8 @@
     "inquiryMinutes": 8,
     "operations": [
       "purchase",
-      "refund"
+      "refund",
+      "tokenization"
     ],
     "integrationType": "wallet",
     "category": "wallet",
