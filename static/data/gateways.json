@@ -64,7 +64,7 @@
     "integrationType": "sdk",
     "category": "gateway",
     "operationMode": "purchase",
-    "logo": "",
+    "logo": "aba_payway.jpg",
     "acceptedAt": [],
     "cardBrands": [
       "Visa",
@@ -221,7 +221,7 @@
     "integrationType": "wallet",
     "category": "wallet",
     "operationMode": "purchase",
-    "logo": "",
+    "logo": "bede.png",
     "acceptedAt": [],
     "cardBrands": [
       "Visa",
@@ -386,7 +386,7 @@
     "integrationType": "wallet",
     "category": "wallet",
     "operationMode": "purchase",
-    "logo": "",
+    "logo": "beyon_money.jpg",
     "acceptedAt": [],
     "cardBrands": [
       "Visa"
@@ -737,7 +737,7 @@
     "integrationType": "redirect",
     "category": "acquirer",
     "operationMode": "purchase",
-    "logo": "",
+    "logo": "fawry.png",
     "acceptedAt": [],
     "cardBrands": [
       "Visa",
@@ -769,7 +769,7 @@
     "integrationType": "redirect",
     "category": "processor",
     "operationMode": "purchase",
-    "logo": "",
+    "logo": "fiserv.svg",
     "acceptedAt": [],
     "cardBrands": [
       "Visa",
@@ -1046,7 +1046,7 @@
     "integrationType": "iata-sdk",
     "category": "specialty",
     "operationMode": "purchase",
-    "logo": "",
+    "logo": "ifg.png",
     "acceptedAt": [],
     "cardBrands": [
       "Visa",
@@ -1133,7 +1133,7 @@
     "integrationType": "redirect",
     "category": "aggregator",
     "operationMode": "purchase",
-    "logo": "",
+    "logo": "moyasar.svg",
     "acceptedAt": [],
     "cardBrands": [
       "Visa",
@@ -1566,7 +1566,7 @@
     "integrationType": "sdk",
     "category": "aggregator",
     "operationMode": "purchase",
-    "logo": "",
+    "logo": "payon.png",
     "acceptedAt": [],
     "cardBrands": [
       "Visa",
