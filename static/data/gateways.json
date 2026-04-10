@@ -401,7 +401,7 @@
   },
   {
     "slug": "cbk",
-    "name": "CBK",
+    "name": "Tpay",
     "countries": [
       "Kuwait"
     ],
@@ -413,15 +413,10 @@
       "purchase"
     ],
     "integrationType": "Redirect",
-    "category": "gateway",
+    "category": "wallet",
     "operationMode": "purchase",
-    "logo": "",
-    "acceptedAt": [
-      "STC Kuwait",
-      "Zain",
-      "Ooredoo",
-      "CBK"
-    ],
+    "logo": "tpay.svg",
+    "acceptedAt": [],
     "cardBrands": [
       "KNET"
     ],
