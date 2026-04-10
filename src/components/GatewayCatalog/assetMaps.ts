@@ -40,7 +40,6 @@ export const BANK_LOGOS: Record<string, string> = {
   "Bank Muscat.": "bank-muscat.png",
   NBO: "nbo.png",
   "Bank Dhofar": "bank-dhofar.png",
-  "Oman Arab Bank": "sohar.png",
   "Bank Nizwa": "bank-nizwa.png",
   Alizz: "alizz.png",
   Sohar: "sohar.png",
@@ -70,6 +69,7 @@ export const BANK_LOGOS: Record<string, string> = {
   "Habib Bank": "habib-bank.png",
   // Egypt
   Meeza: "meeza.png",
+  Tahweel: "tahweel.png",
 };
 
 /** Brand name → image filename in /img/brands/ */
@@ -102,7 +102,6 @@ export const NETWORK_LOGOS: Record<string, string> = {
   KNET: "/img/gateways/knet_icon.svg",
   Benefit: "/img/gateways/benefit_icon.svg",
   OmanNet: "/img/gateways/omannet_icon.svg",
-  NAPS: "/img/gateways/qpay.svg",
 };
 
 /** Currency code → flag image filename in /img/flags/ */

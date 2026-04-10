@@ -1,7 +1,8 @@
 /**
- * One-time script: merge ~/Downloads/pgs.csv into static/data/gateways.json
+ * Merge a gateways CSV into static/data/gateways.json.
  *
- * Run: npx tsx scripts/merge-gateway-csv.ts
+ * Usage: npx tsx scripts/merge-gateway-csv.ts <path-to-csv>
+ * Example: npx tsx scripts/merge-gateway-csv.ts ./data/pgs.csv
  */
 
 import { readFileSync, writeFileSync } from "fs";
