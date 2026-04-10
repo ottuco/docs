@@ -1040,7 +1040,6 @@
     ],
     "digitalWallets": [
       "Apple Pay",
-      "Samsung Pay",
       "STC Pay"
     ],
     "testCards": [
@@ -1182,7 +1181,6 @@
     ],
     "digitalWallets": [
       "Apple Pay",
-      "Samsung Pay",
       "STC Pay"
     ],
     "testCards": [
@@ -1343,7 +1341,6 @@
     "digitalWallets": [
       "Apple Pay",
       "Google Pay",
-      "Samsung Pay",
       "STC Pay"
     ],
     "testCards": [
@@ -1476,8 +1473,7 @@
     ],
     "digitalWallets": [
       "Apple Pay",
-      "Google Pay",
-      "Samsung Pay"
+      "Google Pay"
     ],
     "testCards": [
       {
@@ -2166,7 +2162,6 @@
     "digitalWallets": [
       "Apple Pay",
       "Google Pay",
-      "Samsung Pay",
       "STC Pay",
       "urpay"
     ],
