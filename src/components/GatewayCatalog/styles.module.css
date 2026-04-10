@@ -120,6 +120,7 @@
   width: 16px;
   height: 16px;
   flex-shrink: 0;
+  margin-left: auto;
   color: #4a4a4a;
   transition: transform 0.15s;
 }
