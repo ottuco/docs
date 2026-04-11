@@ -145,6 +145,7 @@ function BankRow({ banks }: { banks: string[] }) {
               type="button"
               className={styles.bankOverflow}
               onClick={() => setPopupOpen(!popupOpen)}
+              aria-label={`Show ${overflow} more banks`}
             >
               +{overflow}
             </button>
@@ -215,6 +216,7 @@ function NetworkRow({ networks }: { networks: string[] }) {
               type="button"
               className={styles.bankOverflow}
               onClick={() => setPopupOpen(!popupOpen)}
+              aria-label={`Show ${overflow} more networks`}
             >
               +{overflow}
             </button>
@@ -393,6 +395,7 @@ function HeaderBadges({
 
 function GatewayCard({ gateway }: { gateway: Gateway }) {
   const logoSrc = useBaseUrl(`/img/gateways/${gateway.logo}`);
+  const banks = filterBanks(gateway.acceptedAt);
 
   return (
     <div className={styles.card}>
@@ -419,14 +422,11 @@ function GatewayCard({ gateway }: { gateway: Gateway }) {
               </div>
             </div>
           </div>
-          {(() => {
-            const banks = filterBanks(gateway.acceptedAt);
-            return banks.length > 0 ? (
-              <BankRow banks={banks} />
-            ) : (
-              <NetworkRow networks={gateway.cardBrands} />
-            );
-          })()}
+          {banks.length > 0 ? (
+            <BankRow banks={banks} />
+          ) : (
+            <NetworkRow networks={gateway.cardBrands} />
+          )}
         </div>
         <HeaderBadges
           wallets={gateway.digitalWallets}
