@@ -515,6 +515,25 @@
   object-fit: contain;
 }
 
+/* Networks row logo: wider slot so wide brand logos (Visa, JCB, etc.)
+   can reach the full 28px height shared with bank logos. */
+.networkLogo {
+  width: 50px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.networkImg {
+  max-width: 50px;
+  max-height: 28px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
 /* Text fallback for banks without images */
 .bankPill {
   display: inline-flex;

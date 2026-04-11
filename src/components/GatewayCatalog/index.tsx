@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import useBaseUrl from "@docusaurus/useBaseUrl";
+import useBaseUrl, { useBaseUrlUtils } from "@docusaurus/useBaseUrl";
 import gatewaysData from "@site/static/data/gateways.json";
 import type { Gateway, GatewayCategory } from "@site/src/types/gateway";
 import {
@@ -88,6 +88,7 @@ function filterBanks(banks: string[]): string[] {
 // ── Sub-components ───────────────────────────────────
 
 const MAX_BANKS = 3;
+const MAX_NETWORKS = 3;
 
 function BankRow({ banks }: { banks: string[] }) {
   const [popupOpen, setPopupOpen] = useState(false);
@@ -144,12 +145,84 @@ function BankRow({ banks }: { banks: string[] }) {
               type="button"
               className={styles.bankOverflow}
               onClick={() => setPopupOpen(!popupOpen)}
+              aria-label={`Show ${overflow} more banks`}
             >
               +{overflow}
             </button>
             {popupOpen && (
               <div className={styles.bankPopup}>
                 {overflowBanks.map(renderBank)}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function NetworkRow({ networks }: { networks: string[] }) {
+  const [popupOpen, setPopupOpen] = useState(false);
+  const overflowRef = useRef<HTMLDivElement>(null);
+  const { withBaseUrl } = useBaseUrlUtils();
+
+  useEffect(() => {
+    if (!popupOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (overflowRef.current && !overflowRef.current.contains(e.target as Node)) {
+        setPopupOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [popupOpen]);
+
+  if (networks.length === 0) {
+    return <div className={styles.bankSectionPlaceholder} aria-hidden="true" />;
+  }
+
+  const shown = networks.slice(0, MAX_NETWORKS);
+  const overflow = networks.length - MAX_NETWORKS;
+  const overflowNetworks = networks.slice(MAX_NETWORKS);
+
+  function renderNetwork(network: string) {
+    const logoPath = NETWORK_LOGOS[network];
+    return logoPath ? (
+      <div key={network} className={styles.networkLogo}>
+        <img
+          src={withBaseUrl(logoPath)}
+          alt={network}
+          className={styles.networkImg}
+          loading="lazy"
+        />
+      </div>
+    ) : (
+      <span key={network} className={styles.bankPill}>
+        {network}
+      </span>
+    );
+  }
+
+  return (
+    <div className={styles.partnerBanks}>
+      <div className={styles.sectionLabel}>Networks:</div>
+      <div className={styles.bankRow}>
+        <div className={styles.bankLogoGroup}>
+          {shown.map(renderNetwork)}
+        </div>
+        {overflow > 0 && (
+          <div className={styles.bankOverflowWrap} ref={overflowRef}>
+            <button
+              type="button"
+              className={styles.bankOverflow}
+              onClick={() => setPopupOpen(!popupOpen)}
+              aria-label={`Show ${overflow} more networks`}
+            >
+              +{overflow}
+            </button>
+            {popupOpen && (
+              <div className={styles.bankPopup}>
+                {overflowNetworks.map(renderNetwork)}
               </div>
             )}
           </div>
@@ -322,6 +395,7 @@ function HeaderBadges({
 
 function GatewayCard({ gateway }: { gateway: Gateway }) {
   const logoSrc = useBaseUrl(`/img/gateways/${gateway.logo}`);
+  const banks = filterBanks(gateway.acceptedAt);
 
   return (
     <div className={styles.card}>
@@ -348,7 +422,11 @@ function GatewayCard({ gateway }: { gateway: Gateway }) {
               </div>
             </div>
           </div>
-          <BankRow banks={filterBanks(gateway.acceptedAt)} />
+          {banks.length > 0 ? (
+            <BankRow banks={banks} />
+          ) : (
+            <NetworkRow networks={gateway.cardBrands} />
+          )}
         </div>
         <HeaderBadges
           wallets={gateway.digitalWallets}
