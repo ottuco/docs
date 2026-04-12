@@ -460,8 +460,24 @@ function applySecurityOverride(spec: any, securityFile: string): void {
     spec.components.securitySchemes = config.schemes;
   }
 
-  // Remap per-operation security arrays
+  // Strip explicit Authorization header parameters from all operations.
+  // These are redundant with the security schemes and show up as a required
+  // field in the API caller, which is confusing.
   const paths = spec.paths || {};
+  for (const pathItem of Object.values<any>(paths)) {
+    for (const method of ["get", "post", "put", "patch", "delete", "options", "head"]) {
+      const op = pathItem[method];
+      if (!op) continue;
+      if (Array.isArray(op.parameters)) {
+        op.parameters = op.parameters.filter(
+          (p: any) => !(p.in === "header" && p.name === "Authorization")
+        );
+        if (op.parameters.length === 0) delete op.parameters;
+      }
+    }
+  }
+
+  // Remap per-operation security arrays
   for (const pathItem of Object.values<any>(paths)) {
     for (const method of ["get", "post", "put", "patch", "delete", "options", "head"]) {
       const op = pathItem[method];
