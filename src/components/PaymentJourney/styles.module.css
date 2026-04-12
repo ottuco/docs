@@ -67,7 +67,9 @@
   background: #f27e20;
   color: #fff;
   border: 2px solid #f27e20;
-  box-shadow: 0 0 0 4px var(--ifm-background-color), 0 0 20px rgba(242, 126, 32, 0.35);
+  box-shadow:
+    0 0 0 4px var(--ifm-background-color),
+    0 0 20px rgba(242, 126, 32, 0.35);
   animation: nodePulse 2s ease-in-out infinite;
 }
 
@@ -78,8 +80,17 @@
 }
 
 @keyframes nodePulse {
-  0%, 100% { box-shadow: 0 0 0 4px var(--ifm-background-color), 0 0 16px rgba(242, 126, 32, 0.25); }
-  50% { box-shadow: 0 0 0 4px var(--ifm-background-color), 0 0 28px rgba(242, 126, 32, 0.45); }
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 4px var(--ifm-background-color),
+      0 0 16px rgba(242, 126, 32, 0.25);
+  }
+  50% {
+    box-shadow:
+      0 0 0 4px var(--ifm-background-color),
+      0 0 28px rgba(242, 126, 32, 0.45);
+  }
 }
 
 /* ── Card surface ────────────────────────────────────── */
@@ -93,7 +104,9 @@
 
 .cardActive {
   border-color: rgba(242, 126, 32, 0.4);
-  box-shadow: 0 4px 24px rgba(242, 126, 32, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 4px 24px rgba(242, 126, 32, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .cardDone {
@@ -367,7 +380,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ── SDK container ───────────────────────────────────── */
@@ -431,7 +446,11 @@
   margin: 0 0 32px;
   border: 1px solid var(--ifm-global-border-color);
   border-radius: 16px;
-  background: linear-gradient(135deg, var(--ifm-background-color) 0%, var(--ifm-background-surface-color) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--ifm-background-color) 0%,
+    var(--ifm-background-surface-color) 100%
+  );
   position: relative;
   overflow: hidden;
 }
@@ -443,7 +462,11 @@
   right: -20%;
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(242, 126, 32, 0.06) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(242, 126, 32, 0.06) 0%,
+    transparent 70%
+  );
   pointer-events: none;
 }
 
@@ -472,7 +495,11 @@
   padding: 48px 24px;
   border: 1px solid var(--ifm-global-border-color);
   border-radius: 16px;
-  background: linear-gradient(135deg, var(--ifm-background-color) 0%, var(--ifm-background-surface-color) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--ifm-background-color) 0%,
+    var(--ifm-background-surface-color) 100%
+  );
   margin-top: 32px;
 }
 
@@ -639,7 +666,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 42px;
+  font-family: "Poppins", sans-serif;
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--ifm-heading-color);
   border: 3px solid var(--ifm-global-border-color);
   background: var(--ifm-background-surface-color);
   transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
@@ -648,7 +679,9 @@
 
 .carouselFlagActive {
   border-color: #f27e20;
-  box-shadow: 0 0 0 3px rgba(242, 126, 32, 0.15), 0 4px 16px rgba(242, 126, 32, 0.12);
+  box-shadow:
+    0 0 0 3px rgba(242, 126, 32, 0.15),
+    0 4px 16px rgba(242, 126, 32, 0.12);
   transform: scale(1.05);
 }
 
@@ -740,7 +773,9 @@
 
 [data-theme="dark"] .cardActive {
   border-color: rgba(242, 126, 32, 0.5);
-  box-shadow: 0 4px 24px rgba(242, 126, 32, 0.12), 0 1px 4px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 4px 24px rgba(242, 126, 32, 0.12),
+    0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 [data-theme="dark"] .hero {
@@ -791,7 +826,9 @@
 
 [data-theme="dark"] .carouselFlagActive {
   border-color: #f27e20;
-  box-shadow: 0 0 0 3px rgba(242, 126, 32, 0.2), 0 4px 16px rgba(242, 126, 32, 0.15);
+  box-shadow:
+    0 0 0 3px rgba(242, 126, 32, 0.2),
+    0 4px 16px rgba(242, 126, 32, 0.15);
 }
 
 [data-theme="dark"] .carouselCurrencyBadge {
@@ -804,10 +841,21 @@
 }
 
 [data-theme="dark"] .nodeActive {
-  box-shadow: 0 0 0 4px #0f1117, 0 0 20px rgba(242, 126, 32, 0.4);
+  box-shadow:
+    0 0 0 4px #0f1117,
+    0 0 20px rgba(242, 126, 32, 0.4);
 }
 
 @keyframes nodePulse {
-  0%, 100% { box-shadow: 0 0 0 4px var(--ifm-background-color), 0 0 16px rgba(242, 126, 32, 0.25); }
-  50% { box-shadow: 0 0 0 4px var(--ifm-background-color), 0 0 28px rgba(242, 126, 32, 0.45); }
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 4px var(--ifm-background-color),
+      0 0 16px rgba(242, 126, 32, 0.25);
+  }
+  50% {
+    box-shadow:
+      0 0 0 4px var(--ifm-background-color),
+      0 0 28px rgba(242, 126, 32, 0.45);
+  }
 }

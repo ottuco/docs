@@ -220,7 +220,7 @@ function CountryCarousel({ selectedIndex, onSelect, onConfirm }: {
                 onClick={() => offset !== 0 && onSelect(idx)}
               >
                 <div className={`${styles.carouselFlag} ${offset === 0 ? styles.carouselFlagActive : ""}`}>
-                  {c.flag}
+                  {c.code}
                 </div>
                 {offset === 0 && (
                   <>
