@@ -65,7 +65,23 @@ To ensure a smooth redirection of the payer back to the designated [redirect_url
 -[ status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) 201, the customer will be redirected to Ottu payment summary page.\
 -[ status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) any other code, the customer will be redirected to Ottu payment summary page. For this particular case, Ottu can notify on the email, when Enable webhook notifications? Activated
 
-<figure><img src="/img/webhooks/payment-redirect-diagram.png" alt="Payment redirect behavior based on webhook status code" /><figcaption></figcaption></figure>
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
+flowchart TD
+    M([Merchant Server]) -->|1. Sends payment details| OTTU[Ottu Checkout API]
+    OTTU -->|2. Returns processed information| M
+    M -->|3. Presents checkout UI| CUST([Customer])
+    CUST -->|4. Submits payment| OTTU
+    OTTU -->|5. Processes payment| PG([Payment Gateway])
+    PG -->|6. Returns payment result| OTTU
+    OTTU -->|7. POSTs result to webhook_url| WEBHOOK[Merchant webhook_url]
+    WEBHOOK -->|HTTP 200| R200[Redirect to merchant redirect_url]
+    WEBHOOK -->|HTTP 201| RSUM[Ottu payment summary page]
+    WEBHOOK -->|Other status| RSUM
+
+    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
+    class OTTU accent
+```
 
 ## Payload example (paid)
 

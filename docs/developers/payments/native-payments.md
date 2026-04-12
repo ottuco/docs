@@ -76,7 +76,7 @@ graph LR
     C -- No --> E[Log]
     D --> F[Inquiry]
 
-    classDef accent fill:#1983BC,color:#FFFFFF,stroke:#302F37
+    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
     class B accent
 ```
 
@@ -95,7 +95,7 @@ graph LR
     C --> B
     B --> A
 
-    classDef accent fill:#1983BC,color:#FFFFFF,stroke:#302F37
+    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
     class C accent
 ```
 

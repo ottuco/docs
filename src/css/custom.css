@@ -195,15 +195,26 @@ html[data-theme="dark"] {
   margin-bottom: 0;
 }
 
+
 /* Bold text — semibold (600) instead of heavy bold (700) for inline descriptions */
 .markdown strong {
   font-weight: 600;
 }
 
-/* Table cells: align content to top */
+/* Table cells: align content to top, with generous row spacing */
 .markdown table td,
 .markdown table th {
   vertical-align: top;
+  line-height: 1.6;
+  font-size: 14px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+/* Explicitly pin spans inside table cells to 14px in case a component or plugin
+   injects a span with its own font-size that would otherwise override the td value. */
+.markdown table td span {
+  font-size: 14px;
 }
 
 /* Checkout SDK: align Payment Options Display Mode images like old docs */
@@ -218,6 +229,11 @@ html[data-theme="dark"] {
   margin: 0;
   flex: 1 1 240px;
   max-width: 320px;
+}
+
+/* Center figure caption within each figure */
+.checkout-sdk-image-row figure figcaption {
+  text-align: center;
 }
 
 .checkout-sdk-image-row img {
@@ -237,10 +253,10 @@ html[data-theme="dark"] {
   display: block;
 }
 
-/* Checkout SDK page images — 40% smaller + centered */
+/* Checkout SDK page images — slightly reduced + centered */
 .theme-doc-markdown figure img[src*="checkout-sdk"],
 .theme-doc-markdown figure img[src*="googleusercontent"] {
-  max-width: 60%;
+  max-width: 85%;
   height: auto;
   display: block;
   margin: 0 auto;
@@ -327,10 +343,13 @@ html[data-theme="dark"] {
     flex: 0 1 auto;
   }
 
-  /* MCP button keeps its size */
+  /* MCP button keeps its size.
+     !important is required: the search plugin loads its own CSS after custom.css
+     and sets position:absolute on its CSS-module class (.navbarSearchContainer_*),
+     which would otherwise win the cascade and overlay the MCP button. */
   .navbar__items--right > * {
     flex-shrink: 0;
-    position: static;
+    position: static !important;
   }
 
   /* Hide GitHub and Ottu.com — reachable via hamburger sidebar */
@@ -530,7 +549,7 @@ html[data-theme="dark"] {
 /* Info panel — dark */
 [data-theme="dark"] .alert--info {
   --ifm-alert-background-color: #0f1f2e;
-  --ifm-alert-border-color: #1983bc;
+  --ifm-alert-border-color: #0b82be;
   color: #e5e7eb;
 }
 
@@ -754,10 +773,24 @@ html[data-theme="dark"] {
   padding: 4px;
 }
 
+/* Inline code in table cells — compact padding so wrapped lines don't spread apart */
+.markdown table td code,
+.markdown table th code {
+  padding: 2px 6px;
+  line-height: 1.4;
+  display: inline;
+}
+
 /* Inline code dark mode */
 [data-theme="dark"] .markdown code {
   background-color: #1e2939;
   color: #d1d5dc;
+}
+
+/* Remove gray background from the API explorer code block. target the pre directly. */
+.openapi-explorer__code-block pre,
+.openapi-explorer__code-block code {
+  background: transparent !important;
 }
 
 /* Premium code blocks — constrained width, subtle borders */
@@ -799,28 +832,120 @@ html[data-theme="dark"] {
   color: #fca5a5;
 }
 
-/* Prevent markdown font overrides from breaking Mermaid node text sizing.
-   Mermaid calculates node widths using its default font before CSS applies.
-   If a custom font (Poppins) is inherited, text overflows the pre-sized nodes. */
+/* ── Mermaid: font isolation ──────────────────────────────────────────────
+   Mermaid pre-sizes nodes using its default font. Poppins would overflow them. */
 .markdown .docusaurus-mermaid-container,
 .markdown .docusaurus-mermaid-container * {
   font-family: "trebuchet ms", verdana, arial, sans-serif;
 }
 
+/* ── Mermaid: node label text — light mode ───────────────────────────────
+   var(--ifm-font-color-base) cascades into SVG foreignObject and overrides
+   Mermaid's primaryTextColor. Pin to dark text on #FAFAFA nodes. */
+.docusaurus-mermaid-container .nodeLabel,
+.docusaurus-mermaid-container .nodeLabel p {
+  color: #302f37 !important;
+}
+/* Accent nodes: white text on #0B82BE — .node.accent gives (0,4,0) specificity,
+   beating the (0,2,0) rule above even when both carry !important. */
+.docusaurus-mermaid-container .node.accent .nodeLabel,
+.docusaurus-mermaid-container .node.accent .nodeLabel p,
+.docusaurus-mermaid-container .node.accent .nodeLabel span {
+  color: #ffffff !important;
+}
+/* SVG <text> element fallback */
+.docusaurus-mermaid-container text {
+  fill: #302f37 !important;
+}
+.docusaurus-mermaid-container .node.accent text,
+.docusaurus-mermaid-container .node.accent tspan {
+  fill: #ffffff !important;
+}
+
+/* ── Mermaid: edge labels — both modes ───────────────────────────────────
+   1. Hide the background <rect> that Mermaid draws behind each label.
+      The rect lives as a direct child of <g class="label">, which is a child
+      of <g class="edgeLabel"> — so target all three possible selector forms.
+   2. Pin text to neutral so it never picks up --ifm-link-color (orange). */
+.docusaurus-mermaid-container .edgeLabel rect,
+.docusaurus-mermaid-container .edgeLabels rect,
+.docusaurus-mermaid-container .label rect {
+  fill: transparent !important;
+}
+.docusaurus-mermaid-container .edgeLabel div,
+.docusaurus-mermaid-container .edgeLabel p,
+.docusaurus-mermaid-container .edgeLabel span {
+  color: #302f37 !important;
+}
+
+/* ── Mermaid: dark mode overrides ────────────────────────────────────────
+   %%{init}%% blocks use "theme":"base" with light fills (#FAFAFA). Those look
+   stark on a dark background and text becomes invisible. Swap to dark surface,
+   use light text, keep accent blue, lighten arrows. */
+html[data-theme="dark"] .docusaurus-mermaid-container .node rect,
+html[data-theme="dark"] .docusaurus-mermaid-container .node polygon,
+html[data-theme="dark"] .docusaurus-mermaid-container .node circle,
+html[data-theme="dark"] .docusaurus-mermaid-container .node ellipse,
+html[data-theme="dark"] .docusaurus-mermaid-container .node path {
+  fill: #1e2939 !important;
+  stroke: #4a5568 !important;
+}
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent rect,
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent polygon,
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent circle,
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent ellipse,
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent path {
+  fill: #0b82be !important;
+  stroke: #0b82be !important;
+}
+html[data-theme="dark"] .docusaurus-mermaid-container .nodeLabel,
+html[data-theme="dark"] .docusaurus-mermaid-container .nodeLabel p {
+  color: #e5e7eb !important;
+}
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent .nodeLabel,
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent .nodeLabel p,
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent .nodeLabel span {
+  color: #ffffff !important;
+}
+html[data-theme="dark"] .docusaurus-mermaid-container text {
+  fill: #e5e7eb !important;
+}
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent text,
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent tspan {
+  fill: #ffffff !important;
+}
+html[data-theme="dark"] .docusaurus-mermaid-container .edgeLabel div,
+html[data-theme="dark"] .docusaurus-mermaid-container .edgeLabel p,
+html[data-theme="dark"] .docusaurus-mermaid-container .edgeLabel span {
+  color: #9ca3af !important;
+}
+html[data-theme="dark"] .docusaurus-mermaid-container .flowchart-link {
+  stroke: #6b7280 !important;
+}
+html[data-theme="dark"] .docusaurus-mermaid-container marker path {
+  fill: #6b7280 !important;
+  stroke: #6b7280 !important;
+}
+
 /* Table styling — from Figma */
 .markdown table thead tr {
   background-color: var(--ifm-background-surface-color);
-  border-bottom-width: 1px;
+  border-bottom-width: 1px; /* overrides Infima's default 2px header border */
 }
-table tr:nth-child(2n) {
+
+/* All body rows: white background — overrides Infima's zebra stripe on odd rows */
+.markdown table tbody tr,
+.markdown table tbody tr:nth-child(2n) {
   background-color: var(--ifm-background-color) !important;
 }
 
 .markdown table thead th {
+  font-size: 16px;
   font-weight: 600;
   color: var(--ifm-heading-color);
-  /* Figma uses left-aligned text for all table cells */
   text-align: left;
+  opacity: 1;
+  border-bottom-width: 1px; /* match body row border thickness */
 }
 
 /* OpenAPI response status code tabs — from Figma */
@@ -864,8 +989,24 @@ table tr:nth-child(2n) {
   color: var(--ifm-font-color-base);
 } */
 
-/* TOC (table of contents) sidebar — Figma: 14px */
-/* .table-of-contents__link {
+/* TOC (table of contents) sidebar — narrower, Figma-matched styles */
+@media (min-width: 997px) {
+  .theme-doc-toc-desktop {
+    max-width: 185px;
+  }
+
+  .col--3:has(.theme-doc-toc-desktop) {
+    flex: 0 0 185px !important;
+    max-width: 185px !important;
+  }
+
+  /* Let main content column grow into the space freed by narrower TOC */
+  .row:has(.theme-doc-toc-desktop) > [class*="docItemCol"] {
+    max-width: none !important;
+  }
+}
+
+.table-of-contents__link {
   font-size: 14px;
   font-weight: 400;
   color: #4a4a4a;
@@ -878,7 +1019,7 @@ table tr:nth-child(2n) {
 .table-of-contents__link--active {
   color: #f27e20;
   font-weight: 500;
-} */
+}
 
 /* Markdown source plugin — dropdown in article headers */
 article .markdown header {

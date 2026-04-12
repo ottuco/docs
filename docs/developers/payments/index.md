@@ -46,7 +46,7 @@ flowchart LR
     CUST -->|Pays| API
     API -->|Result via webhook| M
 
-    classDef accent fill:#1983BC,color:#FFFFFF,stroke:#302F37
+    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
     class API accent
 ```
 

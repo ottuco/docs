@@ -62,7 +62,7 @@ stateDiagram-v2
     ManualActionRequired --> Done: Retry succeeds
     ManualActionRequired --> Expired: Expiration time passes
 
-    classDef accent fill:#1983BC,stroke:#1983BC,color:#fff
+    classDef accent fill:#0B82BE,stroke:#0B82BE,color:#fff
     classDef danger fill:#ED2833,stroke:#ED2833,color:#fff
     class Approved accent
     class ManualActionRequired danger

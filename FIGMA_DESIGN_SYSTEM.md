@@ -108,7 +108,7 @@ Colors communicate **responsibility**, not aesthetics:
 
 | Role | Hex | Meaning |
 |------|-----|---------|
-| Blue | `#1983BC` | Ottu services, APIs, infrastructure |
+| Blue | `#0B82BE` | Ottu services, APIs, infrastructure |
 | Orange | `#F57D2D` | Core execution, orchestration (use sparingly, 1–3 nodes) |
 | Red | `#ED2833` | Security, PCI boundaries, encryption, failure |
 | Pink | `#F093BC` | External actors, merchant UI, banks, third parties |
@@ -309,7 +309,7 @@ Located in `static/img/`:
 |-------|---------|-------|
 | Global tokens & overrides | `src/css/custom.css` | Site-wide |
 | Component styles | `*.module.css` alongside component | Scoped per component |
-| Schema styles | `src/theme/SchemaItem/_SchemaItem.scss` | SCSS with nesting |
+| Schema styles | `src/css/openapi.css` | CSS with nesting |
 
 ### Dark Mode
 

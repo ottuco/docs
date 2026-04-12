@@ -227,7 +227,7 @@ ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
 
       /* Buttons */
       font-family: Poppins;
-      font-size: 16px;
+      font-size: 12px;
       font-style: normal;
       font-weight: 500;
       line-height: normal;
@@ -368,6 +368,20 @@ ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
     line-height: normal;
     text-transform: uppercase;
   }
+
+  /* Override plugin's _SchemaItem.scss defaults (loaded earlier via getClientModules).
+   Wins due to higher specificity: .openapi-schema__container .openapi-schema__nullable
+   is a two-class selector (0,2,0) vs the plugin's flat .openapi-schema__nullable (0,1,0). */
+  .openapi-schema__nullable {
+    color: #0b82be;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .openapi-schema__deprecated {
+    font-size: 16px;
+    font-weight: 500;
+  }
 }
 
 [data-theme="dark"] .openapi-schema__container {
@@ -384,7 +398,7 @@ ul .openapi-schema__list-item {
   p {
     color: #4a4a4a;
 
-    /* Basic text */
+    /* Description text */
     font-family: Poppins;
     font-size: 16px;
     font-style: normal;
@@ -431,6 +445,16 @@ ul .openapi-schema__list-item {
   display: none;
 }
 
+/* API Explorer right panel — section summary titles: 12px to match Figma small text */
+.openapi-explorer__details-summary {
+  font-size: 12px;
+}
+
+/* Schema list items — spacing between property rows (order_no, session_id, etc.) */
+.openapi-schema__list-item {
+  padding-bottom: 12px !important;
+}
+
 /* Language selector dropdown (replaces horizontal carousel) */
 .openapi-tabs__code-dropdown {
   display: block;
@@ -455,4 +479,24 @@ ul .openapi-schema__list-item {
 .openapi-right-panel__container {
   overflow-y: inherit !important;
   position: inherit !important;
+}
+
+/* Links in OpenAPI field descriptions — use Ottu orange, underline matches text color */
+.openapi-schema__list-item a,
+.openapi-schema__container a,
+.openapi-markdown__details a {
+  color: var(--ifm-link-color);
+  text-decoration-color: currentColor;
+}
+
+.openapi-schema__list-item a:hover,
+.openapi-schema__container a:hover,
+.openapi-markdown__details a:hover {
+  color: var(--ifm-link-hover-color);
+}
+
+[data-theme="dark"] .openapi-schema__list-item a,
+[data-theme="dark"] .openapi-schema__container a,
+[data-theme="dark"] .openapi-markdown__details a {
+  color: var(--ifm-link-color);
 }
