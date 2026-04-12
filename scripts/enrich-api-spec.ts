@@ -85,6 +85,12 @@ interface OperationsFile {
   operations: Record<string, OperationEnrichment>;
 }
 
+interface SecurityConfig {
+  schemes: Record<string, any>;
+  mapping?: Record<string, string | null>;
+  force_all_schemes?: boolean;
+}
+
 interface SchemaPropertyOverride {
   description?: string;
   properties?: Record<string, SchemaPropertyOverride | string>;
@@ -443,6 +449,47 @@ function enrichSchemas(
   return count;
 }
 
+// ── Security Scheme Override ─────────────────────────────────────────────────
+
+function applySecurityOverride(spec: any, securityFile: string): void {
+  const config = loadYaml<SecurityConfig>(securityFile);
+  if (!config) return;
+
+  // Replace securitySchemes
+  if (spec.components) {
+    spec.components.securitySchemes = config.schemes;
+  }
+
+  // Remap per-operation security arrays
+  const paths = spec.paths || {};
+  for (const pathItem of Object.values<any>(paths)) {
+    for (const method of ["get", "post", "put", "patch", "delete", "options", "head"]) {
+      const op = pathItem[method];
+      if (!op?.security) continue;
+
+      if (config.force_all_schemes) {
+        op.security = Object.keys(config.schemes).map((name) => ({ [name]: [] }));
+      } else if (config.mapping) {
+        const seen = new Set<string>();
+        const remapped: Array<Record<string, []>> = [];
+
+        for (const secEntry of op.security) {
+          for (const oldName of Object.keys(secEntry)) {
+            const newName = config.mapping[oldName];
+            if (newName == null) continue; // null = drop
+            if (!seen.has(newName)) {
+              seen.add(newName);
+              remapped.push({ [newName]: [] });
+            }
+          }
+        }
+
+        op.security = remapped;
+      }
+    }
+  }
+}
+
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 function processSource(name: string, config: SourceConfig): void {
@@ -500,11 +547,18 @@ function processSource(name: string, config: SourceConfig): void {
   const schemasCount = enrichSchemas(spec, schemasDir, sharedFields);
   info(`Overrode ${schemasCount} schema field descriptions`);
 
-  // 8. Resolve template variables in the entire spec
+  // 8. Apply security scheme overrides
+  const securityFile = path.join(enrichmentsDir, "_security.yaml");
+  if (fs.existsSync(securityFile)) {
+    info("Applying security scheme overrides...");
+    applySecurityOverride(spec, securityFile);
+  }
+
+  // 9. Resolve template variables in the entire spec
   info("Resolving template variables...");
   const enrichedSpec = resolveVariablesDeep(spec, variables);
 
-  // 9. Write output
+  // 10. Write output
   info("Writing enriched spec...");
   const output = yaml.dump(enrichedSpec, {
     lineWidth: -1,
