@@ -845,17 +845,3 @@
     0 0 0 4px #0f1117,
     0 0 20px rgba(242, 126, 32, 0.4);
 }
-
-@keyframes nodePulse {
-  0%,
-  100% {
-    box-shadow:
-      0 0 0 4px var(--ifm-background-color),
-      0 0 16px rgba(242, 126, 32, 0.25);
-  }
-  50% {
-    box-shadow:
-      0 0 0 4px var(--ifm-background-color),
-      0 0 28px rgba(242, 126, 32, 0.45);
-  }
-}

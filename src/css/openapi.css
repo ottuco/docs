@@ -341,7 +341,7 @@ ul.openapi-tabs__mime-list-container.tabs.openapi-tabs__mime {
 .openapi-schema__container {
   /* Allow badges (required, nullable, deprecated) to wrap on narrow screens
      instead of overflowing the viewport edge */
-  display: inline-flex;
+  display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 2px 4px;
