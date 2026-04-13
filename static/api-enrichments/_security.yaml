@@ -2,8 +2,6 @@
 #
 # Replaces the raw spec's securitySchemes and remaps all per-operation
 # security arrays to match. This survives re-fetches of Ottu_API.yaml.
-#
-# mapping: old scheme name → new name, or null to drop it entirely.
 
 schemes:
   Basic Auth:
