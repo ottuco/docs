@@ -18,7 +18,9 @@
   --ottu-sidebar-text-muted: #8e8e93;
   --ottu-sidebar-tree-border: #dadada;
   --ottu-sidebar-tree-border-strong: #1a1a1a;
-  --ottu-sidebar-accent: #f77d1a;
+  /* Accent matches --ifm-color-primary (#f27e20 = rgb(242,126,32)),
+     keeping the active-leaf text/border in sync with the accent bg. */
+  --ottu-sidebar-accent: #f27e20;
   --ottu-sidebar-accent-bg: rgba(242, 126, 32, 0.08);
   --ottu-sidebar-hover-bg: rgba(48, 47, 55, 0.04);
 
@@ -34,7 +36,7 @@ html[data-theme="dark"] {
   --ottu-sidebar-text-muted: #c7cad1;
   --ottu-sidebar-tree-border: #2a3140;
   --ottu-sidebar-tree-border-strong: #ffffff;
-  --ottu-sidebar-accent-bg: rgba(247, 125, 26, 0.12);
+  --ottu-sidebar-accent-bg: rgba(242, 126, 32, 0.12);
   --ottu-sidebar-hover-bg: rgba(255, 255, 255, 0.04);
 }
 
@@ -78,13 +80,6 @@ html[data-theme="dark"] {
   min-height: 36px;
   padding: 0;
   background: transparent;
-
-  /* if needed to add carret to left of Developers */
-  /* display: flex;
-  flex-direction: row-reverse;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 8px; */
 }
 
 .theme-doc-sidebar-item-category-level-1
@@ -255,9 +250,17 @@ html[data-theme="dark"] {
 }
 
 .menu__link--sublist-caret::after {
-  background-size: 16px 16px !important;
+  background-size: 16px 16px;
   transition: transform 0.2s ease;
 }
+
+/*
+ * `!important` here defeats Infima's own
+ * `.menu__link--sublist-caret::after { transform: rotate(...) }`
+ * shipped at the same selector specificity. Without it, source-order
+ * decides the winner and a Docusaurus theme-classic update could
+ * silently flip the caret direction.
+ */
 
 .menu__list-item--collapsed
   > .menu__list-item-collapsible
