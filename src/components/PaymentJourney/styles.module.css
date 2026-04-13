@@ -659,7 +659,7 @@
   user-select: none;
 }
 
-.carouselFlag {
+.carouselCountryCode {
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -677,7 +677,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.carouselFlagActive {
+.carouselCountryCodeActive {
   border-color: #f27e20;
   box-shadow:
     0 0 0 3px rgba(242, 126, 32, 0.15),
@@ -751,7 +751,7 @@
     font-size: 22px;
   }
 
-  .carouselFlag {
+  .carouselCountryCode {
     width: 64px;
     height: 64px;
     font-size: 34px;
@@ -818,13 +818,13 @@
   color: #f27e20;
 }
 
-[data-theme="dark"] .carouselFlag {
+[data-theme="dark"] .carouselCountryCode {
   background: #171a21;
   border-color: #1e2939;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-[data-theme="dark"] .carouselFlagActive {
+[data-theme="dark"] .carouselCountryCodeActive {
   border-color: #f27e20;
   box-shadow:
     0 0 0 3px rgba(242, 126, 32, 0.2),
