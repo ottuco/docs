@@ -839,6 +839,11 @@ html[data-theme="dark"] {
   font-family: "trebuchet ms", verdana, arial, sans-serif;
 }
 
+/* ── Mermaid: spacing — give diagrams breathing room from surrounding text */
+.markdown .docusaurus-mermaid-container {
+  margin-bottom: 24px;
+}
+
 /* ── Mermaid: node label text — light mode ───────────────────────────────
    var(--ifm-font-color-base) cascades into SVG foreignObject and overrides
    Mermaid's primaryTextColor. Pin to dark text on #FAFAFA nodes. */
@@ -925,6 +930,19 @@ html[data-theme="dark"] .docusaurus-mermaid-container .flowchart-link {
 html[data-theme="dark"] .docusaurus-mermaid-container marker path {
   fill: #6b7280 !important;
   stroke: #6b7280 !important;
+}
+
+/* ── Task list (GFM checkboxes) — vertically center checkbox with text ──── */
+.markdown .contains-task-list .task-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+}
+
+.markdown .contains-task-list .task-list-item input[type="checkbox"] {
+  flex-shrink: 0;
+  margin: 0;
 }
 
 /* Table styling — from Figma */
