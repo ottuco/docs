@@ -1,0 +1,45 @@
+---
+title: Search & Filter Payments
+sidebar_label: Search & Filter
+---
+
+import StepGuide from "@site/src/components/StepGuide";
+
+# Search & Filter Payments
+
+This guide explains how to display and filter payment links within the Ottu Dashboard. By following these steps, you can view payment links created by a specific user or processed through a specific [payment gateway](/business/payments/gateways).
+
+## Step-by-Step Instructions
+
+<StepGuide steps={[
+  {
+    title: "Access the Transactions Section",
+    description: <>From the Ottu Dashboard, open the <strong>Payment Request</strong> <a href="/business/plugins">plugin</a> and go to the <strong>Transactions</strong> subsection. All transactions performed via the Payment Request plugin are listed here.</>,
+  },
+  {
+    title: "Add Payment Link Headers",
+    description: <>To display payment links and gateway names in the transactions table:<br /><br />1. Navigate to the <strong>Table Headers</strong> subsection under <strong>Settings</strong>.<br />2. From the available headers, search for <strong>Payment URL</strong> and add it to the selected headers.<br />3. Also add <strong>Gateway Name</strong> to the selected headers.<br /><br />When you return to the <strong>Transactions</strong> table, the <strong>Payment URL</strong> and <strong>Gateway Name</strong> columns will be visible.<br /><br /><div className="alert alert--info" role="alert">You can customize which columns appear in any transaction table. See <a href="/business/payment-management/transaction-insights#proxy-fields">Proxy Fields</a> for details on managing table headers.</div></>,
+  },
+  {
+    title: "Filter by User",
+    description: <>1. Click the <strong>Filter</strong> option.<br />2. In the <strong>Created By</strong> field, enter the username.<br />3. Click <strong>Search</strong>.<br /><br />All payment links created by the specified user are displayed.</>,
+  },
+  {
+    title: "Filter by Payment Gateway",
+    description: <>1. In the filter options, specify the desired <strong>Payment Gateway</strong>.<br />2. Click <strong>Search</strong>.<br /><br />All payment links associated with the selected payment gateway are displayed.</>,
+  },
+]} nextSectionId="video-demonstration" />
+
+## Video Demonstration
+
+A tutorial video is available to provide a visual walkthrough of the filtering process:
+
+<a href="https://drive.google.com/file/d/15hT4UKNmbXPppT6CdjwS0Hwi3cw_96mA/view?usp=sharing" target="_blank">Watch the video tutorial</a>
+
+---
+
+## What's Next?
+
+- [Transaction Insights](/business/payment-management/transaction-insights) -- Explore your transaction data and dashboard charts
+- [Transaction States](/business/payment-management/transaction-states) -- Understand the lifecycle of a payment
+- [Plugins](/business/plugins) -- Learn about Payment Request, E-Commerce, and Bulk plugins
