@@ -34,7 +34,7 @@ Process payments directly when you manage your own UI — Apple Pay buttons, Goo
 
 Test your integration with sandbox credentials and test card numbers before going live. Each gateway has its own set of test cards with specific card numbers, expiry dates, and CVV values.
 
-[**Go to Sandbox & Test Cards →**](sandbox.md)
+[**Go to Sandbox & Test Cards →**](sandbox.mdx)
 
 ## How They Connect
 
