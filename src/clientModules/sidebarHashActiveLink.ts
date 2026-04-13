@@ -37,12 +37,14 @@ function updateActiveLinks(): void {
     if (pathMatches && hashMatches) {
       link.classList.add("menu__link--active");
       link.setAttribute("aria-current", "page");
-    } else if (pathMatches && !hashMatches) {
-      // Same page but different hash — remove active
+    } else {
+      // Any non-match (different hash on same page, OR different page
+      // entirely) must clear the stale active state. Docusaurus only
+      // manages hash-less links, so hash links we added here are our
+      // responsibility to remove.
       link.classList.remove("menu__link--active");
       link.removeAttribute("aria-current");
     }
-    // Links to different pages are left untouched (Docusaurus handles those)
   });
 }
 

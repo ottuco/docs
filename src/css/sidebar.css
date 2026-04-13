@@ -1,0 +1,398 @@
+:root {
+  --doc-sidebar-width: 340px;
+  --ottu-sidebar-bg: #ffffff;
+  --ottu-sidebar-divider: rgba(218, 218, 218, 0.5);
+  --ottu-sidebar-text-primary: #1a1a1a;
+  --ottu-sidebar-text-secondary: #4a4a4a;
+  --ottu-sidebar-text-muted: #8e8e93;
+  --ottu-sidebar-tree-border: #dadada;
+  --ottu-sidebar-tree-border-strong: #1a1a1a;
+  --ottu-sidebar-accent: #f77d1a;
+  --ottu-sidebar-accent-bg: rgba(242, 126, 32, 0.08);
+  --ottu-sidebar-hover-bg: rgba(48, 47, 55, 0.04);
+
+  /* Override Infima default active background */
+  --ifm-menu-color-background-active: transparent;
+}
+
+html[data-theme="dark"] {
+  --ottu-sidebar-bg: #0f1117;
+  --ottu-sidebar-divider: #1e2939;
+  --ottu-sidebar-text-primary: #ffffff;
+  --ottu-sidebar-text-secondary: #c7cad1;
+  --ottu-sidebar-text-muted: #c7cad1;
+  --ottu-sidebar-tree-border: #2a3140;
+  --ottu-sidebar-tree-border-strong: #ffffff;
+  --ottu-sidebar-accent: #f77d1a;
+  --ottu-sidebar-accent-bg: rgba(247, 125, 26, 0.12);
+  --ottu-sidebar-hover-bg: rgba(255, 255, 255, 0.04);
+
+  --ifm-menu-color-background-active: transparent;
+}
+
+/* Sidebar shell */
+.theme-doc-sidebar-container {
+  background: var(--ottu-sidebar-bg);
+  border-right: 1px solid var(--ottu-sidebar-divider) !important;
+}
+
+/* Sidebar inner spacing — Figma: pl-24 pr-16 py-32 */
+/* .theme-doc-sidebar-container [class^="sidebarViewport"] {
+  padding: 32px 16px 32px 24px;
+} */
+
+/* Sidebar inner spacing — Figma: pl-24 pr-16 py-32 */
+.theme-doc-sidebar-container .menu_SIkG {
+  padding: 32px 16px 32px 24px;
+}
+
+.sidebar_njMd,
+.menu_SIkG,
+.theme-doc-sidebar-menu {
+  background: transparent;
+}
+
+/* Remove Docusaurus default active fill */
+.menu__list-item-collapsible--active {
+  background: transparent !important;
+}
+
+html[data-theme="dark"] .menu__list-item-collapsible--active {
+  background: transparent !important;
+}
+
+/* Shared font */
+.theme-doc-sidebar-container .menu__link,
+.theme-doc-sidebar-container .menu__caret {
+  font-family: "Poppins", sans-serif;
+  line-height: normal;
+}
+
+/* Remove default item spacing */
+.theme-doc-sidebar-container .menu__list-item {
+  margin: 0;
+}
+
+/* Level 1: Developers */
+.theme-doc-sidebar-item-category-level-1 > .menu__list-item-collapsible {
+  min-height: 36px;
+  padding: 0;
+  background: transparent;
+
+  /* if needed to add carret to left of Developers */
+  /* display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px; */
+}
+
+.theme-doc-sidebar-item-category-level-1
+  > .menu__list-item-collapsible
+  > .menu__link {
+  min-height: 36px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ottu-sidebar-text-primary);
+  border-radius: 0;
+  flex: 1 1 0;
+}
+
+/* Level 1 caret: no extra padding, icon sits flush */
+/* .theme-doc-sidebar-item-category-level-1
+  > .menu__list-item-collapsible
+  > .menu__caret {
+  padding: 0;
+} */
+
+/* Level 2 container spacing — Figma: gap-[4px] between items */
+.theme-doc-sidebar-item-category-level-1 > .menu__list {
+  margin-top: 4px;
+  padding-left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ── Level 2: top sections (e.g. "Getting Started", "Payments") ── */
+
+.theme-doc-sidebar-item-category-level-2 > .menu__list-item-collapsible {
+  min-height: 36px;
+  padding: 0;
+  border-radius: 8px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+}
+
+.theme-doc-sidebar-item-category-level-2
+  > .menu__list-item-collapsible
+  > .menu__link {
+  min-height: 36px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ottu-sidebar-text-primary);
+  border-radius: 8px;
+  flex: 1 1 0;
+}
+
+.theme-doc-sidebar-item-category-level-2 > .menu__list-item-collapsible:hover {
+  background: var(--ottu-sidebar-hover-bg);
+}
+
+/* Level 2 links (non-collapsible top-level docs) */
+.theme-doc-sidebar-item-link-level-2 > .menu__link {
+  /* min-height: 36px;
+  padding: 8px 12px; */
+  font-size: 14px;
+  font-weight: 600;
+  /* color: var(--ottu-sidebar-text-primary);
+  border-radius: 8px;
+  background: transparent; */
+}
+
+.theme-doc-sidebar-item-link-level-2 > .menu__link:hover {
+  background: var(--ottu-sidebar-hover-bg);
+}
+
+.theme-doc-sidebar-item-link-level-2 > .menu__link.menu__link--active {
+  color: var(--ottu-sidebar-accent) !important;
+  background: var(--ottu-sidebar-accent-bg) !important;
+}
+
+/* Level 3 container spacing */
+.theme-doc-sidebar-item-category-level-2 > .menu__list {
+  margin-top: 4px;
+  margin-left: 12px;
+  padding-left: 0;
+}
+
+/* Level 4 container spacing */
+.theme-doc-sidebar-item-category-level-3 > .menu__list {
+  margin-top: 2px;
+  margin-left: 12px;
+  padding-left: 0;
+}
+
+/* Level 3 leaf rows */
+.theme-doc-sidebar-item-link-level-3 > .menu__link {
+  min-height: 36px;
+  margin: 2px 0;
+  padding: 7px 12px 7px 16px;
+  border-left: 2px solid var(--ottu-sidebar-tree-border);
+  border-radius: 0 !important;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ottu-sidebar-text-secondary);
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Level 3 branch rows */
+.theme-doc-sidebar-item-category-level-3 > .menu__list-item-collapsible {
+  min-height: 36px;
+  padding: 0;
+  background: transparent;
+  align-items: center;
+}
+
+.theme-doc-sidebar-item-category-level-3
+  > .menu__list-item-collapsible
+  > .menu__link {
+  min-height: 36px;
+  margin: 2px 0;
+  padding: 7px 12px 7px 16px;
+  border-left: 2px solid var(--ottu-sidebar-tree-border);
+  border-radius: 0 !important;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ottu-sidebar-text-secondary);
+  background: transparent;
+  box-shadow: none;
+  flex: 1 1 0;
+}
+
+/* Expanded parent branch like Checkout API */
+.theme-doc-sidebar-item-category-level-3.menu__list-item
+  > .menu__list-item-collapsible--active
+  > .menu__link {
+  color: var(--ottu-sidebar-text-primary) !important;
+  border-left: 2px solid var(--ottu-sidebar-tree-border-strong);
+  background: transparent !important;
+  font-weight: 400 !important;
+}
+
+/* Level 4 leaf rows */
+.theme-doc-sidebar-item-link-level-4 > .menu__link {
+  min-height: 36px;
+  margin: 2px 0;
+  padding: 7px 12px 7px 16px;
+  border-left: 2px solid var(--ottu-sidebar-tree-border);
+  border-radius: 0 !important;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ottu-sidebar-text-secondary);
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Active current leaf like Create a new Payment Transaction (L4)
+   and Operations > API Reference (L3 — category with direct link children) */
+.theme-doc-sidebar-item-link-level-4 > .menu__link.menu__link--active,
+.theme-doc-sidebar-item-link-level-3 > .menu__link.menu__link--active {
+  color: var(--ottu-sidebar-accent) !important;
+  border-left: 2px solid var(--ottu-sidebar-accent);
+  background: var(--ottu-sidebar-accent-bg) !important;
+  font-weight: 400 !important;
+}
+
+/* Hover states */
+.theme-doc-sidebar-item-link-level-3 > .menu__link:hover,
+.theme-doc-sidebar-item-link-level-4 > .menu__link:hover,
+.theme-doc-sidebar-item-category-level-3
+  > .menu__list-item-collapsible
+  > .menu__link:hover {
+  background: transparent;
+  color: var(--ottu-sidebar-text-primary);
+}
+
+/* Keep top-level active categories neutral, not orange */
+.theme-doc-sidebar-item-category-level-1
+  > .menu__list-item-collapsible
+  > .menu__link.menu__link--active,
+.theme-doc-sidebar-item-category-level-2
+  > .menu__list-item-collapsible
+  > .menu__link.menu__link--active,
+.theme-doc-sidebar-item-category-level-3
+  > .menu__list-item-collapsible
+  > .menu__link.menu__link--active {
+  color: var(--ottu-sidebar-text-primary) !important;
+
+  /* To show colored active links in tree structure */
+  /* color: var(--ottu-sidebar-accent) !important;
+  background: var(--ottu-sidebar-accent-bg) !important; */
+}
+
+/* Sandbox & Test Cards should look like regular leaf row */
+.theme-doc-sidebar-item-link-level-3 > .menu__link {
+  color: var(--ottu-sidebar-text-secondary);
+}
+
+/* Caret sizing */
+/* .theme-doc-sidebar-container .menu__caret {
+  flex-shrink: 0;
+  padding: 8px;
+} */
+
+.theme-doc-sidebar-container .menu__caret::before,
+.navbar-sidebar .menu__caret::before {
+  width: 16px;
+  height: 16px;
+  background-size: 16px 16px;
+  transition: transform 0.2s ease;
+}
+
+/*
+ * Infima's caret SVG points UP by default.
+ * Figma convention: collapsed = down chevron, expanded = up chevron.
+ * rotate(180deg) flips UP→DOWN; rotate(0) keeps UP.
+ */
+
+/* Collapsed: point down — applies to both desktop sidebar and mobile drawer */
+.theme-doc-sidebar-container
+  .menu__list-item--collapsed
+  > .menu__list-item-collapsible
+  > .menu__caret::before,
+.navbar-sidebar
+  .menu__list-item--collapsed
+  > .menu__list-item-collapsible
+  > .menu__caret::before {
+  transform: rotate(180deg);
+}
+
+/* Expanded: point up (native SVG orientation) */
+.theme-doc-sidebar-container
+  .menu__list-item:not(.menu__list-item--collapsed)
+  > .menu__list-item-collapsible
+  > .menu__caret::before,
+.navbar-sidebar
+  .menu__list-item:not(.menu__list-item--collapsed)
+  > .menu__list-item-collapsible
+  > .menu__caret::before {
+  transform: rotate(0deg);
+}
+
+/* Inline caret (for items without separate CollapseButton) */
+.theme-doc-sidebar-container .menu__link--sublist-caret::after,
+.navbar-sidebar .menu__link--sublist-caret::after {
+  background-size: 16px 16px !important;
+  transition: transform 0.2s ease;
+}
+
+/* Collapsed: point down */
+.theme-doc-sidebar-container
+  .menu__list-item--collapsed
+  > .menu__list-item-collapsible
+  > .menu__link--sublist-caret::after,
+.navbar-sidebar
+  .menu__list-item--collapsed
+  > .menu__list-item-collapsible
+  > .menu__link--sublist-caret::after {
+  transform: rotate(180deg) !important;
+}
+
+/* Expanded: point up */
+.theme-doc-sidebar-container
+  .menu__list-item:not(.menu__list-item--collapsed)
+  > .menu__list-item-collapsible
+  > .menu__link--sublist-caret::after,
+.navbar-sidebar
+  .menu__list-item:not(.menu__list-item--collapsed)
+  > .menu__list-item-collapsible
+  > .menu__link--sublist-caret::after {
+  transform: rotate(0deg) !important;
+}
+
+/* ── Mobile ── */
+
+@media (max-width: 996px) {
+  .theme-doc-sidebar-container [class^="sidebarViewport"] {
+    padding: 24px 12px 24px 16px;
+  }
+
+  /* Mobile drawer (Docusaurus navbar sidebar) rendering the doc sidebar.
+     Classes like .theme-doc-sidebar-item-category-level-* already cascade
+     into this drawer, but container-scoped rules (font, padding, carets)
+     do not — these rules apply the same look inside the drawer. */
+  .navbar-sidebar__item.menu {
+    font-family: "Poppins", sans-serif;
+    padding: 16px 16px;
+  }
+
+  .navbar-sidebar .menu__link,
+  .navbar-sidebar .menu__caret {
+    font-family: "Poppins", sans-serif;
+    line-height: normal;
+  }
+
+  /* Match desktop: L2 items (Getting Started, Payments, Operations…)
+     render with rounded hover background and 8px radius */
+  .navbar-sidebar
+    .theme-doc-sidebar-item-category-level-2
+    > .menu__list-item-collapsible {
+    border-radius: 8px;
+  }
+
+  /* Remove Infima's default active fill on category rows inside the drawer */
+  .navbar-sidebar .menu__list-item-collapsible--active {
+    background: transparent !important;
+  }
+
+  /* "Back to main menu" back button gets Poppins too */
+  .navbar-sidebar__back {
+    font-family: "Poppins", sans-serif;
+  }
+}
+
