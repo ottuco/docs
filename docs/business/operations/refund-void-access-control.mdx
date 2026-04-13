@@ -7,7 +7,7 @@ import StepGuide from "@site/src/components/StepGuide";
 
 # Refund & Void Access Control
 
-Ottu uses a permission-based system to control who can perform refund and void operations. **Staff users** must have explicit permissions assigned before they can request refunds or voids, and those requests go through the [Two-Step Authorization](./two-step-authorization.md) approval flow. **Super users** bypass this flow by default.
+Ottu uses a permission-based system to control who can perform refund and void operations. **Staff users** must have explicit permissions assigned before they can request refunds or voids, and those requests go through the [Two-Step Authorization](./two-step-authorization.mdx) approval flow. **Super users** bypass this flow by default.
 
 :::tip
 To enable this feature, install the **Permissions Approval** plugin: go to **Ottu Dashboard > Administration Panel > Plugins > Installed Plugins** and add it.
@@ -19,7 +19,7 @@ For accountability and security, only **one user** should be designated as the a
 
 ## How It Works
 
-When a staff user is granted refund or void permissions, any operation they initiate enters the [Two-Step Authorization](./two-step-authorization.md) workflow for approval. Pending requests that are not acted upon are automatically canceled after **48 hours** by default. This expiration time is configurable from the backend.
+When a staff user is granted refund or void permissions, any operation they initiate enters the [Two-Step Authorization](./two-step-authorization.mdx) workflow for approval. Pending requests that are not acted upon are automatically canceled after **48 hours** by default. This expiration time is configurable from the backend.
 
 ## Assigning Permissions
 
@@ -60,6 +60,6 @@ If a permission request is neither approved nor rejected within **48 hours**, it
 
 ## What's Next?
 
-- [Two-Step Refund & Void Authorization](./two-step-authorization.md) — Understand the full maker-checker approval workflow
+- [Two-Step Refund & Void Authorization](./two-step-authorization.mdx) — Understand the full maker-checker approval workflow
 - [Operations & Controls](./index.md) — Overview of all operational security features
 - [Payment Management](../payment-management/index.md) — View transactions eligible for refund or void
