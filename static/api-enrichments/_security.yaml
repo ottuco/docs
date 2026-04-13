@@ -2,6 +2,10 @@
 #
 # Replaces the raw spec's securitySchemes and remaps all per-operation
 # security arrays to match. This survives re-fetches of Ottu_API.yaml.
+#
+# force_all_schemes: true applies every scheme to every operation,
+# ignoring the raw spec's per-operation security. This is the active mode.
+# For selective remapping instead, use the 'mapping' key — see scripts/README.md.
 
 schemes:
   Basic Auth:

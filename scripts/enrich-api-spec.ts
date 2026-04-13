@@ -460,28 +460,26 @@ function applySecurityOverride(spec: any, securityFile: string): void {
     spec.components.securitySchemes = config.schemes;
   }
 
-  // Strip explicit Authorization header parameters from all operations.
-  // These are redundant with the security schemes and show up as a required
-  // field in the API caller, which is confusing.
+  if (!config.schemes) return;
+
   const paths = spec.paths || {};
   for (const pathItem of Object.values<any>(paths)) {
     for (const method of ["get", "post", "put", "patch", "delete", "options", "head"]) {
       const op = pathItem[method];
       if (!op) continue;
+
+      // Strip explicit Authorization header parameters — redundant with security
+      // schemes and confusing as a required field in the API explorer.
       if (Array.isArray(op.parameters)) {
         op.parameters = op.parameters.filter(
-          (p: any) => !(p.in === "header" && p.name === "Authorization")
+          (p: any) => !(p.in === "header" && p.name?.toLowerCase() === "authorization")
         );
         if (op.parameters.length === 0) delete op.parameters;
       }
-    }
-  }
 
-  // Remap per-operation security arrays
-  for (const pathItem of Object.values<any>(paths)) {
-    for (const method of ["get", "post", "put", "patch", "delete", "options", "head"]) {
-      const op = pathItem[method];
-      if (!op?.security) continue;
+      // Remap per-operation security arrays.
+      // Skip undefined/null (no security declared) and [] (explicitly no auth).
+      if (!op.security || op.security.length === 0) continue;
 
       if (config.force_all_schemes) {
         op.security = Object.keys(config.schemes).map((name) => ({ [name]: [] }));
