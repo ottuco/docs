@@ -3,6 +3,8 @@ title: Two-Step Refund & Void Authorization
 sidebar_label: Two-Step Authorization
 ---
 
+import StepGuide from "@site/src/components/StepGuide";
+
 # Two-Step Refund & Void Authorization
 
 The Two-Step Authorization feature implements a **maker-checker** workflow for refund and void operations. One user (the maker) submits the request, and another user (the checker) approves or rejects it. This ensures no single person can unilaterally issue a refund or void a transaction.
@@ -20,14 +22,20 @@ A merchant can have **multiple makers**, but only **one checker**. The checker h
 
 ## Activating the Feature
 
-1. From the Ottu Dashboard, open the **Administration Panel**.
-2. Navigate to **Plugins > Installed Plugins**.
-
-   ![Installed Plugins](/img/business/operations/two-step-installed-plugins.png)
-
-3. Add the **Operations Approval** plugin.
-
-   ![Add Operations Approval plugin](/img/business/operations/two-step-add-plugin.png)
+<StepGuide steps={[
+  {
+    title: "Navigate to Installed Plugins",
+    description: <>From the Ottu Dashboard, open the <strong>Administration Panel</strong> and navigate to <strong>Plugins &gt; Installed Plugins</strong>.</>,
+    image: "/img/business/operations/two-step-installed-plugins.png",
+    imageAlt: "Installed Plugins in Administration Panel",
+  },
+  {
+    title: "Add the Operations Approval plugin",
+    description: <>Find and add the <strong>Operations Approval</strong> plugin from the list.</>,
+    image: "/img/business/operations/two-step-add-plugin.png",
+    imageAlt: "Add Operations Approval plugin",
+  },
+]} nextSectionId="assigning-the-checker" />
 
 ## Assigning the Checker
 
