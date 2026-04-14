@@ -155,15 +155,15 @@ export const CATEGORY_LABELS: Record<GatewayCategory, string> = {
 };
 
 export const CATEGORY_ORDER: GatewayCategory[] = [
+  "local_debit",
   "gateway",
   "acquirer",
-  "aggregator",
   "processor",
-  "local_debit",
   "wallet",
   "bnpl",
-  "openbanking",
+  "aggregator",
   "specialty",
+  "openbanking",
 ];
 
 export const REGION_CONFIG = {
