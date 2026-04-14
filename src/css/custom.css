@@ -9,6 +9,7 @@
 @import url("./admonition.css");
 @import url("./markdown.css");
 @import url("./openapi.css");
+@import url("./sidebar.css");
 
 /* Consolas local font */
 @font-face {
@@ -75,24 +76,7 @@
   /* Code */
   --ifm-code-background: #f2f2f2;
   --ifm-code-color: #1d1d1d;
-  /* Code — from Figma inline code style */
-  /* --ifm-code-background: #e5e7eb;
-  --ifm-code-color: #364153; */
 
-  /* Sidebar */
-  --ifm-menu-color-background-active: #f2f2f2;
-
-  /* OpenAPI schema colors — from Figma */
-  /* --openapi-required: #f0252b;
-  --openapi-nullable: #0b82be;
-  --openapi-deprecated: #6b7280; */
-
-  /* HTTP method badge colors — from Figma */
-  /* --ottu-method-post: #0b82be;
-  --ottu-method-get: #f27e20;
-  --ottu-method-patch: #ffba00;
-  --ottu-method-put: #ffba00;
-  --ottu-method-delete: #f0252b; */
 }
 
 html {
@@ -112,8 +96,6 @@ html[data-theme="dark"] {
 
   --ifm-font-color-base: #e5e7eb;
   --ifm-heading-color: #ffffff;
-  /* --ifm-font-color-base: #d1d5dc;
-  --ifm-heading-color: #e5e7eb; */
 
   --ifm-navbar-background-color: #0b0d12;
   --ifm-footer-background-color: #0b0d12;
@@ -122,20 +104,8 @@ html[data-theme="dark"] {
   --ifm-link-hover-color: #fabf97;
 
   --ifm-code-background: #020617;
-
   --ifm-global-border-color: #1e2939;
-  --ifm-menu-color-background-active: #1e2939;
-
   --ifm-code-color: #e5e7eb;
-
-  /* --ifm-link-color: #f27e20;
-  --ifm-link-hover-color: #f4913d;
-
-  --ifm-code-background: #1e2939;
-  --ifm-code-color: #d1d5dc;
-
-  --ifm-global-border-color: #1e2939;
-  --ifm-menu-color-background-active: #1e2939; */
 }
 
 .markdown a {
@@ -375,6 +345,7 @@ html[data-theme="dark"] {
   .navbar__search-input {
     width: 2rem; /* collapsed by default (matches search plugin) */
   }
+
   .navbar__search-input:focus {
     width: calc(100vw - 250px);
     min-width: 5rem;
@@ -636,116 +607,7 @@ html[data-theme="dark"] {
   border-color: #ff6c37;
 }
 
-/* ================================
-   OpenAPI method badges — from Figma design
-   ================================ */
-/* .openapi-method-badge--post,
-.api-method-post {
-  background-color: var(--ottu-method-post) !important;
-}
-
-.openapi-method-badge--get,
-.api-method-get {
-  background-color: var(--ottu-method-get) !important;
-}
-
-.openapi-method-badge--patch,
-.api-method-patch {
-  background-color: var(--ottu-method-patch) !important;
-  color: #ffffff !important;
-}
-
-.openapi-method-badge--put,
-.api-method-put {
-  background-color: var(--ottu-method-put) !important;
-  color: #ffffff !important;
-}
-
-.openapi-method-badge--delete,
-.api-method-delete {
-  background-color: var(--ottu-method-delete) !important;
-} */
-
-/* OpenAPI endpoint URL container — from Figma */
-/* .openapi-explorer__url-container {
-  background-color: var(--ifm-background-surface-color);
-  border-radius: 8px;
-} */
-
-/* OpenAPI tabs — active state border from Figma */
-/* .openapi-tabs__schema-item--active,
-.openapi-tabs__schema-item[aria-selected="true"] {
-  border-color: #f27e20 !important;
-  color: #f27e20 !important;
-} */
-
-/* OpenAPI schema required badge — Figma red */
-/* .openapi-schema__required {
-  color: #f0252b !important;
-} */
-
-/* ================================
-   Sidebar — from Figma design
-   ================================ */
-
-/* All sidebar links: Poppins Regular 14px */
-.menu__list-item-collapsible--active {
-  background: #f2f2f2;
-}
-
-.menu__link {
-  font-family: "Poppins", sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  color: #302f37;
-  border-radius: 8px;
-  padding: 12px 8px;
-  line-height: normal;
-}
-
-.menu__link--active {
-  color: var(--ifm-menu-color-active) !important;
-  font-weight: 600;
-}
-
-/* Sidebar category labels (collapsible parents): Poppins Regular 14px, gray */
-.menu__link--sublist {
-  color: #8e8e93;
-  padding: 8px 8px;
-}
-
-[data-theme="dark"] .menu__link {
-  color: #fff;
-}
-
-[data-theme="dark"] .menu__link--sublist {
-  color: #fff;
-}
-
-/* Sidebar sub-items: 40px left padding from Figma */
-/* .menu__list .menu__list .menu__link {
-  padding-left: 40px;
-} */
-
-/* Sidebar active category background — Figma */
-/* .menu__list-item--active > .menu__link--sublist-caret {
-  background-color: transparent;
-} */
-
-/* Sidebar border — Figma uses right border #dadada */
-.theme-doc-sidebar-container {
-  border-right-color: #dadada !important;
-}
-
-[data-theme="dark"] .theme-doc-sidebar-container {
-  border-right-color: #1e2939 !important;
-}
-
-[data-theme="dark"] .menu__list-item-collapsible--active {
-  background: #1e2939;
-}
-
-/* Inline code styling — Figma */
+/* Inline code styling */
 .markdown code {
   background-color: #e5e7eb;
   color: #364153;
@@ -839,6 +701,11 @@ html[data-theme="dark"] {
   font-family: "trebuchet ms", verdana, arial, sans-serif;
 }
 
+/* ── Mermaid: spacing — give diagrams breathing room from surrounding text */
+.markdown .docusaurus-mermaid-container {
+  margin-bottom: 24px;
+}
+
 /* ── Mermaid: node label text — light mode ───────────────────────────────
    var(--ifm-font-color-base) cascades into SVG foreignObject and overrides
    Mermaid's primaryTextColor. Pin to dark text on #FAFAFA nodes. */
@@ -925,6 +792,19 @@ html[data-theme="dark"] .docusaurus-mermaid-container .flowchart-link {
 html[data-theme="dark"] .docusaurus-mermaid-container marker path {
   fill: #6b7280 !important;
   stroke: #6b7280 !important;
+}
+
+/* ── Task list (GFM checkboxes) — vertically center checkbox with text ──── */
+.markdown .contains-task-list .task-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+}
+
+.markdown .contains-task-list .task-list-item input[type="checkbox"] {
+  flex-shrink: 0;
+  margin: 0;
 }
 
 /* Table styling — from Figma */
