@@ -85,6 +85,12 @@ interface OperationsFile {
   operations: Record<string, OperationEnrichment>;
 }
 
+interface SecurityConfig {
+  schemes: Record<string, any>;
+  mapping?: Record<string, string | null>;
+  force_all_schemes?: boolean;
+}
+
 interface SchemaPropertyOverride {
   description?: string;
   properties?: Record<string, SchemaPropertyOverride | string>;
@@ -92,7 +98,8 @@ interface SchemaPropertyOverride {
 }
 
 interface SchemaFile {
-  properties: Record<string, SchemaPropertyOverride | string>;
+  properties?: Record<string, SchemaPropertyOverride | string>;
+  _example?: any;
 }
 
 interface SharedFieldsFile {
@@ -406,8 +413,8 @@ function enrichSchemas(
     const fileName = path.basename(filePath, path.extname(filePath));
     const data = loadYaml<SchemaFile>(filePath);
 
-    if (!data?.properties) {
-      warn(`No 'properties' key in ${path.basename(filePath)}`);
+    if (!data?.properties && !data?._example) {
+      warn(`No 'properties' or '_example' key in ${path.basename(filePath)}`);
       continue;
     }
 
@@ -424,23 +431,86 @@ function enrichSchemas(
       count++;
     }
 
+    // Top-level schema example override
+    if (data._example !== undefined) {
+      schemas[fileName].example = data._example;
+      count++;
+    }
+
     const schemaProps = schemas[fileName].properties;
     if (!schemaProps) {
-      if (!(data as any)._description) {
+      if (!(data as any)._description && data._example === undefined) {
         warn(`Schema '${fileName}' has no properties in spec`);
       }
       continue;
     }
 
-    count += enrichSchemaProperties(
-      schemaProps,
-      data.properties,
-      sharedFields,
-      fileName
-    );
+    if (data.properties) {
+      count += enrichSchemaProperties(
+        schemaProps,
+        data.properties,
+        sharedFields,
+        fileName
+      );
+    }
   }
 
   return count;
+}
+
+// ── Security Scheme Override ─────────────────────────────────────────────────
+
+function applySecurityOverride(spec: any, securityFile: string): void {
+  const config = loadYaml<SecurityConfig>(securityFile);
+  if (!config) return;
+
+  if (!config.schemes) return;
+
+  // Replace securitySchemes
+  if (spec.components) {
+    spec.components.securitySchemes = config.schemes;
+  }
+
+  const paths = spec.paths || {};
+  for (const pathItem of Object.values<any>(paths)) {
+    for (const method of ["get", "post", "put", "patch", "delete", "options", "head"]) {
+      const op = pathItem[method];
+      if (!op) continue;
+
+      // Strip explicit Authorization header parameters — redundant with security
+      // schemes and confusing as a required field in the API explorer.
+      if (Array.isArray(op.parameters)) {
+        op.parameters = op.parameters.filter(
+          (p: any) => !(p.in === "header" && p.name?.toLowerCase() === "authorization")
+        );
+        if (op.parameters.length === 0) delete op.parameters;
+      }
+
+      // Remap per-operation security arrays.
+      // Skip undefined/null (no security declared) and [] (explicitly no auth).
+      if (!op.security || op.security.length === 0) continue;
+
+      if (config.force_all_schemes) {
+        op.security = Object.keys(config.schemes).map((name) => ({ [name]: [] }));
+      } else if (config.mapping) {
+        const seen = new Set<string>();
+        const remapped: Array<Record<string, []>> = [];
+
+        for (const secEntry of op.security) {
+          for (const oldName of Object.keys(secEntry)) {
+            const newName = config.mapping[oldName];
+            if (newName == null) continue; // null = drop
+            if (!seen.has(newName)) {
+              seen.add(newName);
+              remapped.push({ [newName]: [] });
+            }
+          }
+        }
+
+        op.security = remapped;
+      }
+    }
+  }
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
@@ -500,11 +570,18 @@ function processSource(name: string, config: SourceConfig): void {
   const schemasCount = enrichSchemas(spec, schemasDir, sharedFields);
   info(`Overrode ${schemasCount} schema field descriptions`);
 
-  // 8. Resolve template variables in the entire spec
+  // 8. Apply security scheme overrides
+  const securityFile = path.join(enrichmentsDir, "_security.yaml");
+  if (fs.existsSync(securityFile)) {
+    info("Applying security scheme overrides...");
+    applySecurityOverride(spec, securityFile);
+  }
+
+  // 9. Resolve template variables in the entire spec
   info("Resolving template variables...");
   const enrichedSpec = resolveVariablesDeep(spec, variables);
 
-  // 9. Write output
+  // 10. Write output
   info("Writing enriched spec...");
   const output = yaml.dump(enrichedSpec, {
     lineWidth: -1,

@@ -1,1 +1,0 @@
-{"parameters":[{"in":"header","name":"Authorization","schema":{"type":"string","default":"Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo"},"description":"Private API key to be provided in the format `Api-Key <key>`.","required":true}]}

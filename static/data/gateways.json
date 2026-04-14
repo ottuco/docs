@@ -543,7 +543,8 @@
       "QAR",
       "OMR",
       "AED",
-      "SAR"
+      "SAR",
+      "USD"
     ],
     "inquiryMinutes": null,
     "operations": [
@@ -1190,6 +1191,12 @@
       "Global"
     ],
     "currencies": [
+      "KWD",
+      "BHD",
+      "QAR",
+      "OMR",
+      "AED",
+      "SAR",
       "USD"
     ],
     "inquiryMinutes": 11,

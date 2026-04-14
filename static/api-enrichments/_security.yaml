@@ -1,0 +1,23 @@
+# Security Scheme Overrides
+#
+# Replaces the raw spec's securitySchemes and remaps all per-operation
+# security arrays to match. This survives re-fetches of Ottu_API.yaml.
+#
+# force_all_schemes: true applies every scheme to every operation,
+# ignoring the raw spec's per-operation security. This is the active mode.
+# For selective remapping instead, use the 'mapping' key — see scripts/README.md.
+
+schemes:
+  Basic Auth:
+    type: http
+    scheme: basic
+  API Key Auth:
+    type: apiKey
+    in: header
+    name: Authorization
+    description: API key authentication with required prefix "Api-Key"
+
+# When true, every operation gets ALL schemes from the 'schemes' block above,
+# regardless of what the raw spec had. This ensures the API explorer always
+# shows all available auth options on every endpoint.
+force_all_schemes: true
