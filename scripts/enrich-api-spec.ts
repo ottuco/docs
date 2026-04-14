@@ -98,7 +98,7 @@ interface SchemaPropertyOverride {
 }
 
 interface SchemaFile {
-  properties: Record<string, SchemaPropertyOverride | string>;
+  properties?: Record<string, SchemaPropertyOverride | string>;
   _example?: any;
 }
 
@@ -445,12 +445,14 @@ function enrichSchemas(
       continue;
     }
 
-    count += enrichSchemaProperties(
-      schemaProps,
-      data.properties,
-      sharedFields,
-      fileName
-    );
+    if (data.properties) {
+      count += enrichSchemaProperties(
+        schemaProps,
+        data.properties,
+        sharedFields,
+        fileName
+      );
+    }
   }
 
   return count;
