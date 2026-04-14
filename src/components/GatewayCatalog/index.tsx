@@ -760,9 +760,9 @@ export default function GatewayCatalog(): React.JSX.Element {
     }));
   }, []);
 
-  // Filtering
+  // Filtering and sorting by category order
   const filtered = useMemo(() => {
-    return gateways.filter((gw) => {
+    const result = gateways.filter((gw) => {
       if (selectedRegion && !gatewayMatchesRegion(gw, selectedRegion))
         return false;
       if (
@@ -791,6 +791,10 @@ export default function GatewayCatalog(): React.JSX.Element {
       }
       return true;
     });
+    result.sort((a, b) => {
+      return CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category);
+    });
+    return result;
   }, [search, selectedRegion, selectedCountries, selectedGatewayTypes, selectedNetworks]);
 
   const activeFilterCount =
