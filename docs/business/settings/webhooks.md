@@ -88,6 +88,6 @@ The webhook URL defined in a plugin configuration receives notifications for bot
 
 ## What's Next?
 
-- **[Global Configuration](./global)** — Configure merchant identity and system-wide settings
+- **[Global Configuration](./global.md)** — Configure merchant identity and system-wide settings
 - **[Notifications](/business/notifications/)** — Set up customer-facing email, SMS, and WhatsApp notifications
 - **[Webhooks (Developer Guide)](/developers/webhooks/)** — Technical documentation for webhook payloads, signatures, and integration

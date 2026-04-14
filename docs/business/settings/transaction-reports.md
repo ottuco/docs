@@ -130,5 +130,5 @@ All field types require these additional settings:
 ## What's Next?
 
 - **[Payment Management](/business/payment-management/)** — Track and search transactions from the dashboard
-- **[Webhooks Configuration](./webhooks)** — Set up real-time event notifications
+- **[Webhooks Configuration](./webhooks.md)** — Set up real-time event notifications
 - **[Plugins](/business/plugins/)** — Configure the plugins that reports can be scoped to
