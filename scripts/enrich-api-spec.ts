@@ -414,7 +414,7 @@ function enrichSchemas(
     const data = loadYaml<SchemaFile>(filePath);
 
     if (!data?.properties && !data?._example) {
-      warn(`No 'properties' key in ${path.basename(filePath)}`);
+      warn(`No 'properties' or '_example' key in ${path.basename(filePath)}`);
       continue;
     }
 
@@ -439,7 +439,7 @@ function enrichSchemas(
 
     const schemaProps = schemas[fileName].properties;
     if (!schemaProps) {
-      if (!(data as any)._description) {
+      if (!(data as any)._description && data._example === undefined) {
         warn(`Schema '${fileName}' has no properties in spec`);
       }
       continue;
