@@ -39,17 +39,17 @@ docs/developers/
 │   ├── checkout-api.mdx            # Core: create/retrieve/update payment transactions
 │   ├── checkout-sdk/               # Drop-in SDK for web and mobile (split by platform)
 │   │   ├── index.md                # Overview and shared SDK flow diagrams
-│   │   ├── web.md                  # JavaScript/Web SDK
+│   │   ├── web.mdx                 # JavaScript/Web SDK
 │   │   ├── ios.md                  # iOS Swift SDK
 │   │   ├── android.md              # Android Kotlin SDK
 │   │   └── flutter.md              # Flutter SDK
 │   ├── payment-methods.md          # Discovering available payment methods via pg_codes
 │   ├── native-payments.md          # Apple Pay, Google Pay direct payments
-│   └── sandbox.md                  # Sandbox environment, test cards per gateway
+│   └── sandbox.mdx                 # Sandbox environment, test cards per gateway
 │
 ├── cards-and-tokens/
 │   ├── index.md                    # Section overview — save, manage, charge saved cards
-│   ├── tokenization.md             # How to save cards (with/without payment)
+│   ├── tokenization.mdx            # How to save cards (with/without payment)
 │   ├── user-cards.mdx              # List/delete saved customer cards
 │   └── recurring-payments.mdx      # Auto-debit, CIT/MIT, agreement setup, recurring billing
 │

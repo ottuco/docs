@@ -65,7 +65,7 @@ curl -X POST https://<your-merchant>.ottu.dev/b/checkout/v1/pymt-txn/ \
 The response includes a `session_id` and `payment_url`. Open the `payment_url` to see Ottu's checkout page.
 
 :::tip
-Use the [Sandbox & Test Cards](../payments/sandbox.md) to simulate payments without processing real transactions.
+Use the [Sandbox & Test Cards](../payments/sandbox.mdx) to simulate payments without processing real transactions.
 :::
 
 ## 5. Boost Your Integration
@@ -75,7 +75,7 @@ Ottu offers multiple integration paths depending on your stack and use case:
 | Approach | Best For | Get Started |
 |---|---|---|
 | **REST API** | Full control, any language | You're already here |
-| **Checkout SDK** | Drop-in payment UI for web and mobile | [Web](../payments/checkout-sdk/web.md), [iOS](../payments/checkout-sdk/ios.md), [Android](../payments/checkout-sdk/android.md), [Flutter](../payments/checkout-sdk/flutter.md) |
+| **Checkout SDK** | Drop-in payment UI for web and mobile | [Web](../payments/checkout-sdk/web.mdx), [iOS](../payments/checkout-sdk/ios.md), [Android](../payments/checkout-sdk/android.md), [Flutter](../payments/checkout-sdk/flutter.md) |
 | **Python SDK** (`ottu-py`) | Python backend integrations | [GitHub](https://github.com/ottuco/ottu-py) |
 | **Django SDK** | Django projects with built-in session management, webhooks, and card operations | [GitHub](https://github.com/ottuco/ottu-py#django-integration) |
 | **MCP Server** | AI-assisted integration with Claude Code, Cursor, or VS Code | Click **MCP** in the navbar |
