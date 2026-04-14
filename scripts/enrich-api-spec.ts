@@ -462,12 +462,12 @@ function applySecurityOverride(spec: any, securityFile: string): void {
   const config = loadYaml<SecurityConfig>(securityFile);
   if (!config) return;
 
+  if (!config.schemes) return;
+
   // Replace securitySchemes
   if (spec.components) {
     spec.components.securitySchemes = config.schemes;
   }
-
-  if (!config.schemes) return;
 
   const paths = spec.paths || {};
   for (const pathItem of Object.values<any>(paths)) {

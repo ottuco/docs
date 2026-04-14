@@ -45,9 +45,10 @@ static/
     ├── operations/                      # Operation enrichments (one file per API tag)
     │   ├── checkout-api.yaml
     │   └── ...
-    └── schemas/                         # Schema field overrides (one file per schema)
-        ├── CheckoutPOSTRequest.yaml
-        └── ...
+    ├── schemas/                         # Schema field overrides (one file per schema)
+    │   ├── CheckoutPOSTRequest.yaml
+    │   └── ...
+    └── _security.yaml                   # Security scheme overrides and auth header stripping
 
 scripts/
 ├── fetch-api-schema.ts                  # Downloads schema from Ottu core
@@ -133,6 +134,38 @@ properties:
         description: |
           Auto-debit agreement ID for [recurring payments]({{apiBaseUrl}}/cards-and-tokens/recurring-payments/).
 ```
+
+### Override security schemes
+
+Edit `static/api-enrichments/_security.yaml` to replace the spec's security schemes with public-facing names and control how operations reference them.
+
+```yaml
+# _security.yaml
+schemes:
+  Basic Auth:
+    type: http
+    scheme: basic
+  API Key Auth:
+    type: apiKey
+    in: header
+    name: Authorization
+
+# Replace all operation security refs with the new scheme names
+force_all_schemes: true
+
+# For selective remapping instead of force_all_schemes:
+# mapping:
+#   oldSchemeName: New Scheme Name
+#   anotherScheme: null          # null removes the scheme from operations
+```
+
+| Key | Type | Purpose |
+|---|---|---|
+| `schemes` | object | Replaces `components/securitySchemes` in the spec |
+| `force_all_schemes` | boolean | When `true`, every operation's `security` array is rewritten to reference all defined schemes |
+| `mapping` | object | Selectively remap old scheme names to new ones. Use `null` to remove a scheme from operations. Ignored when `force_all_schemes` is `true` |
+
+The override also strips any explicit `Authorization` header parameters from operations, since authentication is handled by the security schemes.
 
 ## Template Variables
 
