@@ -171,7 +171,7 @@ By understanding and interpreting these fields correctly, you can ensure accurat
 
 Every webhook payload includes a `signature` field — an HMAC-SHA256 hash that proves the payload came from Ottu and hasn’t been tampered with. **Always verify this signature before processing the payment.**
 
-For implementation details and code examples in Python, PHP, Node.js, Java, C#, Ruby, and Go, see [Verify Signatures](./verify-signatures).
+For implementation details and code examples in Python, PHP, Node.js, Java, C#, Ruby, and Go, see [Verify Signatures](./verify-signatures.md).
 
 :::danger
 Never process a payment webhook without verifying the signature. An unverified payload could be forged by an attacker.
@@ -181,7 +181,7 @@ Never process a payment webhook without verifying the signature. An unverified p
 
 The `pg_params` object contains normalized payment gateway response fields. Instead of parsing the raw `gateway_response` (which varies by gateway), use `pg_params` for consistent field access across all 60+ gateways.
 
-For the complete searchable reference of all fields, see [**PG Params**](./pg-params).
+For the complete searchable reference of all fields, see [**PG Params**](./pg-params.md).
 
 :::tip Why pg_params matters
 Ottu normalizes responses from all payment gateways into fixed fields. This means you can switch gateways — from KNET to MPGS to Cybersource — without changing a single line of your webhook handling code. Instead of parsing each gateway’s unique response format, just read from `pg_params`.
@@ -191,7 +191,7 @@ For general webhook setup and configuration, see the [Webhooks Overview](./).
 
 ## What's Next?
 
-- [**PG Params**](./pg-params) — Searchable reference for all normalized gateway response fields
-- [**Operation Events**](./operation-events) — Webhook notifications for refunds, captures, and voids
-- [**Verify Signatures**](./verify-signatures) — Validate webhook authenticity with HMAC-SHA256
+- [**PG Params**](./pg-params.md) — Searchable reference for all normalized gateway response fields
+- [**Operation Events**](./operation-events.md) — Webhook notifications for refunds, captures, and voids
+- [**Verify Signatures**](./verify-signatures.md) — Validate webhook authenticity with HMAC-SHA256
 - [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration

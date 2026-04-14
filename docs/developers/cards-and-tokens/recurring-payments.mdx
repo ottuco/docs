@@ -8,6 +8,7 @@ import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import RecurringDemo from "@site/src/components/RecurringDemo";
 import TestCardCallout from "@site/src/components/TestCardCallout";
 import FAQ, { FAQItem } from '@site/src/components/FAQ';
+import StepGuide from "@site/src/components/StepGuide";
 
 # Recurring Payments & Auto-Debit
 
@@ -98,26 +99,22 @@ Experience the complete recurring payment lifecycle. Save a test card, watch the
 
 #### First Payment (CIT)
 
-**Step 0: Discover Payment Methods**
+<StepGuide steps={[
+  {
+    title: "Discover Payment Methods",
+    description: <>Before creating a session, call the <a href="../payments/payment-methods">Payment Methods API</a> with <code>auto_debit: true</code> to discover which gateways support tokenization and auto-debit.<br /><br /><pre><code>{`POST /b/pbl/v2/payment-methods/
 
-Before creating a session, call the [Payment Methods API](../payments/payment-methods) with `auto_debit: true` to discover which gateways support tokenization and auto-debit:
-
-```json title="POST /b/pbl/v2/payment-methods/ — Discover Auto-Debit Gateways"
 {
   "plugin": "payment_request",
   "operation": "purchase",
   "currencies": ["KWD"],
   "auto_debit": true
-}
-```
+}`}</code></pre> Use the returned <code>pg_codes</code> in the next step.</>,
+  },
+  {
+    title: "Create Payment Session",
+    description: <>Create a session with <code>payment_type: auto_debit</code> and the <code>agreement</code> object. Use a unique <code>customer_id</code> per customer — all future MIT charges and saved cards are associated with this ID.<br /><br /><pre><code>{`POST /b/checkout/v1/pymt-txn/
 
-Use the returned `pg_codes` in the next step.
-
-**Step 1: Create Payment Session**
-
-Create a session with `payment_type: auto_debit` and the `agreement` object. Use a unique `customer_id` per customer — all future MIT charges and saved cards are associated with this ID.
-
-```json title="POST /b/checkout/v1/pymt-txn/ — Create CIT Session"
 {
   "type": "e_commerce",
   "amount": "200.00",
@@ -141,23 +138,15 @@ Create a session with `payment_type: auto_debit` and the `agreement` object. Use
       "category_code": "1234"
     }
   }
-}
-```
-
-**Step 2: Collect Card Details**
-
-Collect the customer's card using one of these options:
-
-- **[Checkout SDK](../payments/checkout-sdk/)** (recommended) — initialize with the `session_id`
-- **Redirect to `checkout_url`** — sends the customer to Ottu's hosted checkout page
-- **Redirect to `payment_methods.redirect_url`** — sends the customer directly to a specific gateway's card entry page
-
-**Step 3: Receive Webhook with Token**
-
-After the customer completes the payment, Ottu sends a [webhook notification](../webhooks/payment-events) with the token:
-
-```json title="Webhook Payload — Token Received"
-{
+}`}</code></pre></>,
+  },
+  {
+    title: "Collect Card Details",
+    description: <>Collect the customer's card using one of these options:<br /><br />• <strong><a href="../payments/checkout-sdk/">Checkout SDK</a></strong> (recommended) — initialize with the <code>session_id</code><br />• <strong>Redirect to <code>checkout_url</code></strong> — sends the customer to Ottu's hosted checkout page<br />• <strong>Redirect to <code>payment_methods.redirect_url</code></strong> — sends the customer directly to a specific gateway's card entry page</>,
+  },
+  {
+    title: "Receive Webhook with Token",
+    description: <>After the customer completes the payment, Ottu sends a <a href="../webhooks/payment-events">webhook notification</a> with the token:<br /><br /><pre><code>{`{
   "session_id": "4a462681df6aab64e27cedc9bbf733cd6442578b",
   "result": "success",
   "state": "paid",
@@ -175,10 +164,9 @@ After the customer completes the payment, Ottu sends a [webhook notification](..
     "pg_code": "credit-card",
     "agreements": ["A123456789"]
   }
-}
-```
-
-**Save the `token.token` and `token.pg_code`** — you'll need them for subsequent charges.
+}`}</code></pre><strong>Save the <code>token.token</code> and <code>token.pg_code</code></strong> — you'll need them for subsequent charges.</>,
+  },
+]} nextSectionId="subsequent-payments-mit" />
 
 #### Subsequent Payments (MIT)
 

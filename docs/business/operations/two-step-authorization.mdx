@@ -3,6 +3,8 @@ title: Two-Step Refund & Void Authorization
 sidebar_label: Two-Step Authorization
 ---
 
+import StepGuide from "@site/src/components/StepGuide";
+
 # Two-Step Refund & Void Authorization
 
 The Two-Step Authorization feature implements a **maker-checker** workflow for refund and void operations. One user (the maker) submits the request, and another user (the checker) approves or rejects it. This ensures no single person can unilaterally issue a refund or void a transaction.
@@ -11,7 +13,7 @@ The Two-Step Authorization feature implements a **maker-checker** workflow for r
 
 | Role | Description |
 |------|-------------|
-| **Maker** | A user with refund/void permissions (see [Refund & Void Access Control](./refund-void-access-control.md)) who submits operation requests |
+| **Maker** | A user with refund/void permissions (see [Refund & Void Access Control](./refund-void-access-control.mdx)) who submits operation requests |
 | **Checker** | The single authorized user who approves or rejects submitted requests. The checker can also execute refunds and voids directly without going through the approval flow. |
 
 :::note
@@ -20,14 +22,20 @@ A merchant can have **multiple makers**, but only **one checker**. The checker h
 
 ## Activating the Feature
 
-1. From the Ottu Dashboard, open the **Administration Panel**.
-2. Navigate to **Plugins > Installed Plugins**.
-
-   ![Installed Plugins](/img/business/operations/two-step-installed-plugins.png)
-
-3. Add the **Operations Approval** plugin.
-
-   ![Add Operations Approval plugin](/img/business/operations/two-step-add-plugin.png)
+<StepGuide steps={[
+  {
+    title: "Navigate to Installed Plugins",
+    description: <>From the Ottu Dashboard, open the <strong>Administration Panel</strong> and navigate to <strong>Plugins &gt; Installed Plugins</strong>.</>,
+    image: "/img/business/operations/two-step-installed-plugins.png",
+    imageAlt: "Installed Plugins in Administration Panel",
+  },
+  {
+    title: "Add the Operations Approval plugin",
+    description: <>Find and add the <strong>Operations Approval</strong> plugin from the list.</>,
+    image: "/img/business/operations/two-step-add-plugin.png",
+    imageAlt: "Add Operations Approval plugin",
+  },
+]} nextSectionId="assigning-the-checker" />
 
 ## Assigning the Checker
 
@@ -125,7 +133,7 @@ The Operation Request Table is located under the **Tickets** tab on the Ottu Das
 
 ## What's Next?
 
-- [Refund & Void Access Control](./refund-void-access-control.md) — Set up the underlying permissions
+- [Refund & Void Access Control](./refund-void-access-control.mdx) — Set up the underlying permissions
 - [Operations & Controls](./index.md) — Overview of all operational security features
 - [Payment Management](../payment-management/index.md) — Manage transactions and view operation history
 - [Notifications](../notifications/index.md) — Configure notification delivery channels

@@ -488,6 +488,6 @@ The above examples provide a way for developers in different languages to genera
 
 ## What's Next?
 
-- [**Payment Events**](./payment-events) — Payment webhook payload reference
-- [**Operation Events**](./operation-events) — Operation webhook payload reference
+- [**Payment Events**](./payment-events.md) — Payment webhook payload reference
+- [**Operation Events**](./operation-events.md) — Operation webhook payload reference
 - [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration

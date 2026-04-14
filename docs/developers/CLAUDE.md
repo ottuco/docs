@@ -24,10 +24,10 @@ Context-specific guidance for the developer documentation section. Supplements t
 ```
 docs/developers/
 ├── index.md                        # Developer hub landing page (Key Concepts + Integration Paths)
-├── invoices.md                     # Invoice creation and management
-├── notifications.md                # SMS/email notification API
+├── invoices.mdx                    # Invoice creation and management
+├── notifications.mdx               # SMS/email notification API
 ├── operations.md                   # Refund, capture, void, cancel, expire, delete
-├── reports.md                      # Transaction report listing and download
+├── reports.mdx                     # Transaction report listing and download
 │
 ├── getting-started/
 │   ├── index.md                    # Getting started overview — setup, first API call
@@ -39,19 +39,19 @@ docs/developers/
 │   ├── checkout-api.mdx            # Core: create/retrieve/update payment transactions
 │   ├── checkout-sdk/               # Drop-in SDK for web and mobile (split by platform)
 │   │   ├── index.md                # Overview and shared SDK flow diagrams
-│   │   ├── web.md                  # JavaScript/Web SDK
+│   │   ├── web.mdx                 # JavaScript/Web SDK
 │   │   ├── ios.md                  # iOS Swift SDK
 │   │   ├── android.md              # Android Kotlin SDK
 │   │   └── flutter.md              # Flutter SDK
 │   ├── payment-methods.md          # Discovering available payment methods via pg_codes
 │   ├── native-payments.md          # Apple Pay, Google Pay direct payments
-│   └── sandbox.md                  # Sandbox environment, test cards per gateway
+│   └── sandbox.mdx                 # Sandbox environment, test cards per gateway
 │
 ├── cards-and-tokens/
 │   ├── index.md                    # Section overview — save, manage, charge saved cards
-│   ├── tokenization.md             # How to save cards (with/without payment)
+│   ├── tokenization.mdx            # How to save cards (with/without payment)
 │   ├── user-cards.mdx              # List/delete saved customer cards
-│   └── recurring-payments.md       # Auto-debit, CIT/MIT, agreement setup, recurring billing
+│   └── recurring-payments.mdx      # Auto-debit, CIT/MIT, agreement setup, recurring billing
 │
 ├── webhooks/
 │   ├── index.md                    # Webhook setup, retries, delivery guarantees
@@ -183,7 +183,7 @@ These files exist but are empty (0 bytes). Priority for content creation:
 | `reference/error-codes.md` | Comprehensive error code reference table |
 | `reference/payment-states.md` | Payment state machine diagram and transitions |
 | `reference/glossary.md` | Developer-focused payment glossary |
-| `cards-and-tokens/recurring-payments.md` | Auto-debit and recurring payment guide |
+| `cards-and-tokens/recurring-payments.mdx` | Auto-debit and recurring payment guide |
 
 ## Local Development
 

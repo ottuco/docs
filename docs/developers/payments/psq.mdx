@@ -7,6 +7,7 @@ hide_table_of_contents: true
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import GatewayTimingChart from "@site/src/components/GatewayTimingChart";
 import FAQ, { FAQItem } from '@site/src/components/FAQ';
+import StepGuide from "@site/src/components/StepGuide";
 
 # Payment Status Query
 
@@ -88,37 +89,26 @@ This ensures merchants only receive webhooks with final, actionable payment stat
 
 ### Step-by-Step
 
-#### 1. Send an inquiry request
-
-Provide at least one identifier — `session_id` or `order_no`:
-
-```bash
-curl -X POST "https://sandbox.ottu.net/b/pbl/v2/inquiry/" \
-  -H "Authorization: Api-Key your_private_api_key" \
-  -H "Content-Type: application/json" \
-  -d '{"session_id": "your_session_id"}'
-```
-
-#### 2. Handle the response
-
-The response matches the [webhook payload](/developers/webhooks/payment-events) structure. Check the `state` field for the current payment transaction status:
-
-- `paid` / `authorized` / `cod` → payment succeeded
-- `pending` / `attempted` → payment still in progress
-- `failed` / `expired` / `canceled` → payment did not complete
-
-#### 3. Optionally trigger a webhook
-
-Include `"notify_webhook_url": true` in the request to have Ottu send a webhook notification with the inquiry result to your configured `webhook_url`:
-
-```json
-{
-  "session_id": "your_session_id",
-  "notify_webhook_url": true
-}
-```
-
-You can also specify an alternate `webhook_url` to receive the result at a different endpoint.
+<StepGuide steps={[
+  {
+    title: "Send an inquiry request",
+    description: <>Provide at least one identifier — <code>session_id</code> or <code>order_no</code>:<br /><br /><pre><code>{`curl -X POST "https://sandbox.ottu.net/b/pbl/v2/inquiry/" \\
+  -H "Authorization: Api-Key your_private_api_key" \\
+  -H "Content-Type: application/json" \\
+  -d '{"session_id": "your_session_id"}'`}</code></pre></>,
+  },
+  {
+    title: "Handle the response",
+    description: <>The response matches the <a href="/developers/webhooks/payment-events">webhook payload</a> structure. Check the <code>state</code> field for the current payment transaction status:<br /><br />• <code>paid</code> / <code>authorized</code> / <code>cod</code> → payment succeeded<br />• <code>pending</code> / <code>attempted</code> → payment still in progress<br />• <code>failed</code> / <code>expired</code> / <code>canceled</code> → payment did not complete</>,
+  },
+  {
+    title: "Optionally trigger a webhook",
+    description: <>Include <code>"notify_webhook_url": true</code> in the request to have Ottu send a webhook notification with the inquiry result to your configured <code>webhook_url</code>:<br /><br /><pre><code>{`{
+    "session_id": "your_session_id",
+    "notify_webhook_url": true
+}`}</code></pre>You can also specify an alternate <code>webhook_url</code> to receive the result at a different endpoint.</>,
+  },
+]} nextSectionId="throttling-rules" />
 
 ### Throttling Rules
 
