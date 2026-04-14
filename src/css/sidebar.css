@@ -53,6 +53,11 @@ html[data-theme="dark"] {
   background: transparent;
 }
 
+.menu_SIkG {
+  @media (min-width: 997px) {
+    padding: 0;
+  }
+}
 /* Shared typography — both desktop container and mobile drawer
    render the doc sidebar inside `.theme-doc-sidebar-menu`, so a
    single rule styles both. `.navbar-sidebar__back` is the drawer's
@@ -62,6 +67,7 @@ html[data-theme="dark"] {
 .navbar-sidebar__back {
   font-family: "Poppins", sans-serif;
   line-height: normal;
+  padding: 0;
 }
 
 /* Remove Infima's default active fill on every collapsible row
