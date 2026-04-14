@@ -10,7 +10,7 @@
  * ============================================================ */
 
 :root {
-  --doc-sidebar-width: 340px;
+  --doc-sidebar-width: 320px;
   --ottu-sidebar-bg: #ffffff;
   --ottu-sidebar-divider: rgba(218, 218, 218, 0.5);
   --ottu-sidebar-text-primary: #1a1a1a;
@@ -53,8 +53,15 @@ html[data-theme="dark"] {
   background: transparent;
 }
 
-.menu_SIkG {
-  @media (min-width: 997px) {
+/* Zero Infima's default .menu padding (0.5rem) on the outer <nav> that
+   wraps the sidebar on desktop. The <nav> carries a hashed CSS-module
+   class (e.g. .menu_SIkG) that is ONLY valid in the current local
+   build — CI/prod builds generate a different hash and any selector
+   keyed off the hash silently stops matching after deploy. Target via
+   the stable container + child combinator instead: this matches the
+   same <nav class="menu …"> without depending on the hash. */
+@media (min-width: 997px) {
+  .menu_SIkG {
     padding: 0;
   }
 }
@@ -168,8 +175,7 @@ html[data-theme="dark"] {
   color: var(--ottu-sidebar-text-primary);
 }
 
-.theme-doc-sidebar-item-category-level-2
-  > .menu__list-item-collapsible:hover {
+.theme-doc-sidebar-item-category-level-2 > .menu__list-item-collapsible:hover {
   background: var(--ottu-sidebar-hover-bg);
 }
 
@@ -294,6 +300,24 @@ html[data-theme="dark"] {
 .menu__link--sublist-caret::after {
   background-size: 16px 16px;
   transition: transform 0.2s ease;
+}
+
+/* Chevron alignment — the business sidebar mixes two category renderings:
+   (1) categories WITH a landing page use `<a> + <button class="menu__caret">`
+       → button sits at the row's right edge (row padding-right = 0);
+   (2) categories WITHOUT a landing page use `<a class="menu__link--sublist-caret">`
+       → the chevron is an `::after` inside the link's content box, so its
+       right edge lands at `row right − link padding-right (12px)`.
+   Zero the right padding on variant (2) so its chevron lines up with the
+   button chevron from variant (1). The `::after` has its own min-width
+   (1.25rem) which keeps the gap between the label and the chevron. */
+.theme-doc-sidebar-menu .menu__link--sublist-caret {
+  padding-right: 0 !important;
+}
+.theme-doc-sidebar-menu .menu__link--sublist-caret::after {
+  min-width: auto;
+  width: 16px;
+  height: 16px;
 }
 
 /*
