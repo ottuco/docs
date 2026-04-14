@@ -99,6 +99,7 @@ interface SchemaPropertyOverride {
 
 interface SchemaFile {
   properties: Record<string, SchemaPropertyOverride | string>;
+  _example?: any;
 }
 
 interface SharedFieldsFile {
@@ -412,7 +413,7 @@ function enrichSchemas(
     const fileName = path.basename(filePath, path.extname(filePath));
     const data = loadYaml<SchemaFile>(filePath);
 
-    if (!data?.properties) {
+    if (!data?.properties && !data?._example) {
       warn(`No 'properties' key in ${path.basename(filePath)}`);
       continue;
     }
@@ -427,6 +428,12 @@ function enrichSchemas(
     // Top-level schema description override
     if ((data as any)._description) {
       schemas[fileName].description = (data as any)._description;
+      count++;
+    }
+
+    // Top-level schema example override
+    if (data._example !== undefined) {
+      schemas[fileName].example = data._example;
       count++;
     }
 
