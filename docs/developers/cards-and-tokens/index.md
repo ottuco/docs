@@ -14,7 +14,7 @@ Two methods available:
 - **Save without payment** — store a card for future use without charging (`payment_type: save_card`, `amount: 0`)
 - **Save during payment** — tokenize the card as part of a successful transaction
 
-[**Go to Tokenization Guide →**](tokenization.md)
+[**Go to Tokenization Guide →**](tokenization.mdx)
 
 ### Manage Saved Cards (User Cards API)
 
@@ -68,11 +68,11 @@ flowchart LR
 - A `webhook_url` to receive token delivery notifications
 
 :::tip
-Not sure where to start? If you need to save cards, start with the [Tokenization Guide](tokenization.md). If you already have tokens and want to set up automatic billing, go directly to [Recurring Payments](recurring-payments.md).
+Not sure where to start? If you need to save cards, start with the [Tokenization Guide](tokenization.mdx). If you already have tokens and want to set up automatic billing, go directly to [Recurring Payments](recurring-payments.md).
 :::
 
 ## What's Next?
 
-- [**Tokenization**](tokenization.md) — How to save cards securely
+- [**Tokenization**](tokenization.mdx) — How to save cards securely
 - [**User Cards**](user-cards.mdx) — Manage saved cards via API
 - [**Recurring Payments**](recurring-payments.md) — Auto-debit and subscription billing

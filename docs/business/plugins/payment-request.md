@@ -123,7 +123,7 @@ Use custom fields to capture order-specific information (e.g., delivery address,
 
 ## What's Next?
 
-- [E-Commerce](./e-commerce.md) — Integrate Ottu directly with your online store
-- [Bulk Payment Request](./bulk-payment-request.md) — Send payment requests to multiple customers at once
+- [E-Commerce](./e-commerce.mdx) — Integrate Ottu directly with your online store
+- [Bulk Payment Request](./bulk-payment-request.mdx) — Send payment requests to multiple customers at once
 - [Payment Management](../payment-management/index.md) — Track and manage all your transactions
 - [Notifications](../notifications/index.md) — Configure how customers receive payment notifications
