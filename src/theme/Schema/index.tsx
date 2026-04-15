@@ -175,12 +175,11 @@ const AnyOneOf: React.FC<SchemaProps> = ({
       <span className="badge badge--info" style={{ marginBottom: "1rem" }}>
         {type}
       </span>
-      {/* @ts-ignore — SchemaTabsProps omits children in v5 but passes them as JSX children */}
+      {/* @ts-expect-error — SchemaTabsProps omits children in v5 but passes them as JSX children */}
       <SchemaTabs defaultValue={defaultValue}>
         {schema[type]?.map((anyOneSchema: any, index: number) => {
           const label = anyOneSchema.title || anyOneSchema.type;
           return (
-            // @ts-ignore
             <TabItem
               key={index}
               label={label}
