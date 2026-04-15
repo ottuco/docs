@@ -17,6 +17,9 @@ operations:
     permissions:
       - $perm:api_key_admin
       - $perm:basic_auth_view_checkout
+    parameters:
+      session_id:
+        example: b17b883a03eaf1837a21b47e8b78c49f6ecec917
 
   Update_payment_transaction_checkout:
     permissions:
