@@ -489,6 +489,7 @@
   flex-wrap: nowrap;
   gap: 12px;
   align-items: center;
+  position: relative;
 }
 
 .bankLogoGroup {
@@ -552,7 +553,6 @@
 
 /* Wrapper for "+N" badge + popup */
 .bankOverflowWrap {
-  position: relative;
   flex-shrink: 0;
 }
 
@@ -580,11 +580,11 @@
 .bankPopup {
   position: absolute;
   top: calc(100% + 8px);
-  left: -16px;
+  left: 0;
   z-index: 10;
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
