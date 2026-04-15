@@ -53,18 +53,6 @@ html[data-theme="dark"] {
   background: transparent;
 }
 
-/* Zero Infima's default .menu padding (0.5rem) on the outer <nav> that
-   wraps the sidebar on desktop. The <nav> carries a hashed CSS-module
-   class (e.g. .menu_SIkG) that is ONLY valid in the current local
-   build — CI/prod builds generate a different hash and any selector
-   keyed off the hash silently stops matching after deploy. Target via
-   the stable container + child combinator instead: this matches the
-   same <nav class="menu …"> without depending on the hash. */
-@media (min-width: 997px) {
-  .menu_SIkG {
-    padding: 0;
-  }
-}
 /* Shared typography — both desktop container and mobile drawer
    render the doc sidebar inside `.theme-doc-sidebar-menu`, so a
    single rule styles both. `.navbar-sidebar__back` is the drawer's
@@ -361,5 +349,11 @@ html[data-theme="dark"] {
     .theme-doc-sidebar-item-category-level-2
     > .menu__list-item-collapsible {
     border-radius: 8px;
+  }
+}
+
+@media (min-width: 997px) {
+  .thin-scrollbar.menu_SIkG {
+    padding: 0;
   }
 }
