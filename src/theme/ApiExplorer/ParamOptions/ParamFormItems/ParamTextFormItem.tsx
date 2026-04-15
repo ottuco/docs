@@ -1,38 +1,83 @@
-/* ============================================================================
- * Copyright (c) Palo Alto Networks
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- * ========================================================================== */
-
-import React from "react";
-
-import FormTextInput from "@theme/ApiExplorer/FormTextInput";
-import { Param, setParam } from "@theme/ApiExplorer/ParamOptions/slice";
+import React, { useEffect, useRef } from "react";
+import { useFormContext } from "react-hook-form";
+import clsx from "clsx";
+// @ts-ignore - theme alias resolved by Docusaurus at build time
+import { setParam } from "@theme/ApiExplorer/ParamOptions/slice";
+// @ts-ignore
 import { useTypedDispatch } from "@theme/ApiItem/hooks";
 
-export interface ParamProps {
-  param: Param;
-}
-
-export default function ParamTextFormItem({ param }: ParamProps) {
+export default function ParamTextFormItem({ param }: { param: any }) {
   const dispatch = useTypedDispatch();
-  return (
-    <FormTextInput
-      isRequired={param.required}
-      paramName={param.name}
-      placeholder={param.description || param.name}
-      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-        dispatch(
-          setParam({
-            ...param,
-            value:
-              param.in === "path" || param.in === "query"
-                ? e.target.value.replace(/\s/g, "%20")
-                : e.target.value,
-          })
-        )
+  const formCtx = useFormContext();
+  const register = formCtx?.register;
+  const setValue = formCtx?.setValue;
+  const errors = formCtx?.formState?.errors;
+  const didInit = useRef(false);
+
+  const example =
+    typeof param.example !== "undefined"
+      ? param.example
+      : param.schema?.example;
+  const hasExample =
+    example !== undefined && example !== null && example !== "";
+
+  // Seed redux + react-hook-form from the example on first mount only.
+  useEffect(() => {
+    if (didInit.current) return;
+    didInit.current = true;
+    if (hasExample && (param.value === undefined || param.value === "")) {
+      const val = String(example);
+      dispatch(setParam({ ...param, value: val }));
+      if (setValue) {
+        setValue(param.name, val, {
+          shouldValidate: false,
+          shouldDirty: false,
+          shouldTouch: false,
+        });
       }
-    />
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const registered = register
+    ? register(param.name, {
+        required: param.required ? "This field is required" : false,
+      })
+    : null;
+  const errorMessage = (errors as any)?.[param.name]?.message as
+    | string
+    | undefined;
+
+  const defaultValue = hasExample ? String(example) : undefined;
+
+  return (
+    <>
+      <input
+        {...(registered ?? {})}
+        className={clsx("openapi-explorer__form-item-input", {
+          error: errorMessage,
+        })}
+        type="text"
+        placeholder={(param.description || param.name)?.split("\n")[0]}
+        title={(param.description || param.name)?.split("\n")[0]}
+        defaultValue={defaultValue}
+        autoComplete="off"
+        onChange={(e) => {
+          registered?.onChange(e);
+          dispatch(
+            setParam({
+              ...param,
+              value:
+                param.in === "path" || param.in === "query"
+                  ? e.target.value.replace(/\s/g, "%20")
+                  : e.target.value,
+            })
+          );
+        }}
+      />
+      {errorMessage && (
+        <div className="openapi-explorer__input-error">{errorMessage}</div>
+      )}
+    </>
   );
 }
