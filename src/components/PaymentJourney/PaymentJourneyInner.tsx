@@ -7,6 +7,7 @@ import {
   callPaymentStatusQuery,
   getWebhookBaseUrl,
 } from "@site/src/utils/sandbox";
+import { appendGuideParams } from "@site/src/utils/buildGuidePayload";
 import { createDemoCallbacks } from "@site/src/utils/checkoutSdk";
 import ApiPanel from "@site/src/components/ApiPanel";
 import CheckoutSDKEmbed from "@site/src/components/CheckoutSDKEmbed";
@@ -566,13 +567,25 @@ export default function PaymentJourneyInner() {
 
           {state.status === "step3a_redirect" && (
             <>
-              <ApiPanel label="checkout_url" data={state.checkoutUrl} />
+              {/*
+                Append demo-guide query params to the checkout URL so the
+                sandbox checkout page (frontend_public) shows the Shepherd.js
+                guided tour with contextual helper cards next to each payment
+                method. See `buildGuidePayload.ts` for the payload shape and
+                ticket #151425 for the full spec.
+
+                TODO(backend): payload is currently built client-side from
+                pg_codes. Once the backend can sign and emit this itself,
+                replace `appendGuideParams` with the server-provided URL.
+              */}
+              <ApiPanel label="checkout_url" data={appendGuideParams(state.checkoutUrl, state.pgCodes)} />
               <p className={styles.cardDescription}>
-                Open the payment link in a new tab, complete the test payment (use card <strong>{TEST_CARD.number}</strong>, expiry <strong>{TEST_CARD.expiry}</strong>, CVV <strong>{TEST_CARD.cvv}</strong>), then come back here to see the webhook.
+                Open the payment link in a new tab, complete the test payment (use card <strong>{TEST_CARD.number}</strong>, expiry <strong>{TEST_CARD.expiry}</strong>, CVV <strong>{TEST_CARD.cvv}</strong>), then come back here to see the webhook. In sandbox, the checkout page will show an interactive guided tour explaining the available payment methods.
               </p>
               <div className={styles.actions}>
                 <button className={styles.primaryBtn} onClick={() => {
-                  window.open(state.checkoutUrl, "_blank");
+                  const guidedUrl = appendGuideParams(state.checkoutUrl, state.pgCodes);
+                  window.open(guidedUrl, "_blank");
                   dispatch({ type: "WAITING_WEBHOOK" });
                 }}>
                   Open Payment Link
