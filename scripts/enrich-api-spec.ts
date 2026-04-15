@@ -74,11 +74,17 @@ interface PermissionBlock {
   extra?: string;
 }
 
+interface ParameterOverride {
+  example?: any;
+  description?: string;
+}
+
 interface OperationEnrichment {
   permissions?: Array<string | PermissionBlock>;
   description_append?: string;
   description_prepend?: string;
   description_replace?: string;
+  parameters?: Record<string, ParameterOverride>;
 }
 
 interface OperationsFile {
@@ -311,6 +317,28 @@ function enrichOperations(
       }
 
       operation.description = description;
+
+      // Apply parameter overrides (example, description)
+      if (enrichment.parameters && Array.isArray(operation.parameters)) {
+        for (const [paramName, override] of Object.entries(enrichment.parameters)) {
+          const param = operation.parameters.find(
+            (p: any) => p.name === paramName
+          );
+          if (!param) {
+            warn(
+              `Parameter '${paramName}' not found on operation '${opId}'`
+            );
+            continue;
+          }
+          if (override.example !== undefined) {
+            param.example = override.example;
+          }
+          if (override.description !== undefined) {
+            param.description = override.description;
+          }
+        }
+      }
+
       count++;
     }
   }
