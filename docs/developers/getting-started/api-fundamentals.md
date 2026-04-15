@@ -54,7 +54,7 @@ Ottu supports two authentication methods for API calls:
 
 A third key type — the **Public Key** — is used only for [Checkout SDK](/developers/payments/checkout-sdk/) initialization, not for API calls.
 
-For setup instructions and permission details, see [Authentication](./authentication).
+For setup instructions and permission details, see [Authentication](/developers/getting-started/authentication/).
 
 ## Request Format
 
@@ -202,12 +202,12 @@ When you exceed the limit, the API returns `429 Too Many Requests`. Implement ex
 
 **Recommended workflow:** Start with the shared sandbox for rapid prototyping, then switch to your own instance to test with your actual gateway configuration before going live.
 
-For test card numbers per gateway, see [Sandbox & Test Cards](../payments/sandbox).
+For test card numbers per gateway, see [Sandbox & Test Cards](/developers/payments/sandbox/).
 
 ## What's Next?
 
-- [**Authentication**](./authentication) — Set up API keys and permissions
-- [**Payment Journey**](../payments/payment-journey) — Interactive integration walkthrough
-- [**Checkout API**](../payments/checkout-api) — Create your first payment transaction
+- [**Authentication**](/developers/getting-started/authentication/) — Set up API keys and permissions
+- [**Payment Journey**](/developers/payments/payment-journey/) — Interactive integration walkthrough
+- [**Checkout API**](/developers/payments/checkout-api/) — Create your first payment transaction
 - [**Error Codes**](/developers/reference/error-codes) — Error response reference
 - [**Payment States**](/developers/reference/payment-states) — Transaction lifecycle and state machine

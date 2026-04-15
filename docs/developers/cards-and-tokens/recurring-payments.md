@@ -14,7 +14,7 @@ import FAQ, { FAQItem } from '@site/src/components/FAQ';
 Auto-debit is a financial arrangement where a customer authorizes a merchant to automatically deduct money from their saved card. This covers subscriptions, installments, recurring billing, and event-based charges — all processed without the customer needing to be present after the initial setup.
 
 :::tip Boost Your Integration
-Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../getting-started/#boost-your-integration) for all available options.
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
 :::
 
 ## When to Use
@@ -28,11 +28,11 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 Before implementing auto-debit, ensure you have:
 
-- A [Payment Gateway](../payments/payment-methods) with auto-debit capability enabled
-- The [Checkout API](../payments/checkout-api) for creating payment sessions
-- [Tokenization](./tokenization) set up — cards must be tokenized before they can be auto-debited
-- A [webhook endpoint](../webhooks/) configured to receive payment notifications
-- Familiarity with the [User Cards API](./user-cards) for card management
+- A [Payment Gateway](/developers/payments/payment-methods/) with auto-debit capability enabled
+- The [Checkout API](/developers/payments/checkout-api/) for creating payment sessions
+- [Tokenization](/developers/cards-and-tokens/tokenization/) set up — cards must be tokenized before they can be auto-debited
+- A [webhook endpoint](/developers/webhooks/) configured to receive payment notifications
+- Familiarity with the [User Cards API](/developers/cards-and-tokens/user-cards/) for card management
 
 ## Guide
 
@@ -83,7 +83,7 @@ graph LR
 1. **CIT** — Merchant creates a session with `payment_type: auto_debit` and an `agreement` object.
 2. **Payment** — Customer enters their card via the Checkout SDK or hosted page and completes 3DS authentication.
 3. **Webhook** — Ottu delivers the token. Save `token.token` and `token.pg_code` for future charges.
-4. **MIT** — Merchant charges the token by creating a new session, then calling the Auto-Debit API (or using [One-Step Checkout](../payments/checkout-api#one-step-checkout)).
+4. **MIT** — Merchant charges the token by creating a new session, then calling the Auto-Debit API (or using [One-Step Checkout](/developers/payments/checkout-api#one-step-checkout)).
 5. **Result** — Webhook confirms the charge. No customer interaction needed.
 
 ### Live Demo
@@ -100,7 +100,7 @@ Experience the complete recurring payment lifecycle. Save a test card, watch the
 
 **Step 0: Discover Payment Methods**
 
-Before creating a session, call the [Payment Methods API](../payments/payment-methods) with `auto_debit: true` to discover which gateways support tokenization and auto-debit:
+Before creating a session, call the [Payment Methods API](/developers/payments/payment-methods/) with `auto_debit: true` to discover which gateways support tokenization and auto-debit:
 
 ```json title="POST /b/pbl/v2/payment-methods/ — Discover Auto-Debit Gateways"
 {
@@ -148,13 +148,13 @@ Create a session with `payment_type: auto_debit` and the `agreement` object. Use
 
 Collect the customer's card using one of these options:
 
-- **[Checkout SDK](../payments/checkout-sdk/)** (recommended) — initialize with the `session_id`
+- **[Checkout SDK](/developers/payments/checkout-sdk/)** (recommended) — initialize with the `session_id`
 - **Redirect to `checkout_url`** — sends the customer to Ottu's hosted checkout page
 - **Redirect to `payment_methods.redirect_url`** — sends the customer directly to a specific gateway's card entry page
 
 **Step 3: Receive Webhook with Token**
 
-After the customer completes the payment, Ottu sends a [webhook notification](../webhooks/payment-events) with the token:
+After the customer completes the payment, Ottu sends a [webhook notification](/developers/webhooks/payment-events/) with the token:
 
 ```json title="Webhook Payload — Token Received"
 {
@@ -186,7 +186,7 @@ Once you have the token, you can charge the customer automatically using either 
 
 **Two-Step (Checkout API + Auto-Debit API):**
 
-1. Create a new session via the [Checkout API](../payments/checkout-api) with the same `pg_code`, `agreement.id`, and `customer_id`
+1. Create a new session via the [Checkout API](/developers/payments/checkout-api/) with the same `pg_code`, `agreement.id`, and `customer_id`
 2. Call the Auto-Debit API with the `session_id` and `token`:
 
 ```json title="POST /b/pbl/v2/auto-debit/ — Charge Saved Card"
@@ -202,7 +202,7 @@ Use the **same** `pg_code`, `agreement.id`, and `customer_id` as the first payme
 
 **One-Step (Checkout API with `payment_instrument`):**
 
-Combine session creation and payment in a single call using [`payment_instrument`](../payments/checkout-api#one-step-checkout). To see this in action, try the [Live Demo](#live-demo) above.
+Combine session creation and payment in a single call using [`payment_instrument`](/developers/payments/checkout-api#one-step-checkout). To see this in action, try the [Live Demo](#live-demo) above.
 
 ```json title="POST /b/checkout/v1/pymt-txn/ — One-Step Checkout"
 {
@@ -231,7 +231,7 @@ Card changes for auto-debit **always require a CIT** (the customer must be prese
 
 1. Customer visits your card management section
 2. Your backend creates a new Checkout session with the same `agreement.id`
-3. Present the [Checkout SDK](../payments/checkout-sdk/) or redirect to `checkout_url`
+3. Present the [Checkout SDK](/developers/payments/checkout-sdk/) or redirect to `checkout_url`
 4. Customer selects or enters a new card
 5. After successful payment, the new card is associated with the agreement
 6. You receive the updated token via webhook
@@ -286,16 +286,16 @@ For recurring billing, notify customers before each charge:
     No. Ottu handles all sensitive card data securely and never exposes it to merchants. You only store tokens, which are safe to keep in your database.
   </FAQItem>
   <FAQItem question="Can I store card tokens in my database?">
-    Yes. Tokens are not actual card numbers — they are secure identifiers generated through [tokenization](./tokenization). They cannot be used outside of Ottu's payment environment.
+    Yes. Tokens are not actual card numbers — they are secure identifiers generated through [tokenization](/developers/cards-and-tokens/tokenization/). They cannot be used outside of Ottu's payment environment.
   </FAQItem>
   <FAQItem question="What if I don't have an agreement ID?">
     Create a unique identifier for your use case. You can use an existing identifier from your system (e.g., subscription ID, order ID) or generate one specifically for the agreement.
   </FAQItem>
   <FAQItem question="When should I save the card token?">
-    Immediately after the first successful payment. While you can always retrieve tokens via the [User Cards API](./user-cards), storing them locally reduces API calls and simplifies your implementation.
+    Immediately after the first successful payment. While you can always retrieve tokens via the [User Cards API](/developers/cards-and-tokens/user-cards/), storing them locally reduces API calls and simplifies your implementation.
   </FAQItem>
   <FAQItem question="Can I recover a missed token?">
-    Yes. Use the [User Cards API](./user-cards) with the `agreement.id` to retrieve saved cards associated with the agreement.
+    Yes. Use the [User Cards API](/developers/cards-and-tokens/user-cards/) with the `agreement.id` to retrieve saved cards associated with the agreement.
   </FAQItem>
   <FAQItem question="Can I update an existing agreement?">
     This functionality is not currently available via API. Contact [support@ottu.com](mailto:support@ottu.com) for assistance.
@@ -304,13 +304,13 @@ For recurring billing, notify customers before each charge:
     Transactions using an expired token will fail. Set up card expiration monitoring and proactively notify customers to update their card details. See [Updating Card Information](#updating-card-information).
   </FAQItem>
   <FAQItem question="Must I use the Checkout SDK?">
-    No, but it's recommended. You can control the payment flow using [Checkout API](../payments/checkout-api) responses directly. However, the SDK simplifies UI implementation and is required for certain payment methods like Apple Pay and Google Pay.
+    No, but it's recommended. You can control the payment flow using [Checkout API](/developers/payments/checkout-api/) responses directly. However, the SDK simplifies UI implementation and is required for certain payment methods like Apple Pay and Google Pay.
   </FAQItem>
 </FAQ>
 
 ## What's Next?
 
-- [**Operations**](../operations) — Refund, capture, or void auto-debit transactions
-- [**Webhooks**](../webhooks/payment-events) — Handle payment notifications for recurring charges
-- [**User Cards**](./user-cards) — Manage saved cards and retrieve tokens
-- [**One-Step Checkout**](../payments/checkout-api#one-step-checkout) — Combine session creation and payment in a single call
+- [**Operations**](/developers/operations/) — Refund, capture, or void auto-debit transactions
+- [**Webhooks**](/developers/webhooks/payment-events/) — Handle payment notifications for recurring charges
+- [**User Cards**](/developers/cards-and-tokens/user-cards/) — Manage saved cards and retrieve tokens
+- [**One-Step Checkout**](/developers/payments/checkout-api#one-step-checkout) — Combine session creation and payment in a single call

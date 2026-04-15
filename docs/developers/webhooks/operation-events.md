@@ -24,7 +24,7 @@ To ensure you receive notifications for subsequent payment gateway operations, i
 3. **Webhook Configuration Details**: \
    For a more in-depth understanding and additional configuration options, refer to the dedicated [webhook config section](/developers/webhooks) in the documentation.
 4. **Webhook Setup Requirements:** \
-   It’s worth noting that the requirements for setting up operation webhooks align with those detailed in the “webhooks overview” page. Ensure you’re familiar with these requirements to guarantee a smooth setup process. For details on these requirements, click [here](./#endpoint-requirements).
+   It’s worth noting that the requirements for setting up operation webhooks align with those detailed in the “webhooks overview” page. Ensure you’re familiar with these requirements to guarantee a smooth setup process. For details on these requirements, click [here](/developers/webhooks/#endpoint-requirements).
 
 By following these steps and ensuring your webhook is correctly configured, you’ll be well-equipped to receive timely updates on all your payment gateway operations.
 
@@ -82,7 +82,7 @@ Operation webhooks are activated under the following scenarios:
 Upon receiving an operation notification, it’s essential to discern and acknowledge the operation’s status and specifics. Here’s a guide on how to interpret the provided details:\
 \
 **Identifying the Transaction:**\
-Every operation is a subsequent action performed on a specific payment transaction, identifiable by its [session\_id](/developers/payments/checkout-api#response-session_id) or [order\_no](/developers/payments/checkout-api#request-order_no). These operations spawn [child payment transactions](/developers/reference/payment-states), each with its distinct payment [attempt](/developers/reference/payment-states) and [state](/developers/reference/payment-states), without altering the primary transaction. The child transaction details are housed in the `txn` field of the [webhook payload](#payload-example-refund). You can retrieve all child transactions from the Payment webhook under the transactions parameter or by invoking the [Payment Status API](/developers/payments/psq).
+Every operation is a subsequent action performed on a specific payment transaction, identifiable by its [session\_id](/developers/payments/checkout-api/) or [order\_no](/developers/payments/checkout-api/). These operations spawn [child payment transactions](/developers/reference/payment-states), each with its distinct payment [attempt](/developers/reference/payment-states) and [state](/developers/reference/payment-states), without altering the primary transaction. The child transaction details are housed in the `txn` field of the [webhook payload](#payload-example-refund). You can retrieve all child transactions from the Payment webhook under the transactions parameter or by invoking the [Payment Status API](/developers/payments/psq).
 
 1. **Types of Operations:**
 
@@ -98,7 +98,7 @@ Every operation is a subsequent action performed on a specific payment transacti
 * `queued`: The operation awaits processing and will be updated in due course.
 
 5. **Verifying the Amount:** As operations exclusively function in the original payment transaction currency, inspecting the amount field ensures the accurate amount is either deducted or appended.
-6. **Interpreting the Transaction State (Optional):** The transaction’s state can be discerned using the [txn.state](#state-string-mandatory) field:
+6. **Interpreting the Transaction State (Optional):** The transaction’s state can be discerned using the `txn.state` field:
 
 * `txn.state = paid`: The transaction was captured.
 * `txn.refunded`: The transaction was refunded.
@@ -112,7 +112,7 @@ By accurately interpreting these fields and states, you can ensure precise ackno
 
 Every operation webhook payload includes a `signature` field — an HMAC-SHA256 hash that proves the payload came from Ottu. **Always verify this signature before processing the operation result.**
 
-For implementation details and code examples, see [Verify Signatures](./verify-signatures).
+For implementation details and code examples, see [Verify Signatures](/developers/webhooks/verify-signatures/).
 
 :::danger
 Never process an operation webhook without verifying the signature. An unverified payload could be forged by an attacker.
@@ -122,7 +122,7 @@ For general webhook setup and configuration, see the [Webhooks Overview](./).
 
 ## What's Next?
 
-- [**PG Params**](./pg-params) — Normalized gateway response fields reference
-- [**Payment Events**](./payment-events) — Webhook notifications for payment transactions
-- [**Verify Signatures**](./verify-signatures) — Validate webhook authenticity with HMAC-SHA256
+- [**PG Params**](/developers/webhooks/pg-params/) — Normalized gateway response fields reference
+- [**Payment Events**](/developers/webhooks/payment-events/) — Webhook notifications for payment transactions
+- [**Verify Signatures**](/developers/webhooks/verify-signatures/) — Validate webhook authenticity with HMAC-SHA256
 - [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration

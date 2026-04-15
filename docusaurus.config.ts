@@ -37,6 +37,9 @@ const config: Config = {
     hooks: {
       onBrokenMarkdownLinks: "warn",
     },
+    mdx1Compat: {
+      headingIds: true, // Allow {#custom-id} syntax in headings (required until v4 migration)
+    },
   },
 
   presets: [

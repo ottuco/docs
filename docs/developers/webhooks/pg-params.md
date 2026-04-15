@@ -50,9 +50,9 @@ Always build your webhook handling logic against `pg_params`. When you add a new
 
 `pg_params` is included in:
 
-- [**Payment webhooks**](./payment-events) — the `pg_params` object in every payment notification
-- [**Operation webhooks**](./operation-events) — the `pg_params` object in refund, capture, and void notifications
-- [**Payment Status Query**](../payments/psq) — the response includes the same normalized fields
+- [**Payment webhooks**](/developers/webhooks/payment-events/) — the `pg_params` object in every payment notification
+- [**Operation webhooks**](/developers/webhooks/operation-events/) — the `pg_params` object in refund, capture, and void notifications
+- [**Payment Status Query**](/developers/payments/psq/) — the response includes the same normalized fields
 
 The raw `gateway_response` is also included in webhook payloads for audit purposes, but you should not rely on it for business logic.
 
@@ -200,13 +200,13 @@ echo 'OK';
     Yes — store it for audit and debugging purposes. If you ever need to open a support ticket with a payment gateway, they'll want to see their original response. But don't build your processing logic on it.
   </FAQItem>
   <FAQItem question="Do operation webhooks include pg_params too?">
-    Yes. [Operation webhooks](./operation-events) (refunds, captures, voids) include `pg_params` with the same normalized fields.
+    Yes. [Operation webhooks](/developers/webhooks/operation-events/) (refunds, captures, voids) include `pg_params` with the same normalized fields.
   </FAQItem>
 </FAQ>
 
 ## What's Next?
 
-- [**Payment Events**](./payment-events) — Full webhook payload reference for payment notifications
-- [**Operation Events**](./operation-events) — Webhook notifications for refunds, captures, and voids
-- [**Verify Signatures**](./verify-signatures) — Validate webhook authenticity with HMAC-SHA256
+- [**Payment Events**](/developers/webhooks/payment-events/) — Full webhook payload reference for payment notifications
+- [**Operation Events**](/developers/webhooks/operation-events/) — Webhook notifications for refunds, captures, and voids
+- [**Verify Signatures**](/developers/webhooks/verify-signatures/) — Validate webhook authenticity with HMAC-SHA256
 - [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration

@@ -12,7 +12,7 @@ import FAQ, { FAQItem } from '@site/src/components/FAQ';
 Ottu's Invoice API automates invoice generation for both online and walk-in customers. You create an invoice with line items, taxes, and discounts — Ottu generates a payment link ([checkout_url](/developers/payments/checkout-api)) that customers can use to view the invoice, download it as PDF, and pay directly. The API integrates with the [Checkout API](/developers/payments/checkout-api) under the hood, so invoices benefit from the same payment gateway support, webhooks, and transaction tracking.
 
 :::tip Boost Your Integration
-Ottu offers SDKs and tools to speed up your integration. See [Getting Started](./getting-started/#boost-your-integration) for all available options.
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
 :::
 
 ## When to Use
@@ -179,7 +179,7 @@ Invoices cannot be modified after creation. If an error is made, create a new in
 
 #### Authentication
 
-Use [Private API Key](/developers/getting-started/authentication#private-key-api-key) or [Basic Authentication](/developers/getting-started/authentication#basic-authentication). Rotate API keys regularly.
+Use [Private API Key](/developers/getting-started/authentication#api-key-auth) or [Basic Authentication](/developers/getting-started/authentication#basic-auth). Rotate API keys regularly.
 
 #### VAL CALC Fields
 
@@ -221,7 +221,7 @@ The invoice calculation uses `ROUND_HALF_UP` at both item and invoice levels:
     Yes, if you know your `pg_code`. But using it ensures you stay informed about gateway changes.
   </FAQItem>
   <FAQItem question="How do I handle authentication?">
-    Use [Private API Key](/developers/getting-started/authentication#private-key-api-key) or [Basic Authentication](/developers/getting-started/authentication#basic-authentication). See [Authentication](/developers/getting-started/authentication).
+    Use [Private API Key](/developers/getting-started/authentication#api-key-auth) or [Basic Authentication](/developers/getting-started/authentication#basic-auth). See [Authentication](/developers/getting-started/authentication).
   </FAQItem>
   <FAQItem question="What are VAL CALC fields?">
     Optional validation fields that check your frontend calculations against Ottu's backend. Include them to catch discrepancies before invoice creation.

@@ -20,7 +20,7 @@ import clsx from "clsx";
 import {
   getQualifierMessage as _getQualifierMessage,
   getSchemaName,
-} from "docusaurus-plugin-openapi-docs/lib/markdown/schema";
+} from "docusaurus-theme-openapi-docs/lib/markdown/schema";
 import {
   SchemaObject,
   SchemaType,
@@ -175,7 +175,7 @@ const AnyOneOf: React.FC<SchemaProps> = ({
       <span className="badge badge--info" style={{ marginBottom: "1rem" }}>
         {type}
       </span>
-      {/* @ts-expect-error upstream SchemaTabsProps type chain is broken */}
+      {/* @ts-ignore — SchemaTabsProps omits children in v5 but passes them as JSX children */}
       <SchemaTabs defaultValue={defaultValue}>
         {schema[type]?.map((anyOneSchema: any, index: number) => {
           const label = anyOneSchema.title || anyOneSchema.type;

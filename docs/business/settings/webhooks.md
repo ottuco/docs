@@ -23,7 +23,7 @@ For technical details on webhook payloads, signatures, and integration, see the 
 
 | Field | Description |
 |-------|-------------|
-| **HMAC key** | The secret key used to generate webhook signatures. Your server uses this to verify that notifications genuinely come from Ottu. See [Signing Mechanism](/developers/webhooks/signing-mechanism) |
+| **HMAC key** | The secret key used to generate webhook signatures. Your server uses this to verify that notifications genuinely come from Ottu. See [Signing Mechanism](/developers/webhooks/verify-signatures/) |
 | **Ignore SSL** | When checked, Ottu skips SSL certificate verification when calling your webhook URL. Use only in development environments |
 | **Notify on Error** | When checked, sends an email notification if an error occurs while delivering a webhook |
 | **Email List** | The email addresses that receive webhook error notifications |
@@ -55,7 +55,7 @@ Consider a scenario where your server is down for 30 seconds, with these setting
 | **Version** | The webhook API version |
 | **Enable webhook notifications** | Master switch to activate webhook notifications |
 | **Enable retry webhook mechanism** | Activates the retry logic described above |
-| **Operations webhook_url** | A dedicated URL for receiving [operation notifications](/developers/webhooks/operation-notification) (refunds, voids, captures) |
+| **Operations webhook_url** | A dedicated URL for receiving [operation notifications](/developers/webhooks/operation-events/) (refunds, voids, captures) |
 | **Enable webhook notifications if transaction initiated from API** | When checked, webhooks fire even for transactions created via the API (not just dashboard-created transactions) |
 
 :::note Redirect Behavior
@@ -83,11 +83,11 @@ You can define webhook behavior for specific [plugins](/business/plugins/), rout
 | **Delete** | Removes this plugin-specific webhook configuration |
 
 :::note
-The webhook URL defined in a plugin configuration receives notifications for both [payment events](/developers/webhooks/payment-notification) and [operation events](/developers/webhooks/operation-notification). If you configure both an **Operations webhook_url** (in general settings) and a plugin-specific webhook URL, Ottu sends data to both URLs.
+The webhook URL defined in a plugin configuration receives notifications for both [payment events](/developers/webhooks/payment-events/) and [operation events](/developers/webhooks/operation-events/). If you configure both an **Operations webhook_url** (in general settings) and a plugin-specific webhook URL, Ottu sends data to both URLs.
 :::
 
 ## What's Next?
 
-- **[Global Configuration](./global)** — Configure merchant identity and system-wide settings
+- **[Global Configuration](/business/settings/global/)** — Configure merchant identity and system-wide settings
 - **[Notifications](/business/notifications/)** — Set up customer-facing email, SMS, and WhatsApp notifications
 - **[Webhooks (Developer Guide)](/developers/webhooks/)** — Technical documentation for webhook payloads, signatures, and integration

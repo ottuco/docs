@@ -45,5 +45,5 @@ Template configuration is managed by the [Ottu support team](mailto:support@ottu
 
 - [Email Notifications](./email.md) -- Learn about email notification setup and availability
 - [SMS Notifications](./sms.md) -- Learn about SMS notification setup and availability
-- [WhatsApp Notifications](./whatsapp/) -- Learn about WhatsApp notification options
+- [WhatsApp Notifications](/business/notifications/whatsapp/) -- Learn about WhatsApp notification options
 - [Delivery Process](./delivery-process.md) -- Understand how notifications are delivered (automatic vs. manual)

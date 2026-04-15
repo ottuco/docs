@@ -19,7 +19,7 @@ Additionally, optional configurations such as the [forms of payment](#formsofpay
 
 :::warning
 
-[API private key](../../../getting-started/authentication#private-key-api-key) should never be used on the client side. Instead, [API public key ](../../../getting-started/authentication#public-key)should be used. This is essential to ensure the security of your application and the protection of sensitive data.
+[API private key](../../../getting-started/authentication#api-key-auth) should never be used on the client side. Instead, [API public key ](../../../getting-started/authentication#public-key)should be used. This is essential to ensure the security of your application and the protection of sensitive data.
 :::
 
 This video walks you step-by-step through the iOS SDK integration process. Watch it to quickly understand setup, configuration, and key features in action.

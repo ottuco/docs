@@ -48,6 +48,6 @@ The [Manual WhatsApp channel](./whatsapp/manual.md) does **not** send notificati
 
 - [Email Notifications](./email.md) -- Learn about email notification setup and states
 - [SMS Notifications](./sms.md) -- Learn about SMS notification setup and states
-- [WhatsApp Notifications](./whatsapp/) -- Explore WhatsApp notification options
+- [WhatsApp Notifications](/business/notifications/whatsapp/) -- Explore WhatsApp notification options
 - [Notification Templates](./templates.md) -- Understand template availability across channels
 - [Transaction Insights](/business/payment-management/transaction-insights) -- Learn about the Transaction Table and payment monitoring

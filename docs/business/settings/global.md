@@ -102,11 +102,11 @@ If you operate multiple Ottu installations connected to a single payment gateway
 | Field | Description |
 |-------|-------------|
 | **Enable session timeout** | When enabled, users without refund/void permissions are automatically logged out after the defined session timeout period |
-| **Enable URL shortener** | Activates the URL shortener for public payment links. See [URL Shortener Configuration](./url-shortener) for setup details |
+| **Enable URL shortener** | Activates the URL shortener for public payment links. See [URL Shortener Configuration](/business/settings/url-shortener) for setup details |
 
 ## What's Next?
 
-- **[Webhooks Configuration](./webhooks)** — Set up real-time notifications for payment and operation events
-- **[API Keys](./api-keys)** — Generate API keys for developer integration
+- **[Webhooks Configuration](/business/settings/webhooks)** — Set up real-time notifications for payment and operation events
+- **[API Keys](/business/settings/api-keys)** — Generate API keys for developer integration
 - **[Currencies](/business/payments/currencies)** — Configure currency exchange and multi-currency support
 - **[Plugins](/business/plugins/)** — Manage payment request and e-commerce plugins

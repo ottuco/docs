@@ -13,11 +13,11 @@ To integrate the Checkout SDK, it must be incorporated into the Android applicat
 - [session_id](#sessionid-string-required)
 - [API public key](../../../getting-started/authentication#public-key)
 
-Additionally, various configuration options, such as accepted [payment methods](#formsofpayment-array-optional) and [theme ](#customization-theme)styling for the checkout interface, can be specified to enhance the user experience.
+Additionally, various configuration options, such as accepted [payment methods](#formsofpayment-array-optional) and [theme ](#theme)styling for the checkout interface, can be specified to enhance the user experience.
 
 :::warning
 
-The [API private key](../../../getting-started/authentication#private-key-api-key) should never be utilized on the client side; instead, use the [API public key](../../../getting-started/authentication#public-key). This is essential for maintaining the security of your application and safeguarding sensitive data.
+The [API private key](../../../getting-started/authentication#api-key-auth) should never be utilized on the client side; instead, use the [API public key](../../../getting-started/authentication#public-key). This is essential for maintaining the security of your application and safeguarding sensitive data.
 :::
 
 This video guides you step-by-step through the **Android SDK integration process**. Watch it to quickly learn how to set up, configure, and see the key features in action.
@@ -278,7 +278,7 @@ The `apiKey` is your Ottu [API public key](../../../getting-started/authenticati
 
 :::warning
 
-Make sure to use the public key and avoid using the private key. The [API private key](../../../getting-started/authentication#private-key-api-key) must be kept confidential at all times and should never be shared with any clients.
+Make sure to use the public key and avoid using the private key. The [API private key](../../../getting-started/authentication#api-key-auth) must be kept confidential at all times and should never be shared with any clients.
 :::
 
 #### **sessionId** _`string`_ _`required`_
