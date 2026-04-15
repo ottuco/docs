@@ -51,7 +51,7 @@ graph LR
 1. **Call the Payment Methods API** — retrieve available payment methods based on your filters.
 
     ```json
-    POST: https://beta.ottu.net/b/pbl/v2/payment-methods/
+    POST: https://sandbox.ottu.net/b/pbl/v2/payment-methods/
     {
         "plugin": "e_commerce",
         "operation": "purchase",
