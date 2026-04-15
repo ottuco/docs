@@ -352,8 +352,18 @@ html[data-theme="dark"] {
   }
 }
 
+/* Zero Infima's default .menu padding (0.5rem) on the outer <nav> that
+   wraps the sidebar on desktop. The <nav> carries a hashed CSS-module
+   class (e.g. .menu_SIkG) that is content-dependent and may rotate on
+   any future Docusaurus/dependency change — a selector keyed off the
+   hash silently stops matching after that. Target via the stable
+   container + descendant selector instead: `.theme-doc-sidebar-container
+   nav.menu` matches the same <nav> without depending on the hash. The
+   nav is NOT a direct child of the container (it's nested inside
+   .sidebarViewport/.sidebar wrappers), so a descendant combinator is
+   required, not `>`. */
 @media (min-width: 997px) {
-  .thin-scrollbar.menu_SIkG {
+  .theme-doc-sidebar-container nav.menu {
     padding: 0;
   }
 }
