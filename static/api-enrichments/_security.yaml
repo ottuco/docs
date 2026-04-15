@@ -8,14 +8,14 @@
 # For selective remapping instead, use the 'mapping' key — see scripts/README.md.
 
 schemes:
-  Basic Auth:
-    type: http
-    scheme: basic
   API Key Auth:
     type: apiKey
     in: header
     name: Authorization
     description: API key authentication with required prefix "Api-Key"
+  Basic Auth:
+    type: http
+    scheme: basic
 
 # When true, every operation gets ALL schemes from the 'schemes' block above,
 # regardless of what the raw spec had. This ensures the API explorer always
