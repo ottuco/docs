@@ -16,8 +16,8 @@ To ensure you receive notifications for subsequent payment gateway operations, i
 1. **Webhook URL Configuration:** \
    There are two ways to configure `webhook_url` for operations&#x20;
 
-* Configuring the operation `webhook_url` within webhook general configuration. For more details, click [here](/developers/webhooks).
-* Configuring the operation `webhook_url` through payment webhook plugin configuration. For further information, click [here](/developers/webhooks).
+- Configuring the operation `webhook_url` within webhook general configuration. For more details, click [here](/developers/webhooks).
+- Configuring the operation `webhook_url` through payment webhook plugin configuration. For further information, click [here](/developers/webhooks).
 
 2. **Enable API-initiated Transaction Notifications:**\
    If you want to receive webhook notifications for transactions initiated via the API, ensure you check the box labeled “Enable webhook notifications if transaction initiated from API.” For instructions on how to do this, please consult the following [reference](/developers/webhooks).
@@ -82,29 +82,29 @@ Operation webhooks are activated under the following scenarios:
 Upon receiving an operation notification, it’s essential to discern and acknowledge the operation’s status and specifics. Here’s a guide on how to interpret the provided details:\
 \
 **Identifying the Transaction:**\
-Every operation is a subsequent action performed on a specific payment transaction, identifiable by its [session\_id](/developers/payments/checkout-api/) or [order\_no](/developers/payments/checkout-api/). These operations spawn [child payment transactions](/developers/reference/payment-states), each with its distinct payment [attempt](/developers/reference/payment-states) and [state](/developers/reference/payment-states), without altering the primary transaction. The child transaction details are housed in the `txn` field of the [webhook payload](#payload-example-refund). You can retrieve all child transactions from the Payment webhook under the transactions parameter or by invoking the [Payment Status API](/developers/payments/psq).
+Every operation is a subsequent action performed on a specific payment transaction, identifiable by its [session_id](/developers/payments/checkout-api/) or [order_no](/developers/payments/checkout-api/). These operations spawn [child payment transactions](/developers/reference/payment-states), each with its distinct payment [attempt](/developers/reference/payment-states) and [state](/developers/reference/payment-states), without altering the primary transaction. The child transaction details are housed in the `txn` field of the [webhook payload](#payload-example-refund). You can retrieve all child transactions from the Payment webhook under the transactions parameter or by invoking the [Payment Status API](/developers/payments/psq).
 
 1. **Types of Operations:**
 
-* **Real-time Operations:** Immediate actions where, for instance, a refund request results in an instant refund. [Child transactions](/developers/reference/payment-states) are created for successful real-time operations, while failures aren’t stored.
-* **Queued Operations:** The Payment Gateway (PG) might not approve the request instantly, placing it in a queue for later processing. Such operations initially bear a `<operation>_queued` state. Once processed, the state either transitions to the specific operation state (like `refunded`, `captured`, `voided`) or `<operation>_rejected`.
+- **Real-time Operations:** Immediate actions where, for instance, a refund request results in an instant refund. [Child transactions](/developers/reference/payment-states) are created for successful real-time operations, while failures aren’t stored.
+- **Queued Operations:** The Payment Gateway (PG) might not approve the request instantly, placing it in a queue for later processing. Such operations initially bear a `<operation>_queued` state. Once processed, the state either transitions to the specific operation state (like `refunded`, `captured`, `voided`) or `<operation>_rejected`.
 
 2. **Understanding Real-time and Queued Payment Gateways:**&#x54;o determine which Payment Gateways operate in real-time and which ones use the queued system, you can consult the list provided [here](/developers/operations).
 3. **Additional Information:** Upon receiving a `<operation>_queued` status, such as `refund_queued`, it’s imperative to archive this response. Ottu will subsequently notify the operation webhook URL with the conclusive result.
 4. **Understanding the result Field:** `result` this field elucidates the operation’s outcome:
 
-* `success`: The operation was executed successfully.
-* `rejected`: The operation was declined. This status invariably succeeds a queued status.
-* `queued`: The operation awaits processing and will be updated in due course.
+- `success`: The operation was executed successfully.
+- `rejected`: The operation was declined. This status invariably succeeds a queued status.
+- `queued`: The operation awaits processing and will be updated in due course.
 
 5. **Verifying the Amount:** As operations exclusively function in the original payment transaction currency, inspecting the amount field ensures the accurate amount is either deducted or appended.
 6. **Interpreting the Transaction State (Optional):** The transaction’s state can be discerned using the `txn.state` field:
 
-* `txn.state = paid`: The transaction was captured.
-* `txn.refunded`: The transaction was refunded.
-* `txn.refund_queued`: The refund operation is pending.
-* `txn.refund_rejected`: The refund operation was declined.
-* `txn.voided`: The transaction was voided.
+- `txn.state = paid`: The transaction was captured.
+- `txn.refunded`: The transaction was refunded.
+- `txn.refund_queued`: The refund operation is pending.
+- `txn.refund_rejected`: The refund operation was declined.
+- `txn.voided`: The transaction was voided.
 
 By accurately interpreting these fields and states, you can ensure precise acknowledgment of all your subsequent payment operations.
 

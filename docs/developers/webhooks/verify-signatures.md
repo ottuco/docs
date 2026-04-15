@@ -11,31 +11,31 @@ To ensure the integrity and authenticity of the [webhook notifications](/develop
 
 #### 1. HMAC Key (Secret Key)
 
-* This is the backbone of the signing and verification process. Merchants can retrieve their unique HMAC Key from the Webhook Configuration panel within Ottu's admin dashboard [here](/developers/webhooks).
-* It's paramount that this key remains confidential. Always store it securely and avoid exposing it to the public.
+- This is the backbone of the signing and verification process. Merchants can retrieve their unique HMAC Key from the Webhook Configuration panel within Ottu's admin dashboard [here](/developers/webhooks).
+- It's paramount that this key remains confidential. Always store it securely and avoid exposing it to the public.
 
 #### 2. Fields for Signature
 
 The signature is not derived from every field in the webhook payload. See payload example [here](/developers/webhooks/payment-events#payload-example-paid). Only specific fields are considered. These are:
 
-* amount
-* currency\_code
-* customer\_first\_name
-* customer\_last\_name
-* customer\_email
-* customer\_phone
-* customer\_address\_line1
-* customer\_address\_line2
-* customer\_address\_city
-* customer\_address\_state
-* customer\_address\_country
-* customer\_address\_postal\_code
-* gateway\_account
-* gateway\_name
-* order\_no
-* reference\_number
-* result
-* state
+- amount
+- currency_code
+- customer_first_name
+- customer_last_name
+- customer_email
+- customer_phone
+- customer_address_line1
+- customer_address_line2
+- customer_address_city
+- customer_address_state
+- customer_address_country
+- customer_address_postal_code
+- gateway_account
+- gateway_name
+- order_no
+- reference_number
+- result
+- state
 
 **Key Considerations**:
 
@@ -46,14 +46,14 @@ This update ensures that developers understand the significance of field presenc
 
 #### 3. Signature Creation
 
-* Fields from the payload are extracted based on the aforementioned list, sorted alphabetically by key name, and then concatenated to form a unique message string.
-* This string, combined with the HMAC Key, is used to create the **HMAC-SHA256** signature. This resultant signature is then dispatched with the [webhook notification](/developers/webhooks/payment-events).
+- Fields from the payload are extracted based on the aforementioned list, sorted alphabetically by key name, and then concatenated to form a unique message string.
+- This string, combined with the HMAC Key, is used to create the **HMAC-SHA256** signature. This resultant signature is then dispatched with the [webhook notification](/developers/webhooks/payment-events).
 
 #### 4. Verification by Merchant
 
-* On receipt of the webhook, merchants should rebuild the message string, using the listed fields.
-* Generate an HMAC signature using their stored [HMAC Key](/developers/webhooks).
-* If the computed signature corresponds to the provided one, the payload's authenticity is confirmed. Any discrepancies suggest potential tampering.
+- On receipt of the webhook, merchants should rebuild the message string, using the listed fields.
+- Generate an HMAC signature using their stored [HMAC Key](/developers/webhooks).
+- If the computed signature corresponds to the provided one, the payload's authenticity is confirmed. Any discrepancies suggest potential tampering.
 
 ## Example
 
@@ -63,9 +63,9 @@ For illustration purposes, let's consider a sample webhook payload and a hypothe
 
 ```json
 {
-   "amount":"86.000",
-   "currency_code":"KWD",
-   "customer_first_name":"example-customer"
+  "amount": "86.000",
+  "currency_code": "KWD",
+  "customer_first_name": "example-customer"
 }
 ```
 
@@ -161,14 +161,14 @@ function generateHmacSignature($payload, $hmacKey) {
         // ... [add all the other keys here] ...
         "reference_number", "result", "state"
     ];
-    
+
     $message = "";
     foreach ($keys as $key) {
         if (isset($payload[$key]) && $payload[$key] !== "") {
             $message .= $key . $payload[$key];
         }
     }
-    
+
     return hash_hmac('sha256', $message, $hmacKey);
 }
 
@@ -228,12 +228,12 @@ public class SignatureGenerator {
             }
         }
         Collections.sort(sortedKeys);
-        for (String key : sortedKeys) 
+        for (String key : sortedKeys)
         {
               message.append(key).append(payload.get(key));
-        } 
+        }
 
- 
+
         Mac sha256HMAC = Mac.getInstance("HmacSHA256");
         SecretKeySpec secretKey = new SecretKeySpec(hmacKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
         sha256HMAC.init(secretKey);
@@ -253,7 +253,7 @@ public class SignatureGenerator {
         payload.put("customer_first_name", "example-customer");
 
         String hmacKey = "pu9MpX3yPR";
-        
+
         System.out.println(generateHmacSignature(payload, hmacKey));
     }
 }
@@ -304,30 +304,35 @@ public class SignatureGenerator {
 ### Node.js
 
 ```javascript title="Node.js"
-const crypto = require('crypto');
+const crypto = require("crypto");
 
 function generateHmacSignature(payload, hmacKey) {
-    const keys = [
-        'amount', 'currency_code', 'customer_first_name',
-        // ... [add all the other keys here] ...
-        'reference_number', 'result', 'state'
-    ];
-    
-    const sortedKeys = Object.keys(payload).sort();
-    const messageArray = sortedKeys.filter(key => keys.includes(key)).map(key => [key, payload[key]]);
-    const message = messageArray.map(([k, v]) => `${k}${v}`).join('');
-    
-    const hmac = crypto.createHmac('sha256', hmacKey);
-    hmac.update(message);
-    
-    return hmac.digest('hex');
+  const keys = [
+    "amount",
+    "currency_code",
+    "customer_first_name",
+    // ... [add all the other keys here] ...
+    "reference_number",
+    "result",
+    "state",
+  ];
+
+  const sortedKeys = Object.keys(payload).sort();
+  const messageArray = sortedKeys
+    .filter((key) => keys.includes(key))
+    .map((key) => [key, payload[key]]);
+  const message = messageArray.map(([k, v]) => `${k}${v}`).join("");
+
+  const hmac = crypto.createHmac("sha256", hmacKey);
+  hmac.update(message);
+
+  return hmac.digest("hex");
 }
 
-
 const payload = {
-    amount: "86.000",
-    currency_code: "KWD",
-    customer_first_name: "example-customer"
+  amount: "86.000",
+  currency_code: "KWD",
+  customer_first_name: "example-customer",
 };
 const hmacKey = "pu9MpX3yPR";
 

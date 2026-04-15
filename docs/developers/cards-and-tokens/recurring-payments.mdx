@@ -7,7 +7,8 @@ hide_table_of_contents: true
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import RecurringDemo from "@site/src/components/RecurringDemo";
 import TestCardCallout from "@site/src/components/TestCardCallout";
-import FAQ, { FAQItem } from '@site/src/components/FAQ';
+import FAQ, { FAQItem } from "@site/src/components/FAQ";
+import StepGuide from "@site/src/components/StepGuide";
 
 # Recurring Payments & Auto-Debit
 
@@ -58,11 +59,11 @@ Only **one card** can be linked to an agreement at any time. To change the card,
 
 #### Agreement Types
 
-| Type | Use Case | Required Fields |
-|------|----------|-----------------|
-| **Recurring** | Subscriptions, regular billing | `id`, `frequency`, `amount_variability`, `expiry_date`, `cycle_interval_days`, `total_cycles` |
-| **Unscheduled** | On-demand charges (e.g., account top-ups) | `id`, `frequency` |
-| **Installment** | Split payments for a single purchase | `id`, `frequency`, `amount_variability`, `expiry_date`, `cycle_interval_days`, `total_cycles`, `seller` |
+| Type            | Use Case                                  | Required Fields                                                                                         |
+| --------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| **Recurring**   | Subscriptions, regular billing            | `id`, `frequency`, `amount_variability`, `expiry_date`, `cycle_interval_days`, `total_cycles`           |
+| **Unscheduled** | On-demand charges (e.g., account top-ups) | `id`, `frequency`                                                                                       |
+| **Installment** | Split payments for a single purchase      | `id`, `frequency`, `amount_variability`, `expiry_date`, `cycle_interval_days`, `total_cycles`, `seller` |
 
 ### Workflow
 
@@ -98,87 +99,74 @@ Experience the complete recurring payment lifecycle. Save a test card, watch the
 
 #### First Payment (CIT)
 
-**Step 0: Discover Payment Methods**
+<StepGuide steps={[
+  {
+    title: "Discover Payment Methods",
+    description: <>Before creating a session, call the <a href="../payments/payment-methods">Payment Methods API</a> with <code>auto_debit: true</code> to discover which gateways support tokenization and auto-debit.<br /><br /><pre><code>{`POST /b/pbl/v2/payment-methods/
 
-Before creating a session, call the [Payment Methods API](/developers/payments/payment-methods/) with `auto_debit: true` to discover which gateways support tokenization and auto-debit:
-
-```json title="POST /b/pbl/v2/payment-methods/ — Discover Auto-Debit Gateways"
 {
-  "plugin": "payment_request",
-  "operation": "purchase",
-  "currencies": ["KWD"],
-  "auto_debit": true
-}
-```
-
-Use the returned `pg_codes` in the next step.
-
-**Step 1: Create Payment Session**
-
-Create a session with `payment_type: auto_debit` and the `agreement` object. Use a unique `customer_id` per customer — all future MIT charges and saved cards are associated with this ID.
-
-```json title="POST /b/checkout/v1/pymt-txn/ — Create CIT Session"
-{
-  "type": "e_commerce",
-  "amount": "200.00",
-  "payment_type": "auto_debit",
-  "currency_code": "KWD",
-  "pg_codes": ["credit-card"],
-  "customer_id": "cust_123",
-  "webhook_url": "https://yourwebsite.com/webhook",
-  "agreement": {
-    "id": "A123456789",
-    "type": "recurring",
-    "amount_variability": "fixed",
-    "start_date": "01/04/2026",
-    "expiry_date": "01/04/2027",
-    "cycle_interval_days": 30,
-    "total_cycles": 12,
-    "frequency": "monthly",
-    "seller": {
-      "name": "Your-Business-Name",
-      "short_name": "YBN",
-      "category_code": "1234"
-    }
-  }
-}
-```
-
-**Step 2: Collect Card Details**
-
-Collect the customer's card using one of these options:
-
-- **[Checkout SDK](/developers/payments/checkout-sdk/)** (recommended) — initialize with the `session_id`
-- **Redirect to `checkout_url`** — sends the customer to Ottu's hosted checkout page
-- **Redirect to `payment_methods.redirect_url`** — sends the customer directly to a specific gateway's card entry page
-
-**Step 3: Receive Webhook with Token**
-
-After the customer completes the payment, Ottu sends a [webhook notification](/developers/webhooks/payment-events/) with the token:
-
-```json title="Webhook Payload — Token Received"
-{
-  "session_id": "4a462681df6aab64e27cedc9bbf733cd6442578b",
-  "result": "success",
-  "state": "paid",
-  "payment_type": "auto_debit",
-  "customer_id": "cust_123",
-  "agreement": {
-    "id": "A123456789",
-    "type": "recurring"
+"plugin": "payment_request",
+"operation": "purchase",
+"currencies": ["KWD"],
+"auto_debit": true
+}`}</code></pre> Use the returned <code>pg_codes</code> in the next step.</>,
   },
-  "token": {
-    "token": "9923965822244314",
-    "customer_id": "cust_123",
-    "brand": "VISA",
-    "number": "**** 1019",
-    "pg_code": "credit-card",
-    "agreements": ["A123456789"]
-  }
-}
-```
+  {
+    title: "Create Payment Session",
+    description: <>Create a session with <code>payment_type: auto_debit</code> and the <code>agreement</code> object. Use a unique <code>customer_id</code> per customer — all future MIT charges and saved cards are associated with this ID.<br /><br /><pre><code>{`POST /b/checkout/v1/pymt-txn/
 
-**Save the `token.token` and `token.pg_code`** — you'll need them for subsequent charges.
+{
+"type": "e_commerce",
+"amount": "200.00",
+"payment_type": "auto_debit",
+"currency_code": "KWD",
+"pg_codes": ["credit-card"],
+"customer_id": "cust_123",
+"webhook_url": "https://yourwebsite.com/webhook",
+"agreement": {
+"id": "A123456789",
+"type": "recurring",
+"amount_variability": "fixed",
+"start_date": "01/04/2026",
+"expiry_date": "01/04/2027",
+"cycle_interval_days": 30,
+"total_cycles": 12,
+"frequency": "monthly",
+"seller": {
+"name": "Your-Business-Name",
+"short_name": "YBN",
+"category_code": "1234"
+}
+}
+}`}</code></pre></>,
+  },
+  {
+    title: "Collect Card Details",
+    description: <>Collect the customer's card using one of these options:<br /><br />• <strong><a href="../payments/checkout-sdk/">Checkout SDK</a></strong> (recommended) — initialize with the <code>session_id</code><br />• <strong>Redirect to <code>checkout_url</code></strong> — sends the customer to Ottu's hosted checkout page<br />• <strong>Redirect to <code>payment_methods.redirect_url</code></strong> — sends the customer directly to a specific gateway's card entry page</>,
+  },
+  {
+    title: "Receive Webhook with Token",
+    description: <>After the customer completes the payment, Ottu sends a <a href="../webhooks/payment-events">webhook notification</a> with the token:<br /><br /><pre><code>{`{
+"session_id": "4a462681df6aab64e27cedc9bbf733cd6442578b",
+"result": "success",
+"state": "paid",
+"payment_type": "auto_debit",
+"customer_id": "cust_123",
+"agreement": {
+"id": "A123456789",
+"type": "recurring"
+},
+"token": {
+"token": "9923965822244314",
+"customer_id": "cust_123",
+"brand": "VISA",
+"number": "\*\*\*\* 1019",
+"pg_code": "credit-card",
+"agreements": ["A123456789"]
+}
+}`}</code></pre><strong>Save the <code>token.token</code> and <code>token.pg_code</code></strong> — you'll need them for subsequent charges.</>,
+},
+]} nextSectionId="subsequent-payments-mit" />
 
 #### Subsequent Payments (MIT)
 
@@ -254,6 +242,7 @@ When an MIT payment fails:
 4. **Allow card update** — the customer may need to update their saved card
 
 Common failure reasons:
+
 - **Insufficient funds** — retry after a delay
 - **Expired card** — request card update from customer
 - **Gateway decline** — check with payment gateway for details
@@ -262,6 +251,7 @@ Common failure reasons:
 #### Pre-Charge Notifications
 
 For recurring billing, notify customers before each charge:
+
 - **1 week before** — upcoming charge notification
 - **1 day before** — final reminder with option to modify
 - Include a link to update card or cancel subscription
@@ -283,28 +273,44 @@ For recurring billing, notify customers before each charge:
 
 <FAQ>
   <FAQItem question="Do I need PCI DSS compliance for auto-debit?">
-    No. Ottu handles all sensitive card data securely and never exposes it to merchants. You only store tokens, which are safe to keep in your database.
+    No. Ottu handles all sensitive card data securely and never exposes it to
+    merchants. You only store tokens, which are safe to keep in your database.
   </FAQItem>
   <FAQItem question="Can I store card tokens in my database?">
-    Yes. Tokens are not actual card numbers — they are secure identifiers generated through [tokenization](/developers/cards-and-tokens/tokenization/). They cannot be used outside of Ottu's payment environment.
+    Yes. Tokens are not actual card numbers — they are secure identifiers
+    generated through
+    [tokenization](/developers/cards-and-tokens/tokenization/). They cannot be
+    used outside of Ottu's payment environment.
   </FAQItem>
   <FAQItem question="What if I don't have an agreement ID?">
-    Create a unique identifier for your use case. You can use an existing identifier from your system (e.g., subscription ID, order ID) or generate one specifically for the agreement.
+    Create a unique identifier for your use case. You can use an existing
+    identifier from your system (e.g., subscription ID, order ID) or generate
+    one specifically for the agreement.
   </FAQItem>
   <FAQItem question="When should I save the card token?">
-    Immediately after the first successful payment. While you can always retrieve tokens via the [User Cards API](/developers/cards-and-tokens/user-cards/), storing them locally reduces API calls and simplifies your implementation.
+    Immediately after the first successful payment. While you can always
+    retrieve tokens via the [User Cards
+    API](/developers/cards-and-tokens/user-cards/), storing them locally reduces
+    API calls and simplifies your implementation.
   </FAQItem>
   <FAQItem question="Can I recover a missed token?">
-    Yes. Use the [User Cards API](/developers/cards-and-tokens/user-cards/) with the `agreement.id` to retrieve saved cards associated with the agreement.
+    Yes. Use the [User Cards API](/developers/cards-and-tokens/user-cards/) with
+    the `agreement.id` to retrieve saved cards associated with the agreement.
   </FAQItem>
   <FAQItem question="Can I update an existing agreement?">
-    This functionality is not currently available via API. Contact [support@ottu.com](mailto:support@ottu.com) for assistance.
+    This functionality is not currently available via API. Contact
+    [support@ottu.com](mailto:support@ottu.com) for assistance.
   </FAQItem>
   <FAQItem question="What happens if the customer's card expires?">
-    Transactions using an expired token will fail. Set up card expiration monitoring and proactively notify customers to update their card details. See [Updating Card Information](#updating-card-information).
+    Transactions using an expired token will fail. Set up card expiration
+    monitoring and proactively notify customers to update their card details.
+    See [Updating Card Information](#updating-card-information).
   </FAQItem>
   <FAQItem question="Must I use the Checkout SDK?">
-    No, but it's recommended. You can control the payment flow using [Checkout API](/developers/payments/checkout-api/) responses directly. However, the SDK simplifies UI implementation and is required for certain payment methods like Apple Pay and Google Pay.
+    No, but it's recommended. You can control the payment flow using [Checkout
+    API](/developers/payments/checkout-api/) responses directly. However, the
+    SDK simplifies UI implementation and is required for certain payment methods
+    like Apple Pay and Google Pay.
   </FAQItem>
 </FAQ>
 

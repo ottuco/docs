@@ -254,25 +254,11 @@
     "operationMode": "purchase",
     "logo": "benefit_icon.svg",
     "acceptedAt": [
-      "NBB",
-      "BBK",
-      "Al Salam",
-      "KFH",
-      "BisB",
-      "Khaleeji",
-      "Ithmaar",
-      "BDB",
-      "HBTF",
+      "Credimax",
+      "EazyPay",
       "Ahli United",
-      "AlBaraka",
-      "Arab Bank",
-      "Citi",
-      "ICICI",
-      "Mashreq",
-      "NBK",
-      "Standard Chartered",
-      "SBI",
-      "UBL"
+      "Al Salam",
+      "KFH Bahrain"
     ],
     "cardBrands": [
       "Benefit"
@@ -1077,27 +1063,17 @@
     "integrationType": "redirect",
     "category": "local_debit",
     "operationMode": "purchase",
-    "logo": "knet_icon.svg",
+    "logo": "knet_logo.png",
     "acceptedAt": [
       "NBK",
-      "CBK",
-      "Gulf",
-      "ABK",
-      "KIB",
-      "Burgan",
       "KFH",
+      "Gulf",
+      "CBK",
+      "Burgan",
       "Boubyan",
       "Warba",
-      "BBK",
-      "HSBC",
-      "FAB",
-      "Citi",
-      "QNB",
-      "Mashreq",
-      "Al Rajhi",
-      "Bank Muscat",
-      "ICBC",
-      "Doha Bank"
+      "KIB",
+      "ABK"
     ],
     "cardBrands": [
       "KNET"
@@ -1462,21 +1438,11 @@
     "logo": "omannet_icon.svg",
     "acceptedAt": [
       "Bank Muscat",
-      "Bank Dhofar",
       "NBO",
+      "Bank Dhofar",
       "Oman Arab Bank",
       "Sohar",
-      "Ahli",
-      "Bank Nizwa",
-      "Alizz",
-      "FAB",
-      "QNB",
-      "Standard Chartered",
-      "SBI",
-      "Habib Bank",
-      "Bank of Beirut",
-      "Bank Melli Iran",
-      "Bank Saderat Iran"
+      "Ahli"
     ],
     "cardBrands": [
       "OmanNet"
@@ -1648,7 +1614,8 @@
       "Visa",
       "Mastercard",
       "RuPay",
-      "Diners"
+      "Diners",
+      "UPI"
     ],
     "digitalWallets": [
       "PayTM",
@@ -1688,24 +1655,8 @@
     "logo": "qpay.svg",
     "acceptedAt": [
       "QNB",
-      "CBQ",
       "Doha Bank",
-      "Ahli",
-      "QIB",
-      "Dukhan",
-      "QIIB",
-      "Masraf Al Rayan",
-      "Lesha",
-      "Arab Bank",
-      "Mashreq",
-      "Standard Chartered",
-      "HSBC",
-      "UBL",
-      "Bank Saderat Iran",
-      "BNP Paribas",
-      "Abu Dhabi Islamic Bank",
-      "Bank Audi",
-      "BLOM Bank"
+      "CBQ"
     ],
     "cardBrands": [
       "NAPS"
@@ -1855,7 +1806,7 @@
     "integrationType": "redirect",
     "category": "gateway",
     "operationMode": "purchase",
-    "logo": "sohar.svg",
+    "logo": "sohar.png",
     "acceptedAt": [],
     "cardBrands": [
       "Visa",

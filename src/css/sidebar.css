@@ -10,7 +10,7 @@
  * ============================================================ */
 
 :root {
-  --doc-sidebar-width: 340px;
+  --doc-sidebar-width: 320px;
   --ottu-sidebar-bg: #ffffff;
   --ottu-sidebar-divider: rgba(218, 218, 218, 0.5);
   --ottu-sidebar-text-primary: #1a1a1a;
@@ -53,6 +53,18 @@ html[data-theme="dark"] {
   background: transparent;
 }
 
+/* Zero Infima's default .menu padding (0.5rem) on the outer <nav> that
+   wraps the sidebar on desktop. The <nav> carries a hashed CSS-module
+   class (e.g. .menu_SIkG) that is ONLY valid in the current local
+   build — CI/prod builds generate a different hash and any selector
+   keyed off the hash silently stops matching after deploy. Target via
+   the stable container + child combinator instead: this matches the
+   same <nav class="menu …"> without depending on the hash. */
+@media (min-width: 997px) {
+  .menu_SIkG {
+    padding: 0;
+  }
+}
 /* Shared typography — both desktop container and mobile drawer
    render the doc sidebar inside `.theme-doc-sidebar-menu`, so a
    single rule styles both. `.navbar-sidebar__back` is the drawer's
@@ -62,6 +74,12 @@ html[data-theme="dark"] {
 .navbar-sidebar__back {
   font-family: "Poppins", sans-serif;
   line-height: normal;
+}
+
+/* Zero padding only on the caret button — stripping it from .menu__link
+   broke the business sidebar where links rely on Infima's default padding. */
+.theme-doc-sidebar-menu .menu__caret {
+  padding: 0;
 }
 
 /* Remove Infima's default active fill on every collapsible row
@@ -74,7 +92,7 @@ html[data-theme="dark"] {
   margin: 0;
 }
 
-/* ── Level 1: "Developers" root ────────────────────────────── */
+/* ── Level 1: root category row ────────────────────────────── */
 
 .theme-doc-sidebar-item-category-level-1 > .menu__list-item-collapsible {
   min-height: 36px;
@@ -92,6 +110,37 @@ html[data-theme="dark"] {
   font-size: 14px;
   font-weight: 400;
   color: var(--ottu-sidebar-text-primary);
+}
+
+/* ── Developers-only: caret on the LEFT of "Developers" ────── */
+
+/* Figma places the chevron before the text on the Developers root.
+   The business sidebar uses the same level-1 class, so scope this
+   override via :has() to the category whose direct L1 link points
+   to /developers/. The row's children are source-ordered [link,
+   caret]; flex-direction: row-reverse renders caret first. Caret
+   rotation rules key off .menu__list-item--collapsed, not DOM order,
+   so they still apply. */
+.theme-doc-sidebar-item-category-level-1:has(
+    > .menu__list-item-collapsible > .menu__link[href="/developers/"]
+  )
+  > .menu__list-item-collapsible {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  /* 12px left padding aligns the caret with the 12px text indent
+     used by the L2 rows below (Getting Started, Payments, …). */
+  padding-left: 12px;
+}
+
+.theme-doc-sidebar-item-category-level-1:has(
+    > .menu__list-item-collapsible > .menu__link[href="/developers/"]
+  )
+  > .menu__list-item-collapsible
+  > .menu__link {
+  /* Text hugs the caret with an ~8px gap (the default 12px left
+     padding would push "Developers" too far from the chevron). */
+  padding-left: 8px;
 }
 
 /* L2 stack — Figma: gap-4 between sections */
@@ -126,8 +175,7 @@ html[data-theme="dark"] {
   color: var(--ottu-sidebar-text-primary);
 }
 
-.theme-doc-sidebar-item-category-level-2
-  > .menu__list-item-collapsible:hover {
+.theme-doc-sidebar-item-category-level-2 > .menu__list-item-collapsible:hover {
   background: var(--ottu-sidebar-hover-bg);
 }
 
@@ -252,6 +300,24 @@ html[data-theme="dark"] {
 .menu__link--sublist-caret::after {
   background-size: 16px 16px;
   transition: transform 0.2s ease;
+}
+
+/* Chevron alignment — the business sidebar mixes two category renderings:
+   (1) categories WITH a landing page use `<a> + <button class="menu__caret">`
+       → button sits at the row's right edge (row padding-right = 0);
+   (2) categories WITHOUT a landing page use `<a class="menu__link--sublist-caret">`
+       → the chevron is an `::after` inside the link's content box, so its
+       right edge lands at `row right − link padding-right (12px)`.
+   Zero the right padding on variant (2) so its chevron lines up with the
+   button chevron from variant (1). The `::after` has its own min-width
+   (1.25rem) which keeps the gap between the label and the chevron. */
+.theme-doc-sidebar-menu .menu__link--sublist-caret {
+  padding-right: 0 !important;
+}
+.theme-doc-sidebar-menu .menu__link--sublist-caret::after {
+  min-width: auto;
+  width: 16px;
+  height: 16px;
 }
 
 /*

@@ -308,7 +308,7 @@ Instead of creating a session first and then calling a separate payment endpoint
 This flow is ideal when you want to immediately process a payment as it's created, for example:
 
 - A "Buy Now" button on a product page that charges the customer right away.
-- A subsequent [auto-debit](../cards-and-tokens/recurring-payments.md) payment using a stored token.
+- A subsequent [auto-debit](../cards-and-tokens/recurring-payments.mdx) payment using a stored token.
 - A wallet-based purchase (Apple Pay / Google Pay) where you already have the payment payload on the server and don't use [Checkout SDK.](/developers/payments/checkout-sdk/)
 - Instant, server-triggered payments that must both create and execute the payment in real time.
 
@@ -329,11 +329,11 @@ Use One-Step Checkout when you:
 
 ### Supported Instruments
 
-| instrument_type | Description                             | Typical Use Case                                                                         |
-| :-------------: | --------------------------------------- | ---------------------------------------------------------------------------------------- |
-|   `apple_pay`   | Apple Pay digital wallet                | Apple Pay supported devices                                                              |
-|  `google_pay`   | Google Pay digital wallet               | Google Pay from Android or Chrome                                                        |
-|     `token`     | Token-based stored or recurring payment | [Auto-debit](../cards-and-tokens/recurring-payments.md) or saved card tokenized payments |
+| instrument_type | Description                             | Typical Use Case                                                                          |
+| :-------------: | --------------------------------------- | ----------------------------------------------------------------------------------------- |
+|   `apple_pay`   | Apple Pay digital wallet                | Apple Pay supported devices                                                               |
+|  `google_pay`   | Google Pay digital wallet               | Google Pay from Android or Chrome                                                         |
+|     `token`     | Token-based stored or recurring payment | [Auto-debit](../cards-and-tokens/recurring-payments.mdx) or saved card tokenized payments |
 
 ### Rules & Restrictions
 
@@ -477,7 +477,7 @@ When a valid [payment_instrument](/developers/payments/checkout-api/) is provide
 </FAQItem>
 
 <FAQItem question="Can I set up recurring payments using the Checkout API?">
-  Yes! Use [Auto-Debit](../cards-and-tokens/recurring-payments.md) with
+  Yes! Use [Auto-Debit](../cards-and-tokens/recurring-payments.mdx) with
   `payment_type` set to `auto_debit` to create agreements for recurring
   transactions.
 </FAQItem>
@@ -525,4 +525,4 @@ When a valid [payment_instrument](/developers/payments/checkout-api/) is provide
 - [**Checkout SDK**](/developers/payments/checkout-sdk/) — Drop-in UI for web and mobile that uses the Checkout API
 - [**Webhooks**](../webhooks/payment-events.md) — Handle payment results on your server
 - [**Operations**](../operations.md) — Refund, capture, or void completed transactions
-- [**Recurring Payments**](../cards-and-tokens/recurring-payments.md) — Set up auto-debit using saved cards
+- [**Recurring Payments**](../cards-and-tokens/recurring-payments.mdx) — Set up auto-debit using saved cards

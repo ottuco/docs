@@ -70,13 +70,13 @@ If you need a gateway response field that isn't currently in `pg_params`, contac
 
 Both fields are included in webhook payloads. Here's when to use each:
 
-|  | `pg_params` | `gateway_response` |
-|---|---|---|
-| **Format** | Consistent across all gateways | Varies by gateway |
-| **Structure** | Flat key-value object | Nested, gateway-specific |
-| **Stability** | Field names are fixed | Can change when a gateway updates their API |
-| **Use for** | Business logic, display, reconciliation | Audit trails, debugging, gateway support tickets |
-| **Recommended** | Yes — primary integration field | Store for audit, don't build logic on it |
+|                 | `pg_params`                             | `gateway_response`                               |
+| --------------- | --------------------------------------- | ------------------------------------------------ |
+| **Format**      | Consistent across all gateways          | Varies by gateway                                |
+| **Structure**   | Flat key-value object                   | Nested, gateway-specific                         |
+| **Stability**   | Field names are fixed                   | Can change when a gateway updates their API      |
+| **Use for**     | Business logic, display, reconciliation | Audit trails, debugging, gateway support tickets |
+| **Recommended** | Yes — primary integration field         | Store for audit, don't build logic on it         |
 
 :::warning
 The raw `gateway_response` format can change without notice when a payment gateway updates their API. Building business logic on raw gateway responses means your integration can break at any time. Use `pg_params` for all programmatic decisions.
@@ -142,7 +142,9 @@ app.post("/webhook", (req, res) => {
   // Use the top-level 'state' for payment status
   const state = payload.state;
 
-  console.log(`Payment ${state}: card=${cardNumber}, auth=${authCode}, rrn=${rrn}`);
+  console.log(
+    `Payment ${state}: card=${cardNumber}, auth=${authCode}, rrn=${rrn}`
+  );
 
   // Store the raw gateway_response for audit purposes only
   const gatewayResponse = payload.gateway_response || {};

@@ -25,13 +25,13 @@ Click **Add URL Shortener Configuration** to create a new configuration.
 
 ## Field Descriptions
 
-| Field | Description |
-|-------|-------------|
-| **URL shortening tool** | The third-party service used to shorten URLs |
-| **API URL** | The API endpoint of the URL shortening service |
-| **User** | The username for authenticating with the shortening service |
-| **Password** | The password for authenticating with the shortening service |
-| **Is global** | When checked, this configuration applies to all payment links across the installation. When unchecked, it applies only to specific cases |
+| Field                   | Description                                                                                                                              |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **URL shortening tool** | The third-party service used to shorten URLs                                                                                             |
+| **API URL**             | The API endpoint of the URL shortening service                                                                                           |
+| **User**                | The username for authenticating with the shortening service                                                                              |
+| **Password**            | The password for authenticating with the shortening service                                                                              |
+| **Is global**           | When checked, this configuration applies to all payment links across the installation. When unchecked, it applies only to specific cases |
 
 ## What's Next?
 
