@@ -20,7 +20,7 @@ Every payment starts with a **payment transaction** — the metadata for the pay
 
 #### REST API
 
-Ottu's REST API is the foundation for all integrations. Start with [Authentication](getting-started/authentication.md) to set up your API keys, then use the [Checkout API](payments/checkout-api.mdx) to create payments. Set up [Webhooks](webhooks/index.md) to get real-time notifications when payment states change — you specify a [webhook URL](payments/checkout-api.mdx#request-webhook_url) when creating a transaction, and Ottu sends status updates there.
+Ottu's REST API is the foundation for all integrations. Start with [Authentication](getting-started/authentication.md) to set up your API keys, then use the [Checkout API](payments/checkout-api.mdx) to create payments. Set up [Webhooks](webhooks/index.md) to get real-time notifications when payment states change — you specify a [webhook URL](payments/checkout-api.mdx) when creating a transaction, and Ottu sends status updates there.
 
 #### Checkout SDK
 

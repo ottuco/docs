@@ -11,6 +11,7 @@ This section covers three core capabilities that work together:
 Replace sensitive card data with secure tokens. Ottu handles PCI DSS compliance — you store only the token, never the card number.
 
 Two methods available:
+
 - **Save without payment** — store a card for future use without charging (`payment_type: save_card`, `amount: 0`)
 - **Save during payment** — tokenize the card as part of a successful transaction
 
@@ -55,6 +56,7 @@ flowchart LR
 ```
 
 **Typical flow:**
+
 1. Merchant creates a payment session via the [Checkout API](/developers/payments/checkout-api) and presents the checkout page to the customer (via [SDK](/developers/payments/checkout-sdk) or redirect)
 2. Customer enters their card details and completes the payment — on success, the card is tokenized and the token is delivered to the merchant via [webhook](/developers/webhooks/payment-events)
 3. Merchant stores the token and can list/manage saved cards via the [User Cards API](user-cards.mdx)

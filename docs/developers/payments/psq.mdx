@@ -18,7 +18,7 @@ The response mirrors the structure of a [payment webhook payload](/developers/we
 When multiple payment methods were attempted using different gateways, all gateways supporting status checks are queried — ensuring you receive the most up-to-date status.
 
 :::tip Boost Your Integration
-Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../getting-started/#boost-your-integration) for all available options.
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
 :::
 
 ## When to Use
@@ -152,7 +152,7 @@ Provide `session_id` (preferred — always present) or `order_no`. At least one 
     At least one payment gateway that supports status checks, and familiarity with the [payment webhook response](/developers/webhooks/payment-events) format.
   </FAQItem>
   <FAQItem question="What authentication does the Payment Status Query API support?">
-    Both [API Key](/developers/getting-started/authentication#private-key-api-key) and [Basic Authentication](/developers/getting-started/authentication#basic-authentication). No special permissions required for Basic Auth beyond `payment.inquiry`.
+    Both [API Key](/developers/getting-started/authentication#api-key-auth) and [Basic Authentication](/developers/getting-started/authentication#basic-auth). No special permissions required for Basic Auth beyond `payment.inquiry`.
   </FAQItem>
   <FAQItem question="Which payment transaction states can I inquire?">
     You can trigger the inquiry for `pending`, `attempted`, `failed`, or `expired` states. For `paid` or `authorized`, the status is returned immediately without querying the gateway. See [Payment States](/developers/reference/payment-states).
