@@ -16,6 +16,9 @@ export const BANK_LOGOS: Record<string, string> = {
   "Al-Tijari": "al-tijari.png",
   // Bahrain
   NBB: "nbb.png",
+  Credimax: "credimax.png",
+  EazyPay: "eazypay.png",
+  "KFH Bahrain": "kfh.png",
   BBK: "bbk.png",
   "Al Salam": "al-salam.png",
   BisB: "bisb.png",
@@ -42,6 +45,7 @@ export const BANK_LOGOS: Record<string, string> = {
   "Bank Nizwa": "bank-nizwa.png",
   Alizz: "alizz.png",
   Sohar: "sohar.png",
+  "Oman Arab Bank": "oman-arab-bank.png",
   Ahli: "ahli.png",
   // UAE & KSA
   "Al Rajhi": "al-rajhi.png",
@@ -99,6 +103,7 @@ export const NETWORK_LOGOS: Record<string, string> = {
   KNET: "/img/gateways/knet_icon.svg",
   Benefit: "/img/gateways/benefit_icon.svg",
   OmanNet: "/img/gateways/omannet_icon.svg",
+  UPI: "/img/networks/upi.svg",
 };
 
 /** Currency code → flag image filename in /img/flags/ */
