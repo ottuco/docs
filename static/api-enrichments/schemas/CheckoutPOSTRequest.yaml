@@ -8,8 +8,6 @@ _example:
   currency_code: KWD
   pg_codes:
     - knet
-  webhook_url: https://test.com/webhook
-  redirect_url: https://test.com/redirect
 
 properties:
   # ── Shared fields (same description across schemas) ──────────
