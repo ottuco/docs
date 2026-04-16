@@ -21,15 +21,23 @@ operations:
       session_id:
         example: b17b883a03eaf1837a21b47e8b78c49f6ecec917
 
-  Update_payment_transaction_checkout:
+  full_update_payment_transaction_checkout:
     permissions:
       - $perm:api_key_admin
       - $perm:basic_auth_update_checkout
+    parameters:
+      session_id:
+        example: b17b883a03eaf1837a21b47e8b78c49f6ecec917
     description_append: |
       :::info
       For PATCH, updates can be performed as long as the payment gateway
       codes are not updated. PUT requires permission for the existing `pg_code`.
       :::
+
+  partial_update_payment_transaction_checkout:
+    parameters:
+      session_id:
+        example: b17b883a03eaf1837a21b47e8b78c49f6ecec917
 
   upload_attachment:
     permissions:

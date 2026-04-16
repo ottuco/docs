@@ -1,1 +1,1 @@
-{"parameters":[{"in":"path","name":"session_id","schema":{"type":"string","pattern":"^[-\\w]+$"},"required":true}]}
+{"parameters":[{"in":"path","name":"session_id","schema":{"type":"string","pattern":"^[-\\w]+$"},"required":true,"example":"b17b883a03eaf1837a21b47e8b78c49f6ecec917"}]}
