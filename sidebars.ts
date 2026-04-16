@@ -82,10 +82,11 @@ const sidebars: SidebarsConfig = {
                 },
                 {type: 'link', label: 'Upload Attachment', href: '/developers/payments/checkout-api#upload-attachment'},
                 {type: 'link', label: 'One-Step Checkout', href: '/developers/payments/checkout-api#one-step-checkout'},
+                {type: 'link', label: 'Branding Options', href: '/developers/payments/checkout-api#branding-options'},
                 {type: 'link', label: 'FAQ', href: '/developers/payments/checkout-api#faq'},
               ],
             },
-            {
+{
               type: 'category',
               label: 'Payment Status Query',
               link: {type: 'doc', id: 'developers/payments/psq'},

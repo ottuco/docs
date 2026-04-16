@@ -411,6 +411,206 @@ When a valid [payment_instrument](/developers/payments/checkout-api/) is provide
 
 ---
 
+## Branding Options
+
+The `branding_options` request parameter lets you attach custom display labels to individual payment methods on the checkout page. Use it to promote offers, highlight preferred gateways, or visually guide customers toward specific payment options.
+
+### What It Renders
+
+When branding is configured for a payment method, the Ottu Checkout SDK displays a **styled text label** directly below the payment method name. The label uses the `color` you provide as the **text foreground color**. Think of it as a small promotional badge attached to a gateway — for example, a green "30% cashback!" label under the KPay button.
+
+```
+┌─────────────────────────────────┐
+│  🏦  KPay                       │
+│       30% cashback!  ← colored  │
+├─────────────────────────────────┤
+│  💳  MPGS                       │
+│       Recommended    ← colored  │
+├─────────────────────────────────┤
+│  💳  CyberSource                │
+│       (no branding)             │
+└─────────────────────────────────┘
+```
+
+### How It Works
+
+1. **You send** `branding_options` in the [Checkout API POST](#api-create-a-new-payment-transaction) or [PATCH](#api-update-payment-transaction) request, mapping each desired `pg_code` to a branding item (`text`, `color`, `font_weight`).
+2. **Ottu stores** the branding data on the payment transaction. The data is persisted regardless of whether you set `include_sdk_setup_preload` to `true`.
+3. **When the checkout loads**, each payment method that has branding shows the `branding_options` object inside `sdk_setup_preload_payload.payment_methods[]`. Payment methods without branding do not include the field.
+
+:::info Prerequisite
+To see `branding_options` in the **API response**, set [`include_sdk_setup_preload`](/developers/payments/checkout-api) to `true`. Without it, the branding is still stored on the transaction and the Checkout SDK will display it, but the `sdk_setup_preload_payload` will not be included in the Checkout API response body.
+:::
+
+### Field Reference
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `branding_options` | `object` | No | — | Top-level wrapper. Write-only — accepted in requests, never returned at the top level of the response. |
+| `branding_options.payment_methods` | `object` | Yes (when `branding_options` is provided) | — | Dictionary keyed by `pg_code`. Must not be empty. Every key must exist in the transaction's `pg_codes`. |
+| `payment_methods.{pg_code}.text` | `string` | Yes | — | Display text shown to the customer (e.g., "30% cashback!"). No length limit enforced by the API, but keep it short for optimal display. |
+| `payment_methods.{pg_code}.color` | `string` | Yes | — | Hex color code with `#` prefix. Formats: `#RGB` or `#RRGGBB`. Examples: `#FF0000`, `#FFF`, `#00cc99`. |
+| `payment_methods.{pg_code}.font_weight` | `integer` | No | `700` | CSS font-weight value. Common values: 400 (regular), 500 (medium), 600 (semi-bold), 700 (bold). The API accepts any integer — values outside standard CSS range are passed to the SDK as-is. |
+
+### End-to-End Example
+
+**1. Create a transaction with branding**
+
+```json
+POST: https://sandbox.ottu.net/b/checkout/v1/pymt-txn/
+{
+  "type": "payment_request",
+  "amount": "50.000",
+  "currency_code": "KWD",
+  "pg_codes": ["kpay", "mpgs", "cybersource"],
+  "include_sdk_setup_preload": true,
+  "branding_options": {
+    "payment_methods": {
+      "kpay": {
+        "text": "30% cashback!",
+        "color": "#008000",
+        "font_weight": 700
+      },
+      "mpgs": {
+        "text": "Recommended",
+        "color": "#1A73E8",
+        "font_weight": 500
+      }
+    }
+  }
+}
+```
+
+**2. Response** — branding appears inside `sdk_setup_preload_payload.payment_methods[]`:
+
+```json
+{
+  "session_id": "abc123xyz",
+  "amount": "50.000",
+  "currency_code": "KWD",
+  "sdk_setup_preload_payload": {
+    "payment_methods": [
+      {
+        "code": "kpay",
+        "name": "KPay",
+        "amount": "50.000",
+        "currency_code": "KWD",
+        "branding_options": {
+          "text": "30% cashback!",
+          "color": "#008000",
+          "font_weight": 700
+        }
+      },
+      {
+        "code": "mpgs",
+        "name": "MPGS",
+        "amount": "50.000",
+        "currency_code": "KWD",
+        "branding_options": {
+          "text": "Recommended",
+          "color": "#1A73E8",
+          "font_weight": 500
+        }
+      },
+      {
+        "code": "cybersource",
+        "name": "CyberSource",
+        "amount": "50.000",
+        "currency_code": "KWD"
+      }
+    ]
+  }
+}
+```
+
+:::info
+`cybersource` has no `branding_options` because no branding was provided for it. `kpay`'s `font_weight` defaults to **700** since it was explicitly set, while `mpgs` uses **500**.
+:::
+
+### PATCH Behavior
+
+Sending `branding_options` on PATCH **replaces** the entire branding object — it does not merge with existing branding. To update branding for one gateway while keeping others, include all desired gateways in the PATCH payload.
+
+```json
+PATCH: https://sandbox.ottu.net/b/checkout/v1/pymt-txn/{session_id}/
+{
+  "branding_options": {
+    "payment_methods": {
+      "kpay": {
+        "text": "Limited time offer!",
+        "color": "#E91E63",
+        "font_weight": 600
+      },
+      "mpgs": {
+        "text": "Recommended",
+        "color": "#1A73E8"
+      }
+    }
+  }
+}
+```
+
+:::info
+When PATCHing without `pg_codes`, branding keys are validated against the transaction's existing `pg_codes`. To remove all branding, omit the `branding_options` field entirely — the existing branding remains unchanged. There is no way to explicitly clear branding to an empty state in a single PATCH.
+:::
+
+### Validation Rules and Error Responses
+
+| Rule | Error |
+|------|-------|
+| `payment_methods` is empty `{}` | `branding_options.payment_methods must not be empty.` |
+| A key is not a valid `pg_code` on the transaction | `branding_options.payment_methods keys must be a subset of pg_codes: ['bad_code'] are not valid.` |
+| `color` is not a valid hex code | `Enter a valid hex color code, e.g. '#FFFF00' or '#FFF'.` |
+| `text` or `color` is missing | `This field is required.` |
+
+**Example — unknown pg_code:**
+
+```json
+// Request
+{
+  "pg_codes": ["kpay"],
+  "branding_options": {
+    "payment_methods": {
+      "unknown_gateway": { "text": "Offer", "color": "#FF0000" }
+    }
+  }
+}
+
+// Response — 400
+{
+  "branding_options": [
+    "branding_options.payment_methods keys must be a subset of pg_codes: ['unknown_gateway'] are not valid."
+  ]
+}
+```
+
+**Example — invalid color:**
+
+```json
+// Request
+{
+  "pg_codes": ["kpay"],
+  "branding_options": {
+    "payment_methods": {
+      "kpay": { "text": "Offer", "color": "red" }
+    }
+  }
+}
+
+// Response — 400
+{
+  "branding_options": {
+    "payment_methods": {
+      "kpay": {
+        "color": ["Enter a valid hex color code, e.g. '#FFFF00' or '#FFF'."]
+      }
+    }
+  }
+}
+```
+
+---
+
 ## FAQ
 
 <FAQ>
@@ -517,6 +717,22 @@ When a valid [payment_instrument](/developers/payments/checkout-api/) is provide
 
   <FAQItem question="What is `file_url`, and where can I use it?">
     The `file_url` is the relative URL of an uploaded file generated by the Upload Attachment API. It can be used to attach the same file to other transactions by including it in the `attachment_upload_url` parameter of the Checkout API request payload.
+  </FAQItem>
+
+  <FAQItem question="Can I set default branding at the shop or merchant level?">
+    No. Branding is configured per transaction via the Checkout API. Each API call specifies its own `branding_options`. There is no shop-level or merchant-level default.
+  </FAQItem>
+
+  <FAQItem question="Do I need include_sdk_setup_preload to use branding?">
+    The branding data is stored on the transaction regardless. However, `include_sdk_setup_preload` must be `true` for branding to appear in the API response. If you use the Ottu Checkout SDK, the SDK fetches payment methods separately and branding will be included automatically.
+  </FAQItem>
+
+  <FAQItem question="What happens if I update pg_codes and remove a branded gateway?">
+    If you send a PATCH that changes `pg_codes` and the new list no longer includes a previously branded gateway, the request will be rejected. Update `branding_options` in the same PATCH to remove the orphaned keys.
+  </FAQItem>
+
+  <FAQItem question="Does PATCH merge or replace branding_options?">
+    PATCH **replaces** the entire `branding_options` object. If your transaction has branding for `kpay` and `mpgs`, and you PATCH with only `kpay`, the `mpgs` branding is removed. Always include all desired gateways in the PATCH payload.
   </FAQItem>
 </FAQ>
 
