@@ -1,0 +1,5 @@
+# Overrides for: components/schemas/Inquiry
+# Request body for POST /pbl/v2/inquiry/
+
+_example:
+  session_id: b17b883a03eaf1837a21b47e8b78c49f6ecec917
