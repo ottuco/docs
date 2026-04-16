@@ -1562,7 +1562,12 @@
                                       "description": "CSS font-weight value. Defaults to 700 (bold).",
                                       "default": 700
                                     }
-                                  }
+                                  },
+                                  "required": [
+                                    "text",
+                                    "color",
+                                    "font_weight"
+                                  ]
                                 }
                               }
                             },
