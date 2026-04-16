@@ -85,8 +85,7 @@ const sidebars: SidebarsConfig = {
                 {type: 'link', label: 'FAQ', href: '/developers/payments/checkout-api#faq'},
               ],
             },
-            {type: 'doc', id: 'developers/payments/branding-options', label: 'Branding Options'},
-            {
+{
               type: 'category',
               label: 'Payment Status Query',
               link: {type: 'doc', id: 'developers/payments/psq'},
