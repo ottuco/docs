@@ -101,6 +101,8 @@ interface SchemaPropertyOverride {
   description?: string;
   properties?: Record<string, SchemaPropertyOverride | string>;
   remove_enum?: boolean;
+  format?: string;
+  type?: string;
 }
 
 interface SchemaFile {
@@ -392,6 +394,16 @@ function enrichSchemaProperties(
           `Property '${fullPath}' not found in schema '${schemaName}'`
         );
       }
+    }
+
+    // Format/type override (e.g., fixing `format: uri` → `format: binary` for file uploads)
+    if (overrideObj.format && schemaProps[propName]) {
+      schemaProps[propName].format = overrideObj.format;
+      count++;
+    }
+    if (overrideObj.type && schemaProps[propName]) {
+      schemaProps[propName].type = overrideObj.type;
+      count++;
     }
 
     // Remove enum values
