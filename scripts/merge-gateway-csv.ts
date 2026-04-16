@@ -94,7 +94,7 @@ const CATEGORY_MAP: Record<string, string> = {
   "Local Debit": "local_debit",
   "Wallet": "wallet",
   "BNPL": "bnpl",
-  "Aggregator": "aggregator",
+  "Aggregator": "psp_ptsp",
   "Acquirer": "acquirer",
   "OpenBanking": "openbanking",
   "Specialist": "specialty",
