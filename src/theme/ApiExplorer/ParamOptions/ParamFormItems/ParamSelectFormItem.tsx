@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import { translate } from "@docusaurus/Translate";
 import { ErrorMessage } from "@hookform/error-message";
@@ -12,10 +12,56 @@ import { useTypedDispatch } from "@theme/ApiItem/hooks";
 import { OPENAPI_FORM } from "@theme/translationIds";
 
 export default function ParamSelectFormItem({ param }: { param: any }) {
-  const { control, formState: { errors } } = useFormContext();
-  const showErrorMessage = errors?.paramSelect;
+  const formCtx = useFormContext();
+  const control = formCtx?.control;
+  const errors = formCtx?.formState?.errors;
+  const setValue = formCtx?.setValue;
   const dispatch = useTypedDispatch();
+  const didInit = useRef(false);
   const options: string[] = param.schema?.enum ?? [];
+
+  const example =
+    typeof param.example !== "undefined" ? param.example : param.schema?.example;
+  const hasExample =
+    example !== undefined &&
+    example !== null &&
+    example !== "" &&
+    options.includes(String(example));
+
+  // Seed redux + react-hook-form from the example on first mount only.
+  useEffect(() => {
+    if (didInit.current) return;
+    didInit.current = true;
+    if (hasExample && (param.value === undefined || param.value === "")) {
+      const val = String(example);
+      dispatch(setParam({ ...param, value: val }));
+      if (setValue) {
+        setValue("paramSelect", val, {
+          shouldValidate: false,
+          shouldDirty: false,
+          shouldTouch: false,
+        });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const showErrorMessage = errors?.paramSelect;
+  const defaultValue = hasExample ? String(example) : "---";
+
+  if (!control) {
+    // Rendered outside FormProvider (e.g. params list panel) — uncontrolled fallback
+    return (
+      <FormSelect
+        options={["---", ...options]}
+        value={defaultValue}
+        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+          const val = e.target.value;
+          dispatch(setParam({ ...param, value: val === "---" ? undefined : val }));
+        }}
+      />
+    );
+  }
 
   return (
     <>
@@ -30,9 +76,11 @@ export default function ParamSelectFormItem({ param }: { param: any }) {
             : false,
         }}
         name="paramSelect"
-        render={({ field: { onChange } }) => (
+        defaultValue={defaultValue}
+        render={({ field: { onChange, value } }) => (
           <FormSelect
             options={["---", ...options]}
+            value={value ?? "---"}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               const val = e.target.value;
               dispatch(
