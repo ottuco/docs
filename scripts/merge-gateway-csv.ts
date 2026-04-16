@@ -37,7 +37,7 @@ const CSV_NAME_TO_SLUG: Record<string, string> = {
   "MPGS": "mpgs",
   "MyFatoorah": "myfatoorah",
   "NBO Gateway": "nbo",
-  "Network International (NI)": "ngenius",
+  "Network International (NI)": "ni",
   "OmanNet": "omannet",
   "Paymob": "paymob",
   "Payon": "payon",
