@@ -1,0 +1,6 @@
+# Overrides for: components/schemas/ChannelSpecificNotification
+# Request body for POST /b/pbl/v2/notifications/send/{channel}/
+
+_example:
+  template_id: payment-request-mail
+  to: customer@example.com

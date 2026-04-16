@@ -13,3 +13,6 @@ operations:
   send_specific_notification:
     description_replace: |
       Send a notification via a specific channel (email, SMS, or WhatsApp) for a given template. The channel is specified in the URL path.
+    parameters:
+      channel:
+        example: email
