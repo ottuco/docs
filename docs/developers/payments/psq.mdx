@@ -77,9 +77,9 @@ Ottu includes a built-in automatic inquiry feature that runs without any merchan
 2. **Retries** — the job queries the gateway **3 times** to ensure accurate reconciliation. If a successful response is received during any call, the remaining retries are skipped.
 3. **Webhook delivery** — once the automatic inquiry resolves the status, Ottu sends a [webhook notification](/developers/webhooks/payment-events) to the merchant.
 
-**Aggregator handling (e.g., MyFatoorah):**
+**PSP & PTSP handling (e.g., MyFatoorah):**
 
-Some aggregator integrations may return a `pending` status even after the customer is redirected back. This happens when the underlying gateway hasn't provided a definitive response yet. In these cases:
+Some PSP and PTSP integrations may return a `pending` status even after the customer is redirected back. This happens when the underlying gateway hasn't provided a definitive response yet. In these cases:
 
 - Ottu does **not** send a webhook for the `pending` status.
 - Instead, Ottu schedules additional inquiry jobs to monitor the status.

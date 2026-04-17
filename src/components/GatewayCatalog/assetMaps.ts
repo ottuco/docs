@@ -83,7 +83,7 @@ export const BRAND_ICONS: Record<string, string> = {
 export const WALLET_ICONS: Record<string, string> = {
   "Apple Pay": "apple-pay.png",
   "Google Pay": "google-pay.png",
-  "Samsung Pay": "samsung-pay.png",
+  "Samsung Pay": "samsung-wallet.png",
 };
 
 /** Payment network name → logo path (relative to site root) */
@@ -150,7 +150,7 @@ export const OPERATION_ICONS: Record<string, string> = {
 export const CATEGORY_LABELS: Record<GatewayCategory, string> = {
   gateway: "PG",
   acquirer: "Acquirer",
-  aggregator: "Aggregator",
+  psp_ptsp: "PSPs & PTSPs",
   processor: "Processor",
   local_debit: "Local Debit",
   wallet: "Wallet",
@@ -166,7 +166,7 @@ export const CATEGORY_ORDER: GatewayCategory[] = [
   "processor",
   "wallet",
   "bnpl",
-  "aggregator",
+  "psp_ptsp",
   "specialty",
   "openbanking",
 ];
