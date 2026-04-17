@@ -15,8 +15,9 @@ interface WebhookViewerProps {
 
 export default function WebhookViewer({ orderId, label, onEvent }: WebhookViewerProps) {
   const [events, setEvents] = useState<WebhookEvent[]>([]);
-  const [connected, setConnected] = useState(false);
+  const [status, setStatus] = useState<"connecting" | "connected" | "reconnecting">("connecting");
   const eventSourceRef = useRef<EventSource | null>(null);
+  const hasConnectedRef = useRef(false);
   const onEventRef = useRef(onEvent);
   onEventRef.current = onEvent;
 
@@ -28,7 +29,10 @@ export default function WebhookViewer({ orderId, label, onEvent }: WebhookViewer
     const es = new EventSource(url);
     eventSourceRef.current = es;
 
-    es.onopen = () => setConnected(true);
+    es.onopen = () => {
+      hasConnectedRef.current = true;
+      setStatus("connected");
+    };
     es.onmessage = (e) => {
       try {
         const event: WebhookEvent = JSON.parse(e.data);
@@ -38,7 +42,7 @@ export default function WebhookViewer({ orderId, label, onEvent }: WebhookViewer
         // ignore malformed events
       }
     };
-    es.onerror = () => setConnected(false);
+    es.onerror = () => setStatus(hasConnectedRef.current ? "reconnecting" : "connecting");
 
     return () => {
       es.close();
@@ -53,14 +57,16 @@ export default function WebhookViewer({ orderId, label, onEvent }: WebhookViewer
           {label || "Webhook Notifications"}
         </span>
         <span
-          className={`${styles.webhookStatus} ${connected ? styles.webhookConnected : ""}`}
+          className={`${styles.webhookStatus} ${status === "connected" ? styles.webhookConnected : ""}`}
         >
           <span className={styles.webhookDot} />
-          {connected
+          {status === "connected"
             ? events.length > 0
               ? "Received"
               : "Listening..."
-            : "Connecting..."}
+            : status === "reconnecting"
+              ? "Reconnecting..."
+              : "Connecting..."}
         </span>
       </div>
       <div className={styles.webhookBody}>
