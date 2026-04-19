@@ -60,7 +60,7 @@ _The webhook is delivered on the second attempt._
 | **Operations webhook_url**                                         | A dedicated URL for receiving [operation notifications](/developers/webhooks/operation-events/) (refunds, voids, captures) |
 | **Enable webhook notifications if transaction initiated from API** | When checked, webhooks fire even for transactions created via the API (not just dashboard-created transactions)            |
 
-:::note Redirect Behavior
+:::note[Redirect Behavior]
 The HTTP status code your server returns in response to a webhook determines where the customer is redirected:
 
 | Your Server Returns | Customer Is Redirected To                                                                  |

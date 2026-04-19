@@ -16,7 +16,7 @@ All API paths are relative to this base URL. For example, to create a payment tr
 POST https://<your-domain>.ottu.net/b/checkout/v1/pymt-txn/
 ```
 
-:::info Sandbox vs Production
+:::info[Sandbox vs Production]
 There are no separate sandbox and production URLs. The **MID (Merchant Identification Number)** configuration in the Ottu admin panel determines whether a payment gateway runs in sandbox or production mode. You can test with:
 
 - **Your own instance** — configure a MID as sandbox in the admin panel. Recommended for testing your specific gateway configuration.
