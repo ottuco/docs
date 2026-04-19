@@ -20,7 +20,7 @@ api_key_only:
 
 basic_auth_create_checkout:
   auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
-  permissions: "`Can add payment requests` ([Payment Request]({{apiBaseUrl}}/payments/payment-methods/#enabling-the-plugin)) or `Can add e-commerce payments` ([E-Commerce]({{apiBaseUrl}}/payments/payment-methods/#enabling-the-plugin))"
+  permissions: "`Can add payment requests` ([Payment Request]({{apiBaseUrl}}/getting-started/#enable-your-plugin)) or `Can add e-commerce payments` ([E-Commerce]({{apiBaseUrl}}/getting-started/#enable-your-plugin))"
   extra: "`Can use pg_code` for the target [payment gateway]({{apiBaseUrl}}/payments/payment-methods/)"
 
 basic_auth_update_checkout:
