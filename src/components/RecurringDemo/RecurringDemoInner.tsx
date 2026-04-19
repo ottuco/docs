@@ -39,6 +39,7 @@ interface State {
   citRequest?: any;
   citResponse?: any;
   agreementId?: string;
+  agreement?: any;
   // Step 3: SDK
   // Step 4: Webhook + token
   citToken?: string;
@@ -62,7 +63,7 @@ type Action =
   | { type: "START"; orderId: string; customerId: string }
   | { type: "STEP1_DONE"; pgCodes: string[]; pmRequest: any; pmResponse: any }
   | { type: "STEP2_CALLING" }
-  | { type: "STEP2_DONE"; sessionId: string; citRequest: any; citResponse: any; agreementId: string }
+  | { type: "STEP2_DONE"; sessionId: string; citRequest: any; citResponse: any; agreementId: string; agreement: any }
   | { type: "STEP3_SDK" }
   | { type: "STEP3_SUCCESS" }
   | { type: "STEP4_WAITING" }
@@ -96,7 +97,7 @@ function reducer(state: State, action: Action): State {
     case "STEP2_CALLING":
       return { ...state, phase: "step2_calling" };
     case "STEP2_DONE":
-      return { ...state, phase: "step2_done", citSessionId: action.sessionId, citRequest: action.citRequest, citResponse: action.citResponse, agreementId: action.agreementId };
+      return { ...state, phase: "step2_done", citSessionId: action.sessionId, citRequest: action.citRequest, citResponse: action.citResponse, agreementId: action.agreementId, agreement: action.agreement };
     case "STEP3_SDK":
       return { ...state, phase: "step3_sdk" };
     case "STEP3_SUCCESS":
@@ -218,20 +219,27 @@ export default function RecurringDemoInner() {
     };
   }, []);
 
-  // Scroll to active step
+  // Scroll to active step (or error card) on every phase transition so the
+  // step header — and any newly-rendered response content — is visible.
   useEffect(() => {
-    if (state.phase === "idle" || state.phase === "error" || state.phase === "complete") return;
-    const activeStep = state.phase.startsWith("step1") ? 1
-      : state.phase.startsWith("step2") ? 2
-      : state.phase.startsWith("step3") ? 3
-      : state.phase.startsWith("step4") ? 4
-      : state.phase.startsWith("step5") ? 5
-      : state.phase.startsWith("step6") ? 6
-      : 0;
-    if (activeStep === 0) return;
+    if (state.phase === "idle" || state.phase === "complete") return;
     const timer = setTimeout(() => {
-      const el = document.querySelector(`[data-recurring-step="${activeStep}"]`);
-      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      const selector =
+        state.phase === "error"
+          ? "[data-recurring-error]"
+          : (() => {
+              const n = state.phase.startsWith("step1") ? 1
+                : state.phase.startsWith("step2") ? 2
+                : state.phase.startsWith("step3") ? 3
+                : state.phase.startsWith("step4") ? 4
+                : state.phase.startsWith("step5") ? 5
+                : state.phase.startsWith("step6") ? 6
+                : 0;
+              return n === 0 ? null : `[data-recurring-step="${n}"]`;
+            })();
+      if (!selector) return;
+      const el = document.querySelector(selector);
+      (el as HTMLElement | null)?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 150);
     return () => clearTimeout(timer);
   }, [state.phase]);
@@ -319,6 +327,7 @@ export default function RecurringDemoInner() {
         citRequest,
         citResponse: session,
         agreementId: agreement.id,
+        agreement,
       });
     } catch (err: any) {
       dispatch({ type: "ERROR", message: err.message || "Failed to create CIT session" });
@@ -370,7 +379,7 @@ export default function RecurringDemoInner() {
       payment_type: "auto_debit",
       webhook_url: webhookUrl,
       order_no: `${state.orderId}-mit`,
-      agreement: { id: state.agreementId, type: "recurring" },
+      agreement: state.agreement,
       payment_instrument: { instrument_type: "token", payload: { token: state.citToken } },
     };
 
@@ -385,7 +394,7 @@ export default function RecurringDemoInner() {
           payment_type: "auto_debit",
           webhook_url: webhookUrl,
           order_no: `${state.orderId}-mit`,
-          agreement: { id: state.agreementId, type: "recurring" },
+          agreement: state.agreement,
           payment_instrument: {
             instrument_type: "token",
             payload: { token: state.citToken },
@@ -397,7 +406,7 @@ export default function RecurringDemoInner() {
     } catch (err: any) {
       dispatch({ type: "ERROR", message: err.message || "One-step MIT failed" });
     }
-  }, [state.orderId, state.customerId, state.citToken, state.citPgCode, state.pgCodes, state.agreementId]);
+  }, [state.orderId, state.customerId, state.citToken, state.citPgCode, state.pgCodes, state.agreement]);
 
   // ── Step 5: MIT Two-Step — Step 1 (create session) ──
   const startMITTwoStep = useCallback(async () => {
@@ -411,7 +420,7 @@ export default function RecurringDemoInner() {
       payment_type: "auto_debit",
       webhook_url: webhookUrl,
       order_no: `${state.orderId}-mit`,
-      agreement: { id: state.agreementId, type: "recurring" },
+      agreement: state.agreement,
     };
 
     dispatch({ type: "STEP5_CALLING", mitMode: "two-step", mitRequest });
@@ -425,7 +434,7 @@ export default function RecurringDemoInner() {
           payment_type: "auto_debit",
           webhook_url: webhookUrl,
           order_no: `${state.orderId}-mit`,
-          agreement: { id: state.agreementId, type: "recurring" },
+          agreement: state.agreement,
         },
       });
 
@@ -433,7 +442,7 @@ export default function RecurringDemoInner() {
     } catch (err: any) {
       dispatch({ type: "ERROR", message: err.message || "MIT session creation failed" });
     }
-  }, [state.orderId, state.customerId, state.citPgCode, state.pgCodes, state.agreementId]);
+  }, [state.orderId, state.customerId, state.citPgCode, state.pgCodes, state.agreement]);
 
   // ── Step 5: MIT Two-Step — Step 2 (auto-debit) ──
   const callMITAutoDebit = useCallback(async () => {
@@ -706,7 +715,7 @@ export default function RecurringDemoInner() {
   // ── Error state ──
   if (state.phase === "error") {
     return (
-      <div className={styles.errorCard}>
+      <div className={styles.errorCard} data-recurring-error>
         <Icon path={mdiAlertCircleOutline} size={1.5} className={styles.errorIcon} />
         <p className={styles.errorMessage}>{state.errorMessage}</p>
         <button className={styles.secondaryBtn} onClick={() => dispatch({ type: "RESET" })}>

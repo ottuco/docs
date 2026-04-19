@@ -50,9 +50,9 @@ Always build your webhook handling logic against `pg_params`. When you add a new
 
 `pg_params` is included in:
 
-- [**Payment webhooks**](./payment-events.md) — the `pg_params` object in every payment notification
-- [**Operation webhooks**](./operation-events.md) — the `pg_params` object in refund, capture, and void notifications
-- [**Payment Status Query**](../payments/psq) — the response includes the same normalized fields
+- [**Payment webhooks**](/developers/webhooks/payment-events/) — the `pg_params` object in every payment notification
+- [**Operation webhooks**](/developers/webhooks/operation-events/) — the `pg_params` object in refund, capture, and void notifications
+- [**Payment Status Query**](/developers/payments/psq/) — the response includes the same normalized fields
 
 The raw `gateway_response` is also included in webhook payloads for audit purposes, but you should not rely on it for business logic.
 
@@ -70,13 +70,13 @@ If you need a gateway response field that isn't currently in `pg_params`, contac
 
 Both fields are included in webhook payloads. Here's when to use each:
 
-|  | `pg_params` | `gateway_response` |
-|---|---|---|
-| **Format** | Consistent across all gateways | Varies by gateway |
-| **Structure** | Flat key-value object | Nested, gateway-specific |
-| **Stability** | Field names are fixed | Can change when a gateway updates their API |
-| **Use for** | Business logic, display, reconciliation | Audit trails, debugging, gateway support tickets |
-| **Recommended** | Yes — primary integration field | Store for audit, don't build logic on it |
+|                 | `pg_params`                             | `gateway_response`                               |
+| --------------- | --------------------------------------- | ------------------------------------------------ |
+| **Format**      | Consistent across all gateways          | Varies by gateway                                |
+| **Structure**   | Flat key-value object                   | Nested, gateway-specific                         |
+| **Stability**   | Field names are fixed                   | Can change when a gateway updates their API      |
+| **Use for**     | Business logic, display, reconciliation | Audit trails, debugging, gateway support tickets |
+| **Recommended** | Yes — primary integration field         | Store for audit, don't build logic on it         |
 
 :::warning
 The raw `gateway_response` format can change without notice when a payment gateway updates their API. Building business logic on raw gateway responses means your integration can break at any time. Use `pg_params` for all programmatic decisions.
@@ -142,7 +142,9 @@ app.post("/webhook", (req, res) => {
   // Use the top-level 'state' for payment status
   const state = payload.state;
 
-  console.log(`Payment ${state}: card=${cardNumber}, auth=${authCode}, rrn=${rrn}`);
+  console.log(
+    `Payment ${state}: card=${cardNumber}, auth=${authCode}, rrn=${rrn}`
+  );
 
   // Store the raw gateway_response for audit purposes only
   const gatewayResponse = payload.gateway_response || {};
@@ -200,13 +202,13 @@ echo 'OK';
     Yes — store it for audit and debugging purposes. If you ever need to open a support ticket with a payment gateway, they'll want to see their original response. But don't build your processing logic on it.
   </FAQItem>
   <FAQItem question="Do operation webhooks include pg_params too?">
-    Yes. [Operation webhooks](./operation-events.md) (refunds, captures, voids) include `pg_params` with the same normalized fields.
+    Yes. [Operation webhooks](/developers/webhooks/operation-events/) (refunds, captures, voids) include `pg_params` with the same normalized fields.
   </FAQItem>
 </FAQ>
 
 ## What's Next?
 
-- [**Payment Events**](./payment-events.md) — Full webhook payload reference for payment notifications
-- [**Operation Events**](./operation-events.md) — Webhook notifications for refunds, captures, and voids
-- [**Verify Signatures**](./verify-signatures.md) — Validate webhook authenticity with HMAC-SHA256
+- [**Payment Events**](/developers/webhooks/payment-events/) — Full webhook payload reference for payment notifications
+- [**Operation Events**](/developers/webhooks/operation-events/) — Webhook notifications for refunds, captures, and voids
+- [**Verify Signatures**](/developers/webhooks/verify-signatures/) — Validate webhook authenticity with HMAC-SHA256
 - [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration

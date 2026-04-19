@@ -12,14 +12,14 @@ import FAQ, { FAQItem } from '@site/src/components/FAQ';
 The Payment Methods API lets you discover which payment gateways and methods are available for a given transaction. Instead of hardcoding payment options, you call this API to get the current list of active gateways — filtered by currency, plugin, tokenization support, or customer. The response includes each gateway's supported operations ([refunds](../operations.md), voids, captures), wallet integrations (Apple Pay, Google Pay), currencies, and tokenization capabilities. This ensures your checkout always shows up-to-date payment options, even when gateway configurations change.
 
 :::tip Boost Your Integration
-Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../getting-started/#boost-your-integration) for all available options. For environment setup (plugins, gateway codes, sandbox vs production), see [Configure Your Environment](../getting-started/#configure-your-environment).
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options. For environment setup (plugins, gateway codes, sandbox vs production), see [Configure Your Environment](/developers/getting-started/#configure-your-environment).
 :::
 
 ## When to Use
 
 - **Before creating a payment session** — discover available `pg_codes` to pass to the [Checkout API](./checkout-api.mdx).
 - **Currency-specific payments** — filter by `currencies`=[`"USD"`] to show only gateways that support a specific currency.
-- **Recurring payments** — filter with `tokenizable`=`true` to find gateways that support [tokenization](../cards-and-tokens/) for saved cards and auto-debit.
+- **Recurring payments** — filter with `tokenizable`=`true` to find gateways that support [tokenization](/developers/cards-and-tokens/) for saved cards and auto-debit.
 - **Customized checkout** — tailor payment options per customer based on their history or preferences.
 - **Dynamic updates** — when gateway settings or MID configurations change in the dashboard, the API automatically reflects the updates. No code changes needed.
 
@@ -46,7 +46,7 @@ graph LR
 3. **Merchant passes `pg_codes` to the Checkout API** to create a payment session with the right gateways.
 4. **Customer sees current payment options** — only active, relevant methods. No manual updates needed.
 
-### Step-by-Step
+### Step-by-Step {#activating-payment-gateway-codes}
 
 1. **Call the Payment Methods API** — retrieve available payment methods based on your filters.
 
@@ -95,8 +95,8 @@ Once integrated with the Payment Methods API, any change in gateway settings or 
 **Scenario:** An e-commerce platform wants to charge only cards that are tokenization-enabled by the customer.
 
 1. Call the Payment Methods API to retrieve tokenization-supported `pg_codes`.
-2. Pass these `pg_codes` to the [User Cards API](../cards-and-tokens/user-cards). It returns only saved cards that have tokenization enabled.
-3. For [subsequent transactions](../cards-and-tokens/recurring-payments), the system only charges approved, tokenization-enabled cards.
+2. Pass these `pg_codes` to the [User Cards API](/developers/cards-and-tokens/user-cards/). It returns only saved cards that have tokenization enabled.
+3. For [subsequent transactions](/developers/cards-and-tokens/recurring-payments/), the system only charges approved, tokenization-enabled cards.
 
 ## API Reference
 
@@ -135,4 +135,4 @@ Implement a mechanism to clear the cache on demand. When a MID change is made in
 
 - [**Checkout API**](./checkout-api.mdx) — Create payment sessions using the discovered payment methods
 - [**Native Payments**](./native-payments.md) — Direct Apple Pay and Google Pay payments
-- [**Checkout SDK**](./checkout-sdk/) — Drop-in UI that automatically uses available payment methods
+- [**Checkout SDK**](/developers/payments/checkout-sdk/) — Drop-in UI that automatically uses available payment methods

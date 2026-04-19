@@ -235,7 +235,7 @@ Open the screen or widget where you plan to add the **Ottu SDK widget**.
 
 ### Required Properties
 
-#### **merchantId** _`string`_ _**`required`**_
+#### **merchantId** _`string`_ _**`required`**_ {#merchant_id-string}
 
 It is used to define the Ottu merchant domain and must be set to the root domain of the Ottu account, excluding the `https://` or `http://` prefix.
 
@@ -249,7 +249,7 @@ It is the Ottu [API public key](../../../getting-started/authentication#public-k
 
 :::warning
 
-Ensure that only the **public key** is used. The [private key](../../../getting-started/authentication#private-key-api-key) must remain confidential and must never be shared with any clients.
+Ensure that only the **public key** is used. The [private key](../../../getting-started/authentication#api-key-auth) must remain confidential and must never be shared with any clients.
 :::
 
 #### **sessionId** _`string`_ _**`required`**_
@@ -1152,7 +1152,7 @@ However, since the SDK is a framework embedded within the merchant's app, confli
 
 To prevent conflicts, the merchant can disable Sentry within the Checkout SDK by setting the `is_enabled` flag to `false` in the configuration inside the SDK studio.
 
-### Rooting & Jailbreak Detection
+### Rooting & Jailbreak Detection {#rooting-detection}
 
 The **Flutter SDK** does **not** perform **rooting** or **jailbreak detection** independently. Instead, these security checks are entirely handled by the **native SDKs**.
 

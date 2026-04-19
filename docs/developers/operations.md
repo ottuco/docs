@@ -20,7 +20,7 @@ Operations via the Operations API do not work with **foreign currencies**. If th
 :::
 
 :::tip Boost Your Integration
-Ottu offers SDKs and tools to speed up your integration. See [Getting Started](./getting-started/#boost-your-integration) for all available options.
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
 :::
 
 ## When to Use
@@ -95,21 +95,33 @@ Use the `extra` object field for additional gateway-specific parameters. For exa
 
 #### Internal Operations
 
-**Cancel** — Halts a payment in progress. Applicable to transactions in `created`, `pending`, `cod`, or `attempted` state. The merchant stops a payment that hasn't reached completion.
+##### Cancel {#cancel}
 
-**Expire** — Invalidates an incomplete payment transaction. Targets `created`, `pending`, or `attempted` states. Transitions the transaction to `expired`, from which it cannot be resumed.
+Halts a payment in progress. Applicable to transactions in `created`, `pending`, `cod`, or `attempted` state. The merchant stops a payment that hasn't reached completion.
 
-**Delete** — Removes transactions no longer needed:
+##### Expire {#expire}
+
+Invalidates an incomplete payment transaction. Targets `created`, `pending`, or `attempted` states. Transitions the transaction to `expired`, from which it cannot be resumed.
+
+##### Delete {#delete}
+
+Removes transactions no longer needed:
 - `paid`, `authorized`, or `cod`/`cash` → **soft delete** (removed from reports, recoverable from Deleted Transactions)
 - All other states → **hard delete** (permanent removal)
 
 #### External Operations
 
-**Capture** — Settles authorized funds. Only applicable to `authorized` transactions. Supports full or partial capture (cannot exceed the authorized amount). Creates a [child transaction](/developers/reference/payment-states) on success.
+##### Capture {#capture}
 
-**Refund** — Returns funds to the customer. Applicable to `paid` or captured transactions. For authorized transactions, a capture must be completed first. Supports full or partial refund. Ottu offers an [approval feature](/business/operations/refund-void-access-control) for refunds, enabling a checker role to approve or reject requests.
+Settles authorized funds. Only applicable to `authorized` transactions. Supports full or partial capture (cannot exceed the authorized amount). Creates a [child transaction](/developers/reference/payment-states) on success.
 
-**Void** — Cancels an authorization before capture. Only applicable to `authorized` transactions. The customer is not charged.
+##### Refund {#refund}
+
+Returns funds to the customer. Applicable to `paid` or captured transactions. For authorized transactions, a capture must be completed first. Supports full or partial refund. Ottu offers an [approval feature](/business/operations/refund-void-access-control) for refunds, enabling a checker role to approve or reject requests.
+
+##### Void {#void}
+
+Cancels an authorization before capture. Only applicable to `authorized` transactions. The customer is not charged.
 
 :::info
 Not all payment gateways support all external operations. If a gateway doesn't support an operation, Ottu rejects the API call with an error message. See [supported operations by gateway](/developers/payments/payment-methods#activating-payment-gateway-codes).
@@ -218,7 +230,7 @@ Select the operation to see its example payload and the full interactive API sch
     See the [operations supported by each gateway](/developers/payments/payment-methods#activating-payment-gateway-codes).
   </FAQItem>
   <FAQItem question="What's the difference between API-Key and Basic Authentication?">
-    [API-Key](/developers/getting-started/authentication#private-key-api-key) grants superadmin privileges. [Basic Authentication](/developers/getting-started/authentication#basic-authentication) allows granular permission control per operation. Use Basic Auth for production access control.
+    [API-Key](/developers/getting-started/authentication#api-key-auth) grants superadmin privileges. [Basic Authentication](/developers/getting-started/authentication#basic-auth) allows granular permission control per operation. Use Basic Auth for production access control.
   </FAQItem>
   <FAQItem question="What permissions are required?">
     Depends on the operation: `payment.capture` for capture, `payment.expire` for expire, etc. See [permission codes](#permission-codes-for-each-operation).

@@ -57,6 +57,6 @@ For the [E-Commerce](/business/plugins/e-commerce) plugin, pre-payment SMS notif
 ## What's Next?
 
 - [Email Notifications](./email.md) -- Set up email as a notification channel
-- [WhatsApp Notifications](./whatsapp/) -- Enable WhatsApp notifications for your customers
+- [WhatsApp Notifications](/business/notifications/whatsapp/) -- Enable WhatsApp notifications for your customers
 - [Notification Templates](./templates.md) -- See the full template availability matrix
 - [Delivery Process](./delivery-process.md) -- Understand automatic vs. manual notification delivery

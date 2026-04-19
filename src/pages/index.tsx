@@ -26,7 +26,7 @@ const DEV_LINKS = [
   { label: "Webhooks", to: "/developers/webhooks/" },
   { label: "Tokenization", to: "/developers/cards-and-tokens/tokenization" },
   { label: "Apple Pay", to: "/business/payments/services/apple-pay/" },
-  { label: "Test Cards", to: "/developers/reference/test-cards" },
+  { label: "Test Cards", to: "/developers/payments/sandbox" },
 ];
 
 const BIZ_LINKS = [

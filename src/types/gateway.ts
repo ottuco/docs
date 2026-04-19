@@ -9,7 +9,7 @@ export interface TestCard {
 }
 
 export type GatewayCategory =
-  | "aggregator"
+  | "psp_ptsp"
   | "gateway"
   | "wallet"
   | "bnpl"

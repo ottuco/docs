@@ -9,9 +9,9 @@ Operations & Controls covers the security and authorization features that govern
 
 ## Available Features
 
-| Feature | Description |
-|---------|-------------|
-| [Refund & Void Access Control](./refund-void-access-control.mdx) | Assign refund and void permissions to specific users |
+| Feature                                                              | Description                                                         |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| [Refund & Void Access Control](./refund-void-access-control.mdx)     | Assign refund and void permissions to specific users                |
 | [Two-Step Refund & Void Authorization](./two-step-authorization.mdx) | Require maker-checker approval before refunds or voids are executed |
 
 ## Why This Matters

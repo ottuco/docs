@@ -431,7 +431,7 @@
       "purchase"
     ],
     "integrationType": "redirect",
-    "category": "aggregator",
+    "category": "psp_ptsp",
     "operationMode": "purchase",
     "logo": "cc_avenue_icon.svg",
     "acceptedAt": [],
@@ -644,7 +644,7 @@
       "refund"
     ],
     "integrationType": "redirect/sdk",
-    "category": "aggregator",
+    "category": "psp_ptsp",
     "operationMode": "purchase",
     "logo": "doku.svg",
     "acceptedAt": [],
@@ -695,7 +695,7 @@
       "refund"
     ],
     "integrationType": "redirect",
-    "category": "aggregator",
+    "category": "psp_ptsp",
     "operationMode": "purchase",
     "logo": "enet_icon.svg",
     "acceptedAt": [],
@@ -899,7 +899,7 @@
       "purchase"
     ],
     "integrationType": "redirect",
-    "category": "aggregator",
+    "category": "psp_ptsp",
     "operationMode": "purchase",
     "logo": "hesabe.svg",
     "acceptedAt": [],
@@ -985,7 +985,7 @@
       "purchase"
     ],
     "integrationType": "redirect",
-    "category": "aggregator",
+    "category": "psp_ptsp",
     "operationMode": "purchase",
     "logo": "hyperpay.svg",
     "acceptedAt": [],
@@ -1110,7 +1110,7 @@
       "capture"
     ],
     "integrationType": "redirect",
-    "category": "aggregator",
+    "category": "psp_ptsp",
     "operationMode": "purchase",
     "logo": "moyasar.svg",
     "acceptedAt": [],
@@ -1266,7 +1266,7 @@
       "refund"
     ],
     "integrationType": "redirect/direct",
-    "category": "aggregator",
+    "category": "psp_ptsp",
     "operationMode": "purchase",
     "logo": "myfatoorah_icon.svg",
     "acceptedAt": [],
@@ -1374,7 +1374,7 @@
     ]
   },
   {
-    "slug": "ngenius",
+    "slug": "ni",
     "name": "Network International (NI)",
     "countries": [
       "Kuwait",
@@ -1482,7 +1482,7 @@
       "void"
     ],
     "integrationType": "redirect",
-    "category": "aggregator",
+    "category": "psp_ptsp",
     "operationMode": "purchase",
     "logo": "paymob.svg",
     "acceptedAt": [],
@@ -1541,7 +1541,7 @@
       "capture"
     ],
     "integrationType": "sdk",
-    "category": "aggregator",
+    "category": "psp_ptsp",
     "operationMode": "purchase",
     "logo": "payon.png",
     "acceptedAt": [],
@@ -1606,7 +1606,7 @@
       "refund"
     ],
     "integrationType": "redirect",
-    "category": "aggregator",
+    "category": "psp_ptsp",
     "operationMode": "purchase",
     "logo": "payu_icon.svg",
     "acceptedAt": [],
@@ -1743,7 +1743,7 @@
       "refund"
     ],
     "integrationType": "redirect",
-    "category": "aggregator",
+    "category": "psp_ptsp",
     "operationMode": "purchase",
     "logo": "skipcash.svg",
     "acceptedAt": [],
@@ -2124,7 +2124,7 @@
       "refund"
     ],
     "integrationType": "redirect",
-    "category": "aggregator",
+    "category": "psp_ptsp",
     "operationMode": "purchase",
     "logo": "tess.svg",
     "acceptedAt": [],
@@ -2154,7 +2154,7 @@
       "refund"
     ],
     "integrationType": "redirect",
-    "category": "aggregator",
+    "category": "psp_ptsp",
     "operationMode": "purchase",
     "logo": "upayments.svg",
     "acceptedAt": [],

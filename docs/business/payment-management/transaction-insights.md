@@ -35,7 +35,7 @@ Ottu lets you customize which columns (headers) appear in each plugin's transact
 
 ![Adding or removing transaction table headers](/img/business/payment-management/insights-add-remove-headers.png)
 
-#### Child Table Transactions
+#### Child Table Transactions {#child-transactions}
 
 [Child transactions](#child-transactions) are generated from capture, refund, or void [operations](/business/operations). These transactions are linked to the original payment transaction (the **parent transaction**) and displayed beneath it. Child transaction headers inherit from the parent transaction's headers for consistency.
 

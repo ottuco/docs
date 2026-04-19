@@ -24,11 +24,11 @@ This interactive guide walks you through a complete payment integration with Ott
 ## Dive Deeper
 
 - [**Checkout API**](./checkout-api.mdx) — Full API reference with all parameters and response fields
-- [**Checkout SDK**](./checkout-sdk/) — SDK integration guides for Web, iOS, Android, and Flutter
-- [**Payment Methods**](./payment-methods) — Gateway discovery, filtering, and dynamic updates
-- [**Webhooks**](../webhooks/payment-events) — Setup, payload reference, and signature verification
-- [**PG Params**](../webhooks/pg-params) — Normalized gateway response fields for consistent webhook handling
-- [**Payment Status Query**](./psq) — Throttling rules, automatic inquiry, and timing guidance
-- [**Recurring Payments**](../cards-and-tokens/recurring-payments) — Tokenization and auto-debit for saved cards
-- [**Operations**](../operations) — Refund, capture, void, cancel, and expire payment transactions
-- [**Payment States**](../reference/payment-states) — Complete state machine reference for payment transactions and attempts
+- [**Checkout SDK**](/developers/payments/checkout-sdk/) — SDK integration guides for Web, iOS, Android, and Flutter
+- [**Payment Methods**](/developers/payments/payment-methods/) — Gateway discovery, filtering, and dynamic updates
+- [**Webhooks**](/developers/webhooks/payment-events/) — Setup, payload reference, and signature verification
+- [**PG Params**](/developers/webhooks/pg-params/) — Normalized gateway response fields for consistent webhook handling
+- [**Payment Status Query**](/developers/payments/psq/) — Throttling rules, automatic inquiry, and timing guidance
+- [**Recurring Payments**](/developers/cards-and-tokens/recurring-payments/) — Tokenization and auto-debit for saved cards
+- [**Operations**](/developers/operations/) — Refund, capture, void, cancel, and expire payment transactions
+- [**Payment States**](/developers/reference/payment-states/) — Complete state machine reference for payment transactions and attempts
