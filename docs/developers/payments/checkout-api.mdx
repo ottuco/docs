@@ -7,16 +7,16 @@ hide_table_of_contents: true
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 
-Ottu provides a comprehensive collection of APIs that offer a seamless and efficient way to test payments and enable merchants to accept and process transactions instantly. The Checkout API is the cornerstone of any payment initiation, whether it's [API-based](./checkout-api) or [SDK-based](./checkout-sdk).
+Ottu provides a comprehensive collection of APIs that offer a seamless and efficient way to test payments and enable merchants to accept and process transactions instantly. The Checkout API is the cornerstone of any payment initiation, whether it's [API-based](/developers/payments/checkout-api/) or [SDK-based](/developers/payments/checkout-sdk/).
 
 ## Best Practices and Guidelines
 
-In order to ensure optimal transaction success tracking and minimize the number of required payment transactions, merchants should [create](./checkout-api) a Payment Transaction as soon as the amount is known. This typically occurs when a customer adds their first item to their cart. Following this, any changes to the total amount should be updated using the [Checkout API PATCH](./checkout-api) method.
+In order to ensure optimal transaction success tracking and minimize the number of required payment transactions, merchants should [create](/developers/payments/checkout-api/) a Payment Transaction as soon as the amount is known. This typically occurs when a customer adds their first item to their cart. Following this, any changes to the total amount should be updated using the [Checkout API PATCH](/developers/payments/checkout-api/) method.
 
 By updating the same payment transaction, rather than creating a new one for each payment attempt, merchants can more effectively trace customer interactions with their cart. This is particularly useful for events such as insufficient funds, where a customer may remove an item from their cart and successfully complete a transaction on their next attempt. Tracking and analyzing such events can help merchants make data-driven decisions for future improvements.
 
 :::tip Boost Your Integration
-Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../getting-started/#boost-your-integration) for all available options.
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
 :::
 
 ---
@@ -86,8 +86,8 @@ For cases where a file is uploaded to the server after the transaction has been 
 
 **Supported Methods**
 
-- [Private API Key](/developers/getting-started/authentication#private-key-api-key)
-- [Basic Authentication](/developers/getting-started/authentication#basic-authentication)
+- [Private API Key](/developers/getting-started/authentication#api-key-auth)
+- [Basic Authentication](/developers/getting-started/authentication#basic-auth)
 
 For further information, please refer to the [Authentication](/developers/getting-started/authentication) section.
 
@@ -302,20 +302,20 @@ Merchants can use the [Checkout API](/developers/payments/checkout-api) to creat
 
 ## One-Step Checkout
 
-One-Step Checkout combines the [Checkout API](./checkout-api) and the [Native Payments](./native-payments)into a single backend request.\
-Instead of creating a session first and then calling a separate payment endpoint, you can perform both actions in one step by including the [payment_instrument](./checkout-api) parameter.
+One-Step Checkout combines the [Checkout API](/developers/payments/checkout-api/) and the [Native Payments](/developers/payments/native-payments/)into a single backend request.\
+Instead of creating a session first and then calling a separate payment endpoint, you can perform both actions in one step by including the [payment_instrument](/developers/payments/checkout-api/) parameter.
 
 This flow is ideal when you want to immediately process a payment as it's created, for example:
 
 - A "Buy Now" button on a product page that charges the customer right away.
-- A subsequent [auto-debit](../cards-and-tokens/recurring-payments.md) payment using a stored token.
-- A wallet-based purchase (Apple Pay / Google Pay) where you already have the payment payload on the server and don't use [Checkout SDK.](./checkout-sdk)
+- A subsequent [auto-debit](/developers/cards-and-tokens/recurring-payments/) payment using a stored token.
+- A wallet-based purchase (Apple Pay / Google Pay) where you already have the payment payload on the server and don't use [Checkout SDK.](/developers/payments/checkout-sdk/)
 - Instant, server-triggered payments that must both create and execute the payment in real time.
 
 By using `payment_instrument,` Ottu automatically creates the session, validates the configuration, and processes the payment through the selected gateway — returning a unified response that includes both the session and transaction details.
 
 :::tip Try it live
-See One-Step Checkout in action with a saved token on the [Recurring Payments live demo](../cards-and-tokens/recurring-payments#live-demo).
+See One-Step Checkout in action with a saved token on the [Recurring Payments live demo](/developers/cards-and-tokens/recurring-payments#live-demo).
 :::
 
 ### When to Use
@@ -329,22 +329,22 @@ Use One-Step Checkout when you:
 
 ### Supported Instruments
 
-| instrument_type | Description                             | Typical Use Case                                                                         |
-| :-------------: | --------------------------------------- | ---------------------------------------------------------------------------------------- |
-|   `apple_pay`   | Apple Pay digital wallet                | Apple Pay supported devices                                                              |
-|  `google_pay`   | Google Pay digital wallet               | Google Pay from Android or Chrome                                                        |
-|     `token`     | Token-based stored or recurring payment | [Auto-debit](../cards-and-tokens/recurring-payments.md) or saved card tokenized payments |
+| instrument_type | Description                             | Typical Use Case                                                                          |
+| :-------------: | --------------------------------------- | ----------------------------------------------------------------------------------------- |
+|   `apple_pay`   | Apple Pay digital wallet                | Apple Pay supported devices                                                               |
+|  `google_pay`   | Google Pay digital wallet               | Google Pay from Android or Chrome                                                         |
+|     `token`     | Token-based stored or recurring payment | [Auto-debit](/developers/cards-and-tokens/recurring-payments/) or saved card tokenized payments |
 
 ### Rules & Restrictions
 
-- Only one [pg_codes](./checkout-api) is allowed per request.
+- Only one [pg_codes](/developers/payments/checkout-api/) is allowed per request.
 - The selected gateway must support the chosen instrument_type.
 - The payload must match exactly the format received from the provider — no alterations should be made.
 - The API must be called server-to-server, never from the client.
 
 ### How to Use it
 
-When your backend is ready to initiate a direct payment using a wallet or card token (e.g., Apple Pay), it should call the [Checkout API](./checkout-api) and include the `payment_instrument` [parameter](./checkout-api). This parameter tells Ottu to both [**create**](./checkout-api) and **attempt to pay** the transaction in a single call, using the payment data you provide. The example [below ](./checkout-api)shows how this works for **Apple Pay**, but the same structure applies to other instruments (e.g., Google Pay) with their own payload formats.
+When your backend is ready to initiate a direct payment using a wallet or card token (e.g., Apple Pay), it should call the [Checkout API](/developers/payments/checkout-api/) and include the `payment_instrument` [parameter](/developers/payments/checkout-api/). This parameter tells Ottu to both [**create**](/developers/payments/checkout-api/) and **attempt to pay** the transaction in a single call, using the payment data you provide. The example [below ](/developers/payments/checkout-api/)shows how this works for **Apple Pay**, but the same structure applies to other instruments (e.g., Google Pay) with their own payload formats.
 
 :::info
 
@@ -395,7 +395,7 @@ In this example, Ottu receives an Apple Pay token in `payment_instrument.payload
 
 ### Response Behavior When `payment_instrument` Is Used
 
-When a valid [payment_instrument](./checkout-api) is provided, Ottu creates the transaction and attempts to complete the payment immediately in the same [Checkout API](./checkout-api) call. Instead of returning the standard Checkout API [response](./checkout-api) (used for redirect/hosted flows), the API returns a transaction result payload that follows the same structure as the [payment notification (webhook)](../webhooks/payment-events.md) data. Your backend can process this response directly as the final payment result (e.g., mark the order as paid when `state = "paid"`).
+When a valid [payment_instrument](/developers/payments/checkout-api/) is provided, Ottu creates the transaction and attempts to complete the payment immediately in the same [Checkout API](/developers/payments/checkout-api/) call. Instead of returning the standard Checkout API [response](/developers/payments/checkout-api/) (used for redirect/hosted flows), the API returns a transaction result payload that follows the same structure as the [payment notification (webhook)](../webhooks/payment-events.md) data. Your backend can process this response directly as the final payment result (e.g., mark the order as paid when `state = "paid"`).
 
 #### Response Example
 
@@ -477,7 +477,7 @@ When a valid [payment_instrument](./checkout-api) is provided, Ottu creates the 
 </FAQItem>
 
 <FAQItem question="Can I set up recurring payments using the Checkout API?">
-  Yes! Use [Auto-Debit](../cards-and-tokens/recurring-payments.md) with
+  Yes! Use [Auto-Debit](/developers/cards-and-tokens/recurring-payments/) with
   `payment_type` set to `auto_debit` to create agreements for recurring
   transactions.
 </FAQItem>
@@ -495,7 +495,7 @@ When a valid [payment_instrument](./checkout-api) is provided, Ottu creates the 
 
   <FAQItem question="What are the benefits of One-Step Checkout?">
     - Single backend call → lower latency and simpler logic.
-    - Consistent structure with [Native Payments](./native-payments).
+    - Consistent structure with [Native Payments](/developers/payments/native-payments/).
     - Unified handling of session creation + payment execution.
     - Ideal for wallets and tokenized recurring payments.
 
@@ -522,7 +522,7 @@ When a valid [payment_instrument](./checkout-api) is provided, Ottu creates the 
 
 ## What's Next?
 
-- [**Checkout SDK**](./checkout-sdk/) — Drop-in UI for web and mobile that uses the Checkout API
+- [**Checkout SDK**](/developers/payments/checkout-sdk/) — Drop-in UI for web and mobile that uses the Checkout API
 - [**Webhooks**](../webhooks/payment-events.md) — Handle payment results on your server
 - [**Operations**](../operations.md) — Refund, capture, or void completed transactions
-- [**Recurring Payments**](../cards-and-tokens/recurring-payments.md) — Set up auto-debit using saved cards
+- [**Recurring Payments**](/developers/cards-and-tokens/recurring-payments/) — Set up auto-debit using saved cards

@@ -1,8 +1,8 @@
 # Authentication
 
-Navigating the digital commerce and financial transactions landscape requires a keen understanding of security, specifically authentication methods. At Ottu, we support three distinct types of authentication to help ensure the safe and seamless operation of your payment system: [Basic Authentication](authentication.md#basic-authentication), [Private Key (API-Key)](authentication.md#private-key-api-key), and [Public Key](authentication.md#public-key).
+Navigating the digital commerce and financial transactions landscape requires a keen understanding of security, specifically authentication methods. At Ottu, we support three distinct types of authentication to help ensure the safe and seamless operation of your payment system: [Basic Authentication](authentication.md#basic-auth), [Private Key (API-Key)](authentication.md#api-key-auth), and [Public Key](authentication.md#public-key).
 
-## Basic Authentication
+## Basic Authentication {#basic-auth}
 
 Basic Authentication employs a username and password combination. The access permissions associated with the username must be explicitly defined.
 
@@ -10,7 +10,7 @@ Basic Authentication employs a username and password combination. The access per
 
 Please ensure that you follow best practices for credential security. Never **store** passwords in your code or on the client side. It’s recommended not to assign super-admin permissions via this method, but to carefully regulate the access permissions for each user. Securely store the credentials within the server environment.
 
-## Private Key (API-Key)
+## Private Key (API-Key) {#api-key-auth}
 
 This key is a high-privilege access token used for server-side communication between your server and Ottu’s API. The private API key should be closely guarded and never shared.
 
@@ -31,7 +31,7 @@ The Public Key is used to initialize the [Checkout SDK](../payments/checkout-sdk
 
 :::info
 
-For detailed instructions on generating API keys for both [Public ](authentication.md#public-key)& [Private ](authentication.md#private-key-api-key)Keys, kindly refer to the [Private Key (API-Key)](authentication.md#private-key-api-key) section.
+For detailed instructions on generating API keys for both [Public ](authentication.md#public-key)& [Private ](authentication.md#api-key-auth)Keys, kindly refer to the [Private Key (API-Key)](authentication.md#api-key-auth) section.
 
 :::
 
@@ -45,11 +45,11 @@ Permissions control what actions an authenticated user or application can perfor
 
 ### API Key
 
-When using the [API Key](authentication.md#private-key-api-key), **all permissions are granted by default**. The API Key has admin-level access to all endpoints, so no additional permission configuration is needed.
+When using the [API Key](authentication.md#api-key-auth), **all permissions are granted by default**. The API Key has admin-level access to all endpoints, so no additional permission configuration is needed.
 
 ### Basic Authentication
 
-With [Basic Authentication](authentication.md#basic-authentication), permissions must be explicitly assigned to each user. This provides granular control over what each user or integration can do.
+With [Basic Authentication](authentication.md#basic-auth), permissions must be explicitly assigned to each user. This provides granular control over what each user or integration can do.
 
 #### Plugin-Based Permissions
 
@@ -86,8 +86,8 @@ For [post-payment operations](../operations.md) (refund, capture, void, etc.), e
 
 | Permission | Used By |
 |---|---|
-| `Can add Invoice` | [Invoice API](../invoices.md) |
-| `report.can_view_report` | [Reports API](../reports.md) |
+| `Can add Invoice` | [Invoice API](../invoices.mdx) |
+| `report.can_view_report` | [Reports API](../reports.mdx) |
 
 ### Best Practices
 

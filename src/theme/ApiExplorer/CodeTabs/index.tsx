@@ -4,7 +4,7 @@
  * ========================================================================== */
 
 import React, { cloneElement, type ChangeEvent } from "react";
-import { sanitizeTabsChildren, useTabs } from "@docusaurus/theme-common/internal";
+import { sanitizeTabsChildren, useTabsContextValue, TabsProvider } from "@docusaurus/theme-common/internal";
 import useIsBrowser from "@docusaurus/useIsBrowser";
 import type { Language } from "docusaurus-theme-openapi-docs/lib/theme/ApiExplorer/CodeSnippets/code-snippets-types";
 
@@ -112,12 +112,14 @@ function TabContent({
 }
 
 function TabsComponent(props: any) {
-  const tabs = useTabs(props);
+  const tabs = useTabsContextValue(props);
   return (
-    <div className="tabs-container openapi-tabs__code-container">
-      <LanguageDropdown {...props} {...tabs} />
-      <TabContent {...props} {...tabs} />
-    </div>
+    <TabsProvider value={tabs}>
+      <div className="tabs-container openapi-tabs__code-container">
+        <LanguageDropdown {...props} {...tabs} />
+        <TabContent {...props} {...tabs} />
+      </div>
+    </TabsProvider>
   );
 }
 

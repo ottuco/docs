@@ -2,6 +2,15 @@
 # Fields using $shared pull descriptions from _shared/fields.yaml
 # Fields with inline descriptions are request-specific
 
+_example:
+  type: e_commerce
+  amount: "10.000"
+  currency_code: KWD
+  pg_codes:
+    - knet
+  webhook_url: https://test.com/webhook
+  redirect_url: https://test.com/redirect
+
 properties:
   # ── Shared fields (same description across schemas) ──────────
   amount: $shared

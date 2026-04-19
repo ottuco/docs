@@ -86,7 +86,7 @@ Returned when credentials are missing or invalid.
 - Missing `Authorization` header
 - Invalid or revoked API key
 - Malformed Basic Auth credentials
-- Using a [Public API Key](/developers/getting-started/authentication#public-key) where a [Private API Key](/developers/getting-started/authentication#private-key-api-key) is required
+- Using a [Public API Key](/developers/getting-started/authentication#public-key) where a [Private API Key](/developers/getting-started/authentication#api-key-auth) is required
 
 ### Permission Errors (403)
 

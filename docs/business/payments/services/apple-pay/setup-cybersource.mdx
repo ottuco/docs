@@ -13,7 +13,7 @@ This guide walks you through integrating Apple Pay with Cybersource. By the end,
 **Prerequisites:**
 
 - A valid Cybersource account
-- An [Apple Developer account](https://developer.apple.com) with a [Merchant ID](./index.md#creating-merchant-id) already created
+- An [Apple Developer account](https://developer.apple.com) with a [Merchant ID](/business/payments/services/apple-pay/#creating-merchant-id) already created
 
 The process involves four steps:
 
@@ -24,31 +24,56 @@ The process involves four steps:
 
 ## Generating a Cybersource RESTful Key
 
-<StepGuide steps={[
-  {
-    title: "Go to Key Management",
-    description: <><ol>
-        <li>Log in to your Cybersource account.</li>
-        <li>Navigate to <strong>Payment Configuration</strong>.</li>
-        <li>Click <strong>Key Management</strong>.</li>
-        <li>Click the <strong>+ Generate Key</strong> button.</li>
-      </ol></>,
-    image: "/img/business/apple-pay-cybersource/cs-01-key-management.png",
-    imageAlt: "Cybersource Key Management",
-  },
-  {
-    title: "Generate the Key",
-    description: <>On the configuration page, select the <strong>REST - Shared Secret</strong> option. Click <strong>Generate Key</strong>.</>,
-    image: "/img/business/apple-pay-cybersource/cs-02-generate-key.png",
-    imageAlt: "Select REST - Shared Secret and generate",
-  },
-  {
-    title: "API Keys Generated",
-    description: <>The <strong>REST API Keys</strong> (Key and Shared Secret) have been generated successfully. Copy both values — you will need them in the next step.</>,
-    image: "/img/business/apple-pay-cybersource/cs-03-api-keys-generated.png",
-    imageAlt: "REST API Keys generated",
-  },
-]} nextSectionId="providing-the-restful-keys-to-ottu" />
+<StepGuide
+  steps={[
+    {
+      title: "Go to Key Management",
+      description: (
+        <>
+          <ol>
+            <li>Log in to your Cybersource account.</li>
+            <li>
+              Navigate to <strong>Payment Configuration</strong>.
+            </li>
+            <li>
+              Click <strong>Key Management</strong>.
+            </li>
+            <li>
+              Click the <strong>+ Generate Key</strong> button.
+            </li>
+          </ol>
+        </>
+      ),
+      image: "/img/business/apple-pay-cybersource/cs-01-key-management.png",
+      imageAlt: "Cybersource Key Management",
+    },
+    {
+      title: "Generate the Key",
+      description: (
+        <>
+          On the configuration page, select the{" "}
+          <strong>REST - Shared Secret</strong> option. Click{" "}
+          <strong>Generate Key</strong>.
+        </>
+      ),
+      image: "/img/business/apple-pay-cybersource/cs-02-generate-key.png",
+      imageAlt: "Select REST - Shared Secret and generate",
+    },
+    {
+      title: "API Keys Generated",
+      description: (
+        <>
+          The <strong>REST API Keys</strong> (Key and Shared Secret) have been
+          generated successfully. Copy both values — you will need them in the
+          next step.
+        </>
+      ),
+      image: "/img/business/apple-pay-cybersource/cs-03-api-keys-generated.png",
+      imageAlt: "REST API Keys generated",
+    },
+  ]}
+  nextSectionId="providing-the-restful-keys-to-ottu"
+/>
 
 ## Providing the RESTful Keys to Ottu
 
@@ -63,70 +88,133 @@ The process involves four steps:
 
 ## Generating a Certificate Signing Request
 
-<StepGuide steps={[
-  {
-    title: "Go to Digital Payment Solutions",
-    description: <><ol>
-        <li>Log in to the <strong>Cybersource portal dashboard</strong>.</li>
-        <li>Under <strong>Payment Configuration</strong>, access <strong>Digital Payment Solutions</strong>.</li>
-        <li>Click the <strong>Configure</strong> button.</li>
-      </ol></>,
-    image: "/img/business/apple-pay-cybersource/cs-05-digital-payment-solutions.png",
-    imageAlt: "Cybersource Digital Payment Solutions",
-  },
-  {
-    title: "Generate the CSR",
-    description: <>Enter the <a href="./index.md#creating-merchant-id">Apple Merchant ID</a> associated with your Apple Pay and click <strong>Generate new certificate signing request</strong>.</>,
-    image: "/img/business/apple-pay-cybersource/cs-06-generate-csr.png",
-    imageAlt: "Enter Merchant ID and generate CSR",
-  },
-  {
-    title: "Download the CSR",
-    description: <>Download the generated certificate signing request.</>,
-    image: "/img/business/apple-pay-cybersource/cs-07-download-csr.png",
-    imageAlt: "Download the generated CSR",
-  },
-]} nextSectionId="download-the-apple-pay-payment-processing-certificate" />
+<StepGuide
+  steps={[
+    {
+      title: "Go to Digital Payment Solutions",
+      description: (
+        <>
+          <ol>
+            <li>
+              Log in to the <strong>Cybersource portal dashboard</strong>.
+            </li>
+            <li>
+              Under <strong>Payment Configuration</strong>, access{" "}
+              <strong>Digital Payment Solutions</strong>.
+            </li>
+            <li>
+              Click the <strong>Configure</strong> button.
+            </li>
+          </ol>
+        </>
+      ),
+      image:
+        "/img/business/apple-pay-cybersource/cs-05-digital-payment-solutions.png",
+      imageAlt: "Cybersource Digital Payment Solutions",
+    },
+    {
+      title: "Generate the CSR",
+      description: (
+        <>
+          Enter the{" "}
+          <a href="/business/payments/services/apple-pay/#creating-merchant-id">
+            Apple Merchant ID
+          </a>{" "}
+          associated with your Apple Pay and click{" "}
+          <strong>Generate new certificate signing request</strong>.
+        </>
+      ),
+      image: "/img/business/apple-pay-cybersource/cs-06-generate-csr.png",
+      imageAlt: "Enter Merchant ID and generate CSR",
+    },
+    {
+      title: "Download the CSR",
+      description: <>Download the generated certificate signing request.</>,
+      image: "/img/business/apple-pay-cybersource/cs-07-download-csr.png",
+      imageAlt: "Download the generated CSR",
+    },
+  ]}
+  nextSectionId="download-the-apple-pay-payment-processing-certificate"
+/>
 
 ## Download the Apple Pay Payment Processing Certificate
 
 ### Upload the CSR to Apple
 
-<StepGuide steps={[
-  {
-    title: "Create Certificate in Apple",
-    description: <><ol>
-        <li>Log in to your <a href="https://developer.apple.com">Apple Developer account</a>.</li>
-        <li>Go to the <a href="./index.md#creating-merchant-id">Merchant ID</a> you created and click <strong>Create Certificate</strong> under <strong>Apple Pay Payment Processing Certificate</strong>.</li>
-      </ol></>,
-    image: "/img/business/apple-pay-cybersource/cs-08-create-certificate.png",
-    imageAlt: "Create Certificate in Apple Developer portal",
-  },
-  {
-    title: "Select No and Continue",
-    description: <>On the next page, select <strong>No</strong> and click <strong>Continue</strong>.</>,
-    image: "/img/business/apple-pay-cybersource/cs-09-select-no.png",
-    imageAlt: "Select No and continue",
-  },
-  {
-    title: "Upload the Cybersource CSR",
-    description: <>Upload the Certificate Signing Request you <a href="#generating-a-certificate-signing-request">generated from Cybersource</a> and click <strong>Continue</strong>.</>,
-    image: "/img/business/apple-pay-cybersource/cs-10-upload-csr.png",
-    imageAlt: "Upload the Cybersource CSR to Apple",
-  },
-  {
-    title: "Download the Payment Processing Certificate",
-    description: <>Download the <strong>Apple Pay Payment Processing Certificate</strong> file.
-      <Admonition type="tip">After downloading, your Apple Pay integration with Cybersource is complete. The certificate enables Cybersource to decrypt Apple Pay transaction data for processing through Ottu.</Admonition>
-    </>,
-    image: "/img/business/apple-pay-cybersource/cs-11-download-certificate.png",
-    imageAlt: "Download the Payment Processing Certificate",
-  },
-]} nextSectionId="whats-next" />
+<StepGuide
+  steps={[
+    {
+      title: "Create Certificate in Apple",
+      description: (
+        <>
+          <ol>
+            <li>
+              Log in to your{" "}
+              <a href="https://developer.apple.com">Apple Developer account</a>.
+            </li>
+            <li>
+              Go to the{" "}
+              <a href="/business/payments/services/apple-pay/#creating-merchant-id">
+                Merchant ID
+              </a>{" "}
+              you created and click <strong>Create Certificate</strong> under{" "}
+              <strong>Apple Pay Payment Processing Certificate</strong>.
+            </li>
+          </ol>
+        </>
+      ),
+      image: "/img/business/apple-pay-cybersource/cs-08-create-certificate.png",
+      imageAlt: "Create Certificate in Apple Developer portal",
+    },
+    {
+      title: "Select No and Continue",
+      description: (
+        <>
+          On the next page, select <strong>No</strong> and click{" "}
+          <strong>Continue</strong>.
+        </>
+      ),
+      image: "/img/business/apple-pay-cybersource/cs-09-select-no.png",
+      imageAlt: "Select No and continue",
+    },
+    {
+      title: "Upload the Cybersource CSR",
+      description: (
+        <>
+          Upload the Certificate Signing Request you{" "}
+          <a href="#generating-a-certificate-signing-request">
+            generated from Cybersource
+          </a>{" "}
+          and click <strong>Continue</strong>.
+        </>
+      ),
+      image: "/img/business/apple-pay-cybersource/cs-10-upload-csr.png",
+      imageAlt: "Upload the Cybersource CSR to Apple",
+    },
+    {
+      title: "Download the Payment Processing Certificate",
+      description: (
+        <>
+          Download the <strong>Apple Pay Payment Processing Certificate</strong>{" "}
+          file.
+          <Admonition type="tip">
+            After downloading, your Apple Pay integration with Cybersource is
+            complete. The certificate enables Cybersource to decrypt Apple Pay
+            transaction data for processing through Ottu.
+          </Admonition>
+        </>
+      ),
+      image:
+        "/img/business/apple-pay-cybersource/cs-11-download-certificate.png",
+      imageAlt: "Download the Payment Processing Certificate",
+    },
+  ]}
+  nextSectionId="whats-next"
+/>
 
 ## What's Next? {#whats-next}
 
-- **[Apple Pay Configuration](./index.md)** — Return to the main Apple Pay setup guide
-- **[Setup MPGS](setup-mpgs)** — Set up Apple Pay with MPGS instead
+- **[Apple Pay Configuration](./index.mdx)** — Return to the main Apple Pay setup guide
+- **[Setup MPGS](/business/payments/services/apple-pay/setup-mpgs/)** — Set up Apple Pay with MPGS instead
 - **[Payment Gateways](/business/payments/gateways)** — Browse and configure your payment gateways
 - **[Payment Services](../)** — Overview of all available payment services

@@ -12,6 +12,7 @@ const config: Config = {
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
+    faster: true,
   },
 
   // Production URL (docs.ottu.net)
@@ -36,6 +37,9 @@ const config: Config = {
     mermaid: true,
     hooks: {
       onBrokenMarkdownLinks: "warn",
+    },
+    mdx1Compat: {
+      headingIds: true, // Allow {#custom-id} syntax in headings (required until v4 migration)
     },
   },
 

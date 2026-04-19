@@ -13,7 +13,7 @@ This guide walks you through integrating Apple Pay with Mastercard Payment Gatew
 **Prerequisites:**
 
 - A valid MPGS account
-- An [Apple Developer account](https://developer.apple.com) with a [Merchant ID](./index.md#creating-merchant-id) already created
+- An [Apple Developer account](https://developer.apple.com) with a [Merchant ID](/business/payments/services/apple-pay/#creating-merchant-id) already created
 
 The process involves three steps:
 
@@ -23,72 +23,133 @@ The process involves three steps:
 
 ## Obtaining Apple Pay CSR
 
-<StepGuide steps={[
-  {
-    title: "Go to Device Payments",
-    description: <>Log in to the Mastercard Payment Gateway Services (MPGS) portal. Go to <strong>Device Payments</strong>.</>,
-    image: "/img/business/apple-pay-mpgs/mpgs-01-device-payments.png",
-    imageAlt: "MPGS Device Payments section",
-  },
-  {
-    title: "Download the CSR File",
-    description: <>Click <strong>Add New Certificate</strong>. Download the <strong>Apple Pay Certificate Signing Request (CSR)</strong> file.</>,
-    image: "/img/business/apple-pay-mpgs/mpgs-02-download-csr.png",
-    imageAlt: "Download the CSR file from MPGS",
-  },
-]} nextSectionId="obtaining-apple-pay-payment-processing-certificate" />
+<StepGuide
+  steps={[
+    {
+      title: "Go to Device Payments",
+      description: (
+        <>
+          Log in to the Mastercard Payment Gateway Services (MPGS) portal. Go to{" "}
+          <strong>Device Payments</strong>.
+        </>
+      ),
+      image: "/img/business/apple-pay-mpgs/mpgs-01-device-payments.png",
+      imageAlt: "MPGS Device Payments section",
+    },
+    {
+      title: "Download the CSR File",
+      description: (
+        <>
+          Click <strong>Add New Certificate</strong>. Download the{" "}
+          <strong>Apple Pay Certificate Signing Request (CSR)</strong> file.
+        </>
+      ),
+      image: "/img/business/apple-pay-mpgs/mpgs-02-download-csr.png",
+      imageAlt: "Download the CSR file from MPGS",
+    },
+  ]}
+  nextSectionId="obtaining-apple-pay-payment-processing-certificate"
+/>
 
 ## Obtaining Apple Pay Payment Processing Certificate
 
-<StepGuide steps={[
-  {
-    title: "Create Certificate in Apple",
-    description: <>Log in to your <a href="https://developer.apple.com">Apple Developer account</a> and go to the <a href="./index.md#creating-merchant-id">Merchant ID</a> you created. Under <strong>Apple Pay Payment Processing Certificate</strong>, click <strong>Create Certificate</strong>.</>,
-    image: "/img/business/apple-pay-mpgs/mpgs-03-create-certificate.png",
-    imageAlt: "Create Payment Processing Certificate in Apple",
-  },
-  {
-    title: "Select No and Continue",
-    description: <>On the next page, choose <strong>No</strong> and click <strong>Continue</strong>.</>,
-    image: "/img/business/apple-pay-mpgs/mpgs-04-choose-no.png",
-    imageAlt: "Select No and continue",
-  },
-  {
-    title: "Upload the MPGS CSR File",
-    description: <>Upload the CSR file you downloaded from MPGS in the <a href="#obtaining-apple-pay-csr">previous step</a>.</>,
-    image: "/img/business/apple-pay-mpgs/mpgs-05-upload-csr.png",
-    imageAlt: "Upload the MPGS CSR file",
-  },
-  {
-    title: "Download the Payment Processing Certificate",
-    description: <>Download the resulting file — this is your <strong>Apple Pay Payment Processing Certificate</strong>.</>,
-    image: "/img/business/apple-pay-mpgs/mpgs-06-download-certificate.png",
-    imageAlt: "Download the Payment Processing Certificate",
-  },
-]} nextSectionId="providing-apple-pay-payment-processing-certificate" />
+<StepGuide
+  steps={[
+    {
+      title: "Create Certificate in Apple",
+      description: (
+        <>
+          Log in to your{" "}
+          <a href="https://developer.apple.com">Apple Developer account</a> and
+          go to the{" "}
+          <a href="/business/payments/services/apple-pay/#creating-merchant-id">
+            Merchant ID
+          </a>{" "}
+          you created. Under{" "}
+          <strong>Apple Pay Payment Processing Certificate</strong>, click{" "}
+          <strong>Create Certificate</strong>.
+        </>
+      ),
+      image: "/img/business/apple-pay-mpgs/mpgs-03-create-certificate.png",
+      imageAlt: "Create Payment Processing Certificate in Apple",
+    },
+    {
+      title: "Select No and Continue",
+      description: (
+        <>
+          On the next page, choose <strong>No</strong> and click{" "}
+          <strong>Continue</strong>.
+        </>
+      ),
+      image: "/img/business/apple-pay-mpgs/mpgs-04-choose-no.png",
+      imageAlt: "Select No and continue",
+    },
+    {
+      title: "Upload the MPGS CSR File",
+      description: (
+        <>
+          Upload the CSR file you downloaded from MPGS in the{" "}
+          <a href="#obtaining-apple-pay-csr">previous step</a>.
+        </>
+      ),
+      image: "/img/business/apple-pay-mpgs/mpgs-05-upload-csr.png",
+      imageAlt: "Upload the MPGS CSR file",
+    },
+    {
+      title: "Download the Payment Processing Certificate",
+      description: (
+        <>
+          Download the resulting file — this is your{" "}
+          <strong>Apple Pay Payment Processing Certificate</strong>.
+        </>
+      ),
+      image: "/img/business/apple-pay-mpgs/mpgs-06-download-certificate.png",
+      imageAlt: "Download the Payment Processing Certificate",
+    },
+  ]}
+  nextSectionId="providing-apple-pay-payment-processing-certificate"
+/>
 
 ## Providing Apple Pay Payment Processing Certificate
 
-<StepGuide steps={[
-  {
-    title: "Go to Device Payments",
-    description: <>Log in to the MPGS portal and go to <strong>Device Payments</strong>.</>,
-    image: "/img/business/apple-pay-mpgs/mpgs-01-device-payments.png",
-    imageAlt: "MPGS Device Payments section",
-  },
-  {
-    title: "Upload the Certificate to MPGS",
-    description: <>Upload the <a href="#obtaining-apple-pay-payment-processing-certificate">Payment Processing Certificate</a> you downloaded from Apple in the previous step.
-      <Admonition type="tip">After uploading, MPGS will process the certificate. Your Apple Pay integration with MPGS is now complete, and transactions can be processed through Ottu.</Admonition>
-    </>,
-    image: "/img/business/apple-pay-mpgs/mpgs-07-upload-to-mpgs.png",
-    imageAlt: "Upload certificate to MPGS portal",
-  },
-]} nextSectionId="whats-next" />
+<StepGuide
+  steps={[
+    {
+      title: "Go to Device Payments",
+      description: (
+        <>
+          Log in to the MPGS portal and go to <strong>Device Payments</strong>.
+        </>
+      ),
+      image: "/img/business/apple-pay-mpgs/mpgs-01-device-payments.png",
+      imageAlt: "MPGS Device Payments section",
+    },
+    {
+      title: "Upload the Certificate to MPGS",
+      description: (
+        <>
+          Upload the{" "}
+          <a href="#obtaining-apple-pay-payment-processing-certificate">
+            Payment Processing Certificate
+          </a>{" "}
+          you downloaded from Apple in the previous step.
+          <Admonition type="tip">
+            After uploading, MPGS will process the certificate. Your Apple Pay
+            integration with MPGS is now complete, and transactions can be
+            processed through Ottu.
+          </Admonition>
+        </>
+      ),
+      image: "/img/business/apple-pay-mpgs/mpgs-07-upload-to-mpgs.png",
+      imageAlt: "Upload certificate to MPGS portal",
+    },
+  ]}
+  nextSectionId="whats-next"
+/>
 
 ## What's Next? {#whats-next}
 
-- **[Apple Pay Configuration](./index.md)** — Return to the main Apple Pay setup guide
-- **[Setup Cybersource](setup-cybersource)** — Set up Apple Pay with Cybersource instead
+- **[Apple Pay Configuration](./index.mdx)** — Return to the main Apple Pay setup guide
+- **[Setup Cybersource](/business/payments/services/apple-pay/setup-cybersource/)** — Set up Apple Pay with Cybersource instead
 - **[Payment Gateways](/business/payments/gateways)** — Browse and configure your payment gateways
 - **[Payment Services](../)** — Overview of all available payment services

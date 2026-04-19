@@ -8,6 +8,7 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import FAQ, { FAQItem } from '@site/src/components/FAQ';
+import StepGuide from "@site/src/components/StepGuide";
 
 # Notifications
 
@@ -20,7 +21,7 @@ The Notifications API lets you manually send or resend transaction notifications
 - **Manual control** — trigger notifications on demand when automatic delivery fails or is delayed.
 
 :::tip Boost Your Integration
-Ottu offers SDKs and tools to speed up your integration. See [Getting Started](./getting-started/#boost-your-integration) for all available options.
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
 :::
 
 ## When to Use
@@ -64,56 +65,37 @@ graph LR
 
 ### Step-by-Step
 
-#### 1. Create a transaction with notification channels
-
-Include the `notifications` parameter when creating the transaction via the [Checkout API](/developers/payments/checkout-api):
-
-```json
-{
-  "type": "payment_request",
-  "pg_codes": ["credit_card"],
-  "amount": "22",
-  "currency_code": "SAR",
-  "order_no": "example_order_no",
-  "customer_email": "example@example.com",
-  "customer_phone": "123456789",
-  "notifications": {
-    "email": ["created", "paid", "canceled", "failed", "expired", "authorized", "voided", "refunded", "captured"],
-    "SMS": ["created", "paid", "canceled", "failed", "expired", "authorized", "voided", "refunded", "captured"],
-    "whatsapp": ["created", "paid", "canceled", "failed", "expired", "authorized"]
-  }
-}
-```
-
-#### 2. Send notifications
-
-Use `session_id` or `order_no` to identify the transaction, and specify the channels:
-
-```json
-{
-  "order_no": "example_order_no",
-  "channels": ["sms", "email", "whatsapp"]
-}
-```
-
-#### 3. Handle the response
-
-Successful notification returns:
-
-```json
-{
-  "message": "Customer notified."
-}
-```
-
-#### 4. Resend as needed
-
-You can resend notifications for the same or different payment states as many times as needed — just repeat step 2 with the same `session_id` or `order_no`.
-
-:::info Supported states per channel
-- **Email & SMS**: `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`, `voided`, `refunded`, `captured`
-- **WhatsApp**: `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`
-:::
+<StepGuide steps={[
+  {
+    title: "Create a transaction with notification channels",
+    description: <>Include the <code>notifications</code> parameter when creating the transaction via the <a href="/developers/payments/checkout-api">Checkout API</a>:<br /><br /><pre><code>{`{
+    "type": "payment_request",
+    "pg_codes": ["credit_card"],
+    "amount": "22",
+    "currency_code": "SAR",
+    "order_no": "example_order_no",
+    "customer_email": "example@example.com",
+    "customer_phone": "123456789",
+    "notifications": {
+      "email": ["created", "paid", "canceled", "failed", "expired", "authorized", "voided", "refunded", "captured"],
+      "SMS": ["created", "paid", "canceled", "failed", "expired", "authorized", "voided", "refunded", "captured"],
+      "whatsapp": ["created", "paid", "canceled", "failed", "expired", "authorized"]
+    }
+}`}</code></pre></>,
+  },
+  {
+    title: "Send notifications",
+    description: <>Use <code>session_id</code> or <code>order_no</code> to identify the transaction, and specify the channels:<br /><br /><pre><code>{JSON.stringify({"order_no": "example_order_no", "channels": ["sms", "email", "whatsapp"]}, null, 2)}</code></pre></>,
+  },
+  {
+    title: "Handle the response",
+    description: <>Successful notification returns:<br /><br /><pre><code>{JSON.stringify({"message": "Customer notified."}, null, 2)}</code></pre></>,
+  },
+  {
+    title: "Resend as needed",
+    description: <>You can resend notifications for the same or different payment states as many times as needed — just repeat step 2 with the same <code>session_id</code> or <code>order_no</code>.<br /><br /><strong>Supported states per channel:</strong><br />• <strong>Email &amp; SMS:</strong> <code>created</code>, <code>paid</code>, <code>canceled</code>, <code>failed</code>, <code>expired</code>, <code>authorized</code>, <code>voided</code>, <code>refunded</code>, <code>captured</code><br />• <strong>WhatsApp:</strong> <code>created</code>, <code>paid</code>, <code>canceled</code>, <code>failed</code>, <code>expired</code>, <code>authorized</code></>,
+  },
+]} nextSectionId="api-reference" />
 
 ## API Reference
 

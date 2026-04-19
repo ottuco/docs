@@ -21,7 +21,7 @@ Familiarize yourself with the request format, base URLs, error handling, and con
 
 All requests and responses use JSON. See [API Fundamentals](api-fundamentals.md) for the complete reference on base URLs, authentication headers, error codes, pagination, and rate limiting.
 
-## 3. Configure Your Environment
+## 3. Configure Your Environment {#configure-your-environment}
 
 Before making API calls, ensure your Ottu dashboard is configured:
 
@@ -68,7 +68,7 @@ The response includes a `session_id` and `payment_url`. Open the `payment_url` t
 Use the [Sandbox & Test Cards](../payments/sandbox.mdx) to simulate payments without processing real transactions.
 :::
 
-## 5. Boost Your Integration
+## 5. Boost Your Integration {#boost-your-integration}
 
 Ottu offers multiple integration paths depending on your stack and use case:
 

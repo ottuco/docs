@@ -20,7 +20,7 @@ Every payment starts with a **payment transaction** — the metadata for the pay
 
 #### REST API
 
-Ottu's REST API is the foundation for all integrations. Start with [Authentication](getting-started/authentication.md) to set up your API keys, then use the [Checkout API](payments/checkout-api.mdx) to create payments. Set up [Webhooks](webhooks/index.md) to get real-time notifications when payment states change — you specify a [webhook URL](payments/checkout-api.mdx#request-webhook_url) when creating a transaction, and Ottu sends status updates there.
+Ottu's REST API is the foundation for all integrations. Start with [Authentication](getting-started/authentication.md) to set up your API keys, then use the [Checkout API](payments/checkout-api.mdx) to create payments. Set up [Webhooks](webhooks/index.md) to get real-time notifications when payment states change — you specify a [webhook URL](payments/checkout-api.mdx) when creating a transaction, and Ottu sends status updates there.
 
 #### Checkout SDK
 
@@ -42,7 +42,7 @@ Based on your use case, start with the section that fits:
 
 - **Refund, Capture, or Void** — After familiarizing yourself with the [Checkout API](payments/checkout-api.mdx), see the [Operations](operations.md) section. Set up [Operation Webhooks](webhooks/operation-events.md) to get notified about operation results.
 
-- **Subscriptions & Recurring Payments** — See [User Cards](cards-and-tokens/user-cards.mdx) for saving payment methods and [Recurring Payments](cards-and-tokens/recurring-payments.md) for auto-debit flows.
+- **Subscriptions & Recurring Payments** — See [User Cards](cards-and-tokens/user-cards.mdx) for saving payment methods and [Recurring Payments](cards-and-tokens/recurring-payments.mdx) for auto-debit flows.
 
 - **Security** — Ottu's sensitive API calls are signed for added security. See [Verify Signatures](webhooks/verify-signatures.md) for the HMAC signing mechanism.
 

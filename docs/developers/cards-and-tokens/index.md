@@ -11,10 +11,11 @@ This section covers three core capabilities that work together:
 Replace sensitive card data with secure tokens. Ottu handles PCI DSS compliance — you store only the token, never the card number.
 
 Two methods available:
+
 - **Save without payment** — store a card for future use without charging (`payment_type: save_card`, `amount: 0`)
 - **Save during payment** — tokenize the card as part of a successful transaction
 
-[**Go to Tokenization Guide →**](tokenization.md)
+[**Go to Tokenization Guide →**](tokenization.mdx)
 
 ### Manage Saved Cards (User Cards API)
 
@@ -34,7 +35,7 @@ Use saved tokens to charge customers automatically — for subscriptions, instal
 - **MIT (Merchant Initiated)** — subsequent automatic charges using the saved token
 - Multiple integration paths: Auto-Debit API, One-Step Checkout, or Native Payments
 
-[**Go to Recurring Payments Guide →**](recurring-payments.md)
+[**Go to Recurring Payments Guide →**](recurring-payments.mdx)
 
 ## How They Connect
 
@@ -55,10 +56,11 @@ flowchart LR
 ```
 
 **Typical flow:**
+
 1. Merchant creates a payment session via the [Checkout API](/developers/payments/checkout-api) and presents the checkout page to the customer (via [SDK](/developers/payments/checkout-sdk) or redirect)
 2. Customer enters their card details and completes the payment — on success, the card is tokenized and the token is delivered to the merchant via [webhook](/developers/webhooks/payment-events)
 3. Merchant stores the token and can list/manage saved cards via the [User Cards API](user-cards.mdx)
-4. For subsequent charges, merchant uses the token with the [Auto-Debit API](recurring-payments.md) or [One-Step Checkout](/developers/payments/checkout-api#one-step-checkout)
+4. For subsequent charges, merchant uses the token with the [Auto-Debit API](recurring-payments.mdx) or [One-Step Checkout](/developers/payments/checkout-api#one-step-checkout)
 
 ## Prerequisites
 
@@ -68,11 +70,11 @@ flowchart LR
 - A `webhook_url` to receive token delivery notifications
 
 :::tip
-Not sure where to start? If you need to save cards, start with the [Tokenization Guide](tokenization.md). If you already have tokens and want to set up automatic billing, go directly to [Recurring Payments](recurring-payments.md).
+Not sure where to start? If you need to save cards, start with the [Tokenization Guide](tokenization.mdx). If you already have tokens and want to set up automatic billing, go directly to [Recurring Payments](recurring-payments.mdx).
 :::
 
 ## What's Next?
 
-- [**Tokenization**](tokenization.md) — How to save cards securely
+- [**Tokenization**](tokenization.mdx) — How to save cards securely
 - [**User Cards**](user-cards.mdx) — Manage saved cards via API
-- [**Recurring Payments**](recurring-payments.md) — Auto-debit and subscription billing
+- [**Recurring Payments**](recurring-payments.mdx) — Auto-debit and subscription billing

@@ -54,13 +54,23 @@ function parseBody(req) {
   });
 }
 
+// ~4KB of padding to defeat proxy buffering on the first response chunk
+// (DO App Platform ingress / Cloudflare hold small SSE responses in a buffer
+// until a threshold is breached, which stalls EventSource.onopen).
+const SSE_PAD = ": " + " ".repeat(4096) + "\n\n";
+
+function formatEvent(id, event) {
+  return `id: ${id}\ndata: ${JSON.stringify(event)}\n\n`;
+}
+
 function handleWebhookPost(orderId, req, res) {
   parseBody(req)
     .then((payload) => {
       const entry = getOrCreateEntry(orderId);
       const event = { payload, receivedAt: new Date().toISOString() };
       entry.webhooks.push(event);
-      const data = `data: ${JSON.stringify(event)}\n\n`;
+      const id = entry.webhooks.length - 1;
+      const data = formatEvent(id, event);
       entry.clients.forEach((client) => client.write(data));
       console.log(
         `[Webhook] Received for ${orderId} (${entry.clients.size} SSE clients)`
@@ -82,21 +92,34 @@ function handleWebhookSSE(orderId, req, res) {
     "X-Accel-Buffering": "no",
     "Access-Control-Allow-Origin": "*",
   });
+  // Force headers out before any body chunk — some proxies hold them otherwise.
+  res.flushHeaders?.();
+  // Disable Nagle so small SSE frames flush immediately.
+  res.socket?.setNoDelay?.(true);
+  // Prime the stream with padding to breach proxy buffer thresholds.
+  res.write(SSE_PAD);
 
   const entry = getOrCreateEntry(orderId);
 
-  // Send any already-received webhooks (catch-up)
-  for (const event of entry.webhooks) {
-    res.write(`data: ${JSON.stringify(event)}\n\n`);
+  // Catch-up: replay only events newer than the client's Last-Event-ID.
+  const lastHeader = req.headers["last-event-id"];
+  const lastId = lastHeader !== undefined ? Number.parseInt(lastHeader, 10) : -1;
+  const startIdx = Number.isFinite(lastId) ? lastId + 1 : 0;
+  for (let i = startIdx; i < entry.webhooks.length; i++) {
+    res.write(formatEvent(i, entry.webhooks[i]));
   }
 
   entry.clients.add(res);
+  console.log(
+    `[SSE] connected ${orderId} (${entry.clients.size} total, replayed ${entry.webhooks.length - startIdx})`
+  );
 
   // Send keepalive comments every 15s to prevent proxy/Cloudflare from closing the connection
   const keepalive = setInterval(() => res.write(": keepalive\n\n"), 15000);
   req.on("close", () => {
     clearInterval(keepalive);
     entry.clients.delete(res);
+    console.log(`[SSE] disconnected ${orderId} (${entry.clients.size} remaining)`);
   });
 }
 
