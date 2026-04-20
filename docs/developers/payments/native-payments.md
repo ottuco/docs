@@ -20,7 +20,7 @@ A payment payload can be:
 
 Ottu processes the payload with the configured gateway and returns a normalized callback result.
 
-:::tip Boost Your Integration
+:::tip[Boost Your Integration]
 Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
 :::
 
@@ -58,7 +58,7 @@ If a transaction has `knet` and `mpgs` `pg_code` but only `knet` supports Apple 
 1. The client collects the wallet or tokenized payment payload and calls the Native Payments endpoint directly.
 2. The client receives the API callback response.
 
-:::danger Never expose private keys on the client side
+:::danger[Never expose private keys on the client side]
 Never embed [Private API Keys](../getting-started/authentication.md#api-key-auth) in client-side code — they grant full API access and will be compromised if exposed. Use a [Public API Key](../getting-started/authentication.md#public-key) for client-side calls.
 :::
 
