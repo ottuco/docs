@@ -71,7 +71,13 @@ function handleWebhookPost(orderId, req, res) {
       entry.webhooks.push(event);
       const id = entry.webhooks.length - 1;
       const data = formatEvent(id, event);
-      entry.clients.forEach((client) => client.write(data));
+      // Append padding after each frame — DO App Platform / Envoy ingress buffers
+      // small SSE writes (<~4KB) indefinitely. Initial handshake padding only
+      // covers the open; every live broadcast needs its own flush.
+      entry.clients.forEach((client) => {
+        client.write(data);
+        client.write(SSE_PAD);
+      });
       console.log(
         `[Webhook] Received for ${orderId} (${entry.clients.size} SSE clients)`
       );
@@ -107,6 +113,10 @@ function handleWebhookSSE(orderId, req, res) {
   const startIdx = Number.isFinite(lastId) ? lastId + 1 : 0;
   for (let i = startIdx; i < entry.webhooks.length; i++) {
     res.write(formatEvent(i, entry.webhooks[i]));
+  }
+  // Flush replay frames past the ingress buffer (see handleWebhookPost).
+  if (entry.webhooks.length > startIdx) {
+    res.write(SSE_PAD);
   }
 
   entry.clients.add(res);
