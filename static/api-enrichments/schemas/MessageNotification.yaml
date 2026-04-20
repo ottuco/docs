@@ -2,7 +2,6 @@
 # Request body for POST /b/pbl/v2/notification/message/
 
 _example:
-  session_id: b17b883a03eaf1837a21b47e8b78c49f6ecec917
   channels:
     - sms
     - email
