@@ -181,11 +181,11 @@ export function getWebhookBaseUrl(): string {
 }
 
 /**
- * Get the base URL for the browser's SSE connection to the webhook relay.
+ * Get the base URL for the browser's connection to the webhook relay.
  * In local dev, connects directly to localhost:8090 (the webhook server).
  * In production, uses the current origin (same server handles both).
  */
-export function getWebhookSSEUrl(): string {
+export function getWebhookRelayUrl(): string {
   if (typeof window === "undefined") return "";
   const { hostname } = window.location;
   if (hostname === "localhost" || hostname === "127.0.0.1") {
