@@ -83,16 +83,17 @@ export default function ParamSelectFormItem({ param }: { param: any }) {
         render={({ field: { onChange, value } }) => (
           <FormSelect
             options={["---", ...options]}
-            value={value ?? "---"}
+            value={value ? value : "---"}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               const val = e.target.value;
+              const normalized = val === "---" ? "" : val;
               dispatch(
                 setParam({
                   ...param,
-                  value: val === "---" ? undefined : val,
+                  value: normalized || undefined,
                 })
               );
-              onChange(val);
+              onChange(normalized);
             }}
           />
         )}
