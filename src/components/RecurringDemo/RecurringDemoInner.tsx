@@ -207,23 +207,28 @@ export default function RecurringDemoInner() {
     };
   }, []);
 
-  // Scroll to active step (or error card) on every phase transition so the
-  // step header — and any newly-rendered response content — is visible.
+  // Scroll on every phase transition so the relevant content is in view.
+  // Without this, transitions that shrink the DOM (all steps collapsing on
+  // `complete`, journey replaced by error card on `error`) leave the stale
+  // scroll position past the end of the component — the viewport lands on
+  // whatever page content sits below.
   useEffect(() => {
-    if (state.phase === "idle" || state.phase === "complete") return;
+    if (state.phase === "idle") return;
     const timer = setTimeout(() => {
       const selector =
         state.phase === "error"
           ? "[data-recurring-error]"
-          : (() => {
-              const n = state.phase.startsWith("step1") ? 1
-                : state.phase.startsWith("step2") ? 2
-                : state.phase.startsWith("step3") ? 3
-                : state.phase.startsWith("step4") ? 4
-                : state.phase.startsWith("step5") ? 5
-                : 0;
-              return n === 0 ? null : `[data-recurring-step="${n}"]`;
-            })();
+          : state.phase === "complete"
+            ? "[data-recurring-complete]"
+            : (() => {
+                const n = state.phase.startsWith("step1") ? 1
+                  : state.phase.startsWith("step2") ? 2
+                  : state.phase.startsWith("step3") ? 3
+                  : state.phase.startsWith("step4") ? 4
+                  : state.phase.startsWith("step5") ? 5
+                  : 0;
+                return n === 0 ? null : `[data-recurring-step="${n}"]`;
+              })();
       if (!selector) return;
       const el = document.querySelector(selector);
       (el as HTMLElement | null)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -870,7 +875,7 @@ export default function RecurringDemoInner() {
             );
           })}
         </div>
-        <div className={styles.completeCard}>
+        <div className={styles.completeCard} data-recurring-complete>
           <h3 className={styles.completeTitle}>Recurring Payment Complete</h3>
           <p className={styles.completeSubtitle}>
             The card was charged without any customer interaction.
