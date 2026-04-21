@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import { translate } from "@docusaurus/Translate";
 import { ErrorMessage } from "@hookform/error-message";
@@ -49,14 +49,17 @@ export default function ParamSelectFormItem({ param }: { param: any }) {
   const showErrorMessage = errors?.paramSelect;
   const defaultValue = hasExample ? String(example) : "---";
 
+  const [localValue, setLocalValue] = useState(defaultValue);
+
   if (!control) {
     // Rendered outside FormProvider (e.g. params list panel) — uncontrolled fallback
     return (
       <FormSelect
         options={["---", ...options]}
-        value={defaultValue}
+        value={localValue}
         onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
           const val = e.target.value;
+          setLocalValue(val);
           dispatch(setParam({ ...param, value: val === "---" ? undefined : val }));
         }}
       />
