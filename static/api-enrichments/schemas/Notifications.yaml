@@ -1,0 +1,10 @@
+# Overrides for: components/schemas/Notifications
+# Used by CheckoutPOSTRequest.notifications and related request schemas.
+
+properties:
+  email:
+    description: |
+      Will be triggered at the following notification events: `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`, `voided`, `refunded`, `captured`. If the payment transaction transitions to an **error** state and an email notification has been set up for the **failed** state, then the customer will receive an email.
+  sms:
+    description: |
+      Will be triggered at the following notification events: `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`, `voided`, `refunded`, `captured`. If the payment transaction transitions to an **error** state and an SMS notification has been set up for the **failed** state, then the customer will receive an SMS.
