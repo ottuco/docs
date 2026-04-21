@@ -4,7 +4,7 @@
 _example:
   type: payment_request
   invoice_number: INV-001
-  due_date: "2026-12-31"
+  due_date: "2030-12-31"
   currency_code: KWD
   pg_codes:
     - knet

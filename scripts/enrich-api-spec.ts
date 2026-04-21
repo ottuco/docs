@@ -397,12 +397,13 @@ function enrichSchemaProperties(
     }
 
     // Format/type override (e.g., fixing `format: uri` → `format: binary` for file uploads)
-    if (overrideObj.format && schemaProps[propName]) {
-      schemaProps[propName].format = overrideObj.format;
-      count++;
-    }
-    if (overrideObj.type && schemaProps[propName]) {
-      schemaProps[propName].type = overrideObj.type;
+    if (schemaProps[propName] && (overrideObj.format || overrideObj.type)) {
+      if (overrideObj.format) {
+        schemaProps[propName].format = overrideObj.format;
+      }
+      if (overrideObj.type) {
+        schemaProps[propName].type = overrideObj.type;
+      }
       count++;
     }
 
