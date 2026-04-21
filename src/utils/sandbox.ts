@@ -19,6 +19,28 @@ export interface CreateSessionOptions {
   extra?: Record<string, unknown>;
 }
 
+const FIRST_NAMES = [
+  "Ahmad", "Fatima", "Yousef", "Noura", "Khaled", "Sara", "Omar", "Layla",
+  "Abdullah", "Mariam", "Hassan", "Aisha", "Faisal", "Dana", "Saad", "Hessa",
+];
+
+function randomKuwaitiPhone(): string {
+  const firstDigit = ["5", "6", "9"][Math.floor(Math.random() * 3)];
+  let rest = "";
+  for (let i = 0; i < 7; i++) rest += Math.floor(Math.random() * 10);
+  return firstDigit + rest;
+}
+
+function randomCustomer() {
+  const name = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
+  const suffix = Math.random().toString(36).slice(2, 8);
+  return {
+    customer_first_name: name,
+    customer_email: `${name.toLowerCase()}.${suffix}@example.com`,
+    customer_phone: randomKuwaitiPhone(),
+  };
+}
+
 export interface SessionResult {
   session_id: string;
   [key: string]: unknown;
@@ -34,6 +56,7 @@ export async function createSandboxSession(
     currency_code: options.currency_code ?? "KWD",
     customer_id: options.customer_id ?? "sandbox",
     include_sdk_setup_preload: true,
+    ...randomCustomer(),
     ...options.extra,
   };
 
