@@ -200,6 +200,7 @@ export default function RecurringDemoInner() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const webhookEventsRef = useRef<any[]>([]);
   const webhookCheckInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+  const hasStartedRef = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -211,24 +212,30 @@ export default function RecurringDemoInner() {
   // Without this, transitions that shrink the DOM (all steps collapsing on
   // `complete`, journey replaced by error card on `error`) leave the stale
   // scroll position past the end of the component — the viewport lands on
-  // whatever page content sits below.
+  // whatever page content sits below. The `idle` state is the restart
+  // target — scroll to the hero so the viewport lands on the component,
+  // not on whatever sits below. Skip on initial mount so the page doesn't
+  // auto-scroll on load.
   useEffect(() => {
-    if (state.phase === "idle") return;
+    if (state.phase !== "idle") hasStartedRef.current = true;
+    if (state.phase === "idle" && !hasStartedRef.current) return;
     const timer = setTimeout(() => {
       const selector =
-        state.phase === "error"
-          ? "[data-recurring-error]"
-          : state.phase === "complete"
-            ? "[data-recurring-complete]"
-            : (() => {
-                const n = state.phase.startsWith("step1") ? 1
-                  : state.phase.startsWith("step2") ? 2
-                  : state.phase.startsWith("step3") ? 3
-                  : state.phase.startsWith("step4") ? 4
-                  : state.phase.startsWith("step5") ? 5
-                  : 0;
-                return n === 0 ? null : `[data-recurring-step="${n}"]`;
-              })();
+        state.phase === "idle"
+          ? "[data-recurring-idle]"
+          : state.phase === "error"
+            ? "[data-recurring-error]"
+            : state.phase === "complete"
+              ? "[data-recurring-complete]"
+              : (() => {
+                  const n = state.phase.startsWith("step1") ? 1
+                    : state.phase.startsWith("step2") ? 2
+                    : state.phase.startsWith("step3") ? 3
+                    : state.phase.startsWith("step4") ? 4
+                    : state.phase.startsWith("step5") ? 5
+                    : 0;
+                  return n === 0 ? null : `[data-recurring-step="${n}"]`;
+                })();
       if (!selector) return;
       const el = document.querySelector(selector);
       (el as HTMLElement | null)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -814,7 +821,7 @@ export default function RecurringDemoInner() {
   // ── Idle state ──
   if (state.phase === "idle") {
     return (
-      <div className={styles.hero}>
+      <div className={styles.hero} data-recurring-idle>
         <h2 className={styles.heroTitle}>Try Recurring Payments</h2>
         <p className={styles.heroSubtitle}>
           Experience the full CIT/MIT flow: save a card with a test payment,
