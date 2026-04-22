@@ -1,15 +1,9 @@
-name: Deploy to DigitalOcean
+name: Deploy to Production
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to deploy'
-        required: true
-        type: choice
-        options:
-          - dev
-          - production
 
 jobs:
   build:
@@ -21,14 +15,23 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20.19.6"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
 
       - name: Type check
         run: npm run typecheck
+
+      - name: Test MCP + Webhook server
+        run: |
+          cd mcp-server
+          npm install
+          npm test
+
+      - name: Generate API docs
+        run: npm run gen-api
 
       - name: Build
         run: npm run build
@@ -39,17 +42,13 @@ jobs:
     steps:
       - name: Trigger DigitalOcean App Platform Deployment
         run: |
-          if [ "${{ inputs.environment }}" == "dev" ]; then
-            APP_ID="${{ secrets.DO_APP_ID_DEV }}"
-          else
-            APP_ID="${{ secrets.DO_APP_ID_PROD }}"
-          fi
+          echo "Deploying to production environment..."
 
           curl -X POST \
             -H "Authorization: Bearer ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" \
             -H "Content-Type: application/json" \
-            "https://api.digitalocean.com/v2/apps/${APP_ID}/deployments" \
+            "https://api.digitalocean.com/v2/apps/${{ secrets.DO_APP_ID_PROD }}/deployments" \
             --fail-with-body
 
       - name: Deployment Triggered
-        run: echo "Deployment triggered for ${{ inputs.environment }} environment"
+        run: echo "Deployment triggered successfully"

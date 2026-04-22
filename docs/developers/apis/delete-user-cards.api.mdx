@@ -1,0 +1,75 @@
+---
+id: delete-user-cards
+title: "Delete a saved card for the customer."
+description: "This endpoint allows you to delete a customer's saved card from the system. Provide the unique card identifier to remove the card from the customer's saved cards list. This action can help maintain up-to-date card information and ensure that customers do not accidentally use expired or unwanted cards for payments."
+sidebar_label: "Delete a saved card for the customer."
+hide_title: true
+hide_table_of_contents: true
+api: eJztV01PG0kQ/Sul5rCJNLZJNnvxjU3YCGWToCScwIL2TJnpMNPd6aoxTMz891X1fNjGgESkXW2kHAAzU1396tWrD6+U8xg0G2ePMjVVGRbIeF4RhvNUh4xUojKkNBgvNmqqvuSGAG3mnbEMuijcNUHtKmAH7WnQkFbErsTwGwHpJWYgvmARXAmcI1BNjOUYjoNbmgzjs8qabxW2hiZDy2ZhMIjXgKVbtkbbbu69haAwxGOIOHUqqCHVFnIsPJTaWNbGQuVH7EaZ5v5Gu3ChjDyAthmgpSrInZqHawgyB9Yx6DSNCHVR1FARAt54EzADF6Cy19rygGXhAnhdl2iZxmd2b28PjjGUhsg4S2f2zN7CQcU5vEfOXQa38Am/VdHZhh3cntnb0WgUf+TI6cHxEbzDevZskuESC0kiTS6R2djLEbEOjNlEV5wLkWmMa7KnvRldYT2S5883r3r2pyaTtkAkQKq8d+Ii4ufNjD8XLCpRXgddImMgNT1dKSPS+FZhqFWirC5RTVXP27nJVKIozbHUarpSXHt5TRyMvVTNXYGdsCnMd8za1HMwuMSOTU3kUqMF2LXhHDSQx9QsTDokCSoy9lLkYcKgqTWQ8VglKnRxqymHCpukg+8152v07K7QPoJ7ty4GDcejO2B7/SbQ39+yK8Yx3ijEQSxwQthSv9RFdAqEaRWwqMEHlyIRcNCWWo3TWJh8ILI7iYmBPCEjr3PnCGGOfI1o4YK0zebu5iJWyoUPLqsihosxfMYCU4bO4p4UpgH1ICwkhuM2YHirGa91De+P3lAilbT2K24WyGkOAXXROaoIpWyhMNIbtojY4WGWKNaXolR1Qhjgdexss0RFRg3XUcNdTcUyUNPTmdC3Loz4ZCauyTtLSELcy/1X8id1ltGyfNTeF33BfSWhb7UmukkU3ujSF+3pD+71+mDMcmtDVVnqUKup+uCgN2maZicxm68T9Wp//ylglLP4cREj7/Lv5l8xZSnuIA2FTQtzYbDIzlvtDLY6BC2SMowl3V8dC10V3E+M6AQMDeIfqxgQGy7k3F/y/jAEF0gJ8Y9DypC1Ke6R7lYNnPZ2s/U9b9FiMGm86T0S6UtUzcZ7kUYPY5fwluYXT6L5P43kIci//3yQn1RZ/wvIL/74uSA3iSrj2jEsfnGwS69Tk/nEz4vJ8uVE2u1kFcdUM5GxgWHZj/0qFGqqcmZP08mk6/pjx1yNLXIsrL7Ffpa429C2G+26pXjzDmNPEXg56gzDemiJsQvme2RzZ/qKyyusYXvlaQfvMG59wIW5gTN14M3oHdZnMW2bLX7AIiH1I1L+n4tRZEw2xWjYsf2RuYKD4yOVKKGlhfNivD/e3wE5mDaJ8o641FERXYBv+uV5c2OO69d6gxnf9bkht1+b+a/NXAqjUzDjDU98oY0VucVCXXXFfarmUujzQjT7UiVKGFGJmvY7r3ST3BGL6Wo114QnoWgaedyuklL7mSE9L6QJLXRB+Igwn/XhPId/f7m/N/wrrHe+kHQLl4rrxg8F8/PtxY+Q030pWLMyk3+CEVp+PN8P3dm3fFtv3jlgiTpsZk3SjwEB0L47SFP0vHFqZ8gK8mGuvTn8+/DLoUqU3hk2V3HYdB821uBtUHfnTotCfm+sqdtHVqt2lDXNYN++evDEMOxaaxODb5p/AHK2LEY=
+sidebar_class_name: "delete api-method"
+info_path: developers/apis/ottu-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+import Translate from "@docusaurus/Translate";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Delete a saved card for the customer."}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"delete"}
+  path={"/b/pbl/v2/card/{token}/"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+This endpoint allows you to delete a customer's saved card from the system. Provide the unique card identifier to remove the card from the customer's saved cards list. This action can help maintain up-to-date card information and ensure that customers do not accidentally use expired or unwanted cards for payments.
+### Permissions
+
+| Auth Method | Required Permissions |
+|---|---|
+| [API Key](/developers/getting-started/authentication/#api-key-auth) | Required (Basic Auth not supported for this endpoint) |
+
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+>
+  <Translate id="theme.openapi.request.title">Request</Translate>
+</Heading>
+
+<ParamsDetails
+  {...require("./delete-user-cards.ParamsDetails.json")}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  {...require("./delete-user-cards.RequestSchema.json")}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  {...require("./delete-user-cards.StatusCodes.json")}
+>
+  
+</StatusCodes>
+
+
+      

@@ -1,0 +1,8 @@
+# Enrichments for tag: "PaymentMethods API"
+
+operations:
+
+  get_payment_methods:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_payment_methods

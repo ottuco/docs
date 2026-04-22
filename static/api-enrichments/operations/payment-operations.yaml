@@ -1,0 +1,52 @@
+# Enrichments for tags: "Payment Operations"
+# Operations: refund, capture, void, cancel, expire, delete, inquiry, auto-debit, cash, native payments
+
+operations:
+
+  public_operations:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_operations
+    description_replace: |
+      Perform operations on existing payment transactions. Supports `refund`, `capture`, `void`, `cancel`, `expire`, and `delete`.
+
+      Use `session_id` or `order_no` to identify the target transaction. For `refund` and `capture`, specify `amount` (defaults to full/remaining amount). For `void`, always applies to the full amount.
+
+      Include `Tracking-Key` header on external operations to prevent duplicates and retrieve status.
+
+  inquiry:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_inquiry
+    description_replace: |
+      Check the status of a payment transaction. For `pending`, `attempted`, `failed`, or `expired` states, Ottu queries the payment gateway for the latest status. For `paid` or `authorized` states, returns the current status immediately.
+
+      Requires at least one identifier: `session_id` or `order_no`.
+
+  auto_debit:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_auto_debit
+
+  auto_debit_2:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_auto_debit
+
+  apple_direct_payment:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_native_payment
+
+  google_direct_payment:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_native_payment
+
+  cash_payment_acknowledgement:
+    permissions:
+      - $perm:api_key_admin
+
+  cash_payment_acknowledgement_2:
+    permissions:
+      - $perm:api_key_admin

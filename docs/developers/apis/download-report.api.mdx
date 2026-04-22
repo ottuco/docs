@@ -1,0 +1,70 @@
+---
+id: download-report
+title: "Download Transaction Report File"
+description: "Download a report file using the secure token from the list endpoint. Returns the file as binary (CSV or XLSX). Tokens are time-limited, user-bound, and rate-limited."
+sidebar_label: "Download Transaction Report File"
+hide_title: true
+hide_table_of_contents: true
+api: eJzVVU1v20gM/SsDnhJAsZKmJ9282w8Y6WILO1kUSIztWKIt1vKMOkMl8Qr67wvOyIprOz30tHuxLQ1Jk+89vmnB1ug0kzWTAjIo7JOprC7+dlhbx5BAgT53VEsEZPCuP1daxQi1pApV48msFJeoPOaNQ8V2jUYtnd2EtxV5VmiK2pLhkZoiN874cBTytVcLMtpt1dnvs7+UderLp9mX85G6lTpeaSlJG7yoaEOMRaIaj+5iYRtTJEqbQjnNw+nowUACtXZ6g4zOQ3bfAkn7teYSEjB6g5BBaBIS8HmJGw1ZC7yt5cCzI7OC7nD6WRxuB1I/5dnd3eTd+cuwXwcQdS6Jo8ZVX9WSsCoUmRc8HPraGo+vThkGCzMqtiFPN1yiYcq1HAsGI0jA4feGHBaQsWuwmyfAeiVTwzRw5NX48wTmCQRyiLcBkPHnibrBrRo3XEJ2P++SFn7TnvKXN3OpHZv0As+by0v5yq1hNCw/dV1X0g1Zk37zAlL7KpwJLK3baIYMItnQdUcQT/dUdaCFD9ap2XWmHBbkMGcvqNQOLzytDBbqbvppJJxdX76RPz+sG5MOcmbXkqbOnko08uDZOr1CRV6h0YsKi3Mp+TYO/mPJiXnUFQ0qaMza2CejdEXaS9sbXcnA2Ef0ha5+BUG7+Ia5bGPtZF+ZIh8FsqbqhHC7fVHc7+JEGMSVBH5Eg47y985Z9wd6r1d4io3Y8vXx7HcenYBkLAdRWkf/hEH3lqMkH3iMRd6e4iRwbV2kW2otRe0h4eoE4oP7VGTWqtRe4XMtQ0oN8ooiI2H+DXJpxdJWGICTzc8gXaS6pvTxKo325VP5a5+2gaIu3XWfii2ge9y5R+MqyKBkrn2Wpl6bYmGfR5a5GRlk6PaWaybkRX5+XLGBJV3TDW4hiZ5Uoi7QvbjSuIczSOLIgKXkGrf7TkDWqCfiUu0oF4Ev6Vk9wLimixvcPgQi95d76EVG2lmgPC8kKABIZmlDYC+ZP5mbYCQJCCyxnavR5ejyqMkhtEugtp43Osi6H3Bg8dZp46NHql4LH0QvB+X21uX/dP/0ADM+c1pXmoygEXTU9mq8hwUkogaB9CoYedCkOKWoEhLIdnfUTpiQgOxxaT1LgbZdaI93ruo6ef29QSfuPk/gUTsSAwvyLcgHM4NsqSuPPwH4bNqL6Fz9R2+7k7juNsvIWj3qqpEnSGCN2+Gi7+Zdsts2ASWejfMca97LOjJkWe7BTT6+vxXOjhZ6HRa6/yHVT3Z0uNuxBfmU2/dkSttGu+i6IT4evZoxGEqMpjB51/0L0aBmSw==
+sidebar_class_name: "get api-method"
+info_path: developers/apis/ottu-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+import Translate from "@docusaurus/Translate";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Download Transaction Report File"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/b/api/v1/reports/files/{token}/download/"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Download a report file using the secure token from the list endpoint. Returns the file as binary (CSV or XLSX). Tokens are time-limited, user-bound, and rate-limited.
+
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+>
+  <Translate id="theme.openapi.request.title">Request</Translate>
+</Heading>
+
+<ParamsDetails
+  {...require("./download-report.ParamsDetails.json")}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  {...require("./download-report.RequestSchema.json")}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  {...require("./download-report.StatusCodes.json")}
+>
+  
+</StatusCodes>
+
+
+      

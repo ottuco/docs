@@ -5,7 +5,7 @@ Your comprehensive guide to Ottu resources, tools, and support channels.
 ## Developer Resources
 
 ### API Documentation
-- **[API Reference](https://docs.ottu.com/api)**: Complete API documentation
+- **[API Reference](/developers/apis/ottu-api)**: Complete API documentation
 - **[Postman Collection](https://documenter.getpostman.com/view/ottu)**: Ready-to-use API requests
 - **[OpenAPI Specification](https://api.ottu.com/docs/openapi.json)**: Machine-readable API spec
 - **[GraphQL Schema](https://api.ottu.com/graphql)**: GraphQL API documentation
@@ -13,13 +13,13 @@ Your comprehensive guide to Ottu resources, tools, and support channels.
 ### SDKs & Libraries
 
 #### Official SDKs
-- **[JavaScript SDK](https://github.com/ottu/ottu-js)**: Frontend and Node.js integration
-- **[Python SDK](https://github.com/ottu/ottu-python)**: Python library
-- **[PHP SDK](https://github.com/ottu/ottu-php)**: PHP integration
-- **[Ruby SDK](https://github.com/ottu/ottu-ruby)**: Ruby gem
-- **[iOS SDK](https://github.com/ottu/ottu-ios)**: Native iOS integration
-- **[Android SDK](https://github.com/ottu/ottu-android)**: Native Android integration
-- **[Flutter SDK](https://github.com/ottu/ottu-flutter)**: Cross-platform mobile
+- **[JavaScript SDK](https://github.com/ottuco/ottu-js)**: Frontend and Node.js integration
+- **[Python SDK](https://github.com/ottuco/ottu-python)**: Python library
+- **[PHP SDK](https://github.com/ottuco/ottu-php)**: PHP integration
+- **[Ruby SDK](https://github.com/ottuco/ottu-ruby)**: Ruby gem
+- **[iOS SDK](https://github.com/ottuco/ottu-ios)**: Native iOS integration
+- **[Android SDK](https://github.com/ottuco/ottu-android)**: Native Android integration
+- **[Flutter SDK](https://github.com/ottuco/ottu-flutter)**: Cross-platform mobile
 
 #### Community Libraries
 - **[Go SDK](https://github.com/ottu-community/ottu-go)**: Community-maintained Go library
@@ -29,13 +29,13 @@ Your comprehensive guide to Ottu resources, tools, and support channels.
 ### Sample Code & Examples
 
 #### GitHub Repositories
-- **[Sample Applications](https://github.com/ottu/examples)**: Complete example applications
-- **[Code Snippets](https://github.com/ottu/code-snippets)**: Useful code examples
-- **[Webhook Examples](https://github.com/ottu/webhook-examples)**: Webhook implementation examples
-- **[Integration Templates](https://github.com/ottu/integration-templates)**: Boilerplate code
+- **[Sample Applications](https://github.com/ottuco/examples)**: Complete example applications
+- **[Code Snippets](https://github.com/ottuco/code-snippets)**: Useful code examples
+- **[Webhook Examples](https://github.com/ottuco/webhook-examples)**: Webhook implementation examples
+- **[Integration Templates](https://github.com/ottuco/integration-templates)**: Boilerplate code
 
 #### Live Demos
-- **[Interactive API Explorer](https://docs.ottu.com/api-explorer)**: Test API calls in your browser
+- **[Interactive API Explorer](/developers/apis/ottu-api)**: Test API calls in your browser
 - **[Payment Demo](https://demo.ottu.com)**: Live payment flow demonstration
 - **[Webhook Tester](https://webhook-tester.ottu.com)**: Test webhook implementations
 
@@ -119,7 +119,7 @@ Your comprehensive guide to Ottu resources, tools, and support channels.
 - **[Discord Community](https://discord.gg/ottu)**: Real-time developer chat
 - **[Stack Overflow](https://stackoverflow.com/questions/tagged/ottu)**: Technical Q&A
 - **[Reddit Community](https://reddit.com/r/ottu)**: Community discussions
-- **[GitHub Discussions](https://github.com/ottu/community/discussions)**: Open discussions
+- **[GitHub Discussions](https://github.com/ottuco/community/discussions)**: Open discussions
 
 ## Training & Education
 
@@ -219,8 +219,8 @@ Your comprehensive guide to Ottu resources, tools, and support channels.
 
 We value your feedback! Help us improve by:
 - **[Feature Requests](https://feedback.ottu.com)**: Suggest new features
-- **[Bug Reports](https://github.com/ottu/bug-reports)**: Report issues
-- **[Documentation Feedback](https://docs.ottu.com/feedback)**: Improve our docs
+- **[Bug Reports](https://github.com/ottuco/bug-reports)**: Report issues
+- **[Documentation Feedback](https://feedback.ottu.com)**: Improve our docs
 - **[User Survey](https://survey.ottu.com)**: Share your experience
 
 ---

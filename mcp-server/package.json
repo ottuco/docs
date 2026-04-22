@@ -1,0 +1,16 @@
+{
+  "name": "ottu-docs-mcp-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node test.mjs"
+  },
+  "dependencies": {
+    "docusaurus-plugin-mcp-server": "^0.11.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

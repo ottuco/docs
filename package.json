@@ -4,29 +4,47 @@
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
+    "fetch-api": "tsx scripts/fetch-api-schema.ts",
+    "enrich-api": "tsx scripts/enrich-api-spec.ts",
+    "extract-schemas": "tsx scripts/extract-schema.ts SchemaWebhook PaymentOperationResponses",
+    "gen-api": "npm run enrich-api && npx docusaurus clean-api-docs ottuApi && npx docusaurus gen-api-docs ottuApi && npm run extract-schemas",
+    "update-api": "npm run fetch-api && npm run gen-api",
     "start": "docusaurus start",
-    "build": "docusaurus build",
+    "build": "docusaurus build && cp -r build/mcp build/_mcp-data",
     "swizzle": "docusaurus swizzle",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "webhook": "PORT=8090 node mcp-server/server.mjs"
   },
   "dependencies": {
-    "@docusaurus/core": "3.8.1",
-    "@docusaurus/preset-classic": "3.8.1",
-    "@mdx-js/react": "^3.0.0",
-    "clsx": "^2.0.0",
-    "prism-react-renderer": "^2.3.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "@docusaurus/core": "^3.10.0",
+    "@docusaurus/faster": "^3.10.0",
+    "@docusaurus/preset-classic": "^3.10.0",
+    "@docusaurus/theme-mermaid": "^3.10.0",
+    "@easyops-cn/docusaurus-search-local": "^0.55.1",
+    "@mdi/js": "^7.4.47",
+    "@mdi/react": "^1.6.1",
+    "@mdx-js/react": "^3.1.1",
+    "clsx": "^2.1.1",
+    "docusaurus-markdown-source-plugin": "^2.2.4",
+    "docusaurus-plugin-mcp-server": "^0.11.0",
+    "prism-react-renderer": "^2.4.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "sass": "^1.98.0"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.8.1",
-    "@docusaurus/tsconfig": "3.8.1",
-    "@docusaurus/types": "3.8.1",
-    "typescript": "~5.6.2"
+    "@docusaurus/module-type-aliases": "^3.10.0",
+    "@docusaurus/tsconfig": "^3.10.0",
+    "@docusaurus/types": "^3.10.0",
+    "@types/js-yaml": "^4.0.9",
+    "docusaurus-plugin-openapi-docs": "^5.0.0",
+    "docusaurus-theme-openapi-docs": "^5.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2"
   },
   "browserslist": {
     "production": [
@@ -41,6 +59,6 @@
     ]
   },
   "engines": {
-    "node": "20.x"
+    "node": "20.19.6"
   }
 }

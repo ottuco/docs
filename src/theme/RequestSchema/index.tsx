@@ -1,0 +1,176 @@
+import React from "react";
+
+import BrowserOnly from "@docusaurus/BrowserOnly";
+import { useDoc } from "@docusaurus/plugin-content-docs/client";
+import { translate } from "@docusaurus/Translate";
+import SchemaNode from "@site/src/theme/Schema";
+import Details from "@theme/Details";
+import TabItem from "@theme/TabItem";
+import type { MediaTypeObject } from "docusaurus-plugin-openapi-docs/lib/openapi/types";
+import Markdown from "docusaurus-theme-openapi-docs/lib/theme/Markdown";
+import MimeTabs from "docusaurus-theme-openapi-docs/lib/theme/MimeTabs";
+import SkeletonLoader from "docusaurus-theme-openapi-docs/lib/theme/SkeletonLoader";
+import {
+  OPENAPI_REQUEST,
+  OPENAPI_SCHEMA_ITEM,
+} from "docusaurus-theme-openapi-docs/lib/theme/translationIds";
+
+interface Props {
+  style?: React.CSSProperties;
+  title: string;
+  body: {
+    content?: {
+      [key: string]: MediaTypeObject;
+    };
+    description?: string;
+    required?: string[] | boolean;
+  };
+}
+
+const RequestSchemaComponent: React.FC<Props> = ({ title, body, style }) => {
+  const { frontMatter } = useDoc();
+  const rootSchemaName = `${String(frontMatter.id)}-request`;
+
+  if (
+    body === undefined ||
+    body.content === undefined ||
+    Object.keys(body).length === 0 ||
+    Object.keys(body.content).length === 0
+  ) {
+    return null;
+  }
+
+  const mimeTypes = Object.keys(body.content);
+
+  if (mimeTypes.length > 1) {
+    return (
+      <MimeTabs className="openapi-tabs__mime" schemaType="request" lazy>
+        {mimeTypes.map((mimeType) => {
+          const firstBody = body.content![mimeType].schema;
+          if (
+            firstBody === undefined ||
+            (firstBody.properties &&
+              Object.keys(firstBody.properties).length === 0)
+          ) {
+            return null;
+          }
+          return (
+            // @ts-ignore
+            <TabItem key={mimeType} label={mimeType} value={mimeType}>
+              <div style={{ marginTop: "1rem" }}>
+                <Details
+                  className="openapi-markdown__details mime"
+                  data-collapsed={false}
+                  open={true}
+                  style={style}
+                  summary={
+                    <>
+                      <summary>
+                        <h3 className="openapi-markdown__details-summary-header-body">
+                          {translate({
+                            id: OPENAPI_REQUEST.BODY_TITLE,
+                            message: title,
+                          })}
+                          {body.required === true && (
+                            <span className="openapi-schema__required">
+                              {translate({
+                                id: OPENAPI_SCHEMA_ITEM.REQUIRED,
+                                message: "required",
+                              })}
+                            </span>
+                          )}
+                        </h3>
+                      </summary>
+                    </>
+                  }
+                >
+                  <div style={{ textAlign: "left", marginLeft: "1rem" }}>
+                    {body.description && (
+                      <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
+                        <Markdown>{body.description}</Markdown>
+                      </div>
+                    )}
+                  </div>
+                  <ul style={{ marginLeft: "1rem" }}>
+                    <SchemaNode
+                      schema={firstBody}
+                      schemaType={rootSchemaName}
+                    />
+                  </ul>
+                </Details>
+              </div>
+            </TabItem>
+          );
+        })}
+      </MimeTabs>
+    );
+  }
+
+  const randomFirstKey = mimeTypes[0];
+  const firstBody =
+    body.content[randomFirstKey].schema ?? body.content![randomFirstKey];
+
+  if (firstBody === undefined) {
+    return null;
+  }
+
+  return (
+    <MimeTabs className="openapi-tabs__mime" schemaType="request">
+      {/* @ts-ignore */}
+      <TabItem label={randomFirstKey} value={`${randomFirstKey}-schema`}>
+        <Details
+          className="openapi-markdown__details mime"
+          data-collapsed={false}
+          open={true}
+          style={style}
+          summary={
+            <>
+              <summary>
+                <h3 className="openapi-markdown__details-summary-header-body">
+                  {translate({
+                    id: OPENAPI_REQUEST.BODY_TITLE,
+                    message: title,
+                  })}
+                  {firstBody.type === "array" && (
+                    <span style={{ opacity: "0.6" }}> array</span>
+                  )}
+                  {body.required && (
+                    <strong className="openapi-schema__required">
+                      {translate({
+                        id: OPENAPI_SCHEMA_ITEM.REQUIRED,
+                        message: "required",
+                      })}
+                    </strong>
+                  )}
+                </h3>
+              </summary>
+            </>
+          }
+        >
+          <div style={{ textAlign: "left", marginLeft: "1rem" }}>
+            {body.description && (
+              <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
+                <Markdown>{body.description}</Markdown>
+              </div>
+            )}
+          </div>
+          <ul style={{ marginLeft: "1rem" }}>
+            <SchemaNode schema={firstBody} schemaType={rootSchemaName} />
+          </ul>
+        </Details>
+      </TabItem>
+    </MimeTabs>
+  );
+};
+
+const RequestSchema: React.FC<Props> = (props) => {
+  return (
+    <BrowserOnly fallback={<SkeletonLoader size="sm" />}>
+      {() => {
+        return <RequestSchemaComponent {...props} />;
+      }}
+    </BrowserOnly>
+  );
+};
+
+export default RequestSchema;

@@ -1,0 +1,99 @@
+---
+title: User Cards
+sidebar_label: User Cards
+hide_table_of_contents: true
+---
+
+import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
+import FAQ, { FAQItem } from '@site/src/components/FAQ';
+
+# User Cards
+
+With Ottu, managing your customers' saved cards is straightforward and secure. The User Cards API lets you fetch all saved cards for a customer or delete a specific card. By incorporating this functionality, you ensure a seamless, personalized, and efficient payment experience.
+
+:::info
+User Cards API is not available in KSA.
+:::
+
+:::tip[Boost Your Integration]
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
+:::
+
+## When to Use
+
+- **Display saved cards** — show customers their previously tokenized cards at checkout for one-click payments.
+- **Delete saved cards** — let customers or your backend remove cards they no longer want stored.
+- **Build custom card management UI** — if the [Checkout SDK](/developers/payments/checkout-sdk/) doesn't fit your UX needs, use these APIs directly.
+- **Pre-filter cards for auto-debit** — retrieve tokenized cards before initiating [recurring payments](/developers/cards-and-tokens/recurring-payments/).
+
+## Setup
+
+When integrating the User Cards API, here are the key points:
+
+1. You will not receive the full card number (PAN). Instead, you'll get the last 4 digits and a token. This token is what you use for payments or authorizations.
+2. If you're using the [Checkout SDK](/developers/payments/checkout-sdk/), customers can delete their saved cards at any point. This gives users control over their payment information.
+3. When a customer saves their card during payment, the corresponding token is included in the payload sent to your [webhook_url](/developers/payments/checkout-api/).
+4. Ottu already handles displaying saved cards and card deletion. Use these APIs only if you need more granular control.
+
+:::info[Successful Payment is a Prerequisite]
+A saved card (token) can only be created after the customer completes a successful payment transaction. This ensures card validity and enables tokenization. See the [Tokenization documentation](/developers/cards-and-tokens/tokenization/#implementation) for implementation details.
+:::
+
+## Guide
+
+### Workflow
+
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
+graph LR
+    A[Checkout API] -->|Payment + save card| B{{Token}}
+    B --> C[User Cards API]
+    C -->|List cards| D([Customer])
+    C -->|Delete card| D
+
+    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
+    class C accent
+```
+
+1. **Customer pays and saves card** — during a [Checkout API](/developers/payments/checkout-api/) payment with tokenization enabled, Ottu creates a token.
+2. **Token delivered via webhook** — the token is included in the webhook payload sent to your `webhook_url`.
+3. **List saved cards** — call the User Cards API with `customer_id` to retrieve all saved cards (masked PAN + token).
+4. **Delete a card** — call the delete endpoint with the card token to remove it.
+
+### Step-by-Step
+
+1. **Fetch saved cards** — call `GET /b/pbl/v2/card/?customer_id={id}` to retrieve all tokenized cards for a customer.
+2. **Display cards** — show the masked card number, brand, and expiry in your UI.
+3. **Delete a card** — call `DELETE /b/pbl/v2/card/{token}/` to remove a specific card.
+4. **Use a card for payment** — pass the token to the [Checkout API](/developers/payments/checkout-api/) or [Auto-Debit API](/developers/payments/native-payments/) for subsequent charges.
+
+## API Reference
+
+<ApiDocEmbed path="get-user-cards.api.mdx" />
+
+---
+
+<ApiDocEmbed path="delete-user-cards.api.mdx" />
+
+## FAQ
+
+<FAQ>
+  <FAQItem question="Can I save a card without making a successful payment?">
+    Not currently. A card can only be tokenized after a successful payment transaction. This ensures the card's validity.
+  </FAQItem>
+  <FAQItem question="How can I delete a card?">
+    Two options: call the User Cards API [delete endpoint](#api-reference) directly, or use the [Checkout SDK](/developers/payments/checkout-sdk/) which handles card management for you.
+  </FAQItem>
+  <FAQItem question="Can I trigger auto-debit payments?">
+    Yes, but only if the customer has agreed and their card is enabled for auto-debit. See the [Recurring Payments](/developers/cards-and-tokens/recurring-payments/) documentation.
+  </FAQItem>
+  <FAQItem question="Does Ottu store cards internally?">
+    No. Card details are stored in an external PCI-compliant vault, typically at the [payment gateway](/developers/payments/payment-methods/) with which the merchant has a contract.
+  </FAQItem>
+</FAQ>
+
+## What's Next?
+
+- [**Recurring Payments**](/developers/cards-and-tokens/recurring-payments/) — Use saved tokens for auto-debit and recurring billing
+- [**Tokenization**](/developers/cards-and-tokens/tokenization/) — How cards get saved during payment
+- [**Checkout SDK**](/developers/payments/checkout-sdk/) — Drop-in UI that handles card management automatically

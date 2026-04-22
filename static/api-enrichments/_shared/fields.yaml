@@ -1,0 +1,111 @@
+# Shared field descriptions for schema enrichments
+# Referenced via $shared marker in schemas/*.yaml files
+#
+# Descriptions are from the original Ottu documentation.
+# Links marked with <!-- TODO:merchant-link ... --> need updating when
+# the corresponding merchant/business pages are created.
+# See .todo/merchant-page-links.md for the full list.
+
+amount:
+  description: |
+    Represents the total amount of the payment transaction, which includes the cost of the purchased items or services but excludes any additional fees or charges. The number of decimals must correlate with the `currency_code`.
+
+currency_code:
+  description: |
+    The currency in which the transaction is denominated. However, it does not guarantee that the payment must be made in this currency, as there can be currency conversions or exchanges resulting in a different currency being charged. <!-- TODO:merchant-link currencies page, currency exchanges section -->
+
+session_id:
+  description: |
+    A unique identifier for each payment transaction, used to maintain the session state during the payment process. It can be used to perform subsequent operations, like retrieve, acknowledge, [refund, capture, and cancellation]({{apiBaseUrl}}/operations/).
+
+state:
+  description: |
+    The current state of the payment transaction, it helps to understand the progress of the payment. Possible values: `created`, `pending`, `attempted`, `authorized`, `paid`, `failed`, `canceled`, `expired`, `invalided`, `refunded`, `cod`. <!-- TODO:merchant-link payment-states page for state machine details -->
+
+customer_email:
+  description: |
+    This field specifies the customer's email address and is used to send payment notifications and receipts. Additionally, it is used for fraud prevention and is transmitted to the payment gateway. The email address may also be included on invoices, receipts, and displayed on the payment page. It must be a valid email address. If email [notifications]({{apiBaseUrl}}/notifications/) are applied, the `notification.email` parameter must be included, making `customer_email` **required**. Otherwise, it will be **optional**.
+
+customer_first_name:
+  description: |
+    The first name of the recipient of the payment. This field is used for various communications such as the invoice, receipt, email, SMS, or displayed on the payment page. It may also be sent to the payment gateway if necessary.
+
+customer_last_name:
+  description: |
+    The last name of the recipient of the payment. This field is used for various communications such as the invoice, receipt, email, SMS, or displayed on the payment page. It may also be sent to the payment gateway if necessary.
+
+customer_phone:
+  description: |
+    Customer phone number associated with the payment. This might be sent to the payment gateway and depending on the gateway, it may trigger a click to pay process on the payment page. The phone number will also be included in the invoice, receipt, email, and displayed on the payment page. It becomes a **required** parameter if the merchant wants to enable KFAST on KNET (KFAST is a tokenization feature on KPay page, which works with UDF3 mapped with `customer_phone`), or if SMS [notifications]({{apiBaseUrl}}/notifications/) are enabled. Otherwise, it remains **optional**.
+
+customer_id:
+  description: |
+    The customer ID is a unique identifier for the customer within the merchant's system. It is also used as a merchant identifier for the customer and plays a critical role in [tokenization]({{apiBaseUrl}}/cards-and-tokens/tokenization/). All the customer's cards will be associated with this ID.
+
+customer_birthdate:
+  description: |
+    Specifies the customer's date of birth. This field can be used for various purposes such as identity verification, eligibility checks, or customer profiling. The value must be provided in the `YYYY-MM-DD` format.
+
+order_no:
+  description: |
+    The unique identifier assigned to this payment transaction. It is used for tracking purposes and is set by the merchant or the system. For MPGS transactions, the `order_no` value must not exceed 37 characters.
+
+language:
+  description: |
+    This field specifies the language to be used for communication with the customer, including the payment page, receipt, invoice, email, SMS, and any other communications related to the payment transaction. Available choices: `en`, `ar`. Default language is `en`.
+
+payment_type:
+  description: |
+    Enum: `one_off`, `auto_debit`, or `save_card`. `one_off`: For payments that occur only once without future commitments. `save_card`: Indicates that the transaction is for the purpose of saving the card information. For additional information, please refer to the [Tokenization]({{apiBaseUrl}}/cards-and-tokens/tokenization/) document. `auto_debit`: For payments that are automatically deducted, such as recurring subscriptions, installments, or unscheduled auto-debits. For more information about auto-debit API, please refer to [Auto-Debit API documentation]({{apiBaseUrl}}/cards-and-tokens/recurring-payments/). If `auto_debit` is selected: (1) `agreement` and `customer_id` parameters will also be mandatory. (2) Only PG codes supporting [tokenization]({{apiBaseUrl}}/cards-and-tokens/tokenization/) can be selected.
+
+type:
+  description: |
+    The type of the payment transaction. This field represents the purpose of the payment and can be one of several pre-defined choices. Available choices: `payment_request`, `e_commerce`. <!-- TODO:merchant-link plugins page for Payment Request vs E-Commerce plugin details -->
+
+redirect_url:
+  description: |
+    It is the destination where customers are redirected after the payment stage, only if the `webhook_url` returns a success status. Query parameters, including `order_no`, `reference_number`, `session_id`, and any `extra` parameters, will be added to the `redirect_url`. For more information on how redirection works, please check [Payment Webhooks]({{apiBaseUrl}}/webhooks/payment-events/).
+
+webhook_url:
+  description: |
+    In case of a payment event or payment operation, Ottu triggers an HTTP request to this URL, to disclose transactional data. It should be provided by merchant. See [Payment Webhooks]({{apiBaseUrl}}/webhooks/payment-events/).
+
+pg_codes:
+  description: |
+    The list of [payment gateway codes]({{apiBaseUrl}}/payments/payment-methods/) from which a customer can select to perform the payment or authorization. Customer uses only one PG code. For [Basic Authentication]({{apiBaseUrl}}/getting-started/authentication/#basic-auth): User can use the PG code that has permission to access to. For [API Key]({{apiBaseUrl}}/getting-started/authentication/#api-key-auth): User can use all the PG codes.
+
+extra:
+  description: |
+    An object for extra data aka dynamic fields. Extra data can accept any value by default. However, if the merchant wants to enforce a specific type, they can use the plugins.Field class to do so. All CUSTOM fields are validated inside extra field.
+
+expiration_time:
+  description: |
+    If defined, any payment transactions created more than the defined period of time ago will be invalidated or expired if the customer tries to pay them. This field may be used to help ensure that payment transactions are processed in a timely manner. By default, this expiration period is set to 24 hours from the time of transaction creation. Format: `DD HH:MM:SS`. In order to automatically change the state to **expired**, the "Expire Payment Transactions?" field should be enabled in Ottu dashboard. <!-- TODO:merchant-link dashboard configuration for "Expire Payment Transactions?" toggle -->
+
+due_datetime:
+  description: |
+    The date and time by which the payment is due. This field may be used to help remind the customer to complete the payment before the due date. The default value is UTC. Format: `DD/MM/YYYY hh:mm`. If the `expiration_time` for a payment has passed, the payment state will be changed and cannot be paid. However, if the `due_datetime` has passed, the payment can still be paid, but the customer may incur fees or penalties.
+
+product_type:
+  description: |
+    The type of product or service being purchased. This field may be used for tracking and reporting purposes.
+
+vendor_name:
+  description: |
+    The name of the vendor or merchant associated with this payment. This field may be used for accounting and reporting purposes.
+
+email_recipients:
+  description: |
+    A comma-separated list of email addresses for internal recipients who will receive customer emails. These recipients will be included in email notifications sent to the customer regarding their payment.
+
+operation:
+  description: |
+    Specifies the type of operation to be performed by the payment gateway. If set to `purchase`, the payment source will be directly charged. If set to `authorize`, the payment source will only be authorized and the actual charge will be made at a later time.
+
+checkout_url:
+  description: |
+    URL that directs the customer to the Ottu Checkout Page where they can see the payment details and available payment methods for the transaction. If you need to share the payment link over SMS or WhatsApp, use `checkout_short_url` instead.
+
+initiator_id:
+  description: |
+    The user who initiated the creation of this payment transaction, if available. This field is optional and may be used to track who created the payment transaction. It is present only when [Basic Authentication]({{apiBaseUrl}}/getting-started/authentication/#basic-auth) is used, because [API Key]({{apiBaseUrl}}/getting-started/authentication/#api-key-auth) Authentication is not associated with any user.

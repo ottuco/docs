@@ -1,164 +1,179 @@
-import {themes as prismThemes} from 'prism-react-renderer';
-import type {Config} from '@docusaurus/types';
-import type * as Preset from '@docusaurus/preset-classic';
+import { themes as prismThemes } from "prism-react-renderer";
+import type { Config } from "@docusaurus/types";
+import type * as Preset from "@docusaurus/preset-classic";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'Ottu Documentation',
-  tagline: 'Payment processing made simple',
-  favicon: 'img/favicon.ico',
-  
+  title: "Ottu Documentation",
+  tagline: "Payment processing made simple",
+  favicon: "img/ottu_logo.avif",
+
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
+    faster: true,
   },
 
   // Production URL (docs.ottu.net)
-  url: 'https://docs.ottu.net',
-  baseUrl: '/',
+  url: "https://docs.ottu.net",
+  baseUrl: "/",
 
-  trailingSlash: false,
+  trailingSlash: true,
 
-  onBrokenLinks: 'warn',
-  onBrokenMarkdownLinks: 'warn',
+  clientModules: ["./src/clientModules/sidebarHashActiveLink.ts"],
+
+  onBrokenLinks: "warn",
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
   // may want to replace "en" with "zh-Hans".
   i18n: {
-    defaultLocale: 'en',
-    locales: ['en'],
+    defaultLocale: "en",
+    locales: ["en"],
+  },
+
+  markdown: {
+    mermaid: true,
+    hooks: {
+      onBrokenMarkdownLinks: "warn",
+    },
+    mdx1Compat: {
+      headingIds: true, // Allow {#custom-id} syntax in headings (required until v4 migration)
+      admonitions: true, // Convert :::type Title → :::type[Title] for MDX v3 compatibility
+    },
   },
 
   presets: [
     [
-      'classic',
+      "classic",
       {
         docs: {
-          sidebarPath: './sidebars.ts',
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/ottu/public-docs/tree/main/',
+          routeBasePath: "/",
+          sidebarPath: "./sidebars.ts",
+          docItemComponent: "@theme/ApiItem",
+          showLastUpdateTime: true,
         },
         blog: false,
         theme: {
-          customCss: './src/css/custom.css',
+          customCss: "./src/css/custom.css",
         },
       } satisfies Preset.Options,
     ],
   ],
 
-
   themeConfig: {
     // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
+    image: "img/docusaurus-social-card.jpg",
     navbar: {
-      title: 'Ottu',
+      title: "",
       logo: {
-        alt: 'Ottu Logo',
-        src: 'img/logo.svg',
+        alt: "Ottu Logo",
+        src: "img/ottu_logo.webp",
       },
       items: [
         {
-          type: 'docSidebar',
-          sidebarId: 'mainSidebar',
-          position: 'left',
-          label: 'Overview',
+          type: "docSidebar",
+          sidebarId: "mainSidebar",
+          position: "left",
+          label: "Overview",
         },
         {
-          type: 'docSidebar',
-          sidebarId: 'developerSidebar',
-          position: 'left',
-          label: 'Developers',
+          type: "docSidebar",
+          sidebarId: "developerSidebar",
+          position: "left",
+          label: "Developers",
         },
         {
-          type: 'docSidebar',
-          sidebarId: 'businessSidebar',
-          position: 'left',
-          label: 'Business',
+          type: "docSidebar",
+          sidebarId: "businessSidebar",
+          position: "left",
+          label: "Business",
         },
         {
-          href: 'https://github.com/ottu',
-          label: 'GitHub',
-          position: 'right',
+          type: "custom-mcpButton" as any,
+          position: "right",
         },
         {
-          href: 'https://ottu.com',
-          label: 'Ottu.com',
-          position: 'right',
+          href: "https://github.com/ottuco",
+          label: "GitHub",
+          position: "right",
+        },
+        {
+          href: "https://ottu.com",
+          label: "Ottu.com",
+          position: "right",
         },
       ],
     },
     footer: {
-      style: 'dark',
+      style: "dark",
       links: [
         {
-          title: 'Documentation',
+          title: "Documentation",
           items: [
             {
-              label: 'Overview',
-              to: '/overview/about',
+              label: "Overview",
+              to: "/overview/about",
             },
             {
-              label: 'Developer Quick Start',
-              to: '/quick-start/developers',
+              label: "Developer Docs",
+              to: "/developers/getting-started",
             },
             {
-              label: 'Merchant Quick Start',
-              to: '/quick-start/merchants',
+              label: "Business Guide",
+              to: "/business/",
             },
           ],
         },
         {
-          title: 'Developers',
+          title: "Developers",
           items: [
             {
-              label: 'API Reference',
-              to: '/developers/api-fundamentals',
+              label: "API Reference",
+              to: "/developers/getting-started/api-fundamentals",
             },
             {
-              label: 'Quick Start',
-              to: '/developers/quick-start',
+              label: "Quick Start",
+              to: "/developers/getting-started",
             },
             {
-              label: 'Developer Guide',
-              to: '/quick-start/developers',
+              label: "Developer Guide",
+              to: "/developers/",
             },
           ],
         },
         {
-          title: 'Business',
+          title: "Business",
           items: [
             {
-              label: 'Dashboard Tour',
-              to: '/business/dashboard-tour',
+              label: "Getting Started",
+              to: "/business/",
             },
             {
-              label: 'Merchant Guide',
-              to: '/quick-start/merchants',
+              label: "Payment Gateways",
+              to: "/business/payments/gateways",
             },
             {
-              label: 'Getting Started',
-              to: '/overview/about',
+              label: "Compliance & Security",
+              to: "/business/compliance",
             },
           ],
         },
         {
-          title: 'Resources',
+          title: "Resources",
           items: [
             {
-              label: 'Support',
-              href: 'https://ottu.com/support',
+              label: "Support",
+              href: "https://ottu.com/support",
             },
             {
-              label: 'Status',
-              href: 'https://status.ottu.com',
+              label: "Status",
+              href: "https://status.ottu.com",
             },
             {
-              label: 'GitHub',
-              href: 'https://github.com/ottu',
+              label: "GitHub",
+              href: "https://github.com/ottuco",
             },
           ],
         },
@@ -169,7 +184,78 @@ const config: Config = {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
     },
+    languageTabs: [
+      { language: "javascript" },
+      { language: "curl" },
+      { language: "python" },
+      { language: "nodejs" },
+      { language: "php" },
+      { language: "java" },
+      { language: "csharp" },
+      { language: "go" },
+      { language: "ruby" },
+      { language: "swift" },
+      { language: "kotlin" },
+      { language: "dart" },
+      { language: "rust" },
+      { language: "shell" },
+      { language: "powershell" },
+      { language: "http" },
+      { language: "c" },
+      { language: "objective-c" },
+      { language: "ocaml" },
+      { language: "r" },
+      { language: "postman-cli" },
+    ],
   } satisfies Preset.ThemeConfig,
+
+  plugins: [
+    [
+      "docusaurus-plugin-openapi-docs",
+      {
+        id: "api",
+        docsPluginId: "classic",
+        config: {
+          ottuApi: {
+            specPath: "static/Ottu_API_enriched.yaml",
+            outputDir: "docs/developers/apis",
+            sidebarOptions: {
+              groupPathsBy: "tag",
+            },
+            downloadUrl: "https://example.com/ottu_api.yaml",
+          },
+        },
+      },
+    ],
+    [
+      "docusaurus-plugin-mcp-server",
+      {
+        server: { name: "ottu-docs", version: "1.0.0" },
+        excludeRoutes: [
+          "/404*",
+          "/search*",
+          "/business/*",
+          "/developers/reference/*",
+        ],
+      },
+    ],
+    ["docusaurus-markdown-source-plugin", { docsPath: "/" }],
+  ],
+
+  themes: [
+    "docusaurus-theme-openapi-docs",
+    "@docusaurus/theme-mermaid",
+    [
+      "@easyops-cn/docusaurus-search-local",
+      {
+        hashed: true,
+        language: ["en"],
+        indexDocs: true,
+        indexBlog: false,
+        docsRouteBasePath: "/",
+      },
+    ],
+  ],
 };
 
 export default config;

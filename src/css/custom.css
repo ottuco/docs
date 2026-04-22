@@ -4,27 +4,954 @@
  * work well for content-centric websites.
  */
 
-/* You can override the default Infima variables here. */
-:root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
-  --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+/* Poppins font import */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap");
+@import url("./admonition.css");
+@import url("./markdown.css");
+@import url("./openapi.css");
+@import url("./sidebar.css");
+
+/* Consolas local font */
+@font-face {
+  font-family: "Consolas";
+  src: url("../fonts/Consolas-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
-[data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+/* You can override the default Infima variables here. */
+:root {
+  /* Typography — Poppins */
+  --ifm-font-family-base: "Poppins", system-ui, -apple-system, sans-serif;
+  --ifm-heading-font-family: "Poppins", system-ui, -apple-system, sans-serif;
+  --ifm-font-family-monospace: "Consolas", "Monaco", "Courier New", monospace;
+
+  /* Font sizes — 4-level heading hierarchy */
+  --ifm-h1-font-size: 2rem; /* 32px — Headline 1 */
+  --ifm-h2-font-size: 1.5rem; /* 24px — Section title */
+  --ifm-h3-font-size: 1.25rem; /* 20px — Step / subsection title */
+  --ifm-h4-font-size: 1.125rem; /* 18px — Minor heading */
+  --ifm-font-size-base: 1rem; /* 16px — Body text */
+
+  /* Font weights */
+  --ifm-heading-font-weight: 700;
+
+  /* Brand primary (Ottu orange — from Figma) */
+  --ifm-color-primary: #f27e20;
+  --ifm-color-primary-dark: #da711d;
+  --ifm-color-primary-darker: #ce6b1b;
+  --ifm-color-primary-darkest: #a95816;
+  --ifm-color-primary-light: #f4913d;
+  --ifm-color-primary-lighter: #f59d52;
+  --ifm-color-primary-lightest: #f8bc83;
+
+  --title-font-dark-color: #ffffff;
+  --desc-font-dark-color: #fafafa;
+
+  /* Backgrounds */
+  --ifm-background-color: #ffffff;
+  --ifm-background-surface-color: #fafafa;
+
+  /* Text — from Figma design */
+  --ifm-font-color-base: #4a4a4a; /* secondary-text */
+  --ifm-heading-color: #302f37; /* heading text */
+
+  /* Navbar */
+  --ifm-navbar-background-color: #ffffff;
+  --ifm-navbar-shadow: none;
+  --ifm-navbar-padding-horizontal: 1rem;
+  --ifm-navbar-item-padding-horizontal: 0.75rem;
+
+  /* Footer */
+  --ifm-footer-background-color: #f7f7f7;
+
+  /* Links */
+  --ifm-link-color: #f27e20;
+  --ifm-link-hover-color: #f8a46c;
+
+  /* Borders — from Figma */
+  --ifm-global-border-color: #e5e5e5;
+
+  /* Code */
+  --ifm-code-background: #f2f2f2;
+  --ifm-code-color: #1d1d1d;
+
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--ifm-navbar-height));
+}
+
+/* ================================
+   DARK MODE — from Figma API explorer panel
+   ================================ */
+/* Use html[data-theme="dark"] instead of [data-theme="dark"] to ensure
+   higher specificity (0,1,1) over :root (0,0,1), preventing cssnano from
+   overriding these variables when it merges and repositions :root rules. */
+html[data-theme="dark"] {
+  --ifm-background-color: #0f1117;
+  --ifm-background-surface-color: #171a21;
+
+  --ifm-font-color-base: #e5e7eb;
+  --ifm-heading-color: #ffffff;
+
+  --ifm-navbar-background-color: #0b0d12;
+  --ifm-footer-background-color: #0b0d12;
+
+  --ifm-link-color: #f57d2d;
+  --ifm-link-hover-color: #fabf97;
+
+  --ifm-code-background: #020617;
+  --ifm-global-border-color: #1e2939;
+  --ifm-code-color: #e5e7eb;
+}
+
+.markdown a {
+  color: var(--ifm-link-color);
+}
+
+.markdown a:hover {
+  color: var(--ifm-link-hover-color);
+}
+
+/* Panel links use the panel's own accent color — beats .markdown a (0,2,1 > 0,1,1) */
+.markdown .theme-admonition a,
+.markdown .theme-admonition a:hover {
+  color: var(--ifm-alert-border-color);
+}
+
+/* Style markdown headings — Figma uses #302f37 for all headings */
+.markdown h1 {
+  font-weight: 700;
+  color: var(--ifm-heading-color);
+}
+
+.markdown h2 {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 600;
+  color: var(--ifm-heading-color);
+  line-height: 1.4;
+  margin-top: 4rem;
+  margin-bottom: 1rem;
+}
+
+.markdown h3 {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 600;
+  color: var(--ifm-heading-color);
+  line-height: 1.4;
+  margin-top: 4rem;
+  margin-bottom: 1rem;
+}
+
+.markdown h4 {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 600;
+  color: var(--ifm-heading-color);
+  line-height: 1.4;
+  margin-top: 4rem;
+  margin-bottom: 1rem;
+}
+
+/* List item spacing — 16px between items, remove double margin from loose list <p> tags */
+.markdown li {
+  margin-bottom: 1rem; /* 16px */
+}
+
+.markdown li p {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+
+/* Bold text — semibold (600) instead of heavy bold (700) for inline descriptions */
+.markdown strong {
+  font-weight: 600;
+}
+
+/* Table cells: align content to top, with generous row spacing */
+.markdown table td,
+.markdown table th {
+  vertical-align: top;
+  line-height: 1.6;
+  font-size: 14px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+/* Explicitly pin spans inside table cells to 14px in case a component or plugin
+   injects a span with its own font-size that would otherwise override the td value. */
+.markdown table td span {
+  font-size: 14px;
+}
+
+/* Checkout SDK: align Payment Options Display Mode images like old docs */
+.checkout-sdk-image-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.checkout-sdk-image-row figure {
+  margin: 0;
+  flex: 1 1 240px;
+  max-width: 320px;
+}
+
+/* Center figure caption within each figure */
+.checkout-sdk-image-row figure figcaption {
+  text-align: center;
+}
+
+.checkout-sdk-image-row img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.checkout-sdk-figure {
+  margin: 0 0 12px 0;
+  max-width: 420px;
+}
+
+.checkout-sdk-figure img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Checkout SDK page images — slightly reduced + centered */
+.theme-doc-markdown figure img[src*="checkout-sdk"],
+.theme-doc-markdown figure img[src*="googleusercontent"] {
+  max-width: 85%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Stepper (old docs style) */
+.stepper {
+  counter-reset: step;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stepper-item {
+  position: relative;
+  padding: 0 0 18px 36px;
+}
+
+.stepper-item::before {
+  counter-increment: step;
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--ifm-color-primary);
+  color: white;
+  font-weight: 700;
+  font-size: 12px;
+  display: grid;
+  place-items: center;
+}
+
+.stepper-item::after {
+  content: "";
+  position: absolute;
+  left: 11px;
+  top: 26px;
+  width: 2px;
+  height: calc(100% - 26px);
+  background: var(--ifm-color-emphasis-300);
+}
+
+.stepper-item:last-child::after {
+  display: none;
+}
+
+.stepper-sublist {
+  list-style: decimal;
+  margin: 6px 0 0 18px;
+  padding-left: 16px;
+}
+
+:target {
+  scroll-margin-top: calc(var(--ifm-navbar-height));
+}
+
+/* ================================
+   NAVBAR RESPONSIVE FIXES
+   ================================ */
+
+/* Medium screens: tighten item spacing to delay early hamburger collapse */
+@media (max-width: 1280px) and (min-width: 997px) {
+  .navbar__item {
+    padding: 0 0.5rem;
+  }
+  .navbar__link {
+    font-size: 0.875rem;
+  }
+}
+
+/* Mobile (hamburger active): fix right-side layout so items don't overlap */
+@media (max-width: 996px) {
+  /* Allow right container to shrink so expanded search doesn't push logo off-screen.
+     Infima sets flex: 0 0 auto — override flex-shrink to 1. */
+  .navbar__items--right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 8px;
+    flex: 0 1 auto;
+  }
+
+  /* MCP button keeps its size.
+     !important is required: the search plugin loads its own CSS after custom.css
+     and sets position:absolute on its CSS-module class (.navbarSearchContainer_*),
+     which would otherwise win the cascade and overlay the MCP button. */
+  .navbar__items--right > * {
+    flex-shrink: 0;
+    position: static !important;
+  }
+
+  /* Hide GitHub and Ottu.com — reachable via hamburger sidebar */
+  .navbar__items--right > .navbar__item.navbar__link {
+    display: none;
+  }
+
+  /* Swap order: search first (left), MCP last (right) */
+  .navbar__search {
+    position: static !important;
+    flex-shrink: 1;
+    min-width: 2rem;
+    overflow: hidden;
+    order: -1;
+  }
+
+  .mcp-install-dropdown {
+    order: 10;
+  }
+
+  /* Override Infima's 9rem (144px) width — too wide for mobile.
+     Use a fluid width that leaves room for hamburger + logo + MCP. */
+  .navbar__search-input {
+    width: 2rem; /* collapsed by default (matches search plugin) */
+  }
+
+  .navbar__search-input:focus {
+    width: calc(100vw - 250px);
+    min-width: 5rem;
+    max-width: 9rem;
+  }
+
+  /* Hide ctrl+K hint on mobile (plugin only hides at ≤576px) */
+  .navbar__search [class*="searchHintContainer"] {
+    display: none;
+  }
+}
+
+/* Desktop: even spacing between right-side navbar items */
+@media (min-width: 997px) {
+  .navbar__items--right {
+    gap: 0.25rem;
+    align-items: center;
+  }
+
+  /* Add breathing room between MCP button and adjacent links */
+  .mcp-install-dropdown {
+    margin-right: 0.25rem;
+  }
+
+  /* Consistent left margin before search to separate it from theme toggle */
+  .navbar__search {
+    margin-left: 0.5rem;
+  }
+}
+
+/* ≥400px: MCP button shows icon + label */
+@media (min-width: 400px) {
+  .mcp-install-dropdown__button {
+    font-size: inherit;
+    padding: 6px 12px;
+    line-height: inherit;
+  }
+}
+
+/* <400px: MCP button shows icon only — hide label text, keep SVG */
+@media (max-width: 399px) {
+  .mcp-install-dropdown__button {
+    font-size: 0;
+    padding: 6px 8px;
+    line-height: 0;
+  }
+  .mcp-install-dropdown__button svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* When mobile sidebar is open: hide right-side items from the top bar
+   so they don't render over the open sidebar panel */
+.navbar-sidebar--show .navbar__items--right {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ================================
+   MCP DROPDOWN RESPONSIVE FIXES
+   ================================ */
+
+/* The plugin injects width:520px as inline <style> — override it so the
+   dropdown never overflows the viewport on narrow screens.
+   With Infima's .dropdown--right, the menu's right edge aligns with the
+   button's right edge and extends leftward; capping the width keeps it
+   within the viewport. */
+.mcp-install-dropdown__menu {
+  width: min(520px, calc(100vw - 1rem)) !important;
+  max-width: calc(100vw - 1rem) !important;
+  box-sizing: border-box;
+}
+
+/* Inside the mobile sidebar: switch to static layout so the dropdown
+   flows inline within the sidebar panel instead of escaping it absolutely.
+   Replace Infima's visibility/opacity/transform toggle with a max-height
+   collapse so the button still controls open/closed state. */
+.navbar-sidebar .mcp-install-dropdown {
+  position: static;
+  display: block;
+  width: 100%;
+}
+
+/* Base (collapsed) — override Infima's visibility mechanism entirely */
+.navbar-sidebar .mcp-install-dropdown__menu {
+  position: static !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-shadow: none;
+  border-radius: var(--ifm-global-radius);
+  transform: none !important;
+  /* Force visible so Infima's hidden state doesn't fight us */
+  visibility: visible !important;
+  opacity: 1 !important;
+  /* Height-based collapse owns the show/hide instead */
+  max-height: 0;
+  overflow: hidden;
+  margin-top: 0;
+  pointer-events: none;
+  transition:
+    max-height 0.2s ease,
+    margin-top 0.15s ease;
+}
+
+/* Expanded — only when dropdown--show is present */
+.navbar-sidebar .dropdown--show .mcp-install-dropdown__menu {
+  max-height: 800px;
+  overflow-y: auto;
+  margin-top: 0.5rem;
+  pointer-events: all;
+  border: 1px solid var(--ifm-toc-border-color);
+}
+
+/* ================================
+   END MCP DROPDOWN RESPONSIVE FIXES
+   ================================ */
+
+/* ================================
+   END NAVBAR RESPONSIVE FIXES
+   ================================ */
+
+/* Admonition colors — from Figma Info Panels system.
+   Docusaurus maps: note→alert--secondary, tip→alert--success, others match name.
+   Both old aliases (.alert--note / .alert--tip) and correct names are listed. */
+
+/* Note panel — light */
+[data-theme="light"] .alert--secondary,
+[data-theme="light"] .alert--note {
+  --ifm-alert-background-color: #f7f7f7;
+  --ifm-alert-border-color: #302f37;
+  color: #1a1a1a;
+}
+
+/* Info panel — light */
+[data-theme="light"] .alert--info {
+  --ifm-alert-background-color: rgba(11, 130, 190, 0.08);
+  --ifm-alert-border-color: #0b82be;
+  color: #1a1a1a;
+}
+
+/* Tip panel — light */
+[data-theme="light"] .alert--success,
+[data-theme="light"] .alert--tip {
+  --ifm-alert-background-color: #eaf7f0;
+  --ifm-alert-border-color: #22c55e;
+  color: #1a1a1a;
+}
+
+/* Warning panel — light */
+[data-theme="light"] .alert--warning {
+  --ifm-alert-background-color: #fff4ed;
+  --ifm-alert-border-color: #f27e20;
+  color: #1a1a1a;
+}
+
+/* Danger panel — light */
+[data-theme="light"] .alert--danger {
+  --ifm-alert-background-color: #fde8ea;
+  --ifm-alert-border-color: #ed2833;
+  color: #1a1a1a;
+}
+
+/* Note panel — dark */
+[data-theme="dark"] .alert--secondary,
+[data-theme="dark"] .alert--note {
+  --ifm-alert-background-color: #151821;
+  --ifm-alert-border-color: #6b7280;
+  color: #e5e7eb;
+}
+
+/* Info panel — dark */
+[data-theme="dark"] .alert--info {
+  --ifm-alert-background-color: #0f1f2e;
+  --ifm-alert-border-color: #0b82be;
+  color: #e5e7eb;
+}
+
+/* Tip panel — dark */
+[data-theme="dark"] .alert--success,
+[data-theme="dark"] .alert--tip {
+  --ifm-alert-background-color: #102026;
+  --ifm-alert-border-color: #22c55e;
+  color: #e5e7eb;
+}
+
+/* Warning panel — dark */
+[data-theme="dark"] .alert--warning {
+  --ifm-alert-background-color: #241a0f;
+  --ifm-alert-border-color: #f27e20;
+  color: #fef3c7;
+}
+
+/* Danger panel — dark */
+[data-theme="dark"] .alert--danger {
+  --ifm-alert-background-color: #2a1113;
+  --ifm-alert-border-color: #ed2833;
+  color: #fee2e2;
+}
+
+.alert {
+  border-left-width: 4px;
+  border-radius: 8px;
+  --ifm-link-color: #f27e20;
+}
+
+.alert__title {
+  color: var(--ifm-heading-color);
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.alert p {
+  font-size: 14px;
+}
+
+.alert code {
+  background-color: rgba(15, 17, 23, 0.06);
+  color: var(--ifm-heading-color);
+}
+
+[data-theme="dark"] .alert code {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Improve ApiExplorer code tab icon contrast in dark mode */
+[data-theme="dark"] .openapi-tabs__code-item--http,
+[data-theme="dark"] .openapi-tabs__code-item--shell,
+[data-theme="dark"] .openapi-tabs__code-item--rust {
+  color: #e5e7eb;
+}
+
+[data-theme="dark"] .openapi-tabs__code-item--http::after,
+[data-theme="dark"] .openapi-tabs__code-item--shell::after {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32' fill='none' stroke='%23e5e7eb'><path d='M12 22L8 16L12 10M20 22L24 16L20 10' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+}
+
+[data-theme="dark"] .openapi-tabs__code-item--rust::after {
+  filter: brightness(0) invert(1) saturate(1.1);
+}
+
+/* Postman CLI language tab logo */
+.openapi-tabs__code-item--postman-cli {
+  color: #ff6c37;
+}
+
+.openapi-tabs__code-item--postman-cli::after {
+  content: "";
+  width: var(--code-tab-logo-width);
+  height: var(--code-tab-logo-height);
+  background: url("https://raw.githubusercontent.com/devicons/devicon/master/icons/postman/postman-original.svg")
+    no-repeat center;
+  background-size: contain;
+  margin-block: auto;
+}
+
+.openapi-tabs__code-item--postman-cli.active {
+  box-shadow: 0 0 0 3px rgba(255, 108, 55, 0.3);
+  border-color: #ff6c37;
+}
+
+/* Inline code styling */
+.markdown code {
+  background-color: #e5e7eb;
+  color: #364153;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.875rem;
+  font-weight: 400;
+  /* Remove default code element borders for better appearance with custom background and padding */
+  border: none;
+}
+
+/* Inline code in running text — tighter padding */
+.markdown p code {
+  padding: 2px 4px;
+}
+
+.markdown li code,
+.markdown h1 code,
+.markdown h2 code,
+.markdown h3 code,
+.markdown h4 code,
+.markdown h5 code,
+.markdown h6 code {
+  padding: 4px;
+}
+
+/* Inline code in table cells — compact padding so wrapped lines don't spread apart */
+.markdown table td code,
+.markdown table th code {
+  padding: 2px 6px;
+  line-height: 1.4;
+  display: inline;
+}
+
+/* Inline code dark mode */
+[data-theme="dark"] .markdown code {
+  background-color: #1e2939;
+  color: #d1d5dc;
+}
+
+/* Remove gray background from the API explorer code block. target the pre directly. */
+.openapi-explorer__code-block pre,
+.openapi-explorer__code-block code {
+  background: transparent !important;
+}
+
+/* Premium code blocks — constrained width, subtle borders */
+.markdown .theme-code-block {
+  max-width: min(700px, 100%);
+  border-radius: 8px;
+  border: 1px solid var(--ifm-global-border-color);
+  overflow: hidden;
+}
+
+/* Test card status badges */
+.badge-success {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.badge-declined {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+[data-theme="dark"] .badge-success {
+  background: #14532d;
+  color: #86efac;
+}
+
+[data-theme="dark"] .badge-declined {
+  background: #450a0a;
+  color: #fca5a5;
+}
+
+/* ── Mermaid: font isolation ──────────────────────────────────────────────
+   Mermaid pre-sizes nodes using its default font. Poppins would overflow them. */
+.markdown .docusaurus-mermaid-container,
+.markdown .docusaurus-mermaid-container * {
+  font-family: "trebuchet ms", verdana, arial, sans-serif;
+}
+
+/* ── Mermaid: spacing — give diagrams breathing room from surrounding text */
+.markdown .docusaurus-mermaid-container {
+  margin-bottom: 24px;
+}
+
+/* ── Mermaid: node label text — light mode ───────────────────────────────
+   var(--ifm-font-color-base) cascades into SVG foreignObject and overrides
+   Mermaid's primaryTextColor. Pin to dark text on #FAFAFA nodes. */
+.docusaurus-mermaid-container .nodeLabel,
+.docusaurus-mermaid-container .nodeLabel p {
+  color: #302f37 !important;
+}
+/* Accent nodes: white text on #0B82BE — .node.accent gives (0,4,0) specificity,
+   beating the (0,2,0) rule above even when both carry !important. */
+.docusaurus-mermaid-container .node.accent .nodeLabel,
+.docusaurus-mermaid-container .node.accent .nodeLabel p,
+.docusaurus-mermaid-container .node.accent .nodeLabel span {
+  color: #ffffff !important;
+}
+/* SVG <text> element fallback */
+.docusaurus-mermaid-container text {
+  fill: #302f37 !important;
+}
+.docusaurus-mermaid-container .node.accent text,
+.docusaurus-mermaid-container .node.accent tspan {
+  fill: #ffffff !important;
+}
+
+/* ── Mermaid: edge labels — both modes ───────────────────────────────────
+   1. Hide the background <rect> that Mermaid draws behind each label.
+      The rect lives as a direct child of <g class="label">, which is a child
+      of <g class="edgeLabel"> — so target all three possible selector forms.
+   2. Pin text to neutral so it never picks up --ifm-link-color (orange). */
+.docusaurus-mermaid-container .edgeLabel rect,
+.docusaurus-mermaid-container .edgeLabels rect,
+.docusaurus-mermaid-container .label rect {
+  fill: transparent !important;
+}
+.docusaurus-mermaid-container .edgeLabel div,
+.docusaurus-mermaid-container .edgeLabel p,
+.docusaurus-mermaid-container .edgeLabel span {
+  color: #302f37 !important;
+}
+
+/* ── Mermaid: dark mode overrides ────────────────────────────────────────
+   %%{init}%% blocks use "theme":"base" with light fills (#FAFAFA). Those look
+   stark on a dark background and text becomes invisible. Swap to dark surface,
+   use light text, keep accent blue, lighten arrows. */
+html[data-theme="dark"] .docusaurus-mermaid-container .node rect,
+html[data-theme="dark"] .docusaurus-mermaid-container .node polygon,
+html[data-theme="dark"] .docusaurus-mermaid-container .node circle,
+html[data-theme="dark"] .docusaurus-mermaid-container .node ellipse,
+html[data-theme="dark"] .docusaurus-mermaid-container .node path {
+  fill: #1e2939 !important;
+  stroke: #4a5568 !important;
+}
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent rect,
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent polygon,
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent circle,
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent ellipse,
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent path {
+  fill: #0b82be !important;
+  stroke: #0b82be !important;
+}
+html[data-theme="dark"] .docusaurus-mermaid-container .nodeLabel,
+html[data-theme="dark"] .docusaurus-mermaid-container .nodeLabel p {
+  color: #e5e7eb !important;
+}
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent .nodeLabel,
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent .nodeLabel p,
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent .nodeLabel span {
+  color: #ffffff !important;
+}
+html[data-theme="dark"] .docusaurus-mermaid-container text {
+  fill: #e5e7eb !important;
+}
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent text,
+html[data-theme="dark"] .docusaurus-mermaid-container .node.accent tspan {
+  fill: #ffffff !important;
+}
+html[data-theme="dark"] .docusaurus-mermaid-container .edgeLabel div,
+html[data-theme="dark"] .docusaurus-mermaid-container .edgeLabel p,
+html[data-theme="dark"] .docusaurus-mermaid-container .edgeLabel span {
+  color: #9ca3af !important;
+}
+html[data-theme="dark"] .docusaurus-mermaid-container .flowchart-link {
+  stroke: #6b7280 !important;
+}
+html[data-theme="dark"] .docusaurus-mermaid-container marker path {
+  fill: #6b7280 !important;
+  stroke: #6b7280 !important;
+}
+
+/* ── Task list (GFM checkboxes) — vertically center checkbox with text ──── */
+.markdown .contains-task-list .task-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+}
+
+.markdown .contains-task-list .task-list-item input[type="checkbox"] {
+  flex-shrink: 0;
+  margin: 0;
+}
+
+/* Table styling — from Figma */
+.markdown table thead tr {
+  background-color: var(--ifm-background-surface-color);
+  border-bottom-width: 1px; /* overrides Infima's default 2px header border */
+}
+
+/* All body rows: white background — overrides Infima's zebra stripe on odd rows */
+.markdown table tbody tr,
+.markdown table tbody tr:nth-child(2n) {
+  background-color: var(--ifm-background-color) !important;
+}
+
+.markdown table thead th {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ifm-heading-color);
+  text-align: left;
+  opacity: 1;
+  border-bottom-width: 1px; /* match body row border thickness */
+}
+
+/* OpenAPI response status code tabs — from Figma */
+/* .openapi-tabs__response-code-item--active {
+  background-color: #f0252b !important;
+  color: white !important;
+  border-radius: 8px;
+} */
+
+/* Navbar items — Figma: Poppins Medium 16px */
+/* .navbar__link {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  color: #4a4a4a;
+}
+
+[data-theme="dark"] .navbar__link {
+  color: #d1d5dc;
+}
+
+.navbar__title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+} */
+
+/* Footer text — Figma: Poppins Regular 14px, #8e8e93 */
+/* .footer__link-item {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+} */
+
+/* Hero section styles */
+/* .hero__title {
+  font-weight: 700;
+  color: var(--ifm-heading-color);
+}
+
+.hero__subtitle {
+  color: var(--ifm-font-color-base);
+} */
+
+/* TOC (table of contents) sidebar — narrower, Figma-matched styles */
+@media (min-width: 997px) {
+  .theme-doc-toc-desktop {
+    max-width: 185px;
+  }
+
+  .col--3:has(.theme-doc-toc-desktop) {
+    flex: 0 0 185px !important;
+    max-width: 185px !important;
+  }
+
+  /* Let main content column grow into the space freed by narrower TOC */
+  .row:has(.theme-doc-toc-desktop) > [class*="docItemCol"] {
+    max-width: none !important;
+  }
+}
+
+.table-of-contents__link {
+  font-size: 14px;
+  font-weight: 400;
+  color: #4a4a4a;
+}
+
+[data-theme="dark"] .table-of-contents__link {
+  color: #d1d5dc;
+}
+
+.table-of-contents__link--active {
+  color: #f27e20;
+  font-weight: 500;
+}
+
+/* Markdown source plugin — dropdown in article headers */
+article .markdown header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  overflow: visible;
+}
+
+article .markdown header h1 {
+  flex: 1 1 auto;
+  text-transform: capitalize;
+}
+
+.markdown-actions-container {
+  flex-shrink: 0;
+  margin-left: auto;
+  position: relative;
+}
+
+.markdown-actions-container .dropdown {
+  position: relative;
+}
+
+.markdown-actions-container .dropdown__menu {
+  z-index: 1000;
+  min-width: 220px;
+  right: 0;
+  left: auto;
+}
+
+.dropdown__link:hover {
+  background-color: var(--ifm-hover-overlay);
+}
+
+@media (max-width: 768px) {
+  .markdown-actions-container {
+    margin-right: clamp(0px, 0.5rem, 1rem);
+    margin-bottom: 1rem;
+  }
+
+  .markdown-actions-container .button {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+  }
+
+  .markdown-actions-container .dropdown__menu {
+    right: 0;
+    left: auto;
+    min-width: min(220px, calc(100vw - 2rem));
+    max-width: calc(100vw - 2rem);
+    padding-bottom: 0.75rem;
+  }
 }

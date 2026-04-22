@@ -1,0 +1,73 @@
+# Shared permission blocks for operation enrichments
+# Referenced via $perm:<key> in operations/*.yaml files
+#
+# Each block defines:
+#   auth_method  — display name with optional link (markdown)
+#   permissions  — required permissions text (markdown, single line for table cell)
+#   extra        — optional additional permission note (rendered below the table)
+
+# ── Common blocks ─────────────────────────────────────────────
+
+api_key_admin:
+  auth_method: "[API Key]({{apiBaseUrl}}/getting-started/authentication/#api-key-auth)"
+  permissions: "All permissions (admin access)"
+
+api_key_only:
+  auth_method: "[API Key]({{apiBaseUrl}}/getting-started/authentication/#api-key-auth)"
+  permissions: "Required (Basic Auth not supported for this endpoint)"
+
+# ── Checkout API ──────────────────────────────────────────────
+
+basic_auth_create_checkout:
+  auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
+  permissions: "`Can add payment requests` ([Payment Request]({{apiBaseUrl}}/payments/payment-methods/#enabling-the-plugin)) or `Can add e-commerce payments` ([E-Commerce]({{apiBaseUrl}}/payments/payment-methods/#enabling-the-plugin))"
+  extra: "`Can use pg_code` for the target [payment gateway]({{apiBaseUrl}}/payments/payment-methods/)"
+
+basic_auth_update_checkout:
+  auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
+  permissions: "`Can change payment requests` or `Can change e-commerce payments`"
+  extra: "`Can use pg_code` for the target [payment gateway]({{apiBaseUrl}}/payments/payment-methods/)"
+
+basic_auth_view_checkout:
+  auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
+  permissions: "`Can view payment requests` or `Can view e-commerce payments` (also implied by `Can add` or `Can change` permissions)"
+
+# ── Payment Methods API ───────────────────────────────────────
+
+basic_auth_payment_methods:
+  auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
+  permissions: "User-specific access based on assigned permissions"
+  extra: "`Can use pg_code` — grants access to the specific [payment gateway]({{apiBaseUrl}}/payments/payment-methods/) (e.g., \"Can use Credit Card\")"
+
+# ── Operations API ────────────────────────────────────────────
+
+basic_auth_operations:
+  auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
+  permissions: "Requires the specific operation permission: `payment.capture`, `payment.refund`, `payment.void`, `payment.cancel`, `payment.expire`, or `payment.delete`"
+
+basic_auth_inquiry:
+  auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
+  permissions: "`payment.inquiry`"
+
+# ── Auto-Debit / Native Payments ──────────────────────────────
+
+basic_auth_auto_debit:
+  auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
+  permissions: "`Can add payment requests` or `Can add e-commerce payments`"
+
+basic_auth_native_payment:
+  auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
+  permissions: "`Can add payment requests` or `Can add e-commerce payments`"
+
+# ── Invoice API ───────────────────────────────────────────────
+
+basic_auth_create_invoice:
+  auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
+  permissions: "`Can add payment requests` or `Can add e-commerce payments` + `Can add Invoice`"
+  extra: "`Can use pg_code` for the target [payment gateway]({{apiBaseUrl}}/payments/payment-methods/)"
+
+# ── Reports API ───────────────────────────────────────────────
+
+basic_auth_view_reports:
+  auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
+  permissions: "`report.can_view_report`"

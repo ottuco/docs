@@ -1,0 +1,132 @@
+---
+title: Property Management
+sidebar_label: Properties
+---
+
+import StepGuide from "@site/src/components/StepGuide";
+
+# Property Management
+
+This section covers adding, editing, and managing property details within the Ottu Real Estate Plugin. It ensures accurate property records and optimized workflows for seamless property administration.
+
+## Property Management Dashboard
+
+The **Property Management Dashboard** provides a clear overview of all properties and easy access to essential property details and actions.
+
+**Key features:**
+
+- **Property Overview** -- View a list of all properties with addresses, contracts, and unit statuses.
+- **Quick Access** -- Easily view property details like classification, reporting profile, and invoice profile.
+- **Unit Status** -- Track available, rented, and under-maintenance units at a glance.
+- **Filter Options** -- Quickly find properties using filters for location, availability, and classification.
+- **Add & Edit Properties** -- Directly add, edit, or update property and unit details.
+- **Reports** -- Generate PDF reports on unit vacancy and occupancy status.
+
+## Add New Property
+
+To add a new property, navigate to the **Property Management** section and click the **+ADD PROPERTY** button.
+
+![Add property button](/img/business/real-estate/properties/prop-01-add-button.png)
+
+You will be redirected to the form for adding a new property.
+
+### New Property Form
+
+Fill out the following fields:
+
+| Field | Description |
+|---|---|
+| **Property Name (EN)** | The name of the property in English |
+| **Property Name (AR)** | The name of the property in Arabic |
+| **Address** | The physical address of the property |
+| **Province** | The province where the property is located |
+| **Town** | The town or city where the property is situated |
+| **Property Classification** | The classification or category of the property |
+| **Reporting Profile** | Groups multiple properties under one profile for consolidated reporting |
+| **Invoice Profile** | Manages the logo, notification, and signature for receipts and checkout pages associated with this profile |
+| **Gateway** | The payment gateway associated with the property |
+| **Allow Cash Payment** | Option to enable or disable cash payments (check or uncheck) |
+
+![New property form](/img/business/real-estate/properties/prop-02-new-property-form.png)
+
+### Add Unit Types and Units
+
+To add multiple unit types (e.g., villas and apartments) along with their respective units:
+
+<StepGuide steps={[
+  {
+    title: "Unit Type",
+    description: <><ol>
+        <li>Click <strong>ADD UNIT TYPE WITH UNIT</strong> to add a unit type and new units.</li>
+        <li><strong>Unit Type</strong>: Choose from existing unit types in the dropdown list, or add a new one by clicking <strong>ADD UNIT TYPE</strong> and filling in the required details.</li>
+      </ol></>,
+    image: "/img/business/real-estate/properties/prop-03-unit-type.png",
+    imageAlt: "Add unit type",
+  },
+  {
+    title: "Add Units",
+    description: <><strong>Add Units</strong>: Click the <strong>ADD OR EDIT UNITS</strong> button.</>,
+    image: "/img/business/real-estate/properties/prop-04-add-edit-units.png",
+    imageAlt: "Add or edit units",
+  },
+  {
+    title: "Define the New Unit",
+    description: <><strong>Define the New Unit</strong>: After specifying the number of units and their prices, click the <strong>ADD</strong> button.</>,
+    image: "/img/business/real-estate/properties/prop-05-define-new-unit.png",
+    imageAlt: "Define new unit",
+  },
+  {
+    title: "Unit Details",
+    description: <><strong>Unit Details</strong>: Provide details such as <strong>Unit Number</strong> and <strong>Floor</strong> for each unit.</>,
+    image: "/img/business/real-estate/properties/prop-06-unit-details.png",
+    imageAlt: "Unit details form",
+  },
+  {
+    title: "Save Property with Units",
+    description: <>Repeat the above steps until all property unit types are added. Then click the <strong>Save</strong> button in the New Property Form to save all changes.</>,
+    image: "/img/business/real-estate/properties/prop-07-save-property.png",
+    imageAlt: "Save property with units",
+  },
+]} nextSectionId="edit-property" />
+
+## Edit Property {#edit-property}
+
+Merchants can update property details through a straightforward process:
+
+1. **Access Property List** -- Go to the **Property Management** section.
+2. **Select Property** -- Click on the **property name** you want to edit.
+3. **Edit Form Opens** -- A pre-filled form with the property's details appears.
+4. **Modify Details** -- Update property information as needed.
+5. **Manage Units** -- Edit existing units or add new units if required.
+6. **Save Changes** -- Finalize updates and save.
+
+## Generate Property Report
+
+Merchants can generate a PDF report detailing property vacancy and occupancy.
+
+### How to Generate the PDF Report
+
+<StepGuide steps={[
+  {
+    title: "Click the Print Button",
+    description: <><ol>
+        <li><strong>Access the Property Management Table</strong> -- Navigate to the <strong>Property Management</strong> section in your dashboard.</li>
+        <li><strong>Define Filter Parameters (Optional)</strong> -- Click the <strong>Filter</strong> button and set your desired criteria.</li>
+        <li><strong>Click the Print Button</strong> -- From the Property Management table, click the <strong>Print</strong> button.</li>
+      </ol></>,
+    image: "/img/business/real-estate/properties/prop-08-print-report.png",
+    imageAlt: "Print property report",
+  },
+  {
+    title: "Download the PDF File",
+    description: <><strong>Automatic PDF Generation</strong> -- The PDF generates automatically after clicking Print.<br /><br /><strong>Download the PDF File</strong> -- Once generated, download it to your device.</>,
+    image: "/img/business/real-estate/properties/prop-09-generated-report.png",
+    imageAlt: "Generated property report",
+  },
+]} nextSectionId="whats-next" />
+
+## What's Next? {#whats-next}
+
+- [Getting Started](/business/industry/real-estate/getting-started) -- Walk through a complete property setup journey
+- [Tenant & Contract Management](/business/industry/real-estate/tenant-contract/) -- Manage tenants and create contracts for your properties
+- [Generate Invoice](/business/industry/real-estate/generate-invoice) -- Create and send invoices for your properties

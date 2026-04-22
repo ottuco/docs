@@ -1,0 +1,369 @@
+/* ============================================================
+ * Ottu doc sidebar
+ * Applies to the desktop container (.theme-doc-sidebar-container)
+ * AND the mobile drawer (.navbar-sidebar) — the doc sidebar is
+ * rendered inside both via the same theme classes, so level-N
+ * rules cascade to the drawer automatically. Any rule that must
+ * *only* affect desktop is scoped to .theme-doc-sidebar-container;
+ * anything that must *only* affect mobile lives in the @media block.
+ * Figma reference: node 327:1149.
+ * ============================================================ */
+
+:root {
+  --doc-sidebar-width: 320px;
+  --ottu-sidebar-bg: #ffffff;
+  --ottu-sidebar-divider: rgba(218, 218, 218, 0.5);
+  --ottu-sidebar-text-primary: #1a1a1a;
+  --ottu-sidebar-text-secondary: #4a4a4a;
+  --ottu-sidebar-text-muted: #8e8e93;
+  --ottu-sidebar-tree-border: #dadada;
+  --ottu-sidebar-tree-border-strong: #1a1a1a;
+  /* Accent matches --ifm-color-primary (#f27e20 = rgb(242,126,32)),
+     keeping the active-leaf text/border in sync with the accent bg. */
+  --ottu-sidebar-accent: #f27e20;
+  --ottu-sidebar-accent-bg: rgba(242, 126, 32, 0.08);
+  --ottu-sidebar-hover-bg: rgba(48, 47, 55, 0.04);
+
+  /* Neutralize Infima's default active fill — we paint our own. */
+  --ifm-menu-color-background-active: transparent;
+}
+
+html[data-theme="dark"] {
+  --ottu-sidebar-bg: #0f1117;
+  --ottu-sidebar-divider: #1e2939;
+  --ottu-sidebar-text-primary: #ffffff;
+  --ottu-sidebar-text-secondary: #c7cad1;
+  --ottu-sidebar-text-muted: #c7cad1;
+  --ottu-sidebar-tree-border: #2a3140;
+  --ottu-sidebar-tree-border-strong: #ffffff;
+  --ottu-sidebar-accent-bg: rgba(242, 126, 32, 0.12);
+  --ottu-sidebar-hover-bg: rgba(255, 255, 255, 0.04);
+}
+
+/* ── Shell ─────────────────────────────────────────────────── */
+
+.theme-doc-sidebar-container {
+  background: var(--ottu-sidebar-bg);
+  border-right: 1px solid var(--ottu-sidebar-divider) !important;
+}
+
+/* Figma: pl-24 pr-16 py-32 (desktop only) */
+.theme-doc-sidebar-container .theme-doc-sidebar-menu {
+  padding: 32px 16px 32px 24px;
+  background: transparent;
+}
+
+/* Shared typography — both desktop container and mobile drawer
+   render the doc sidebar inside `.theme-doc-sidebar-menu`, so a
+   single rule styles both. `.navbar-sidebar__back` is the drawer's
+   "Back to main menu" button which sits outside that scope. */
+.theme-doc-sidebar-menu .menu__link,
+.theme-doc-sidebar-menu .menu__caret,
+.navbar-sidebar__back {
+  font-family: "Poppins", sans-serif;
+  line-height: normal;
+}
+
+/* Zero padding only on the caret button — stripping it from .menu__link
+   broke the business sidebar where links rely on Infima's default padding. */
+.theme-doc-sidebar-menu .menu__caret {
+  padding: 0;
+}
+
+/* Remove Infima's default active fill on every collapsible row
+   (light + dark — cascades, no theme override needed). */
+.menu__list-item-collapsible--active {
+  background: transparent !important;
+}
+
+.theme-doc-sidebar-menu .menu__list-item {
+  margin: 0;
+}
+
+/* ── Level 1: root category row ────────────────────────────── */
+
+.theme-doc-sidebar-item-category-level-1 > .menu__list-item-collapsible {
+  min-height: 36px;
+  padding: 0;
+  background: transparent;
+}
+
+.theme-doc-sidebar-item-category-level-1
+  > .menu__list-item-collapsible
+  > .menu__link {
+  min-height: 36px;
+  padding: 8px 12px;
+  border-radius: 0;
+  flex: 1 1 0;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ottu-sidebar-text-primary);
+}
+
+/* ── Developers-only: caret on the LEFT of "Developers" ────── */
+
+/* Figma places the chevron before the text on the Developers root.
+   The business sidebar uses the same level-1 class, so scope this
+   override via :has() to the category whose direct L1 link points
+   to /developers/. The row's children are source-ordered [link,
+   caret]; flex-direction: row-reverse renders caret first. Caret
+   rotation rules key off .menu__list-item--collapsed, not DOM order,
+   so they still apply. */
+.theme-doc-sidebar-item-category-level-1:has(
+    > .menu__list-item-collapsible > .menu__link[href="/developers/"]
+  )
+  > .menu__list-item-collapsible {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  /* 12px left padding aligns the caret with the 12px text indent
+     used by the L2 rows below (Getting Started, Payments, …). */
+  padding-left: 12px;
+}
+
+.theme-doc-sidebar-item-category-level-1:has(
+    > .menu__list-item-collapsible > .menu__link[href="/developers/"]
+  )
+  > .menu__list-item-collapsible
+  > .menu__link {
+  /* Text hugs the caret with an ~8px gap (the default 12px left
+     padding would push "Developers" too far from the chevron). */
+  padding-left: 8px;
+}
+
+/* L2 stack — Figma: gap-4 between sections */
+.theme-doc-sidebar-item-category-level-1 > .menu__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+  padding-left: 0;
+}
+
+/* ── Level 2: "Getting Started", "Payments", … ─────────────── */
+
+.theme-doc-sidebar-item-category-level-2 > .menu__list-item-collapsible {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.theme-doc-sidebar-item-category-level-2
+  > .menu__list-item-collapsible
+  > .menu__link {
+  min-height: 36px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  flex: 1 1 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ottu-sidebar-text-primary);
+}
+
+.theme-doc-sidebar-item-category-level-2 > .menu__list-item-collapsible:hover {
+  background: var(--ottu-sidebar-hover-bg);
+}
+
+/* L2 direct links (top-level docs that are not categories) */
+.theme-doc-sidebar-item-link-level-2 > .menu__link {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.theme-doc-sidebar-item-link-level-2 > .menu__link:hover {
+  background: var(--ottu-sidebar-hover-bg);
+}
+
+.theme-doc-sidebar-item-link-level-2 > .menu__link.menu__link--active {
+  color: var(--ottu-sidebar-accent) !important;
+  background: var(--ottu-sidebar-accent-bg) !important;
+}
+
+/* Nested lists indent to form the tree rail */
+.theme-doc-sidebar-item-category-level-2 > .menu__list {
+  margin: 4px 0 0 12px;
+  padding-left: 0;
+}
+
+.theme-doc-sidebar-item-category-level-3 > .menu__list {
+  margin: 2px 0 0 12px;
+  padding-left: 0;
+}
+
+/* ── Tree rows: L3 leaves, L3 branches, L4 leaves ──────────── */
+
+/* One shared rule for every row that sits on the tree rail. */
+.theme-doc-sidebar-item-link-level-3 > .menu__link,
+.theme-doc-sidebar-item-link-level-4 > .menu__link,
+.theme-doc-sidebar-item-category-level-3
+  > .menu__list-item-collapsible
+  > .menu__link {
+  min-height: 36px;
+  margin: 2px 0;
+  padding: 7px 12px 7px 16px;
+  border-left: 2px solid var(--ottu-sidebar-tree-border);
+  border-radius: 0 !important;
+  flex: 1 1 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ottu-sidebar-text-secondary);
+}
+
+/* L3 branch row (Checkout API, PSQ, Payment Methods, …) */
+.theme-doc-sidebar-item-category-level-3 > .menu__list-item-collapsible {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0;
+  background: transparent;
+}
+
+/* Expanded parent branch — dark rail, primary text, no bg fill. */
+.theme-doc-sidebar-item-category-level-3
+  > .menu__list-item-collapsible--active
+  > .menu__link {
+  color: var(--ottu-sidebar-text-primary) !important;
+  border-left: 2px solid var(--ottu-sidebar-tree-border-strong);
+  background: transparent !important;
+}
+
+/* Active leaf — Figma accent treatment.
+   L4 covers Checkout API children; L3 covers Operations/Invoices/
+   Notifications/Reports whose children are direct hash links. */
+.theme-doc-sidebar-item-link-level-3 > .menu__link.menu__link--active,
+.theme-doc-sidebar-item-link-level-4 > .menu__link.menu__link--active {
+  color: var(--ottu-sidebar-accent) !important;
+  border-left: 2px solid var(--ottu-sidebar-accent);
+  background: var(--ottu-sidebar-accent-bg) !important;
+}
+
+/* Tree-row hover — darken text, keep bg transparent. */
+.theme-doc-sidebar-item-link-level-3 > .menu__link:hover,
+.theme-doc-sidebar-item-link-level-4 > .menu__link:hover,
+.theme-doc-sidebar-item-category-level-3
+  > .menu__list-item-collapsible
+  > .menu__link:hover {
+  background: transparent;
+  color: var(--ottu-sidebar-text-primary);
+}
+
+/* Category rows (L1/L2/L3) stay neutral when active — the branch
+   itself isn't a page, only its children get the accent treatment. */
+.theme-doc-sidebar-item-category-level-1
+  > .menu__list-item-collapsible
+  > .menu__link.menu__link--active,
+.theme-doc-sidebar-item-category-level-2
+  > .menu__list-item-collapsible
+  > .menu__link.menu__link--active,
+.theme-doc-sidebar-item-category-level-3
+  > .menu__list-item-collapsible
+  > .menu__link.menu__link--active {
+  color: var(--ottu-sidebar-text-primary) !important;
+}
+
+/* ── Carets ────────────────────────────────────────────────── */
+
+/*
+ * `.menu__caret` and `.menu__link--sublist-caret` only exist inside
+ * Docusaurus menus, so these rules are safe without container scoping
+ * and apply to both the desktop sidebar and the mobile drawer.
+ *
+ * Infima's caret SVG points UP by default. Figma convention:
+ *   collapsed = down chevron  (rotate 180deg)
+ *   expanded  = up chevron    (rotate 0)
+ */
+
+.menu__caret::before {
+  width: 16px;
+  height: 16px;
+  background-size: 16px 16px;
+  transition: transform 0.2s ease;
+}
+
+.menu__link--sublist-caret::after {
+  background-size: 16px 16px;
+  transition: transform 0.2s ease;
+}
+
+/* Chevron alignment — the business sidebar mixes two category renderings:
+   (1) categories WITH a landing page use `<a> + <button class="menu__caret">`
+       → button sits at the row's right edge (row padding-right = 0);
+   (2) categories WITHOUT a landing page use `<a class="menu__link--sublist-caret">`
+       → the chevron is an `::after` inside the link's content box, so its
+       right edge lands at `row right − link padding-right (12px)`.
+   Zero the right padding on variant (2) so its chevron lines up with the
+   button chevron from variant (1). The `::after` has its own min-width
+   (1.25rem) which keeps the gap between the label and the chevron. */
+.theme-doc-sidebar-menu .menu__link--sublist-caret {
+  padding-right: 0 !important;
+}
+.theme-doc-sidebar-menu .menu__link--sublist-caret::after {
+  min-width: auto;
+  width: 16px;
+  height: 16px;
+}
+
+/*
+ * `!important` here defeats Infima's own
+ * `.menu__link--sublist-caret::after { transform: rotate(...) }`
+ * shipped at the same selector specificity. Without it, source-order
+ * decides the winner and a Docusaurus theme-classic update could
+ * silently flip the caret direction.
+ */
+
+.menu__list-item--collapsed
+  > .menu__list-item-collapsible
+  > .menu__caret::before,
+.menu__list-item--collapsed
+  > .menu__list-item-collapsible
+  > .menu__link--sublist-caret::after {
+  transform: rotate(180deg) !important;
+}
+
+.menu__list-item:not(.menu__list-item--collapsed)
+  > .menu__list-item-collapsible
+  > .menu__caret::before,
+.menu__list-item:not(.menu__list-item--collapsed)
+  > .menu__list-item-collapsible
+  > .menu__link--sublist-caret::after {
+  transform: rotate(0deg) !important;
+}
+
+/* ── Mobile drawer (max-width: 996px) ──────────────────────── */
+
+@media (max-width: 996px) {
+  /* Panel padding for the doc sidebar panel inside the drawer.
+     The level-N rules above already cascade in via
+     `.theme-doc-sidebar-item-*-level-*` classes. */
+  .navbar-sidebar__item.menu {
+    padding: 16px;
+  }
+
+  /* Parity with desktop: rounded L2 hover rows inside the drawer */
+  .navbar-sidebar
+    .theme-doc-sidebar-item-category-level-2
+    > .menu__list-item-collapsible {
+    border-radius: 8px;
+  }
+}
+
+/* Zero Infima's default .menu padding (0.5rem) on the outer <nav> that
+   wraps the sidebar on desktop. The <nav> carries a hashed CSS-module
+   class (e.g. .menu_SIkG) that is content-dependent and may rotate on
+   any future Docusaurus/dependency change — a selector keyed off the
+   hash silently stops matching after that. Target via the stable
+   container + descendant selector instead: `.theme-doc-sidebar-container
+   nav.menu` matches the same <nav> without depending on the hash. The
+   nav is NOT a direct child of the container (it's nested inside
+   .sidebarViewport/.sidebar wrappers), so a descendant combinator is
+   required, not `>`. */
+@media (min-width: 997px) {
+  .theme-doc-sidebar-container nav.menu {
+    padding: 0;
+  }
+}

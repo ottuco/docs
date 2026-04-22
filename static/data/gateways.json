@@ -1,0 +1,2239 @@
+[
+  {
+    "slug": "standard",
+    "name": "Standard Test Cards",
+    "countries": [
+      "Global"
+    ],
+    "currencies": [],
+    "inquiryMinutes": null,
+    "operations": [
+      "purchase"
+    ],
+    "integrationType": "redirect",
+    "category": "local_debit",
+    "operationMode": "purchase",
+    "logo": "",
+    "acceptedAt": [],
+    "cardBrands": [],
+    "digitalWallets": [],
+    "testCards": [
+      {
+        "cardNumber": "4242 4242 4242 4242",
+        "expiry": "12/28",
+        "cvv": "123",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "4111 1111 1111 1111",
+        "expiry": "Any future",
+        "cvv": "Any 3 digits",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "5555 5555 5555 4444",
+        "expiry": "12/28",
+        "cvv": "123",
+        "brand": "Mastercard",
+        "status": "declined",
+        "statusLabel": "Declined"
+      }
+    ]
+  },
+  {
+    "slug": "abapayway",
+    "name": "ABA PayWay",
+    "countries": [
+      "Cambodia"
+    ],
+    "currencies": [
+      "KHR",
+      "USD"
+    ],
+    "inquiryMinutes": 12,
+    "operations": [
+      "purchase",
+      "refund",
+      "auth",
+      "capture"
+    ],
+    "integrationType": "sdk",
+    "category": "gateway",
+    "operationMode": "purchase",
+    "logo": "aba_payway.jpg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "UnionPay",
+      "JCB"
+    ],
+    "digitalWallets": [
+      "Alipay",
+      "WeChat Pay",
+      "ABA PAY"
+    ],
+    "testCards": []
+  },
+  {
+    "slug": "amazon_pay",
+    "name": "Amazon Payment Services",
+    "countries": [
+      "UAE",
+      "Egypt",
+      "Iraq"
+    ],
+    "currencies": [
+      "AED",
+      "EGP",
+      "IQD"
+    ],
+    "inquiryMinutes": 6,
+    "operations": [
+      "purchase"
+    ],
+    "integrationType": "wallet",
+    "category": "gateway",
+    "operationMode": "purchase",
+    "logo": "amazon_pay_icon.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "Maestro",
+      "mada"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Amazon Pay"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "4005 5500 0000 0001",
+        "expiry": "05/25",
+        "cvv": "123",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "5123 4567 8901 2346",
+        "expiry": "05/25",
+        "cvv": "123",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "3456 7890 1234 564",
+        "expiry": "05/25",
+        "cvv": "1234",
+        "brand": "Amex",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "4557 0123 4567 8902",
+        "expiry": "05/25",
+        "cvv": "123",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS"
+      },
+      {
+        "cardNumber": "5313 5810 0012 3430",
+        "expiry": "05/25",
+        "cvv": "123",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS"
+      },
+      {
+        "cardNumber": "3742 0000 0000 004",
+        "expiry": "05/25",
+        "cvv": "1234",
+        "brand": "Amex",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS"
+      }
+    ]
+  },
+  {
+    "slug": "bambora",
+    "name": "Worldline",
+    "countries": [
+      "Canada",
+      "Global"
+    ],
+    "currencies": [
+      "CAD"
+    ],
+    "inquiryMinutes": 0,
+    "operations": [
+      "purchase"
+    ],
+    "integrationType": "redirect",
+    "category": "processor",
+    "operationMode": "purchase",
+    "logo": "bambora_icon.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay",
+      "PayPal"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "4030 0000 1000 1234",
+        "expiry": "05/25",
+        "cvv": "123",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success"
+      }
+    ]
+  },
+  {
+    "slug": "bede",
+    "name": "Bede",
+    "countries": [
+      "Kuwait"
+    ],
+    "currencies": [
+      "KWD"
+    ],
+    "inquiryMinutes": null,
+    "operations": [
+      "purchase"
+    ],
+    "integrationType": "wallet",
+    "category": "wallet",
+    "operationMode": "purchase",
+    "logo": "bede.png",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "KNET"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Bede Wallet"
+    ],
+    "testCards": []
+  },
+  {
+    "slug": "benefit",
+    "name": "Benefit",
+    "countries": [
+      "Bahrain"
+    ],
+    "currencies": [
+      "BHD"
+    ],
+    "inquiryMinutes": 8,
+    "operations": [
+      "purchase",
+      "refund",
+      "autodebit"
+    ],
+    "integrationType": "redirect",
+    "category": "local_debit",
+    "operationMode": "purchase",
+    "logo": "benefit_icon.svg",
+    "acceptedAt": [
+      "Credimax",
+      "EazyPay",
+      "Ahli United",
+      "Al Salam",
+      "KFH Bahrain"
+    ],
+    "cardBrands": [
+      "Benefit"
+    ],
+    "digitalWallets": [],
+    "testCards": [
+      {
+        "cardNumber": "4600 4101 2345 6789",
+        "expiry": "Any future",
+        "cvv": "Any 4 digits",
+        "brand": "Benefit",
+        "status": "success",
+        "statusLabel": "Approved",
+        "note": "Response: 00"
+      },
+      {
+        "cardNumber": "4550 1201 2345 6789",
+        "expiry": "Any future",
+        "cvv": "Any 4 digits",
+        "brand": "Benefit",
+        "status": "declined",
+        "statusLabel": "Expired Card",
+        "note": "Response: 54"
+      },
+      {
+        "cardNumber": "4889 7801 2345 6789",
+        "expiry": "Any future",
+        "cvv": "Any 4 digits",
+        "brand": "Benefit",
+        "status": "declined",
+        "statusLabel": "Limit Exceeded",
+        "note": "Response: 61"
+      },
+      {
+        "cardNumber": "4415 5501 2345 6789",
+        "expiry": "Any future",
+        "cvv": "Any 4 digits",
+        "brand": "Benefit",
+        "status": "declined",
+        "statusLabel": "Insufficient Funds",
+        "note": "Response: 51"
+      },
+      {
+        "cardNumber": "4575 5501 2345 6789",
+        "expiry": "Any future",
+        "cvv": "Any 4 digits",
+        "brand": "Benefit",
+        "status": "declined",
+        "statusLabel": "Refer to Issuer",
+        "note": "Response: 78"
+      },
+      {
+        "cardNumber": "4845 5501 2345 6789",
+        "expiry": "Any future",
+        "cvv": "Any 4 digits",
+        "brand": "Benefit",
+        "status": "declined",
+        "statusLabel": "Invalid PIN",
+        "note": "Response: 55"
+      },
+      {
+        "cardNumber": "4895 5501 2345 6789",
+        "expiry": "Any future",
+        "cvv": "Any 4 digits",
+        "brand": "Benefit",
+        "status": "declined",
+        "statusLabel": "Do Not Honor",
+        "note": "Response: 05"
+      }
+    ],
+    "testCardNotes": "Expiry date for all cards: any future date. CVV: any 4 digits."
+  },
+  {
+    "slug": "benefit_pay",
+    "name": "BenefitPay",
+    "countries": [
+      "Bahrain"
+    ],
+    "currencies": [
+      "BHD"
+    ],
+    "inquiryMinutes": 8,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "wallet",
+    "category": "wallet",
+    "operationMode": "purchase",
+    "logo": "benefitpay.svg",
+    "acceptedAt": [],
+    "cardBrands": [],
+    "digitalWallets": [
+      "BenefitPay"
+    ],
+    "testCards": []
+  },
+  {
+    "slug": "beyon_money",
+    "name": "Beyon Money",
+    "countries": [
+      "Bahrain"
+    ],
+    "currencies": [
+      "BHD"
+    ],
+    "inquiryMinutes": 28,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "wallet",
+    "category": "wallet",
+    "operationMode": "purchase",
+    "logo": "beyon_money.jpg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa"
+    ],
+    "digitalWallets": [
+      "Beyon Money"
+    ],
+    "testCards": []
+  },
+  {
+    "slug": "cbk",
+    "name": "Tpay",
+    "countries": [
+      "Kuwait"
+    ],
+    "currencies": [
+      "KWD"
+    ],
+    "inquiryMinutes": null,
+    "operations": [
+      "purchase"
+    ],
+    "integrationType": "Redirect",
+    "category": "wallet",
+    "operationMode": "purchase",
+    "logo": "tpay.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "KNET"
+    ],
+    "digitalWallets": [],
+    "testCards": []
+  },
+  {
+    "slug": "ccavenues",
+    "name": "CCAvenue",
+    "countries": [
+      "Kuwait",
+      "Bahrain",
+      "Qatar",
+      "Oman",
+      "UAE",
+      "KSA"
+    ],
+    "currencies": [
+      "KWD",
+      "BHD",
+      "QAR",
+      "OMR",
+      "AED",
+      "SAR"
+    ],
+    "inquiryMinutes": 0,
+    "operations": [
+      "purchase"
+    ],
+    "integrationType": "redirect",
+    "category": "psp_ptsp",
+    "operationMode": "purchase",
+    "logo": "cc_avenue_icon.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "4111 1111 1111 1111",
+        "expiry": "Any future",
+        "cvv": "123",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success"
+      }
+    ],
+    "testCardNotes": "Only Visa, Mastercard, and Diners Club can be tested. AMEX and JCB are not supported in sandbox."
+  },
+  {
+    "slug": "checkoutcom",
+    "name": "Checkout.com",
+    "countries": [
+      "Kuwait",
+      "Bahrain",
+      "Qatar",
+      "Oman",
+      "UAE",
+      "KSA",
+      "Global"
+    ],
+    "currencies": [
+      "KWD",
+      "BHD",
+      "QAR",
+      "OMR",
+      "AED",
+      "SAR"
+    ],
+    "inquiryMinutes": 8,
+    "operations": [
+      "purchase",
+      "refund",
+      "tokenization"
+    ],
+    "integrationType": "redirect",
+    "category": "acquirer",
+    "operationMode": "purchase",
+    "logo": "checkoutcom.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "mada",
+      "KNET",
+      "OmanNet"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay",
+      "PayPal",
+      "Alipay"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "4242 4242 4242 4242",
+        "expiry": "05/25",
+        "cvv": "100",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success"
+      }
+    ]
+  },
+  {
+    "slug": "cybersource",
+    "name": "Cybersource",
+    "countries": [
+      "Kuwait",
+      "Bahrain",
+      "Qatar",
+      "Oman",
+      "UAE",
+      "KSA",
+      "Global"
+    ],
+    "currencies": [
+      "KWD",
+      "BHD",
+      "QAR",
+      "OMR",
+      "AED",
+      "SAR",
+      "USD"
+    ],
+    "inquiryMinutes": null,
+    "operations": [
+      "purchase",
+      "refund",
+      "auth",
+      "capture",
+      "void",
+      "tokenization",
+      "autodebit"
+    ],
+    "integrationType": "redirect/sdk",
+    "category": "gateway",
+    "operationMode": "purchase",
+    "logo": "cybersource_icon.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "JCB",
+      "Discover"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay",
+      "Samsung Pay"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "4111 1111 1111 1111",
+        "expiry": "Any future",
+        "cvv": "Any 3 digits",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "5555 5555 5555 4444",
+        "expiry": "Any future",
+        "cvv": "Any 3 digits",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success"
+      }
+    ]
+  },
+  {
+    "slug": "dapi",
+    "name": "Dapi",
+    "countries": [
+      "UAE"
+    ],
+    "currencies": [
+      "AED"
+    ],
+    "inquiryMinutes": null,
+    "operations": [
+      "purchase"
+    ],
+    "integrationType": "a2a",
+    "category": "openbanking",
+    "operationMode": "purchase",
+    "logo": "dapi.svg",
+    "acceptedAt": [],
+    "cardBrands": [],
+    "digitalWallets": [],
+    "testCards": []
+  },
+  {
+    "slug": "deema",
+    "name": "deema",
+    "countries": [
+      "Kuwait"
+    ],
+    "currencies": [
+      "KWD"
+    ],
+    "inquiryMinutes": 8,
+    "operations": [
+      "purchase",
+      "refund",
+      "auth",
+      "capture"
+    ],
+    "integrationType": "redirect",
+    "category": "bnpl",
+    "operationMode": "purchase",
+    "logo": "deema.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "KNET"
+    ],
+    "digitalWallets": [],
+    "testCards": []
+  },
+  {
+    "slug": "doku",
+    "name": "DOKU",
+    "countries": [
+      "Indonesia"
+    ],
+    "currencies": [
+      "IDR"
+    ],
+    "inquiryMinutes": 60,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect/sdk",
+    "category": "psp_ptsp",
+    "operationMode": "purchase",
+    "logo": "doku.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "JCB",
+      "Amex"
+    ],
+    "digitalWallets": [
+      "DOKU",
+      "OVO",
+      "ShopeePay",
+      "DANA",
+      "LinkAja"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "4000 0000 0000 0044",
+        "expiry": "03/33",
+        "cvv": "123",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "5500 0000 0000 0004",
+        "expiry": "03/33",
+        "cvv": "123",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success"
+      }
+    ]
+  },
+  {
+    "slug": "enet",
+    "name": "eNet",
+    "countries": [
+      "Kuwait"
+    ],
+    "currencies": [
+      "KWD"
+    ],
+    "inquiryMinutes": 3,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "psp_ptsp",
+    "operationMode": "purchase",
+    "logo": "enet_icon.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "KNET"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
+    ],
+    "testCards": []
+  },
+  {
+    "slug": "fawry",
+    "name": "Fawry",
+    "countries": [
+      "Egypt"
+    ],
+    "currencies": [
+      "EGP"
+    ],
+    "inquiryMinutes": 8,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "acquirer",
+    "operationMode": "purchase",
+    "logo": "fawry.png",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Meeza"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Vodafone Cash",
+      "Orange"
+    ],
+    "testCards": []
+  },
+  {
+    "slug": "fiserv",
+    "name": "Fiserv",
+    "countries": [
+      "UAE",
+      "Global"
+    ],
+    "currencies": [
+      "AED"
+    ],
+    "inquiryMinutes": null,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "processor",
+    "operationMode": "purchase",
+    "logo": "fiserv.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "JCB",
+      "Discover",
+      "UnionPay"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay"
+    ],
+    "testCards": []
+  },
+  {
+    "slug": "fss",
+    "name": "FSS",
+    "countries": [
+      "Kuwait",
+      "Bahrain",
+      "Qatar",
+      "Oman",
+      "UAE",
+      "KSA",
+      "Global"
+    ],
+    "currencies": [
+      "KWD",
+      "BHD",
+      "QAR",
+      "OMR",
+      "AED",
+      "SAR"
+    ],
+    "inquiryMinutes": 8,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "processor",
+    "operationMode": "purchase",
+    "logo": "master_visa.svg",
+    "acceptedAt": [],
+    "cardBrands": [],
+    "digitalWallets": [],
+    "testCards": [
+      {
+        "cardNumber": "4012 0010 3714 1112",
+        "expiry": "12/27",
+        "cvv": "212",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "Secure Code: 123456, OTP: 123456"
+      }
+    ]
+  },
+  {
+    "slug": "geidea",
+    "name": "Geidea",
+    "countries": [
+      "KSA"
+    ],
+    "currencies": [
+      "SAR"
+    ],
+    "inquiryMinutes": null,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "acquirer",
+    "operationMode": "purchase",
+    "logo": "geidea.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "mada"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "5123 4500 0000 0008",
+        "expiry": "01/39",
+        "cvv": "100",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS Challenge"
+      },
+      {
+        "cardNumber": "4440 0000 0990 0010",
+        "expiry": "01/39",
+        "cvv": "100",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS Challenge"
+      },
+      {
+        "cardNumber": "5588 4800 0000 0003",
+        "expiry": "01/39",
+        "cvv": "100",
+        "brand": "MADA",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS Challenge"
+      },
+      {
+        "cardNumber": "3400 0009 9900 051",
+        "expiry": "01/39",
+        "cvv": "1000",
+        "brand": "AMEX",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS Challenge"
+      }
+    ],
+    "testCardNotes": "Use expiry 05/39 for declined, 04/27 for expired card, 08/28 for connection timeout."
+  },
+  {
+    "slug": "hesabe",
+    "name": "Hesabe",
+    "countries": [
+      "Kuwait"
+    ],
+    "currencies": [
+      "KWD"
+    ],
+    "inquiryMinutes": 10,
+    "operations": [
+      "purchase"
+    ],
+    "integrationType": "redirect",
+    "category": "psp_ptsp",
+    "operationMode": "purchase",
+    "logo": "hesabe.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "KNET"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "8888 8800 0000 0001",
+        "expiry": "09/30",
+        "cvv": "1234",
+        "brand": "KNET",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "4440 0000 4220 0022",
+        "expiry": "01/39",
+        "cvv": "207",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "MPGS"
+      },
+      {
+        "cardNumber": "5123 4500 0000 0008",
+        "expiry": "01/39",
+        "cvv": "100",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "MPGS"
+      },
+      {
+        "cardNumber": "3737 0862 3186 001",
+        "expiry": "01/39",
+        "cvv": "1000",
+        "brand": "AMEX",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "4440 0000 9900 0010",
+        "expiry": "05/39",
+        "cvv": "101",
+        "brand": "Visa",
+        "status": "declined",
+        "statusLabel": "Declined",
+        "note": "MPGS"
+      },
+      {
+        "cardNumber": "5555 5555 5555 4444",
+        "expiry": "05/39",
+        "cvv": "101",
+        "brand": "Mastercard",
+        "status": "declined",
+        "statusLabel": "Declined",
+        "note": "MPGS"
+      }
+    ],
+    "testCardNotes": "Use cardholder name \"Hesabe\". Amounts < 1 KWD recommended for testing."
+  },
+  {
+    "slug": "hyperpay",
+    "name": "HyperPay",
+    "countries": [
+      "Iraq",
+      "KSA"
+    ],
+    "currencies": [
+      "IQD",
+      "SAR"
+    ],
+    "inquiryMinutes": 31,
+    "operations": [
+      "purchase"
+    ],
+    "integrationType": "redirect",
+    "category": "psp_ptsp",
+    "operationMode": "purchase",
+    "logo": "hyperpay.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "mada"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "STC Pay"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "4111 1111 1111 1111",
+        "expiry": "Any future",
+        "cvv": "123",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "5204 7300 0000 2514",
+        "expiry": "Any future",
+        "cvv": "251",
+        "brand": "Mastercard",
+        "status": "declined",
+        "statusLabel": "Declined"
+      }
+    ]
+  },
+  {
+    "slug": "ifg",
+    "name": "IATA Financial Gateway (IFG)",
+    "countries": [
+      "Global"
+    ],
+    "currencies": [
+      "USD"
+    ],
+    "inquiryMinutes": null,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "iata-sdk",
+    "category": "specialty",
+    "operationMode": "purchase",
+    "logo": "ifg.png",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "UATP"
+    ],
+    "digitalWallets": [],
+    "testCards": []
+  },
+  {
+    "slug": "kpay",
+    "name": "KNET",
+    "countries": [
+      "Kuwait"
+    ],
+    "currencies": [
+      "KWD"
+    ],
+    "inquiryMinutes": 8,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "local_debit",
+    "operationMode": "purchase",
+    "logo": "knet_logo.png",
+    "acceptedAt": [
+      "NBK",
+      "KFH",
+      "Gulf",
+      "CBK",
+      "Burgan",
+      "Boubyan",
+      "Warba",
+      "KIB",
+      "ABK"
+    ],
+    "cardBrands": [
+      "KNET"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "8888 8800 0000 0001",
+        "expiry": "09/2030",
+        "cvv": "Any 4 digits",
+        "brand": "KNET",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "For not captured, use expiry 08/21"
+      }
+    ]
+  },
+  {
+    "slug": "moyasar",
+    "name": "Moyasar",
+    "countries": [
+      "KSA"
+    ],
+    "currencies": [
+      "SAR"
+    ],
+    "inquiryMinutes": null,
+    "operations": [
+      "purchase",
+      "refund",
+      "auth",
+      "capture"
+    ],
+    "integrationType": "redirect",
+    "category": "psp_ptsp",
+    "operationMode": "purchase",
+    "logo": "moyasar.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "mada"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "STC Pay"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "4201 3201 1111 1010",
+        "expiry": "Any future",
+        "cvv": "Any 3 digits",
+        "brand": "MADA",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "4111 1140 0576 5430",
+        "expiry": "Any future",
+        "cvv": "Any 3 digits",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "5421 0801 0100 0000",
+        "expiry": "Any future",
+        "cvv": "Any 3 digits",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "3400 0000 0090 0000",
+        "expiry": "Any future",
+        "cvv": "Any 4 digits",
+        "brand": "AMEX",
+        "status": "success",
+        "statusLabel": "Success"
+      }
+    ],
+    "testCardNotes": "Cardholder name must be at least two words. Only listed cards work — others will be declined."
+  },
+  {
+    "slug": "mpgs",
+    "name": "MPGS",
+    "countries": [
+      "Global"
+    ],
+    "currencies": [
+      "KWD",
+      "BHD",
+      "QAR",
+      "OMR",
+      "AED",
+      "SAR",
+      "USD"
+    ],
+    "inquiryMinutes": 11,
+    "operations": [
+      "purchase",
+      "refund",
+      "auth",
+      "capture",
+      "void",
+      "tokenization",
+      "autodebit"
+    ],
+    "integrationType": "redirect/direct",
+    "category": "gateway",
+    "operationMode": "purchase_authorize",
+    "logo": "mpgs.png",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "JCB",
+      "Discover",
+      "UnionPay"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay",
+      "Samsung Pay"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "5123 4500 0000 0008",
+        "expiry": "01/39",
+        "cvv": "100",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "4508 7500 1574 1019",
+        "expiry": "01/39",
+        "cvv": "100",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "5120 3501 0006 4537",
+        "expiry": "Any future",
+        "cvv": "Any 3 digits",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "For tokenization testing"
+      },
+      {
+        "cardNumber": "5120 3501 0006 4545",
+        "expiry": "Any future",
+        "cvv": "Any 3 digits",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "For tokenization testing"
+      }
+    ],
+    "testCardNotes": "Cards 3 and 4 are specifically for receiving token data during tokenization testing."
+  },
+  {
+    "slug": "myfatoorah",
+    "name": "MyFatoorah",
+    "countries": [
+      "Kuwait",
+      "Bahrain",
+      "Qatar",
+      "Oman",
+      "UAE",
+      "KSA"
+    ],
+    "currencies": [
+      "KWD",
+      "BHD",
+      "QAR",
+      "OMR",
+      "AED",
+      "SAR"
+    ],
+    "inquiryMinutes": 8,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect/direct",
+    "category": "psp_ptsp",
+    "operationMode": "purchase",
+    "logo": "myfatoorah_icon.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "mada",
+      "KNET",
+      "Benefit",
+      "Meeza"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay",
+      "STC Pay"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "4508 7500 1574 1019",
+        "expiry": "Any future",
+        "cvv": "Any 3 digits",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "5123 4500 0000 0008",
+        "expiry": "01/39",
+        "cvv": "100",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "8888 8800 0000 0001",
+        "expiry": "09/30",
+        "cvv": "Any 4 digits",
+        "brand": "KNET",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "4600 4101 2345 6789",
+        "expiry": "Any future",
+        "cvv": "Any 6 digits",
+        "brand": "Benefit",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "3456 7890 1234 564",
+        "expiry": "04/37",
+        "cvv": "1000",
+        "brand": "AMEX",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "4464 0400 0000 0007",
+        "expiry": "02/29",
+        "cvv": "123",
+        "brand": "MADA",
+        "status": "success",
+        "statusLabel": "Success"
+      }
+    ],
+    "testCardNotes": "Cardholder name: use format like \"test test\"."
+  },
+  {
+    "slug": "nbo",
+    "name": "NBO Gateway",
+    "countries": [
+      "Oman"
+    ],
+    "currencies": [
+      "OMR"
+    ],
+    "inquiryMinutes": 10,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "gateway",
+    "operationMode": "purchase",
+    "logo": "nbo.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "5421 6033 0039 7131",
+        "expiry": "01/25",
+        "cvv": "070",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success"
+      }
+    ]
+  },
+  {
+    "slug": "ni",
+    "name": "Network International (NI)",
+    "countries": [
+      "Kuwait",
+      "UAE"
+    ],
+    "currencies": [
+      "KWD",
+      "AED"
+    ],
+    "inquiryMinutes": 8,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "gateway",
+    "operationMode": "purchase",
+    "logo": "ni.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "JCB",
+      "UnionPay"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "4012 0010 3714 1112",
+        "expiry": "05/25",
+        "cvv": "—",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "PIN: 123"
+      }
+    ]
+  },
+  {
+    "slug": "omannet",
+    "name": "OmanNet",
+    "countries": [
+      "Oman"
+    ],
+    "currencies": [
+      "OMR"
+    ],
+    "inquiryMinutes": 8,
+    "operations": [
+      "purchase",
+      "refund",
+      "autodebit"
+    ],
+    "integrationType": "redirect",
+    "category": "local_debit",
+    "operationMode": "purchase",
+    "logo": "omannet_icon.svg",
+    "acceptedAt": [
+      "Bank Muscat",
+      "NBO",
+      "Bank Dhofar",
+      "Oman Arab Bank",
+      "Sohar",
+      "Ahli"
+    ],
+    "cardBrands": [
+      "OmanNet"
+    ],
+    "digitalWallets": [],
+    "testCards": [
+      {
+        "cardNumber": "4837 9150 8285 6089",
+        "expiry": "06/27",
+        "cvv": "766",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "OTP sent to registered email"
+      }
+    ]
+  },
+  {
+    "slug": "paymob",
+    "name": "Paymob",
+    "countries": [
+      "UAE",
+      "KSA",
+      "Egypt"
+    ],
+    "currencies": [
+      "AED",
+      "SAR",
+      "EGP"
+    ],
+    "inquiryMinutes": null,
+    "operations": [
+      "purchase",
+      "refund",
+      "auth",
+      "capture",
+      "void"
+    ],
+    "integrationType": "redirect",
+    "category": "psp_ptsp",
+    "operationMode": "purchase",
+    "logo": "paymob.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Meeza",
+      "mada"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Vodafone Cash"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "5123 4567 8901 2346",
+        "expiry": "01/39",
+        "cvv": "123",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "4111 1111 1111 1111",
+        "expiry": "01/39",
+        "cvv": "123",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "2223 0000 0000 0007",
+        "expiry": "01/39",
+        "cvv": "100",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success"
+      }
+    ],
+    "testCardNotes": "Cardholder name: \"Test Account\"."
+  },
+  {
+    "slug": "payon",
+    "name": "Payon",
+    "countries": [
+      "Bahrain"
+    ],
+    "currencies": [
+      "BHD"
+    ],
+    "inquiryMinutes": 31,
+    "operations": [
+      "purchase",
+      "refund",
+      "auth",
+      "capture"
+    ],
+    "integrationType": "sdk",
+    "category": "psp_ptsp",
+    "operationMode": "purchase",
+    "logo": "payon.png",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Benefit"
+    ],
+    "digitalWallets": [],
+    "testCards": []
+  },
+  {
+    "slug": "paypal",
+    "name": "PayPal",
+    "countries": [
+      "Global"
+    ],
+    "currencies": [
+      "USD"
+    ],
+    "inquiryMinutes": 0,
+    "operations": [
+      "purchase"
+    ],
+    "integrationType": "redirect",
+    "category": "wallet",
+    "operationMode": "purchase",
+    "logo": "paypal_icon.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "Discover"
+    ],
+    "digitalWallets": [
+      "PayPal"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "3714 4963 5398 431",
+        "expiry": "01/39",
+        "cvv": "1000",
+        "brand": "American Express",
+        "status": "success",
+        "statusLabel": "Success"
+      }
+    ]
+  },
+  {
+    "slug": "payu_india",
+    "name": "PayU",
+    "countries": [
+      "India"
+    ],
+    "currencies": [
+      "INR"
+    ],
+    "inquiryMinutes": 15,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "psp_ptsp",
+    "operationMode": "purchase",
+    "logo": "payu_icon.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "RuPay",
+      "Diners",
+      "UPI"
+    ],
+    "digitalWallets": [
+      "PayTM",
+      "PhonePe",
+      "Google Pay",
+      "Apple Pay"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "5123 4567 8901 2346",
+        "expiry": "Any future",
+        "cvv": "123",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "OTP: 123456"
+      }
+    ]
+  },
+  {
+    "slug": "qpay",
+    "name": "QPay (NAPS)",
+    "countries": [
+      "Qatar"
+    ],
+    "currencies": [
+      "QAR"
+    ],
+    "inquiryMinutes": 20,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "local_debit",
+    "operationMode": "purchase",
+    "logo": "qpay.svg",
+    "acceptedAt": [
+      "QNB",
+      "Doha Bank",
+      "CBQ"
+    ],
+    "cardBrands": [
+      "NAPS"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "4215 3755 0088 3243",
+        "expiry": "06/26",
+        "cvv": "1234",
+        "brand": "NAPS",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "4151 8012 0000 3960",
+        "expiry": "Any future",
+        "cvv": "Any 4 digits",
+        "brand": "NAPS",
+        "status": "declined",
+        "statusLabel": "Declined"
+      }
+    ],
+    "testCardNotes": "OTP for all QPay cards: 1234"
+  },
+  {
+    "slug": "rajhi",
+    "name": "Al Rajhi Bank",
+    "countries": [
+      "KSA"
+    ],
+    "currencies": [
+      "SAR"
+    ],
+    "inquiryMinutes": 8,
+    "operations": [
+      "purchase",
+      "refund",
+      "auth",
+      "capture",
+      "tokenization"
+    ],
+    "integrationType": "redirect",
+    "category": "gateway",
+    "operationMode": "purchase_authorize",
+    "logo": "rajhi.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "mada"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay",
+      "urpay"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "5105 1051 0510 5100",
+        "expiry": "12/23",
+        "cvv": "123",
+        "brand": "Visa / Mastercard",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "OTP: 123123"
+      }
+    ]
+  },
+  {
+    "slug": "skipcash",
+    "name": "SkipCash",
+    "countries": [
+      "Qatar"
+    ],
+    "currencies": [
+      "QAR"
+    ],
+    "inquiryMinutes": 30,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "psp_ptsp",
+    "operationMode": "purchase",
+    "logo": "skipcash.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "mada"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay",
+      "SkipCash"
+    ],
+    "testCards": []
+  },
+  {
+    "slug": "smart_pay",
+    "name": "Smartpay",
+    "countries": [
+      "Oman"
+    ],
+    "currencies": [
+      "OMR"
+    ],
+    "inquiryMinutes": 16,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "gateway",
+    "operationMode": "purchase",
+    "logo": "smartpay.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "OmanNet"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "bm Wallet"
+    ],
+    "testCards": []
+  },
+  {
+    "slug": "sohar",
+    "name": "Sohar International",
+    "countries": [
+      "Oman"
+    ],
+    "currencies": [
+      "OMR"
+    ],
+    "inquiryMinutes": 16,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "gateway",
+    "operationMode": "purchase",
+    "logo": "sohar.png",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
+    ],
+    "testCards": []
+  },
+  {
+    "slug": "stc_pay",
+    "name": "STC Bank",
+    "countries": [
+      "KSA",
+      "Bahrain"
+    ],
+    "currencies": [
+      "SAR",
+      "BHD"
+    ],
+    "inquiryMinutes": 8,
+    "operations": [
+      "purchase",
+      "refund",
+      "tokenization"
+    ],
+    "integrationType": "wallet",
+    "category": "wallet",
+    "operationMode": "purchase",
+    "logo": "stcpay.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "mada"
+    ],
+    "digitalWallets": [
+      "STC Pay"
+    ],
+    "testCards": [],
+    "testCardNotes": "Wallet testing — use test phone: 548220713 (country code 966). OTP: 123456 (success), 111111 (insufficient balance), 222222 (daily limit exceeded)."
+  },
+  {
+    "slug": "tabby",
+    "name": "Tabby",
+    "countries": [
+      "KSA",
+      "Kuwait",
+      "Bahrain",
+      "Qatar",
+      "Oman",
+      "UAE"
+    ],
+    "currencies": [
+      "SAR",
+      "KWD",
+      "BHD",
+      "QAR",
+      "OMR",
+      "AED"
+    ],
+    "inquiryMinutes": 16,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "bnpl",
+    "operationMode": "purchase",
+    "logo": "tabby-logo-charcoal.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "mada"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
+    ],
+    "testCards": [],
+    "testCardNotes": "BNPL testing — use test email: otp.success@tabby.ai, phone: 500000001, OTP: 8888. Tabby uses its own checkout flow, not card entry."
+  },
+  {
+    "slug": "taly",
+    "name": "Taly",
+    "countries": [
+      "Kuwait"
+    ],
+    "currencies": [
+      "KWD"
+    ],
+    "inquiryMinutes": 30,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "bnpl",
+    "operationMode": "purchase",
+    "logo": "taly.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "KNET"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay"
+    ],
+    "testCards": []
+  },
+  {
+    "slug": "tamara",
+    "name": "Tamara",
+    "countries": [
+      "KSA",
+      "Kuwait",
+      "Bahrain",
+      "Qatar",
+      "Oman",
+      "UAE"
+    ],
+    "currencies": [
+      "SAR",
+      "KWD",
+      "BHD",
+      "QAR",
+      "OMR",
+      "AED"
+    ],
+    "inquiryMinutes": 8,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "bnpl",
+    "operationMode": "purchase",
+    "logo": "tamara.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "mada"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "5436 0310 3060 6378",
+        "expiry": "01/99",
+        "cvv": "257",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "4242 4242 4242 4242",
+        "expiry": "01/99",
+        "cvv": "100",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS"
+      },
+      {
+        "cardNumber": "4111 1111 1111 1111",
+        "expiry": "01/99",
+        "cvv": "100",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "Non-3DS"
+      },
+      {
+        "cardNumber": "4658 5840 9000 0001",
+        "expiry": "01/99",
+        "cvv": "25",
+        "brand": "MADA",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "KSA only"
+      },
+      {
+        "cardNumber": "4556 2537 5271 2245",
+        "expiry": "Any future",
+        "cvv": "Any",
+        "brand": "Visa",
+        "status": "declined",
+        "statusLabel": "Declined"
+      }
+    ],
+    "testCardNotes": "Test phone: 500000001. Confirm OTP when prompted."
+  },
+  {
+    "slug": "tap",
+    "name": "Tap Payments",
+    "countries": [
+      "Kuwait",
+      "Bahrain",
+      "Qatar",
+      "Oman",
+      "UAE",
+      "KSA"
+    ],
+    "currencies": [
+      "KWD",
+      "BHD",
+      "QAR",
+      "OMR",
+      "AED",
+      "SAR"
+    ],
+    "inquiryMinutes": 20,
+    "operations": [
+      "purchase",
+      "refund",
+      "auth",
+      "capture",
+      "tokenization",
+      "autodebit"
+    ],
+    "integrationType": "redirect/direct",
+    "category": "acquirer",
+    "operationMode": "purchase",
+    "logo": "tap.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "mada",
+      "KNET",
+      "OmanNet",
+      "Benefit"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay",
+      "STC Pay",
+      "urpay"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "4508 7500 1574 1019",
+        "expiry": "Any future",
+        "cvv": "100",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS"
+      },
+      {
+        "cardNumber": "4012 0000 3333 0026",
+        "expiry": "Any future",
+        "cvv": "100",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "No 3DS"
+      },
+      {
+        "cardNumber": "5123 4500 0000 0008",
+        "expiry": "Any future",
+        "cvv": "100",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS"
+      },
+      {
+        "cardNumber": "3456 7890 1234 564",
+        "expiry": "Any future",
+        "cvv": "1000",
+        "brand": "AMEX",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS"
+      },
+      {
+        "cardNumber": "4464 0400 0000 0007",
+        "expiry": "Any future",
+        "cvv": "100",
+        "brand": "MADA",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS"
+      },
+      {
+        "cardNumber": "8888 8800 0000 0001",
+        "expiry": "09/30",
+        "cvv": "1234",
+        "brand": "KNET",
+        "status": "success",
+        "statusLabel": "Success"
+      }
+    ],
+    "testCardNotes": "CVV values: 100 = MATCH, 101 = NOT_PROCESSED, 102 = NO_MATCH. For AMEX: 1000, 1010, 1020."
+  },
+  {
+    "slug": "tess",
+    "name": "TESS Payments",
+    "countries": [
+      "Qatar"
+    ],
+    "currencies": [
+      "QAR"
+    ],
+    "inquiryMinutes": null,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "psp_ptsp",
+    "operationMode": "purchase",
+    "logo": "tess.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "NAPS"
+    ],
+    "digitalWallets": [
+      "Apple Pay",
+      "Google Pay"
+    ],
+    "testCards": []
+  },
+  {
+    "slug": "upayments",
+    "name": "UPayments",
+    "countries": [
+      "Kuwait"
+    ],
+    "currencies": [
+      "KWD"
+    ],
+    "inquiryMinutes": null,
+    "operations": [
+      "purchase",
+      "refund"
+    ],
+    "integrationType": "redirect",
+    "category": "psp_ptsp",
+    "operationMode": "purchase",
+    "logo": "upayments.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "KNET"
+    ],
+    "digitalWallets": [
+      "Apple Pay"
+    ],
+    "testCards": []
+  },
+  {
+    "slug": "upg",
+    "name": "UPG (EBC)",
+    "countries": [
+      "Egypt"
+    ],
+    "currencies": [
+      "EGP"
+    ],
+    "inquiryMinutes": 0,
+    "operations": [
+      "purchase"
+    ],
+    "integrationType": "redirect",
+    "category": "local_debit",
+    "operationMode": "purchase",
+    "logo": "upg_icon.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "Meeza"
+    ],
+    "digitalWallets": [
+      "Tahweel",
+      "Mobile Wallets"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "5078 0362 4660 0381",
+        "expiry": "09/25",
+        "cvv": "331",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "OTP: 111111"
+      }
+    ]
+  },
+  {
+    "slug": "urpay",
+    "name": "urpay",
+    "countries": [
+      "KSA"
+    ],
+    "currencies": [
+      "SAR"
+    ],
+    "inquiryMinutes": null,
+    "operations": [
+      "purchase"
+    ],
+    "integrationType": "wallet",
+    "category": "wallet",
+    "operationMode": "purchase",
+    "logo": "urpay.svg",
+    "acceptedAt": [],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "mada"
+    ],
+    "digitalWallets": [
+      "urpay",
+      "Apple Pay"
+    ],
+    "testCards": []
+  }
+]

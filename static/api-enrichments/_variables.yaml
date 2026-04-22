@@ -1,0 +1,9 @@
+# Template variables for API enrichments
+# Resolved via {{varName}} syntax in all enrichment files and the final spec
+#
+# These are resolved AFTER all merges, so they work in both
+# enrichment overlay files and in the original spec descriptions.
+
+apiBaseUrl: "/developers"
+glossaryUrl: "/glossary"
+sandboxUrl: "https://sandbox.ottu.dev"

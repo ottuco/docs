@@ -1,0 +1,11 @@
+# Enrichments for tag: "User Cards"
+
+operations:
+
+  get_user_cards:
+    permissions:
+      - $perm:api_key_only
+
+  delete_user_cards:
+    permissions:
+      - $perm:api_key_only

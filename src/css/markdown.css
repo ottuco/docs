@@ -1,0 +1,74 @@
+.theme-api-markdown h1,
+.theme-doc-markdown h1 {
+  margin-top: 0;
+  margin-bottom: 16px;
+
+  color: #302f37;
+
+  /* Headline 1 */
+  font-family: Poppins;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+}
+
+.theme-api-markdown h2,
+.theme-doc-markdown h2 {
+  margin-top: 32px;
+  margin-bottom: 16px;
+
+  color: #302f37;
+
+  /* Subheading 3 */
+  font-family: Poppins;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.theme-api-markdown h3,
+.theme-doc-markdown h3 {
+  margin-top: 32px;
+  margin-bottom: 16px;
+
+  color: #302f37;
+
+  /* Subheading 3 */
+  font-family: Poppins;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.markdown p {
+  margin-top: 0;
+  margin-bottom: 16px;
+
+  color: #4a4a4a;
+
+  /* Basic text */
+  font-family: Poppins;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.markdown li:not(:first-child) {
+  margin-top: 16px;
+}
+
+[data-theme="dark"] .theme-api-markdown h1,
+[data-theme="dark"] .theme-doc-markdown h1,
+[data-theme="dark"] .theme-api-markdown h2,
+[data-theme="dark"] .theme-doc-markdown h2,
+[data-theme="dark"] .theme-api-markdown h3,
+[data-theme="dark"] .theme-doc-markdown h3 {
+  color: var(--title-font-dark-color);
+}
+[data-theme="dark"] .markdown p {
+  color: var(--desc-font-dark-color);
+}

@@ -1,0 +1,1 @@
+{"parameters":[{"in":"path","name":"token","schema":{"type":"string"},"description":"Secure download token (UUID) from the `download_action.url` field in the list response. Tokens are time-limited and bound to the authenticated user.","required":true}]}

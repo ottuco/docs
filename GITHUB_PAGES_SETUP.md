@@ -207,8 +207,8 @@ No secrets are required for basic GitHub Pages deployment. The workflow uses:
 ### Deployment URLs
 
 - **Production**: https://ottu.github.io/public-docs/
-- **Source Code**: https://github.com/ottu/public-docs
-- **Actions**: https://github.com/ottu/public-docs/actions
+- **Source Code**: https://github.com/ottuco/public-docs
+- **Actions**: https://github.com/ottuco/public-docs/actions
 
 ## Next Steps
 

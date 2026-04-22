@@ -1,0 +1,217 @@
+/* ═══════════════════════════════════════════════════════
+   Gateway Timing Chart — Refined Histogram
+   Proportional bars, subtle fills, colored left accents
+   ═══════════════════════════════════════════════════════ */
+
+.chart {
+  margin: 24px 0;
+  max-width: 600px;
+  font-family: "Poppins", system-ui, sans-serif;
+}
+
+/* ── Tier row ────────────────────────────────────────── */
+.tier {
+  display: flex;
+  align-items: stretch;
+  margin-bottom: 4px;
+}
+
+/* ── Minutes label (left column, fixed width) ────────── */
+.minutes {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 48px;
+  flex-shrink: 0;
+  padding: 8px 4px;
+  border-radius: 6px 0 0 6px;
+}
+
+.minutesValue {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.minutesUnit {
+  font-size: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  opacity: 0.7;
+  margin-top: 1px;
+}
+
+/* ── Bar track (full width container) ────────────────── */
+.barTrack {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Gateway bar (proportional width) ────────────────── */
+.bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 8px 12px;
+  border-radius: 0 6px 6px 0;
+  min-height: 38px;
+  border-left: 3px solid;
+  transition: all 0.15s ease;
+  min-width: fit-content;
+}
+
+.bar:hover {
+  filter: brightness(0.97);
+}
+
+/* ── Gateway pill ────────────────────────────────────── */
+.gateway {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+}
+
+/* ── Color tiers — single neutral scheme, accent on numbers only ── */
+
+/* Minutes badge: accent color signals timing urgency */
+/* Fast: 6-8 min — teal */
+.tierFast .minutes {
+  background: #0d9488;
+  color: #fff;
+}
+/* Standard: 10-11 min — Ottu blue */
+.tierStandard .minutes {
+  background: #0b82be;
+  color: #fff;
+}
+/* Moderate: 15-20 min — Ottu orange */
+.tierModerate .minutes {
+  background: #f27e20;
+  color: #fff;
+}
+/* Slow: 28-31 min — warm red */
+.tierSlow .minutes {
+  background: #dc2626;
+  color: #fff;
+}
+
+.tierFast .bar,
+.tierStandard .bar,
+.tierModerate .bar,
+.tierSlow .bar {
+  background: #f2f2f2;
+  border-left-color: #bfbfbf;
+  color: var(--ifm-heading-color);
+}
+
+.tierFast .gateway,
+.tierStandard .gateway,
+.tierModerate .gateway,
+.tierSlow .gateway {
+  background: #e5e5e5;
+  color: #4a4a4a;
+}
+
+/* ── N/A section ─────────────────────────────────────── */
+.noInquiry {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-global-border-color);
+  max-width: 600px;
+}
+
+.noInquiryLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--ifm-font-color-base);
+  opacity: 0.5;
+  margin: 0 0 8px;
+}
+
+.noInquiryGateways {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.noInquiryPill {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  background: var(--ifm-global-border-color);
+  color: var(--ifm-font-color-base);
+  opacity: 0.6;
+}
+
+/* ── Dark mode ───────────────────────────────────────── */
+/* Minutes badge: same accent in dark mode */
+[data-theme="dark"] .tierFast .minutes {
+  background: #0d9488;
+}
+[data-theme="dark"] .tierStandard .minutes {
+  background: #0b82be;
+}
+[data-theme="dark"] .tierModerate .minutes {
+  background: #f27e20;
+}
+[data-theme="dark"] .tierSlow .minutes {
+  background: #dc2626;
+}
+
+[data-theme="dark"] .tierFast .bar,
+[data-theme="dark"] .tierStandard .bar,
+[data-theme="dark"] .tierModerate .bar,
+[data-theme="dark"] .tierSlow .bar {
+  background: #1e2939;
+  border-left-color: #374151;
+}
+
+[data-theme="dark"] .tierFast .gateway,
+[data-theme="dark"] .tierStandard .gateway,
+[data-theme="dark"] .tierModerate .gateway,
+[data-theme="dark"] .tierSlow .gateway {
+  background: #2d3748;
+  color: #d1d5dc;
+}
+
+[data-theme="dark"] .noInquiry {
+  background: #171a21;
+  border-color: #1e2939;
+}
+
+[data-theme="dark"] .noInquiryPill {
+  background: #1e2939;
+  color: #9ca3af;
+}
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 600px) {
+  .minutes {
+    width: 40px;
+  }
+
+  .minutesValue {
+    font-size: 14px;
+  }
+
+  .gateway {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+}

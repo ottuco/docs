@@ -1,0 +1,6 @@
+# Overrides for: components/schemas/PaymentMethodsRequest
+
+properties:
+  pg_names:
+    description: |
+      When provided, the payment methods will be narrowed down to those that support the specified payment gateway name. Example: `["kpay", "mpgs"]`.

@@ -1,0 +1,87 @@
+# Overrides for: components/schemas/CheckoutPOSTRequest
+# Fields using $shared pull descriptions from _shared/fields.yaml
+# Fields with inline descriptions are request-specific
+
+_example:
+  type: e_commerce
+  amount: "10.000"
+  currency_code: KWD
+  pg_codes:
+    - knet
+  webhook_url: https://test.com/webhook
+  redirect_url: https://test.com/redirect
+
+properties:
+  # ── Shared fields (same description across schemas) ──────────
+  amount: $shared
+  currency_code: $shared
+  customer_email: $shared
+  customer_first_name: $shared
+  customer_last_name: $shared
+  customer_phone: $shared
+  customer_id: $shared
+  customer_birthdate: $shared
+  order_no: $shared
+  language: $shared
+  payment_type: $shared
+  type: $shared
+  redirect_url: $shared
+  webhook_url: $shared
+  pg_codes: $shared
+  extra: $shared
+  expiration_time: $shared
+  due_datetime: $shared
+  product_type: $shared
+  vendor_name: $shared
+  email_recipients: $shared
+
+  # ── Request-specific fields ──────────────────────────────────
+
+  attachment:
+    description: |
+      Attachments can be included as an optional feature in email notifications sent to the customer regarding their payment. These attachments will also be available for download on the checkout page. The primary purpose of this field is to provide the customer with additional information or documentation related to their purchase. Attachments should be sent using the [multipart/form-data](https://developer.mozilla.org/en-US/docs/Web/API/FormData/Using_FormData_Objects) encoding type. Ensure that you change the content type to `multipart/form-data` when sending attachments. They cannot be sent using [JSON](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON) encoding. Allowed file extensions: PDF, JPEG, PNG, DOC, DOCX, JPG, XLS, XLSX, and TXT. The name of the attached file should not exceed 100 characters.
+
+  attachment_upload_url:
+    description: |
+      A writable field used to reference an attachment that has already been uploaded to the server.
+
+  generate_qr_code:
+    description: |
+      If set to true, the `qr_code_url` field will be present in the response. Upon scanning it, the customer will be redirected to the `checkout_url`, which is the Ottu Checkout page. Default value is false.
+
+  include_sdk_setup_preload:
+    description: |
+      When set to true, the Checkout API will include the `sdk_setup_preload_payload` in its response. This payload facilitates immediate UI setup without the need for further API calls. By default, the parameter is set to `false`, and the `sdk_setup_preload_payload` is not included in the API response.
+
+  shortify_attachment_url:
+    description: |
+      If true, it generates short attachment retrieval URL, which could be embedded in either SMS, Email, or WhatsApp messages, as it uses fewer characters. If an external URL shortening service, such as [Bitly](https://bitly.com/), is configured, the `attachment_short_url` will be shorter than attachment response parameter. If not configured, the `attachment_short_url` will be in the same format with `attachment` response parameter. Default value is false. <!-- TODO:merchant-link URL shortener configuration page -->
+
+  shortify_checkout_url:
+    description: |
+      If true, it generates short checkout retrieval URL, which could be embedded in either SMS, Email, or WhatsApp messages, as it uses fewer characters. If an external URL shortening service, such as [Bitly](https://bitly.com/), is configured, the `checkout_short_url` will be shorter than `checkout_url` parameter. If not configured, the `checkout_short_url` will be in the format of `https://<ottu-url>/b/abc123`. Default value is false. <!-- TODO:merchant-link URL shortener configuration page -->
+
+  # Nested field descriptions for card_acceptance_criteria, notifications,
+  # billing_address, shipping_address, and agreement live in their referenced
+  # schemas: CardAcceptanceCriteria.yaml, Notifications.yaml, Address.yaml,
+  # ShippingAddress.yaml, Agreement.yaml.
+
+  card_acceptance_criteria:
+    description: |
+      This field allows the merchant to define specific rules and conditions that a card must meet to be eligible for payment. These stipulations apply regardless of whether a customer chooses to pay using a saved card or opts to add a new card for the transaction. The `card_acceptance_criteria` field is applicable only for direct payments and not for hosted session payments.
+
+  notifications:
+    description: |
+      An object that contains the notification settings for this payment transaction, including SMS and email notifications, as well as the events for which they will be sent (e.g., `created`, `paid`, `refund`, `canceled`, etc.). This field may be used to configure and customize the [notifications]({{apiBaseUrl}}/notifications/) sent to customers and internal recipients throughout the payment process.
+
+  billing_address:
+    description: |
+      An object to save customer registered address data into payment transaction.
+
+  shipping_address:
+    description: |
+      An object to save address data into payment transaction.
+
+  agreement:
+    description: |
+      An established contractual arrangement with the payer, which authorizes the merchant to securely store and subsequently utilize their payment information for specific purposes. This could encompass arrangements like recurring payments for services such as mobile subscriptions, installment-based payments for purchases, arrangements for ad-hoc charges like account top-ups, or for standard industry practices like penalty charges for missed appointments. For more information please refer to [Recurring Payments]({{apiBaseUrl}}/cards-and-tokens/recurring-payments/). It is imperative for the merchant to strictly avoid including these parameters when the payment type is labeled as `one_off`. The agreement parameter should be sent exclusively when the payment type is designated as `auto_debit`.
