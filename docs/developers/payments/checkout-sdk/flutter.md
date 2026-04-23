@@ -454,11 +454,6 @@ Specifies the device `Theme` mode, which can be set to one of the following:
 - `dark` – Forces the UI to use dark mode.
 - `auto` – Adapts the UI based on the device's system settings.
 
-:::info
-
-The `uiMode` parameter only affects Flutter Android and not Flutter iOS, as the flutter follows the behavior of the native implementation
-:::
-
 #### Properties Description
 
 All properties in the `CheckoutTheme` class are optional, allowing users to customize any of them as needed.

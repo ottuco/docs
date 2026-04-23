@@ -2,7 +2,6 @@
 # Operations: create, retrieve, update, upload attachment
 
 operations:
-
   create_payment_transaction_checkout:
     permissions:
       - $perm:api_key_admin
@@ -24,8 +23,17 @@ operations:
       - $perm:basic_auth_update_checkout
     description_append: |
       :::info
+      PUT requires permission for the existing `pg_code`.
+      :::
+
+  partial_update_payment_transaction_checkout:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_update_checkout
+    description_append: |
+      :::info
       For PATCH, updates can be performed as long as the payment gateway
-      codes are not updated. PUT requires permission for the existing `pg_code`.
+      codes are not updated.
       :::
 
   upload_attachment:

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { getWebhookSSEUrl } from "@site/src/utils/sandbox";
+import { getWebhookRelayUrl } from "@site/src/utils/sandbox";
 import styles from "./styles.module.css";
 
 interface WebhookEvent {
@@ -13,40 +13,49 @@ interface WebhookViewerProps {
   onEvent?: (event: WebhookEvent) => void;
 }
 
+const POLL_INTERVAL_MS = 1500;
+
 export default function WebhookViewer({ orderId, label, onEvent }: WebhookViewerProps) {
   const [events, setEvents] = useState<WebhookEvent[]>([]);
   const [status, setStatus] = useState<"connecting" | "connected" | "reconnecting">("connecting");
-  const eventSourceRef = useRef<EventSource | null>(null);
-  const hasConnectedRef = useRef(false);
   const onEventRef = useRef(onEvent);
   onEventRef.current = onEvent;
 
   useEffect(() => {
     if (!orderId) return;
 
-    const baseUrl = getWebhookSSEUrl();
-    const url = `${baseUrl}/webhook/${orderId}/events`;
-    const es = new EventSource(url);
-    eventSourceRef.current = es;
+    const url = `${getWebhookRelayUrl()}/webhook/${orderId}/events.json`;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let cursor = -1;
+    let hasSucceeded = false;
 
-    es.onopen = () => {
-      hasConnectedRef.current = true;
-      setStatus("connected");
-    };
-    es.onmessage = (e) => {
+    const poll = async () => {
       try {
-        const event: WebhookEvent = JSON.parse(e.data);
-        setEvents((prev) => [...prev, event]);
-        onEventRef.current?.(event);
+        const res = await fetch(`${url}?since=${cursor}`, { cache: "no-store" });
+        if (cancelled) return;
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data: { events: Array<WebhookEvent & { id: number }>; lastId: number } = await res.json();
+        if (cancelled) return;
+        if (data.events.length > 0) {
+          setEvents((prev) => [...prev, ...data.events]);
+          data.events.forEach((e) => onEventRef.current?.(e));
+          cursor = data.lastId;
+        }
+        hasSucceeded = true;
+        setStatus("connected");
       } catch {
-        // ignore malformed events
+        if (cancelled) return;
+        setStatus(hasSucceeded ? "reconnecting" : "connecting");
+      } finally {
+        if (!cancelled) timer = setTimeout(poll, POLL_INTERVAL_MS);
       }
     };
-    es.onerror = () => setStatus(hasConnectedRef.current ? "reconnecting" : "connecting");
+    poll();
 
     return () => {
-      es.close();
-      eventSourceRef.current = null;
+      cancelled = true;
+      if (timer) clearTimeout(timer);
     };
   }, [orderId]);
 
@@ -96,7 +105,6 @@ export default function WebhookViewer({ orderId, label, onEvent }: WebhookViewer
 export function extractTokenFromWebhook(events: WebhookEvent[]): string | null {
   for (const event of events) {
     const p = event.payload;
-    // Token can be at various paths depending on the webhook structure
     if (p?.token?.token) return p.token.token;
     if (p?.token && typeof p.token === "string") return p.token;
   }

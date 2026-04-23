@@ -13,8 +13,10 @@ const DOCS_PATH = path.join(DATA_DIR, "docs.json");
 const INDEX_PATH = path.join(DATA_DIR, "search-index.json");
 
 // ── Webhook Relay ────────────────────────────────────────────────────────────
-// In-memory store for webhook payloads, keyed by orderId.
-// Each entry holds SSE clients and received webhooks, with a 1-hour TTL.
+// In-memory store for webhook payloads, keyed by orderId. Clients poll for
+// updates via GET /:orderId/events.json?since=<id> — SSE was dropped because
+// Cloudflare (DO App Platform's edge) non-deterministically buffers streaming
+// responses; request/response is reliable where streaming was 50/50.
 const webhookStore = new Map();
 const WEBHOOK_TTL_MS = 3600000; // 1 hour
 
@@ -22,7 +24,6 @@ setInterval(() => {
   const now = Date.now();
   for (const [id, entry] of webhookStore) {
     if (now - entry.createdAt > WEBHOOK_TTL_MS) {
-      entry.clients.forEach((res) => res.end());
       webhookStore.delete(id);
     }
   }
@@ -31,7 +32,6 @@ setInterval(() => {
 function getOrCreateEntry(orderId) {
   if (!webhookStore.has(orderId)) {
     webhookStore.set(orderId, {
-      clients: new Set(),
       webhooks: [],
       createdAt: Date.now(),
     });
@@ -54,26 +54,13 @@ function parseBody(req) {
   });
 }
 
-// ~4KB of padding to defeat proxy buffering on the first response chunk
-// (DO App Platform ingress / Cloudflare hold small SSE responses in a buffer
-// until a threshold is breached, which stalls EventSource.onopen).
-const SSE_PAD = ": " + " ".repeat(4096) + "\n\n";
-
-function formatEvent(id, event) {
-  return `id: ${id}\ndata: ${JSON.stringify(event)}\n\n`;
-}
-
 function handleWebhookPost(orderId, req, res) {
   parseBody(req)
     .then((payload) => {
       const entry = getOrCreateEntry(orderId);
-      const event = { payload, receivedAt: new Date().toISOString() };
-      entry.webhooks.push(event);
-      const id = entry.webhooks.length - 1;
-      const data = formatEvent(id, event);
-      entry.clients.forEach((client) => client.write(data));
+      entry.webhooks.push({ payload, receivedAt: new Date().toISOString() });
       console.log(
-        `[Webhook] Received for ${orderId} (${entry.clients.size} SSE clients)`
+        `[Webhook] Received for ${orderId} (${entry.webhooks.length} total)`
       );
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ status: "ok" }));
@@ -84,43 +71,22 @@ function handleWebhookPost(orderId, req, res) {
     });
 }
 
-function handleWebhookSSE(orderId, req, res) {
-  res.writeHead(200, {
-    "Content-Type": "text/event-stream",
-    "Cache-Control": "no-cache, no-transform",
-    Connection: "keep-alive",
-    "X-Accel-Buffering": "no",
-    "Access-Control-Allow-Origin": "*",
-  });
-  // Force headers out before any body chunk — some proxies hold them otherwise.
-  res.flushHeaders?.();
-  // Disable Nagle so small SSE frames flush immediately.
-  res.socket?.setNoDelay?.(true);
-  // Prime the stream with padding to breach proxy buffer thresholds.
-  res.write(SSE_PAD);
-
+function handleWebhookPoll(orderId, req, res) {
   const entry = getOrCreateEntry(orderId);
-
-  // Catch-up: replay only events newer than the client's Last-Event-ID.
-  const lastHeader = req.headers["last-event-id"];
-  const lastId = lastHeader !== undefined ? Number.parseInt(lastHeader, 10) : -1;
-  const startIdx = Number.isFinite(lastId) ? lastId + 1 : 0;
+  const sinceParam = new URL(req.url, "http://x").searchParams.get("since");
+  const since = Number.parseInt(sinceParam ?? "-1", 10);
+  const startIdx = Number.isFinite(since) ? since + 1 : 0;
+  const events = [];
   for (let i = startIdx; i < entry.webhooks.length; i++) {
-    res.write(formatEvent(i, entry.webhooks[i]));
+    events.push({ id: i, ...entry.webhooks[i] });
   }
-
-  entry.clients.add(res);
-  console.log(
-    `[SSE] connected ${orderId} (${entry.clients.size} total, replayed ${entry.webhooks.length - startIdx})`
-  );
-
-  // Send keepalive comments every 15s to prevent proxy/Cloudflare from closing the connection
-  const keepalive = setInterval(() => res.write(": keepalive\n\n"), 15000);
-  req.on("close", () => {
-    clearInterval(keepalive);
-    entry.clients.delete(res);
-    console.log(`[SSE] disconnected ${orderId} (${entry.clients.size} remaining)`);
+  res.writeHead(200, {
+    "Content-Type": "application/json",
+    "Cache-Control": "no-store",
   });
+  res.end(
+    JSON.stringify({ events, lastId: entry.webhooks.length - 1 })
+  );
 }
 
 // ── MCP Artifacts ────────────────────────────────────────────────────────────
@@ -174,8 +140,8 @@ async function fetchWithRetry(maxAttempts = 10, delayMs = 15000) {
 //   POST /          → MCP protocol (from /mcp)
 //   POST /refresh   → re-fetch MCP artifacts (from /mcp/refresh)
 //   GET  /health    → health check (from /mcp/health or /webhook/health)
-//   POST /:id       → webhook relay (from /webhook/:id)
-//   GET  /:id/events → webhook SSE (from /webhook/:id/events)
+//   POST /:id             → webhook relay (from /webhook/:id)
+//   GET  /:id/events.json → webhook poll (from /webhook/:id/events.json)
 
 async function start() {
   let mcpServer = null;
@@ -216,10 +182,10 @@ async function start() {
       return;
     }
 
-    // ── Webhook SSE: GET /:orderId/events ──
-    const sseMatch = url.match(/^\/([^/]+)\/events\/?$/);
-    if (sseMatch && req.method === "GET") {
-      handleWebhookSSE(sseMatch[1], req, res);
+    // ── Webhook poll: GET /:orderId/events.json ──
+    const pollMatch = url.match(/^\/([^/]+)\/events\.json(?:\?.*)?$/);
+    if (pollMatch && req.method === "GET") {
+      handleWebhookPoll(pollMatch[1], req, res);
       return;
     }
 

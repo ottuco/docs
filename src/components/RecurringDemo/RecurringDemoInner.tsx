@@ -23,7 +23,6 @@ type Phase =
   | "step3_sdk"     | "step3_success"
   | "step4_waiting" | "step4_done"
   | "step5_select"  | "step5_calling" | "step5_done"
-  | "step6_waiting" | "step6_done"
   | "complete" | "error";
 
 interface State {
@@ -52,8 +51,6 @@ interface State {
   mitResponse?: any;
   mitAutoDebitRequest?: any;
   mitAutoDebitResponse?: any;
-  // Step 6: MIT webhook
-  mitWebhookPayload?: any;
   // UI
   expandedDoneSteps: Set<number>;
   errorMessage?: string;
@@ -73,8 +70,6 @@ type Action =
   | { type: "STEP5_SESSION_DONE"; mitSessionId: string; mitResponse: any }
   | { type: "STEP5_AUTO_DEBIT"; mitAutoDebitRequest: any }
   | { type: "STEP5_DONE"; mitResponse?: any; mitAutoDebitResponse?: any }
-  | { type: "STEP6_WAITING" }
-  | { type: "STEP6_DONE"; mitWebhookPayload: any }
   | { type: "COMPLETE" }
   | { type: "ERROR"; message: string }
   | { type: "TOGGLE_STEP"; stepNum: number }
@@ -121,10 +116,6 @@ function reducer(state: State, action: Action): State {
         ...(action.mitResponse && { mitResponse: action.mitResponse }),
         ...(action.mitAutoDebitResponse && { mitAutoDebitResponse: action.mitAutoDebitResponse }),
       };
-    case "STEP6_WAITING":
-      return { ...state, phase: "step6_waiting" };
-    case "STEP6_DONE":
-      return { ...state, phase: "step6_done", mitWebhookPayload: action.mitWebhookPayload };
     case "COMPLETE":
       return { ...state, phase: "complete" };
     case "ERROR":
@@ -150,7 +141,6 @@ const STEPS = [
   { num: 3, title: "Accept Payment", subtitle: "Checkout SDK" },
   { num: 4, title: "Webhook Notification", subtitle: "Token received" },
   { num: 5, title: "Charge Saved Card", subtitle: "MIT — Auto-Debit" },
-  { num: 6, title: "Payment Confirmation", subtitle: "MIT Webhook" },
 ];
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -161,8 +151,7 @@ function getStepStatus(stepNum: number, phase: Phase): "pending" | "active" | "d
     : phase.startsWith("step3") ? 3
     : phase.startsWith("step4") ? 4
     : phase.startsWith("step5") ? 5
-    : phase.startsWith("step6") ? 6
-    : phase === "complete" ? 7
+    : phase === "complete" ? 6
     : 0;
   if (stepNum < activeStep) return "done";
   if (stepNum === activeStep) return "active";
@@ -211,7 +200,6 @@ export default function RecurringDemoInner() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const webhookEventsRef = useRef<any[]>([]);
   const webhookCheckInterval = useRef<ReturnType<typeof setInterval> | null>(null);
-  const mitWebhookStartCount = useRef(0);
 
   useEffect(() => {
     return () => {
@@ -219,24 +207,28 @@ export default function RecurringDemoInner() {
     };
   }, []);
 
-  // Scroll to active step (or error card) on every phase transition so the
-  // step header — and any newly-rendered response content — is visible.
+  // Scroll on every phase transition so the relevant content is in view.
+  // Without this, transitions that shrink the DOM (all steps collapsing on
+  // `complete`, journey replaced by error card on `error`) leave the stale
+  // scroll position past the end of the component — the viewport lands on
+  // whatever page content sits below.
   useEffect(() => {
-    if (state.phase === "idle" || state.phase === "complete") return;
+    if (state.phase === "idle") return;
     const timer = setTimeout(() => {
       const selector =
         state.phase === "error"
           ? "[data-recurring-error]"
-          : (() => {
-              const n = state.phase.startsWith("step1") ? 1
-                : state.phase.startsWith("step2") ? 2
-                : state.phase.startsWith("step3") ? 3
-                : state.phase.startsWith("step4") ? 4
-                : state.phase.startsWith("step5") ? 5
-                : state.phase.startsWith("step6") ? 6
-                : 0;
-              return n === 0 ? null : `[data-recurring-step="${n}"]`;
-            })();
+          : state.phase === "complete"
+            ? "[data-recurring-complete]"
+            : (() => {
+                const n = state.phase.startsWith("step1") ? 1
+                  : state.phase.startsWith("step2") ? 2
+                  : state.phase.startsWith("step3") ? 3
+                  : state.phase.startsWith("step4") ? 4
+                  : state.phase.startsWith("step5") ? 5
+                  : 0;
+                return n === 0 ? null : `[data-recurring-step="${n}"]`;
+              })();
       if (!selector) return;
       const el = document.querySelector(selector);
       (el as HTMLElement | null)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -461,19 +453,22 @@ export default function RecurringDemoInner() {
     }
   }, [state.mitSessionId, state.citToken]);
 
-  // Step 5 done — user clicks Continue to watch MIT webhook
-  const continueToMITWebhook = useCallback(() => {
-    mitWebhookStartCount.current = webhookEventsRef.current.length;
-    dispatch({ type: "STEP6_WAITING" });
-    startWebhookWatch((events) => {
-      const newEvents = events.slice(mitWebhookStartCount.current);
-      if (newEvents.length > 0) {
-        dispatch({ type: "STEP6_DONE", mitWebhookPayload: newEvents[newEvents.length - 1]?.payload });
-      }
-    });
-  }, [startWebhookWatch]);
+  // ── Success summary (extracted from final API response) ──
+  const chargeSummary = (() => {
+    const src = state.mitMode === "two-step" ? state.mitAutoDebitResponse : state.mitResponse;
+    if (!src) return null;
+    return {
+      state: src.state ?? src.payment_status ?? src.status,
+      amount: src.amount ?? src.total_amount,
+      currency: src.currency_code ?? src.currency,
+      paymentId: src.session_id ?? src.payment_id ?? src.id,
+      reference: src.order_no ?? src.reference_number,
+    };
+  })();
 
-  // Step 6 done — user clicks Complete
+  const chargeCommitted =
+    state.mitMode === "one-step" ? !!state.mitResponse : !!state.mitAutoDebitResponse;
+  const canSwitchMode = state.phase === "step5_done" && !chargeCommitted;
 
   // ── Render step content ──
   const renderStepContent = (stepNum: number) => {
@@ -602,94 +597,214 @@ export default function RecurringDemoInner() {
           </>
         );
 
-      case 5:
-        return (
-          <>
-            {state.phase === "step5_select" && (
-              <>
-                <p className={styles.cardDescription}>
-                  Choose how to charge the saved card without customer interaction:
-                </p>
-                <div className={styles.pathSelector}>
-                  <div className={styles.pathCard} onClick={startMITOneStep}>
-                    <p className={styles.pathLabel}>One-Step Checkout</p>
-                    <p className={styles.pathDescription}>Checkout API with payment_instrument — session created and charged in one call</p>
-                  </div>
-                  <div className={styles.pathCard} onClick={startMITTwoStep}>
-                    <p className={styles.pathLabel}>Two-Step</p>
-                    <p className={styles.pathDescription}>Checkout API + Auto-Debit API — create session first, then charge separately</p>
-                  </div>
+      case 5: {
+        if (state.phase === "step5_select") {
+          return (
+            <>
+              <p className={styles.cardDescription}>
+                Choose how to charge the saved card without customer interaction:
+              </p>
+              <div className={styles.pathSelector}>
+                <div className={styles.pathCard} onClick={startMITOneStep}>
+                  <p className={styles.pathLabel}>One-Step Checkout</p>
+                  <p className={styles.pathDescription}>Checkout API with payment_instrument — session created and charged in one call</p>
                 </div>
-              </>
-            )}
-            {state.phase === "step5_calling" && (
-              <div className={styles.actions}>
-                <button className={styles.primaryBtn} disabled>
-                  <span className={styles.spinner} /> {state.mitMode === "one-step" ? "Creating session + charging..." : "Processing..."}
-                </button>
+                <div className={styles.pathCard} onClick={startMITTwoStep}>
+                  <p className={styles.pathLabel}>Two-Step</p>
+                  <p className={styles.pathDescription}>Checkout API + Auto-Debit API — create session first, then charge separately</p>
+                </div>
               </div>
-            )}
-            {(state.phase === "step5_done" || state.expandedDoneSteps.has(5)) && (
-              <>
-                <ApiPanel label={state.mitMode === "one-step" ? "POST /b/checkout/v1/pymt-txn/ (One-Step)" : "POST /b/checkout/v1/pymt-txn/ (Create Session)"} data={state.mitRequest} />
-                {state.mitResponse && (
-                  <ApiPanel label={state.mitMode === "one-step" ? "Response — One-Step MIT" : "Response — MIT Session"} data={state.mitResponse} />
-                )}
-                {state.mitMode === "two-step" && state.phase === "step5_done" && !state.mitAutoDebitResponse && (
-                  <div className={styles.actions}>
-                    <button className={styles.primaryBtn} onClick={callMITAutoDebit}>
-                      Call Auto-Debit API
-                    </button>
-                  </div>
-                )}
-                {state.mitAutoDebitRequest && (
-                  <ApiPanel label="POST /b/pbl/v2/payment/auto-debit/" data={state.mitAutoDebitRequest} />
-                )}
-                {state.mitAutoDebitResponse && (
-                  <ApiPanel label="Response — Auto-Debit" data={state.mitAutoDebitResponse} />
-                )}
-                {state.phase === "step5_done" && (state.mitMode === "one-step" || state.mitAutoDebitResponse) && (
-                  <div className={styles.actions}>
-                    <button className={styles.primaryBtn} onClick={continueToMITWebhook}>
-                      Continue — Payment Confirmation
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </>
+            </>
+          );
+        }
+
+        // sub-step statuses for Two-Step
+        const sub1Status: "pending" | "active" | "done" =
+          state.mitResponse ? "done"
+          : state.phase === "step5_calling" && !state.mitAutoDebitRequest ? "active"
+          : "pending";
+        const sub2Status: "pending" | "active" | "done" =
+          state.mitAutoDebitResponse ? "done"
+          : state.mitAutoDebitRequest ? "active"
+          : state.mitResponse ? "pending"
+          : "pending";
+
+        const modeLabel = state.mitMode === "one-step" ? "One-Step Checkout" : "Two-Step Checkout";
+        const modeHint = state.mitMode === "one-step"
+          ? "Session created and charged in a single API call"
+          : "Create session first, then charge with Auto-Debit";
+
+        const showModeChip = !!state.mitMode;
+
+        const summaryCard = chargeCommitted && chargeSummary && (
+          <div className={styles.summaryCard}>
+            <div className={styles.summaryHeader}>
+              <span className={styles.summaryIcon}><Icon path={mdiCheck} size={0.7} /></span>
+              <div>
+                <p className={styles.summaryTitle}>Payment Charged</p>
+                <p className={styles.summarySubtitle}>
+                  The saved token was debited automatically — no customer interaction required.
+                </p>
+              </div>
+            </div>
+            <div className={styles.summaryGrid}>
+              {chargeSummary.state && (
+                <div className={styles.summaryField}>
+                  <span className={styles.summaryLabel}>State</span>
+                  <span className={styles.summaryValue}><code>{String(chargeSummary.state)}</code></span>
+                </div>
+              )}
+              {chargeSummary.amount && (
+                <div className={styles.summaryField}>
+                  <span className={styles.summaryLabel}>Amount</span>
+                  <span className={styles.summaryValue}>{chargeSummary.amount} {chargeSummary.currency || ""}</span>
+                </div>
+              )}
+              {chargeSummary.paymentId && (
+                <div className={styles.summaryField}>
+                  <span className={styles.summaryLabel}>Payment ID</span>
+                  <span className={styles.summaryValue}><code>{chargeSummary.paymentId}</code></span>
+                </div>
+              )}
+              {chargeSummary.reference && (
+                <div className={styles.summaryField}>
+                  <span className={styles.summaryLabel}>Reference</span>
+                  <span className={styles.summaryValue}><code>{chargeSummary.reference}</code></span>
+                </div>
+              )}
+            </div>
+          </div>
         );
 
-      case 6:
+        const completeButton = chargeCommitted && state.phase === "step5_done" && (
+          <div className={styles.actions}>
+            <button className={styles.primaryBtn} onClick={() => dispatch({ type: "COMPLETE" })}>
+              Complete
+            </button>
+          </div>
+        );
+
         return (
           <>
-            {(state.phase === "step6_waiting" || state.phase === "step6_done" || state.expandedDoneSteps.has(6)) && state.orderId && (
-              <WebhookViewer
-                orderId={state.orderId}
-                label="MIT Webhook Notifications"
-              />
+            {showModeChip && (
+              <div className={styles.modeChip}>
+                <div className={styles.modeChipMain}>
+                  <span className={styles.modeChipBadge}>Mode</span>
+                  <div>
+                    <p className={styles.modeChipLabel}>{modeLabel}</p>
+                    <p className={styles.modeChipHint}>{modeHint}</p>
+                  </div>
+                </div>
+                {canSwitchMode && (
+                  <button
+                    type="button"
+                    className={styles.modeChipSwitch}
+                    onClick={() => dispatch({ type: "STEP5_SELECT" })}
+                  >
+                    Switch mode
+                  </button>
+                )}
+              </div>
             )}
-            {state.phase === "step6_waiting" && (
-              <p className={styles.cardDescription} style={{ marginTop: 12 }}>
-                Waiting for the MIT payment webhook to confirm the charge...
-              </p>
-            )}
-            {(state.phase === "step6_done" || state.expandedDoneSteps.has(6)) && state.mitWebhookPayload && (
+
+            {/* One-Step flow */}
+            {state.mitMode === "one-step" && (
               <>
-                <p className={styles.cardDescription} style={{ marginTop: 12 }}>
-                  MIT payment confirmed. The saved card was charged without any customer interaction.
-                </p>
-                {state.phase === "step6_done" && (
+                {state.phase === "step5_calling" && (
                   <div className={styles.actions}>
-                    <button className={styles.primaryBtn} onClick={() => dispatch({ type: "COMPLETE" })}>
-                      Complete
+                    <button className={styles.primaryBtn} disabled>
+                      <span className={styles.spinner} /> Creating session + charging...
                     </button>
                   </div>
                 )}
+                {(state.phase === "step5_done" || state.expandedDoneSteps.has(5)) && (
+                  <>
+                    <ApiPanel label="POST /b/checkout/v1/pymt-txn/ (One-Step)" data={state.mitRequest} />
+                    {state.mitResponse && (
+                      <ApiPanel label="Response — One-Step MIT" data={state.mitResponse} />
+                    )}
+                    {summaryCard}
+                    {completeButton}
+                  </>
+                )}
               </>
+            )}
+
+            {/* Two-Step flow */}
+            {state.mitMode === "two-step" && (
+              <div className={styles.subSteps}>
+                {/* Sub-step 5.1: Create MIT Session */}
+                <div className={`${styles.subCard} ${sub1Status === "active" ? styles.subCardActive : ""} ${sub1Status === "done" ? styles.subCardDone : ""}`}>
+                  <div className={styles.subStepHeader}>
+                    <span className={`${styles.subStepDot} ${styles[`subStepDot_${sub1Status}`]}`}>
+                      {sub1Status === "done" && <Icon path={mdiCheck} size={0.5} />}
+                      {sub1Status === "active" && <span className={styles.spinnerSmall} />}
+                    </span>
+                    <div className={styles.subStepTitles}>
+                      <p className={styles.subStepTitle}>5.1 · Create MIT Session</p>
+                      <p className={styles.subStepSubtitle}>POST /b/checkout/v1/pymt-txn/</p>
+                    </div>
+                  </div>
+                  {sub1Status !== "pending" && (
+                    <div className={styles.subStepBody}>
+                      <ApiPanel label="Request" data={state.mitRequest} />
+                      {state.mitResponse && <ApiPanel label="Response" data={state.mitResponse} />}
+                    </div>
+                  )}
+                </div>
+
+                {/* Sub-step 5.2: Trigger Auto-Debit */}
+                <div className={`${styles.subCard} ${sub2Status === "active" ? styles.subCardActive : ""} ${sub2Status === "done" ? styles.subCardDone : ""}`}>
+                  <div className={styles.subStepHeader}>
+                    <span className={`${styles.subStepDot} ${styles[`subStepDot_${sub2Status}`]}`}>
+                      {sub2Status === "done" && <Icon path={mdiCheck} size={0.5} />}
+                      {sub2Status === "active" && <span className={styles.spinnerSmall} />}
+                    </span>
+                    <div className={styles.subStepTitles}>
+                      <p className={styles.subStepTitle}>5.2 · Trigger Auto-Debit</p>
+                      <p className={styles.subStepSubtitle}>POST /b/pbl/v2/payment/auto-debit/</p>
+                    </div>
+                  </div>
+                  {sub2Status === "pending" && state.mitResponse && (
+                    <div className={styles.subStepBody}>
+                      <p className={styles.subStepPrompt}>
+                        Session created. Call the Auto-Debit endpoint to charge the saved token.
+                      </p>
+                      <div className={styles.actions}>
+                        <button className={styles.primaryBtn} onClick={callMITAutoDebit}>
+                          Call Auto-Debit API
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {sub2Status === "active" && (
+                    <div className={styles.subStepBody}>
+                      <div className={styles.actions}>
+                        <button className={styles.primaryBtn} disabled>
+                          <span className={styles.spinner} /> Charging saved card...
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {sub2Status === "done" && (
+                    <div className={styles.subStepBody}>
+                      {state.mitAutoDebitRequest && (
+                        <ApiPanel label="Request" data={state.mitAutoDebitRequest} />
+                      )}
+                      {state.mitAutoDebitResponse && (
+                        <ApiPanel label="Response" data={state.mitAutoDebitResponse} />
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {summaryCard}
+                {completeButton}
+              </div>
             )}
           </>
         );
+      }
 
       default:
         return null;
@@ -760,7 +875,7 @@ export default function RecurringDemoInner() {
             );
           })}
         </div>
-        <div className={styles.completeCard}>
+        <div className={styles.completeCard} data-recurring-complete>
           <h3 className={styles.completeTitle}>Recurring Payment Complete</h3>
           <p className={styles.completeSubtitle}>
             The card was charged without any customer interaction.

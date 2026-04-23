@@ -11,7 +11,7 @@ Every payment in Ottu has two levels: a **payment transaction** (the top-level e
 
 This two-level model exists because a single payment transaction can involve multiple payment attempts. The customer might fail on the first try (wrong card, insufficient funds) and succeed on the second — the payment transaction stays open while individual payment attempts come and go.
 
-:::note Quick Reference
+:::note[Quick Reference]
 For most integrations, check the `state` field in [webhook payloads](/developers/webhooks/payment-events) or the [Checkout API response](/developers/payments/checkout-api). The success states are **`paid`**, **`authorized`**, and **`cod`**. Everything else means the payment is incomplete or failed.
 :::
 
@@ -133,7 +133,7 @@ When multi-attempt is disabled (or the payment transaction was created via a leg
 The `attempted` state exists specifically for multi-attempt payment transactions. It signals "at least one payment attempt was made, but none succeeded yet — the customer can try again."
 :::
 
-:::info Type vs Payment Type
+:::info[Type vs Payment Type]
 Payment transaction **`type`** (e.g., `e_commerce`, `payment_request`) determines the business flow. **`payment_type`** (e.g., `one_off`, `auto_debit`, `save_card`) determines the payment method behavior. Both types can use any payment_type — for example, both `e_commerce` and `payment_request` payment transactions can be `auto_debit`.
 :::
 
