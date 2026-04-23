@@ -178,9 +178,65 @@ function getActiveHashFromScroll(): string | null {
 // ── DOM mutations ────────────────────────────────────────────────────────
 
 /**
+ * The sidebar's scroll container is the outer `<nav class="menu
+ * thin-scrollbar">` in Docusaurus — NOT the inner `<ul
+ * class="theme-doc-sidebar-menu">`. Its exact selector uses a CSS-
+ * module hash that's unstable across Docusaurus updates, so we find
+ * it at runtime by walking up from the active link to the nearest
+ * ancestor that actually scrolls.
+ */
+function findSidebarScrollContainer(
+  from: HTMLElement,
+): HTMLElement | null {
+  let el: HTMLElement | null = from.parentElement;
+  while (el && el !== document.body) {
+    const cs = window.getComputedStyle(el);
+    if (
+      (cs.overflowY === "auto" || cs.overflowY === "scroll") &&
+      el.scrollHeight > el.clientHeight
+    ) {
+      return el;
+    }
+    el = el.parentElement;
+  }
+  return null;
+}
+
+// How far from the top of the sidebar's scroll area the active link
+// should sit. 0.0 pins it to the top edge; 0.1 leaves a small gap so
+// the parent category label above the active leaf stays visible.
+const ACTIVE_ITEM_OFFSET_RATIO = 0.1;
+
+/**
+ * Scroll the sidebar so the active link is ~10% down from the top of
+ * the sidebar's scroll area. Called on every hash change (URL-driven
+ * route updates AND scroll-spy driven updates), so the active item
+ * always lands in the same predictable spot.
+ */
+function scrollSidebarToActive(link: HTMLAnchorElement): void {
+  const container = findSidebarScrollContainer(link);
+  if (!container) return;
+
+  const linkRect = link.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
+  const relativeTop =
+    linkRect.top - containerRect.top + container.scrollTop;
+  const target = Math.max(
+    0,
+    relativeTop - container.clientHeight * ACTIVE_ITEM_OFFSET_RATIO,
+  );
+
+  // Already at the desired position — avoid firing redundant smooth
+  // scrolls on retry ticks where the active link hasn't changed.
+  if (Math.abs(target - container.scrollTop) < 2) return;
+  container.scrollTo({ top: target, behavior: "smooth" });
+}
+
+/**
  * Toggles `.menu__link--active` on every hash-bearing sidebar link that
  * points at the current page, making `hashId`'s link the active one
- * (or none active if `hashId` is null). Does NOT write the URL —
+ * (or none active if `hashId` is null). Also scrolls the sidebar to
+ * keep the newly active link visible. Does NOT write the URL —
  * writing URLs from the URL-driven path (updateActiveLinks) is how
  * the original bug started: on an early retry the target sidebar
  * link hasn't rendered yet, the deep-link fallback returns the
@@ -191,6 +247,7 @@ function setSidebarActive(hashId: string | null): void {
   const sidebarLinks = document.querySelectorAll<HTMLAnchorElement>(
     ".menu__link[href*='#']",
   );
+  let activeLink: HTMLAnchorElement | null = null;
   sidebarLinks.forEach((link) => {
     const href = link.getAttribute("href");
     if (!href) return;
@@ -209,11 +266,13 @@ function setSidebarActive(hashId: string | null): void {
     if (linkHash === hashId) {
       link.classList.add("menu__link--active");
       link.setAttribute("aria-current", "page");
+      activeLink = link;
     } else {
       link.classList.remove("menu__link--active");
       link.removeAttribute("aria-current");
     }
   });
+  if (activeLink) scrollSidebarToActive(activeLink);
 }
 
 /**
