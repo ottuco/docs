@@ -290,6 +290,32 @@ function onScroll(): void {
 
 // ── Retry / route change ─────────────────────────────────────────────────
 
+/**
+ * Scroll the page so the target element for the URL hash sits at the
+ * top of the viewport. Called AFTER lazy content has hydrated, to fix
+ * the browser's initial scroll-to-anchor having run against a
+ * still-growing page. No-op if:
+ *   - No hash in the URL
+ *   - Target element isn't in the DOM
+ *   - Target is already close to the top (within 10 px)
+ *   - The user has already scrolled (spyMuted === false)
+ */
+function forceScrollToInitialHash(): void {
+  if (!spyMuted) return; // user took over — don't yank them back
+
+  const hash = window.location.hash;
+  if (!hash) return;
+  const target = document.getElementById(hash.slice(1));
+  if (!target) return;
+
+  const topOffset = getNavbarHeight() + 16;
+  const rect = target.getBoundingClientRect();
+  if (Math.abs(rect.top - topOffset) < 10) return;
+
+  const y = rect.top + window.scrollY - topOffset;
+  window.scrollTo(0, y);
+}
+
 function scheduleUpdate(): void {
   // Schema-deep-link targets are rendered asynchronously by the swizzled
   // <Schema>/<SchemaItem> components (BrowserOnly + lazy hydration), so
@@ -299,6 +325,19 @@ function scheduleUpdate(): void {
   const delays = [0, 50, 200, 500, 1200];
   delays.forEach((delay) => {
     window.setTimeout(() => updateActiveLinks(), delay);
+  });
+
+  // Correct the browser's initial scroll-to-anchor after content has
+  // had time to hydrate. On pages with <ApiDocEmbed>, the embed's
+  // content loads AFTER the browser has already scrolled to the
+  // initial (pre-hydration) position — so the target heading drifts
+  // out of the viewport. Each pass only scrolls if the target is
+  // still off-position; once the page stabilises, subsequent passes
+  // are no-ops. If the user scrolled before this runs, spyMuted is
+  // false and every pass bails.
+  [1500, 3000].forEach((delay) => {
+    if (!spyMuted) return; // user took over — don't yank them back
+    window.setTimeout(forceScrollToInitialHash, delay);
   });
 }
 
