@@ -997,7 +997,7 @@
     ],
     "digitalWallets": [
       "Apple Pay",
-      "STC Pay"
+      "STC Bank"
     ],
     "testCards": [
       {
@@ -1122,7 +1122,7 @@
     ],
     "digitalWallets": [
       "Apple Pay",
-      "STC Pay"
+      "STC Bank"
     ],
     "testCards": [
       {
@@ -1282,7 +1282,7 @@
     "digitalWallets": [
       "Apple Pay",
       "Google Pay",
-      "STC Pay"
+      "STC Bank"
     ],
     "testCards": [
       {
@@ -1845,7 +1845,7 @@
       "mada"
     ],
     "digitalWallets": [
-      "STC Pay"
+      "STC Bank"
     ],
     "testCards": [],
     "testCardNotes": "Wallet testing — use test phone: 548220713 (country code 966). OTP: 123456 (success), 111111 (insufficient balance), 222222 (daily limit exceeded)."
@@ -2049,7 +2049,7 @@
     "digitalWallets": [
       "Apple Pay",
       "Google Pay",
-      "STC Pay",
+      "STC Bank",
       "urpay"
     ],
     "testCards": [

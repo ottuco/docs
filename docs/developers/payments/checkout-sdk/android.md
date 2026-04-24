@@ -627,15 +627,15 @@ To avoid style issues and potential crashes, the parent application's theme must
 
 ## Wallet Configuration
 
-### STC Pay
+### STC Bank
 
-Once the STC Pay integration between Ottu and STC Pay has been completed, the necessary checks are automatically handled by the Checkout SDK to ensure the seamless display of the STC Pay button.
+Once the STC Bank integration between Ottu and STC Bank has been completed, the necessary checks are automatically handled by the Checkout SDK to ensure the seamless display of the STC Bank button.
 
 Upon initialization of the Checkout SDK with the [session_id](../../checkout-api) and payment gateway codes ([pg_codes](../../checkout-api)), the following condition is automatically verified:
 
-- The `session_id` and pg_codes provided during SDK initialization must be linked to the STC Pay Payment Service. This verification ensures that the STC Pay option is made available for selection as a payment method.
+- The `session_id` and pg_codes provided during SDK initialization must be linked to the STC Bank Payment Service. This verification ensures that the STC Bank option is made available for selection as a payment method.
 
-Regardless of whether a mobile number has been entered by the customer during transaction creation, the STC Pay button is displayed by the Android SDK.
+Regardless of whether a mobile number has been entered by the customer during transaction creation, the STC Bank button is displayed by the Android SDK.
 
 ### Onsite Checkout
 
@@ -814,7 +814,7 @@ The SDK is designed to protect sensitive data by restricting screen capture func
 
     Merchants have the flexibility to showcase specific methods based on their requirements.&#x20;
 
-    For instance, if you wish to exclusively display the STC Pay button, you can achieve this by setting `formsOfPayment` = `[StcPay]`, which will result in only the STC Pay button being displayed. This approach is applicable to other payment methods as well.
+    For instance, if you wish to exclusively display the STC Bank button, you can achieve this by setting `formsOfPayment` = `[StcPay]`, which will result in only the STC Bank button being displayed. This approach is applicable to other payment methods as well.
   </FAQItem>
   <FAQItem question="What are the minimum system requirements for the SDK integration?">
     It is required to have a device running Android 8 or higher (Android API level 26 or higher).

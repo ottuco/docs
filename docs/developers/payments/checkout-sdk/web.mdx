@@ -870,16 +870,16 @@ Checkout.init({
 
 <figure><img src="/img/checkout-sdk/Google%20Pay%20Button.png" alt="Google Pay button in Web SDK" /><figcaption></figcaption></figure>
 
-### stc pay
+### STC Bank
 
-If you have completed the stc pay integration between Ottu and stc pay, the Checkout SDK will handle the necessary checks to display the stc pay button seamlessly. When you initialize the Checkout SDK with your [session_id](../../checkout-api) and payment gateway codes [pg_codes](../../checkout-api), the SDK will automatically verify the following conditions:
+If you have completed the STC Bank integration between Ottu and STC Bank, the Checkout SDK will handle the necessary checks to display the STC Bank button seamlessly. When you initialize the Checkout SDK with your [session_id](../../checkout-api) and payment gateway codes [pg_codes](../../checkout-api), the SDK will automatically verify the following conditions:
 
-1. The `session_id` and `pg_codes` provided during SDK initialization must be associated with the stc pay Payment Service. This ensures that the stc pay option is available for the customer to choose as a payment method.
-2. The Web SDK displays the stc pay button irrespective of whether the customer has provided a mobile number while creating the transaction or not.
+1. The `session_id` and `pg_codes` provided during SDK initialization must be associated with the STC Bank Payment Service. This ensures that the STC Bank option is available for the customer to choose as a payment method.
+2. The Web SDK displays the STC Bank button irrespective of whether the customer has provided a mobile number while creating the transaction or not.
 
 #### Customize Button
 
-You can customize the stc pay button using the Checkout SDK's [formsOfPayment](#formsofpayment-array) and [theme](#theme-object) properties. The `formsOfPayment` property tells the Checkout SDK to render only the stc pay button. If you don't include this property, the SDK will render all available payment options.
+You can customize the STC Bank button using the Checkout SDK's [formsOfPayment](#formsofpayment-array) and [theme](#theme-object) properties. The `formsOfPayment` property tells the Checkout SDK to render only the STC Bank button. If you don't include this property, the SDK will render all available payment options.
 
 ```javascript
 Checkout.init({
@@ -897,7 +897,7 @@ Checkout.init({
 });
 ```
 
-<figure><img src="/img/checkout-sdk/stc%20pay%20Button.png" alt="stc pay button in Web SDK" /><figcaption></figcaption></figure>
+<figure><img src="/img/checkout-sdk/stc%20pay%20Button.png" alt="STC Bank button in Web SDK" /><figcaption></figcaption></figure>
 
 ### urpay
 
@@ -1376,7 +1376,7 @@ It's important to note that while the `redirect_url` option is typically present
   - `apple_pay` - Apple Pay
   - `google_pay` - Google Pay
   - `token_pay` - Token Pay
-  - `stc_pay` - stc pay
+  - `stc_pay` - STC Bank
   - `redirect` - Redirect
 
 - ##### payment_gateway_info `object`
@@ -1710,7 +1710,7 @@ Checkout.init({
     Yes, there are some compatibility nuances to be aware of:
 
     - For the Apple Pay button, it is mainly displayed on Apple devices and the Safari browser. For Chrome, it will only be displayed on the latest iOS 16.
-    - For and Google Pay, stc pay & other payments methods, always refer to their official documentation for the most recent information about compatibility issues.
+    - For and Google Pay, STC Bank & other payments methods, always refer to their official documentation for the most recent information about compatibility issues.
   </FAQItem>
   <FAQItem question="6 How do I customize the payment request for Apple Pay and Google Pay?">
     You can tailor the payment request for both Apple Pay and Google Pay using their respective initialization methods. These methods allow you to set various properties like API version, supported cards, networks, countries, and merchant capabilities etc.You can check the list of properties supported by [ApplePay](https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypaymentrequest) & [GooglePay](https://developers.google.com/pay/api/web/reference/request-objects#PaymentDataRequest).

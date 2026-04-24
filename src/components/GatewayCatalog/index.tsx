@@ -65,7 +65,7 @@ const NON_BANK_NAMES = new Set([
   "Linked Bank Accounts / Cards", "Credit Cards.", "Visa/Mastercard.",
   // Digital wallets
   "Apple Pay", "Apple Pay.", "Google Pay", "PayPal", "Samsung Pay",
-  "STC Pay", "urpay", "Alipay", "WeChat Pay", "ABA PAY", "Vodafone Cash",
+  "STC Bank", "urpay", "Alipay", "WeChat Pay", "ABA PAY", "Vodafone Cash",
   "Orange", "Fawry",
 ]);
 
