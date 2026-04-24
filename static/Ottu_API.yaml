@@ -2102,11 +2102,11 @@ paths:
     post:
       operationId: stc_pay_checkout_sdk_capture
       description: " \n            The Capture endpoint is responsible for processing
-        capture requests to STC pay.\n            It accepts the session ID and OTP
+        capture requests to STC Bank.\n            It accepts the session ID and OTP
         (One-Time Password) as input parameters.\n            The endpoint performs
-        a capture request to STC pay\n            and handles the transaction state
+        a capture request to STC Bank\n            and handles the transaction state
         based on the response from the payment gateway.\n        "
-      summary: Submit STC Pay OTP
+      summary: Submit STC Bank OTP
       tags:
       - Checkout SDK
       requestBody:
@@ -2142,11 +2142,11 @@ paths:
   /b/checkout/api/sdk/v1/stcpay/submit/:
     post:
       operationId: stc_pay_checkout_sdk_authorize
-      description: "\n            To initiate a payment using the SDK for STC pay
+      description: "\n            To initiate a payment using the SDK for STC Bank
         Payment,\n            you are required to submit the customer's phone number\n
         \           and indicate whether to enable the option to save the card for
         future use.        \n        "
-      summary: Submit STC Pay payment method
+      summary: Submit STC Bank payment method
       tags:
       - Checkout SDK
       requestBody:
@@ -6483,7 +6483,7 @@ components:
             * `tamara` - Tamara
             * `hesabe` - Hesabe
             * `rajhi` - Alrajhi Bank
-            * `stc_pay` - STC Pay
+            * `stc_pay` - STC Bank
             * `stcbahrain` - STC Bahrain
             * `urpay` - URPay
             * `beyon_money` - BeyonMoney
@@ -8986,7 +8986,7 @@ components:
             was formerly listed within the `payment_methods` array\nit has been removed
             in favor of a more streamlined integration within the SDK\nsimilar to
             the approach for `payment_services`.\n\n**Backward Compatibility:** \n\nThe
-            SDK must still support STC Pay for applications relying on older API versions.\nAlthough
+            SDK must still support STC Bank for applications relying on older API versions.\nAlthough
             it will not appear in current and future versions\nthe SDK will manage
             its inclusion internally\n\nto ensure a seamless transition and consistent
             user experience\nacross different API versions, without disrupting existing
@@ -9254,7 +9254,7 @@ components:
             was formerly listed within the `payment_methods` array\nit has been removed
             in favor of a more streamlined integration within the SDK\nsimilar to
             the approach for `payment_services`.\n\n**Backward Compatibility:** \n\nThe
-            SDK must still support STC Pay for applications relying on older API versions.\nAlthough
+            SDK must still support STC Bank for applications relying on older API versions.\nAlthough
             it will not appear in current and future versions\nthe SDK will manage
             its inclusion internally\n\nto ensure a seamless transition and consistent
             user experience\nacross different API versions, without disrupting existing
@@ -11915,7 +11915,7 @@ components:
             * `apple_pay` - Apple Pay
             * `google_pay` - Google Pay
             * `token_pay` - Token Pay
-            * `stc_pay` - STC Pay
+            * `stc_pay` - STC Bank
             * `urpay` - URPay
             * `redirect` - Redirect
             * `samsung_pay` - Samsung Pay
@@ -16513,7 +16513,7 @@ components:
           description: |-
             When provided, the payment methods will be narrowed down to those that support the specified payment gateway name. Example: ['kpay','mpgs']
 
-            Available Values:<br><li>`abapayway` - ABA PayWay</li><br><li>`rajhi` - Alrajhi Bank</li><br><li>`amazon_pay` - Amazon Pay</li><br><li>`bambora` - Bambora</li><br><li>`benefit` - Benefit</li><br><li>`benefit_pay` - BenefitPay</li><br><li>`beyon_money` - BeyonMoney</li><br><li>`bookeey` - Bookeey</li><br><li>`burgan` - Burgan</li><br><li>`cod` - Cash</li><br><li>`cbk` - CBK</li><br><li>`ccavenues` - Ccavenues</li><br><li>`checkoutcom` - checkout.com</li><br><li>`cybersource` - CyberSource</li><br><li>`csuc` - Cybersource Unified Checkout</li><br><li>`dapi` - Dapi</li><br><li>`deema` - Deema</li><br><li>`doku` - Doku</li><br><li>`enet` - Enet</li><br><li>`fawry` - Fawry</li><br><li>`fiserv` - Fiserv</li><br><li>`fss` - FSS</li><br><li>`geidea` - Geidea</li><br><li>`hesabe` - Hesabe</li><br><li>`hyperpay` - HyperPay</li><br><li>`kpay` - KNET</li><br><li>`moyasar` - Moyasar</li><br><li>`mpgs` - MPGS</li><br><li>`myfatoorah` - MyFatoorah</li><br><li>`ngenius` - N-Genius</li><br><li>`nbo` - NBO</li><br><li>`omannet` - OmanNet</li><br><li>`ottu_pg` - Ottu PG</li><br><li>`paymob` - PayMob</li><br><li>`payon` - PayOn</li><br><li>`paypal` - PayPal</li><br><li>`payu_india` - PayU India</li><br><li>`qpay` - Qpay</li><br><li>`skipcash` - Skip Cash</li><br><li>`smart_pay` - SmartPay</li><br><li>`sohar` - SoharInternational</li><br><li>`stcbahrain` - STC Bahrain</li><br><li>`stc_pay` - STC Pay</li><br><li>`tabby` - Tabby</li><br><li>`taly` - Taly</li><br><li>`tamara` - Tamara</li><br><li>`tap` - Tap Payments</li><br><li>`tess` - Tess Payments</li><br><li>`upayments` - UPayments</li><br><li>`upg` - UPG</li><br><li>`urpay` - URPay</li>
+            Available Values:<br><li>`abapayway` - ABA PayWay</li><br><li>`rajhi` - Alrajhi Bank</li><br><li>`amazon_pay` - Amazon Pay</li><br><li>`bambora` - Bambora</li><br><li>`benefit` - Benefit</li><br><li>`benefit_pay` - BenefitPay</li><br><li>`beyon_money` - BeyonMoney</li><br><li>`bookeey` - Bookeey</li><br><li>`burgan` - Burgan</li><br><li>`cod` - Cash</li><br><li>`cbk` - CBK</li><br><li>`ccavenues` - Ccavenues</li><br><li>`checkoutcom` - checkout.com</li><br><li>`cybersource` - CyberSource</li><br><li>`csuc` - Cybersource Unified Checkout</li><br><li>`dapi` - Dapi</li><br><li>`deema` - Deema</li><br><li>`doku` - Doku</li><br><li>`enet` - Enet</li><br><li>`fawry` - Fawry</li><br><li>`fiserv` - Fiserv</li><br><li>`fss` - FSS</li><br><li>`geidea` - Geidea</li><br><li>`hesabe` - Hesabe</li><br><li>`hyperpay` - HyperPay</li><br><li>`kpay` - KNET</li><br><li>`moyasar` - Moyasar</li><br><li>`mpgs` - MPGS</li><br><li>`myfatoorah` - MyFatoorah</li><br><li>`ngenius` - N-Genius</li><br><li>`nbo` - NBO</li><br><li>`omannet` - OmanNet</li><br><li>`ottu_pg` - Ottu PG</li><br><li>`paymob` - PayMob</li><br><li>`payon` - PayOn</li><br><li>`paypal` - PayPal</li><br><li>`payu_india` - PayU India</li><br><li>`qpay` - Qpay</li><br><li>`skipcash` - Skip Cash</li><br><li>`smart_pay` - SmartPay</li><br><li>`sohar` - SoharInternational</li><br><li>`stcbahrain` - STC Bahrain</li><br><li>`stc_pay` - STC Bank</li><br><li>`tabby` - Tabby</li><br><li>`taly` - Taly</li><br><li>`tamara` - Tamara</li><br><li>`tap` - Tap Payments</li><br><li>`tess` - Tess Payments</li><br><li>`upayments` - UPayments</li><br><li>`upg` - UPG</li><br><li>`urpay` - URPay</li>
         type:
           enum:
           - sandbox
@@ -16795,7 +16795,7 @@ components:
             * `apple_pay` - Apple Pay
             * `google_pay` - Google Pay
             * `token_pay` - Token Pay
-            * `stc_pay` - STC Pay
+            * `stc_pay` - STC Bank
             * `urpay` - URPay
             * `redirect` - Redirect
             * `samsung_pay` - Samsung Pay
@@ -17106,7 +17106,7 @@ components:
             * `apple_pay` - Apple Pay
             * `google_pay` - Google Pay
             * `token_pay` - Token Pay
-            * `stc_pay` - STC Pay
+            * `stc_pay` - STC Bank
             * `urpay` - URPay
             * `redirect` - Redirect
             * `samsung_pay` - Samsung Pay
@@ -17238,7 +17238,7 @@ components:
             * `apple_pay` - Apple Pay
             * `google_pay` - Google Pay
             * `token_pay` - Token Pay
-            * `stc_pay` - STC Pay
+            * `stc_pay` - STC Bank
             * `urpay` - URPay
             * `redirect` - Redirect
             * `samsung_pay` - Samsung Pay
@@ -17316,7 +17316,7 @@ components:
             * `apple_pay` - Apple Pay
             * `google_pay` - Google Pay
             * `token_pay` - Token Pay
-            * `stc_pay` - STC Pay
+            * `stc_pay` - STC Bank
             * `urpay` - URPay
             * `redirect` - Redirect
             * `samsung_pay` - Samsung Pay
@@ -17435,7 +17435,7 @@ components:
             * `apple_pay` - Apple Pay
             * `google_pay` - Google Pay
             * `token_pay` - Token Pay
-            * `stc_pay` - STC Pay
+            * `stc_pay` - STC Bank
             * `urpay` - URPay
             * `redirect` - Redirect
             * `samsung_pay` - Samsung Pay
@@ -17514,7 +17514,7 @@ components:
             * `apple_pay` - Apple Pay
             * `google_pay` - Google Pay
             * `token_pay` - Token Pay
-            * `stc_pay` - STC Pay
+            * `stc_pay` - STC Bank
             * `urpay` - URPay
             * `redirect` - Redirect
             * `samsung_pay` - Samsung Pay
@@ -17583,7 +17583,7 @@ components:
             * `apple_pay` - Apple Pay
             * `google_pay` - Google Pay
             * `token_pay` - Token Pay
-            * `stc_pay` - STC Pay
+            * `stc_pay` - STC Bank
             * `urpay` - URPay
             * `redirect` - Redirect
             * `samsung_pay` - Samsung Pay
@@ -17699,7 +17699,7 @@ components:
           description: |-
             Use the `submit_url` to retrieve the OTP needed to complete the payment.Then for the OTP submission process you can use the `payment_url`
 
-            * `stc_pay` - STC Pay
+            * `stc_pay` - STC Bank
         redirect_url:
           type: string
           format: uri
@@ -17727,7 +17727,7 @@ components:
         submit_url:
           type: string
           format: uri
-          description: The URL used in the SMS payment flow, such as for STC Pay.
+          description: The URL used in the SMS payment flow, such as for STC Bank.
             It is utilized for submitting request for an OTP and authorizing the transaction,
             This URL facilitates the first steps in the transaction verification and
             payment process.
@@ -17741,7 +17741,7 @@ components:
         payment_url:
           type: string
           format: uri
-          description: The URL used in the SMS payment flow, such as for STC Pay.
+          description: The URL used in the SMS payment flow, such as for STC Bank.
             It is utilized for submitting an OTP and capturing the transaction following
             the authorization process and the OTP request. This URL facilitates the
             final steps in the transaction verification and payment process.
@@ -17802,7 +17802,7 @@ components:
             * `apple_pay` - Apple Pay
             * `google_pay` - Google Pay
             * `token_pay` - Token Pay
-            * `stc_pay` - STC Pay
+            * `stc_pay` - STC Bank
             * `urpay` - URPay
             * `redirect` - Redirect
             * `samsung_pay` - Samsung Pay
@@ -17881,7 +17881,7 @@ components:
             * `apple_pay` - Apple Pay
             * `google_pay` - Google Pay
             * `token_pay` - Token Pay
-            * `stc_pay` - STC Pay
+            * `stc_pay` - STC Bank
             * `urpay` - URPay
             * `redirect` - Redirect
             * `samsung_pay` - Samsung Pay
@@ -17950,7 +17950,7 @@ components:
             * `apple_pay` - Apple Pay
             * `google_pay` - Google Pay
             * `token_pay` - Token Pay
-            * `stc_pay` - STC Pay
+            * `stc_pay` - STC Bank
             * `urpay` - URPay
             * `redirect` - Redirect
             * `samsung_pay` - Samsung Pay
@@ -19337,7 +19337,7 @@ components:
         submit_url:
           type: string
           format: uri
-          description: The URL used in the SMS payment flow, such as for STC Pay.
+          description: The URL used in the SMS payment flow, such as for STC Bank.
             It is utilized for submitting request for an OTP and authorizing the transaction,
             This URL facilitates the first steps in the transaction verification and
             payment process.
@@ -19351,7 +19351,7 @@ components:
         payment_url:
           type: string
           format: uri
-          description: The URL used in the SMS payment flow, such as for STC Pay.
+          description: The URL used in the SMS payment flow, such as for STC Bank.
             It is utilized for submitting an OTP and capturing the transaction following
             the authorization process and the OTP request. This URL facilitates the
             final steps in the transaction verification and payment process.
