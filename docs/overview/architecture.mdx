@@ -1,0 +1,124 @@
+---
+title: Architecture at a Glance
+description: How Ottu's REST API, Checkout SDK, orchestration engine, and webhooks fit together, and where your merchant systems plug in.
+---
+
+import ThemedImage from '@theme/ThemedImage';
+import useBaseUrl from '@docusaurus/useBaseUrl';
+
+# Architecture at a Glance
+
+Ottu is a payment orchestration platform that sits between your systems, 45+ payment gateways, and your customers. This page summarizes the pieces that make up the platform and links to the authoritative documentation for each one.
+
+## High-Level Architecture
+
+<ThemedImage
+  alt="Ottu platform architecture: the merchant backend calls the REST API, the merchant frontend embeds the Checkout SDK for the customer, the orchestration engine routes to the payment gateway, and webhooks send HMAC-signed events back to the merchant backend."
+  sources={{
+    light: useBaseUrl('/img/architecture-light.svg'),
+    dark: useBaseUrl('/img/architecture-dark.svg'),
+  }}
+/>
+
+The merchant backend is always the API caller. The customer only interacts with the checkout UI. See [Payment Journey](/developers/payments/payment-journey/) for the step-by-step flow.
+
+## Core Components
+
+### API Layer
+
+- **REST over HTTPS** with JSON request and response bodies
+- **Versioned endpoints** (for example `/b/checkout/v1/`, `/b/pbl/v2/`)
+- **Pagination** via `limit` and `offset` query parameters
+- **Rate limits**: 90,000 requests/day for general API calls, 25/hour for report downloads, 10/minute for utility endpoints. Exceeding a limit returns `429 Too Many Requests`.
+
+See [API Fundamentals](/developers/getting-started/api-fundamentals/) for pagination, error envelopes, and amount formatting rules.
+
+### Authentication
+
+Three credentials, each with a distinct purpose:
+
+| Credential | Header | Use |
+|---|---|---|
+| Private (API) Key | `Authorization: Api-Key <key>` | Server-to-server calls with admin scope |
+| Basic Auth | `Authorization: Basic <base64>` | Server calls scoped to a specific dashboard user's permissions |
+| Public Key | passed into Checkout SDK | Client-side initialization of the Checkout SDK only |
+
+Full details in [Authentication](/developers/getting-started/authentication/).
+
+### Payment Orchestration
+
+- **Multi-gateway routing** across 45+ payment gateways from a single integration
+- **Smart routing** by BIN, card country, scheme, amount, and real-time gateway success rate
+- **Automatic failover** between configured gateways when a primary route declines
+- **Multi-currency** with configurable exchange rates and markup fees
+
+See [Payment Routing](/business/payments/routing/) and [Payment Gateways](/business/payments/gateways/) for configuration.
+
+### Checkout SDKs
+
+Embeddable payment UI for collecting card details and handling 3-D Secure without the merchant's surfaces ever touching raw card data:
+
+- [Web](/developers/payments/checkout-sdk/web/)
+- [iOS](/developers/payments/checkout-sdk/ios/)
+- [Android](/developers/payments/checkout-sdk/android/)
+- [Flutter](/developers/payments/checkout-sdk/flutter/)
+
+### Tokenization
+
+Card details are exchanged for tokens at the gateway's PCI-compliant vault. Merchants store the token (not the card) and use it for:
+
+- One-click repeat payments
+- Subscription and recurring billing
+- Auto-debit (CIT for the first charge, MIT for subsequent charges)
+
+See [Cards & Tokenization](/developers/cards-and-tokens/).
+
+### Webhooks
+
+Ottu notifies the merchant backend of payment and operation outcomes asynchronously. Events are signed with **HMAC-SHA256** so the receiver can verify authenticity.
+
+- [Payment Events](/developers/webhooks/payment-events/)
+- [Operation Events](/developers/webhooks/operation-events/)
+- [Verifying Signatures](/developers/webhooks/verify-signatures/)
+
+## Integration Patterns
+
+### Server-to-Server
+
+Direct REST calls from the merchant backend. Use for:
+
+- Creating and managing payment transactions
+- Refunds, voids, and captures via the Operations API
+- Tokenized auto-debit charges
+- Batch or administrative flows
+
+### Client-Side via Checkout SDK
+
+The merchant frontend embeds the Checkout SDK; the customer enters card details directly into the SDK; the merchant's servers never see card data. PCI scope for the merchant is reduced to SAQ A.
+
+### Hybrid
+
+Most integrations combine both: the backend creates the payment session via API, the frontend renders the Checkout SDK against that session, and the backend confirms the outcome via webhook.
+
+## Security
+
+What Ottu actually certifies:
+
+- **PCI DSS Level 1** — the highest tier of the Payment Card Industry Data Security Standard, audited annually by a QSA with quarterly ASV scans
+- **ISO/IEC 27001** — information security management system certification
+
+Operational controls:
+
+- **TLS 1.2+** for all API and dashboard traffic
+- **Tokenization** removes raw card data from the merchant's environment; merchants integrating via hosted checkout or Checkout SDK typically qualify for SAQ A
+- **Role-based access control** in the dashboard with optional two-step authorization for sensitive operations (refund, void)
+- **Signed webhooks** (HMAC-SHA256) so merchants can verify every callback
+
+See [Compliance & Security](/business/compliance/) for the full list and how to request certificates or a Data Processing Agreement (DPA).
+
+## What's Next?
+
+- [About Ottu](/overview/about/) — product overview and what makes the platform different
+- [Developer Quickstart](/developers/getting-started/) — go from zero to a working API call
+- [Compliance & Security](/business/compliance/) — detailed compliance posture
+- [Glossary](/glossary/) — payment terminology reference
