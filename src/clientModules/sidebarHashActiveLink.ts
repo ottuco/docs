@@ -391,6 +391,21 @@ function showLoader(): HTMLElement {
   // even if the global stylesheet hasn't been injected by webpack yet.
   overlay.innerHTML = `
     <style>
+      /* Hide the main page scrollbar while the loader is up so the
+         user doesn't see the scrollbar thumb jump around as lazy
+         content hydrates and snapToTop() fires. scrollbar-gutter
+         reserves the gutter so content doesn't shift 15px sideways
+         when the scrollbar reappears after the loader fades. */
+      html[data-initial-hash-loading="true"] {
+        scrollbar-gutter: stable;
+        scrollbar-width: none;          /* Firefox */
+        -ms-overflow-style: none;       /* legacy Edge */
+      }
+      html[data-initial-hash-loading="true"]::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        display: none;                  /* Chrome/Safari */
+      }
       #ottu-initial-hash-loader {
         position: fixed;
         inset: 0;
@@ -436,24 +451,32 @@ function hideLoader(): void {
 }
 
 /**
- * Scroll the page so the target element for the URL hash sits just
- * below the navbar. Temporarily forces `scroll-behavior: auto` to
- * override the global CSS `smooth` setting — during hydration we want
- * instant placement, not an animated journey.
+ * Snap the page to the absolute top instantly. Called while the
+ * loader still masks the page — the user never sees this jump. After
+ * the loader fades we animate smoothly down to the target so the user
+ * gets a visible cue about where on the page they're landing.
  */
-function forceScrollToHash(hashId: string): void {
-  const target = document.getElementById(hashId);
-  if (!target) return;
-
-  const topOffset = getNavbarHeight() + 16;
-  const rect = target.getBoundingClientRect();
-  const y = rect.top + window.scrollY - topOffset;
-
+function snapToTop(): void {
   const htmlEl = document.documentElement;
   const prev = htmlEl.style.scrollBehavior;
   htmlEl.style.scrollBehavior = "auto";
-  window.scrollTo(0, Math.max(0, y));
+  window.scrollTo(0, 0);
   htmlEl.style.scrollBehavior = prev;
+}
+
+/**
+ * Smooth-scroll the page so the target heading sits just below the
+ * navbar. Respects the CSS `scroll-behavior: smooth` already set on
+ * `html`. Called AFTER the loader has faded, so the user can watch
+ * the animation.
+ */
+function smoothScrollToHash(hashId: string): void {
+  const target = document.getElementById(hashId);
+  if (!target) return;
+  const topOffset = getNavbarHeight() + 16;
+  const rect = target.getBoundingClientRect();
+  const y = rect.top + window.scrollY - topOffset;
+  window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
 }
 
 /**
@@ -517,12 +540,20 @@ function runInitialHashGate(): void {
   // sync while the loader is up.
 
   waitForLayoutStability(hashId, () => {
-    forceScrollToHash(hashId);
-    // One more frame to let the browser commit the scroll before we
-    // fade — avoids a visible flash of pre-scroll position.
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => hideLoader());
-    });
+    // Sequence: snap to top under the loader → fade loader → smooth-scroll
+    // to the target. The user never sees the hydration mess or the reset
+    // to top; they just see the loader fade out revealing the top of the
+    // page, then a smooth scroll carrying them to the anchor.
+    snapToTop();
+    window.setTimeout(() => {
+      requestAnimationFrame(() => {
+        hideLoader();
+        // Wait for the fade-out transition to finish (see #ottu-initial-hash-loader
+        // style: 180ms) plus a small buffer so the loader is fully out of
+        // the way before the scroll animation begins.
+        window.setTimeout(() => smoothScrollToHash(hashId), 220);
+      });
+    }, 200)
   });
 }
 
