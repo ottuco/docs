@@ -347,33 +347,186 @@ function onScroll(): void {
   });
 }
 
-// ── Retry / route change ─────────────────────────────────────────────────
+// ── Initial-hash hydration gate ──────────────────────────────────────────
+//
+// The problem this solves: on a direct load of a URL like
+//   /developers/payments/checkout-api/#api-create-a-new-payment-transaction
+// the browser performs its native scroll-to-anchor immediately after
+// HTML parse, BEFORE React hydrates <ApiDocEmbed>. The embed's
+// RequestSchema / ResponseSchema are `<BrowserOnly>`-wrapped and
+// SSR-render as tiny <SkeletonLoader>s, so the page height at browser
+// scroll time is much smaller than its hydrated height. After
+// hydration the schemas balloon and the target heading drifts far
+// below the viewport — the user lands on the wrong section.
+//
+// Fix: on initial load, overlay a full-screen loader the instant this
+// module runs, wait for page height to stabilise across several
+// consecutive animation frames (= all lazy schemas have hydrated and
+// painted), then force-scroll to the target and fade the loader out.
+// The user never sees the intermediate wrong position.
+//
+// Scope: only the very first page-load (one-shot). SPA navigations
+// don't need this — BrowserOnly renders children synchronously when
+// `window` is available, so there's no SSR/CSR size delta.
+
+const STABILITY_FRAMES = 6; // ~100ms @ 60fps
+const STABILITY_TIMEOUT_MS = 6000;
+
+let initialLoadHandled = false;
+
+function getHashTargetId(): string | null {
+  const { hash } = window.location;
+  if (!hash || hash === "#") return null;
+  return decodeURIComponent(hash.slice(1));
+}
+
+function showLoader(): HTMLElement {
+  const existing = document.getElementById("ottu-initial-hash-loader");
+  if (existing) return existing;
+
+  const overlay = document.createElement("div");
+  overlay.id = "ottu-initial-hash-loader";
+  overlay.setAttribute("aria-hidden", "true");
+  // Inline styles + style tag: zero CSS coupling, guaranteed to apply
+  // even if the global stylesheet hasn't been injected by webpack yet.
+  overlay.innerHTML = `
+    <style>
+      #ottu-initial-hash-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 100000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--ifm-background-color, #ffffff);
+        transition: opacity 180ms ease-out;
+        opacity: 1;
+      }
+      #ottu-initial-hash-loader[data-hiding="true"] { opacity: 0; }
+      #ottu-initial-hash-loader .ottu-spinner {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 3px solid rgba(242, 126, 32, 0.15);
+        border-top-color: var(--ifm-color-primary, #f27e20);
+        animation: ottu-spin 0.9s linear infinite;
+      }
+      @keyframes ottu-spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+    <div class="ottu-spinner"></div>
+  `;
+
+  // Prefer appending to <body>; if body isn't parsed yet, fall back to
+  // documentElement. Either way, the overlay is detached from React's
+  // render tree so hydration won't clobber it.
+  const parent = document.body ?? document.documentElement;
+  parent.appendChild(overlay);
+  document.documentElement.setAttribute("data-initial-hash-loading", "true");
+  return overlay;
+}
+
+function hideLoader(): void {
+  const overlay = document.getElementById("ottu-initial-hash-loader");
+  document.documentElement.removeAttribute("data-initial-hash-loading");
+  if (!overlay) return;
+  overlay.setAttribute("data-hiding", "true");
+  window.setTimeout(() => overlay.remove(), 220);
+}
 
 /**
- * Scroll the page so the target element for the URL hash sits at the
- * top of the viewport. Called AFTER lazy content has hydrated, to fix
- * the browser's initial scroll-to-anchor having run against a
- * still-growing page. No-op if:
- *   - No hash in the URL
- *   - Target element isn't in the DOM
- *   - Target is already close to the top (within 10 px)
- *   - The user has already scrolled (spyMuted === false)
+ * Scroll the page so the target element for the URL hash sits just
+ * below the navbar. Temporarily forces `scroll-behavior: auto` to
+ * override the global CSS `smooth` setting — during hydration we want
+ * instant placement, not an animated journey.
  */
-function forceScrollToInitialHash(): void {
-  if (!spyMuted) return; // user took over — don't yank them back
-
-  const hash = window.location.hash;
-  if (!hash) return;
-  const target = document.getElementById(hash.slice(1));
+function forceScrollToHash(hashId: string): void {
+  const target = document.getElementById(hashId);
   if (!target) return;
 
   const topOffset = getNavbarHeight() + 16;
   const rect = target.getBoundingClientRect();
-  if (Math.abs(rect.top - topOffset) < 10) return;
-
   const y = rect.top + window.scrollY - topOffset;
-  window.scrollTo(0, y);
+
+  const htmlEl = document.documentElement;
+  const prev = htmlEl.style.scrollBehavior;
+  htmlEl.style.scrollBehavior = "auto";
+  window.scrollTo(0, Math.max(0, y));
+  htmlEl.style.scrollBehavior = prev;
 }
+
+/**
+ * Watch `scrollHeight` across animation frames. When it's been
+ * unchanged for STABILITY_FRAMES in a row AND the hash target is in
+ * the DOM, we consider lazy content fully hydrated and painted.
+ * Hard-stops at STABILITY_TIMEOUT_MS so a never-stable page
+ * doesn't leave the user staring at a spinner forever.
+ */
+function waitForLayoutStability(
+  hashId: string,
+  onStable: () => void,
+): void {
+  const startedAt = performance.now();
+  let lastHeight = -1;
+  let stableCount = 0;
+
+  const tick = () => {
+    if (performance.now() - startedAt > STABILITY_TIMEOUT_MS) {
+      onStable();
+      return;
+    }
+
+    const target = document.getElementById(hashId);
+    const height = document.documentElement.scrollHeight;
+
+    if (target && height === lastHeight) {
+      stableCount += 1;
+      if (stableCount >= STABILITY_FRAMES) {
+        onStable();
+        return;
+      }
+    } else {
+      stableCount = 0;
+      lastHeight = height;
+    }
+
+    requestAnimationFrame(tick);
+  };
+
+  requestAnimationFrame(tick);
+}
+
+/**
+ * One-shot gate that runs on the very first page-load. If the URL has
+ * a hash, show a loader, wait for lazy content to hydrate, force-scroll
+ * to the target, then fade the loader out. Idempotent — subsequent
+ * invocations are no-ops.
+ */
+function runInitialHashGate(): void {
+  if (initialLoadHandled) return;
+  initialLoadHandled = true;
+
+  const hashId = getHashTargetId();
+  if (!hashId) return;
+
+  showLoader();
+
+  // Normal initial updateActiveLinks retries run in parallel via
+  // scheduleUpdate() — those keep sidebar highlight / URL-hash in
+  // sync while the loader is up.
+
+  waitForLayoutStability(hashId, () => {
+    forceScrollToHash(hashId);
+    // One more frame to let the browser commit the scroll before we
+    // fade — avoids a visible flash of pre-scroll position.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => hideLoader());
+    });
+  });
+}
+
+// ── Retry / route change ─────────────────────────────────────────────────
 
 function scheduleUpdate(): void {
   // Schema-deep-link targets are rendered asynchronously by the swizzled
@@ -384,19 +537,6 @@ function scheduleUpdate(): void {
   const delays = [0, 50, 200, 500, 1200];
   delays.forEach((delay) => {
     window.setTimeout(() => updateActiveLinks(), delay);
-  });
-
-  // Correct the browser's initial scroll-to-anchor after content has
-  // had time to hydrate. On pages with <ApiDocEmbed>, the embed's
-  // content loads AFTER the browser has already scrolled to the
-  // initial (pre-hydration) position — so the target heading drifts
-  // out of the viewport. Each pass only scrolls if the target is
-  // still off-position; once the page stabilises, subsequent passes
-  // are no-ops. If the user scrolled before this runs, spyMuted is
-  // false and every pass bails.
-  [1500, 3000].forEach((delay) => {
-    if (!spyMuted) return; // user took over — don't yank them back
-    window.setTimeout(forceScrollToInitialHash, delay);
   });
 }
 
@@ -410,6 +550,9 @@ export function onRouteDidUpdate(): void {
   lastActiveHash = null;
   spyMuted = true;
   scheduleUpdate();
+  // One-shot hydration gate. No-op on SPA navigations (initialLoadHandled
+  // is set true on the first call), no-op when URL has no hash.
+  runInitialHashGate();
 }
 
 // ── Listeners ────────────────────────────────────────────────────────────
@@ -447,4 +590,22 @@ if (typeof window !== "undefined") {
     },
     { passive: true },
   );
+
+  // Paint the loader as early as possible on the very first load —
+  // ideally before React hydrates, so the user never sees the
+  // browser's pre-hydration scroll-to-anchor land on the wrong
+  // position. `onRouteDidUpdate` will also call this, but it can fire
+  // a few frames later than we'd like. Both calls are idempotent via
+  // the `initialLoadHandled` flag.
+  if (window.location.hash) {
+    // If <body> is already parsed, show immediately; otherwise wait
+    // for the earliest possible DOM insertion point.
+    if (document.body) {
+      runInitialHashGate();
+    } else {
+      document.addEventListener("DOMContentLoaded", runInitialHashGate, {
+        once: true,
+      });
+    }
+  }
 }
