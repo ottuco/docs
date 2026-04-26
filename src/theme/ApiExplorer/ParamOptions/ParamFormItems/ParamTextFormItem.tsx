@@ -21,12 +21,17 @@ export default function ParamTextFormItem({ param }: { param: any }) {
   const hasExample =
     example !== undefined && example !== null && example !== "";
 
+  const encodeForParam = (val: string) =>
+    param.in === "path" || param.in === "query"
+      ? val.replace(/\s/g, "%20")
+      : val;
+
   // Seed redux + react-hook-form from the example on first mount only.
   useEffect(() => {
     if (didInit.current) return;
     didInit.current = true;
     if (hasExample && (param.value === undefined || param.value === "")) {
-      const val = String(example);
+      const val = encodeForParam(String(example));
       dispatch(setParam({ ...param, value: val }));
       if (setValue) {
         setValue(param.name, val, {
@@ -48,7 +53,9 @@ export default function ParamTextFormItem({ param }: { param: any }) {
     | string
     | undefined;
 
-  const defaultValue = hasExample ? String(example) : undefined;
+  const defaultValue = hasExample
+    ? encodeForParam(String(example))
+    : undefined;
 
   return (
     <>
@@ -67,10 +74,7 @@ export default function ParamTextFormItem({ param }: { param: any }) {
           dispatch(
             setParam({
               ...param,
-              value:
-                param.in === "path" || param.in === "query"
-                  ? e.target.value.replace(/\s/g, "%20")
-                  : e.target.value,
+              value: encodeForParam(e.target.value),
             })
           );
         }}
