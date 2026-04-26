@@ -384,11 +384,13 @@ function enrichSchemaProperties(
 
     const overrideObj = override as SchemaPropertyOverride;
 
+    let propModified = false;
+
     // Direct description override
     if (overrideObj.description) {
       if (schemaProps[propName]) {
         schemaProps[propName].description = overrideObj.description;
-        count++;
+        propModified = true;
       } else {
         warn(
           `Property '${fullPath}' not found in schema '${schemaName}'`
@@ -404,8 +406,10 @@ function enrichSchemaProperties(
       if (overrideObj.type) {
         schemaProps[propName].type = overrideObj.type;
       }
-      count++;
+      propModified = true;
     }
+
+    if (propModified) count++;
 
     // Remove enum values
     if (overrideObj.remove_enum && schemaProps[propName]) {
