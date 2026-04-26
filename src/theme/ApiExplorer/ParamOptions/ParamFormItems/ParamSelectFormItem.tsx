@@ -36,7 +36,7 @@ export default function ParamSelectFormItem({ param }: { param: any }) {
       const val = String(example);
       dispatch(setParam({ ...param, value: val }));
       if (setValue) {
-        setValue("paramSelect", val, {
+        setValue(param.name, val, {
           shouldValidate: false,
           shouldDirty: false,
           shouldTouch: false,
@@ -46,7 +46,7 @@ export default function ParamSelectFormItem({ param }: { param: any }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const showErrorMessage = errors?.paramSelect;
+  const showErrorMessage = (errors as any)?.[param.name];
   const defaultValue = hasExample ? String(example) : "---";
 
   const [localValue, setLocalValue] = useState(defaultValue);
@@ -78,7 +78,7 @@ export default function ParamSelectFormItem({ param }: { param: any }) {
               })
             : false,
         }}
-        name="paramSelect"
+        name={param.name}
         defaultValue={defaultValue}
         render={({ field: { onChange, value } }) => (
           <FormSelect
@@ -101,7 +101,7 @@ export default function ParamSelectFormItem({ param }: { param: any }) {
       {showErrorMessage && (
         <ErrorMessage
           errors={errors}
-          name="paramSelect"
+          name={param.name}
           render={({ message }) => (
             <div className="openapi-explorer__input-error">{message}</div>
           )}
