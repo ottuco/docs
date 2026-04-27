@@ -236,6 +236,7 @@ const config: Config = {
           "/search*",
           "/business/*",
           "/developers/reference/*",
+          "/overview/changelog*",
         ],
       },
     ],

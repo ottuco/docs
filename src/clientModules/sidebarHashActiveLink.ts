@@ -8,52 +8,106 @@
  * This module listens for hash changes and URL navigation, then toggles
  * the active class on sidebar links whose `href` matches the full URL
  * (pathname + hash).
+ *
+ * Also handles deep-linked schema property anchors (e.g. the IDs emitted
+ * by the swizzled Schema/SchemaItem components for OpenAPI schema
+ * properties): when the current hash doesn't exactly match any sidebar
+ * link, we locate its DOM element and pick the nearest preceding section
+ * anchor whose id IS a sidebar link hash. That keeps the correct section
+ * highlighted while the user browses deep into a schema.
  */
 
 function normalizePath(path: string): string {
   return path.endsWith("/") ? path : `${path}/`;
 }
 
+function findSectionForHash(
+  currentHashId: string,
+  sectionHashes: Set<string>,
+): string | null {
+  const currentEl = document.getElementById(currentHashId);
+  if (!currentEl) return null;
+
+  let closestAnchor: HTMLElement | null = null;
+  sectionHashes.forEach((hashId) => {
+    const anchor = document.getElementById(hashId);
+    if (!anchor) return;
+
+    const relation = anchor.compareDocumentPosition(currentEl);
+    if (!(relation & Node.DOCUMENT_POSITION_FOLLOWING)) return;
+
+    if (!closestAnchor) {
+      closestAnchor = anchor;
+      return;
+    }
+    const cmp = closestAnchor.compareDocumentPosition(anchor);
+    if (cmp & Node.DOCUMENT_POSITION_FOLLOWING) {
+      closestAnchor = anchor;
+    }
+  });
+
+  return closestAnchor ? (closestAnchor as HTMLElement).id : null;
+}
+
 function updateActiveLinks(): void {
   const { pathname, hash } = window.location;
-  const fullPath = `${pathname}${hash}`;
+  const currentHashId = hash.startsWith("#") ? hash.slice(1) : "";
 
-  // Find all sidebar menu links
   const sidebarLinks = document.querySelectorAll<HTMLAnchorElement>(
     ".menu__link[href*='#']",
   );
 
+  const pageLinks: Array<{ link: HTMLAnchorElement; linkHash: string }> = [];
   sidebarLinks.forEach((link) => {
     const href = link.getAttribute("href");
     if (!href || !href.includes("#")) return;
-
     const [linkPath, linkHash] = href.split("#");
+    if (normalizePath(linkPath) !== normalizePath(pathname)) {
+      link.classList.remove("menu__link--active");
+      link.removeAttribute("aria-current");
+      return;
+    }
+    pageLinks.push({ link, linkHash });
+  });
 
-    // Check if pathname matches and hash matches
-    const pathMatches =
-      normalizePath(linkPath) === normalizePath(pathname);
-    const hashMatches = hash === `#${linkHash}`;
+  const pageHashes = new Set(pageLinks.map(({ linkHash }) => linkHash));
 
-    if (pathMatches && hashMatches) {
+  let activeHash: string | null = null;
+  if (currentHashId) {
+    if (pageHashes.has(currentHashId)) {
+      activeHash = currentHashId;
+    } else {
+      activeHash = findSectionForHash(currentHashId, pageHashes);
+    }
+  }
+
+  pageLinks.forEach(({ link, linkHash }) => {
+    if (linkHash === activeHash) {
       link.classList.add("menu__link--active");
       link.setAttribute("aria-current", "page");
     } else {
-      // Any non-match (different hash on same page, OR different page
-      // entirely) must clear the stale active state. Docusaurus only
-      // manages hash-less links, so hash links we added here are our
-      // responsibility to remove.
       link.classList.remove("menu__link--active");
       link.removeAttribute("aria-current");
     }
   });
 }
 
-export function onRouteDidUpdate(): void {
-  // Small delay to let Docusaurus finish rendering the sidebar
-  requestAnimationFrame(() => updateActiveLinks());
+function scheduleUpdate(): void {
+  // Schema-deep-link targets are rendered asynchronously by the swizzled
+  // <Schema>/<SchemaItem> components (BrowserOnly + lazy hydration), so
+  // the target element isn't in the DOM on the first animation frame.
+  // Retry with growing delays until the target appears or we've given
+  // ApiDocEmbed enough time to fully hydrate.
+  const delays = [0, 50, 200, 500, 1200];
+  delays.forEach((delay) => {
+    window.setTimeout(() => updateActiveLinks(), delay);
+  });
 }
 
-// Listen for hash changes (clicking anchor links on the same page)
+export function onRouteDidUpdate(): void {
+  scheduleUpdate();
+}
+
 if (typeof window !== "undefined") {
   window.addEventListener("hashchange", () => updateActiveLinks());
 }

@@ -642,14 +642,14 @@ The parent application must use a theme based on `Theme.AppCompat` (or a subclas
 
 ## Wallet Configuration
 
-### STC Pay
+### STC Bank
 
-If the STC Pay integration between Ottu and STC Pay has been completed, the Checkout SDK will automatically handle the necessary checks to display the STC Pay button seamlessly.
+If the STC Bank integration between Ottu and STC Bank has been completed, the Checkout SDK will automatically handle the necessary checks to display the STC Bank button seamlessly.
 
 When the Checkout SDK is initialized with the [session_id](../../checkout-api) and payment gateway codes ([pg_codes](../../checkout-api)), the SDK will verify the following conditions:
 
-- The `session_id` and `pg_codes` provided during initialization must be associated with the STC Pay Payment Service. This ensures that the STC Pay option is available for the customer.
-- In the Android SDK, the STC Pay button is displayed regardless of whether the customer has entered a mobile number while creating the transaction.
+- The `session_id` and `pg_codes` provided during initialization must be associated with the STC Bank Payment Service. This ensures that the STC Bank option is available for the customer.
+- In the Android SDK, the STC Bank button is displayed regardless of whether the customer has entered a mobile number while creating the transaction.
 
 ### Apple Pay
 
@@ -1181,13 +1181,13 @@ Since the implementation differs between the two platforms, please refer to the 
 
     Merchants can configure the forms of payment displayed according to their needs.
 
-    For example, to **display only the STC Pay button**, use:
+    For example, to **display only the STC Bank button**, use:
 
     ```
     formsOfPayment = ["stcPay"]
     ```
 
-    This ensures that only the **STC Pay** button is shown. The same approach applies to other payment methods.
+    This ensures that only the **STC Bank** button is shown. The same approach applies to other payment methods.
   </FAQItem>
   <FAQItem question="What are the minimum system requirements for SDK integration?">
     The SDK requires a device running:

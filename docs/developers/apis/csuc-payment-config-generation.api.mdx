@@ -1,0 +1,117 @@
+---
+id: csuc-payment-config-generation
+title: "Initialize CSUC Payment Flow"
+description: "This endpoint initializes the Cybersource Unified Checkout (CSUC) payment flow by generating and returning the capture context token and associated configuration."
+sidebar_label: "Initialize CSUC Payment Flow"
+hide_title: true
+hide_table_of_contents: true
+api: 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
+sidebar_class_name: "post api-method"
+info_path: developers/apis/ottu-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+import Translate from "@docusaurus/Translate";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Initialize CSUC Payment Flow"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/b/checkout/api/sdk/v1/csuc_sdk/submit/{session_id}/{pg_code}/"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+This endpoint initializes the Cybersource Unified Checkout (CSUC) payment flow by generating and returning the capture context token and associated configuration. 
+
+**Flow Summary**:
+1. **Validate Inputs**: The `pg_code` and `session_id` are validated to ensure:
+   - The MID exists and supports Click to Pay payment method
+   - The payment transaction exists and is valid for payment
+2. **Retrieve Transaction**: Fetches the `PaymentTransaction` using `session_id`
+3. **Create/Reuse Payment Attempt**: Either creates a new payment attempt or reuses the latest one
+4. **Generate Capture Context**: Calls Cybersource API to create a capture context JWT token containing:
+   - Allowed card networks and payment types
+   - Client version and locale settings
+   - Billing, shipping, and email capture mandates
+   - Transaction amount and currency
+   - Decision manager configuration
+5. **Parse Token**: Decodes the JWT to extract SDK client configuration:
+   - JavaScript SDK URL and integrity hash
+   - Payment form submission URL
+6. **Cache & Return**: Caches the complete response (10 min TTL) and returns configuration
+
+
+**Capture Context Caching**:
+- Capture contexts are cached using key: `{mid_code}_{session_id}_ctp_context`
+- Cache TTL: 600 seconds (10 minutes)
+- Subsequent requests with same session reuse cached context
+
+
+**Response Structure**:
+- `sdk_client`: Contains the Cybersource JS SDK URL, SRI integrity hash, and CORS settings
+- `form_config`: Specifies the payment execution endpoint URL and form parameters
+- `capture_context`: JWT token to initialize the checkout widget
+
+
+**Typical Use Case**:
+- Called by frontend before rendering the Cybersource payment widget
+- The frontend loads the SDK from `sdk_client.src` with integrity verification
+- The `capture_context` is passed to Cybersource's JavaScript SDK
+- After user completes payment, the widget generates a transient token
+- Frontend submits transient token to `form_config.action` URL
+
+
+**Integration Steps**:
+1. Frontend calls this endpoint with `pg_code` and `session_id`
+2. Backend generates/retrieves capture context from Cybersource
+3. Frontend dynamically loads the JS SDK using `sdk_client` configuration
+4. Frontend initializes Cybersource widget with `capture_context`
+5. User completes payment in Cybersource widget
+6. Frontend receives transient token from widget
+7. Frontend POSTs transient token to `form_config.action` URL
+
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+>
+  <Translate id="theme.openapi.request.title">Request</Translate>
+</Heading>
+
+<ParamsDetails
+  {...require("./csuc-payment-config-generation.ParamsDetails.json")}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  {...require("./csuc-payment-config-generation.RequestSchema.json")}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  {...require("./csuc-payment-config-generation.StatusCodes.json")}
+>
+  
+</StatusCodes>
+
+
+      
