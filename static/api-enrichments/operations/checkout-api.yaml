@@ -2,7 +2,6 @@
 # Operations: create, retrieve, update, upload attachment
 
 operations:
-
   create_payment_transaction_checkout:
     permissions:
       - $perm:api_key_admin

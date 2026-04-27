@@ -1,0 +1,7 @@
+# Overrides for: components/schemas/Notification
+# Request body for POST /b/pbl/v2/notification/ (template notifications)
+
+_example:
+  channel: email
+  template_id: "payment-request-mail"
+  to: customer@example.com
