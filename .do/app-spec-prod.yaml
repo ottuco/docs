@@ -4,7 +4,7 @@ alerts:
   - rule: DEPLOYMENT_FAILED
   - rule: DOMAIN_FAILED
 domains:
-  - domain: docs.ottu.net
+  - domain: docs.ottu.com
     type: PRIMARY
 features:
   - buildpack-stack=ubuntu-22
@@ -46,6 +46,6 @@ services:
     instance_count: 1
     envs:
       - key: BASE_URL
-        value: "https://docs.ottu.net"
+        value: "https://docs.ottu.com"
       - key: PORT
         value: "3456"

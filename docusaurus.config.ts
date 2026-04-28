@@ -15,8 +15,8 @@ const config: Config = {
     faster: true,
   },
 
-  // Production URL (docs.ottu.net)
-  url: "https://docs.ottu.net",
+  // Production URL (docs.ottu.com)
+  url: "https://docs.ottu.com",
   baseUrl: "/",
 
   trailingSlash: true,

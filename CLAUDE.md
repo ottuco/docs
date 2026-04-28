@@ -129,7 +129,7 @@ docs/
 ## Key Configuration
 
 - **Base URL**: `/` (root)
-- **Branch Strategy**: main → production (docs.ottu.net), dev → staging (docs.ottu.dev)
+- **Branch Strategy**: main → production (docs.ottu.com), dev → staging (docs.ottu.dev)
 
 ## Development Commands
 
@@ -148,7 +148,7 @@ npm run update-api                    # Full pipeline: fetch + gen-api
 ## Deployment
 
 - **Platform**: DigitalOcean App Platform
-- **Production**: `main` branch → https://docs.ottu.net
+- **Production**: `main` branch → https://docs.ottu.com
 - **Staging**: `dev` branch → https://docs.ottu.dev
 
 ## Navigation Structure
