@@ -1,0 +1,6 @@
+# Overrides for: components/schemas/UserCards
+# Request body for POST /b/pbl/v2/user-cards/
+
+_example:
+  type: sandbox
+  customer_id: sandbox

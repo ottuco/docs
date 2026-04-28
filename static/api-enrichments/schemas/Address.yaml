@@ -1,0 +1,16 @@
+# Overrides for: components/schemas/Address
+# Used by CheckoutPOSTRequest.billing_address and related request schemas.
+
+properties:
+  line1:
+    description: "Should be filled by street & house data."
+  line2:
+    description: "Additional address data for accuracy."
+  city:
+    description: "The city where the customer is living and registered."
+  state:
+    description: "State of the customer's city (sometimes the same as the city)."
+  country:
+    description: "Customer's country, [ISO 3166-1 Alpha-2 code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Will be validated against existing countries."
+  postal_code:
+    description: "Postal code (may have different length for different countries)."

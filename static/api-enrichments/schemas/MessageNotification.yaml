@@ -1,0 +1,7 @@
+# Overrides for: components/schemas/MessageNotification
+# Request body for POST /b/pbl/v2/notification/message/
+
+_example:
+  channels:
+    - sms
+    - email

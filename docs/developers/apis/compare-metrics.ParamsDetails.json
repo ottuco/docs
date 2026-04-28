@@ -1,0 +1,1 @@
+{"parameters":[{"in":"header","name":"X-Service-ID","schema":{"type":"string","default":"service.name.dev"},"description":"Keycloak realm to be provided for authentication.","required":true}]}

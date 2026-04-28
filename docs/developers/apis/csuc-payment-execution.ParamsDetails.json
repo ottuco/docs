@@ -1,0 +1,1 @@
+{"parameters":[{"in":"path","name":"pg_code","schema":{"type":"string"},"required":true},{"in":"path","name":"session_id","schema":{"type":"string"},"required":true}]}

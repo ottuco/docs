@@ -64,7 +64,7 @@ flowchart LR
 
 ## Prerequisites
 
-- A [Payment Gateway](/developers/payments/payment-methods#activating-payment-gateway-codes) that supports tokenization (currently: MasterCard, Visa, STC Pay)
+- A [Payment Gateway](/developers/payments/payment-methods#activating-payment-gateway-codes) that supports tokenization (currently: MasterCard, Visa, STC Bank)
 - The [Checkout API](/developers/payments/checkout-api) for creating payment sessions
 - A `customer_id` to associate saved cards with a customer
 - A `webhook_url` to receive token delivery notifications

@@ -1,0 +1,10 @@
+# Overrides for: components/schemas/AttachmentUpload
+# Request body for POST /checkout/v1/upload-attachment/ (multipart/form-data).
+# The upstream spec declares `file` as `format: uri`, which makes the API
+# Explorer render a plain text field. Switching to `format: binary` makes
+# the plugin render a native file picker (see FormBodyItem in
+# docusaurus-theme-openapi-docs).
+
+properties:
+  file:
+    format: binary

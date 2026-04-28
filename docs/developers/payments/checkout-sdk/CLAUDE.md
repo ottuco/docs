@@ -31,7 +31,7 @@ toc_max_heading_level: 3
 ## Wallet Configuration
   ### Apple Pay                ← init config + button customization + gateway-specific notes (e.g., KNET)
   ### Google Pay               ← init config + button customization
-  ### stc pay                  ← init config + button customization
+  ### STC Bank                  ← init config + button customization
   ### urpay                    ← init config + button customization
 
 ## Callbacks
@@ -110,7 +110,7 @@ All wallet-specific content is consolidated under `## Wallet Configuration`, gro
   ### Google Pay
     #### googlePayInit
     #### Customize Button
-  ### stc pay
+  ### STC Bank
     #### Customize Button
   ### urpay
     #### Customize Button

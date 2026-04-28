@@ -11,7 +11,7 @@ import FAQ, { FAQItem } from '@site/src/components/FAQ';
 
 The Payment Methods API lets you discover which payment gateways and methods are available for a given transaction. Instead of hardcoding payment options, you call this API to get the current list of active gateways — filtered by currency, plugin, tokenization support, or customer. The response includes each gateway's supported operations ([refunds](../operations.md), voids, captures), wallet integrations (Apple Pay, Google Pay), currencies, and tokenization capabilities. This ensures your checkout always shows up-to-date payment options, even when gateway configurations change.
 
-:::tip Boost Your Integration
+:::tip[Boost Your Integration]
 Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options. For environment setup (plugins, gateway codes, sandbox vs production), see [Configure Your Environment](/developers/getting-started/#configure-your-environment).
 :::
 

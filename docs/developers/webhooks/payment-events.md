@@ -183,7 +183,7 @@ The `pg_params` object contains normalized payment gateway response fields. Inst
 
 For the complete searchable reference of all fields, see [**PG Params**](/developers/webhooks/pg-params/).
 
-:::tip Why pg_params matters
+:::tip[Why pg_params matters]
 Ottu normalizes responses from all payment gateways into fixed fields. This means you can switch gateways — from KNET to MPGS to Cybersource — without changing a single line of your webhook handling code. Instead of parsing each gateway’s unique response format, just read from `pg_params`.
 :::
 

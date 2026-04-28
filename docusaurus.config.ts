@@ -40,6 +40,7 @@ const config: Config = {
     },
     mdx1Compat: {
       headingIds: true, // Allow {#custom-id} syntax in headings (required until v4 migration)
+      admonitions: true, // Convert :::type Title → :::type[Title] for MDX v3 compatibility
     },
   },
 
@@ -235,6 +236,7 @@ const config: Config = {
           "/search*",
           "/business/*",
           "/developers/reference/*",
+          "/overview/changelog*",
         ],
       },
     ],

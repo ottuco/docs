@@ -10,18 +10,18 @@
           ],
           "type": "string",
           "x-spec-enum-id": "559f7896c94c0925",
-          "description": "Indicates if all payments within the agreement use the same amount or if the amount differs between the payments.\n\n* `fixed` - Fixed\n* `variable` - Variable"
+          "description": "It defines if the payment amount can vary with each transaction within the agreement. Enum: `fixed`, `variable`."
         },
         "cycle_interval_days": {
           "type": "integer",
           "maximum": 366,
           "minimum": 1,
-          "description": "The minimum number of days between payments agreed with the payer."
+          "description": "The number of days between each recurring payment."
         },
         "expiry_date": {
           "type": "string",
           "format": "date",
-          "description": "Date on which your agreement with the payer to process payments expires."
+          "description": "The final date until which the agreement remains valid."
         },
         "frequency": {
           "enum": [
@@ -37,17 +37,17 @@
           ],
           "type": "string",
           "x-spec-enum-id": "f7d3278be09218f0",
-          "description": "The frequency of the payments within the series as agreed with the payer.\n\n* `irregular` - Irregular\n* `daily` - Daily\n* `weekly` - Weekly\n* `semi_monthly` - Semi Monthly\n* `monthly` - Monthly\n* `quarterly` - Quarterly\n* `semi_annually` - Semi Annually\n* `yearly` - Yearly\n* `other` - Other"
+          "description": "This pertains to the frequency of payments within the series as agreed upon with the payer. Such as: `irregular`, `daily`, `weekly`, `monthly`, `quarterly`, `semi_annually`, `yearly`, and `other`. When `type` set as `unscheduled`, `frequency` should set as `irregular`.\n"
         },
         "id": {
           "type": "string",
-          "description": "A unique identifier for the agreement established with the payer. This ID links to the specific terms and conditions the payer has authorized for processing their stored card details. Use cases include: \n1. Recurring Payments: Periodic debits, e.g., gym memberships. \n2. Installment Payments: Multiple charges for a single purchase over time. \n3. Unscheduled: Future payments as required, e.g., account top-ups. \n4. Industry Practice: Standard business practices related to an original payment, e.g., hotel charges after checkout.",
+          "description": "It serves as a unique identifier for the agreement established with the payer. The Agreement ID plays a crucial role as an identifier for correlated payments associated with a customer order or invoice, highlighting the need for it to vary based on the correlated payments.\n",
           "maxLength": 128
         },
         "max_amount_per_cycle": {
           "type": "string",
           "format": "decimal",
-          "description": "The maximum amount for a single payment in the series as agreed with the payer."
+          "description": "The agreed-upon maximum amount for an individual payment within the series."
         },
         "seller": {
           "properties": {
@@ -73,13 +73,13 @@
         "start_date": {
           "type": "string",
           "format": "date",
-          "description": "Date on which the agreement with the payer to process payments starts."
+          "description": "The date on which the agreement with the payer to process payments begins."
         },
         "total_cycles": {
           "type": "integer",
           "maximum": 999,
           "minimum": 1,
-          "description": "The number of merchant-initiated payments within the recurring payment agreement."
+          "description": "The total number of payment cycles within the agreement duration."
         },
         "type": {
           "enum": [
@@ -92,7 +92,7 @@
           "type": "string",
           "x-spec-enum-id": "a78a057f002d8a8c",
           "default": "recurring",
-          "description": "The type of commercial agreement that the payer has with the merchant.\n\n *Note*: For `unscheduled` agreements, the allowed values should be configured as follows: \n\n `id` - Accepts any value. \n\n `frequency`. \n\n `type`.\n\n This configuration ensures that only specific values are permitted for each field when the `type` is `Unscheduled`.\n\n *Note*: For `recurring` agreements, the following fields are mandatory as follows: \n\n `amount_variability` \n\n `cycle_interval_days` \n\n `expiry_date` \n\n ` `requency` \n\n `id` \n\n  `total_cycles` \n\n This configuration ensures that the required values are mandatory for each field when the `type` is `Recurring`.\n\n* `event_based` - Event Based\n* `installment` - Installment\n* `recurring` - Recurring\n* `unscheduled` - Unscheduled\n* `other` - Other"
+          "description": "The type of commercial agreement that the payer has with the merchant: `recurring` (Default), `unscheduled`, `other`, `event_based`, `installment`.\n"
         }
       },
       "type": "object",
@@ -154,7 +154,7 @@
           "type": "integer",
           "maximum": 365,
           "minimum": 1,
-          "description": "Specifies the minimum required validity period, in days, for a card to be eligible for payment. If set to 30 days, for example, cards set to expire within the next month would be declined. This ensures short-lived cards nearing their expiration date are filtered out, reducing chances of payment failures. When implementing, balance your operational needs with customer convenience. Setting it too stringent might increase payment declines, while a lenient approach could risk future payment failures.\n\nAdditionally, it defaults to 30 days when the `payment_type` is `auto_debit`. If any other payment type is selected, no default value is set."
+          "description": "Specifies the minimum required validity period, in days, for a card to be eligible for payment. If set to 30 days, for example, cards set to expire within the next month would be declined. Additionally, it defaults to 30 days when the `payment_type` is `auto_debit`. If any other payment type is selected, no default value is set.\n"
         }
       },
       "type": "object",

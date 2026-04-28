@@ -115,7 +115,7 @@
     "testCards": [
       {
         "cardNumber": "4005 5500 0000 0001",
-        "expiry": "05/25",
+        "expiry": "05/30",
         "cvv": "123",
         "brand": "Visa",
         "status": "success",
@@ -123,7 +123,7 @@
       },
       {
         "cardNumber": "5123 4567 8901 2346",
-        "expiry": "05/25",
+        "expiry": "05/30",
         "cvv": "123",
         "brand": "Mastercard",
         "status": "success",
@@ -131,7 +131,7 @@
       },
       {
         "cardNumber": "3456 7890 1234 564",
-        "expiry": "05/25",
+        "expiry": "05/30",
         "cvv": "1234",
         "brand": "Amex",
         "status": "success",
@@ -139,7 +139,7 @@
       },
       {
         "cardNumber": "4557 0123 4567 8902",
-        "expiry": "05/25",
+        "expiry": "05/30",
         "cvv": "123",
         "brand": "Visa",
         "status": "success",
@@ -148,7 +148,7 @@
       },
       {
         "cardNumber": "5313 5810 0012 3430",
-        "expiry": "05/25",
+        "expiry": "05/30",
         "cvv": "123",
         "brand": "Mastercard",
         "status": "success",
@@ -157,7 +157,7 @@
       },
       {
         "cardNumber": "3742 0000 0000 004",
-        "expiry": "05/25",
+        "expiry": "05/30",
         "cvv": "1234",
         "brand": "Amex",
         "status": "success",
@@ -197,7 +197,7 @@
     "testCards": [
       {
         "cardNumber": "4030 0000 1000 1234",
-        "expiry": "05/25",
+        "expiry": "05/30",
         "cvv": "123",
         "brand": "Visa",
         "status": "success",
@@ -503,8 +503,8 @@
     "testCards": [
       {
         "cardNumber": "4242 4242 4242 4242",
-        "expiry": "05/25",
-        "cvv": "100",
+        "expiry": "Any future",
+        "cvv": "Any 3 digits",
         "brand": "Visa",
         "status": "success",
         "statusLabel": "Success"
@@ -997,7 +997,7 @@
     ],
     "digitalWallets": [
       "Apple Pay",
-      "STC Pay"
+      "STC Bank"
     ],
     "testCards": [
       {
@@ -1122,7 +1122,7 @@
     ],
     "digitalWallets": [
       "Apple Pay",
-      "STC Pay"
+      "STC Bank"
     ],
     "testCards": [
       {
@@ -1282,7 +1282,7 @@
     "digitalWallets": [
       "Apple Pay",
       "Google Pay",
-      "STC Pay"
+      "STC Bank"
     ],
     "testCards": [
       {
@@ -1719,7 +1719,7 @@
     "testCards": [
       {
         "cardNumber": "5105 1051 0510 5100",
-        "expiry": "12/23",
+        "expiry": "12/27",
         "cvv": "123",
         "brand": "Visa / Mastercard",
         "status": "success",
@@ -1845,7 +1845,7 @@
       "mada"
     ],
     "digitalWallets": [
-      "STC Pay"
+      "STC Bank"
     ],
     "testCards": [],
     "testCardNotes": "Wallet testing — use test phone: 548220713 (country code 966). OTP: 123456 (success), 111111 (insufficient balance), 222222 (daily limit exceeded)."
@@ -2049,7 +2049,7 @@
     "digitalWallets": [
       "Apple Pay",
       "Google Pay",
-      "STC Pay",
+      "STC Bank",
       "urpay"
     ],
     "testCards": [

@@ -8,7 +8,7 @@ Ottu provides a single integration point for accepting payments across multiple 
 
 ### Core Capabilities
 
-- **50+ Payment Gateways** — Banks (KNET, MPGS, Cybersource), fintechs (Checkout.com, Tap, MyFatoorah), BNPL (Tabby, Tamara), and digital wallets (STC Pay, BenefitPay). See the full [Payment Gateway catalog](/business/payments/gateways).
+- **50+ Payment Gateways** — Banks (KNET, MPGS, Cybersource), fintechs (Checkout.com, Tap, MyFatoorah), BNPL (Tabby, Tamara), and digital wallets (STC Bank, BenefitPay). See the full [Payment Gateway catalog](/business/payments/gateways).
 - **Smart Payment Routing** — Route payments by BIN, card country, scheme, amount, and real-time success rate. Automatic fallback when a gateway is down. See [Payment Routing](/business/payments/routing).
 - **Multi-Currency** — Accept payments in multiple currencies with configurable exchange rates and markup fees. See [Currencies](/business/payments/currencies).
 - **Notifications** — Automated Email, SMS, and WhatsApp notifications at every stage of the payment lifecycle. See [Notifications](/business/notifications/).
