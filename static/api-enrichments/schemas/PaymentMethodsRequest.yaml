@@ -1,4 +1,14 @@
 # Overrides for: components/schemas/PaymentMethodsRequest
+# Request body for POST /pbl/v2/payment-methods/
+
+_example:
+  plugin: payment_request
+  operation: purchase
+  currencies:
+    - KWD
+  type: sandbox
+  tags:
+    - demo
 
 properties:
   pg_names:

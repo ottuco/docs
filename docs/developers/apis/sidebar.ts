@@ -223,13 +223,13 @@ const sidebar: SidebarsConfig = {
         {
           type: "doc",
           id: "developers/apis/stc-pay-checkout-sdk-capture",
-          label: "Submit STC Bank OTP",
+          label: "Submit STC Pay OTP",
           className: "api-method post",
         },
         {
           type: "doc",
           id: "developers/apis/stc-pay-checkout-sdk-authorize",
-          label: "Submit STC Bank payment method",
+          label: "Submit STC Pay payment method",
           className: "api-method post",
         },
         {

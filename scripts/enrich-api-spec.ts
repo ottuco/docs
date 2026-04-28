@@ -74,11 +74,17 @@ interface PermissionBlock {
   extra?: string;
 }
 
+interface ParameterOverride {
+  example?: any;
+  description?: string;
+}
+
 interface OperationEnrichment {
   permissions?: Array<string | PermissionBlock>;
   description_append?: string;
   description_prepend?: string;
   description_replace?: string;
+  parameters?: Record<string, ParameterOverride>;
 }
 
 interface OperationsFile {
@@ -95,6 +101,8 @@ interface SchemaPropertyOverride {
   description?: string;
   properties?: Record<string, SchemaPropertyOverride | string>;
   remove_enum?: boolean;
+  format?: string;
+  type?: string;
 }
 
 interface SchemaFile {
@@ -311,6 +319,28 @@ function enrichOperations(
       }
 
       operation.description = description;
+
+      // Apply parameter overrides (example, description)
+      if (enrichment.parameters && Array.isArray(operation.parameters)) {
+        for (const [paramName, override] of Object.entries(enrichment.parameters)) {
+          const param = operation.parameters.find(
+            (p: any) => p.name === paramName
+          );
+          if (!param) {
+            warn(
+              `Parameter '${paramName}' not found on operation '${opId}'`
+            );
+            continue;
+          }
+          if (override.example !== undefined) {
+            param.example = override.example;
+          }
+          if (override.description !== undefined) {
+            param.description = override.description;
+          }
+        }
+      }
+
       count++;
     }
   }
@@ -354,17 +384,32 @@ function enrichSchemaProperties(
 
     const overrideObj = override as SchemaPropertyOverride;
 
+    let propModified = false;
+
     // Direct description override
     if (overrideObj.description) {
       if (schemaProps[propName]) {
         schemaProps[propName].description = overrideObj.description;
-        count++;
+        propModified = true;
       } else {
         warn(
           `Property '${fullPath}' not found in schema '${schemaName}'`
         );
       }
     }
+
+    // Format/type override (e.g., fixing `format: uri` → `format: binary` for file uploads)
+    if (schemaProps[propName] && (overrideObj.format || overrideObj.type)) {
+      if (overrideObj.format) {
+        schemaProps[propName].format = overrideObj.format;
+      }
+      if (overrideObj.type) {
+        schemaProps[propName].type = overrideObj.type;
+      }
+      propModified = true;
+    }
+
+    if (propModified) count++;
 
     // Remove enum values
     if (overrideObj.remove_enum && schemaProps[propName]) {
