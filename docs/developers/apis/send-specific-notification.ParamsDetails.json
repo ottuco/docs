@@ -1,1 +1,1 @@
-{"parameters":[{"in":"path","name":"channel","schema":{"type":"string","enum":["email","sms","whatsapp"]},"description":"Specify the channel of notification to send.","required":true}]}
+{"parameters":[{"in":"path","name":"channel","schema":{"type":"string","enum":["email","sms","whatsapp"]},"description":"Specify the channel of notification to send.","required":true,"example":"email"}]}
