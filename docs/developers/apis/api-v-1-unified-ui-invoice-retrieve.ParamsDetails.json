@@ -1,0 +1,1 @@
+{"parameters":[{"in":"path","name":"txn__session_id","schema":{"type":"string","description":"A unique identifier for each payment transaction, used to maintain the session state during the payment process."},"required":true}]}

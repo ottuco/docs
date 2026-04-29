@@ -1,0 +1,24 @@
+# Overrides for: components/schemas/ShippingAddress
+# Used by CheckoutPOSTRequest.shipping_address and related request schemas.
+
+properties:
+  line1:
+    description: "Location details where the shipment should be delivered to. Should be filled by street & house data."
+  line2:
+    description: "Additional address data for accuracy."
+  city:
+    description: "The city where the shipment should be delivered to."
+  state:
+    description: "The state where the shipment should be delivered to (sometimes the same as the city)."
+  country:
+    description: "Destination country, [ISO 3166-1 Alpha-2 code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Will be validated against existing countries."
+  postal_code:
+    description: "Postal code (may have different length for different countries)."
+  first_name:
+    description: "Shipment recipient first name."
+  last_name:
+    description: "Shipment recipient last name."
+  email:
+    description: "Shipment recipient email address."
+  phone:
+    description: "Shipment recipient phone number."

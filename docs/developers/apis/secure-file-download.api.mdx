@@ -1,0 +1,82 @@
+---
+id: secure-file-download
+title: "Secure file download"
+description: "Download sensitive files using temporary authenticated tokens."
+sidebar_label: "Secure file download"
+hide_title: true
+hide_table_of_contents: true
+api: eJztVt9v2zYQ/lcO9xQHiu006YuAPaSrm2Xt2iJO0A1xUNDS2WItkyp5iuMZ+t+HI+VfSdOi6F6GNQ+ORB3J7767++5WaCtyirU1Fzmm6CmrHX2c6JI+5nZhSqtyTDAnnzldiRmm+LL9AJ6M16zvCGSDh9prMwWmeWWdcktQNRdkWGeKKQe2MzK+OzIjc3j4m12AZlhYN/Pp4eHIHHfhhcpmZHKYkhFM5EHB9fXFy7gTFgWZcBGskYH24OhzTZ4pH5lnXbgKltqDZ+soB23gknLtYaG5gOPnR3Ntaia4unoDB5k1Ez2tnRqX1BmZky78WmoyDI4y0nfktxddX76JRwQoI3O6sZ2rGXk4H1ytkUS73z9c7bqvrRmZ510YkrsjB3eq1HnwMJyXQFZQNvNhh3X677AhAWWEYydIxO/IXHSR7isd45YeHka3fVwkUBMmB8fPITrr4SCniapL7nThYgJLW689BAWnx304f/d2AI58ZY2nBBxNHPkCuCBZtbXLCNjClBgUGFpseSm1mbURfSWREdrVlATTBwltJGNsuYDhCRw44toZCVquHWUsp1aOvJ4aCiR3gs+lzVS5Pmu7K8Q+HPjn0ZBMHt4LUjk5mFgHZ5XKCuq0eM52uRRA156ch0wZsKZcbn2IucsFLcEuTAK1Kcm3C8oR+LoiV8vmLiZYKafmxOQ8pjcr1FIQleICEzRqTphiCCkm6LOC5grTFfKykg+enTZTTHBi3VwxpljXOscmQUkd7SjHlF1NzW2CrKZyAV6zLjVr8nibxOrUvAw3n72/gNe0BPET05vbJlnhC+V1tl25lZNjVL3geNbvy7/MGibD8qiqqmzzs/fJS3WvdnDvl/2rvdLzdZaR95O67MJlG6CxNlL2IS7tJXCwF8wOWLeN/sHwpCOcPgHIZkx85NmRmu8De5LQiACb8PdQt4Tpk/6zH6Dgcidvhyf7qQsHQaAGb89evBl8HJ78cuVq6uATOE77x9+Fo/XYjj9RxpKGToQ7JEZAyUqXj5lp9nLrZm0n+aW5FMNz0VqdDZyz7g/yXk3pacgn/yJkkhu/FMtWqzDFv2wdCtBY3ihj6CPbLORCR1141KSCRzCPLgV5qM3OISpkLyiWbsU+MLXm5HrH8JucnP7nwnj8fSLww2F8udssoFDrPpWLFmgP2oR2+I0I0n1VKm3CgFFQOxJoD8ZCac103VT3Ahna4iBe9lVWmgTnxIWVEWhKwUuR9BR74169VuBeHI6OJN16qwCg6YnOh54e20HtSkyxYK582ut5ZfKxve9a5rpriLHZEfGhMBxJ3JfyDZeq0q9piUlsMrHRbdvMXn97RJ4cOaPlgxkkds91Kol+TfQ9jPCs0kevaTkKCbLbRDZYxKV1T5P3sRgF4rSZ2GDYkv6OuYaz9xeYoNAS4Rx3+93+I5Ab0ybBynqeq5B7rYPDQPf+xPfwiJ08/jmW/hxL/79jaVumTPfcC0IpNRXUaNVq2Q2OMcGNmmGrRFHPMMF0PbdKXymsZ9myWo2Vp2tXNo0sf67JyfR5m+CdcloyNMherr0855hOVOnpK0V6cNmKTweeQr1WPyPSd6fKWt4wwRktN9N1c9ska0UUAPHbWZZRxTu7HnU2EeCN0p8PrjBB9Uh0Z0F02wc5/YuIHupvhCC/Mol/cctqFSW9aTb28dOTOzaiH6118Lxp/gH/jXna
+sidebar_class_name: "get api-method"
+info_path: developers/apis/ottu-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+import Translate from "@docusaurus/Translate";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Secure file download"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/b/utilities/secure-file/{token}/"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Download sensitive files using temporary authenticated tokens.
+
+**How it works:**
+1. Backend generates a UUID token when file download is requested
+2. Token is stored in Redis with 15-minute TTL (configurable)
+3. Client receives download URL with token
+4. Client makes GET request with JWT authentication
+5. Server validates token, checks authorization, and serves file
+
+**Token expiration:** Tokens expire after 15 minutes (default). If you receive a 410 GONE response, refresh the resource to get a new download link.
+
+**File storage:** Works with both S3 (returns redirect to presigned URL) and local storage (returns file with X-Sendfile header for Apache).
+
+**Authorization:** Users can only download files they own, unless they are superusers.
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+>
+  <Translate id="theme.openapi.request.title">Request</Translate>
+</Heading>
+
+<ParamsDetails
+  {...require("./secure-file-download.ParamsDetails.json")}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  {...require("./secure-file-download.RequestSchema.json")}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  {...require("./secure-file-download.StatusCodes.json")}
+>
+  
+</StatusCodes>
+
+
+      

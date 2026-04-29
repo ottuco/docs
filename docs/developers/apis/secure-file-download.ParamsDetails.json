@@ -1,0 +1,1 @@
+{"parameters":[{"in":"path","name":"token","schema":{"type":"string","format":"uuid"},"required":true}]}

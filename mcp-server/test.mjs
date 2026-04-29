@@ -100,107 +100,69 @@ async function testWebhookPostAndRetrieve() {
   pass("Webhook POST accepts payload");
 }
 
-async function testWebhookSSEHeaders() {
-  const orderId = `sse-headers-${Date.now()}`;
-
-  const controller = new AbortController();
-  const res = await fetch(`${BASE_URL}/${orderId}/events`, {
-    signal: controller.signal,
-    headers: { Accept: "text/event-stream" },
-  });
+async function testWebhookPollHeaders() {
+  const orderId = `poll-headers-${Date.now()}`;
+  const res = await fetch(`${BASE_URL}/${orderId}/events.json`);
 
   const contentType = res.headers.get("content-type");
-  const accelBuffering = res.headers.get("x-accel-buffering");
   const cacheControl = res.headers.get("cache-control");
 
-  controller.abort();
-
-  if (contentType !== "text/event-stream") return fail("SSE headers", `content-type: ${contentType}`);
-  if (accelBuffering !== "no") return fail("SSE headers", `x-accel-buffering: ${accelBuffering} (must be "no" for Cloudflare)`);
-  if (!cacheControl || !cacheControl.includes("no-transform")) return fail("SSE headers", `cache-control missing no-transform: ${cacheControl}`);
-  pass("SSE response has correct anti-buffering headers");
-}
-
-async function testWebhookSSEReceivesEvents() {
-  const orderId = `sse-flow-${Date.now()}`;
-
-  // Connect SSE first
-  const controller = new AbortController();
-  const sseRes = await fetch(`${BASE_URL}/${orderId}/events`, {
-    signal: controller.signal,
-  });
-
-  const reader = sseRes.body.getReader();
-  const decoder = new TextDecoder();
-
-  // POST a webhook after short delay
-  setTimeout(async () => {
-    await fetch(`${BASE_URL}/${orderId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ result: "success", token: { token: "tok_123" } }),
-    });
-  }, 200);
-
-  // Read from SSE stream with timeout
-  let received = "";
-  const timeout = setTimeout(() => controller.abort(), 5000);
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      received += decoder.decode(value);
-      if (received.includes("tok_123")) break;
-    }
-  } catch (e) {
-    // AbortError is expected on timeout
+  if (res.status !== 200) return fail("Poll headers", `status ${res.status}`);
+  if (!contentType || !contentType.includes("application/json")) {
+    return fail("Poll headers", `content-type: ${contentType}`);
   }
-  clearTimeout(timeout);
-  controller.abort();
-
-  if (!received.includes("tok_123")) return fail("SSE event delivery", "event not received within 5s");
-  if (!received.includes("data:")) return fail("SSE event delivery", "event not in SSE format");
-  pass("SSE delivers webhook events to connected clients");
+  if (!cacheControl || !cacheControl.includes("no-store")) {
+    return fail("Poll headers", `cache-control missing no-store: ${cacheControl}`);
+  }
+  pass("Poll response has correct JSON + no-store headers");
 }
 
-async function testWebhookSSECatchUp() {
-  const orderId = `sse-catchup-${Date.now()}`;
+async function testWebhookPollReceivesEvents() {
+  const orderId = `poll-flow-${Date.now()}`;
 
-  // POST webhook BEFORE connecting SSE
+  // Empty store → events: []
+  const empty = await fetch(`${BASE_URL}/${orderId}/events.json?since=-1`).then((r) => r.json());
+  if (empty.events.length !== 0) return fail("Poll empty", `expected empty, got ${empty.events.length}`);
+  if (empty.lastId !== -1) return fail("Poll empty", `expected lastId -1, got ${empty.lastId}`);
+
+  // POST a webhook
   await fetch(`${BASE_URL}/${orderId}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ result: "success", catchup: true }),
+    body: JSON.stringify({ result: "success", token: { token: "tok_123" } }),
   });
 
-  // Now connect SSE — should receive the historical event
-  const controller = new AbortController();
-  const sseRes = await fetch(`${BASE_URL}/${orderId}/events`, {
-    signal: controller.signal,
-  });
-
-  const reader = sseRes.body.getReader();
-  const decoder = new TextDecoder();
-
-  let received = "";
-  const timeout = setTimeout(() => controller.abort(), 3000);
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      received += decoder.decode(value);
-      if (received.includes("catchup")) break;
-    }
-  } catch (e) {
-    // AbortError expected
+  // Poll picks it up
+  const after = await fetch(`${BASE_URL}/${orderId}/events.json?since=-1`).then((r) => r.json());
+  if (after.events.length !== 1) return fail("Poll after POST", `expected 1 event, got ${after.events.length}`);
+  if (after.lastId !== 0) return fail("Poll after POST", `expected lastId 0, got ${after.lastId}`);
+  if (after.events[0].id !== 0) return fail("Poll after POST", `missing id field`);
+  if (!JSON.stringify(after.events[0].payload).includes("tok_123")) {
+    return fail("Poll after POST", "payload missing");
   }
-  clearTimeout(timeout);
-  controller.abort();
+  pass("Poll returns webhook events with id + payload + lastId");
+}
 
-  if (!received.includes("catchup")) return fail("SSE catch-up", "historical event not delivered on connect");
-  pass("SSE delivers historical events on connect (catch-up)");
+async function testWebhookPollSinceCursor() {
+  const orderId = `poll-cursor-${Date.now()}`;
+
+  // POST three events
+  for (let i = 0; i < 3; i++) {
+    await fetch(`${BASE_URL}/${orderId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ seq: i }),
+    });
+  }
+
+  // since=0 must return only events 1 and 2
+  const after = await fetch(`${BASE_URL}/${orderId}/events.json?since=0`).then((r) => r.json());
+  if (after.events.length !== 2) return fail("Poll cursor", `since=0 expected 2, got ${after.events.length}`);
+  if (after.events[0].id !== 1 || after.events[1].id !== 2) {
+    return fail("Poll cursor", `wrong ids: ${after.events.map((e) => e.id).join(",")}`);
+  }
+  if (after.lastId !== 2) return fail("Poll cursor", `lastId ${after.lastId}`);
+  pass("Poll `since` cursor filters already-seen events");
 }
 
 async function testWebhookInvalidJSON() {
@@ -247,9 +209,9 @@ async function run() {
 
   await testHealthCheck();
   await testWebhookPostAndRetrieve();
-  await testWebhookSSEHeaders();
-  await testWebhookSSEReceivesEvents();
-  await testWebhookSSECatchUp();
+  await testWebhookPollHeaders();
+  await testWebhookPollReceivesEvents();
+  await testWebhookPollSinceCursor();
   await testWebhookInvalidJSON();
   await testMCPEndpoint();
   await test404();

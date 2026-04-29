@@ -9,7 +9,7 @@ import FAQ, { FAQItem } from "@site/src/components/FAQ";
 
 # Tokenization
 
-Tokenization significantly reduces the risk associated with handling sensitive customer card data. Instead of storing the actual card details, a unique token is generated and used for future transactions, thus enhancing the security of your payment processes. This feature is currently compatible with MasterCard, Visa, and STC Pay, with further options planned for future inclusion.
+Tokenization significantly reduces the risk associated with handling sensitive customer card data. Instead of storing the actual card details, a unique token is generated and used for future transactions, thus enhancing the security of your payment processes. This feature is currently compatible with MasterCard, Visa, and STC Bank, with further options planned for future inclusion.
 
 ## What is Tokenization?
 
@@ -323,7 +323,7 @@ By following these steps, you can easily streamline your payment process, ensuri
     The optimal time to save the card token in your database is immediately after the first payment against the subscription that you plan to [auto-debit](/developers/cards-and-tokens/recurring-payments). While it’s not strictly necessary—you can always fetch this information through the [User Cards](/developers/cards-and-tokens/user-cards) API and Payment Methods APIs—it does streamline your processes and reduce development complexity.
   </FAQItem>
   <FAQItem question="Do I need to use the Checkout SDK to display payment options to the customer?">
-    No, it’s not mandatory to use the [Checkout SDK](/developers/payments/checkout-sdk). You can control the payment process using the responses from the [Checkout API](/developers/payments/checkout-api). However, it’s worth noting that the `Checkout SDK` simplifies the UI implementation and is necessary for certain payment methods such as `Apple Pay`, `Google Pay`, `STC Pay`, and others. While it’s recommended to use the `Checkout SDK` for its simplicity and comprehensive features, the choice ultimately lies in your hands based on your specific needs.
+    No, it’s not mandatory to use the [Checkout SDK](/developers/payments/checkout-sdk). You can control the payment process using the responses from the [Checkout API](/developers/payments/checkout-api). However, it’s worth noting that the `Checkout SDK` simplifies the UI implementation and is necessary for certain payment methods such as `Apple Pay`, `Google Pay`, `STC Bank`, and others. While it’s recommended to use the `Checkout SDK` for its simplicity and comprehensive features, the choice ultimately lies in your hands based on your specific needs.
   </FAQItem>
   <FAQItem question="Can I retrieve a list of saved cards for a customer?">
     Yes, you can retrieve a list of a customer’s saved cards utilizing the [Fetch Card API](/developers/cards-and-tokens/user-cards#fetch-cards). This powerful API provides merchants secure access to essential saved card information,such as:

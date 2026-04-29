@@ -42,7 +42,7 @@ Two completely different structures. Your code would need separate parsing logic
 { "auth_code": "A83921", "transaction_id": "9201831", "ref": "REF001" }
 ```
 
-:::tip Switch gateways without code changes
+:::tip[Switch gateways without code changes]
 Always build your webhook handling logic against `pg_params`. When you add a new payment connection or switch from one gateway to another, your code keeps working — Ottu handles the extraction and normalization behind the scenes.
 :::
 
@@ -62,7 +62,7 @@ Search or filter all normalized fields below. Click any field name to get a shar
 
 <PGParamsReference />
 
-:::info Need a parameter that's not listed?
+:::info[Need a parameter that's not listed?]
 If you need a gateway response field that isn't currently in `pg_params`, contact us at **csd@ottu.com** and we'll add it. New parameters are added regularly as merchants request them.
 :::
 

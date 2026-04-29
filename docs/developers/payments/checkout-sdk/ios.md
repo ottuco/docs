@@ -599,16 +599,16 @@ The above code performs the following checks and actions:
 
 This setup ensures compliance with KNET's requirements and provides a clear user experience for handling failed payments.
 
-### STC Pay
+### STC Bank
 
-When the [integration](#stc-pay) between Ottu and STC Pay is completed, the necessary checks to display the STC Pay button are handled seamlessly by the Checkout SDK.
+When the [integration](#stc-bank) between Ottu and STC Bank is completed, the necessary checks to display the STC Bank button are handled seamlessly by the Checkout SDK.
 
 **Initialization**: Upon initialization of the Checkout SDK with the provided [session_id](#sessionid-string-required) and payment gateway codes ([pg_codes](../../checkout-api)), several conditions are automatically verified:
 
-- It is confirmed that the `session_id` and `pg_codes` provided during SDK initialization are associated with the STC Pay Payment Service. This ensures that the STC Pay option is available for the customer to choose as a payment method.
-- It is ensured that the STC Pay button is displayed by the iOS SDK, regardless of whether the customer has provided a mobile number while creating the transaction.
+- It is confirmed that the `session_id` and `pg_codes` provided during SDK initialization are associated with the STC Bank Payment Service. This ensures that the STC Bank option is available for the customer to choose as a payment method.
+- It is ensured that the STC Bank button is displayed by the iOS SDK, regardless of whether the customer has provided a mobile number while creating the transaction.
 
-This setup ensures a seamless integration and user experience, allowing customers to easily set up and use STC Pay during the checkout process.
+This setup ensures a seamless integration and user experience, allowing customers to easily set up and use STC Bank during the checkout process.
 
 ### Onsite Checkout
 
@@ -942,7 +942,7 @@ This technique works in two ways:
   <FAQItem question="1 What forms of payments are supported by the SDK?">
     The SDK supports the following payment forms: `tokenPay`, `ottuPG`, `redirect` `applePay` and `stcPay`. Merchants can display specific methods according to their needs.
 
-    **For example,** if you want to only show the STC Pay button, you can do so using formsOfPayment = `stcPay`, and only the STC Pay button will be displayed. The same applies for `applePay` and other methods.
+    **For example,** if you want to only show the STC Bank button, you can do so using formsOfPayment = `stcPay`, and only the STC Bank button will be displayed. The same applies for `applePay` and other methods.
   </FAQItem>
   <FAQItem question="2 What are the minimum system requirements for the SDK integration?">
     It is required to have a device running iOS 13 or higher.

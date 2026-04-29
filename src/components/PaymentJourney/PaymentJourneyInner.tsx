@@ -259,6 +259,7 @@ export default function PaymentJourneyInner() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set());
   const webhookCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const hasStartedRef = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -270,8 +271,16 @@ export default function PaymentJourneyInner() {
     setExpandedSteps(new Set());
   }, [state.status]);
 
+  // Scroll on every status transition. For terminal states (error/complete)
+  // the journey DOM collapses dramatically; without scrolling the stale
+  // position from the previous step leaves the viewport on page content
+  // below the now-shorter component instead of on the error/complete card.
+  // The `idle` state is the restart target — scroll to the hero so the
+  // viewport lands on the component, not on whatever sits below it. Skip
+  // on initial mount (first render) so pages don't auto-scroll on load.
   useEffect(() => {
-    if (state.status === "idle" || state.status === "error" || state.status === "complete") return;
+    if (state.status !== "idle") hasStartedRef.current = true;
+    if (state.status === "idle" && !hasStartedRef.current) return;
     const statusMap: Record<string, number> = {
       step0_country: 1,
       step1_calling: 2, step1_done: 2,
@@ -281,11 +290,21 @@ export default function PaymentJourneyInner() {
       step5_pgparams: 6,
       step6_calling: 7, step6_done: 7,
     };
-    const activeStep = statusMap[state.status] ?? 0;
-    if (activeStep === 0) return;
     const timer = setTimeout(() => {
-      const el = document.querySelector(`[data-step="${activeStep}"]`);
-      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      const selector =
+        state.status === "idle"
+          ? "[data-payment-journey-idle]"
+          : state.status === "error"
+            ? "[data-payment-journey-error]"
+            : state.status === "complete"
+              ? "[data-payment-journey-complete]"
+              : (() => {
+                  const activeStep = statusMap[state.status] ?? 0;
+                  return activeStep === 0 ? null : `[data-step="${activeStep}"]`;
+                })();
+      if (!selector) return;
+      const el = document.querySelector(selector);
+      (el as HTMLElement | null)?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 150);
     return () => clearTimeout(timer);
   }, [state.status]);
@@ -414,7 +433,7 @@ export default function PaymentJourneyInner() {
 
   if (state.status === "idle") {
     return (
-      <div className={styles.hero}>
+      <div className={styles.hero} data-payment-journey-idle>
         <span className={styles.heroTitle}>Payment Integration Journey</span>
         <p className={styles.heroSubtitle}>
           Walk through a complete Ottu payment integration with live API calls.
@@ -431,7 +450,7 @@ export default function PaymentJourneyInner() {
 
   if (state.status === "error") {
     return (
-      <div className={styles.errorCard}>
+      <div className={styles.errorCard} data-payment-journey-error>
         <Icon path={mdiAlertCircleOutline} size={1.5} className={styles.errorIcon} />
         <p className={styles.errorMessage}>{state.errorMessage}</p>
         <div className={styles.actions}>
@@ -451,7 +470,7 @@ export default function PaymentJourneyInner() {
         <div className={styles.journey}>
           {STEPS.map((_, i) => renderStep(i + 1, null))}
         </div>
-        <div className={styles.completeCard}>
+        <div className={styles.completeCard} data-payment-journey-complete>
           <span className={styles.completeIcon}>&#x1F389;</span>
           <h3 className={styles.completeTitle}>Journey Complete</h3>
           <p className={styles.completeSubtitle}>

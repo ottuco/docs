@@ -1,0 +1,25 @@
+# Overrides for: components/schemas/Agreement
+# Used by CheckoutPOSTRequest.agreement and related request schemas.
+
+properties:
+  id:
+    description: |
+      It serves as a unique identifier for the agreement established with the payer. The Agreement ID plays a crucial role as an identifier for correlated payments associated with a customer order or invoice, highlighting the need for it to vary based on the correlated payments.
+  amount_variability:
+    description: "It defines if the payment amount can vary with each transaction within the agreement. Enum: `fixed`, `variable`."
+  start_date:
+    description: "The date on which the agreement with the payer to process payments begins."
+  expiry_date:
+    description: "The final date until which the agreement remains valid."
+  max_amount_per_cycle:
+    description: "The agreed-upon maximum amount for an individual payment within the series."
+  cycle_interval_days:
+    description: "The number of days between each recurring payment."
+  total_cycles:
+    description: "The total number of payment cycles within the agreement duration."
+  frequency:
+    description: |
+      This pertains to the frequency of payments within the series as agreed upon with the payer. Such as: `irregular`, `daily`, `weekly`, `monthly`, `quarterly`, `semi_annually`, `yearly`, and `other`. When `type` set as `unscheduled`, `frequency` should set as `irregular`.
+  type:
+    description: |
+      The type of commercial agreement that the payer has with the merchant: `recurring` (Default), `unscheduled`, `other`, `event_based`, `installment`.

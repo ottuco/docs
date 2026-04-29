@@ -1,228 +1,97 @@
 # Resources & Support
 
-Your comprehensive guide to Ottu resources, tools, and support channels.
+A curated list of what's actually available to developers and merchants integrating with Ottu. If a link doesn't appear here, it isn't something we publish today — reach out to your account manager for anything you can't find.
 
 ## Developer Resources
 
-### API Documentation
-- **[API Reference](/developers/apis/ottu-api)**: Complete API documentation
-- **[Postman Collection](https://documenter.getpostman.com/view/ottu)**: Ready-to-use API requests
-- **[OpenAPI Specification](https://api.ottu.com/docs/openapi.json)**: Machine-readable API spec
-- **[GraphQL Schema](https://api.ottu.com/graphql)**: GraphQL API documentation
+### API Reference
 
-### SDKs & Libraries
+- **[Interactive API Reference](/developers/apis/ottu-api/)** — browse every endpoint, view request and response schemas, and try calls directly in the browser.
+- **[Authentication](/developers/getting-started/authentication/)** — API keys, Basic Auth, and Public Key for the Checkout SDK.
+- **[API Fundamentals](/developers/getting-started/api-fundamentals/)** — pagination, rate limits, error handling, and amount formatting.
+- **[Sandbox & Test Cards](/developers/payments/sandbox/)** — the shared sandbox environment and test card numbers for each gateway.
 
-#### Official SDKs
-- **[JavaScript SDK](https://github.com/ottuco/ottu-js)**: Frontend and Node.js integration
-- **[Python SDK](https://github.com/ottuco/ottu-python)**: Python library
-- **[PHP SDK](https://github.com/ottuco/ottu-php)**: PHP integration
-- **[Ruby SDK](https://github.com/ottuco/ottu-ruby)**: Ruby gem
-- **[iOS SDK](https://github.com/ottuco/ottu-ios)**: Native iOS integration
-- **[Android SDK](https://github.com/ottuco/ottu-android)**: Native Android integration
-- **[Flutter SDK](https://github.com/ottuco/ottu-flutter)**: Cross-platform mobile
+### SDKs
 
-#### Community Libraries
-- **[Go SDK](https://github.com/ottu-community/ottu-go)**: Community-maintained Go library
-- **[Java SDK](https://github.com/ottu-community/ottu-java)**: Community-maintained Java library
-- **[.NET SDK](https://github.com/ottu-community/ottu-dotnet)**: Community-maintained .NET library
+#### Checkout SDK — embeddable payment UI
 
-### Sample Code & Examples
+The Checkout SDK collects card details, handles 3-D Secure, and routes payment submission to Ottu. It's available for four platforms:
 
-#### GitHub Repositories
-- **[Sample Applications](https://github.com/ottuco/examples)**: Complete example applications
-- **[Code Snippets](https://github.com/ottuco/code-snippets)**: Useful code examples
-- **[Webhook Examples](https://github.com/ottuco/webhook-examples)**: Webhook implementation examples
-- **[Integration Templates](https://github.com/ottuco/integration-templates)**: Boilerplate code
+- [Web](/developers/payments/checkout-sdk/web/)
+- [iOS](/developers/payments/checkout-sdk/ios/)
+- [Android](/developers/payments/checkout-sdk/android/)
+- [Flutter](/developers/payments/checkout-sdk/flutter/)
 
-#### Live Demos
-- **[Interactive API Explorer](/developers/apis/ottu-api)**: Test API calls in your browser
-- **[Payment Demo](https://demo.ottu.com)**: Live payment flow demonstration
-- **[Webhook Tester](https://webhook-tester.ottu.com)**: Test webhook implementations
+#### Server-side integration
 
-### Development Tools
+- **[Python SDK](https://github.com/ottuco/ottu-python)** — Python wrapper around the REST API.
+- **[Django SDK](/developers/getting-started/#django-sdk)** — Django-specific integration with built-in session management, webhooks, and card operations.
 
-#### Testing & Debugging
-- **[Webhook Debugger](https://webhook-debugger.ottu.com)**: Debug webhook events
-- **[API Status Monitor](https://status.ottu.com)**: Real-time API status
-- **[Test Card Generator](https://test-cards.ottu.com)**: Generate test card numbers
-- **[Mock Server](https://mock.ottu.com)**: Test server for development
-
-#### Integration Tools
-- **[Postman Collection](https://www.getpostman.com/collections/ottu)**: API testing collection
-- **[Insomnia Workspace](https://insomnia.ottu.com)**: Alternative API client
-- **[Bruno Collection](https://bruno.ottu.com)**: Open-source API client collection
+:::note
+Ottu does not publish server-side SDKs for other languages. Integrate directly via REST using the [Interactive API Reference](/developers/apis/ottu-api/) — every endpoint page includes request examples in cURL, Python, Node.js, and PHP.
+:::
 
 ## Business Resources
 
-### Getting Started Guides
-- **Merchant Onboarding**: Complete setup guide
-- **Payment Gateway Setup**: Gateway configuration
-- **Dashboard Tutorial**: Navigate the dashboard
-- **First Payment**: Create your first payment
+### E-commerce & Platform Integrations
 
-### Templates & Assets
+Pre-built Ottu integrations for common e-commerce and ERP platforms, documented in [Integrations](/business/integrations/):
 
-#### Email Templates
-- **[Payment Confirmation](https://templates.ottu.com/email/payment-confirmation)**: Customer receipts
-- **[Invoice Templates](https://templates.ottu.com/email/invoice)**: Professional invoices
-- **[Reminder Templates](https://templates.ottu.com/email/reminder)**: Payment reminders
-- **[Refund Notifications](https://templates.ottu.com/email/refund)**: Refund confirmations
-
-#### Branding Assets
-- **[Logo Guidelines](https://brand.ottu.com/logo)**: Ottu logo usage
-- **[Color Palette](https://brand.ottu.com/colors)**: Official brand colors
-- **[Typography](https://brand.ottu.com/fonts)**: Recommended fonts
-- **[Brand Kit](https://brand.ottu.com/kit)**: Complete branding package
-
-### E-commerce Integrations
-
-#### Plugins & Extensions
-- **[Shopify App](https://apps.shopify.com/ottu)**: Shopify integration
-- **[WooCommerce Plugin](https://wordpress.org/plugins/ottu-woocommerce)**: WordPress integration
-- **[Magento Extension](https://marketplace.magento.com/ottu-payment)**: Magento integration
-- **[BigCommerce App](https://www.bigcommerce.com/apps/ottu)**: BigCommerce integration
-
-#### CMS Integrations
-- **[WordPress Plugin](https://wordpress.org/plugins/ottu-payments)**: WordPress payments
-- **[Drupal Module](https://www.drupal.org/project/ottu)**: Drupal integration
-- **[Joomla Extension](https://extensions.joomla.org/extension/ottu)**: Joomla integration
+- Shopify (with automated billing)
+- WooCommerce
+- Magento
+- OpenCart
+- CS-Cart
+- PrestaShop
+- Microsoft Dynamics NAV
+- SAP Hybris
+- Odoo
+- nopCommerce
 
 ### Industry Solutions
 
-#### Specialized Modules
-- **Real Estate Module**: Property payment solutions
-- **Satellite Payments**: Offline payment processing
-- **Subscription Billing**: Recurring payment solutions
-- **Marketplace Payments**: Multi-vendor platforms
+- **[Real Estate](/business/industry/real-estate/)** — property portfolio, tenant and contract lifecycle, invoicing, maintenance tracking, and auditing.
+- **[Satellite](/business/industry/satellite/)** — multi-installation dashboard for operators managing many merchant accounts, with Shopify billing automation.
 
-#### Compliance Resources
-- **PCI DSS Guide**: Security compliance
-- **GDPR Compliance**: Data protection
-- **SOX Compliance**: Financial reporting standards
-- **Industry Standards**: Regulatory compliance
+### Compliance
 
-## Support Channels
+See [Compliance & Security](/business/compliance/) for the authoritative posture. In summary:
 
-### Direct Support
-- **Email Support**: support@ottu.com
-- **Developer Support**: dev-support@ottu.com
-- **Sales Inquiries**: sales@ottu.com
-- **Partnership Opportunities**: partners@ottu.com
+- **PCI DSS Level 1** — the highest tier of the Payment Card Industry Data Security Standard.
+- **ISO/IEC 27001** — information security management system certification.
+- **Data Processing Agreement (DPA)** — GDPR-compliant data processing terms available on request.
 
-### Live Support
-- **Live Chat**: Available 24/7 in dashboard
-- **Phone Support**: Available for verified accounts
-- **Screen Sharing**: Available for complex issues
-- **Emergency Support**: Priority support for critical issues
+Contact `support@ottu.com` to request certificates or a DPA.
 
-### Community Support
-- **[Discord Community](https://discord.gg/ottu)**: Real-time developer chat
-- **[Stack Overflow](https://stackoverflow.com/questions/tagged/ottu)**: Technical Q&A
-- **[Reddit Community](https://reddit.com/r/ottu)**: Community discussions
-- **[GitHub Discussions](https://github.com/ottuco/community/discussions)**: Open discussions
+## Support
 
-## Training & Education
+### Contact
 
-### Webinars & Events
-- **[Monthly Webinars](https://events.ottu.com/webinars)**: Regular training sessions
-- **[Developer Meetups](https://events.ottu.com/meetups)**: Local developer events
-- **[Industry Conferences](https://events.ottu.com/conferences)**: Payment industry events
-- **[Workshops](https://events.ottu.com/workshops)**: Hands-on training
+- **Support**: [support@ottu.com](mailto:support@ottu.com)
+- **Sales and partnerships**: via [ottu.com](https://ottu.com)
+- **Live chat**: available in the merchant dashboard once you're signed in.
 
-### Learning Resources
-- **[Video Tutorials](https://learn.ottu.com/videos)**: Step-by-step video guides
-- **[Best Practices](https://learn.ottu.com/best-practices)**: Optimization guides
-- **[Case Studies](https://learn.ottu.com/case-studies)**: Real-world examples
-- **[Certification Program](https://learn.ottu.com/certification)**: Professional certification
+### When contacting support
 
-### Documentation
-- **[Knowledge Base](https://help.ottu.com)**: Comprehensive help articles
-- **[FAQ](https://help.ottu.com/faq)**: Frequently asked questions
-- **[Troubleshooting](https://help.ottu.com/troubleshooting)**: Common issues and solutions
-- **[Migration Guides](https://help.ottu.com/migration)**: Platform migration assistance
+To help us resolve issues quickly, include:
 
-## System Status & Updates
+- **The exact error message** (copy-paste, not a screenshot description)
+- **What you were trying to do** (the API call, the dashboard flow, the SDK action)
+- **A minimal reproducible code snippet** with any sensitive data removed
+- **Your environment** — programming language/framework, SDK version, whether you're hitting sandbox or production
 
-### Service Status
-- **[Status Page](https://status.ottu.com)**: Real-time system status
-- **[Incident History](https://status.ottu.com/history)**: Past incidents and resolutions
-- **[Maintenance Schedule](https://status.ottu.com/maintenance)**: Planned maintenance
-- **[Performance Metrics](https://status.ottu.com/metrics)**: System performance data
+### Status
 
-### Updates & Announcements
-- **Changelog**: Feature updates and improvements
-- **[Developer Blog](https://blog.ottu.com/developers)**: Technical articles
-- **[Product Updates](https://blog.ottu.com/product)**: New features and changes
-- **[Security Bulletins](https://blog.ottu.com/security)**: Security updates
+- [status.ottu.com](https://status.ottu.com) — real-time platform status and incident history.
 
-## Third-Party Integrations
+## Documentation
 
-### Accounting Software
-- **[QuickBooks Integration](https://integrations.ottu.com/quickbooks)**: Accounting sync
-- **[Xero Integration](https://integrations.ottu.com/xero)**: Financial management
-- **[FreshBooks Integration](https://integrations.ottu.com/freshbooks)**: Invoicing sync
-- **[Sage Integration](https://integrations.ottu.com/sage)**: Enterprise accounting
-
-### CRM Systems
-- **[Salesforce Integration](https://integrations.ottu.com/salesforce)**: Customer management
-- **[HubSpot Integration](https://integrations.ottu.com/hubspot)**: Marketing automation
-- **[Pipedrive Integration](https://integrations.ottu.com/pipedrive)**: Sales pipeline
-- **[Zoho Integration](https://integrations.ottu.com/zoho)**: Business suite
-
-### Communication Tools
-- **[Slack Integration](https://integrations.ottu.com/slack)**: Team notifications
-- **[Microsoft Teams Integration](https://integrations.ottu.com/teams)**: Collaboration
-- **[Discord Integration](https://integrations.ottu.com/discord)**: Community notifications
-- **[Email Marketing](https://integrations.ottu.com/email)**: Automated campaigns
-
-## Legal & Compliance
-
-### Terms & Policies
-- **[Terms of Service](https://ottu.com/terms)**: Usage terms
-- **[Privacy Policy](https://ottu.com/privacy)**: Data handling
-- **[Cookie Policy](https://ottu.com/cookies)**: Cookie usage
-- **[Acceptable Use Policy](https://ottu.com/acceptable-use)**: Usage guidelines
-
-### Compliance Documents
-- **[PCI DSS Certificate](https://ottu.com/compliance/pci)**: Security certification
-- **[SOC 2 Report](https://ottu.com/compliance/soc2)**: Security audit
-- **[ISO 27001 Certificate](https://ottu.com/compliance/iso27001)**: Information security
-- **[GDPR Compliance](https://ottu.com/compliance/gdpr)**: Data protection
-
-### Legal Resources
-- **[Data Processing Agreement](https://ottu.com/legal/dpa)**: GDPR compliance
-- **[Merchant Agreement](https://ottu.com/legal/merchant)**: Service agreement
-- **[API Terms](https://ottu.com/legal/api-terms)**: API usage terms
-- **[Developer Terms](https://ottu.com/legal/developer-terms)**: Development guidelines
-
-## Getting Help
-
-### Before Contacting Support
-1. **Check the Documentation**: Most questions are answered in our guides
-2. **Search the Knowledge Base**: Use the search function to find solutions
-3. **Visit the Community**: Other users may have faced similar issues
-4. **Review the Status Page**: Check if there are known issues
-
-### When Contacting Support
-- **Include Error Messages**: Copy exact error messages
-- **Provide Context**: Explain what you were trying to do
-- **Share Code Snippets**: Include relevant code (remove sensitive data)
-- **Mention Your Setup**: Programming language, framework, environment
-
-### Response Times
-- **General Support**: 24 hours
-- **Developer Support**: 12 hours
-- **Critical Issues**: 4 hours
-- **Emergency Support**: 1 hour (for verified accounts)
-
-## Feedback & Suggestions
-
-We value your feedback! Help us improve by:
-- **[Feature Requests](https://feedback.ottu.com)**: Suggest new features
-- **[Bug Reports](https://github.com/ottuco/bug-reports)**: Report issues
-- **[Documentation Feedback](https://feedback.ottu.com)**: Improve our docs
-- **[User Survey](https://survey.ottu.com)**: Share your experience
+- [About Ottu](/overview/about/)
+- [Architecture](/overview/architecture/)
+- [Developer Docs](/developers/getting-started/)
+- [Business Guide](/business/)
+- [Glossary](/glossary/)
 
 ---
 
-**Need immediate assistance?** Contact our support team at support@ottu.com or use the live chat in your dashboard. We're here to help you succeed with Ottu!
+**Need immediate assistance?** Email [support@ottu.com](mailto:support@ottu.com) or use the live chat in your dashboard.

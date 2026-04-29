@@ -22,7 +22,6 @@ const sidebars: SidebarsConfig = {
       items: [
         'overview/about',
         'overview/architecture',
-        'overview/changelog',
       ],
     },
     {

@@ -61,89 +61,27 @@ properties:
     description: |
       If true, it generates short checkout retrieval URL, which could be embedded in either SMS, Email, or WhatsApp messages, as it uses fewer characters. If an external URL shortening service, such as [Bitly](https://bitly.com/), is configured, the `checkout_short_url` will be shorter than `checkout_url` parameter. If not configured, the `checkout_short_url` will be in the format of `https://<ottu-url>/b/abc123`. Default value is false. <!-- TODO:merchant-link URL shortener configuration page -->
 
+  # Nested field descriptions for card_acceptance_criteria, notifications,
+  # billing_address, shipping_address, and agreement live in their referenced
+  # schemas: CardAcceptanceCriteria.yaml, Notifications.yaml, Address.yaml,
+  # ShippingAddress.yaml, Agreement.yaml.
+
   card_acceptance_criteria:
     description: |
       This field allows the merchant to define specific rules and conditions that a card must meet to be eligible for payment. These stipulations apply regardless of whether a customer chooses to pay using a saved card or opts to add a new card for the transaction. The `card_acceptance_criteria` field is applicable only for direct payments and not for hosted session payments.
-    properties:
-      min_expiry_time:
-        description: |
-          Specifies the minimum required validity period, in days, for a card to be eligible for payment. If set to 30 days, for example, cards set to expire within the next month would be declined. Additionally, it defaults to 30 days when the `payment_type` is `auto_debit`. If any other payment type is selected, no default value is set.
 
   notifications:
     description: |
       An object that contains the notification settings for this payment transaction, including SMS and email notifications, as well as the events for which they will be sent (e.g., `created`, `paid`, `refund`, `canceled`, etc.). This field may be used to configure and customize the [notifications]({{apiBaseUrl}}/notifications/) sent to customers and internal recipients throughout the payment process.
-    properties:
-      email:
-        description: |
-          Will be triggered at the following notification events: `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`, `voided`, `refunded`, `captured`. If the payment transaction transitions to an **error** state and an email notification has been set up for the **failed** state, then the customer will receive an email.
-      sms:
-        description: |
-          Will be triggered at the following notification events: `created`, `paid`, `canceled`, `failed`, `expired`, `authorized`, `voided`, `refunded`, `captured`. If the payment transaction transitions to an **error** state and an SMS notification has been set up for the **failed** state, then the customer will receive an SMS.
 
   billing_address:
     description: |
       An object to save customer registered address data into payment transaction.
-    properties:
-      line1:
-        description: "Should be filled by street & house data."
-      line2:
-        description: "Additional address data for accuracy."
-      city:
-        description: "The city where the customer is living and registered."
-      state:
-        description: "State of the customer's city (sometimes the same as the city)."
-      country:
-        description: "Customer's country, [ISO 3166-1 Alpha-2 code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Will be validated against existing countries."
-      postal_code:
-        description: "Postal code (may have different length for different countries)."
 
   shipping_address:
     description: |
       An object to save address data into payment transaction.
-    properties:
-      line1:
-        description: "Location details where the shipment should be delivered to. Should be filled by street & house data."
-      line2:
-        description: "Additional address data for accuracy."
-      city:
-        description: "The city where the shipment should be delivered to."
-      state:
-        description: "The state where the shipment should be delivered to (sometimes the same as the city)."
-      country:
-        description: "Destination country, [ISO 3166-1 Alpha-2 code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Will be validated against existing countries."
-      postal_code:
-        description: "Postal code (may have different length for different countries)."
-      first_name:
-        description: "Shipment recipient first name."
-      last_name:
-        description: "Shipment recipient last name."
-      email:
-        description: "Shipment recipient email address."
-      phone:
-        description: "Shipment recipient phone number."
 
   agreement:
     description: |
       An established contractual arrangement with the payer, which authorizes the merchant to securely store and subsequently utilize their payment information for specific purposes. This could encompass arrangements like recurring payments for services such as mobile subscriptions, installment-based payments for purchases, arrangements for ad-hoc charges like account top-ups, or for standard industry practices like penalty charges for missed appointments. For more information please refer to [Recurring Payments]({{apiBaseUrl}}/cards-and-tokens/recurring-payments/). It is imperative for the merchant to strictly avoid including these parameters when the payment type is labeled as `one_off`. The agreement parameter should be sent exclusively when the payment type is designated as `auto_debit`.
-    properties:
-      id:
-        description: |
-          It serves as a unique identifier for the agreement established with the payer. The Agreement ID plays a crucial role as an identifier for correlated payments associated with a customer order or invoice, highlighting the need for it to vary based on the correlated payments.
-      amount_variability:
-        description: "It defines if the payment amount can vary with each transaction within the agreement. Enum: `fixed`, `variable`."
-      start_date:
-        description: "The date on which the agreement with the payer to process payments begins."
-      expiry_date:
-        description: "The final date until which the agreement remains valid."
-      max_amount_per_cycle:
-        description: "The agreed-upon maximum amount for an individual payment within the series."
-      cycle_interval_days:
-        description: "The number of days between each recurring payment."
-      total_cycles:
-        description: "The total number of payment cycles within the agreement duration."
-      frequency:
-        description: |
-          This pertains to the frequency of payments within the series as agreed upon with the payer. Such as: `irregular`, `daily`, `weekly`, `monthly`, `quarterly`, `semi_annually`, `yearly`, and `other`. When `type` set as `unscheduled`, `frequency` should set as `irregular`.
-      type:
-        description: |
-          The type of commercial agreement that the payer has with the merchant: `recurring` (Default), `unscheduled`, `other`, `event_based`, `installment`.
