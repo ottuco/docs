@@ -10,6 +10,7 @@
 @import url("./markdown.css");
 @import url("./openapi.css");
 @import url("./sidebar.css");
+@import url("./initial-loader.css");
 
 /* Consolas local font */
 @font-face {
