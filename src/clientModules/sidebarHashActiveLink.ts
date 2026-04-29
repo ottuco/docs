@@ -479,6 +479,115 @@ function smoothScrollToHash(hashId: string): void {
   window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
 }
 
+// After the gate's smooth scroll lands, content can still shift
+// (heavy <ApiExplorer> Redux UI hydrating, late images/fonts loading,
+// schema collapsibles measuring themselves) — and a shift in any
+// element ABOVE the target pushes the target down without changing
+// scrollY, so the user sees the section visually drift below the
+// navbar. We watch for this for a few seconds after the scroll lands
+// and silently scrollBy() to compensate, keeping the target pinned at
+// our intended top offset. Disengages the moment the user provides
+// any real scroll input.
+const MAINTAIN_DURATION_MS = 5000;
+const MAINTAIN_TICK_MS = 100;
+
+// Cancellation handle for the most recent maintainTargetPosition call.
+// Set on every new run; called on route change so a stale compensator
+// from the previous page doesn't fight the new page's scroll position
+// (its `target` element is still captured by closure but detached from
+// the live DOM, so getBoundingClientRect returns 0/0 → drift looks
+// like -76 → it scrollBy(-76) every tick, which is exactly the bug
+// we'd otherwise create).
+let cancelMaintain: (() => void) | null = null;
+
+function maintainTargetPosition(hashId: string): void {
+  // Cancel any in-flight maintenance for the previous route.
+  cancelMaintain?.();
+
+  const target = document.getElementById(hashId);
+  if (!target) return;
+  const startedAt = performance.now();
+  let cancelled = false;
+
+  const compensate = () => {
+    if (cancelled) return false;
+    if (!spyMuted) return false; // user took over
+    if (performance.now() - startedAt > MAINTAIN_DURATION_MS) return false;
+    // If the element fell out of the live DOM (route change since we
+    // started), bail rather than chasing a phantom drift.
+    if (!target.isConnected) return false;
+
+    const topOffset = getNavbarHeight() + 16;
+    const rect = target.getBoundingClientRect();
+    const drift = Math.round(rect.top - topOffset);
+    if (Math.abs(drift) > 1) {
+      const htmlEl = document.documentElement;
+      const prev = htmlEl.style.scrollBehavior;
+      htmlEl.style.scrollBehavior = "auto";
+      window.scrollBy(0, drift);
+      htmlEl.style.scrollBehavior = prev;
+    }
+    return true;
+  };
+
+  // Two complementary watchers:
+  //   1. ResizeObserver — fires synchronously when body geometry changes,
+  //      so we correct in the same frame as the shift (invisible to user).
+  //   2. setInterval fallback — catches shifts the ResizeObserver misses
+  //      (e.g. fixed-height elements changing position via transform).
+  let ro: ResizeObserver | null = null;
+  if (typeof ResizeObserver !== "undefined") {
+    ro = new ResizeObserver(() => {
+      if (!compensate()) ro?.disconnect();
+    });
+    ro.observe(document.body);
+  }
+  const interval = window.setInterval(() => {
+    if (!compensate()) {
+      window.clearInterval(interval);
+      ro?.disconnect();
+    }
+  }, MAINTAIN_TICK_MS);
+
+  cancelMaintain = () => {
+    cancelled = true;
+    window.clearInterval(interval);
+    ro?.disconnect();
+  };
+}
+
+/**
+ * Wait until the page has stopped scrolling (scrollY unchanged for a
+ * few consecutive animation frames). Used to defer
+ * maintainTargetPosition until AFTER the gate's smooth-scroll has
+ * finished animating; otherwise the compensator sees the in-progress
+ * scroll as "drift" and snaps the page mid-animation, breaking it.
+ */
+const SCROLL_IDLE_FRAMES = 6;
+function waitForScrollIdle(timeoutMs: number, onIdle: () => void): void {
+  const startedAt = performance.now();
+  let lastY = window.scrollY;
+  let stableCount = 0;
+  const tick = () => {
+    if (performance.now() - startedAt > timeoutMs) {
+      onIdle();
+      return;
+    }
+    if (window.scrollY === lastY) {
+      stableCount += 1;
+      if (stableCount >= SCROLL_IDLE_FRAMES) {
+        onIdle();
+        return;
+      }
+    } else {
+      stableCount = 0;
+      lastY = window.scrollY;
+    }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
 /**
  * Watch `scrollHeight` across animation frames. When it's been
  * unchanged for STABILITY_FRAMES in a row AND the hash target is in
@@ -528,10 +637,15 @@ function waitForLayoutStability(
  */
 function runInitialHashGate(): void {
   if (initialLoadHandled) return;
-  initialLoadHandled = true;
 
   const hashId = getHashTargetId();
-  if (!hashId) return;
+  if (!hashId) return; // no hash on initial load — no gate, leave flag false
+
+  // Set the flag ONLY when we're committing to gate this load. Otherwise
+  // a sequence like (mount with no hash) → (hash added by router) would
+  // mark the load handled without ever showing the gate, and the
+  // subsequent route update would fall through to the SPA branch.
+  initialLoadHandled = true;
 
   showLoader();
 
@@ -551,9 +665,60 @@ function runInitialHashGate(): void {
         // Wait for the fade-out transition to finish (see #ottu-initial-hash-loader
         // style: 180ms) plus a small buffer so the loader is fully out of
         // the way before the scroll animation begins.
-        window.setTimeout(() => smoothScrollToHash(hashId), 220);
+        window.setTimeout(() => {
+          smoothScrollToHash(hashId);
+          // After the smooth-scroll completes, late content (heavy
+          // ApiExplorer hydration, fonts/images, deep <Details> measuring)
+          // can shift layout and push the target below the navbar. Start
+          // a short window of layout-shift compensation so the target
+          // visually stays put. Delay long enough that the smooth-scroll
+          // animation itself has finished (~700ms for 9000px in Chrome).
+          // Wait for the smooth-scroll animation to ACTUALLY stop
+          // (scrollY stable for several frames) before starting the
+          // layout-shift compensator. Without this, the compensator
+          // fires mid-animation, sees the in-progress scroll as
+          // "drift", and instant-snaps the page to the target — which
+          // visually breaks the smooth-scroll the user is watching.
+          // 4000ms timeout is plenty for browser smooth-scroll to
+          // finish even on tall pages with multi-thousand-px distances.
+          waitForScrollIdle(4000, () => maintainTargetPosition(hashId));
+        }, 220);
       });
-    }, 200)
+    }, 200);
+  });
+}
+
+/**
+ * SPA cross-page navigation handler — fires when the user clicks a
+ * sidebar link to a DIFFERENT page that has a hash. Browsers don't run
+ * native scroll-to-anchor for client-side routing, and Docusaurus's
+ * `scrollAfterNavigation` runs before lazy `<ApiDocEmbed>` content has
+ * hydrated, so deep-link targets often don't exist when it tries to
+ * scroll. We wait for layout stability, then smooth-scroll to the
+ * target ourselves and start the same layout-shift compensator the
+ * initial-load path uses.
+ *
+ * No loader here: the user just clicked something, they expect
+ * immediate visual response. The smooth-scroll IS the response.
+ *
+ * The dispatch in `onRouteDidUpdate` already filters to "cross-page
+ * with hash" — same-page hash changes go through the click listener
+ * synchronously, and no-hash cross-page nav lets Docusaurus's default
+ * scroll-to-top run.
+ */
+let lastNavPathname: string | null = null;
+function runSpaHashScroll(): void {
+  const hashId = getHashTargetId();
+  if (!hashId) return;
+
+  // Re-mute scroll-spy: this is effectively a fresh page load from the
+  // user's perspective, and hydration on the new page will cause the
+  // same layout-shift scroll noise we mute on initial load.
+  spyMuted = true;
+
+  waitForLayoutStability(hashId, () => {
+    smoothScrollToHash(hashId);
+    window.setTimeout(() => maintainTargetPosition(hashId), 1200);
   });
 }
 
@@ -580,10 +745,36 @@ export function onRouteDidUpdate(): void {
   watchList = [];
   lastActiveHash = null;
   spyMuted = true;
+  // Cancel any layout-shift compensator still running for the previous
+  // route — its target element is now detached, so it would chase a
+  // phantom drift and break the new page's scroll position.
+  cancelMaintain?.();
   scheduleUpdate();
-  // One-shot hydration gate. No-op on SPA navigations (initialLoadHandled
-  // is set true on the first call), no-op when URL has no hash.
-  runInitialHashGate();
+
+  // Branch on initial-load vs cross-page SPA-nav. Same-page hash changes
+  // (click or back/forward to a hash on the current page) are NOT
+  // re-scrolled here — Docusaurus's own scroll handlers already do that
+  // synchronously, and adding our wait-for-stability + smooth-scroll on
+  // top makes them slower for no benefit. Captured BEFORE runInitialHashGate
+  // flips the flag, otherwise runSpaHashScroll would also fire on the
+  // very first route update and double-handle initial load.
+  const isFirstRouteUpdate = !initialLoadHandled;
+  const prevPath = lastNavPathname;
+  const currentPath = window.location.pathname;
+  lastNavPathname = currentPath;
+
+  if (isFirstRouteUpdate) {
+    runInitialHashGate();
+  } else if (currentPath !== prevPath) {
+    // Cross-page SPA navigation. The new page's lazy <ApiDocEmbed>
+    // content hasn't hydrated when Docusaurus's scrollAfterNavigation
+    // fires — its scrollIntoView on the hash target silently no-ops
+    // because the deep schema element doesn't exist yet, and the user
+    // ends up wherever the browser left scrollY (often deep into the
+    // previous page's position). We wait for hydration ourselves,
+    // then smooth-scroll, then run the layout-shift compensator.
+    runSpaHashScroll();
+  }
 }
 
 // ── Listeners ────────────────────────────────────────────────────────────

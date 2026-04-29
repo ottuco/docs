@@ -282,8 +282,20 @@ html[data-theme="dark"] {
   padding-left: 16px;
 }
 
-:target {
-  scroll-margin-top: calc(var(--ifm-navbar-height));
+/* scroll-padding-top on html already reserves the navbar height (60px),
+   so scrollIntoView already lands the target right below the navbar.
+   scroll-margin-top adds visual breathing room — match the 16px offset
+   our scroll-spy and gate's smooth-scroll use, so any source of
+   scrollIntoView (Docusaurus's scrollAfterNavigation, markdown-source-
+   plugin's scrollToElement, manual hash-link clicks) lands the target
+   at the same y-position as our gate.
+
+   Apply to [id] not :target — lazy-rendered schema elements (deep API
+   property anchors) don't exist when the URL hash is first parsed, so
+   the browser's :target tracking misses them. [id] covers every
+   anchorable element regardless of when it appeared in the DOM. */
+[id] {
+  scroll-margin-top: 16px;
 }
 
 /* ================================
