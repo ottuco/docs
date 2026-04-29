@@ -107,7 +107,7 @@ The documentation site includes an [MCP server](https://modelcontextprotocol.io/
 
 ```bash
 # Claude Code
-claude mcp add --transport http ottu-docs https://docs.ottu.net/mcp
+claude mcp add --transport http ottu-docs https://docs.ottu.com/mcp
 ```
 
 Or click the **MCP** button in the navbar for setup instructions for Cursor, VS Code, and other tools.
