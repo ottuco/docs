@@ -380,74 +380,35 @@ function getHashTargetId(): string | null {
   return decodeURIComponent(hash.slice(1));
 }
 
-function showLoader(): HTMLElement {
-  const existing = document.getElementById("ottu-initial-hash-loader");
-  if (existing) return existing;
+// Loader visuals live entirely in CSS: src/css/custom.css uses
+// `html[data-initial-hash-loading]` pseudo-elements to paint a
+// full-screen overlay and spinner. The synchronous <script> in
+// docusaurus.config.ts headTags sets the attribute before body parses,
+// so the overlay is on screen from the very first paint — there is no
+// pre-loader FOUC the user could see. The functions below are just
+// idempotent attribute toggles.
 
-  const overlay = document.createElement("div");
-  overlay.id = "ottu-initial-hash-loader";
-  overlay.setAttribute("aria-hidden", "true");
-  // Inline styles + style tag: zero CSS coupling, guaranteed to apply
-  // even if the global stylesheet hasn't been injected by webpack yet.
-  overlay.innerHTML = `
-    <style>
-      /* Hide the main page scrollbar while the loader is up so the
-         user doesn't see the scrollbar thumb jump around as lazy
-         content hydrates and snapToTop() fires. scrollbar-gutter
-         reserves the gutter so content doesn't shift 15px sideways
-         when the scrollbar reappears after the loader fades. */
-      html[data-initial-hash-loading="true"] {
-        scrollbar-gutter: stable;
-        scrollbar-width: none;          /* Firefox */
-        -ms-overflow-style: none;       /* legacy Edge */
-      }
-      html[data-initial-hash-loading="true"]::-webkit-scrollbar {
-        width: 0;
-        height: 0;
-        display: none;                  /* Chrome/Safari */
-      }
-      #ottu-initial-hash-loader {
-        position: fixed;
-        inset: 0;
-        z-index: 100000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--ifm-background-color, #ffffff);
-        transition: opacity 180ms ease-out;
-        opacity: 1;
-      }
-      #ottu-initial-hash-loader[data-hiding="true"] { opacity: 0; }
-      #ottu-initial-hash-loader .ottu-spinner {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        border: 3px solid rgba(242, 126, 32, 0.15);
-        border-top-color: var(--ifm-color-primary, #f27e20);
-        animation: ottu-spin 0.9s linear infinite;
-      }
-      @keyframes ottu-spin {
-        to { transform: rotate(360deg); }
-      }
-    </style>
-    <div class="ottu-spinner"></div>
-  `;
+const LOADER_FADE_MS = 220;
 
-  // Prefer appending to <body>; if body isn't parsed yet, fall back to
-  // documentElement. Either way, the overlay is detached from React's
-  // render tree so hydration won't clobber it.
-  const parent = document.body ?? document.documentElement;
-  parent.appendChild(overlay);
+function showLoader(): void {
+  // Idempotent: the head script may have already set this on initial
+  // page load. We re-set it for safety in case route logic ever calls
+  // showLoader() outside of that path.
   document.documentElement.setAttribute("data-initial-hash-loading", "true");
-  return overlay;
 }
 
 function hideLoader(): void {
-  const overlay = document.getElementById("ottu-initial-hash-loader");
-  document.documentElement.removeAttribute("data-initial-hash-loading");
-  if (!overlay) return;
-  overlay.setAttribute("data-hiding", "true");
-  window.setTimeout(() => overlay.remove(), 220);
+  const htmlEl = document.documentElement;
+  if (!htmlEl.hasAttribute("data-initial-hash-loading")) return;
+  // Flip attribute to "fading" so CSS transitions opacity to 0. After
+  // the transition completes, drop the attribute entirely so the
+  // pseudo-elements stop rendering and the scrollbar comes back.
+  htmlEl.setAttribute("data-initial-hash-loading", "fading");
+  window.setTimeout(() => {
+    if (htmlEl.getAttribute("data-initial-hash-loading") === "fading") {
+      htmlEl.removeAttribute("data-initial-hash-loading");
+    }
+  }, LOADER_FADE_MS + 20);
 }
 
 /**
@@ -654,37 +615,19 @@ function runInitialHashGate(): void {
   // sync while the loader is up.
 
   waitForLayoutStability(hashId, () => {
-    // Sequence: snap to top under the loader → fade loader → smooth-scroll
-    // to the target. The user never sees the hydration mess or the reset
-    // to top; they just see the loader fade out revealing the top of the
-    // page, then a smooth scroll carrying them to the anchor.
+    // Sequence: snap to top under the loader → fade loader and start
+    // smooth-scroll TOGETHER. The user sees the page scrolling toward
+    // the target through a fading overlay, with no "page at top" flash
+    // between fade-end and scroll-start. Layout-shift compensation
+    // starts once the smooth-scroll animation has stopped (scrollY
+    // stable for several frames), otherwise the compensator would see
+    // the in-progress scroll as drift and break the animation.
     snapToTop();
-    window.setTimeout(() => {
-      requestAnimationFrame(() => {
-        hideLoader();
-        // Wait for the fade-out transition to finish (see #ottu-initial-hash-loader
-        // style: 180ms) plus a small buffer so the loader is fully out of
-        // the way before the scroll animation begins.
-        window.setTimeout(() => {
-          smoothScrollToHash(hashId);
-          // After the smooth-scroll completes, late content (heavy
-          // ApiExplorer hydration, fonts/images, deep <Details> measuring)
-          // can shift layout and push the target below the navbar. Start
-          // a short window of layout-shift compensation so the target
-          // visually stays put. Delay long enough that the smooth-scroll
-          // animation itself has finished (~700ms for 9000px in Chrome).
-          // Wait for the smooth-scroll animation to ACTUALLY stop
-          // (scrollY stable for several frames) before starting the
-          // layout-shift compensator. Without this, the compensator
-          // fires mid-animation, sees the in-progress scroll as
-          // "drift", and instant-snaps the page to the target — which
-          // visually breaks the smooth-scroll the user is watching.
-          // 4000ms timeout is plenty for browser smooth-scroll to
-          // finish even on tall pages with multi-thousand-px distances.
-          waitForScrollIdle(4000, () => maintainTargetPosition(hashId));
-        }, 220);
-      });
-    }, 200);
+    requestAnimationFrame(() => {
+      hideLoader();
+      smoothScrollToHash(hashId);
+      waitForScrollIdle(4000, () => maintainTargetPosition(hashId));
+    });
   });
 }
 
