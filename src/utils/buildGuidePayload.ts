@@ -85,6 +85,34 @@ export type PaymentMethodFromAPI = {
   logo?: string;
 };
 
+// ── URL-length workaround (ticket #151425) ────────────────────────────
+//
+// Each method in the payload contributes ~700 bytes (description,
+// test_data, copy_values, redirect_note, unavailable_note). With 13+
+// methods, the base64-encoded `guide_payload` query parameter exceeds
+// ~8 KB and the resulting checkout URL becomes unreliable: Chrome
+// crashes on paste, some proxies/CDNs reject it, and bookmarking is
+// broken.
+//
+// Pragmatic fix: cap the URL payload at MAX_PAYLOAD_METHODS. The
+// frontend's `discoverUnmatchedMethods()` (frontend_public/src/
+// composables/useDemoGuide.ts) auto-discovers any SDK-rendered
+// methods that aren't in the payload by scanning the shadow DOM
+// for `.ottu__sdk-methods-theme` elements, and enriches them with
+// locally-templated descriptions / test data. So the tour still
+// covers every method on screen — only the *source* of the step
+// content shifts from URL to frontend templates for overflow methods.
+//
+// FUTURE: when guide data moves out of the URL, remove this cap.
+// Migration options:
+//   A) Backend returns the guide payload in the checkout-page API
+//      response (response.demo_guide). Cleanest — no URL involvement.
+//   B) Backend signs the payload server-side during
+//      /b/checkout/redirect/start/ and passes an opaque short token.
+//   C) Slim manifest in URL ({code, variant, title, available} only,
+//      ~70 bytes/method) + shared frontend enrichment helper.
+const MAX_PAYLOAD_METHODS = 5;
+
 // ── Fixed helper blocks ────────────────────────────────────────────────
 
 const TEST_CARD_DATA = {
@@ -136,7 +164,12 @@ function isWalletMethod(code: string): boolean {
 export function buildGuidePayload(paymentMethods: PaymentMethodFromAPI[]): DemoPayload {
   const methods: DemoPaymentMethod[] = [];
 
-  for (const pm of paymentMethods) {
+  // Cap at MAX_PAYLOAD_METHODS to keep the URL under browser/proxy limits.
+  // Overflow methods are picked up by the frontend's DOM-based discovery
+  // and enriched with the same templates — see comment block above.
+  const capped = paymentMethods.slice(0, MAX_PAYLOAD_METHODS);
+
+  for (const pm of capped) {
     if (!pm.code || !pm.name) continue;
 
     const sdkCode = deriveSdkCode(pm);
