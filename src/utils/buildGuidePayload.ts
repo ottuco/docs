@@ -2,19 +2,42 @@
  * Docs-side builder for the sandbox checkout demo guide payload
  * (ticket #151425).
  *
- * TODO(backend): This is client-side dummy data. In the long run the
- * backend should generate this payload from the actual pg_codes + merchant
- * country it selected for the session, and sign/compress it before handing
- * it back to the docs. For now we construct it here so the docs team can
- * demo the feature end-to-end without waiting on Core.
+ * Builds a `DemoPayload` from the actual Payment Methods API response,
+ * deriving the SDK element `code` (apple_pay | google_pay | ottu_pg |
+ * redirect) from each method's `wallets` and `is_tokenizable` fields.
+ * Every pg_code gets its own tour step — no deduplication.
+ *
+ * ┌─────────────────────────────────────────────────────────────────┐
+ * │ FUTURE BACKEND MIGRATION (ticket #151425)                      │
+ * │                                                                 │
+ * │ Currently the docs site builds this payload client-side and     │
+ * │ passes it via `guide_payload` query param on the checkout URL.  │
+ * │                                                                 │
+ * │ Planned backend approaches (either/or):                         │
+ * │                                                                 │
+ * │ A) Backend injects guide data into the redirect URL query       │
+ * │    params during `/b/checkout/redirect/start/` redirect.        │
+ * │    The backend already forwards `demo_mode` + `guide_payload`   │
+ * │    params; it would replace the docs-built payload with its own │
+ * │    signed/authoritative version.                                │
+ * │                                                                 │
+ * │ B) Backend includes guide data as an extra field in the         │
+ * │    checkout-page API response:                                  │
+ * │    GET /b/checkout/api/intl/v1/checkout-page/{session_id}       │
+ * │    → response.demo_guide: { methods: [...], ... }               │
+ * │    The frontend reads it from the API instead of query params.  │
+ * │                                                                 │
+ * │ When migrated: delete this file from docs, remove query-param   │
+ * │ parsing in frontend_public/src/lib/demoGuide/demoPayload.ts,    │
+ * │ and read from the backend-provided source instead.              │
+ * └─────────────────────────────────────────────────────────────────┘
  *
  * Contract with frontend_public:
  *   - `methods[].code` must match the `name` attribute the Checkout SDK
  *     sets on each rendered method row (`apple_pay`, `google_pay`,
  *     `ottu_pg`, `redirect`).
- *   - `methods[].variant` (optional) discriminates multiple methods with
- *     the same `name` by matching the custom attribute whose key equals
- *     `name` (e.g. for `redirect`: `redirect="gbk-credit"`).
+ *   - `methods[].variant` must match the pg_code attribute value the SDK
+ *     sets (e.g. `redirect="knet-test"`, `ottu_pg="ottu_sdk"`).
  *   - All strings are plain text — the frontend runs them through
  *     DOMPurify at parse time anyway, but keep them clean on our end.
  *
@@ -28,6 +51,7 @@ import { TEST_CARD } from "@site/src/components/TestCardCallout";
 type DemoPaymentMethod = {
   code: string;
   variant?: string;
+  pg_code?: string;
   title: string;
   available: boolean;
   description?: string;
@@ -43,6 +67,22 @@ export type DemoPayload = {
   page_intro?: string;
   page_note?: string;
   post_payment_message?: string;
+  /** URL the post-payment "Back to docs" button navigates to. */
+  back_url?: string;
+};
+
+/**
+ * Shape of a single entry from the Payment Methods API response
+ * (`response.payment_methods[]`).
+ */
+export type PaymentMethodFromAPI = {
+  code: string;
+  name: string;
+  wallets?: string[];
+  is_sandbox?: boolean;
+  is_tokenizable?: boolean;
+  auto_debit_enabled?: boolean;
+  logo?: string;
 };
 
 // ── Fixed helper blocks ────────────────────────────────────────────────
@@ -59,131 +99,104 @@ const TEST_CARD_COPY = {
   CVV: TEST_CARD.cvv,
 } as const;
 
-// ── Per-pg_code metadata table ─────────────────────────────────────────
+// ── SDK code derivation ───────────────────────────────────────────────
 //
-// Each entry is keyed by the SDK `name` attribute and optional `variant`.
-// The docs-side `pgCodes` list (from the Payment Methods API) identifies
-// which of these to include in the emitted payload.
+// The Checkout SDK groups payment methods into 4 buckets and sets the
+// `name` attribute on each `.ottu__sdk-payment-method` element:
+//
+//   wallets includes "ApplePay"    → name="apple_pay"
+//   wallets includes "GooglePay"   → name="google_pay"
+//   is_tokenizable (inline card)   → name="ottu_pg"
+//   everything else (bank page)    → name="redirect"
+//
+// The pg_code is set as a custom attribute whose key equals the `name`:
+//   e.g. redirect="knet-test", apple_pay="apple-pay-alrayn"
 
-type MethodMeta = Omit<DemoPaymentMethod, "code" | "variant">;
+function deriveSdkCode(method: PaymentMethodFromAPI): string {
+  const wallets = method.wallets ?? [];
+  if (wallets.some((w) => w.toLowerCase().includes("apple"))) return "apple_pay";
+  if (wallets.some((w) => w.toLowerCase().includes("google"))) return "google_pay";
+  if (wallets.some((w) => w.toLowerCase().includes("samsung"))) return "samsung_pay";
+  if (method.is_tokenizable) return "ottu_pg";
+  return "redirect";
+}
 
-const METHOD_TABLE: Array<{
-  code: DemoPaymentMethod["code"];
-  variant?: string;
-  matchPgCode?: (pgCode: string) => boolean;
-  meta: MethodMeta;
-}> = [
-  // ── Wallet-type methods (typically `name="apple_pay"` or "google_pay") ──
-  {
-    code: "apple_pay",
-    matchPgCode: (pg) => pg.toLowerCase().includes("apple"),
-    meta: {
-      title: "Apple Pay",
-      available: false, // sandbox can't trigger real ApplePaySession without a paired device
-      description:
-        "Apple Pay is visible but cannot be tested in the sandbox without an Apple-signed device.",
-      unavailable_note:
-        "Try Apple Pay from a real iOS device or Mac with Safari and a test card provisioned in Wallet. For this sandbox walkthrough, use the `redirect` card option below.",
-    },
-  },
-  {
-    code: "google_pay",
-    matchPgCode: (pg) => pg.toLowerCase().includes("gpay") || pg.toLowerCase().includes("google"),
-    meta: {
-      title: "Google Pay",
-      available: false,
-      description:
-        "Google Pay requires a Google-signed test profile. We skip it in this sandbox tour.",
-      unavailable_note:
-        "Available in real integrations only. Stick with the redirect flow below to complete the demo.",
-    },
-  },
-  // ── Ottu PG (saved-card / auto-debit / token) ─────────────────────────
-  {
-    code: "ottu_pg",
-    matchPgCode: (pg) => pg.toLowerCase().includes("auto_deb") || pg.toLowerCase().includes("auto-deb"),
-    variant: "auto-debit",
-    meta: {
-      title: "Saved card — Auto-Debit",
-      available: true,
-      description:
-        "Charges a previously tokenized card without the customer retyping details. In this demo the card is already saved.",
-      test_data: { ...TEST_CARD_DATA },
-      copy_values: { ...TEST_CARD_COPY },
-    },
-  },
-  {
-    code: "ottu_pg",
-    matchPgCode: (pg) => pg.toLowerCase().includes("token") || pg.toLowerCase().includes("pg_token"),
-    variant: "token",
-    meta: {
-      title: "Saved card — Token",
-      available: true,
-      description:
-        "Pay with a card token returned from a previous checkout. No CVV retyping required when the merchant has CVV-less mode enabled.",
-      test_data: { ...TEST_CARD_DATA },
-      copy_values: { ...TEST_CARD_COPY },
-    },
-  },
-  {
-    code: "ottu_pg",
-    matchPgCode: (pg) => pg.toLowerCase().includes("samsung"),
-    variant: "samsung",
-    meta: {
-      title: "Samsung Wallet",
-      available: false,
-      description: "Samsung Wallet requires a Samsung-signed device.",
-      unavailable_note: "Skip this one — try the redirect card flow instead.",
-    },
-  },
-  // ── Redirect-type methods (hosted bank pages, KNET, MPGS, etc.) ──────
-  {
-    code: "redirect",
-    matchPgCode: () => true, // default for any redirect we don't specifically recognize
-    meta: {
-      title: "Hosted bank checkout",
-      available: true,
-      description:
-        "Opens the gateway's own payment page in a new tab. After completing payment you'll come back here.",
-      test_data: { ...TEST_CARD_DATA },
-      copy_values: { ...TEST_CARD_COPY },
-      redirects: true,
-      redirect_note:
-        "You'll be redirected off this page. Complete the payment on the gateway's page, then return here to see the post-payment banner and your webhook arrive in the docs tab.",
-    },
-  },
-];
+function isWalletMethod(code: string): boolean {
+  return code === "apple_pay" || code === "google_pay" || code === "samsung_pay";
+}
 
 // ── Payload construction ───────────────────────────────────────────────
 
 /**
- * Build a demo payload from the `pgCodes` list that the Payment Methods API
- * returned for a sandbox session. Unknown pg_codes are simply skipped —
- * no guesses, no crashes.
+ * Build a demo payload from the Payment Methods API response. Each
+ * payment method gets its own tour step — no deduplication.
+ *
+ * @param paymentMethods  The `payment_methods` array from the API response.
  */
-export function buildGuidePayload(pgCodes: string[]): DemoPayload {
+export function buildGuidePayload(paymentMethods: PaymentMethodFromAPI[]): DemoPayload {
   const methods: DemoPaymentMethod[] = [];
-  const seen = new Set<string>();
 
-  for (const pg of pgCodes) {
-    for (const entry of METHOD_TABLE) {
-      if (!entry.matchPgCode || !entry.matchPgCode(pg)) continue;
-      // Dedupe strictly on code+variant: many pg_codes often map to the
-      // same UX (e.g. 11 different `redirect` gateways all look identical
-      // to the end-user). Showing 11 identical tour steps is noise, so we
-      // collapse them into a single "Hosted bank checkout" card.
-      const key = `${entry.code}::${entry.variant ?? ""}`;
-      if (seen.has(key)) {
-        break;
-      }
-      seen.add(key);
-      methods.push({
-        code: entry.code,
-        ...(entry.variant ? { variant: entry.variant } : {}),
-        ...entry.meta,
-      });
-      break;
+  for (const pm of paymentMethods) {
+    if (!pm.code || !pm.name) continue;
+
+    const sdkCode = deriveSdkCode(pm);
+    const isWallet = isWalletMethod(sdkCode);
+    const isRedirect = sdkCode === "redirect";
+
+    // ── Per-method description + unavailability reason ──────────
+    let description: string;
+    let unavailableNote: string | undefined;
+
+    if (sdkCode === "apple_pay") {
+      description =
+        `Selecting ${pm.name} lets you pay instantly using a card stored in your Apple Wallet. The payment is processed via Apple's secure tokenization — no card details are entered manually.`;
+      unavailableNote =
+        `${pm.name} requires an Apple device (iPhone, iPad, or Mac with Touch ID/Face ID) with a card added to Apple Wallet. It cannot be used in a standard desktop browser or the sandbox.`;
+    } else if (sdkCode === "google_pay") {
+      description =
+        `Selecting ${pm.name} lets you pay using a payment method saved in your Google account. The transaction is completed with a single tap — no card details needed.`;
+      unavailableNote =
+        `${pm.name} requires a Google account with a saved payment method and a supported browser or device. It may not be available in the sandbox environment.`;
+    } else if (sdkCode === "samsung_pay") {
+      description =
+        `Selecting ${pm.name} lets you pay using a card registered in your Samsung Wallet. The payment is authorized via Samsung's secure tokenization.`;
+      unavailableNote =
+        `${pm.name} requires a Samsung device with the Samsung Pay app installed and your Samsung account logged in. It is not available on non-Samsung devices or in the sandbox.`;
+    } else if (isRedirect) {
+      description =
+        `Selecting ${pm.name} redirects you to the ${pm.name} payment gateway page. Complete the payment there using the test card details below, and you'll be returned here automatically.`;
+    } else {
+      // ottu_pg — inline card form
+      description =
+        `Selecting ${pm.name} opens an inline card form right here on this page. Enter the test card details below, then click pay — no redirect needed.`;
     }
+
+    const entry: DemoPaymentMethod = {
+      code: sdkCode,
+      variant: pm.code,
+      pg_code: pm.code,
+      title: pm.name,
+      available: !isWallet,
+      description,
+    };
+
+    if (isWallet && unavailableNote) {
+      entry.unavailable_note = unavailableNote;
+    }
+
+    // Attach test card data to card-accepting methods (ottu_pg + redirect)
+    if (!isWallet) {
+      entry.test_data = { ...TEST_CARD_DATA };
+      entry.copy_values = { ...TEST_CARD_COPY };
+    }
+
+    if (isRedirect) {
+      entry.redirects = true;
+      entry.redirect_note =
+        `You'll be redirected off this page to the ${pm.name} gateway. After completing payment, you'll return here to see the result.`;
+    }
+
+    methods.push(entry);
   }
 
   return {
@@ -193,6 +206,7 @@ export function buildGuidePayload(pgCodes: string[]): DemoPayload {
       "Only the methods marked available can be exercised in this sandbox. Use the test card values and follow the guide step by step.",
     post_payment_message:
       "Payment complete. Switch back to the Ottu docs tab — the webhook will appear in the Payment Journey panel there.",
+    back_url: typeof window !== "undefined" ? window.location.href : undefined,
   };
 }
 
@@ -222,14 +236,17 @@ export function encodeGuidePayload(payload: DemoPayload): string {
  * Append the demo-guide query params to a checkout URL. Returns a new
  * URL string — never mutates the input.
  *
- * @param checkoutUrl  The `checkout_url` returned from the Checkout API.
- * @param pgCodes      The `pg_codes` array from the Payment Methods API.
+ * @param checkoutUrl      The `checkout_url` returned from the Checkout API.
+ * @param paymentMethods   The `payment_methods` array from the Payment Methods API.
  * @returns A URL with `demo_mode=1&guide_payload=<base64>` appended.
  */
-export function appendGuideParams(checkoutUrl: string, pgCodes: string[]): string {
+export function appendGuideParams(
+  checkoutUrl: string,
+  paymentMethods: PaymentMethodFromAPI[],
+): string {
   if (!checkoutUrl) return checkoutUrl;
   try {
-    const payload = buildGuidePayload(pgCodes);
+    const payload = buildGuidePayload(paymentMethods);
     if (payload.methods.length === 0) return checkoutUrl;
     const encoded = encodeGuidePayload(payload);
     if (!encoded) return checkoutUrl;

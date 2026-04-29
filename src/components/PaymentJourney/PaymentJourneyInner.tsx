@@ -597,13 +597,13 @@ export default function PaymentJourneyInner() {
                 pg_codes. Once the backend can sign and emit this itself,
                 replace `appendGuideParams` with the server-provided URL.
               */}
-              <ApiPanel label="checkout_url" data={appendGuideParams(state.checkoutUrl, state.pgCodes)} />
+              <ApiPanel label="checkout_url" data={appendGuideParams(state.checkoutUrl, state.paymentMethodsResponse?.payment_methods ?? [])} />
               <p className={styles.cardDescription}>
                 Open the payment link in a new tab, complete the test payment (use card <strong>{TEST_CARD.number}</strong>, expiry <strong>{TEST_CARD.expiry}</strong>, CVV <strong>{TEST_CARD.cvv}</strong>), then come back here to see the webhook. In sandbox, the checkout page will show an interactive guided tour explaining the available payment methods.
               </p>
               <div className={styles.actions}>
                 <button className={styles.primaryBtn} onClick={() => {
-                  const guidedUrl = appendGuideParams(state.checkoutUrl, state.pgCodes);
+                  const guidedUrl = appendGuideParams(state.checkoutUrl, state.paymentMethodsResponse?.payment_methods ?? []);
                   window.open(guidedUrl, "_blank");
                   dispatch({ type: "WAITING_WEBHOOK" });
                 }}>
