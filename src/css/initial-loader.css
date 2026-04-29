@@ -1,0 +1,68 @@
+/**
+ * Initial-hash loader overlay.
+ *
+ * Pairs with the synchronous <script> in docusaurus.config.ts headTags
+ * that sets `data-initial-hash-loading="true"` on <html> when the first
+ * page load has a URL hash. The pseudo-element overlay paints from the
+ * very first frame so the user never sees the pre-hydration scroll-to-
+ * anchor landing on the wrong section. The client module
+ * (src/clientModules/sidebarHashActiveLink.ts) flips the attribute to
+ * "fading" once content has hydrated and the page has scrolled to the
+ * target, then removes it once the CSS opacity transition completes.
+ *
+ * Why this file is safe in the bundled stylesheet (vs. inlined in head):
+ * <link rel="stylesheet"> in <head> is render-blocking by default, so
+ * the browser does NOT paint <body> until this rule is parsed. The head
+ * script sets the attribute before <link> finishes loading; once it
+ * does, the overlay is in place at first paint.
+ */
+
+html[data-initial-hash-loading] {
+  scrollbar-gutter: stable;
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* legacy Edge */
+}
+html[data-initial-hash-loading]::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;                /* Chrome / Safari */
+}
+
+html[data-initial-hash-loading]::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  background: var(--ifm-background-color, #ffffff);
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity 220ms ease-out;
+}
+
+html[data-initial-hash-loading]::after {
+  content: "";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin-top: -22px;
+  margin-left: -22px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 3px solid rgba(242, 126, 32, 0.15);
+  border-top-color: var(--ifm-color-primary, #f27e20);
+  animation: ottu-hash-spin 0.9s linear infinite;
+  z-index: 100001;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 220ms ease-out;
+}
+
+html[data-initial-hash-loading="fading"]::before,
+html[data-initial-hash-loading="fading"]::after {
+  opacity: 0;
+}
+
+@keyframes ottu-hash-spin {
+  to { transform: rotate(360deg); }
+}

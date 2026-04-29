@@ -15,13 +15,31 @@ const config: Config = {
     faster: true,
   },
 
-  // Production URL (docs.ottu.net)
-  url: "https://docs.ottu.net",
+  // Production URL (docs.ottu.com)
+  url: "https://docs.ottu.com",
   baseUrl: "/",
 
   trailingSlash: true,
 
   clientModules: ["./src/clientModules/sidebarHashActiveLink.ts"],
+
+  // Synchronous head injection so the initial-hash loader is visible from
+  // the very first paint. The loader visuals live in
+  // src/css/initial-loader.css (imported by custom.css). Because
+  // <link rel="stylesheet"> in <head> is render-blocking, the browser
+  // doesn't paint <body> until those rules are parsed — so the overlay
+  // is on screen from the first frame. The client module
+  // (src/clientModules/sidebarHashActiveLink.ts) flips the attribute to
+  // "fading" once content has hydrated and the page has scrolled to the
+  // target, then removes it once the CSS opacity transition completes.
+  headTags: [
+    {
+      tagName: "script",
+      attributes: {},
+      innerHTML:
+        "(function(){try{if(window.location.hash){document.documentElement.setAttribute('data-initial-hash-loading','true');}}catch(e){}})();",
+    },
+  ],
 
   onBrokenLinks: "warn",
 
