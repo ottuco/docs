@@ -11,6 +11,50 @@ Every payment in Ottu moves through a series of states, from creation to complet
 For the full technical state machine, see [Payment States](/developers/reference/payment-states).
 :::
 
+## Payment Object Model
+
+Every payment in Ottu is described by four core objects. Knowing what each one is — and how they relate — makes the state tables below much easier to follow.
+
+- **[PaymentTransaction](/glossary#term-payment-transaction)** — the parent record holding the customer's intent to pay (amount, currency, allowed gateways, lifecycle state).
+- **[PaymentAttempt](/glossary#term-payment-attempt)** — a single gateway-level try against a `PaymentTransaction`. One transaction can have many attempts; at most one reaches a `paid` state.
+- **[Payment Request](/glossary#term-payment-request)** — a `PaymentTransaction` with `type: payment_request`, merchant-initiated and typically delivered as a payment link.
+- **[E-commerce Payment](/glossary#term-e-commerce-payment)** — a `PaymentTransaction` with `type: e_commerce`, customer-initiated from an external storefront (Shopify, WooCommerce, Magento, etc.).
+
+### Hierarchy
+
+A `PaymentTransaction` is the parent record. Every gateway-level try against it is a `PaymentAttempt` child:
+
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
+flowchart LR
+    PT["<b>PaymentTransaction</b><br/>parent · intent · lifecycle"]:::accent
+    PA["<b>PaymentAttempt</b><br/>single gateway try · own FSM"]:::accent
+    PT -->|"1..N children"| PA
+
+    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
+```
+
+The `type` field on `PaymentTransaction` tells you what kind of intent it represents — a `Payment Request`, an `E-commerce Payment`, or one of several other types:
+
+```mermaid
+%%{init: {"theme": "base", "flowchart": {"defaultRenderer": "elk"}, "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
+flowchart TB
+    PT["<b>PaymentTransaction</b><br/>parent · intent · lifecycle"]:::accent
+    PR["Payment Request<br/>type: payment_request<br/>merchant-initiated link"]
+    EC["E-commerce Payment<br/>type: e_commerce<br/>storefront-initiated"]
+    OT["Other types<br/>bulk · event · food_ordering · …"]
+
+    PT -->|type| PR
+    PT -->|type| EC
+    PT -->|type| OT
+
+    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
+```
+
+:::note
+The "Parent Transaction" and "Child Transaction" terms used in the rest of this page refer to a separate concept: a child transaction is a record Ottu creates when a [post-payment operation](/business/operations) (capture, refund, void) is performed on the original payment. They are **not** the same as `PaymentAttempts` above — `PaymentAttempts` are the customer's individual tries on a single payment, while child transactions track later operations on a completed payment.
+:::
+
 Transactions in Ottu fall into two categories:
 
 - **Parent Transaction** -- Stores all the essential data about the payment. This is the primary record of the transaction.
