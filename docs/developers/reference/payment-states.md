@@ -4,6 +4,7 @@ sidebar_label: Payment States
 ---
 
 import FAQ, { FAQItem } from '@site/src/components/FAQ';
+import PaymentObjectModel from '@site/src/components/PaymentObjectModel.mdx';
 
 # Payment States
 
@@ -15,64 +16,26 @@ This two-level model exists because a single payment transaction can involve mul
 For most integrations, check the `state` field in [webhook payloads](/developers/webhooks/payment-events) or the [Checkout API response](/developers/payments/checkout-api). The success states are **`paid`**, **`authorized`**, and **`cod`**. Everything else means the payment is incomplete or failed.
 :::
 
-## Payment Object Model
-
-Every payment in Ottu is described by four core objects. The state machines documented below operate on these objects, so it helps to know what each one is — and how they relate — before reading the tables.
-
-- **[PaymentTransaction](/glossary#term-payment-transaction)** — the parent record holding the customer's intent to pay (amount, currency, allowed gateways, lifecycle state).
-- **[PaymentAttempt](/glossary#term-payment-attempt)** — a single gateway-level try against a `PaymentTransaction`. One transaction can have many attempts; at most one reaches a `paid` state.
-- **[Payment Request](/glossary#term-payment-request)** — a `PaymentTransaction` with `type: payment_request`, merchant-initiated and typically delivered as a payment link.
-- **[E-commerce Payment](/glossary#term-e-commerce-payment)** — a `PaymentTransaction` with `type: e_commerce`, customer-initiated from an external storefront (Shopify, WooCommerce, Magento, etc.).
-
-### Hierarchy
-
-A `PaymentTransaction` is the parent record. Every gateway-level try against it is a `PaymentAttempt` child:
-
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
-flowchart LR
-    PT["<b>PaymentTransaction</b><br/>parent · intent · lifecycle"]:::accent
-    PA["<b>PaymentAttempt</b><br/>single gateway try · own FSM"]:::accent
-    PT -->|"1..N children"| PA
-
-    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
-```
-
-The `type` field on `PaymentTransaction` tells you what kind of intent it represents — a `Payment Request`, an `E-commerce Payment`, or one of several other types:
-
-```mermaid
-%%{init: {"theme": "base", "flowchart": {"defaultRenderer": "elk"}, "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
-flowchart TB
-    PT["<b>PaymentTransaction</b><br/>parent · intent · lifecycle"]:::accent
-    PR["Payment Request<br/>type: payment_request<br/>merchant-initiated link"]
-    EC["E-commerce Payment<br/>type: e_commerce<br/>storefront-initiated"]
-    OT["Other types<br/>bulk · event · food_ordering · …"]
-
-    PT -->|type| PR
-    PT -->|type| EC
-    PT -->|type| OT
-
-    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
-```
+<PaymentObjectModel />
 
 ## Payment Transaction States
 
-| State | Description | Terminal? | Available Operations |
-|-------|-------------|:---------:|---------------------|
-| `created` | Payment transaction created via the [Checkout API](/developers/payments/checkout-api). Customer has not yet opened the payment link. | No | [Cancel](/developers/operations#cancel), [Expire](/developers/operations#expire) |
-| `pending` | Customer opened the payment link; request sent to the payment gateway. | No | [Cancel](/developers/operations#cancel), [Expire](/developers/operations#expire) |
-| `attempted` | Customer tried to pay but the payment attempt failed. Payment transaction remains open for retry (see [Multi-Attempt Logic](#multi-attempt-logic)). | No | [Cancel](/developers/operations#cancel), [Expire](/developers/operations#expire) |
-| `authorized` | Funds reserved on the customer's bank account but not yet captured. Merchant must [capture](/developers/operations#capture) or [void](/developers/operations#void). | Yes | [Capture](/developers/operations#capture), [Void](/developers/operations#void) |
-| `paid` | Payment successful. Funds collected. | Yes | [Refund](/developers/operations#refund) |
-| `cod` | Cash on Delivery — payment marked as offline/cash. | Yes | [Cancel](/developers/operations#cancel) |
-| `failed` | Payment failed definitively. No retry possible (multi-attempt exhausted or disabled). | Yes | — |
-| `canceled` | Administratively canceled by staff or via the [Operations API](/developers/operations#cancel). | Yes | — |
-| `expired` | Not paid before expiration date, or customer canceled on gateway page. | Yes | — |
-| `invalided` | Configuration change made the payment transaction unprocessable (missing currency, disabled gateway). | Yes | — |
-| `refunded` | [Refund operation](/developers/operations#refund) completed. This is a child payment transaction state. | Yes | — |
-| `refund_queued` | Refund sent to the payment gateway, awaiting confirmation. The gateway will send a webhook when the refund is processed. | No | Awaiting gateway confirmation |
-| `refund_rejected` | Gateway rejected the refund request. | Yes | — |
-| `voided` | [Authorization reversed](/developers/operations#void) before the acquirer sent it for processing. Child payment transaction state. | Yes | — |
+| State             | Description                                                                                                                                                         | Terminal? | Available Operations                                                             |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------: | -------------------------------------------------------------------------------- |
+| `created`         | Payment transaction created via the [Checkout API](/developers/payments/checkout-api). Customer has not yet opened the payment link.                                |    No     | [Cancel](/developers/operations#cancel), [Expire](/developers/operations#expire) |
+| `pending`         | Customer opened the payment link; request sent to the payment gateway.                                                                                              |    No     | [Cancel](/developers/operations#cancel), [Expire](/developers/operations#expire) |
+| `attempted`       | Customer tried to pay but the payment attempt failed. Payment transaction remains open for retry (see [Multi-Attempt Logic](#multi-attempt-logic)).                 |    No     | [Cancel](/developers/operations#cancel), [Expire](/developers/operations#expire) |
+| `authorized`      | Funds reserved on the customer's bank account but not yet captured. Merchant must [capture](/developers/operations#capture) or [void](/developers/operations#void). |    Yes    | [Capture](/developers/operations#capture), [Void](/developers/operations#void)   |
+| `paid`            | Payment successful. Funds collected.                                                                                                                                |    Yes    | [Refund](/developers/operations#refund)                                          |
+| `cod`             | Cash on Delivery — payment marked as offline/cash.                                                                                                                  |    Yes    | [Cancel](/developers/operations#cancel)                                          |
+| `failed`          | Payment failed definitively. No retry possible (multi-attempt exhausted or disabled).                                                                               |    Yes    | —                                                                                |
+| `canceled`        | Administratively canceled by staff or via the [Operations API](/developers/operations#cancel).                                                                      |    Yes    | —                                                                                |
+| `expired`         | Not paid before expiration date, or customer canceled on gateway page.                                                                                              |    Yes    | —                                                                                |
+| `invalided`       | Configuration change made the payment transaction unprocessable (missing currency, disabled gateway).                                                               |    Yes    | —                                                                                |
+| `refunded`        | [Refund operation](/developers/operations#refund) completed. This is a child payment transaction state.                                                             |    Yes    | —                                                                                |
+| `refund_queued`   | Refund sent to the payment gateway, awaiting confirmation. The gateway will send a webhook when the refund is processed.                                            |    No     | Awaiting gateway confirmation                                                    |
+| `refund_rejected` | Gateway rejected the refund request.                                                                                                                                |    Yes    | —                                                                                |
+| `voided`          | [Authorization reversed](/developers/operations#void) before the acquirer sent it for processing. Child payment transaction state.                                  |    Yes    | —                                                                                |
 
 ### Payment Transaction Lifecycle
 
@@ -112,14 +75,14 @@ Dashed arrows show that even `failed` and `expired` payment transactions can rec
 
 Each payment attempt represents a single interaction with a payment gateway. A payment transaction can have one or many payment attempts.
 
-| State | Description | Triggered By |
-|-------|-------------|-------------|
-| `pending` | Payment attempt created; request about to be sent to the payment gateway. | Customer initiates payment on checkout page |
-| `success` | Payment gateway confirmed the payment succeeded. | Gateway returns successful response |
-| `failed` | Payment attempt failed (insufficient funds, card declined, 3DS failure). | Gateway returns failure; or payment attempt times out |
-| `canceled` | Customer canceled on the payment gateway page (e.g., clicked "Back" on KNET). | Customer navigates away from gateway |
-| `error` | Error occurred creating the payment gateway link (connectivity, invalid config). | PSP link creation fails |
-| `cod` | Cash on Delivery payment acknowledged. | CoD gateway confirms offline payment |
+| State      | Description                                                                      | Triggered By                                          |
+| ---------- | -------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `pending`  | Payment attempt created; request about to be sent to the payment gateway.        | Customer initiates payment on checkout page           |
+| `success`  | Payment gateway confirmed the payment succeeded.                                 | Gateway returns successful response                   |
+| `failed`   | Payment attempt failed (insufficient funds, card declined, 3DS failure).         | Gateway returns failure; or payment attempt times out |
+| `canceled` | Customer canceled on the payment gateway page (e.g., clicked "Back" on KNET).    | Customer navigates away from gateway                  |
+| `error`    | Error occurred creating the payment gateway link (connectivity, invalid config). | PSP link creation fails                               |
+| `cod`      | Cash on Delivery payment acknowledged.                                           | CoD gateway confirms offline payment                  |
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
@@ -149,14 +112,14 @@ A new payment attempt is created each time the customer submits a payment on the
 Payment attempt state changes trigger payment transaction state changes, but the mapping is not 1:1. A failed payment attempt does not always mean a failed payment transaction.
 :::
 
-| Payment Attempt Outcome | Multi-Attempt Enabled | Multi-Attempt Disabled |
-|----------------|----------------------|----------------------|
-| `success` (purchase operation) | Payment transaction → `paid` | Payment transaction → `paid` |
-| `success` (authorize operation) | Payment transaction → `authorized` | Payment transaction → `authorized` |
-| `cod` | Payment transaction → `cod` | Payment transaction → `cod` |
-| `failed` | Payment transaction → `attempted` (retry available) | Payment transaction → `failed` (terminal) |
-| `canceled` | Payment transaction → `attempted` (retry available) | Payment transaction → `expired` |
-| `error` | Inquiry may resolve later | Payment transaction → `failed` |
+| Payment Attempt Outcome         | Multi-Attempt Enabled                               | Multi-Attempt Disabled                    |
+| ------------------------------- | --------------------------------------------------- | ----------------------------------------- |
+| `success` (purchase operation)  | Payment transaction → `paid`                        | Payment transaction → `paid`              |
+| `success` (authorize operation) | Payment transaction → `authorized`                  | Payment transaction → `authorized`        |
+| `cod`                           | Payment transaction → `cod`                         | Payment transaction → `cod`               |
+| `failed`                        | Payment transaction → `attempted` (retry available) | Payment transaction → `failed` (terminal) |
+| `canceled`                      | Payment transaction → `attempted` (retry available) | Payment transaction → `expired`           |
+| `error`                         | Inquiry may resolve later                           | Payment transaction → `failed`            |
 
 ### Multi-Attempt Logic
 
@@ -181,15 +144,15 @@ Payment transaction **`type`** (e.g., `e_commerce`, `payment_request`) determine
 
 These groupings are used by the [Operations API](/developers/operations), [Webhooks](/developers/webhooks/), and [Payment Status Query API](/developers/payments/psq) to determine which actions are valid.
 
-| Group | States | Used By |
-|-------|--------|---------|
-| **Success states** | `paid`, `authorized`, `cod` | Trigger post-payment logic (webhooks, fulfillment) |
-| **Terminal states** | `paid`, `authorized`, `cod`, `failed`, `canceled`, `expired`, `invalided` | No further customer action possible |
-| **Cancelable** | `created`, `pending`, `attempted`, `cod` | [Cancel operation](/developers/operations#cancel) |
-| **Expirable** | `created`, `pending`, `attempted` | [Expire operation](/developers/operations#expire) or automatic expiration |
-| **Can acknowledge payment** | `created`, `pending`, `attempted`, `failed`, `expired` | Gateway can still report success (delayed callback) |
-| **Inquirable** | `pending`, `attempted`, `failed`, `expired` | [Payment Status Query](/developers/payments/psq) to check latest status |
-| **Child payment transaction states** | `paid`, `refunded`, `refund_queued`, `refund_rejected`, `voided` | Created by [operations](/developers/operations) on a parent payment transaction |
+| Group                                | States                                                                    | Used By                                                                         |
+| ------------------------------------ | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| **Success states**                   | `paid`, `authorized`, `cod`                                               | Trigger post-payment logic (webhooks, fulfillment)                              |
+| **Terminal states**                  | `paid`, `authorized`, `cod`, `failed`, `canceled`, `expired`, `invalided` | No further customer action possible                                             |
+| **Cancelable**                       | `created`, `pending`, `attempted`, `cod`                                  | [Cancel operation](/developers/operations#cancel)                               |
+| **Expirable**                        | `created`, `pending`, `attempted`                                         | [Expire operation](/developers/operations#expire) or automatic expiration       |
+| **Can acknowledge payment**          | `created`, `pending`, `attempted`, `failed`, `expired`                    | Gateway can still report success (delayed callback)                             |
+| **Inquirable**                       | `pending`, `attempted`, `failed`, `expired`                               | [Payment Status Query](/developers/payments/psq) to check latest status         |
+| **Child payment transaction states** | `paid`, `refunded`, `refund_queued`, `refund_rejected`, `voided`          | Created by [operations](/developers/operations) on a parent payment transaction |
 
 ## Child Payment Transactions
 
