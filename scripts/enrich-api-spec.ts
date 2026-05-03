@@ -399,14 +399,14 @@ function enrichSchemaProperties(
     }
 
     // Format/type override (e.g., fixing `format: uri` → `format: binary` for file uploads)
-    if (schemaProps[propName] && (overrideObj.format || overrideObj.type)) {
-      if (overrideObj.format) {
-        schemaProps[propName].format = overrideObj.format;
+    if (overrideObj.format || overrideObj.type) {
+      if (schemaProps[propName]) {
+        if (overrideObj.format) schemaProps[propName].format = overrideObj.format;
+        if (overrideObj.type) schemaProps[propName].type = overrideObj.type;
+        propModified = true;
+      } else {
+        warn(`Property '${fullPath}' not found in schema '${schemaName}' (format/type override skipped)`);
       }
-      if (overrideObj.type) {
-        schemaProps[propName].type = overrideObj.type;
-      }
-      propModified = true;
     }
 
     if (propModified) count++;
