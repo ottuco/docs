@@ -21,10 +21,12 @@ export default function ParamTextFormItem({ param }: { param: any }) {
   const hasExample =
     example !== undefined && example !== null && example !== "";
 
-  const encodeForParam = (val: string) =>
-    param.in === "path" || param.in === "query"
-      ? val.replace(/\s/g, "%20")
-      : val;
+  const encodeForParam = (val: string) => {
+    if (param.in !== "path" && param.in !== "query") return val;
+    // encodeURIComponent is overly aggressive — restore characters that are
+    // safe and commonly used in real API values.
+    return encodeURIComponent(val).replace(/%2F/g, "/").replace(/%2C/g, ",").replace(/%40/g, "@").replace(/%3A/g, ":");
+  };
 
   // Seed redux + react-hook-form from the example on first mount only.
   useEffect(() => {
