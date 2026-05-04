@@ -28,12 +28,6 @@ export default function ParamSelectFormItem({ param }: { param: any }) {
       : null;
   const hasExample = exampleStr !== null && options.includes(exampleStr);
 
-  if (exampleStr !== null && !hasExample) {
-    console.warn(
-      `[ParamSelectFormItem] Example value "${exampleStr}" for param "${param.name}" is not in enum options [${options.join(", ")}]. Pre-fill skipped.`
-    );
-  }
-
   const defaultValue = hasExample ? exampleStr! : "---";
   const [localValue, setLocalValue] = useState(defaultValue);
 
@@ -41,6 +35,11 @@ export default function ParamSelectFormItem({ param }: { param: any }) {
   useEffect(() => {
     if (didInit.current) return;
     didInit.current = true;
+    if (exampleStr !== null && !hasExample) {
+      console.warn(
+        `[ParamSelectFormItem] Example value "${exampleStr}" for param "${param.name}" is not in enum options [${options.join(", ")}]. Pre-fill skipped.`
+      );
+    }
     if (hasExample && (param.value === undefined || param.value === "")) {
       dispatch(setParam({ ...param, value: exampleStr }));
       if (setValue) {
