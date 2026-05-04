@@ -1,0 +1,6 @@
+# Overrides for: components/schemas/Inquiry
+# Request body for POST /b/pbl/v2/inquiry/
+
+_example:
+  order_no: "string"
+  session_id: "string"

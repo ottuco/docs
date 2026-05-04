@@ -22,21 +22,28 @@ export default function ParamSelectFormItem({ param }: { param: any }) {
 
   const example =
     typeof param.example !== "undefined" ? param.example : param.schema?.example;
-  const hasExample =
-    example !== undefined &&
-    example !== null &&
-    example !== "" &&
-    options.includes(String(example));
+  const exampleStr =
+    example !== undefined && example !== null && example !== ""
+      ? String(example)
+      : null;
+  const hasExample = exampleStr !== null && options.includes(exampleStr);
+
+  const defaultValue = hasExample ? exampleStr! : "---";
+  const [localValue, setLocalValue] = useState(defaultValue);
 
   // Seed redux + react-hook-form from the example on first mount only.
   useEffect(() => {
     if (didInit.current) return;
     didInit.current = true;
+    if (exampleStr !== null && !hasExample) {
+      console.warn(
+        `[ParamSelectFormItem] Example value "${exampleStr}" for param "${param.name}" is not in enum options [${options.join(", ")}]. Pre-fill skipped.`
+      );
+    }
     if (hasExample && (param.value === undefined || param.value === "")) {
-      const val = String(example);
-      dispatch(setParam({ ...param, value: val }));
+      dispatch(setParam({ ...param, value: exampleStr }));
       if (setValue) {
-        setValue(param.name, val, {
+        setValue(param.name, exampleStr, {
           shouldValidate: false,
           shouldDirty: false,
           shouldTouch: false,
@@ -47,9 +54,6 @@ export default function ParamSelectFormItem({ param }: { param: any }) {
   }, []);
 
   const showErrorMessage = (errors as any)?.[param.name];
-  const defaultValue = hasExample ? String(example) : "---";
-
-  const [localValue, setLocalValue] = useState(defaultValue);
 
   if (!control) {
     // Rendered outside FormProvider (e.g. params list panel) — uncontrolled fallback

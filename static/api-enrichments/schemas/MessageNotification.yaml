@@ -2,6 +2,8 @@
 # Request body for POST /b/pbl/v2/notification/message/
 
 _example:
+  session_id: "string"
+  order_no: "string"
   channels:
     - sms
     - email
