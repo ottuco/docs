@@ -390,13 +390,13 @@ function enrichSchemaProperties(
       warn(`Property '${fullPath}' not found in schema '${schemaName}' — override skipped`);
     } else {
       // Direct description override
-      if (overrideObj.description && schemaProps[propName]) {
+      if (overrideObj.description) {
         schemaProps[propName].description = overrideObj.description;
         propModified = true;
       }
 
       // Format/type override (e.g., fixing `format: uri` → `format: binary` for file uploads)
-      if ((overrideObj.format || overrideObj.type) && schemaProps[propName]) {
+      if (overrideObj.format || overrideObj.type) {
         if (overrideObj.format) schemaProps[propName].format = overrideObj.format;
         if (overrideObj.type) schemaProps[propName].type = overrideObj.type;
         propModified = true;
