@@ -86,7 +86,7 @@ The SDK can be used on devices running **iOS 15** or higher.
     ottu_flutter_checkout:
       git:
         url: https://github.com/ottuco/ottu-flutter.git
-        ref: 2.1.15
+        ref: 2.2.2
     ```
   </li>
   <li className="stepper-item">
@@ -99,7 +99,7 @@ The SDK can be used on devices running **iOS 15** or higher.
 
     :::info
     If you choose to use CocoaPods, please use release version
-    **2.1.15-cocoapods**.
+    **2.2.2-cocoapods**.
     :::
   </li>
 </ol>
@@ -300,6 +300,18 @@ Passing `0` will cause the SDK to throw an exception. This exception must be cau
   - If no match is found, no option is selected.
 
 All of these parameters are optional and are demonstrated in the following figures.
+
+#### **verifyPayment** _`object`_ _**`optional`**_
+
+`VerifyPaymentDelegate` a typealias of a function allowing to trigger prepayment hook before processing with the payment.
+
+See [Prepayment Hook](#prepayment-hook) chapter for details.
+
+#### **payButtonText** _`object`_ _**`optional`**_
+
+`PayButtonText` class allows setting the custom text for the “Pay” button. Please note, both `en` and `ar` fields of this class are required, so if provided, both English and Arabic texts have to be set.
+
+See [Full Example](#full-example) chapter for the reference.
 
 #### Android
 
@@ -507,6 +519,7 @@ If a property is not set, the default value (as specified in the Figma design [h
 | `selectorIconColor`                        |          The color of the icon of the payment          | [Color](#color) |
 | `savePhoneNumberIconColor`                 | The color of "Diskette" button for saving phone number | [Color](#color) |
 | `selectPaymentMethodHeaderBackgroundColor` |   The background of an item in payment options list    | [Color](#color) |
+| `paymentItemBorderColor`                   | The color or the payment item border in the list mode | [Color](#color) |
 
 ##### **Buttons**
 
@@ -569,6 +582,7 @@ If a property is not set, the default value (as specified in the Figma design [h
 | `rippleColor` | Button background color | [RippleColor](#ripplecolor) |
 | `fontType`    |   Button text font ID   |                        Int                        |
 | `textColor`   |    Button text color    |       [Color](#color)       |
+| `cornerRadius` | The corner radius of the button | Float |
 
 ##### Switch
 
@@ -589,6 +603,13 @@ If a property is not set, the default value (as specified in the Figma design [h
 | `top`         |    Int    |
 | `right`       |    Int    |
 | `bottom`      |    Int    |
+
+##### **Payment Item**
+
+| Property Name           | Description                          | Data Type |
+| ----------------------- | ------------------------------------ | :-------: |
+| `paymentItemCornerRadius` | Corner radius of the payment item in the list mode | Double |
+
 
 #### Example
 
@@ -639,6 +660,27 @@ If only one payment option is available and it is a wallet, the UI is automatica
 
 The parent application must use a theme based on `Theme.AppCompat` (or a subclass) to prevent crashes and styling problems. This requirement is defined in the `themes.xml` file within the `values` directory of the project.
 :::
+
+## Prepayment Hook
+
+The SDK allows the parent/merchant App to perform some validation before proceeding with the payment. This is done via a prepayment hook function implemented in the parent/merchant app. This function can either return `CardVerificationResult.success()`, meaning the payment will be proceeded, or `CardVerificationResult.failure(String message)`, meaning the payment will be stopped and an alert dialog with a `message` string displayed. This string can have a localized value, to do so it is needed to set the translated text to `<name_of_a_file>.arb` files if the App uses `l10n` localization feature.
+
+Here’s an example of prepayment hook implementation:
+
+```
+Future<CardVerificationResult<void, String>> _verifyPayment(String? payload) async {
+    //merchant Api call for payload validation
+    return Future.delayed(Duration(seconds: 2)).then((_) {
+      return widget.failPaymentValidation
+          ? CardVerificationResult.failure(AppLocalizations.of(context)!.prepaymentFailureMessage)
+          : CardVerificationResult.success();
+    });
+  }
+```
+
+There’s a `payload` parameter in the hook. For onsite checkout and tokenized payments it contains masked cardholder data. For all other payment types, the `payload` is nullable.
+
+Detailed description of the `payload` for specific payment type you may find here: [Card data structure](/developers/payments/checkout-sdk/web#card-data-structure).
 
 ## Wallet Configuration
 
