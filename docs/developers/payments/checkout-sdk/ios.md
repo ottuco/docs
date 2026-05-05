@@ -59,7 +59,7 @@ Add Ottu SDK as a dependency in `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/ottuco/ottu-ios.git", from: "2.1.10")
+    .package(url: "https://github.com/ottuco/ottu-ios.git", from: "2.2.5")
 ]
 ```
 
@@ -74,7 +74,7 @@ Or in Xcode:
 Add the following line to your **Podfile**:
 
 ```ruby
-pod 'ottu_checkout_sdk', :git => 'https://github.com/ottuco/ottu-ios.git', :tag => '2.1.10'
+pod 'ottu_checkout_sdk', :git => 'https://github.com/ottuco/ottu-ios.git', :tag => '2.2.5'
 ```
 
 **Run:**
@@ -268,9 +268,7 @@ For more details on how to use the `session_id` parameter in the Checkout API, r
 
 #### **delegate** _`object`_ _`required`_
 
-An object is used to provide SDK callbacks to the application. Typically, this is the parent app's class that conforms to `OttuDelegate`, aggregating the SDK object.
-
-To implement this delegate, the class must define three callback functions. More details are accessible next secion.
+An object providing the SDK callbacks to the app This is usually the parent app’s class corresponding to `OttuDelegate` aggregating the SDK object. In order the class to correspond to this delegate, it needs to implement 3 callback functions (see [Callbacks](#callbacks) chapter).
 
 ### Display Options
 
@@ -289,6 +287,18 @@ Available options for `formsOfPayment`:
 #### displaySettings _`object`_ _`optional`_
 
 The display of payment options is configured using the `PaymentOptionsDisplaySettings` struct. Additional information is provided in the Payment Options Display Mode section.
+
+#### verifyPayment _`object`_ _`optional`_
+
+VerifyPaymentDelegate function allowing to trigger prepayment hook before processing with the payment.
+
+See [Full Example](#full-example) chapter for details.
+
+#### payButtonText _`object`_ _`optional`_
+
+PayButtonText class allowing set the custom text for the “Pay” button. Please note, both en and ar fields of this class are required, so if provided, both English and Arabic texts have to be set.
+
+See [Full Example](#full-example) chapter for the reference.
 
 #### Payment Options Display Mode
 
@@ -423,6 +433,7 @@ If a property is not specified, the default value (as defined in the Figma desig
 | `backgroundColor`                         |           The main background of the SDK view component           |  UIColor  |
 | `backgroundColorModal`                    |                The background of any modal window                 |  UIColor  |
 | `iconColor`                               |               The color of the icon of the payment                |  UIColor  |
+| `selectPaymentMethodBorderColor`          |            Payment item border color in the list mode             |  UIColor  |
 | `paymentItemBackgroundColor`              |         The background of an item in payment options list         |  UIColor  |
 | `selectPaymentMethodTitleBackgroundColor` | The background of the "Select Payment Method" bottom sheet header |  UIColor  |
 
@@ -479,6 +490,7 @@ If a property is not specified, the default value (as defined in the Figma desig
 | `enabledBackgroundColor`  |  UIColor  |
 | `disabledBackgroundColor` |  UIColor  |
 | `fontFamily`              |  String   |
+| `cornerRadius`            |  CGFloat  |
 
 ##### **UIEdgeInsets**
 
@@ -488,6 +500,13 @@ If a property is not specified, the default value (as defined in the Figma desig
 | `top`         |    Int    |
 | `right`       |    Int    |
 | `bottom`      |    Int    |
+
+##### **Payment Item**
+
+| Property Name                  | Description                                | Data Type |
+| ------------------------------- | :----------------------------------------: | :-------: |
+| `selectPaymentMethodCornerRadius` | Payment item corner radius in the list mode |    |
+
 
 #### Theme Example
 
@@ -543,6 +562,35 @@ Therefore, the currently selected device language or the app's selected language
 The SDK also supports UI adjustments based on the device's theme settings (light or dark mode).
 
 The appropriate theme is applied automatically during SDK initialization, aligning with the device's settings. Similar to language settings, no manual adjustments are required within the application.
+
+## Prepayment Hook
+
+The SDK allows the parent app to perform some validation before proceeding with the payment. This is done via a prepayment hook function implemented in the parent app. This function can either return `CardVerificationResult.Success()`, meaning the payment will be proceeded, or `CardVerificationResult.Failure(message)`, meaning the payment will be stopped and an alert dialog with a message string displayed. This string can have a localized value, to do so it is needed to set the translated text to `res/values/strings.xml` file.
+
+Here’s an example of prepayment hook implementation:
+
+```
+private func verifyPaymentCallback(_ payload: String?) async -> CardVerificationResult<Void> {
+    Logger.app.info("OttuPaymentsViewController.verifyPaymentCallback, payload: \(String(describing: payload))")
+    let seconds = 2.0
+    try? await Task.sleep(nanoseconds: UInt64(seconds * Double(NSEC_PER_SEC)))
+    if failPaymentValidation {
+        let message = NSLocalizedString(
+            "prepayment_failure_message",
+            tableName: "Localizable",
+            bundle: Bundle(for: Self.self),
+            comment: ""
+        )
+        return CardVerificationResult.failure(message)
+    } else {
+        return CardVerificationResult.success(())
+    }
+}
+```
+
+There’s a `payload` parameter in the hook. For onsite checkout and tokenized payments it contains masked cardholder data. For all other payment types, the `payload` is empty.
+
+Detailed description of the `payload` for specific payment type you may find here: [Card data structure](/developers/payments/checkout-sdk/web#card-data-structure).
 
 ## Wallet Configuration
 
@@ -943,6 +991,7 @@ This technique works in two ways:
     The SDK supports the following payment forms: `tokenPay`, `ottuPG`, `redirect` `applePay` and `stcPay`. Merchants can display specific methods according to their needs.
 
     **For example,** if you want to only show the STC Bank button, you can do so using formsOfPayment = `stcPay`, and only the STC Bank button will be displayed. The same applies for `applePay` and other methods.
+
   </FAQItem>
   <FAQItem question="2 What are the minimum system requirements for the SDK integration?">
     It is required to have a device running iOS 13 or higher.
@@ -960,5 +1009,6 @@ This technique works in two ways:
     - Merchant capabilities
 
     For a complete list of supported properties, refer to the [Apple Pay](https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypaymentrequest) documentation.
+
   </FAQItem>
 </FAQ>
