@@ -663,7 +663,7 @@ The parent application must use a theme based on `Theme.AppCompat` (or a subclas
 
 ## Prepayment Hook
 
-The SDK allows the parent/merchant App to perform some validation before proceeding with the payment. This is done via a prepayment hook function implemented in the parent/merchant app. This function can either return `CardVerificationResult.success()`, meaning the payment will be proceeded, or `CardVerificationResult.failure(String message)`, meaning the payment will be stopped and an alert dialog with a `message` string displayed. This string can have a localized value, to do so it is needed to set the translated text to `<name_of_a_file>.arb` files if the App uses `l10n` localization feature.
+The SDK allows the parent/merchant App to perform some validation before proceeding with the payment. This is done via a prepayment hook function implemented in the parent/merchant app. This function can either return `CardVerificationResult.success()`, meaning the payment will proceed, or `CardVerificationResult.failure(String message)`, meaning the payment will be stopped and an alert dialog with a `message` string displayed. This string can have a localized value, to do so it is needed to set the translated text to `<name_of_a_file>.arb` files if the App uses `l10n` localization feature.
 
 Here’s an example of prepayment hook implementation:
 

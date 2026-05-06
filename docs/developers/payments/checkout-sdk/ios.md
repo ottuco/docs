@@ -564,7 +564,7 @@ The appropriate theme is applied automatically during SDK initialization, aligni
 
 ## Prepayment Hook
 
-The SDK allows the parent app to perform some validation before proceeding with the payment. This is done via a prepayment hook function implemented in the parent app. This function can either return `CardVerificationResult.Success()`, meaning the payment will be proceeded, or `CardVerificationResult.Failure(message)`, meaning the payment will be stopped and an alert dialog with a message string displayed. This string can have a localized value, to do so it is needed to set the translated text to `res/values/strings.xml` file.
+The SDK allows the parent app to perform some validation before proceeding with the payment. This is done via a prepayment hook function implemented in the parent app. This function can either return `CardVerificationResult.Success()`, meaning the payment will proceed, or `CardVerificationResult.Failure(message)`, meaning the payment will be stopped and an alert dialog with a message string displayed. This string can have a localized value, to do so it is needed to set the translated text to `res/values/strings.xml` file.
 
 Here’s an example of prepayment hook implementation:
 
