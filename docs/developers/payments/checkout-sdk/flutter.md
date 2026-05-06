@@ -519,7 +519,7 @@ If a property is not set, the default value (as specified in the Figma design [h
 | `selectorIconColor`                        |          The color of the icon of the payment          | [Color](#color) |
 | `savePhoneNumberIconColor`                 | The color of "Diskette" button for saving phone number | [Color](#color) |
 | `selectPaymentMethodHeaderBackgroundColor` |   The background of an item in payment options list    | [Color](#color) |
-| `paymentItemBorderColor`                   | The color or the payment item border in the list mode | [Color](#color) |
+| `paymentItemBorderColor`                   | The color of the payment item border in the list mode | [Color](#color) |
 
 ##### **Buttons**
 
