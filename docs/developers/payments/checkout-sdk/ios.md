@@ -268,7 +268,7 @@ For more details on how to use the `session_id` parameter in the Checkout API, r
 
 #### **delegate** _`object`_ _`required`_
 
-An object providing the SDK callbacks to the app This is usually the parent app’s class corresponding to `OttuDelegate` aggregating the SDK object. In order the class to correspond to this delegate, it needs to implement 3 callback functions (see [Callbacks](#callbacks)).
+An object providing the SDK callbacks to the app. This is usually the parent app’s class corresponding to `OttuDelegate` aggregating the SDK object. In order the class to correspond to this delegate, it needs to implement 3 callback functions (see [Callbacks](#callbacks)).
 
 ### Display Options
 
