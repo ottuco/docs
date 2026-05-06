@@ -568,7 +568,7 @@ The SDK allows the parent app to perform some validation before proceeding with 
 
 Here’s an example of prepayment hook implementation:
 
-```
+```swift
 private func verifyPaymentCallback(_ payload: String?) async -> CardVerificationResult<Void> {
     Logger.app.info("OttuPaymentsViewController.verifyPaymentCallback, payload: \(String(describing: payload))")
     let seconds = 2.0

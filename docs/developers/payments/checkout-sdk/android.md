@@ -658,7 +658,7 @@ The SDK allows the parent app to perform some validation before proceeding with 
 
 Here’s an example of prepayment hook implementation:
 
-```
+```kotlin
 verifyPayment = { payload ->
   // just do some verification stuff
   doSomething()

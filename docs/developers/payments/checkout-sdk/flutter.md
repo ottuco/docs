@@ -667,7 +667,7 @@ The SDK allows the parent/merchant App to perform some validation before proceed
 
 Here’s an example of prepayment hook implementation:
 
-```
+```dart
 Future<CardVerificationResult<void, String>> _verifyPayment(String? payload) async {
     //merchant Api call for payload validation
     return Future.delayed(Duration(seconds: 2)).then((_) {
