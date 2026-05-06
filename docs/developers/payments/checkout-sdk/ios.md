@@ -292,7 +292,7 @@ The display of payment options is configured using the `PaymentOptionsDisplaySet
 
 VerifyPaymentDelegate function allowing to trigger prepayment hook before processing with the payment.
 
-See [Full Example](#full-example) chapter for details.
+See [Prepayment Hook](#prepayment-hook) chapter for details.
 
 #### payButtonText _`object`_ _`optional`_
 
@@ -503,10 +503,9 @@ If a property is not specified, the default value (as defined in the Figma desig
 
 ##### **Payment Item**
 
-| Property Name                  | Description                                | Data Type |
-| ------------------------------- | :----------------------------------------: | :-------: |
-| `selectPaymentMethodCornerRadius` | Payment item corner radius in the list mode |    |
-
+| Property Name                     |                 Description                 | Data Type |
+| --------------------------------- | :-----------------------------------------: | :-------: |
+| `selectPaymentMethodCornerRadius` | Payment item corner radius in the list mode |           |
 
 #### Theme Example
 
