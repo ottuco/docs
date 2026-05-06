@@ -268,7 +268,7 @@ For more details on how to use the `session_id` parameter in the Checkout API, r
 
 #### **delegate** _`object`_ _`required`_
 
-An object providing the SDK callbacks to the app This is usually the parent app’s class corresponding to `OttuDelegate` aggregating the SDK object. In order the class to correspond to this delegate, it needs to implement 3 callback functions (see [Callbacks](#callbacks) chapter).
+An object providing the SDK callbacks to the app This is usually the parent app’s class corresponding to `OttuDelegate` aggregating the SDK object. In order the class to correspond to this delegate, it needs to implement 3 callback functions (see [Callbacks](#callbacks)).
 
 ### Display Options
 
@@ -290,15 +290,15 @@ The display of payment options is configured using the `PaymentOptionsDisplaySet
 
 #### verifyPayment _`object`_ _`optional`_
 
-VerifyPaymentDelegate function allowing to trigger prepayment hook before processing with the payment.
+`VerifyPaymentDelegate` function that allows triggering prepayment hook before processing with the payment.
 
-See [Prepayment Hook](#prepayment-hook) chapter for details.
+See [Prepayment Hook](#prepayment-hook) for details.
 
 #### payButtonText _`object`_ _`optional`_
 
-PayButtonText class allowing set the custom text for the “Pay” button. Please note, both en and ar fields of this class are required, so if provided, both English and Arabic texts have to be set.
+`PayButtonText` class that allows setting custom text for the “Pay” button. Please note, both `en` and `ar` fields of this class are required, so if provided, both English and Arabic texts have to be set.
 
-See [Full Example](#full-example) chapter for the reference.
+See [Full Example](#full-example) for the reference.
 
 #### Payment Options Display Mode
 
@@ -349,7 +349,7 @@ displaySettings: PaymentOptionsDisplaySettings(
 )
 ```
 
-To view the full function call, please refer to the Ottu SDK - iOS | Example chapter in the documentation. This section provides the complete example, including how the function is used in the context of the Ottu SDK.
+To view the full function call, please refer to [Full Example](#full-example) in the documentation. This section provides the complete example, including how the function is used in the context of the Ottu SDK.
 
 ### Preloading
 

@@ -291,7 +291,7 @@ This identifier is automatically generated at the creation of the payment transa
 
 The callback functions used for getting payment status. They should be provided directly to the Checkout initialization function.
 
-See [Callbacks](#callbacks) chapter for details.
+See [Callbacks](#callbacks) for details.
 
 ### Display Options
 
@@ -361,19 +361,19 @@ These parameters are passed to the `Checkout.init` builder class via the followi
 .displaySettings(displaySettings)
 ```
 
-To view the full function call, please refer to the [Full Example](#full-example) chapter in the documentation.
+To view the full function call, please refer to the [Full Example](#full-example) in the documentation.
 
 #### **verifyPayment** _`object`_ _`optional`_
 
-`VerifyPaymentDelegate` function allowing to trigger prepayment hook before processing with the payment.
+`VerifyPaymentDelegate` function that allows triggering prepayment hook before processing with the payment.
 
-See [Prepayment Hook](#prepayment-hook) chapter for details.
+See [Prepayment Hook](#prepayment-hook) for details.
 
 #### **payButtonText** _`object`_ _`optional`_
 
-`PayButtonText` class allowing set the custom text for the “Pay” button. Please note, both `en` and `ar` fields of this class are required, so if provided, both English and Arabic texts have to be set.
+`PayButtonText` class that allows setting custom text for the “Pay” button. Please note, both `en` and `ar` fields of this class are required, so if provided, both English and Arabic texts have to be set.
 
-See [Full Example](#full-example) chapter for the reference.
+See [Full Example](#full-example) for the reference.
 
 
 ### Preloading
