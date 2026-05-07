@@ -248,7 +248,7 @@ Checkout.init({
     ```javascript
     Checkout.init({
       selector: "checkout",
-      merchant_id: 'domain',
+      merchant_id: 'sandbox.ottu.net', // use your merchant id
       session_id: 'session_id',
       apiKey: 'apiKey',
       theme: {
@@ -335,7 +335,7 @@ Checkout.init({
     ```javascript
     Checkout.init({
       selector: "checkout",
-      merchant_id: "domain",
+      merchant_id: "sandbox.ottu.net", // use your merchant id
       session_id: "session_id",
       apiKey: "apiKey",
       theme: {
@@ -376,7 +376,7 @@ Checkout.init({
     ```javascript
     Checkout.init({
       selector: "checkout",
-      merchant_id: "domain",
+      merchant_id: "sandbox.ottu.net", // use your merchant id
       session_id: "session_id",
       apiKey: "apiKey",
       googlePayInit: {
@@ -444,7 +444,7 @@ Checkout.init({
 ```javascript
 Checkout.init({
   selector: "checkout",
-  merchant_id: "domain",
+  merchant_id: "sandbox.ottu.net", // use your merchant id
   session_id: "session_id",
   apiKey: "apiKey",
   theme: {
@@ -477,7 +477,7 @@ However, Google Pay supports an additional property `buttonSizeMode` property, w
 ```javascript
 Checkout.init({
   selector: "checkout",
-  merchant_id: "domain",
+  merchant_id: "sandbox.ottu.net", // use your merchant id
   session_id: "session_id",
   apiKey: "apiKey",
   theme: {
@@ -556,7 +556,7 @@ However, `stcPay` and `urPay` can supported any `css` collor in `buttonColor.`
 ```javascript
 Checkout.init({
   selector: "checkout",
-  merchant_id: "domain",
+  merchant_id: "sandbox.ottu.net", // use your merchant id
   session_id: "session_id",
   apiKey: "apiKey",
   lang: "en",
@@ -614,7 +614,7 @@ In addition to above properties, users have the capability to customize the Appl
 ```javascript
 Checkout.init({
     selector: "checkout",
-    merchant_id: 'domain',
+    merchant_id: 'sandbox.ottu.net', // use your merchant id
     session_id: 'session_id',
     apiKey: 'apiKey',
     // Default values configured for Apple Pay
@@ -935,12 +935,15 @@ Onsite Checkout lets customers enter their card details directly on your page, w
 
 ### How to enable
 
-Include `'jazz'` in the `formsOfPayment` array when calling [`Checkout.init`](#checkoutinit). The Jazz SDK will only be loaded when this value is present.
+Onsite Checkout is loaded when `'jazz'` is part of the [`formsOfPayment`](#formsofpayment-array) array passed to [`Checkout.init`](#checkoutinit). Whether you need to change anything depends on whether you currently pass `formsOfPayment` at all:
+
+- **If you don't pass `formsOfPayment`**, no change is required, by default all forms of payment are enabled, including `'jazz'`.
+- **If you do pass `formsOfPayment` explicitly**, make sure `'jazz'` is included alongside your other entries. Forms of payment that are not listed will not be rendered.
 
 ```javascript
 Checkout.init({
   selector: "checkout",
-  merchant_id: "example.ottu.com",
+  merchant_id: "sandbox.ottu.net", // use your merchant id
   apiKey: "<public-key>",
   session_id: "<session-id>",
   formsOfPayment: ["jazz", "tokenPay", "applePay"],
@@ -1220,7 +1223,7 @@ window.successCallback = (data) => {
 };
 Checkout.init({
   selector: "checkout",
-  merchant_id: "domain",
+  merchant_id: "sandbox.ottu.net", // use your merchant id
   session_id: "session_id",
   apiKey: "apiKey",
 });
@@ -1570,7 +1573,7 @@ function unfreezeBasket() {
 
 Checkout.init({
   selector: "checkout",
-  merchant_id: "sandbox.ottu.net",
+  merchant_id: "sandbox.ottu.net", // use your merchant id
   session_id: "session_id",
   apiKey: "apiKey",
   lang: "en",
@@ -1676,7 +1679,7 @@ Checkout init function
 ```javascript
 Checkout.init({
   selector: "checkout",
-  merchant_id: "sandbox.ottu.net",
+  merchant_id: "sandbox.ottu.net", // use your merchant id
   session_id: "session_id",
   apiKey: "apiKey",
   lang: "en", // en or ar default en
