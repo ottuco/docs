@@ -284,17 +284,17 @@ Available options for `formsOfPayment`:
 - `tokenPay`: Uses tokenization to securely store and process customers' payment information.
 - `redirect`: Redirects customers to an external payment gateway or a third-party payment processor to complete the transaction.
 
-#### displaySettings _`object`_ _`optional`_
+#### **displaySettings** _`object`_ _`optional`_
 
 The display of payment options is configured using the `PaymentOptionsDisplaySettings` struct. Additional information is provided in the Payment Options Display Mode section.
 
-#### verifyPayment _`object`_ _`optional`_
+#### **verifyPayment** _`object`_ _`optional`_
 
 `VerifyPaymentDelegate` function that allows triggering a prepayment hook before payment processing.
 
 See [Prepayment Hook](#prepayment-hook) for details.
 
-#### payButtonText _`object`_ _`optional`_
+#### **payButtonText** _`object`_ _`optional`_
 
 `PayButtonText` class that allows setting custom text for the “Pay” button. Please note, both `en` and `ar` fields of this class are required, so if provided, both English and Arabic texts have to be set.
 
@@ -564,7 +564,7 @@ The appropriate theme is applied automatically during SDK initialization, aligni
 
 ## Prepayment Hook
 
-The SDK allows the parent app to perform some validation before proceeding with the payment. This is done via a prepayment hook function implemented in the parent app. This function can either return `CardVerificationResult.Success()`, meaning the payment will proceed, or `CardVerificationResult.Failure(message)`, meaning the payment will be stopped and an alert dialog with a `message` string displayed. This string can have a localized value, to do so it is needed to set the translated text to `Localizable.strings` file.
+The SDK allows the parent app to perform some validation before proceeding with the payment. This is done via a prepayment hook function implemented in the parent app. This function can either return `CardVerificationResult.success()`, meaning the payment will proceed, or `CardVerificationResult.failure(message)`, meaning the payment will be stopped and an alert dialog with a `message` string displayed. This string can have a localized value, to do so it is needed to set the translated text to `Localizable.strings` file.
 
 Here’s an example of prepayment hook implementation:
 
