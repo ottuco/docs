@@ -138,6 +138,7 @@ The available options for `formsOfPayment` are:
 - `redirect`: A method where customers are redirected to a payment gateway or a third-party payment processor to complete their payment.
 - `stcPay`: A method where customers enter their mobile number and provide an OTP send to their mobile number to complete their payment.
 - `urPay`: A method where customers enter their mobile number and provide an OTP send to their mobile number to complete their payment.
+- `jazz`: Renders Ottu's onsite card form inline using the Jazz SDK, so customers enter their card details directly on the merchant page instead of being redirected. See [Onsite Checkout](#onsite-checkout) for setup details.
 
 #### displayMode _`string`_
 
@@ -928,11 +929,42 @@ Checkout.init({
 
 <figure><img src="/img/checkout-sdk/urpay%20Button.png" alt="urpay button in Web SDK" /><figcaption></figcaption></figure>
 
+## Onsite Checkout
+
+Onsite Checkout lets customers enter their card details directly on your page, without being redirected to a separate payment gateway page. The card form is rendered inside a PCI-compliant iframe hosted by Ottu's **Jazz SDK** and embedded inline within the Checkout SDK container, so the entire payment flow — card entry, 3D Secure challenge, and final result — happens on the merchant page.
+
+### How to enable
+
+ **Include `'jazz'` in the `formsOfPayment` array** when calling [`Checkout.init`](#checkoutinit). The Jazz SDK will only be loaded when this value is present.
+
+```javascript
+Checkout.init({
+  selector: "checkout",
+  merchant_id: "example.ottu.com",
+  apiKey: "<public-key>",
+  session_id: "<session-id>",
+  formsOfPayment: ["jazz", "tokenPay", "applePay"],
+});
+```
+
+If `'jazz'` is omitted, or if a payment method has not been enabled for onsite checkout, the Checkout SDK falls back automatically to the standard redirect-to-gateway flow for that method.
+
+### Flow
+
+From the customer's perspective, an onsite payment looks like this:
+
+1. The customer selects a card-based payment method in the checkout.
+2. The card form (rendered by the Jazz SDK) appears inline inside the checkout container.
+3. The customer enters their card details and clicks **Pay**.
+4. If the card issuer requires 3D Secure, the challenge runs in-flow without leaving the page.
+5. When the payment finishes, the SDK invokes [`successCallback`](#successcallback), [`errorCallback`](#errorcallback), or [`cancelCallback`](#cancelcallback) depending on the outcome.
+
+
 ## Callbacks
 
 In the Checkout SDK, callback functions play a vital role in providing real-time updates on the status of payment transactions. `Callbacks` enhance the user experience by enabling seamless and efficient handling of various payment scenarios, such as errors, successful payments, and cancellations.
 
-Please note that due to technical constraints associated with off-site redirection during the payment process, the `successCallback` and `cancelCallback` functions are only called for on-site checkouts. However, the `errorCallback` function is called for any kind of payments. On-site checkouts include options such as Apple Pay, Google Pay, payments with saved cards, and on-site card form transactions, which support callback functionality for a seamless user experience.
+Please note that due to technical constraints associated with off-site redirection during the payment process, the `successCallback` and `cancelCallback` functions are only called for on-site checkouts. However, the `errorCallback` function is called for any kind of payments. On-site checkouts include options such as Apple Pay, Google Pay, payments with saved cards, and [onsite card form](#onsite-checkout) transactions, which support callback functionality for a seamless user experience.
 
 ### errorCallback
 
@@ -1104,7 +1136,7 @@ window.beforePayment = function (data) {
 
 #### Apply Discount Based on Card PAN
 
-In `tokenPay` and `cardPay` payment methods, the SDK passes the card details to the `beforePayment` callback. This allows you to identify the card brand or specific bank (via PAN) and apply a discount dynamically.
+In `tokenPay` and `jazz` payment methods, the SDK passes the card details to the `beforePayment` callback. This allows you to identify the card brand or specific bank (via PAN) and apply a discount dynamically.
 
 **Implementation Steps:**
 
@@ -1192,7 +1224,7 @@ Checkout.init({
 
 ##### **Card Data Structure**
 
-When `tokenPay` or `cardPay` is used, the `paymentData` argument in the hook will contain the following `card` object:
+When `tokenPay` or `jazz` is used, the `paymentData` argument in the hook will contain the following `card` object. The same shape is also delivered for [Onsite Checkout](#onsite-checkout) payments, so any logic written against this structure works for both the gateway-redirect and onsite flows.
 
 JSON
 
