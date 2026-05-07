@@ -86,7 +86,7 @@ The SDK can be used on devices running **iOS 15** or higher.
     ottu_flutter_checkout:
       git:
         url: https://github.com/ottuco/ottu-flutter.git
-        ref: 2.2.2
+        ref: 2.2.3
     ```
   </li>
   <li className="stepper-item">
@@ -99,7 +99,7 @@ The SDK can be used on devices running **iOS 15** or higher.
 
     :::info
     If you choose to use CocoaPods, please use release version
-    **2.2.2-cocoapods**.
+    **2.2.3-cocoapods**.
     :::
   </li>
 </ol>
