@@ -896,6 +896,7 @@ html[data-theme="dark"] .docusaurus-mermaid-container marker path {
   /* Let main content column grow into the space freed by narrower TOC */
   .row:has(.theme-doc-toc-desktop) > [class*="docItemCol"] {
     max-width: none !important;
+    min-width: 0;
   }
 }
 
