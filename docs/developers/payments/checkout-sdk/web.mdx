@@ -935,7 +935,7 @@ Onsite Checkout lets customers enter their card details directly on your page, w
 
 ### How to enable
 
- **Include `'jazz'` in the `formsOfPayment` array** when calling [`Checkout.init`](#checkoutinit). The Jazz SDK will only be loaded when this value is present.
+Include `'jazz'` in the `formsOfPayment` array when calling [`Checkout.init`](#checkoutinit). The Jazz SDK will only be loaded when this value is present.
 
 ```javascript
 Checkout.init({
@@ -947,7 +947,12 @@ Checkout.init({
 });
 ```
 
-If `'jazz'` is omitted, or if a payment method has not been enabled for onsite checkout, the Checkout SDK falls back automatically to the standard redirect-to-gateway flow for that method.
+:::note
+
+Onsite Checkout is enabled per merchant according to your available tier. To enable it for your account, contact [csd@ottu.com](mailto:csd@ottu.com).
+
+If `'jazz'` is omitted, or if a payment method has not been enabled for onsite checkout on your account, the Checkout SDK falls back automatically to the standard redirect-to-gateway flow for that method.
+:::
 
 ### Flow
 
@@ -958,7 +963,6 @@ From the customer's perspective, an onsite payment looks like this:
 3. The customer enters their card details and clicks **Pay**.
 4. If the card issuer requires 3D Secure, the challenge runs in-flow without leaving the page.
 5. When the payment finishes, the SDK invokes [`successCallback`](#successcallback), [`errorCallback`](#errorcallback), or [`cancelCallback`](#cancelcallback) depending on the outcome.
-
 
 ## Callbacks
 
