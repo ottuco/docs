@@ -290,7 +290,7 @@ The display of payment options is configured using the `PaymentOptionsDisplaySet
 
 #### verifyPayment _`object`_ _`optional`_
 
-`VerifyPaymentDelegate` function that allows triggering prepayment hook before processing with the payment.
+`VerifyPaymentDelegate` function that allows triggering a prepayment hook before payment processing.
 
 See [Prepayment Hook](#prepayment-hook) for details.
 
@@ -505,7 +505,7 @@ If a property is not specified, the default value (as defined in the Figma desig
 
 | Property Name                     |                 Description                 | Data Type |
 | --------------------------------- | :-----------------------------------------: | :-------: |
-| `selectPaymentMethodCornerRadius` | Payment item corner radius in the list mode |           |
+| `selectPaymentMethodCornerRadius` | Payment item corner radius in the list mode |  CGFloat  |
 
 #### Theme Example
 
@@ -564,7 +564,7 @@ The appropriate theme is applied automatically during SDK initialization, aligni
 
 ## Prepayment Hook
 
-The SDK allows the parent app to perform some validation before proceeding with the payment. This is done via a prepayment hook function implemented in the parent app. This function can either return `CardVerificationResult.Success()`, meaning the payment will proceed, or `CardVerificationResult.Failure(message)`, meaning the payment will be stopped and an alert dialog with a message string displayed. This string can have a localized value, to do so it is needed to set the translated text to `res/values/strings.xml` file.
+The SDK allows the parent app to perform some validation before proceeding with the payment. This is done via a prepayment hook function implemented in the parent app. This function can either return `CardVerificationResult.Success()`, meaning the payment will proceed, or `CardVerificationResult.Failure(message)`, meaning the payment will be stopped and an alert dialog with a `message` string displayed. This string can have a localized value, to do so it is needed to set the translated text to `Localizable.strings` file.
 
 Here’s an example of prepayment hook implementation:
 

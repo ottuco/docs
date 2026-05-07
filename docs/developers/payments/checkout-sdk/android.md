@@ -365,7 +365,7 @@ To view the full function call, please refer to the [Full Example](#full-example
 
 #### **verifyPayment** _`object`_ _`optional`_
 
-`VerifyPaymentDelegate` function that allows triggering prepayment hook before processing with the payment.
+`VerifyPaymentDelegate` function that allows triggering a prepayment hook before payment processing.
 
 See [Prepayment Hook](#prepayment-hook) for details.
 

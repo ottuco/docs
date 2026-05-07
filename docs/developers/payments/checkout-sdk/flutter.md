@@ -303,13 +303,13 @@ All of these parameters are optional and are demonstrated in the following figur
 
 #### **verifyPayment** _`object`_ _**`optional`**_
 
-`VerifyPaymentDelegate` typealias of a function that allows triggering prepayment hook before processing with the payment.
+`VerifyPaymentDelegate` typealias of a function that allows triggering a prepayment hook before payment processing.
 
 See [Prepayment Hook](#prepayment-hook) for details.
 
 #### **payButtonText** _`object`_ _**`optional`**_
 
-`PayButtonText` class allows setting the custom text for the “Pay” button. Please note, both `en` and `ar` fields of this class are required, so if provided, both English and Arabic texts have to be set.
+`PayButtonText` class that allows setting the custom text for the “Pay” button. Please note, both `en` and `ar` fields of this class are required, so if provided, both English and Arabic texts have to be set.
 
 See [Full Example](#full-example) for the reference.
 
