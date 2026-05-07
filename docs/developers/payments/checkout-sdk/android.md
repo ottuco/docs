@@ -57,7 +57,7 @@ The SDK is compatible with devices running Android 8 or higher (API version 26 o
     </div>
 
     ```swift
-    implementation("com.github.ottuco:ottu-android-checkout:2.1.7")
+    implementation("com.github.ottuco:ottu-android-checkout:2.2.2")
     ```
   </li>
 </ol>
@@ -289,7 +289,9 @@ This identifier is automatically generated at the creation of the payment transa
 
 #### **successCallback, errorCallback and cancelCallback** _`Unit`_ _`required`_
 
-Callback functions are used to retrieve the payment status and must be provided directly to the Checkout initialization function. For more details, refer to the [Callbacks](#callbacks) section.
+The callback functions used for getting payment status. They should be provided directly to the Checkout initialization function.
+
+See [Callbacks](#callbacks) for details.
 
 ### Display Options
 
@@ -359,7 +361,20 @@ These parameters are passed to the `Checkout.init` builder class via the followi
 .displaySettings(displaySettings)
 ```
 
-To view the full function call, please refer to the [Full Example](#full-example) chapter in the documentation.
+To view the full function call, please refer to the [Full Example](#full-example) in the documentation.
+
+#### **verifyPayment** _`object`_ _`optional`_
+
+`VerifyPaymentDelegate` function that allows triggering a prepayment hook before payment processing.
+
+See [Prepayment Hook](#prepayment-hook) for details.
+
+#### **payButtonText** _`object`_ _`optional`_
+
+`PayButtonText` class that allows setting custom text for the “Pay” button. Please note, both `en` and `ar` fields of this class are required, so if provided, both English and Arabic texts have to be set.
+
+See [Full Example](#full-example) for the reference.
+
 
 ### Preloading
 
@@ -471,6 +486,8 @@ If a property is not specified, the default value (as defined in the Figma desig
 | `selectorIconColor`                        |          The color of the icon of the payment          | [Color](#color) |
 | `savePhoneNumberIconColor`                 | The color of "Diskette" button for saving phone number | [Color](#color) |
 | `selectPaymentMethodHeaderBackgroundColor` |   The background of an item in payment options list    | [Color](#color) |
+| `paymentItemBorderColor`                   | The color of the payment item border in the list mode  | [Color](#color) |
+
 
 #### **Buttons**
 
@@ -528,11 +545,12 @@ If a property is not specified, the default value (as defined in the Figma desig
 
 ##### Button
 
-| Property Name |       Description       |                     Data Type                     |
-| ------------- | :---------------------: | :-----------------------------------------------: |
-| `rippleColor` | Button background color | [RippleColor](#ripplecolor) |
-| `fontType`    |   Button text font ID   |                        Int                        |
-| `textColor`   |    Button text color    |       [Color](#color)       |
+| Property Name  |           Description           |          Data Type          |
+| -------------  | :-----------------------------: | :-------------------------: |
+| `rippleColor`  |     Button background color     | [RippleColor](#ripplecolor) |
+| `fontType`     |       Button text font ID       |            Int              |
+| `textColor`    |        Button text color        |       [Color](#color)       |
+| `cornerRadius` | The corner radius of the button |            Float            |
 
 ##### Switch
 
@@ -553,6 +571,15 @@ If a property is not specified, the default value (as defined in the Figma desig
 | `top`         |    Int    |
 | `right`       |    Int    |
 | `bottom`      |    Int    |
+
+
+##### **Payment item**
+
+| Property Name             | Description                                        | Data Type |
+| -----------------------   | :----------------------------------------------:   | :-------: |
+| `paymentItemCornerRadius` | Corner radius of the payment item in the list mode |   Float   |
+
+
 
 #### Theme Example
 
@@ -624,6 +651,26 @@ If a wallet is the only available payment option, the UI is minimized automatica
 
 To avoid style issues and potential crashes, the parent application's theme must be `Theme.AppCompat` or one of its descendant classes. This theme is specified in the `themes.xml` file located in the `values` directory of the project.
 :::
+
+## Prepayment Hook
+
+The SDK allows the parent app to perform some validation before proceeding with the payment. This is done via a prepayment hook function implemented in the parent app. This function can either return `CardVerificationResult.Success()`, meaning the payment will proceed, or `CardVerificationResult.Failure(message)`, meaning the payment will be stopped and an alert dialog with a message string displayed. This string can have a localized value, to do so it is needed to set the translated text to `res/values/strings.xml` file.
+
+Here’s an example of prepayment hook implementation:
+
+```kotlin
+verifyPayment = { payload ->
+  // just do some verification stuff
+  doSomething()
+  if (failPaymentValidation) CardVerificationResult.Failure(
+        getString(R.string.prepayment_failure_message)
+  ) else CardVerificationResult.Success()
+},
+```
+
+There’s a `payload` parameter in the hook. For onsite checkout and tokenized payments it contains masked cardholder data. For all other payment types, the `payload` is empty.
+
+Detailed description of the `payload` for specific payment type you may find here: [Card data structure](/developers/payments/checkout-sdk/web#card-data-structure).
 
 ## Wallet Configuration
 
