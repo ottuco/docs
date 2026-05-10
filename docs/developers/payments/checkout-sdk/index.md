@@ -16,13 +16,13 @@ It is important to keep in mind that the Checkout SDK cannot work without a back
 
 By following this process, you can ensure that your application is able to properly leverage the features and functionality provided by the Checkout SDK, while also maintaining a secure and reliable payment processing system for your users.
 
-### Ottu-Checkout definition
+## Ottu-Checkout definition
 
 Ottu-checkout is a seamless, confidential and flexible payment checkout. Allows the merchant(s) to proceed the payment either single or bulk payment by a few steps. Ottu-checkout gives the merchant(s) the possibility to utilize many multiple payment gateways, simply generate the payment link and share it by different ways such as Email, WhatsApp, and SMS.
 
-### Ottu-Checkout SDK flow
+## Ottu-Checkout SDK flow
 
-#### Merchant backend
+### Merchant backend
 
 <figure><img src="/img/checkout-sdk/1%20%2812%29%20%282%29.png" alt="Merchant backend payment flow" /><figcaption></figcaption></figure>
 
@@ -33,7 +33,7 @@ In the event the due amount is determined, the merchant should be notified to in
 
 <figure><img src="/img/checkout-sdk/2%20%2811%29%20copy.png" alt="Checkout API success and error handling flow" /><figcaption></figcaption></figure>
 
-#### Merchant frontend
+### Merchant frontend
 
 After rendering the page, SDK will be fetched and embed from CDN (content delivery network). Then initiating the checkout SDK, and the SDK will render all the available payment methods.&#x20;
 
