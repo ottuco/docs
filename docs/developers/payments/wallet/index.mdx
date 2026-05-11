@@ -3,7 +3,9 @@ title: Wallet
 description: Customer wallet credits — refund, store, and spend balances at checkout.
 toc_min_heading_level: 2
 toc_max_heading_level: 3
-hide_table_of_contents: true
+# hide_table_of_contents intentionally NOT set until the <ApiDocEmbed> tabs
+# are restored in Task 22 (after Connect ships subticket 150892). Without the
+# right-column API panel, readers need the TOC for navigation.
 ---
 
 import Tabs from "@theme/Tabs";
@@ -63,7 +65,7 @@ flowchart LR
 
 ### Live Demo
 
-The interactive demo seeds a wallet on the fly for a fresh customer, then launches the Checkout SDK with wallet enabled. It will be wired in once the demo component is implemented — see [Wallet for merchants](/business/wallet/) for screenshots of the flow.
+The demo below seeds a fresh wallet on the fly for a generated customer, then launches the Checkout SDK with wallet enabled. The seeding step relies on the public sandbox wallet endpoint (Redmine subticket 150892); until that ships, the demo will surface a clear error during the "Setting up your demo wallet…" step. Screenshots of the merchant-side flow are on the [business wallet pages](/business/wallet/).
 
 <WalletDemo />
 
@@ -269,6 +271,6 @@ No. Wallet credit does not expire today.
 ## What's Next?
 
 - [Refund to Wallet (Operations)](../../operations#refund-to-wallet) — the refund API change that creates wallet credits.
-- [Checkout SDK — Wallet section](../checkout-sdk/web#wallet) — how wallet appears in the SDK.
+- [Checkout SDK — Ottu Wallet section](../checkout-sdk/web#ottu-wallet) — how wallet appears in the SDK.
 - [Payment Methods API](../payment-methods) — discovering available payment methods.
 - [Wallet for merchants](/business/wallet/) — business-side documentation.

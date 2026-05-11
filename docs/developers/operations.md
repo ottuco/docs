@@ -145,6 +145,10 @@ Set `destination: "wallet"` on the refund operation request:
 
 The `destination` field defaults to `"gateway"` when omitted, preserving the original refund behavior. Setting `"wallet"` switches the destination — no other request fields change.
 
+:::tip Use `Tracking-Key` for idempotency
+Wallet credits are immutable — a duplicate refund-to-wallet call creates a second uneditable credit entry (the gateway path fails on duplicates; the wallet path does not). Always include the `Tracking-Key` header so retries deduplicate. See [the Guide above](#guide) for the full idempotency contract.
+:::
+
 **Behavior:**
 
 - A wallet account is created automatically if one doesn't exist for the (merchant, customer, currency) combination.
