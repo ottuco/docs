@@ -441,6 +441,24 @@ const glossaryTerms: GlossaryTerm[] = [
       "Canceling an authorized transaction before it's captured. This releases the hold on the customer's funds without any money changing hands.",
   },
   {
+    term: "Wallet",
+    id: "wallet",
+    definition:
+      "A stored balance held by Ottu for a customer in a specific currency, used as a payment method at checkout. Wallet accounts are keyed by merchant, customer, and currency; each currency maintains a separate balance.",
+  },
+  {
+    term: "Wallet Credit",
+    id: "wallet-credit",
+    definition:
+      "An immutable ledger entry that adds funds to a wallet, typically issued via a refund-to-wallet operation. Credits cannot be edited or deleted; corrections are made by issuing an opposing entry.",
+  },
+  {
+    term: "Wallet Reservation",
+    id: "wallet-reservation",
+    definition:
+      "A temporary hold on wallet funds during checkout. Reservations commit on payment success and are automatically released approximately four hours after an abandoned, cancelled, or failed payment.",
+  },
+  {
     term: "Webhook",
     id: "webhook",
     definition:
