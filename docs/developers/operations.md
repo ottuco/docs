@@ -119,6 +119,51 @@ Settles authorized funds. Only applicable to `authorized` transactions. Supports
 
 Returns funds to the customer. Applicable to `paid` or captured transactions. For authorized transactions, a capture must be completed first. Supports full or partial refund. Ottu offers an [approval feature](/business/operations/refund-void-access-control) for refunds, enabling a checker role to approve or reject requests.
 
+##### Refund to Wallet {#refund-to-wallet}
+
+Instead of returning funds through the original payment gateway, you can refund a payment directly to the customer's **wallet** balance. The customer can then spend that credit at any future Ottu checkout in the same currency. See [Wallet](./payments/wallet/) for the full feature overview.
+
+**When to use:**
+
+- The customer's original card has expired or been reissued.
+- You want to issue store credit, loyalty, or goodwill credit without payment-gateway fees.
+- The original gateway doesn't support refunds for that transaction type.
+
+Set `destination: "wallet"` on the refund operation request:
+
+```json title="POST /b/pbl/v2/operation/"
+{
+  "session_id": "sess_9f8e7d6c5b4a",
+  "operation": "refund",
+  "amount": "10.000",
+  "destination": "wallet",
+  "metadata": {
+    "reason": "goodwill_credit"
+  }
+}
+```
+
+The `destination` field defaults to `"gateway"` when omitted, preserving the original refund behavior. Setting `"wallet"` switches the destination — no other request fields change.
+
+**Behavior:**
+
+- A wallet account is created automatically if one doesn't exist for the (merchant, customer, currency) combination.
+- The credit is recorded as an immutable ledger entry — corrections require an opposing reversal entry.
+- The original payment session is linked to the credit entry for audit.
+- No PII is stored on the wallet service.
+- Disputes against the original payment after a refund-to-wallet can be resolved manually — contact [csd@ottu.com](mailto:csd@ottu.com) to raise a reversal.
+
+**Errors:**
+
+| HTTP | Code | When |
+|------|------|------|
+| 400 | `account_inactive` | Wallet account is suspended |
+| 400 | `policy_violation` | Refund amount violates a wallet policy rule |
+| 409 | `idempotency_conflict` | Same Idempotency-Key reused with different payload |
+| 422 | `validation_error` | Schema validation failed on the refund payload |
+
+For the full wallet integration, including the read APIs and SDK behavior, see [Wallet](./payments/wallet/). For the merchant dashboard workflow, see [Refund to wallet (business docs)](/business/wallet/refund-to-wallet).
+
 ##### Void {#void}
 
 Cancels an authorization before capture. Only applicable to `authorized` transactions. The customer is not charged.
