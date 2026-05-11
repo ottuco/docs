@@ -121,7 +121,7 @@ Returns funds to the customer. Applicable to `paid` or captured transactions. Fo
 
 ##### Refund to Wallet {#refund-to-wallet}
 
-Instead of returning funds through the original payment gateway, you can refund a payment directly to the customer's **wallet** balance. The customer can then spend that credit at any future Ottu checkout in the same currency. See [Wallet](./payments/wallet/) for the full feature overview.
+Instead of returning funds through the original payment gateway, you can refund a payment directly to the customer's **wallet** balance. The customer can then spend that credit at any future Ottu checkout in the same currency. See [Wallet](/developers/payments/wallet/) for the full feature overview.
 
 **When to use:**
 
@@ -162,7 +162,7 @@ The `destination` field defaults to `"gateway"` when omitted, preserving the ori
 | 409 | `idempotency_conflict` | Same Idempotency-Key reused with different payload |
 | 422 | `validation_error` | Schema validation failed on the refund payload |
 
-For the full wallet integration, including the read APIs and SDK behavior, see [Wallet](./payments/wallet/). For the merchant dashboard workflow, see [Refund to wallet (business docs)](/business/wallet/refund-to-wallet).
+For the full wallet integration, including the read APIs and SDK behavior, see [Wallet](/developers/payments/wallet/). For the merchant dashboard workflow, see [Refund to wallet (business docs)](/business/wallet/refund-to-wallet).
 
 ##### Void {#void}
 
