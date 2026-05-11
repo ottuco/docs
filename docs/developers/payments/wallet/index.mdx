@@ -73,89 +73,22 @@ The demo below seeds a fresh wallet on the fly for a generated customer, then la
 
 #### 1. Discover wallet availability for a customer
 
-Call the [Payment Methods API](../payment-methods) with the `customer_id` for the session. When the customer has positive balance in the session currency, a payment method with `type: "wallet"` appears in the response.
+Use the [Payment Methods API](../payment-methods) (`POST /b/pbl/v2/payment-methods/`) to discover available methods for a session. When the customer has positive wallet balance in the session currency, a method with `type: "wallet"` appears alongside the other available methods.
 
-<Tabs groupId="language">
-<TabItem value="curl" label="cURL">
-
-```bash title="Discover wallet availability"
-curl -X POST https://yourdomain.ottu.com/b/checkout/v1/pymt-txn/payment-methods/ \
-  -H "Authorization: Api-Key YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "customer_id": "cust_abc123",
-    "currency_code": "KWD",
-    "amount": "15.000"
-  }'
+```json title="POST /b/pbl/v2/payment-methods/"
+{
+  "plugin": "e_commerce",
+  "operation": "purchase",
+  "currencies": ["KWD"],
+  "customer_id": "cust_abc123"
+}
 ```
 
-</TabItem>
-<TabItem value="python" label="Python">
+:::note `customer_id` filter
+The `customer_id` parameter on the Payment Methods API is required for wallet discovery — it tells Ottu which customer's wallet balance to check. Support for this parameter is part of Redmine subticket 150892. Until that ships, wallet methods are surfaced automatically when you initialize the [Checkout SDK](../checkout-sdk/) with a `customer_id` on the session — you can skip the explicit discovery call and rely on the SDK to render the method when balance is positive.
+:::
 
-```python title="Discover wallet availability"
-import requests
-
-response = requests.post(
-    "https://yourdomain.ottu.com/b/checkout/v1/pymt-txn/payment-methods/",
-    headers={
-        "Authorization": "Api-Key YOUR_API_KEY",
-        "Content-Type": "application/json",
-    },
-    json={
-        "customer_id": "cust_abc123",
-        "currency_code": "KWD",
-        "amount": "15.000",
-    },
-)
-methods = response.json()
-```
-
-</TabItem>
-<TabItem value="node" label="Node.js">
-
-```javascript title="Discover wallet availability"
-const response = await fetch(
-  "https://yourdomain.ottu.com/b/checkout/v1/pymt-txn/payment-methods/",
-  {
-    method: "POST",
-    headers: {
-      Authorization: "Api-Key YOUR_API_KEY",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      customer_id: "cust_abc123",
-      currency_code: "KWD",
-      amount: "15.000",
-    }),
-  }
-);
-const methods = await response.json();
-```
-
-</TabItem>
-<TabItem value="php" label="PHP">
-
-```php title="Discover wallet availability"
-$response = file_get_contents(
-    'https://yourdomain.ottu.com/b/checkout/v1/pymt-txn/payment-methods/',
-    false,
-    stream_context_create([
-        'http' => [
-            'method' => 'POST',
-            'header' => "Authorization: Api-Key YOUR_API_KEY\r\nContent-Type: application/json\r\n",
-            'content' => json_encode([
-                'customer_id' => 'cust_abc123',
-                'currency_code' => 'KWD',
-                'amount' => '15.000',
-            ]),
-        ],
-    ])
-);
-$methods = json_decode($response, true);
-```
-
-</TabItem>
-</Tabs>
+For the full request/response reference, headers, error codes, and supported filters, see the [Payment Methods API page](../payment-methods).
 
 #### 2. Initialize Checkout with wallet enabled
 
