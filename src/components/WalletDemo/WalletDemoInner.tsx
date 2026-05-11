@@ -1,134 +1,85 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
+import {
+  loadCheckoutScript,
+  initCheckout,
+  createDemoCallbacks,
+} from "@site/src/utils/checkoutSdk";
 import {
   createSandboxSession,
   createSandboxWalletCredit,
-  SANDBOX_MERCHANT_ID,
-  SANDBOX_API_KEY,
 } from "@site/src/utils/sandbox";
 import type { WalletCreditResult } from "@site/src/utils/sandbox";
 import styles from "./styles.module.css";
-
-declare global {
-  interface Window {
-    Checkout: any;
-    walletDemoSuccess?: (data: unknown) => void;
-    walletDemoError?: (err: unknown) => void;
-    walletDemoCancel?: () => void;
-  }
-}
 
 type State =
   | { kind: "idle" }
   | { kind: "seeding" }
   | { kind: "ready"; credit: WalletCreditResult }
+  | { kind: "launching"; credit: WalletCreditResult }
   | { kind: "checkout"; credit: WalletCreditResult; sessionId: string }
-  | { kind: "done"; message: string }
+  | { kind: "done" }
   | { kind: "seed_error"; message: string }
   | { kind: "pay_error"; message: string };
 
-const SCRIPT_SRC = "https://assets.ottu.net/checkout/v3/checkout.min.js";
-
-function useCheckoutScript(): boolean {
-  const [loaded, setLoaded] = useState<boolean>(
-    typeof window !== "undefined" && Boolean(window.Checkout)
-  );
-
-  useEffect(() => {
-    if (loaded) return;
-    if (window.Checkout) {
-      setLoaded(true);
-      return;
-    }
-    const existing = document.querySelector<HTMLScriptElement>(
-      `script[src="${SCRIPT_SRC}"]`
-    );
-    if (existing) {
-      const handler = () => setLoaded(true);
-      existing.addEventListener("load", handler);
-      return () => existing.removeEventListener("load", handler);
-    }
-    const script = document.createElement("script");
-    script.src = SCRIPT_SRC;
-    script.dataset.success = "walletDemoSuccess";
-    script.dataset.error = "walletDemoError";
-    script.dataset.cancel = "walletDemoCancel";
-    script.onload = () => setLoaded(true);
-    document.head.appendChild(script);
-  }, [loaded]);
-
-  return loaded;
-}
+const READY_DELAY_MS = 1500;
 
 export default function WalletDemoInner(): React.JSX.Element {
   const [state, setState] = useState<State>({ kind: "idle" });
-  const scriptLoaded = useCheckoutScript();
-  const mountRef = useRef<HTMLDivElement>(null);
 
-  // Auto-advance from "ready" to "checkout" after 1.5s
+  // Auto-advance "ready" → "launching" → "checkout"
   useEffect(() => {
     if (state.kind !== "ready") return;
-    const timer = setTimeout(async () => {
+    const timer = setTimeout(() => {
+      setState({ kind: "launching", credit: state.credit });
+    }, READY_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [state]);
+
+  // Create session + load SDK while in "launching"
+  useEffect(() => {
+    if (state.kind !== "launching") return;
+    let cancelled = false;
+    (async () => {
       try {
-        const session = await createSandboxSession({
-          pg_codes: ["ottu_sandbox"],
-          amount: "15.000",
-          currency_code: state.credit.currency,
-          customer_id: state.credit.customer_id,
-        });
+        const [session] = await Promise.all([
+          createSandboxSession({
+            pg_codes: ["ottu_sandbox"],
+            amount: "15.000",
+            currency_code: state.credit.currency,
+            customer_id: state.credit.customer_id,
+          }),
+          loadCheckoutScript(),
+        ]);
+        if (cancelled) return;
         setState({
           kind: "checkout",
           credit: state.credit,
           sessionId: session.session_id,
         });
       } catch (err) {
+        if (cancelled) return;
         setState({
           kind: "pay_error",
           message: err instanceof Error ? err.message : String(err),
         });
       }
-    }, 1500);
-    return () => clearTimeout(timer);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [state]);
 
-  // Mount Checkout SDK when entering "checkout" state
+  // Mount Checkout SDK once we have a session
   useEffect(() => {
-    if (state.kind !== "checkout" || !scriptLoaded) return;
-
-    window.walletDemoSuccess = (data: unknown) => {
-      setState({
-        kind: "done",
-        message: "Payment successful.",
-      });
-    };
-    window.walletDemoError = (err: unknown) => {
-      setState({
-        kind: "pay_error",
-        message: `Payment error: ${
-          err instanceof Error ? err.message : JSON.stringify(err)
-        }`,
-      });
-    };
-    window.walletDemoCancel = () => {
-      setState({
-        kind: "pay_error",
-        message: "Payment was cancelled.",
-      });
-    };
-
-    window.Checkout.init({
+    if (state.kind !== "checkout") return;
+    const callbacks = createDemoCallbacks(() => setState({ kind: "done" }));
+    initCheckout({
       selector: "wallet-demo-mount",
-      merchant_id: SANDBOX_MERCHANT_ID,
-      apiKey: SANDBOX_API_KEY,
-      session_id: state.sessionId,
+      sessionId: state.sessionId,
       formsOfPayment: ["wallet", "ottu_sandbox"],
+      callbacks,
     });
-
-    return () => {
-      delete window.walletDemoSuccess;
-      delete window.walletDemoError;
-      delete window.walletDemoCancel;
-    };
-  }, [state, scriptLoaded]);
+  }, [state]);
 
   const start = async () => {
     setState({ kind: "seeding" });
@@ -149,13 +100,16 @@ export default function WalletDemoInner(): React.JSX.Element {
 
   const restart = () => setState({ kind: "idle" });
 
+  const showRestart =
+    state.kind === "done" ||
+    state.kind === "seed_error" ||
+    state.kind === "pay_error";
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <h3 className={styles.title}>Wallet at Checkout — Live Demo</h3>
-        {(state.kind === "done" ||
-          state.kind === "seed_error" ||
-          state.kind === "pay_error") && (
+        {showRestart && (
           <button className={styles.restartButton} onClick={restart}>
             Try again
           </button>
@@ -183,17 +137,23 @@ export default function WalletDemoInner(): React.JSX.Element {
         </div>
       )}
 
+      {state.kind === "launching" && (
+        <div className={styles.progress}>
+          <div className={styles.progressIcon} />
+          <span>Launching checkout…</span>
+        </div>
+      )}
+
       {state.kind === "checkout" && (
-        <div
-          ref={mountRef}
-          id="wallet-demo-mount"
-          className={styles.checkoutMount}
-        />
+        <div id="wallet-demo-mount" className={styles.checkoutMount} />
       )}
 
       {state.kind === "done" && (
         <div className={styles.resultCard}>
-          <p>{state.message}</p>
+          <p>
+            <strong>Payment successful.</strong> The wallet balance has been
+            applied. Start over to try a different amount or coverage scenario.
+          </p>
         </div>
       )}
 
