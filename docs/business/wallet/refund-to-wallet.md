@@ -52,7 +52,7 @@ Refunding to wallet credits the customer's wallet balance instead of returning f
 
 ## What customers see
 
-The next time the customer reaches checkout in your store (same currency), they'll see **Wallet (X.XXX KWD)** as a payment method. For the full customer-side flow, see [Wallet at checkout](./using-wallet-at-checkout).
+The next time the customer reaches checkout in your store (same currency), they'll see **Wallet (X.XXX KWD)** as a payment method. For the full customer-side flow, see [Wallet at checkout](/business/wallet/using-wallet-at-checkout).
 
 ## FAQ
 
@@ -74,5 +74,5 @@ No, customers are not notified automatically when a wallet credit is issued toda
 
 ## What's Next?
 
-- [Wallet at checkout](./using-wallet-at-checkout) — what the customer sees when paying.
-- [Wallet reporting](./reporting) — auditing wallet balances and history.
+- [Wallet at checkout](/business/wallet/using-wallet-at-checkout) — what the customer sees when paying.
+- [Wallet reporting](/business/wallet/reporting) — auditing wallet balances and history.

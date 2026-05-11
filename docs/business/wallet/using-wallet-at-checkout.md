@@ -62,7 +62,7 @@ The wallet only appears when its currency matches the order currency.
 
 - Display the customer's wallet balance on your own site or app — call the [Wallet Accounts API](/developers/payments/wallet/#api-reference).
 - Refund any future order to the same wallet to top it up.
-- View full credit and debit history per customer in [Wallet reporting](./reporting).
+- View full credit and debit history per customer in [Wallet reporting](/business/wallet/reporting).
 
 ## FAQ
 
@@ -84,5 +84,5 @@ Reserved wallet funds are automatically restored about four hours after an aband
 
 ## What's Next?
 
-- [Refund to wallet](./refund-to-wallet) — issuing wallet credits.
-- [Wallet reporting](./reporting) — auditing balances and history.
+- [Refund to wallet](/business/wallet/refund-to-wallet) — issuing wallet credits.
+- [Wallet reporting](/business/wallet/reporting) — auditing balances and history.

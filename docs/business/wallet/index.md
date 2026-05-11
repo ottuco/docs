@@ -41,7 +41,7 @@ A KWD wallet cannot be used to pay a SAR order, and vice versa. Each currency ma
 
 ## What's Next?
 
-- [Refund to wallet](./refund-to-wallet) — the dashboard workflow.
-- [Wallet at checkout](./using-wallet-at-checkout) — what the customer sees.
-- [Wallet reporting](./reporting) — viewing balances and ledger.
+- [Refund to wallet](/business/wallet/refund-to-wallet) — the dashboard workflow.
+- [Wallet at checkout](/business/wallet/using-wallet-at-checkout) — what the customer sees.
+- [Wallet reporting](/business/wallet/reporting) — viewing balances and ledger.
 - [Wallet for developers](/developers/payments/wallet/) — API and SDK integration.

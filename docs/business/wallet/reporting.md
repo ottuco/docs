@@ -86,6 +86,6 @@ Open the ledger entry — the **Linked session** field gives you the original pa
 
 ## What's Next?
 
-- [Refund to wallet](./refund-to-wallet) — issuing credits.
-- [Wallet at checkout](./using-wallet-at-checkout) — the customer-side flow.
+- [Refund to wallet](/business/wallet/refund-to-wallet) — issuing credits.
+- [Wallet at checkout](/business/wallet/using-wallet-at-checkout) — the customer-side flow.
 - [Wallet for developers](/developers/payments/wallet/) — querying balances and history programmatically.
