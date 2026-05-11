@@ -28,7 +28,7 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/
 The Payment Methods API is a foundation for other Ottu APIs. It returns detailed information about each available payment method — supported operations, wallet integrations, currencies, and tokenization capabilities — giving you the data needed to create payment sessions with the right gateways.
 
 :::tip Wallet as a payment method
-When a customer has positive wallet balance in the session currency, a method with `type: "wallet"` appears in the response. See [Wallet](./wallet/) for the full integration.
+When a customer has positive wallet balance in the session currency, a method with `type: "wallet"` appears in the response. See [Wallet](/developers/payments/wallet/) for the full integration.
 :::
 
 ### Workflow
