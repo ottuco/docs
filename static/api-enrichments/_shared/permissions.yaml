@@ -71,3 +71,10 @@ basic_auth_create_invoice:
 basic_auth_view_reports:
   auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
   permissions: "`report.can_view_report`"
+
+# ── Wallet API ────────────────────────────────────────────────
+
+basic_auth_wallet_read:
+  auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
+  permissions: "`wallet.view`"
+  extra: "Read-only access to wallet accounts, ledger entries, and operations. Refund-to-wallet (which credits a wallet) uses `payment.refund` — see `basic_auth_operations`."
