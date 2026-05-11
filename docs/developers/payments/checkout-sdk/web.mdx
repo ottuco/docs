@@ -934,7 +934,7 @@ Checkout.init({
 
 When a customer has wallet credit in the session currency, the SDK renders a **Wallet** payment method automatically — no init config is required. Pass the `customer_id` when creating the session, and either include `'wallet'` in `formsOfPayment` or omit `formsOfPayment` to show all available methods. Wallet is hidden for authorize-only sessions.
 
-For full balance behavior, partial-payment rules, and the four-hour reservation auto-release, see the [Wallet section](../wallet/).
+For full balance behavior, partial-payment rules, and the four-hour reservation auto-release, see the [Wallet section](/developers/payments/wallet/).
 
 :::warning Cross-currency wallet payments are not supported
 The wallet only appears when its currency matches the order currency.
@@ -967,7 +967,7 @@ The wallet only appears when its currency matches the order currency.
   },
   {
     title: "Try it",
-    description: <>The live demo seeds a fresh wallet for a generated customer_id and launches the SDK with wallet enabled. Use the demo on the <a href="../wallet/">Wallet overview page</a>.</>,
+    description: <>The live demo seeds a fresh wallet for a generated customer_id and launches the SDK with wallet enabled. Use the demo on the <a href="/developers/payments/wallet/">Wallet overview page</a>.</>,
     image: "/img/developers/wallet/sdk-05-live-demo.png",
     imageAlt: "Wallet live demo entry point",
   },
