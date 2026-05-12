@@ -21,6 +21,11 @@ ingress:
         path:
           prefix: /webhook
     - component:
+        name: mcp
+      match:
+        path:
+          prefix: /seed-wallet
+    - component:
         name: docs
       match:
         path:
@@ -32,6 +37,14 @@ static_sites:
       repo: ottuco/docs
     source_dir: /
     environment_slug: node-js
+    envs:
+      - key: WALLET_DEMO_ENV
+        scope: BUILD_TIME
+        value: "ksa.ottu.dev"
+      - key: WALLET_DEMO_KSA_OTTU_DEV_CONNECT_API_KEY
+        scope: BUILD_TIME
+        type: SECRET
+        value: ""
 services:
   - name: mcp
     github:
@@ -49,3 +62,10 @@ services:
         value: "https://docs.ottu.com"
       - key: PORT
         value: "3456"
+      - key: WALLET_DEMO_ENV
+        scope: RUN_TIME
+        value: "ksa.ottu.dev"
+      - key: WALLET_DEMO_KSA_OTTU_DEV_KEYCLOAK_CLIENT_SECRET
+        scope: RUN_TIME
+        type: SECRET
+        value: ""
