@@ -246,17 +246,6 @@ function generateIdempotencyKey(): string {
   return `idem_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
-/**
- * Seed a wallet credit on the sandbox merchant for the WalletDemo component.
- *
- * Generates a fresh customer_id per call so each demo run starts with a clean
- * wallet. Uses the same public sandbox API key as createSandboxSession.
- *
- * The endpoint path and auth scheme reflect the public sandbox proxy exposed
- * by Connect (Redmine subticket 150892). If Connect ships a different path or
- * auth, update this function — the public contract (returning customer_id +
- * balance + currency + account_uuid) does not change.
- */
 export async function createSandboxWalletCredit(
   options: CreateWalletCreditOptions
 ): Promise<WalletCreditResult> {

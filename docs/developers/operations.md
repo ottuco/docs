@@ -152,7 +152,7 @@ Wallet credits are immutable — a duplicate refund-to-wallet call creates a sec
 | 409 | `idempotency_conflict` | Same Idempotency-Key reused with different payload |
 | 422 | `validation_error` | Schema validation failed on the refund payload |
 
-For the full wallet integration, including the read APIs and SDK behavior, see [Wallet](/developers/payments/wallet/). For the merchant dashboard workflow, see [Refund to wallet (business docs)](/business/wallet/refund-to-wallet).
+For the full wallet integration, including the read APIs and SDK behavior, see [Wallet](/developers/payments/wallet/). For the merchant dashboard workflow, see [Refund to Wallet (business docs)](/business/wallet#refund-to-wallet).
 
 ##### Void {#void}
 
@@ -174,6 +174,19 @@ Select the operation to see its example payload and the full interactive API sch
   "operation": "refund",
   "session_id": "your_session_id",
   "amount": "20.00"
+}
+```
+
+<ApiDocEmbed path="public-operations.api.mdx" />
+
+</TabItem>
+<TabItem value="refund-to-wallet" label="Refund to Wallet">
+
+```json title="Example Request"
+{
+  "operation": "refund",
+  "session_id": "your_session_id",
+  "destination": "wallet"
 }
 ```
 
