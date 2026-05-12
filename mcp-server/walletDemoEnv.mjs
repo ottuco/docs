@@ -32,7 +32,8 @@ export function getActiveEnv() {
     pg_filter: env.pg_filter,
     secret_var_names: env.secrets,
     keycloak_client_secret: process.env[env.secrets.keycloak_client_secret] || "",
-    connect_api_key: process.env[env.secrets.connect_api_key] || "",
+    connect_api_key:
+      process.env[env.secrets.connect_api_key] || env.connect_api_key_default || "",
   };
   return cached;
 }

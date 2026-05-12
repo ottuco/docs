@@ -231,6 +231,90 @@
       "description": "Customer phone number associated with the payment. This might be sent to the payment gateway and depending on the gateway, it may trigger a click to pay process on the payment page. The phone number will also be included in the invoice, receipt, email, and displayed on the payment page.",
       "maxLength": 32
     },
+    "customer_wallet_transactions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "One wallet leg in `customer_wallet_transactions`.\n\nA txn that uses multiple wallets (Ottu + Qitaf stacked, etc.) emits one\nrecord per provider. Single-wallet txns emit a one-element list.",
+        "properties": {
+          "amount": {
+            "type": "string",
+            "description": "Amount charged from this wallet."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Wallet transaction creation timestamp."
+          },
+          "currency": {
+            "type": "string",
+            "description": "ISO 4217 currency code."
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Wallet transaction last modification timestamp."
+          },
+          "operation_id": {
+            "type": "string",
+            "description": "Wallet service operation ID (opaque per provider)."
+          },
+          "provider_code": {
+            "type": "string",
+            "description": "Stable identifier of the wallet provider that handled this leg (e.g. `wallet_ottu`, `wallet_qitaf`). Empty for legacy native payments where the provider wasn't recorded on the attempt."
+          },
+          "wallet_response": {
+            "properties": {
+              "amount": {
+                "type": "string",
+                "description": "Amount of the wallet operation."
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Operation creation timestamp."
+              },
+              "currency": {
+                "type": "string",
+                "description": "ISO 4217 currency code."
+              },
+              "customer_id": {
+                "type": "string",
+                "description": "Customer identifier in the wallet service."
+              },
+              "operation_id": {
+                "type": "string",
+                "description": "Wallet operation ID (opaque per provider)."
+              },
+              "payment_entry_id": {
+                "type": "integer",
+                "description": "Ledger entry ID for the payment debit."
+              },
+              "reserve_entry_id": {
+                "type": "integer",
+                "description": "Ledger entry ID for the reservation hold."
+              },
+              "status": {
+                "type": "string",
+                "description": "Operation status (e.g. 'completed', 'pending')."
+              }
+            },
+            "type": "object",
+            "description": "Full response returned by the wallet service for this leg."
+          }
+        },
+        "required": [
+          "amount",
+          "created_at",
+          "currency",
+          "modified_at",
+          "operation_id",
+          "wallet_response"
+        ]
+      },
+      "readOnly": true,
+      "description": "List of wallet legs that contributed to this payment — one entry per wallet provider (Ottu, Qitaf, …). Multi-wallet stacking emits multiple entries; full or single-wallet payments emit a one-element list. Omitted entirely (key absent) when no wallet was involved."
+    },
     "extra": {
       "description": "The extra information for the payment details, which the merchant has sent it in key value form."
     },
@@ -489,7 +573,7 @@
         "customer_id": {
           "type": "string",
           "description": "The unique identifier for the customer who owns the card",
-          "maxLength": 36
+          "maxLength": 64
         },
         "cvv_required": {
           "type": "boolean",
@@ -632,6 +716,7 @@
     "card_acceptance_criteria",
     "currency_code",
     "customer_address_country",
+    "customer_wallet_transactions",
     "fee",
     "gateway_account",
     "gateway_name",

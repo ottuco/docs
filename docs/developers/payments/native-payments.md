@@ -231,12 +231,12 @@ Select the payment provider to see its full interactive API schema:
 <Tabs groupId="native-payment-provider" queryString>
 <TabItem value="apple-pay" label="Apple Pay">
 
-<ApiDocEmbed path="apple-direct-payment.api.mdx" />
+<ApiDocEmbed path="apple-native-payment.api.mdx" />
 
 </TabItem>
 <TabItem value="google-pay" label="Google Pay">
 
-<ApiDocEmbed path="google-direct-payment.api.mdx" />
+<ApiDocEmbed path="google-native-payment.api.mdx" />
 
 </TabItem>
 <TabItem value="auto-debit" label="Auto-Debit">

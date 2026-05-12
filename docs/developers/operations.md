@@ -129,7 +129,7 @@ Instead of returning funds through the original payment gateway, you can refund 
 - You want to issue store credit, loyalty, or goodwill credit without payment-gateway fees.
 - The original gateway doesn't support refunds for that transaction type.
 
-Set `destination: "wallet"` on the refund operation request. The `destination` field defaults to `"pg"` when omitted, preserving the original refund behavior. Setting `"wallet"` switches the destination — no other request fields change. See the [API Reference](#api-reference) below for the full request schema and interactive try-it-out.
+Set `destination: "wallet"` on the refund operation request. The `destination` field defaults to `"pg"` when omitted, preserving the original refund behavior. If the settling payment method has more than one wallet configured (e.g. Ottu + Qitaf), also send `wallet_code` to identify which wallet receives the credit; with a single wallet `wallet_code` is optional and resolves automatically. See the [API Reference](#api-reference) below for the full request schema and interactive try-it-out.
 
 :::tip Use `Tracking-Key` for idempotency
 Wallet credits are immutable — a duplicate refund-to-wallet call creates a second uneditable credit entry (the gateway path fails on duplicates; the wallet path does not). Always include the `Tracking-Key` header so retries deduplicate. See [the Guide above](#guide) for the full idempotency contract.
@@ -186,7 +186,8 @@ Select the operation to see its example payload and the full interactive API sch
 {
   "operation": "refund",
   "session_id": "your_session_id",
-  "destination": "wallet"
+  "destination": "wallet",
+  "wallet_code": "wallet_service_code"
 }
 ```
 

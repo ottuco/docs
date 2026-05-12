@@ -306,6 +306,34 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/CheckoutPOSTRequest"
+            examples:
+              LoyaltyEnabled(minimal):
+                value:
+                  type: e_commerce
+                  amount: "100.000"
+                  currency_code: SAR
+                  customer_id: CUST-123
+                  customer_phone: "+966500000000"
+                  loyalty:
+                    enabled: true
+                summary: Mark transaction as rewardable
+                description: Minimal payload — set `loyalty.enabled=true`. The customer earns points automatically if the chosen PGMID has a wallet service with reward capability configured (e.g. Qitaf for STC merchants on SAR transactions).
+              LoyaltyWithReference+Metadata:
+                value:
+                  type: e_commerce
+                  amount: "250.000"
+                  currency_code: SAR
+                  customer_id: CUST-123
+                  customer_phone: "+966500000000"
+                  order_no: ORDER-2026-9182
+                  loyalty:
+                    enabled: true
+                    reference: LOY-CAMP-SPRING-9182
+                    metadata:
+                      campaign_id: spring2026
+                      segment: vip
+                summary: Loyalty with merchant reference and metadata
+                description: Full loyalty payload. `reference` overrides the default (`order_no`) sent to the loyalty provider; `metadata` is forwarded opaquely so merchant-side analytics can correlate rewards back to a campaign.
           application/x-www-form-urlencoded:
             schema:
               $ref: "#/components/schemas/CheckoutPOSTRequest"
@@ -580,6 +608,263 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AttachmentUploadClientErrors"
+          description: ""
+  /b/checkout/v1/wallet/accounts/:
+    post:
+      operationId: wallet_accounts
+      description: |-
+        Lists every wallet account that belongs to a customer — one account per currency.
+
+        ### When to call this
+        - Showing the customer their wallet balances (e.g. "You have 50.000 KWD and 25.000 USD").
+        - Checking whether a customer already has a wallet in a specific currency before initiating a payment or refund-to-wallet.
+        - Building a back-office tool that needs to inspect a customer's wallet portfolio.
+
+        ### Request body
+        | field | required | description |
+        |---|---|---|
+        | `customer_id` | yes | The merchant's identifier for the customer (the same `customer_id` you send during checkout). |
+        | `currency` | no | ISO 4217 code (e.g. `KWD`). Restricts results to a single currency. |
+        | `status` | no | One of `active`, `suspended`, `closed`. Defaults to all statuses. |
+        | `pagination` | no | Cursor pagination object — `{ "cursor": <int|null>, "direction": "forward"|"backward", "per_page": 1..50 }`. Defaults to `{ cursor: null, direction: "forward", per_page: 20 }`. |
+
+        ### Pagination
+        The wallet uses **cursor-based pagination**, not page numbers. To fetch the next page, take the `next` object from the previous response and send it back as `pagination`:
+        ```json
+        // 1st page
+        { "customer_id": "cust-123" }
+        // response → "next": {"cursor": 42, "direction": "forward", "per_page": 20}
+
+        // 2nd page
+        { "customer_id": "cust-123", "pagination": {"cursor": 42, "direction": "forward", "per_page": 20} }
+        ```
+        When there are no more pages, `next` is `null`.
+
+        ### Response
+        Each item in `results` includes the account `id` (UUID), `currency`, `status`, `balance`, `available_balance`, and timestamps. `available_balance` excludes funds held by active reservations and is what the customer can spend right now.
+
+        ### Common responses
+        - **200** — accounts returned. `count: 0` with empty `results` is valid (customer has no wallet yet).
+        - **400** — validation error or upstream wallet error (the wallet's `detail` is forwarded).
+        - **401** — missing or invalid API key.
+        - **503** — no wallet service is configured on this merchant.
+      summary: List wallet accounts for a customer
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+          description: Private API key to be provided in the format `Api-Key <key>`.
+          required: true
+      tags:
+        - Wallet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletAccountsRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/WalletAccountsRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/WalletAccountsRequest"
+        required: true
+      security:
+        - SSO_BasicAuth: []
+        - basicAuth: []
+        - SSO_JWT_Auth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletAccountsResponse"
+          description: ""
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletAccountsErrors"
+          description: ""
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ""
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ""
+  /b/checkout/v1/wallet/entries/:
+    post:
+      operationId: wallet_entries
+      description: |-
+        Returns the ledger entries (debits, credits, reservations, releases, refunds, etc.) for one of the customer's wallet accounts.
+
+        ### When to call this
+        - Building a transaction history page in the customer-facing portal.
+        - Reconciling a single payment (`session_id` filter) — see exactly which `reserve` / `debit_payment` / `release` entries it produced.
+        - Auditing wallet activity over a date range, by gateway (`pg_code`), or by entry type.
+
+        ### How account resolution works
+        You only pass `customer_id` and `currency`. Ottu resolves the matching wallet account internally and queries its ledger. If the customer has no account in that currency the call returns **400** with `{"detail": "No <CUR> wallet account found for customer."}`.
+
+        ### Request body
+        | field | required | description |
+        |---|---|---|
+        | `customer_id` | yes | The merchant's identifier for the customer. |
+        | `currency` | yes | ISO 4217 code that selects which wallet account to read from. |
+        | `entry_type` | no | Filter by type: `credit_refund`, `debit_payment`, `reserve`, `release`, `expire`, `reversal`, `credit_adjustment`, `debit_adjustment`. |
+        | `direction` | no | `credit` (money into the wallet) or `debit` (money out). |
+        | `status` | no | `pending`, `completed`, or `failed`. |
+        | `session_id` | no | Restrict to entries produced by a specific payment session. Useful for reconciliation. |
+        | `provider` / `pg_code` | no | Restrict to entries originated by a specific provider or payment gateway code. |
+        | `date_from` / `date_to` | no | ISO date range (entry `created_at`). Inclusive. |
+        | `pagination` | no | Same cursor-based pagination object as the accounts endpoint (`{ cursor, direction, per_page }`, max `per_page` is 50, default 20). |
+
+        ### Response
+        Each entry includes its `entry_type`, `direction`, `amount`, `currency`, `status`, the originating `session_id` and `pg_code`, and `created_at`. Use the `next`/`previous` cursor objects to page through history.
+
+        ### Common responses
+        - **200** — entries returned (possibly empty).
+        - **400** — validation error, missing wallet account for the requested currency, or upstream wallet error.
+        - **401** — missing or invalid API key.
+        - **503** — no wallet service is configured on this merchant.
+      summary: List ledger entries on a customer's wallet account
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+          description: Private API key to be provided in the format `Api-Key <key>`.
+          required: true
+      tags:
+        - Wallet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletEntriesRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/WalletEntriesRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/WalletEntriesRequest"
+        required: true
+      security:
+        - SSO_BasicAuth: []
+        - basicAuth: []
+        - SSO_JWT_Auth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletEntriesResponse"
+          description: ""
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletEntriesErrors"
+          description: ""
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ""
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ""
+  /b/checkout/v1/wallet/operations/:
+    post:
+      operationId: wallet_operation_details
+      description: |-
+        Returns a single wallet **operation** — the atomic unit of work the wallet performs (a reservation, a refund, an express debit, an adjustment, a reversal). Each operation rolls up one or more ledger entries (see the entries endpoint) under one identifier.
+
+        ### When to call this
+        - Investigating a specific wallet operation by id (e.g. from a webhook, log line, or another API response).
+        - Showing the customer or finance team a detailed breakdown of one wallet event.
+        - Reconciling: confirm an operation's final `status` and inspect its entries.
+
+        ### Request body
+        | field | required | description |
+        |---|---|---|
+        | `operation_id` | yes | The wallet's numeric operation id (returned by reservation/refund/express-checkout flows). |
+
+        ### Response
+        - `operation_type` — one of `refund`, `reservation`, `deduction`, `adjustment`, `reversal`.
+        - `status` — one of `pending`, `completed`, `expired`, `canceled`, `failed`, `reversed`, `requires_review`.
+        - `session_id` — the payment session that produced the operation.
+        - `entries` — the ledger entries created by this operation (each with `entry_type`, `direction`, `amount`, `currency`, `status`).
+
+        ### Common responses
+        - **200** — operation found.
+        - **400** — validation error or upstream wallet error (e.g. operation not found is forwarded as-is).
+        - **401** — missing or invalid API key.
+        - **503** — no wallet service is configured on this merchant.
+      summary: Get a single wallet operation by id
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+          description: Private API key to be provided in the format `Api-Key <key>`.
+          required: true
+      tags:
+        - Wallet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletOperationsRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/WalletOperationsRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/WalletOperationsRequest"
+        required: true
+      security:
+        - SSO_BasicAuth: []
+        - basicAuth: []
+        - SSO_JWT_Auth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletOperationResponse"
+          description: ""
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletOperationsErrors"
+          description: ""
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ""
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
           description: ""
   /b/invoice/v1/invoice/:
     post:
@@ -1229,6 +1514,23 @@ paths:
                   operation: refund
                   amount: "100.000"
                 summary: Refund
+              WalletRefund:
+                value:
+                  session_id: <add `session_id` here>
+                  operation: refund
+                  amount: "100.000"
+                  destination: wallet
+                summary: Wallet Refund
+                description: Credits the refund to the wallet linked to the settling MID. Use this form when only one wallet is configured on the payment method — the wallet is resolved automatically.
+              WalletRefund(stackedWallets):
+                value:
+                  session_id: <add `session_id` here>
+                  operation: refund
+                  amount: "100.000"
+                  destination: wallet
+                  wallet_code: <add `wallet_code` here>
+                summary: Wallet Refund — explicit wallet
+                description: When the settling MID has more than one wallet configured (e.g. Ottu + Qitaf), `wallet_code` is required to identify which wallet should receive the credit. The value matches the active `WalletPaymentService.code` on that MID.
               IFGRefund:
                 value:
                   session_id: <add `session_id` here>
@@ -1329,7 +1631,7 @@ paths:
           description: ""
   /b/pbl/v2/payment/apple-pay/:
     post:
-      operationId: apple_direct_payment
+      operationId: apple_native_payment
       description: |-
         Allows merchants to submit an Apple Pay payment directly via server-to-server integration. This endpoint requires private key authentication and expects a valid Apple Pay token structure in the request payload under `payload`. 
 
@@ -1341,13 +1643,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ApplePayDirectPayment"
+              $ref: "#/components/schemas/ApplePayNativePayment"
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/ApplePayDirectPayment"
+              $ref: "#/components/schemas/ApplePayNativePayment"
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/ApplePayDirectPayment"
+              $ref: "#/components/schemas/ApplePayNativePayment"
         required: true
       security:
         - basicAuth: []
@@ -1363,7 +1665,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DirectApplePaymentErrors"
+                $ref: "#/components/schemas/NativeApplePaymentErrors"
           description: ""
         "401":
           content:
@@ -1467,7 +1769,7 @@ paths:
           description: ""
   /b/pbl/v2/payment/google-pay/:
     post:
-      operationId: google_direct_payment
+      operationId: google_native_payment
       description: |-
         Allows merchants to submit an Google Pay payment directly via server-to-server integration. This endpoint requires private key authentication and expects a valid Google Pay token structure in the request payload under `payload`. 
 
@@ -1479,13 +1781,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GooglePayDirectPayment"
+              $ref: "#/components/schemas/GooglePayNativePayment"
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/GooglePayDirectPayment"
+              $ref: "#/components/schemas/GooglePayNativePayment"
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/GooglePayDirectPayment"
+              $ref: "#/components/schemas/GooglePayNativePayment"
         required: true
       security:
         - basicAuth: []
@@ -1495,13 +1797,57 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DirectGooglePaymentSuccess"
+                $ref: "#/components/schemas/NativeGooglePaymentSuccess"
           description: ""
         "400":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DirectGooglePaymentErrors"
+                $ref: "#/components/schemas/NativeGooglePaymentErrors"
+          description: ""
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ""
+  /b/pbl/v2/payment/wallet/:
+    post:
+      operationId: wallet_native_payment
+      description: |-
+        Allows merchants to charge a customer's wallet balance directly via server-to-server integration. The wallet service is identified by `instrument_type=wallet` in the checkout transaction. 
+
+        The payment is processed using the customer's wallet account linked to the transaction's `customer_id`. No additional payload is required from the customer — the wallet service handles the debit internally.
+      summary: Native Payment API (Wallet)
+      tags:
+        - Payment Operations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletNativePayment"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/WalletNativePayment"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/WalletNativePayment"
+        required: true
+      security:
+        - basicAuth: []
+        - SSO_BasicAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SchemaWebhook"
+          description: ""
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NativeWalletPaymentErrors"
           description: ""
         "401":
           content:
@@ -2317,22 +2663,6 @@ components:
         - currency_code
         - fee
         - total
-    ApplePayDirectPayment:
-      type: object
-      properties:
-        payload:
-          $ref: "#/components/schemas/ApplePayToken"
-        pg_code:
-          type:
-            - string
-            - "null"
-          description: The unique pg_code used for this payment instrument.
-        session_id:
-          type: string
-          description: A unique identifier for the payment transaction (session).
-      required:
-        - payload
-        - session_id
     ApplePayHeaderSchema:
       type: object
       description: Apple Pay header containing encryption details
@@ -2369,6 +2699,22 @@ components:
           description: Apple Pay payment token received from Apple Pay SDK. Pass the complete token object exactly as received without modification. Includes paymentData (encrypted), paymentMethod details, and transactionIdentifier.
       required:
         - payload
+    ApplePayNativePayment:
+      type: object
+      properties:
+        payload:
+          $ref: "#/components/schemas/ApplePayToken"
+        pg_code:
+          type:
+            - string
+            - "null"
+          description: The unique pg_code used for this payment instrument.
+        session_id:
+          type: string
+          description: A unique identifier for the payment transaction (session).
+      required:
+        - payload
+        - session_id
     ApplePayPayloadSchema:
       type: object
       description: Complete Apple Pay token structure
@@ -2654,7 +3000,7 @@ components:
         customer_id:
           type: string
           description: The unique identifier for the customer who owns the card
-          maxLength: 36
+          maxLength: 64
         cvv_required:
           type: boolean
           description: Specifies if the card requires the submission of a CVV for transactions. A card without CVV requirement can be used for auto-debit or recurring payments.
@@ -2745,8 +3091,9 @@ components:
             - skipcash
             - taly
             - tess
+            - ottu_sandbox
           type: string
-          x-spec-enum-id: d824e9691fe4d7ec
+          x-spec-enum-id: dffcbd9ebd1f5a1c
           description: |-
             The payment `gateway` associated with the user's card.
 
@@ -2805,6 +3152,7 @@ components:
             * `skipcash` - Skip Cash
             * `taly` - Taly
             * `tess` - Tess Payments
+            * `ottu_sandbox` - Ottu Sandbox
         token:
           type: string
           description: The unique token associated with the card, required for tokenized card payments. Use this value to securely process transactions.
@@ -2968,6 +3316,21 @@ components:
             Per-payment-method branding customization provided by the merchant. Use payment_methods.{pg_code} to supply display data for each gateway. Only pg_codes present in payment_methods will have 'branding_options' included in their sdk_setup_preload_payload.payment_methods entry.
 
             font_weight follows CSS conventions (400 regular, 500 medium, 600 semibold, 700 bold). Defaults to 700 when omitted.
+        loyalty:
+          oneOf:
+            - $ref: "#/components/schemas/Loyalty"
+            - type: "null"
+          description: |-
+            Merchant-provided loyalty intent for this transaction. When `enabled=true` AND the pg_code used to pay is linked to an active wallet service with reward capability (e.g. STC Qitaf), the customer earns loyalty points on payment success.
+
+            **How it works**
+
+            1. Merchant sets `loyalty.enabled=true` on checkout creation.
+            2. Customer completes payment via any PGMID configured on this merchant.
+            3. If that PGMID has an active wallet service with the `POST_PURCHASE_REWARD` capability, an asynchronous reward job fires after the transaction enters `PAID` state.
+            4. The reward operation is stored on the transaction and automatically reversed (proportionally on partial refunds) if the transaction is later refunded.
+
+            **Provider selection is implicit** — Ottu picks the right loyalty backend based on the PGMID's wallet-service configuration, so merchants do not need to know which loyalty program runs at the gateway level. Adding new loyalty providers (e.g. Mada Loyalty) requires no payload change.
         shipping_address:
           $ref: "#/components/schemas/ShippingAddress"
         agreement:
@@ -3284,6 +3647,21 @@ components:
             Per-payment-method branding customization provided by the merchant. Use payment_methods.{pg_code} to supply display data for each gateway. Only pg_codes present in payment_methods will have 'branding_options' included in their sdk_setup_preload_payload.payment_methods entry.
 
             font_weight follows CSS conventions (400 regular, 500 medium, 600 semibold, 700 bold). Defaults to 700 when omitted.
+        loyalty:
+          oneOf:
+            - $ref: "#/components/schemas/Loyalty"
+            - type: "null"
+          description: |-
+            Merchant-provided loyalty intent for this transaction. When `enabled=true` AND the pg_code used to pay is linked to an active wallet service with reward capability (e.g. STC Qitaf), the customer earns loyalty points on payment success.
+
+            **How it works**
+
+            1. Merchant sets `loyalty.enabled=true` on checkout creation.
+            2. Customer completes payment via any PGMID configured on this merchant.
+            3. If that PGMID has an active wallet service with the `POST_PURCHASE_REWARD` capability, an asynchronous reward job fires after the transaction enters `PAID` state.
+            4. The reward operation is stored on the transaction and automatically reversed (proportionally on partial refunds) if the transaction is later refunded.
+
+            **Provider selection is implicit** — Ottu picks the right loyalty backend based on the PGMID's wallet-service configuration, so merchants do not need to know which loyalty program runs at the gateway level. Adding new loyalty providers (e.g. Mada Loyalty) requires no payload change.
         shipping_address:
           $ref: "#/components/schemas/ShippingAddress"
         agreement:
@@ -3600,6 +3978,21 @@ components:
             Per-payment-method branding customization provided by the merchant. Use payment_methods.{pg_code} to supply display data for each gateway. Only pg_codes present in payment_methods will have 'branding_options' included in their sdk_setup_preload_payload.payment_methods entry.
 
             font_weight follows CSS conventions (400 regular, 500 medium, 600 semibold, 700 bold). Defaults to 700 when omitted.
+        loyalty:
+          oneOf:
+            - $ref: "#/components/schemas/Loyalty"
+            - type: "null"
+          description: |-
+            Merchant-provided loyalty intent for this transaction. When `enabled=true` AND the pg_code used to pay is linked to an active wallet service with reward capability (e.g. STC Qitaf), the customer earns loyalty points on payment success.
+
+            **How it works**
+
+            1. Merchant sets `loyalty.enabled=true` on checkout creation.
+            2. Customer completes payment via any PGMID configured on this merchant.
+            3. If that PGMID has an active wallet service with the `POST_PURCHASE_REWARD` capability, an asynchronous reward job fires after the transaction enters `PAID` state.
+            4. The reward operation is stored on the transaction and automatically reversed (proportionally on partial refunds) if the transaction is later refunded.
+
+            **Provider selection is implicit** — Ottu picks the right loyalty backend based on the PGMID's wallet-service configuration, so merchants do not need to know which loyalty program runs at the gateway level. Adding new loyalty providers (e.g. Mada Loyalty) requires no payload change.
         shipping_address:
           $ref: "#/components/schemas/ShippingAddress"
         agreement:
@@ -3916,6 +4309,21 @@ components:
             Per-payment-method branding customization provided by the merchant. Use payment_methods.{pg_code} to supply display data for each gateway. Only pg_codes present in payment_methods will have 'branding_options' included in their sdk_setup_preload_payload.payment_methods entry.
 
             font_weight follows CSS conventions (400 regular, 500 medium, 600 semibold, 700 bold). Defaults to 700 when omitted.
+        loyalty:
+          oneOf:
+            - $ref: "#/components/schemas/Loyalty"
+            - type: "null"
+          description: |-
+            Merchant-provided loyalty intent for this transaction. When `enabled=true` AND the pg_code used to pay is linked to an active wallet service with reward capability (e.g. STC Qitaf), the customer earns loyalty points on payment success.
+
+            **How it works**
+
+            1. Merchant sets `loyalty.enabled=true` on checkout creation.
+            2. Customer completes payment via any PGMID configured on this merchant.
+            3. If that PGMID has an active wallet service with the `POST_PURCHASE_REWARD` capability, an asynchronous reward job fires after the transaction enters `PAID` state.
+            4. The reward operation is stored on the transaction and automatically reversed (proportionally on partial refunds) if the transaction is later refunded.
+
+            **Provider selection is implicit** — Ottu picks the right loyalty backend based on the PGMID's wallet-service configuration, so merchants do not need to know which loyalty program runs at the gateway level. Adding new loyalty providers (e.g. Mada Loyalty) requires no payload change.
         shipping_address:
           $ref: "#/components/schemas/ShippingAddress"
         agreement:
@@ -4232,6 +4640,21 @@ components:
             Per-payment-method branding customization provided by the merchant. Use payment_methods.{pg_code} to supply display data for each gateway. Only pg_codes present in payment_methods will have 'branding_options' included in their sdk_setup_preload_payload.payment_methods entry.
 
             font_weight follows CSS conventions (400 regular, 500 medium, 600 semibold, 700 bold). Defaults to 700 when omitted.
+        loyalty:
+          oneOf:
+            - $ref: "#/components/schemas/Loyalty"
+            - type: "null"
+          description: |-
+            Merchant-provided loyalty intent for this transaction. When `enabled=true` AND the pg_code used to pay is linked to an active wallet service with reward capability (e.g. STC Qitaf), the customer earns loyalty points on payment success.
+
+            **How it works**
+
+            1. Merchant sets `loyalty.enabled=true` on checkout creation.
+            2. Customer completes payment via any PGMID configured on this merchant.
+            3. If that PGMID has an active wallet service with the `POST_PURCHASE_REWARD` capability, an asynchronous reward job fires after the transaction enters `PAID` state.
+            4. The reward operation is stored on the transaction and automatically reversed (proportionally on partial refunds) if the transaction is later refunded.
+
+            **Provider selection is implicit** — Ottu picks the right loyalty backend based on the PGMID's wallet-service configuration, so merchants do not need to know which loyalty program runs at the gateway level. Adding new loyalty providers (e.g. Mada Loyalty) requires no payload change.
         shipping_address:
           $ref: "#/components/schemas/ShippingAddress"
         agreement:
@@ -4837,19 +5260,45 @@ components:
         - $ref: "#/components/schemas/NestedFieldErrors"
         - $ref: "#/components/schemas/GenericErrorMessage"
         - $ref: "#/components/schemas/OperationErrorResponse"
-    DirectApplePaymentErrors:
-      oneOf:
-        - $ref: "#/components/schemas/OperationErrorResponse"
-        - $ref: "#/components/schemas/FieldErrors"
-    DirectGooglePaymentErrors:
-      oneOf:
-        - $ref: "#/components/schemas/OperationErrorResponse"
-        - $ref: "#/components/schemas/FieldErrors"
-    DirectGooglePaymentSuccess:
-      oneOf:
-        - $ref: "#/components/schemas/SchemaWebhook"
-        - $ref: "#/components/schemas/IFrame3DSResponse"
-        - $ref: "#/components/schemas/Redirect3DSResponse"
+    CustomerWalletTransaction:
+      type: object
+      description: |-
+        One wallet leg in `customer_wallet_transactions`.
+
+        A txn that uses multiple wallets (Ottu + Qitaf stacked, etc.) emits one
+        record per provider. Single-wallet txns emit a one-element list.
+      properties:
+        provider_code:
+          type: string
+          description: Stable identifier of the wallet provider that handled this leg (e.g. `wallet_ottu`, `wallet_qitaf`). Empty for legacy native payments where the provider wasn't recorded on the attempt.
+        amount:
+          type: string
+          description: Amount charged from this wallet.
+        currency:
+          type: string
+          description: ISO 4217 currency code.
+        operation_id:
+          type: string
+          description: Wallet service operation ID (opaque per provider).
+        wallet_response:
+          allOf:
+            - $ref: "#/components/schemas/WalletServiceResponse"
+          description: Full response returned by the wallet service for this leg.
+        created_at:
+          type: string
+          format: date-time
+          description: Wallet transaction creation timestamp.
+        modified_at:
+          type: string
+          format: date-time
+          description: Wallet transaction last modification timestamp.
+      required:
+        - amount
+        - created_at
+        - currency
+        - modified_at
+        - operation_id
+        - wallet_response
     DirectPaymentResponse:
       type: object
       properties:
@@ -4954,6 +5403,12 @@ components:
           type: string
           description: Customer phone number associated with the payment. This might be sent to the payment gateway and depending on the gateway, it may trigger a click to pay process on the payment page. The phone number will also be included in the invoice, receipt, email, and displayed on the payment page.
           maxLength: 32
+        customer_wallet_transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/CustomerWalletTransaction"
+          readOnly: true
+          description: List of wallet legs that contributed to this payment — one entry per wallet provider (Ottu, Qitaf, …). Multi-wallet stacking emits multiple entries; full or single-wallet payments emit a one-element list. Omitted entirely (key absent) when no wallet was involved.
         extra:
           description: The extra information for the payment details, which the merchant has sent it in key value form.
         fee:
@@ -5102,6 +5557,7 @@ components:
         - card_acceptance_criteria
         - currency_code
         - customer_address_country
+        - customer_wallet_transactions
         - fee
         - gateway_account
         - gateway_name
@@ -5235,22 +5691,6 @@ components:
           type: string
       required:
         - detail
-    GooglePayDirectPayment:
-      type: object
-      properties:
-        payload:
-          $ref: "#/components/schemas/GooglePayPaymentData"
-        pg_code:
-          type:
-            - string
-            - "null"
-          description: The unique pg_code used for this payment instrument.
-        session_id:
-          type: string
-          description: A unique identifier for the payment transaction (session).
-      required:
-        - payload
-        - session_id
     GooglePayInfoSchema:
       type: object
       description: Google Pay card information
@@ -5284,6 +5724,22 @@ components:
           description: Google Pay payment data received from Google Pay SDK. Pass the complete paymentData object exactly as received without modification. Includes apiVersion, paymentMethodData with tokenization data.
       required:
         - payload
+    GooglePayNativePayment:
+      type: object
+      properties:
+        payload:
+          $ref: "#/components/schemas/GooglePayPaymentData"
+        pg_code:
+          type:
+            - string
+            - "null"
+          description: The unique pg_code used for this payment instrument.
+        session_id:
+          type: string
+          description: A unique identifier for the payment transaction (session).
+      required:
+        - payload
+        - session_id
     GooglePayPayloadSchema:
       type: object
       description: Complete Google Pay payment data structure
@@ -5735,6 +6191,21 @@ components:
             Per-payment-method branding customization provided by the merchant. Use payment_methods.{pg_code} to supply display data for each gateway. Only pg_codes present in payment_methods will have 'branding_options' included in their sdk_setup_preload_payload.payment_methods entry.
 
             font_weight follows CSS conventions (400 regular, 500 medium, 600 semibold, 700 bold). Defaults to 700 when omitted.
+        loyalty:
+          oneOf:
+            - $ref: "#/components/schemas/Loyalty"
+            - type: "null"
+          description: |-
+            Merchant-provided loyalty intent for this transaction. When `enabled=true` AND the pg_code used to pay is linked to an active wallet service with reward capability (e.g. STC Qitaf), the customer earns loyalty points on payment success.
+
+            **How it works**
+
+            1. Merchant sets `loyalty.enabled=true` on checkout creation.
+            2. Customer completes payment via any PGMID configured on this merchant.
+            3. If that PGMID has an active wallet service with the `POST_PURCHASE_REWARD` capability, an asynchronous reward job fires after the transaction enters `PAID` state.
+            4. The reward operation is stored on the transaction and automatically reversed (proportionally on partial refunds) if the transaction is later refunded.
+
+            **Provider selection is implicit** — Ottu picks the right loyalty backend based on the PGMID's wallet-service configuration, so merchants do not need to know which loyalty program runs at the gateway level. Adding new loyalty providers (e.g. Mada Loyalty) requires no payload change.
         shipping_address:
           $ref: "#/components/schemas/ShippingAddress"
         agreement:
@@ -6138,6 +6609,21 @@ components:
             Per-payment-method branding customization provided by the merchant. Use payment_methods.{pg_code} to supply display data for each gateway. Only pg_codes present in payment_methods will have 'branding_options' included in their sdk_setup_preload_payload.payment_methods entry.
 
             font_weight follows CSS conventions (400 regular, 500 medium, 600 semibold, 700 bold). Defaults to 700 when omitted.
+        loyalty:
+          oneOf:
+            - $ref: "#/components/schemas/Loyalty"
+            - type: "null"
+          description: |-
+            Merchant-provided loyalty intent for this transaction. When `enabled=true` AND the pg_code used to pay is linked to an active wallet service with reward capability (e.g. STC Qitaf), the customer earns loyalty points on payment success.
+
+            **How it works**
+
+            1. Merchant sets `loyalty.enabled=true` on checkout creation.
+            2. Customer completes payment via any PGMID configured on this merchant.
+            3. If that PGMID has an active wallet service with the `POST_PURCHASE_REWARD` capability, an asynchronous reward job fires after the transaction enters `PAID` state.
+            4. The reward operation is stored on the transaction and automatically reversed (proportionally on partial refunds) if the transaction is later refunded.
+
+            **Provider selection is implicit** — Ottu picks the right loyalty backend based on the PGMID's wallet-service configuration, so merchants do not need to know which loyalty program runs at the gateway level. Adding new loyalty providers (e.g. Mada Loyalty) requires no payload change.
         shipping_address:
           $ref: "#/components/schemas/ShippingAddress"
         agreement:
@@ -6492,6 +6978,25 @@ components:
         - state
         - status
         - type
+    Loyalty:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: |-
+            Required. Set to `true` to mark this transaction as eligible for loyalty rewards. When `true` AND the pg_code used to settle the transaction is linked to an active wallet service whose provider declares the `POST_PURCHASE_REWARD` capability (currently STC Qitaf), the customer earns points on payment success.
+
+            Setting `false` (or omitting the entire `loyalty` object) disables rewards for this transaction even if a wallet service is configured.
+        reference:
+          type: string
+          description: Optional merchant-side loyalty reference (campaign ID, program code, etc.). Forwarded to the loyalty provider as the external reference for this reward operation. Defaults to the transaction's `order_no` when omitted.
+          maxLength: 128
+        metadata:
+          type: object
+          additionalProperties: {}
+          description: Optional opaque key/value pairs forwarded to the loyalty provider as additional context. Treated as a black box by Ottu — useful for attaching merchant-specific tags such as campaign IDs, segment codes, or audit references.
+      required:
+        - enabled
     MIDIcon:
       type: object
       description: Serializer for PG logo with custom logo URL resolution.
@@ -6581,6 +7086,23 @@ components:
         message:
           type: string
           default: Customer notified.
+    NativeApplePaymentErrors:
+      oneOf:
+        - $ref: "#/components/schemas/OperationErrorResponse"
+        - $ref: "#/components/schemas/FieldErrors"
+    NativeGooglePaymentErrors:
+      oneOf:
+        - $ref: "#/components/schemas/OperationErrorResponse"
+        - $ref: "#/components/schemas/FieldErrors"
+    NativeGooglePaymentSuccess:
+      oneOf:
+        - $ref: "#/components/schemas/SchemaWebhook"
+        - $ref: "#/components/schemas/IFrame3DSResponse"
+        - $ref: "#/components/schemas/Redirect3DSResponse"
+    NativeWalletPaymentErrors:
+      oneOf:
+        - $ref: "#/components/schemas/OperationErrorResponse"
+        - $ref: "#/components/schemas/FieldErrors"
     Nested:
       type: object
       properties:
@@ -6841,6 +7363,21 @@ components:
             <b>Example</b>
 
             check in Request samples there is an example showcasing how to structure the extra field for a partial refund request, including specifying refund amounts for tickets
+        destination:
+          enum:
+            - pg
+            - wallet
+          type: string
+          x-spec-enum-id: a8d72362952c1daf
+          default: pg
+          description: |-
+            Specifies where the refund should be credited. Use `pg` (default) to refund via the original payment gateway, or `wallet` to credit the amount to the customer's wallet balance. The `wallet` option is only available for `refund` operations and requires that the payment method has an active wallet service and the transaction has a `customer_id`.
+
+            * `pg` - pg
+            * `wallet` - wallet
+        wallet_code:
+          type: string
+          description: Identifies which wallet should receive the refund credit when `destination=wallet`. Required when the transaction stacked across multiple wallets (e.g. Ottu + Qitaf) — without it the refund target is ambiguous. Optional when only one wallet is configured on the payment method; in that case it falls back to the single active wallet.
       required:
         - operation
     OperationErrorResponse:
@@ -6854,6 +7391,13 @@ components:
           type: string
           default: failed
           description: Indicates the outcome of the operation. Typically set to 'failed' for error responses.
+        failed_provider:
+          type: string
+          description: Wallet cohort errors only. The `provider_code` of the wallet leg whose commit/release failed and triggered the saga rollback.
+        pg_response:
+          description: Wallet cohort errors only. Raw response from the failing wallet service so the frontend can surface the upstream error code.
+        rollback:
+          description: "Wallet cohort errors only. Compensation report — `{refunded: [...], released: [...], compensation_failures: [...]}` — tells the frontend exactly which legs were reversed."
     OperationFailure:
       type: object
       properties:
@@ -6952,6 +7496,12 @@ components:
             - ApplePay
             - GooglePay
           description: Denotes a list of payment services linked with this payment gateway, such as `GooglePay` and `ApplePay`
+        payment_services:
+          type: array
+          items:
+            $ref: "#/components/schemas/PaymentServiceListing"
+          readOnly: true
+          description: Active payment services linked to this payment gateway — device payment services (Apple Pay, Google Pay, Samsung Pay, ...) and wallet providers (Ottu, Qitaf, ...). Each entry exposes the service `code` and `name`.
         default_currency:
           type: string
           readOnly: true
@@ -7006,6 +7556,7 @@ components:
               - telecom
               - utilities
               - demo
+              - test
             type: string
             description: |-
               * `e_commerce` - e_commerce
@@ -7028,7 +7579,8 @@ components:
               * `telecom` - telecom
               * `utilities` - utilities
               * `demo` - demo
-            x-spec-enum-id: b366021a7a7a68c9
+              * `test` - test
+            x-spec-enum-id: 397e40e715a6be71
           readOnly: true
           description: Business vertical tags assigned to this payment method.
       required:
@@ -7042,6 +7594,7 @@ components:
         - name
         - operation
         - operations
+        - payment_services
         - tags
         - wallets
     PaginatedReportAPIListList:
@@ -7108,6 +7661,21 @@ components:
             Per-payment-method branding customization provided by the merchant. Use payment_methods.{pg_code} to supply display data for each gateway. Only pg_codes present in payment_methods will have 'branding_options' included in their sdk_setup_preload_payload.payment_methods entry.
 
             font_weight follows CSS conventions (400 regular, 500 medium, 600 semibold, 700 bold). Defaults to 700 when omitted.
+        loyalty:
+          oneOf:
+            - $ref: "#/components/schemas/Loyalty"
+            - type: "null"
+          description: |-
+            Merchant-provided loyalty intent for this transaction. When `enabled=true` AND the pg_code used to pay is linked to an active wallet service with reward capability (e.g. STC Qitaf), the customer earns loyalty points on payment success.
+
+            **How it works**
+
+            1. Merchant sets `loyalty.enabled=true` on checkout creation.
+            2. Customer completes payment via any PGMID configured on this merchant.
+            3. If that PGMID has an active wallet service with the `POST_PURCHASE_REWARD` capability, an asynchronous reward job fires after the transaction enters `PAID` state.
+            4. The reward operation is stored on the transaction and automatically reversed (proportionally on partial refunds) if the transaction is later refunded.
+
+            **Provider selection is implicit** — Ottu picks the right loyalty backend based on the PGMID's wallet-service configuration, so merchants do not need to know which loyalty program runs at the gateway level. Adding new loyalty providers (e.g. Mada Loyalty) requires no payload change.
         shipping_address:
           $ref: "#/components/schemas/ShippingAddress"
         agreement:
@@ -7372,6 +7940,7 @@ components:
         - $ref: "#/components/schemas/GooglePayInstrument"
         - $ref: "#/components/schemas/TokenPayInstrument"
         - $ref: "#/components/schemas/SamsungPayInstrument"
+        - $ref: "#/components/schemas/WalletInstrument"
     PaymentLabel:
       type: object
       properties:
@@ -7532,7 +8101,7 @@ components:
           description: |-
             When provided, the payment methods will be narrowed down to those that support the specified payment gateway name. Example: ['kpay','mpgs']
 
-            Available Values:<br><li>`abapayway` - ABA PayWay</li><br><li>`rajhi` - Alrajhi Bank</li><br><li>`amazon_pay` - Amazon Pay</li><br><li>`bambora` - Bambora</li><br><li>`benefit` - Benefit</li><br><li>`benefit_pay` - BenefitPay</li><br><li>`beyon_money` - BeyonMoney</li><br><li>`bookeey` - Bookeey</li><br><li>`burgan` - Burgan</li><br><li>`cod` - Cash</li><br><li>`cbk` - CBK</li><br><li>`ccavenues` - Ccavenues</li><br><li>`checkoutcom` - checkout.com</li><br><li>`cybersource` - CyberSource</li><br><li>`csuc` - Cybersource Unified Checkout</li><br><li>`dapi` - Dapi</li><br><li>`deema` - Deema</li><br><li>`doku` - Doku</li><br><li>`enet` - Enet</li><br><li>`fawry` - Fawry</li><br><li>`fiserv` - Fiserv</li><br><li>`fss` - FSS</li><br><li>`geidea` - Geidea</li><br><li>`hesabe` - Hesabe</li><br><li>`hyperpay` - HyperPay</li><br><li>`kpay` - KNET</li><br><li>`moyasar` - Moyasar</li><br><li>`mpgs` - MPGS</li><br><li>`myfatoorah` - MyFatoorah</li><br><li>`ngenius` - N-Genius</li><br><li>`nbo` - NBO</li><br><li>`omannet` - OmanNet</li><br><li>`ottu_pg` - Ottu PG</li><br><li>`paymob` - PayMob</li><br><li>`payon` - PayOn</li><br><li>`paypal` - PayPal</li><br><li>`payu_india` - PayU India</li><br><li>`qpay` - Qpay</li><br><li>`skipcash` - Skip Cash</li><br><li>`smart_pay` - SmartPay</li><br><li>`sohar` - SoharInternational</li><br><li>`stcbahrain` - STC Bahrain</li><br><li>`stc_pay` - STC Pay</li><br><li>`tabby` - Tabby</li><br><li>`taly` - Taly</li><br><li>`tamara` - Tamara</li><br><li>`tap` - Tap Payments</li><br><li>`tess` - Tess Payments</li><br><li>`upayments` - UPayments</li><br><li>`upg` - UPG</li><br><li>`urpay` - URPay</li>
+            Available Values:<br><li>`abapayway` - ABA PayWay</li><br><li>`rajhi` - Alrajhi Bank</li><br><li>`amazon_pay` - Amazon Pay</li><br><li>`bambora` - Bambora</li><br><li>`benefit` - Benefit</li><br><li>`benefit_pay` - BenefitPay</li><br><li>`beyon_money` - BeyonMoney</li><br><li>`bookeey` - Bookeey</li><br><li>`burgan` - Burgan</li><br><li>`cod` - Cash</li><br><li>`cbk` - CBK</li><br><li>`ccavenues` - Ccavenues</li><br><li>`checkoutcom` - checkout.com</li><br><li>`cybersource` - CyberSource</li><br><li>`csuc` - Cybersource Unified Checkout</li><br><li>`dapi` - Dapi</li><br><li>`deema` - Deema</li><br><li>`doku` - Doku</li><br><li>`enet` - Enet</li><br><li>`fawry` - Fawry</li><br><li>`fiserv` - Fiserv</li><br><li>`fss` - FSS</li><br><li>`geidea` - Geidea</li><br><li>`hesabe` - Hesabe</li><br><li>`hyperpay` - HyperPay</li><br><li>`kpay` - KNET</li><br><li>`moyasar` - Moyasar</li><br><li>`mpgs` - MPGS</li><br><li>`myfatoorah` - MyFatoorah</li><br><li>`ngenius` - N-Genius</li><br><li>`nbo` - NBO</li><br><li>`omannet` - OmanNet</li><br><li>`ottu_pg` - Ottu PG</li><br><li>`ottu_sandbox` - Ottu Sandbox</li><br><li>`paymob` - PayMob</li><br><li>`payon` - PayOn</li><br><li>`paypal` - PayPal</li><br><li>`payu_india` - PayU India</li><br><li>`qpay` - Qpay</li><br><li>`skipcash` - Skip Cash</li><br><li>`smart_pay` - SmartPay</li><br><li>`sohar` - SoharInternational</li><br><li>`stcbahrain` - STC Bahrain</li><br><li>`stc_pay` - STC Pay</li><br><li>`tabby` - Tabby</li><br><li>`taly` - Taly</li><br><li>`tamara` - Tamara</li><br><li>`tap` - Tap Payments</li><br><li>`tess` - Tess Payments</li><br><li>`upayments` - UPayments</li><br><li>`upg` - UPG</li><br><li>`urpay` - URPay</li>
         type:
           enum:
             - sandbox
@@ -7568,6 +8137,7 @@ components:
               - telecom
               - utilities
               - demo
+              - test
             type: string
             description: |-
               * `e_commerce` - e_commerce
@@ -7590,8 +8160,28 @@ components:
               * `telecom` - telecom
               * `utilities` - utilities
               * `demo` - demo
-            x-spec-enum-id: b366021a7a7a68c9
+              * `test` - test
+            x-spec-enum-id: 397e40e715a6be71
           description: "When provided, the payment methods will be filtered to those matching any of the specified business vertical tags (OR logic). Example: ['e_commerce', 'pos']"
+        payment_services:
+          type: array
+          items:
+            enum:
+              - apple_pay
+              - google_pay
+              - samsung_pay
+              - wallet
+            type: string
+            description: |-
+              * `apple_pay` - Apple Pay
+              * `google_pay` - Google Pay
+              * `samsung_pay` - Samsung Pay
+              * `wallet` - Wallet
+            x-spec-enum-id: a4096334d394fe33
+          description: |-
+            When provided, only payment methods that have at least one of the listed payment services attached are returned (OR logic). Each value maps to a configured `PaymentService` linked to the PGMID — for example a MID with an active Apple Pay configuration is returned for `payment_services=['apple_pay']`, and a MID linked to an active Ottu / Qitaf wallet is returned for `payment_services=['wallet']`. Example: ['wallet', 'apple_pay']
+
+            Available Values:<br><li>`apple_pay` - Apple Pay</li><br><li>`google_pay` - Google Pay</li><br><li>`samsung_pay` - Samsung Pay</li><br><li>`wallet` - Wallet</li>
       required:
         - plugin
     PaymentMethodsResponse:
@@ -7621,6 +8211,26 @@ components:
       oneOf:
         - $ref: "#/components/schemas/InternalOperation"
         - $ref: "#/components/schemas/ExternalOperation"
+    PaymentServiceListing:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Code to identify the service in the API/URLs/etc
+          maxLength: 16
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          description: "Name to be displayed in dropdown or anywhere else the settings are being displayed. IE: Apple Pay, Google Pay, etc"
+          maxLength: 16
+        name_ar:
+          type: string
+          title: Arabic Name
+          description: "Arabic Name to be displayed in dropdown or anywhere else the settings are being displayed. IE: Apple Pay, Google Pay, etc"
+          maxLength: 16
+      required:
+        - code
+        - name
     PrePaymentCheckResponses:
       oneOf:
         - $ref: "#/components/schemas/TabbyPrePaymentCheck"
@@ -7902,6 +8512,12 @@ components:
           type: string
           description: Customer phone number associated with the payment. This might be sent to the payment gateway and depending on the gateway, it may trigger a click to pay process on the payment page. The phone number will also be included in the invoice, receipt, email, and displayed on the payment page.
           maxLength: 32
+        customer_wallet_transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/CustomerWalletTransaction"
+          readOnly: true
+          description: List of wallet legs that contributed to this payment — one entry per wallet provider (Ottu, Qitaf, …). Multi-wallet stacking emits multiple entries; full or single-wallet payments emit a one-element list. Omitted entirely (key absent) when no wallet was involved.
         extra:
           description: The extra information for the payment details, which the merchant has sent it in key value form.
         fee:
@@ -8050,6 +8666,7 @@ components:
         - card_acceptance_criteria
         - currency_code
         - customer_address_country
+        - customer_wallet_transactions
         - fee
         - gateway_account
         - gateway_name
@@ -8694,6 +9311,484 @@ components:
       required:
         - customer_id
         - type
+    WalletAccountItem:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Wallet account ID (UUID).
+        customer_id:
+          type: string
+          description: Customer identifier.
+        currency:
+          type: string
+          description: ISO 4217 currency code (e.g. KWD, USD).
+        status:
+          enum:
+            - active
+            - suspended
+            - closed
+          type: string
+          x-spec-enum-id: f781fab3fd9e8ab1
+          description: |-
+            Current account status.
+
+            * `active` - active
+            * `suspended` - suspended
+            * `closed` - closed
+        balance:
+          type: string
+          description: Total account balance.
+        available_balance:
+          type: string
+          description: Balance available for new transactions (excludes reserved funds).
+        created_at:
+          type: string
+          format: date-time
+          description: Account creation timestamp.
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp.
+      required:
+        - available_balance
+        - balance
+        - created_at
+        - currency
+        - customer_id
+        - id
+        - status
+        - updated_at
+    WalletAccountsErrors:
+      oneOf:
+        - $ref: "#/components/schemas/FieldErrors"
+        - $ref: "#/components/schemas/GenericErrorMessage"
+    WalletAccountsRequest:
+      type: object
+      properties:
+        customer_id:
+          type: string
+          description: Customer identifier.
+        currency:
+          type: string
+          maxLength: 3
+        status:
+          enum:
+            - active
+            - suspended
+            - closed
+          type: string
+          description: |-
+            * `active` - active
+            * `suspended` - suspended
+            * `closed` - closed
+          x-spec-enum-id: f781fab3fd9e8ab1
+        pagination:
+          $ref: "#/components/schemas/WalletPaginationCursor"
+      required:
+        - customer_id
+    WalletAccountsResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/WalletAccountItem"
+          description: List of wallet accounts.
+        count:
+          type: integer
+          description: Total number of accounts returned.
+        next:
+          oneOf:
+            - $ref: "#/components/schemas/WalletPaginationCursor"
+            - type: "null"
+          description: Cursor for the next page, or null if no more pages.
+        previous:
+          oneOf:
+            - $ref: "#/components/schemas/WalletPaginationCursor"
+            - type: "null"
+          description: Cursor for the previous page, or null if on the first page.
+      required:
+        - count
+        - next
+        - previous
+        - results
+    WalletEntriesErrors:
+      oneOf:
+        - $ref: "#/components/schemas/FieldErrors"
+        - $ref: "#/components/schemas/GenericErrorMessage"
+    WalletEntriesRequest:
+      type: object
+      properties:
+        customer_id:
+          type: string
+          description: Customer identifier.
+        currency:
+          type: string
+          maxLength: 3
+        entry_type:
+          enum:
+            - credit_refund
+            - debit_payment
+            - reserve
+            - release
+            - expire
+            - reversal
+            - credit_adjustment
+            - debit_adjustment
+          type: string
+          description: |-
+            * `credit_refund` - credit_refund
+            * `debit_payment` - debit_payment
+            * `reserve` - reserve
+            * `release` - release
+            * `expire` - expire
+            * `reversal` - reversal
+            * `credit_adjustment` - credit_adjustment
+            * `debit_adjustment` - debit_adjustment
+          x-spec-enum-id: 65a180006453c78d
+        direction:
+          enum:
+            - credit
+            - debit
+          type: string
+          description: |-
+            * `credit` - credit
+            * `debit` - debit
+          x-spec-enum-id: 61c3cf55f7e48eaa
+        status:
+          enum:
+            - pending
+            - completed
+            - failed
+          type: string
+          description: |-
+            * `pending` - pending
+            * `completed` - completed
+            * `failed` - failed
+          x-spec-enum-id: 6d6191fe2b5c6a10
+        session_id:
+          type: string
+        provider:
+          type: string
+        pg_code:
+          type: string
+        date_from:
+          type: string
+          format: date
+        date_to:
+          type: string
+          format: date
+        pagination:
+          $ref: "#/components/schemas/WalletPaginationCursor"
+      required:
+        - currency
+        - customer_id
+    WalletEntriesResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/WalletEntryItem"
+          description: List of wallet ledger entries.
+        count:
+          type: integer
+          description: Total number of entries returned.
+        next:
+          oneOf:
+            - $ref: "#/components/schemas/WalletPaginationCursor"
+            - type: "null"
+          description: Cursor for the next page, or null if no more pages.
+        previous:
+          oneOf:
+            - $ref: "#/components/schemas/WalletPaginationCursor"
+            - type: "null"
+          description: Cursor for the previous page, or null if on the first page.
+      required:
+        - count
+        - next
+        - previous
+        - results
+    WalletEntryItem:
+      type: object
+      properties:
+        entry_type:
+          enum:
+            - credit_refund
+            - debit_payment
+            - reserve
+            - release
+            - expire
+            - reversal
+            - credit_adjustment
+            - debit_adjustment
+          type: string
+          x-spec-enum-id: 65a180006453c78d
+          description: |-
+            Type of ledger entry.
+
+            * `credit_refund` - credit_refund
+            * `debit_payment` - debit_payment
+            * `reserve` - reserve
+            * `release` - release
+            * `expire` - expire
+            * `reversal` - reversal
+            * `credit_adjustment` - credit_adjustment
+            * `debit_adjustment` - debit_adjustment
+        direction:
+          enum:
+            - credit
+            - debit
+          type: string
+          x-spec-enum-id: 61c3cf55f7e48eaa
+          description: |-
+            Whether the entry increases (credit) or decreases (debit) the balance.
+
+            * `credit` - credit
+            * `debit` - debit
+        amount:
+          type: string
+          description: Entry amount.
+        currency:
+          type: string
+          description: ISO 4217 currency code.
+        status:
+          enum:
+            - pending
+            - completed
+            - failed
+          type: string
+          x-spec-enum-id: 6d6191fe2b5c6a10
+          description: |-
+            Current status of the entry.
+
+            * `pending` - pending
+            * `completed` - completed
+            * `failed` - failed
+        session_id:
+          type: string
+          description: Payment session ID associated with this entry.
+        pg_code:
+          type: string
+          description: Payment gateway code associated with this entry.
+        created_at:
+          type: string
+          format: date-time
+          description: Entry creation timestamp.
+      required:
+        - amount
+        - currency
+        - direction
+        - entry_type
+    WalletInstrument:
+      type: object
+      properties:
+        instrument_type:
+          enum:
+            - wallet
+          type: string
+          x-spec-enum-id: ba4affc717e2ff3d
+          default: wallet
+          description: |-
+            Payment type: Wallet.
+
+            * `wallet` - wallet
+        payload:
+          allOf:
+            - $ref: "#/components/schemas/WalletPayload"
+          description: Wallet instrument payload. Must specify `wallet_code` so the native strategy knows which configured wallet to debit.
+      required:
+        - payload
+    WalletNativePayment:
+      type: object
+      properties:
+        payload:
+          type: object
+          additionalProperties: {}
+        pg_code:
+          type:
+            - string
+            - "null"
+          description: The unique pg_code used for this payment instrument.
+        session_id:
+          type: string
+          description: A unique identifier for the payment transaction (session).
+      required:
+        - session_id
+    WalletOperationEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Entry ID.
+        entry_type:
+          type: string
+          description: Type of ledger entry.
+        direction:
+          enum:
+            - credit
+            - debit
+          type: string
+          x-spec-enum-id: 61c3cf55f7e48eaa
+          description: |-
+            Whether the entry increases (credit) or decreases (debit) the balance.
+
+            * `credit` - credit
+            * `debit` - debit
+        amount:
+          type: string
+          description: Entry amount.
+        currency:
+          type: string
+          description: ISO 4217 currency code.
+        status:
+          type: string
+          description: Entry status.
+        created_at:
+          type: string
+          format: date-time
+          description: Entry creation timestamp.
+      required:
+        - amount
+        - currency
+        - direction
+        - entry_type
+        - id
+    WalletOperationResponse:
+      type: object
+      properties:
+        operation_type:
+          enum:
+            - refund
+            - reservation
+            - deduction
+            - adjustment
+            - reversal
+          type: string
+          x-spec-enum-id: 77531463918851c8
+          description: |-
+            The type of wallet operation.
+
+            * `refund` - refund
+            * `reservation` - reservation
+            * `deduction` - deduction
+            * `adjustment` - adjustment
+            * `reversal` - reversal
+        status:
+          enum:
+            - pending
+            - completed
+            - expired
+            - canceled
+            - failed
+            - reversed
+            - requires_review
+          type: string
+          x-spec-enum-id: 36788b40a91bc793
+          description: |-
+            Current status of the operation.
+
+            * `pending` - pending
+            * `completed` - completed
+            * `expired` - expired
+            * `canceled` - canceled
+            * `failed` - failed
+            * `reversed` - reversed
+            * `requires_review` - requires_review
+        session_id:
+          type: string
+          description: Payment session ID associated with this operation.
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/WalletOperationEntry"
+          description: Ledger entries created by this operation.
+      required:
+        - entries
+        - operation_type
+        - session_id
+        - status
+    WalletOperationsErrors:
+      oneOf:
+        - $ref: "#/components/schemas/FieldErrors"
+        - $ref: "#/components/schemas/GenericErrorMessage"
+    WalletOperationsRequest:
+      type: object
+      properties:
+        operation_id:
+          type: integer
+          description: Wallet operation ID.
+      required:
+        - operation_id
+    WalletPaginationCursor:
+      type: object
+      properties:
+        cursor:
+          type:
+            - integer
+            - "null"
+          description: Record ID cursor; null for the first page.
+        direction:
+          enum:
+            - forward
+            - backward
+          type: string
+          x-spec-enum-id: 437dcb7b7508c518
+          default: forward
+          description: |-
+            Direction to paginate from the cursor.
+
+            * `forward` - forward
+            * `backward` - backward
+        per_page:
+          type: integer
+          maximum: 50
+          minimum: 1
+          default: 20
+          description: Page size (1-50).
+    WalletPayload:
+      type: object
+      description: |-
+        Payload shape for `instrument_type=wallet`.
+
+        Used as the runtime validator in `PaymentInstrumentWalletValidator` and
+        as the documented schema for the `payload` field of the wallet variant
+        of `payment_instrument`.
+      properties:
+        wallet_code:
+          type: string
+          description: The `code` of the active `WalletPaymentService` to debit. Required when `instrument_type=wallet` and the PGMID has more than one wallet configured (e.g. Ottu + Qitaf). The native strategy resolves the row by this code, then calls `provider.debit(...)` against it.
+      required:
+        - wallet_code
+    WalletServiceResponse:
+      type: object
+      properties:
+        amount:
+          type: string
+          description: Amount of the wallet operation.
+        status:
+          type: string
+          description: Operation status (e.g. 'completed', 'pending').
+        currency:
+          type: string
+          description: ISO 4217 currency code.
+        created_at:
+          type: string
+          format: date-time
+          description: Operation creation timestamp.
+        customer_id:
+          type: string
+          description: Customer identifier in the wallet service.
+        operation_id:
+          type: string
+          description: Wallet operation ID (opaque per provider).
+        payment_entry_id:
+          type: integer
+          description: Ledger entry ID for the payment debit.
+        reserve_entry_id:
+          type: integer
+          description: Ledger entry ID for the reservation hold.
   securitySchemes:
     SSO_BasicAuth:
       type: http
@@ -8711,4 +9806,4 @@ components:
       name: Authorization
       description: Token-based authentication with required prefix "Token"
 servers:
-  - url: https://sandbox.ottu.net
+  - url: https://ksa.ottu.dev

@@ -28,6 +28,7 @@ type WalletDemoEnvEntry = {
     payment_services?: string[];
   };
   secrets: { connect_api_key: string; keycloak_client_secret: string };
+  connect_api_key_default?: string;
 };
 type WalletDemoDoc = { environments: Record<string, WalletDemoEnvEntry>; default: string };
 
@@ -51,9 +52,13 @@ const walletDemo = {
   sessionAmount: walletDemoEntry.session_amount,
   pgFilter: walletDemoEntry.pg_filter,
   // Same leak model as the existing SANDBOX_AUTH_KEY in src/utils/sandbox.ts —
-  // a public sandbox key, env-overridable per merchant. Missing key surfaces
-  // as a runtime error from the Payment Methods / Checkout API call.
-  apiKey: process.env[walletDemoEntry.secrets.connect_api_key] || "",
+  // a public sandbox key, env-overridable per merchant. Resolution: env var →
+  // inline default in the YAML → "" (which surfaces as a runtime error from
+  // the Payment Methods / Checkout API call).
+  apiKey:
+    process.env[walletDemoEntry.secrets.connect_api_key] ||
+    walletDemoEntry.connect_api_key_default ||
+    "",
 };
 
 const config: Config = {

@@ -5,9 +5,9 @@
  * Credentials are intentionally public — sandbox-only, already exposed in CodePen.
  */
 
-export const SANDBOX_MERCHANT_ID = "sandbox.ottu.net";
-export const SANDBOX_API_KEY = "13df331cb989d68313b9141e2094d3f042c6d157";
-const SANDBOX_AUTH_KEY = "Fxi63E9x.AiYMnCCXcBVr657gs4N3ex3MZdeAeWDy";
+export const SANDBOX_MERCHANT_ID = "ksa.ottu.dev";
+export const SANDBOX_API_KEY = "88a460b42a0f8bec4011da23ce1d547bd04e8afc";
+const SANDBOX_AUTH_KEY = "uUjUqczM.P5PqlXx8zyuFUQVk19PLxfHBZu8rG4Uy";
 
 export interface CreateSessionOptions {
   pg_codes: string[];

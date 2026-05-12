@@ -1,9 +1,9 @@
-// Public-sandbox default. Use for any code sample whose API surface is
-// already shipped on the public sandbox (`sandbox.ottu.net`).
-export const OTTU_CONNECT_BASE_URL = "https://sandbox.ottu.net";
+// Base URL for all API code samples and interactive demos.
+// Points at Ottu's KSA dev environment (`ksa.ottu.dev`), which currently
+// hosts the full public API surface including wallet endpoints.
+export const OTTU_CONNECT_BASE_URL = "https://ksa.ottu.dev";
 
-// Dev-only override. Use for APIs not yet promoted to the public sandbox
-// — e.g. wallet endpoints, currently only available on `ksa.ottu.dev`.
-// Remove call sites and standardize on OTTU_CONNECT_BASE_URL once the API
-// ships to public sandbox.
-export const OTTU_DEV_BASE_URL = "https://ksa.ottu.dev";
+// Backwards-compatible alias. Historically `OTTU_DEV_BASE_URL` pointed at
+// `ksa.ottu.dev` for APIs not yet on the public sandbox; both constants now
+// resolve to the same base. Prefer `OTTU_CONNECT_BASE_URL` in new code.
+export const OTTU_DEV_BASE_URL = OTTU_CONNECT_BASE_URL;

@@ -1,8 +1,11 @@
 # Public per-environment config for the wallet docs live demo.
 #
-# Secrets are NOT here — they come from env vars at runtime/build-time, keyed
-# by env slug (see "secrets" key for the expected var names). Slug convention:
-# uppercase(env_name).replaceAll('.','_') — e.g. ksa.ottu.dev → KSA_OTTU_DEV.
+# Resolution order for each secret: env var named in `secrets` → inline
+# `*_default` below → "" (which surfaces as a runtime error). The inline
+# defaults exist so the demo works out of the box against the dev sandbox
+# without setting env vars; override per-deploy with the env vars.
+# Slug convention: uppercase(env_name).replaceAll('.','_') — e.g.
+# ksa.ottu.dev → KSA_OTTU_DEV.
 #
 # Active environment is chosen by the WALLET_DEMO_ENV env var (falls back to
 # `default` below). To target a new merchant: add an entry, set its secrets,
@@ -27,6 +30,10 @@ environments:
     secrets:
       connect_api_key: WALLET_DEMO_KSA_OTTU_DEV_CONNECT_API_KEY
       keycloak_client_secret: WALLET_DEMO_KSA_OTTU_DEV_KEYCLOAK_CLIENT_SECRET
+    # Public dev-sandbox key — same leak model as SANDBOX_AUTH_KEY in
+    # src/utils/sandbox.ts. The Keycloak client secret intentionally has no
+    # inline default (more sensitive); set the env var for wallet seeding.
+    connect_api_key_default: "uUjUqczM.P5PqlXx8zyuFUQVk19PLxfHBZu8rG4Uy"
 
   sandbox.ottu.net:
     merchant_id: sandbox.ottu.net

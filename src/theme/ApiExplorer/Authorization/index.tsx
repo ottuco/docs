@@ -12,7 +12,9 @@ import React, { Fragment, useEffect } from "react";
 
 const DEFAULT_USERNAME = "demo_user";
 const DEFAULT_PASSWORD = "WY4Q9I1d5kHH3nJ";
-const DEFAULT_API_KEY = "GYj5Na8H.29g9hqNjm11nORQMa2WiZwIBQQ49MdAL";
+// Public demo key on ksa.ottu.dev. Bare key only — the explorer prepends
+// the "Api-Key " prefix when it builds the Authorization header.
+const DEFAULT_API_KEY = "uUjUqczM.P5PqlXx8zyuFUQVk19PLxfHBZu8rG4Uy";
 
 export default function Authorization(): React.JSX.Element | null {
   const data = useTypedSelector((state: any) => state.auth.data);
@@ -203,7 +205,7 @@ export default function Authorization(): React.JSX.Element | null {
 
         if (a.type === "apiKey") {
           const placeholder =
-            a.name === "Authorization" ? "Api-Key <key>" : `${a.name}`;
+            a.name === "Authorization" ? "your-api-key" : `${a.name}`;
           return (
             <FormItem label={`${a.key}`} key={`${a.key}-apikey`}>
               <FormTextInput

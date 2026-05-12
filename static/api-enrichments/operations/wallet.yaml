@@ -1,38 +1,36 @@
 # Enrichments for tag: "Wallet"
 #
 # Operation keys must match the operationId values in static/Ottu_API.yaml.
-# Once Connect ships the wallet proxy (Redmine subticket 150892), if the actual
-# operationIds differ from the keys below, rename to match.
 
 operations:
 
-  wallet_accounts_list:
+  wallet_accounts:
     permissions:
       - $perm:api_key_admin
       - $perm:basic_auth_wallet_read
     description_replace: |
-      Returns all wallet accounts for a customer, one per currency.
+      Returns the customer's wallet accounts — one per currency — with confirmed and available balances.
 
-      Accounts are created lazily — they exist only after the first credit (refund-to-wallet, manual adjustment, promo, or goodwill). If a customer has never received a wallet credit in a given currency, no account is returned for that currency.
+      Accounts are created lazily: one exists only after the first credit lands in that currency (a [refund to wallet]({{apiBaseUrl}}/operations/#refund-to-wallet), a manual adjustment, a promo, or a goodwill credit). A customer who has never received a wallet credit in a given currency has no account in that currency, and none is returned — `count: 0` with an empty `results` array is a valid response.
 
-      The `balance` field reflects confirmed funds only; amounts reserved during in-flight checkouts are excluded.
+      `balance` reflects confirmed funds only; `available_balance` is `balance` minus the amounts held by in-flight checkout reservations, and is what the customer can actually spend right now. Results are cursor-paginated — pass the `pagination.cursor` value from the `next` object to fetch the following page.
 
-  wallet_ledger_list:
+  wallet_entries:
     permissions:
       - $perm:api_key_admin
       - $perm:basic_auth_wallet_read
     description_replace: |
-      Returns the immutable ledger of credits, debits, and reservations for a single wallet account.
+      Returns the immutable ledger of a customer's wallet account — credits, debits, reservations, releases, expiries, and adjustments — filtered by the parameters you supply. Use it to build a wallet transaction history in your own customer-facing UI.
 
-      Uses cursor-based pagination — pass the `cursor` parameter returned in the previous response to fetch the next page.
+      `customer_id` and `currency` are both required: Ottu resolves the matching wallet account internally and queries its ledger. If the customer has no account in that currency the call returns `400` with `{"detail": "No <CUR> wallet account found for customer."}`.
 
-      Each entry references the originating payment session via `linked_session_id` when applicable. Entries are append-only; corrections are made by issuing an opposing entry, never by editing or deleting an existing one.
+      Each entry references the originating payment session via `session_id` when applicable. Entries are append-only — corrections are made by posting an opposing entry, never by editing or deleting an existing one. Results are cursor-paginated — pass the `pagination.cursor` value from the `next` object to fetch the following page.
 
-  wallet_operation_retrieve:
+  wallet_operation_details:
     permissions:
       - $perm:api_key_admin
       - $perm:basic_auth_wallet_read
     description_replace: |
-      Returns a single wallet operation (credit, debit, or reservation) by its `operation_id`.
+      Returns a single wallet operation by its `operation_id`, together with every ledger entry it produced. An operation is the atomic unit of work the wallet performs — a reservation, a refund, a deduction, an adjustment, or a reversal — and rolls up one or more ledger entries under one identifier.
 
-      Use this when you have an operation ID from a previous response (e.g., the operation returned by a refund-to-wallet call) and want to fetch the canonical record for audit or reconciliation.
+      Use this when you have an operation ID from an earlier response — for example the operation returned by a [refund to wallet]({{apiBaseUrl}}/operations/#refund-to-wallet) — and you want the canonical record for audit or reconciliation. A reservation operation, for instance, produces a `reserve` entry that is later closed by a `debit_payment` entry from the deduction operation; both are returned here.
