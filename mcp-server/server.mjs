@@ -162,10 +162,11 @@ async function handleSeedWallet(req, res) {
     return;
   }
 
-  const idempotencyKey = `idem_demo_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  const idempotencyKey = crypto.randomUUID();
+  const demoTag = `demo_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
   let upstream;
   try {
-    upstream = await fetch(`${env.wallet_url}/wallet/credits/`, {
+    upstream = await fetch(`${env.wallet_url}/wallet/credits`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -178,9 +179,11 @@ async function handleSeedWallet(req, res) {
         currency,
         amount,
         funding_source_type: "promo",
+        session_id: `sess_${demoTag}`,
         pg_code,
-        reference_number: `ref_demo_${idempotencyKey}`,
-        order_no: `ord_demo_${idempotencyKey}`,
+        provider: "",
+        reference_number: `ref_${demoTag}`,
+        order_no: `ord_${demoTag}`,
         metadata: { source: "docs_walletdemo", synthetic: true, env: env.name },
       }),
     });

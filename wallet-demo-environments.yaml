@@ -22,7 +22,7 @@ environments:
     pg_filter:
       plugin: e_commerce
       type: sandbox
-      tags: [docs]
+      tags: [demo]
       payment_services: [wallet]
     secrets:
       connect_api_key: WALLET_DEMO_KSA_OTTU_DEV_CONNECT_API_KEY
@@ -41,7 +41,7 @@ environments:
     pg_filter:
       plugin: e_commerce
       type: sandbox
-      tags: [docs]
+      tags: [demo]
       payment_services: [wallet]
     secrets:
       connect_api_key: WALLET_DEMO_SANDBOX_OTTU_NET_CONNECT_API_KEY

@@ -1,295 +1,130 @@
 /* ═══════════════════════════════════════════════════════
-   Wallet Demo — Editorial Fintech Timeline
-   Mirrors PaymentJourney's visual language for consistency.
+   Wallet Demo — compact stepper, matches CheckoutDemo.
    ═══════════════════════════════════════════════════════ */
 
-/* ── Container ───────────────────────────────────────── */
-.journey {
-  position: relative;
-  padding: 0 0 0 56px;
-  margin: 32px 0 48px;
-}
-
-/* ── Timeline spine ──────────────────────────────────── */
-.journey::before {
-  content: "";
-  position: absolute;
-  left: 19px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: linear-gradient(
-    to bottom,
-    var(--ifm-global-border-color) 0%,
-    rgba(242, 126, 32, 0.3) 50%,
-    var(--ifm-global-border-color) 100%
-  );
-}
-
-/* ── Step card ───────────────────────────────────────── */
-.step {
-  position: relative;
-  margin-bottom: 8px;
-  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.step:last-child {
-  margin-bottom: 0;
-}
-
-/* ── Timeline node ───────────────────────────────────── */
-.node {
-  position: absolute;
-  left: -56px;
-  top: 20px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: "Poppins", sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  z-index: 2;
-  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 0 0 0 4px var(--ifm-background-color);
-}
-
-.nodePending {
-  background: var(--ifm-background-surface-color);
-  color: var(--ifm-font-color-base);
-  border: 2px solid var(--ifm-global-border-color);
-  opacity: 0.5;
-}
-
-.nodeActive {
-  background: #f27e20;
-  color: #fff;
-  border: 2px solid #f27e20;
-  box-shadow:
-    0 0 0 4px var(--ifm-background-color),
-    0 0 20px rgba(242, 126, 32, 0.35);
-  animation: nodePulse 2s ease-in-out infinite;
-}
-
-.nodeDone {
-  background: #22c55e;
-  color: #fff;
-  border: 2px solid #22c55e;
-}
-
-@keyframes nodePulse {
-  0%, 100% {
-    box-shadow:
-      0 0 0 4px var(--ifm-background-color),
-      0 0 16px rgba(242, 126, 32, 0.25);
-  }
-  50% {
-    box-shadow:
-      0 0 0 4px var(--ifm-background-color),
-      0 0 28px rgba(242, 126, 32, 0.45);
-  }
-}
-
-/* ── Card surface ────────────────────────────────────── */
-.card {
+.container {
   border: 1px solid var(--ifm-global-border-color);
   border-radius: 12px;
   overflow: hidden;
+  margin: 24px 0;
   background: var(--ifm-background-color);
-  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.cardActive {
-  border-color: rgba(242, 126, 32, 0.4);
-  box-shadow:
-    0 4px 24px rgba(242, 126, 32, 0.08),
-    0 1px 4px rgba(0, 0, 0, 0.04);
-}
-
-.cardDone {
-  opacity: 0.7;
-  border-color: var(--ifm-global-border-color);
-}
-
-.cardDone:hover {
-  opacity: 1;
-}
-
-.cardDoneExpanded {
-  opacity: 1;
-  border-color: rgba(34, 197, 94, 0.35);
-}
-
-/* ── Card header ─────────────────────────────────────── */
-.cardHeader {
-  padding: 18px 24px;
+/* Idle state */
+.idleCard {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  cursor: default;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  gap: 12px;
 }
 
-.cardHeaderDone {
-  padding: 14px 24px;
-  cursor: pointer;
-}
-
-.cardHeaderDone:hover {
-  background: rgba(0, 0, 0, 0.02);
-}
-
-[data-theme="dark"] .cardHeaderDone:hover {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.cardTitle {
-  font-family: "Poppins", sans-serif;
-  font-size: 16px;
+.idleTitle {
+  font-size: 20px;
   font-weight: 600;
   color: var(--ifm-heading-color);
   margin: 0;
 }
 
-.cardTitlePending {
-  opacity: 0.4;
-}
-
-.cardSubtitle {
-  font-size: 13px;
-  color: var(--ifm-font-color-base);
-  opacity: 0.6;
-  margin: 4px 0 0 0;
-}
-
-.doneRight {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.doneBadge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #22c55e;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-}
-
-.chevron {
-  color: var(--ifm-font-color-base);
-  opacity: 0.4;
-  transition: transform 0.2s ease;
-}
-
-/* ── Card body ───────────────────────────────────────── */
-.cardBody {
-  padding: 0 24px 24px;
-}
-
-.cardDescription {
+.idleDescription {
   font-size: 14px;
-  line-height: 1.65;
   color: var(--ifm-font-color-base);
-  margin: 0 0 20px 0;
+  margin: 0;
+  max-width: 460px;
 }
 
-/* ── Hero (idle) ─────────────────────────────────────── */
-.hero {
-  text-align: center;
-  padding: 56px 24px;
-  margin: 0 0 32px;
-  border: 1px solid var(--ifm-global-border-color);
-  border-radius: 16px;
-  background: linear-gradient(
-    135deg,
-    var(--ifm-background-color) 0%,
-    var(--ifm-background-surface-color) 100%
-  );
-  position: relative;
-  overflow: hidden;
-}
-
-.hero::before {
-  content: "";
-  position: absolute;
-  top: -60%;
-  right: -20%;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(242, 126, 32, 0.06) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.heroTitle {
+.launchButton {
+  margin-top: 8px;
+  padding: 10px 28px;
+  border: none;
+  border-radius: 8px;
+  background: #f27e20;
+  color: #ffffff;
   font-family: "Poppins", sans-serif;
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--ifm-heading-color);
-  margin: 0 0 12px;
-  position: relative;
-}
-
-.heroSubtitle {
   font-size: 15px;
-  color: var(--ifm-font-color-base);
-  margin: 0 0 28px;
-  max-width: 480px;
-  margin-left: auto;
-  margin-right: auto;
-  line-height: 1.6;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
 }
 
-/* ── Complete card ───────────────────────────────────── */
-.completeCard {
-  text-align: center;
-  padding: 48px 24px;
-  border: 1px solid var(--ifm-global-border-color);
-  border-radius: 16px;
-  background: linear-gradient(
-    135deg,
-    var(--ifm-background-color) 0%,
-    var(--ifm-background-surface-color) 100%
-  );
-  margin-top: 32px;
+.launchButton:hover {
+  background: #da711d;
 }
 
-.completeIcon {
-  font-size: 48px;
-  margin-bottom: 16px;
-  display: block;
+/* Progress stepper */
+.progressCard {
+  padding: 40px 32px;
 }
 
-.completeTitle {
-  font-family: "Poppins", sans-serif;
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--ifm-heading-color);
-  margin: 0 0 8px;
+.stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.completeSubtitle {
+.step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   font-size: 14px;
   color: var(--ifm-font-color-base);
-  margin: 0 0 24px;
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
 }
 
-/* ── Error card ──────────────────────────────────────── */
+.stepActive {
+  opacity: 1;
+  font-weight: 500;
+  color: var(--ifm-heading-color);
+}
+
+.stepDone {
+  opacity: 0.7;
+}
+
+.stepIcon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 12px;
+}
+
+.stepIconPending {
+  background: var(--ifm-global-border-color);
+  color: var(--ifm-font-color-base);
+}
+
+.stepIconActive {
+  background: #f27e20;
+  color: #ffffff;
+  animation: spin 1s linear infinite;
+}
+
+.stepIconDone {
+  background: #22c55e;
+  color: #ffffff;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Error state */
 .errorCard {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 40px 24px;
+  justify-content: center;
+  padding: 48px 24px;
   text-align: center;
   gap: 12px;
-  border: 1px solid #ed2833;
-  border-radius: 12px;
-  margin: 16px 0;
-  background: rgba(237, 40, 51, 0.04);
 }
 
 .errorIcon {
@@ -304,45 +139,9 @@
   word-break: break-word;
 }
 
-/* ── Action buttons ──────────────────────────────────── */
-.actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 20px;
-  justify-content: center;
-}
-
-.primaryBtn {
-  padding: 10px 28px;
-  border: none;
-  border-radius: 8px;
-  background: #f27e20;
-  color: #fff;
-  font-family: "Poppins", sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.primaryBtn:hover {
-  background: #da711d;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(242, 126, 32, 0.3);
-}
-
-.primaryBtn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.secondaryBtn {
-  padding: 10px 24px;
+.retryButton {
+  margin-top: 8px;
+  padding: 8px 24px;
   border: 1px solid var(--ifm-global-border-color);
   border-radius: 8px;
   background: transparent;
@@ -351,73 +150,30 @@
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease;
 }
 
-.secondaryBtn:hover {
+.retryButton:hover {
   background: var(--ifm-background-surface-color);
 }
 
-/* ── Spinner ─────────────────────────────────────────── */
-.spinner {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+.retryButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* ── SDK mount ───────────────────────────────────────── */
-.sdkContainer {
-  min-height: 380px;
-  margin: 16px 0 0;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid var(--ifm-global-border-color);
-}
-
-/* ── Env badge on hero ───────────────────────────────── */
-.envBadge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: rgba(242, 126, 32, 0.08);
-  color: #f27e20;
-  font-family: "Poppins", sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  margin-bottom: 16px;
-  position: relative;
-}
-
-.envBadgeCode {
-  font-family: "Consolas", "Monaco", monospace;
-  margin-left: 6px;
-  text-transform: none;
-  letter-spacing: 0;
-}
-
-/* ── Success banner ──────────────────────────────────── */
-.successBanner {
+/* Complete state */
+.completeCard {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
   text-align: center;
-  padding: 32px 24px;
-  gap: 4px;
+  gap: 8px;
 }
 
-.successBannerIcon {
+.completeIcon {
   width: 40px;
   height: 40px;
   flex-shrink: 0;
@@ -427,21 +183,36 @@
   border-radius: 50%;
   background: #22c55e;
   color: #ffffff;
-  margin-bottom: 8px;
 }
 
-.successBannerTitle {
-  font-family: "Poppins", sans-serif;
+.completeTitle {
   font-size: 20px;
   font-weight: 600;
   color: var(--ifm-heading-color);
-  margin: 0;
+  margin: 8px 0 0;
 }
 
-.successBannerDescription {
+.completeDescription {
   font-size: 14px;
   color: var(--ifm-font-color-base);
-  margin: 0 0 8px;
-  max-width: 400px;
-  line-height: 1.6;
+  margin: 0;
+  max-width: 460px;
+}
+
+.restartButton {
+  margin-top: 12px;
+  padding: 8px 24px;
+  border: 1px solid var(--ifm-global-border-color);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ifm-heading-color);
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.restartButton:hover {
+  background: var(--ifm-background-surface-color);
 }

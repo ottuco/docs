@@ -6,9 +6,11 @@ export default function WalletDemo(): React.JSX.Element {
   return (
     <BrowserOnly
       fallback={
-        <div className={styles.hero}>
-          <h3 className={styles.heroTitle}>Wallet at Checkout — Live Demo</h3>
-          <p className={styles.heroSubtitle}>Loading…</p>
+        <div className={styles.container}>
+          <div className={styles.idleCard}>
+            <h3 className={styles.idleTitle}>Try Wallet at Checkout</h3>
+            <p className={styles.idleDescription}>Loading…</p>
+          </div>
         </div>
       }
     >
