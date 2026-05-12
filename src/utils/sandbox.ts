@@ -17,6 +17,12 @@ export interface CreateSessionOptions {
   type?: string;
   /** Arbitrary extra fields merged into the request body (e.g., payment_type, agreement, payment_instrument, webhook_url) */
   extra?: Record<string, unknown>;
+  /** Override merchant host for the request URL. Defaults to SANDBOX_MERCHANT_ID. */
+  merchantId?: string;
+  /** Override Connect base URL (e.g., https://ksa.ottu.dev). Defaults to https://${SANDBOX_MERCHANT_ID}. */
+  connectBaseUrl?: string;
+  /** Override Api-Key. Defaults to SANDBOX_AUTH_KEY. */
+  apiKey?: string;
 }
 
 const FIRST_NAMES = [
@@ -60,12 +66,14 @@ export async function createSandboxSession(
     ...options.extra,
   };
 
+  const baseUrl = options.connectBaseUrl ?? `https://${options.merchantId ?? SANDBOX_MERCHANT_ID}`;
+  const apiKey = options.apiKey ?? SANDBOX_AUTH_KEY;
   const response = await fetch(
-    `https://${SANDBOX_MERCHANT_ID}/b/checkout/v1/pymt-txn/`,
+    `${baseUrl}/b/checkout/v1/pymt-txn/`,
     {
       method: "POST",
       headers: {
-        Authorization: `Api-Key ${SANDBOX_AUTH_KEY}`,
+        Authorization: `Api-Key ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
@@ -128,6 +136,13 @@ export async function callPaymentMethods(options: {
   tags?: string[];
   tokenizable?: boolean;
   auto_debit?: boolean;
+  payment_services?: string[];
+  /** Override merchant host. Defaults to SANDBOX_MERCHANT_ID. */
+  merchantId?: string;
+  /** Override Connect base URL. Defaults to https://${SANDBOX_MERCHANT_ID}. */
+  connectBaseUrl?: string;
+  /** Override Api-Key. Defaults to SANDBOX_AUTH_KEY. */
+  apiKey?: string;
 }): Promise<any> {
   const body: Record<string, unknown> = {
     plugin: options.plugin ?? "payment_request",
@@ -138,13 +153,16 @@ export async function callPaymentMethods(options: {
   if (options.tags) body.tags = options.tags;
   if (options.tokenizable != null) body.tokenizable = options.tokenizable;
   if (options.auto_debit != null) body.auto_debit = options.auto_debit;
+  if (options.payment_services) body.payment_services = options.payment_services;
 
+  const baseUrl = options.connectBaseUrl ?? `https://${options.merchantId ?? SANDBOX_MERCHANT_ID}`;
+  const apiKey = options.apiKey ?? SANDBOX_AUTH_KEY;
   const response = await fetch(
-    `https://${SANDBOX_MERCHANT_ID}/b/pbl/v2/payment-methods/`,
+    `${baseUrl}/b/pbl/v2/payment-methods/`,
     {
       method: "POST",
       headers: {
-        Authorization: `Api-Key ${SANDBOX_AUTH_KEY}`,
+        Authorization: `Api-Key ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
@@ -224,72 +242,9 @@ export function extractPgCodes(pmResponse: any): string[] {
   return (pmResponse?.payment_methods ?? []).map((pg: any) => pg.code);
 }
 
-export interface CreateWalletCreditOptions {
-  amount: string;
-  currency: string;
-  pg_code: string;
-  customer_id?: string;
-}
-
-export interface WalletCreditResult {
-  customer_id: string;
-  balance: string;
-  currency: string;
-  account_uuid: string;
-}
-
-function generateDemoCustomerId(): string {
+/**
+ * Generate a fresh demo customer_id (used by WalletDemo when seeding a wallet).
+ */
+export function generateDemoCustomerId(): string {
   return `demo_${Math.random().toString(36).slice(2, 10)}`;
-}
-
-function generateIdempotencyKey(): string {
-  return `idem_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-}
-
-export async function createSandboxWalletCredit(
-  options: CreateWalletCreditOptions
-): Promise<WalletCreditResult> {
-  const customer_id = options.customer_id ?? generateDemoCustomerId();
-  const idempotencyKey = generateIdempotencyKey();
-
-  const response = await fetch(
-    `https://${SANDBOX_MERCHANT_ID}/b/wallet/v1/credits/`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Api-Key ${SANDBOX_AUTH_KEY}`,
-        "Content-Type": "application/json",
-        "Merchant-Id": SANDBOX_MERCHANT_ID,
-        "Idempotency-Key": idempotencyKey,
-      },
-      body: JSON.stringify({
-        customer_id,
-        currency: options.currency,
-        amount: options.amount,
-        funding_source_type: "promo",
-        pg_code: options.pg_code,
-        reference_number: `ref_demo_${idempotencyKey}`,
-        order_no: `ord_demo_${idempotencyKey}`,
-        metadata: {
-          source: "docs_walletdemo",
-          synthetic: true,
-        },
-      }),
-    }
-  );
-
-  if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(
-      `Wallet credit failed (${response.status}): ${text || response.statusText}`
-    );
-  }
-
-  const data = await response.json();
-  return {
-    customer_id,
-    balance: data.balance,
-    currency: data.currency ?? options.currency,
-    account_uuid: data.account_uuid,
-  };
 }

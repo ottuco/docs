@@ -7,12 +7,10 @@ export default function WalletDemo(): React.JSX.Element {
     <BrowserOnly
       fallback={
         <div className={styles.container}>
-          <div className={styles.header}>
-            <h3 className={styles.title}>Wallet at Checkout — Live Demo</h3>
+          <div className={styles.idleCard}>
+            <h3 className={styles.idleTitle}>Try Wallet at Checkout</h3>
+            <p className={styles.idleDescription}>Loading…</p>
           </div>
-          <button className={styles.startButton} disabled>
-            Try Wallet at Checkout
-          </button>
         </div>
       }
     >
