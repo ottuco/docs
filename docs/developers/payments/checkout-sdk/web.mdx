@@ -8,6 +8,7 @@ import FAQ, { FAQItem } from '@site/src/components/FAQ';
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import CheckoutDemo from "@site/src/components/CheckoutDemo";
+import StepGuide from "@site/src/components/StepGuide";
 
 The [Checkout SDK](./) is a JavaScript library provided by Ottu that allows you to easily integrate an Ottu-powered [checkout process](../#ottu-checkout-sdk-flow) into your web application. With the Checkout SDK, you can customize the look and feel of your checkout process, as well as which forms of payment are accepted.
 
@@ -928,6 +929,49 @@ Checkout.init({
 ```
 
 <figure><img src="/img/checkout-sdk/urpay%20Button.png" alt="urpay button in Web SDK" /><figcaption></figcaption></figure>
+
+## Ottu Wallet
+
+When a customer has wallet credit in the session currency, the SDK renders a **Wallet** payment method automatically — no init config is required. Pass the `customer_id` when creating the session, and either include `'wallet'` in `formsOfPayment` or omit `formsOfPayment` to show all available methods. Wallet is hidden for authorize-only sessions.
+
+For full balance behavior, partial-payment rules, and the four-hour reservation auto-release, see the [Wallet section](/developers/payments/wallet/).
+
+:::warning Cross-currency wallet payments are not supported
+The wallet only appears when its currency matches the order currency.
+:::
+
+<StepGuide steps={[
+  {
+    title: "Wallet appears as a method",
+    description: <>When the customer has positive balance in the session currency, <strong>Wallet (10.000 KWD)</strong> renders alongside cards and other gateways. No SDK config is needed beyond passing <code>customer_id</code> on the Checkout API session.</>,
+    image: "/img/developers/wallet/sdk-01-wallet-method.png",
+    imageAlt: "Checkout SDK showing Wallet as a payment method with balance",
+  },
+  {
+    title: "Full coverage: balance ≥ amount",
+    description: <>Customer selects Wallet → SDK shows "10.000 KWD will be applied" → submits → only the session amount is deducted. Surplus stays in the wallet.</>,
+    image: "/img/developers/wallet/sdk-02-full-coverage.png",
+    imageAlt: "Wallet selected with full coverage of the session amount",
+  },
+  {
+    title: "Partial coverage: balance < amount",
+    description: <>Customer selects Wallet → SDK shows "10.000 KWD will be applied; pick a method for the remaining 5.000 KWD" → adds a card → both reservations confirm together at submit.</>,
+    image: "/img/developers/wallet/sdk-03-partial-coverage.png",
+    imageAlt: "Wallet plus card combined for partial coverage",
+  },
+  {
+    title: "Authorize-only: wallet hidden",
+    description: <>When the session is configured for authorization-only, wallet is not offered. Wallet supports immediate-capture flows only.</>,
+    image: "/img/developers/wallet/sdk-04-authorize-hidden.png",
+    imageAlt: "Authorize-only checkout without wallet method",
+  },
+  {
+    title: "Try it",
+    description: <>The live demo seeds a fresh wallet for a generated customer_id and launches the SDK with wallet enabled. Use the demo on the <a href="/developers/payments/wallet/">Wallet overview page</a>.</>,
+    image: "/img/developers/wallet/sdk-05-live-demo.png",
+    imageAlt: "Wallet live demo entry point",
+  },
+]} />
 
 ## Onsite Checkout
 

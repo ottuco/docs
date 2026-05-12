@@ -75,7 +75,7 @@ Ottu offers multiple integration paths depending on your stack and use case:
 | Approach | Best For | Get Started |
 |---|---|---|
 | **REST API** | Full control, any language | You're already here |
-| **Checkout SDK** | Drop-in payment UI for web and mobile | [Web](../payments/checkout-sdk/web.mdx), [iOS](../payments/checkout-sdk/ios.md), [Android](../payments/checkout-sdk/android.md), [Flutter](../payments/checkout-sdk/flutter.md) |
+| **Checkout SDK** | Drop-in payment UI for web and mobile | [Web](../payments/checkout-sdk/web.mdx), [iOS](../payments/checkout-sdk/ios.mdx), [Android](../payments/checkout-sdk/android.mdx), [Flutter](../payments/checkout-sdk/flutter.mdx) |
 | **Python SDK** (`ottu-py`) | Python backend integrations | [GitHub](https://github.com/ottuco/ottu-py) |
 | **Django SDK** | Django projects with built-in session management, webhooks, and card operations | [GitHub](https://github.com/ottuco/ottu-py#django-integration) |
 | **MCP Server** | AI-assisted integration with Claude Code, Cursor, or VS Code | Click **MCP** in the navbar |

@@ -1,0 +1,38 @@
+# Enrichments for tag: "Wallet"
+#
+# Operation keys must match the operationId values in static/Ottu_API.yaml.
+# Once Connect ships the wallet proxy (Redmine subticket 150892), if the actual
+# operationIds differ from the keys below, rename to match.
+
+operations:
+
+  wallet_accounts_list:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_wallet_read
+    description_replace: |
+      Returns all wallet accounts for a customer, one per currency.
+
+      Accounts are created lazily — they exist only after the first credit (refund-to-wallet, manual adjustment, promo, or goodwill). If a customer has never received a wallet credit in a given currency, no account is returned for that currency.
+
+      The `balance` field reflects confirmed funds only; amounts reserved during in-flight checkouts are excluded.
+
+  wallet_ledger_list:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_wallet_read
+    description_replace: |
+      Returns the immutable ledger of credits, debits, and reservations for a single wallet account.
+
+      Uses cursor-based pagination — pass the `cursor` parameter returned in the previous response to fetch the next page.
+
+      Each entry references the originating payment session via `linked_session_id` when applicable. Entries are append-only; corrections are made by issuing an opposing entry, never by editing or deleting an existing one.
+
+  wallet_operation_retrieve:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_wallet_read
+    description_replace: |
+      Returns a single wallet operation (credit, debit, or reservation) by its `operation_id`.
+
+      Use this when you have an operation ID from a previous response (e.g., the operation returned by a refund-to-wallet call) and want to fetch the canonical record for audit or reconciliation.

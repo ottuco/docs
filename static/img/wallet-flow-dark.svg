@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 460" role="img" aria-labelledby="wallet-title-d wallet-desc-d" preserveAspectRatio="xMidYMid meet">
+  <title id="wallet-title-d">Ottu Wallet Flow</title>
+  <desc id="wallet-desc-d">The merchant backend refunds a payment to wallet through Ottu Connect, which credits the wallet service. On the next checkout, the SDK discovers the wallet balance, reserves it on submit, and any remainder is charged through the payment gateway. Ottu Connect commits the reservation on success.</desc>
+
+  <defs>
+    <marker id="arrow-wallet-dark" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,1 L9,5 L0,9 z" fill="#8A8A92" />
+    </marker>
+    <style>
+      .node { fill: #1C1C21; stroke: #3A3A40; stroke-width: 1.4; }
+      .accent { fill: #0B82BE; stroke: #0B82BE; stroke-width: 1.4; }
+      .container-bg { fill: #0F1A22; stroke: #0B82BE; stroke-dasharray: 5 5; stroke-width: 1.2; opacity: 0.85; }
+      .platform-label { fill: #5CB4E1; font: 700 10px 'Inter', system-ui, -apple-system, sans-serif; letter-spacing: 1.6px; }
+      .label { fill: #E8E8EB; font: 600 13px 'Inter', system-ui, -apple-system, sans-serif; }
+      .label-white { fill: #FFFFFF; font: 600 13px 'Inter', system-ui, -apple-system, sans-serif; }
+      .sub { fill: #A0A0A8; font: 400 11px 'Inter', system-ui, -apple-system, sans-serif; }
+      .sub-white { fill: #FFFFFF; font: 400 11px 'Inter', system-ui, -apple-system, sans-serif; opacity: 0.9; }
+      .arrow { fill: none; stroke: #8A8A92; stroke-width: 1.4; }
+      .arrow-label { fill: #A0A0A8; font: 500 10px 'Inter', system-ui, -apple-system, sans-serif; letter-spacing: 0.3px; }
+      .arrow-label-bg { fill: #0F1A22; }
+      .arrow-label-bg-plain { fill: #1C1C21; }
+    </style>
+  </defs>
+
+  <!-- Ottu Platform container -->
+  <rect class="container-bg" x="320" y="70" width="550" height="290" rx="14" />
+  <text class="platform-label" x="340" y="96">OTTU PLATFORM</text>
+
+  <!-- Customer -->
+  <rect class="node" x="30" y="36" width="180" height="48" rx="24" />
+  <text class="label" x="120" y="66" text-anchor="middle">Customer</text>
+
+  <!-- Merchant Frontend -->
+  <rect class="node" x="30" y="120" width="180" height="70" rx="8" />
+  <text class="label" x="120" y="150" text-anchor="middle">Merchant Frontend</text>
+  <text class="sub" x="120" y="170" text-anchor="middle">Embeds Checkout SDK</text>
+
+  <!-- Merchant Backend -->
+  <rect class="node" x="30" y="230" width="180" height="70" rx="8" />
+  <text class="label" x="120" y="260" text-anchor="middle">Merchant Backend</text>
+  <text class="sub" x="120" y="280" text-anchor="middle">Refund · Session create</text>
+
+  <!-- Checkout SDK -->
+  <rect class="node" x="340" y="115" width="220" height="70" rx="8" />
+  <text class="label" x="450" y="145" text-anchor="middle">Checkout SDK</text>
+  <text class="sub" x="450" y="165" text-anchor="middle">Reserves · Commits · Releases</text>
+
+  <!-- Ottu Connect (accent) -->
+  <rect class="accent" x="340" y="215" width="220" height="70" rx="8" />
+  <text class="label-white" x="450" y="245" text-anchor="middle">Ottu Connect</text>
+  <text class="sub-white" x="450" y="265" text-anchor="middle">REST API · Operation routing</text>
+
+  <!-- Wallet Service (accent) -->
+  <rect class="accent" x="600" y="115" width="240" height="70" rx="8" />
+  <text class="label-white" x="720" y="145" text-anchor="middle">Wallet Service</text>
+  <text class="sub-white" x="720" y="165" text-anchor="middle">Ledger · Reservations · Balance</text>
+
+  <!-- Refund destination switch -->
+  <rect class="node" x="600" y="215" width="240" height="70" rx="8" />
+  <text class="label" x="720" y="245" text-anchor="middle">Refund destination</text>
+  <text class="sub" x="720" y="265" text-anchor="middle">"pg" (default) · "wallet"</text>
+
+  <!-- Payment Gateway -->
+  <rect class="node" x="900" y="100" width="180" height="210" rx="8" />
+  <text class="label" x="990" y="135" text-anchor="middle">Payment Gateway</text>
+  <text class="sub" x="990" y="175" text-anchor="middle">Charges remainder</text>
+  <text class="sub" x="990" y="195" text-anchor="middle">when wallet</text>
+  <text class="sub" x="990" y="213" text-anchor="middle">doesn't cover</text>
+  <text class="sub" x="990" y="247" text-anchor="middle" font-style="italic">Refund reverses here</text>
+  <text class="sub" x="990" y="265" text-anchor="middle" font-style="italic">when destination = "pg"</text>
+
+  <!-- Arrows -->
+  <!-- Customer → Checkout SDK -->
+  <path class="arrow" d="M 210 60 C 280 60 310 120 340 140" marker-end="url(#arrow-wallet-dark)" />
+  <rect class="arrow-label-bg-plain" x="244" y="86" width="80" height="14" rx="3" />
+  <text class="arrow-label" x="284" y="97" text-anchor="middle">pays at checkout</text>
+
+  <!-- Merchant Frontend → Checkout SDK -->
+  <path class="arrow" d="M 210 155 L 340 155" marker-end="url(#arrow-wallet-dark)" />
+  <rect class="arrow-label-bg-plain" x="244" y="143" width="62" height="14" rx="3" />
+  <text class="arrow-label" x="275" y="154" text-anchor="middle">embeds</text>
+
+  <!-- Merchant Backend → Ottu Connect -->
+  <path class="arrow" d="M 210 250 L 340 250" marker-end="url(#arrow-wallet-dark)" />
+  <rect class="arrow-label-bg-plain" x="232" y="238" width="86" height="14" rx="3" />
+  <text class="arrow-label" x="275" y="249" text-anchor="middle">refund · session</text>
+
+  <!-- Checkout SDK → Ottu Connect -->
+  <path class="arrow" d="M 450 185 L 450 215" marker-end="url(#arrow-wallet-dark)" />
+  <rect class="arrow-label-bg" x="458" y="192" width="76" height="14" rx="3" />
+  <text class="arrow-label" x="496" y="203" text-anchor="middle">reserve / commit</text>
+
+  <!-- Ottu Connect → Wallet Service -->
+  <path class="arrow" d="M 560 240 Q 580 205 600 158" marker-end="url(#arrow-wallet-dark)" />
+  <rect class="arrow-label-bg" x="554" y="178" width="62" height="14" rx="3" />
+  <text class="arrow-label" x="585" y="189" text-anchor="middle">credit / debit</text>
+
+  <!-- Ottu Connect → Payment Gateway -->
+  <path class="arrow" d="M 840 250 L 900 220" marker-end="url(#arrow-wallet-dark)" />
+  <rect class="arrow-label-bg" x="842" y="238" width="60" height="14" rx="3" />
+  <text class="arrow-label" x="872" y="249" text-anchor="middle">remainder</text>
+
+  <!-- Wallet Service → Checkout SDK (balance / reservation) -->
+  <path class="arrow" d="M 720 115 Q 580 70 450 115" stroke-dasharray="4 3" marker-end="url(#arrow-wallet-dark)" />
+  <rect class="arrow-label-bg" x="546" y="76" width="78" height="14" rx="3" />
+  <text class="arrow-label" x="585" y="87" text-anchor="middle">balance shown</text>
+</svg>

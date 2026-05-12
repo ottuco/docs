@@ -1,0 +1,95 @@
+.container {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  background: var(--ifm-background-surface-color);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--ifm-color-emphasis-100);
+  border-radius: 6px;
+}
+
+.progressIcon {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--ifm-color-emphasis-400);
+  border-top-color: #0B82BE;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.success {
+  color: #2E7D32;
+  font-weight: 500;
+}
+
+.error {
+  color: var(--ifm-color-danger);
+  padding: 0.75rem;
+  background: rgba(237, 40, 51, 0.08);
+  border-radius: 6px;
+}
+
+.startButton {
+  background: #0B82BE;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.startButton:hover {
+  background: #0a6fa3;
+}
+
+.startButton:disabled {
+  background: var(--ifm-color-emphasis-300);
+  cursor: not-allowed;
+}
+
+.restartButton {
+  background: transparent;
+  color: #0B82BE;
+  border: 1px solid #0B82BE;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.checkoutMount {
+  margin-top: 1rem;
+  min-height: 400px;
+}
+
+.resultCard {
+  padding: 1rem;
+  background: var(--ifm-color-emphasis-100);
+  border-radius: 6px;
+  margin-top: 1rem;
+}

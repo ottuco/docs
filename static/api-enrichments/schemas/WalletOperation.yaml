@@ -1,0 +1,28 @@
+# Overrides for: components/schemas/WalletOperation
+# Single wallet operation with its produced ledger entries
+
+properties:
+  operation_id:
+    description: |
+      Unique identifier for the operation. Use this to retrieve the full operation record via the Get Operation endpoint.
+  type:
+    description: |
+      Operation type. One of `credit`, `debit`, `reserve`, `commit`, `release`, `reversal`.
+  amount:
+    description: |
+      Amount involved in the operation, in the wallet's currency. Always positive — the `type` indicates direction.
+  status:
+    description: |
+      Operation status. `completed` is terminal; `pending` is in-flight; `failed` is terminal with an error.
+  account_uuid:
+    description: |
+      The wallet account this operation acted on.
+  linked_session_id:
+    description: |
+      The Ottu Checkout session that originated this operation, if applicable.
+  entries:
+    description: |
+      The ledger entries produced by this operation. Most operations produce a single entry; reserve/commit pairs produce a reservation entry followed by a debit entry.
+  created_at:
+    description: |
+      ISO 8601 timestamp when this operation was initiated.

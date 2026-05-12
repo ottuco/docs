@@ -123,6 +123,18 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: 'category',
+              label: 'Wallet',
+              link: {type: 'doc', id: 'developers/payments/wallet/index'},
+              items: [
+                {type: 'link', label: 'When to Use',     href: '/developers/payments/wallet#when-to-use'},
+                {type: 'link', label: 'Guide',           href: '/developers/payments/wallet#guide'},
+                {type: 'link', label: 'API Reference',   href: '/developers/payments/wallet#api-reference'},
+                {type: 'link', label: 'Best Practices',  href: '/developers/payments/wallet#best-practices'},
+                {type: 'link', label: 'FAQ',             href: '/developers/payments/wallet#faq'},
+              ],
+            },
+            {
+              type: 'category',
               label: 'Checkout SDK',
               link: {type: 'doc', id: 'developers/payments/checkout-sdk/index'},
               items: [
@@ -289,6 +301,17 @@ const sidebars: SidebarsConfig = {
         'business/payment-management/transaction-insights',
         'business/payment-management/transaction-states',
         'business/payment-management/notifications-timing',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Wallet',
+      link: {type: 'doc', id: 'business/wallet/index'},
+      items: [
+        'business/wallet/index',
+        'business/wallet/refund-to-wallet',
+        'business/wallet/using-wallet-at-checkout',
+        'business/wallet/reporting',
       ],
     },
     {

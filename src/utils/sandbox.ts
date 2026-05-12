@@ -223,3 +223,84 @@ export function getWebhookRelayUrl(): string {
 export function extractPgCodes(pmResponse: any): string[] {
   return (pmResponse?.payment_methods ?? []).map((pg: any) => pg.code);
 }
+
+export interface CreateWalletCreditOptions {
+  amount: string;
+  currency: string;
+  pg_code: string;
+  customer_id?: string;
+}
+
+export interface WalletCreditResult {
+  customer_id: string;
+  balance: string;
+  currency: string;
+  account_uuid: string;
+}
+
+function generateDemoCustomerId(): string {
+  return `demo_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function generateIdempotencyKey(): string {
+  return `idem_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+/**
+ * Seed a wallet credit on the sandbox merchant for the WalletDemo component.
+ *
+ * Generates a fresh customer_id per call so each demo run starts with a clean
+ * wallet. Uses the same public sandbox API key as createSandboxSession.
+ *
+ * The endpoint path and auth scheme reflect the public sandbox proxy exposed
+ * by Connect (Redmine subticket 150892). If Connect ships a different path or
+ * auth, update this function — the public contract (returning customer_id +
+ * balance + currency + account_uuid) does not change.
+ */
+export async function createSandboxWalletCredit(
+  options: CreateWalletCreditOptions
+): Promise<WalletCreditResult> {
+  const customer_id = options.customer_id ?? generateDemoCustomerId();
+  const idempotencyKey = generateIdempotencyKey();
+
+  const response = await fetch(
+    `https://${SANDBOX_MERCHANT_ID}/b/wallet/v1/credits/`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Api-Key ${SANDBOX_AUTH_KEY}`,
+        "Content-Type": "application/json",
+        "Merchant-Id": SANDBOX_MERCHANT_ID,
+        "Idempotency-Key": idempotencyKey,
+      },
+      body: JSON.stringify({
+        customer_id,
+        currency: options.currency,
+        amount: options.amount,
+        funding_source_type: "promo",
+        pg_code: options.pg_code,
+        reference_number: `ref_demo_${idempotencyKey}`,
+        order_no: `ord_demo_${idempotencyKey}`,
+        metadata: {
+          source: "docs_walletdemo",
+          synthetic: true,
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => "");
+    throw new Error(
+      `Wallet credit failed (${response.status}): ${text || response.statusText}`
+    );
+  }
+
+  const data = await response.json();
+  return {
+    customer_id,
+    balance: data.balance,
+    currency: data.currency ?? options.currency,
+    account_uuid: data.account_uuid,
+  };
+}
