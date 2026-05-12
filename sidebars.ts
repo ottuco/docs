@@ -308,10 +308,13 @@ const sidebars: SidebarsConfig = {
       label: 'Wallet',
       link: {type: 'doc', id: 'business/wallet/index'},
       items: [
-        'business/wallet/index',
-        'business/wallet/refund-to-wallet',
-        'business/wallet/using-wallet-at-checkout',
-        'business/wallet/reporting',
+        {type: 'link', label: 'Why use Wallet',     href: '/business/wallet#why-use-wallet'},
+        {type: 'link', label: 'How it works',       href: '/business/wallet#how-it-works'},
+        {type: 'link', label: 'Refund to Wallet',   href: '/business/wallet#refund-to-wallet'},
+        {type: 'link', label: 'Wallet at Checkout', href: '/business/wallet#wallet-at-checkout'},
+        {type: 'link', label: 'Wallet Reporting',   href: '/business/wallet#wallet-reporting'},
+        {type: 'link', label: 'Things to know',     href: '/business/wallet#things-to-know'},
+        {type: 'link', label: 'FAQ',                href: '/business/wallet#faq'},
       ],
     },
     {
