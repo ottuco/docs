@@ -15,6 +15,7 @@ import useBaseUrl from "@docusaurus/useBaseUrl";
 import CodeBlock from "@theme/CodeBlock";
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import WalletDemo from "@site/src/components/WalletDemo";
+import WalletScenarios from "@site/src/components/WalletScenarios";
 import { OTTU_DEV_BASE_URL } from "@site/src/constants/api";
 
 # Wallet
@@ -158,13 +159,7 @@ Checkout.init({
 
 The SDK reserves the required amount (or the full balance, whichever is lower). If the session amount exceeds the wallet balance, the customer is prompted to pick a second method for the remainder. On submit, all reservations confirm together. On success the wallet entry commits; on cancel, error, or four-hour timeout it auto-releases.
 
-<ThemedImage
-  alt="Screenshot placeholder — the Checkout SDK rendering the wallet entry alongside other payment methods"
-  sources={{
-    light: useBaseUrl('/img/wallet-checkout-placeholder.svg'),
-    dark: useBaseUrl('/img/wallet-checkout-placeholder.svg'),
-  }}
-/>
+<WalletScenarios />
 
 #### 5. (Optional) Read wallet state from your backend
 
