@@ -54,6 +54,8 @@ Lead with what the feature does for their business. No code. Dashboard-focused w
 - **No jargon without definition** — first use of any payment domain term (MID, PG, tokenization, PCI DSS) links to the glossary
 - **Hyperlinks throughout** — link inline in body text where concepts are mentioned, don't batch all links at the bottom
 - **Code examples must be copy-paste ready** — runnable against the sandbox environment with only an API key substitution
+- **Demo `merchant_id`** — code samples that show the Checkout SDK `merchant_id` parameter MUST use `sandbox.ottu.net` (the sandbox demo merchant). Existing usage in `docs/developers/payments/checkout-sdk/web.mdx` is the canonical reference.
+- **API base URLs in code samples** — never hardcode `https://sandbox.ottu.net` or `https://ksa.ottu.dev` in fenced code blocks. Import the constant from `@site/src/constants/api` and render the sample with `<CodeBlock>` template literals. Default is `OTTU_CONNECT_BASE_URL`; use `OTTU_DEV_BASE_URL` only when the API surface isn't yet on public sandbox (e.g. wallet today). Canonical reference: `docs/developers/payments/wallet/index.mdx`.
 - **Multi-language code tabs** — use Docusaurus `<Tabs>` with `groupId="language"` in this order: cURL, Python, Node.js, PHP
 - **Self-contained** — don't redirect the reader to another page for essential information; include the key context on the current page with a link for deeper reading
 

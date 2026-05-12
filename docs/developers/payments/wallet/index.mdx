@@ -10,14 +10,22 @@ toc_max_heading_level: 3
 
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
+import ThemedImage from "@theme/ThemedImage";
+import useBaseUrl from "@docusaurus/useBaseUrl";
+import CodeBlock from "@theme/CodeBlock";
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import WalletDemo from "@site/src/components/WalletDemo";
+import { OTTU_DEV_BASE_URL } from "@site/src/constants/api";
 
 # Wallet
 
 Wallet lets you refund customer payments to a stored balance keyed by merchant, customer, and currency, then let the customer spend that credit at any future Ottu checkout in the same currency. No PII is stored on the wallet service.
 
 Authentication for merchant-facing endpoints follows the standard [Ottu API key](/developers/getting-started/authentication) flow — the same key you use for the [Checkout API](../checkout-api). Service-to-service auth between Ottu Connect and the wallet service uses OAuth 2.0 internally and is invisible to merchants.
+
+:::note Dev-environment base URL
+Wallet is currently available on Ottu's dev environment (`ksa.ottu.dev`). Every wallet API call in this guide targets that base URL. When wallet ships to the public sandbox (`sandbox.ottu.net`), update the base URL in your integration accordingly.
+:::
 
 :::tip Boost Your Integration
 Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../../getting-started/#boost-your-integration) for all available options.
@@ -34,33 +42,20 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 ### Workflow
 
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#FAFAFA", "primaryBorderColor": "#BFBFBF", "primaryTextColor": "#302F37", "lineColor": "#BFBFBF", "fontFamily": "Inter, system-ui, sans-serif"}}}%%
-flowchart LR
-    Merchant[Merchant Backend]
-    Connect[Ottu Connect]
-    Wallet[Wallet Service]
-    SDK[Checkout SDK]
-    Customer[Customer]
-    PG[Payment Gateway]
+<ThemedImage
+  alt="Ottu wallet flow: the merchant backend refunds through Ottu Connect to the Wallet Service. On the next checkout, the SDK reads the wallet balance, reserves it on submit, charges any remainder through the payment gateway, and Ottu Connect commits the reservation on success."
+  sources={{
+    light: useBaseUrl('/img/wallet-flow-light.svg'),
+    dark: useBaseUrl('/img/wallet-flow-dark.svg'),
+  }}
+/>
 
-    Merchant -- "refund (destination: wallet)" --> Connect
-    Connect -- credit ledger entry --> Wallet
-    Customer -- later session --> SDK
-    SDK -- Payment Methods (wallet appears) --> Connect
-    Connect -- reserve --> Wallet
-    SDK -- "remainder, if any" --> PG
-    PG -- success --> Connect
-    Connect -- commit --> Wallet
+Wallet credit is created when a merchant refunds with `destination: "wallet"` — see [Refund to Wallet](../../operations#refund-to-wallet). Once a customer has positive balance in the session currency, the developer journey to spend it is:
 
-    classDef accent fill:#0B82BE,stroke:#0B82BE,color:#FFFFFF
-    class Wallet accent
-```
-
-1. **Merchant refunds to wallet** — the refund operation accepts `destination: "wallet"`, which credits the customer's wallet instead of reversing through the gateway.
-2. **Customer returns** — at the next checkout, the wallet service confirms positive balance in the order currency.
-3. **Wallet appears as a method** — the SDK renders "Wallet (X.XXX CCC)" alongside other payment options.
-4. **Reservation on submit** — when the customer pays, the required amount is reserved. Any shortfall is collected from a second method.
+1. **Filter the payment methods** — call the [Payment Methods API](../payment-methods) with `payment_services: ["wallet"]` to get the wallet-capable `pg_codes`.
+2. **Create a Checkout session** — call the [Checkout API](../checkout-api) with those `pg_codes` and the `customer_id`. The `customer_id` is what binds the session to that customer's wallet account.
+3. **Initialize the Checkout SDK** — the SDK fetches the wallet balance from Ottu Connect and renders "Wallet (X.XXX CCC)" alongside the other payment methods.
+4. **Customer applies wallet on submit** — Ottu Connect reserves the required amount (or the full balance, whichever is lower). Any shortfall is charged through the selected gateway.
 5. **Commit or release** — on success the reservation commits to a debit entry; on abandon, cancel, or failure it auto-releases after about four hours.
 
 ### Live Demo
@@ -71,46 +66,109 @@ The demo below seeds a fresh wallet on the fly for a generated customer, then la
 
 ### Step-by-Step
 
-#### 1. Discover wallet availability for a customer
+#### 1. List the wallet-capable payment gateways
 
-Use the [Payment Methods API](../payment-methods) (`POST /b/pbl/v2/payment-methods/`) to discover available methods for a session. When the customer has positive wallet balance in the session currency, a method with `type: "wallet"` appears alongside the other available methods.
+Call the [Payment Methods API](../payment-methods) (`POST /b/pbl/v2/payment-methods/`) with `payment_services: ["wallet"]` to filter the gateway list to those that support wallet payments. Use these `pg_codes` when creating the Checkout session.
 
-```json title="POST /b/pbl/v2/payment-methods/"
+<CodeBlock language="bash" title="Filter payment methods to wallet-capable PGs">{`curl --location '${OTTU_DEV_BASE_URL}/b/pbl/v2/payment-methods/' \\
+  --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
+  --header 'Content-Type: application/json' \\
+  --data '{
+    "plugin": "e_commerce",
+    "currencies": ["KWD"],
+    "type": "sandbox",
+    "payment_services": ["wallet"],
+    "tags": ["demo"]
+  }'`}</CodeBlock>
+
+```json title="Example response (wallet-enabled PG)"
 {
-  "plugin": "e_commerce",
-  "operation": "purchase",
-  "currencies": ["KWD"],
-  "customer_id": "cust_abc123"
+  "customer_payment_methods": [],
+  "payment_methods": [
+    {
+      "code": "ottu-sandbox",
+      "name": "Ottu Sandbox",
+      "is_sandbox": true,
+      "default_currency": "KWD",
+      "accepted_currencies": ["KWD", "SAR", "AED", "USD", "BHD"],
+      "operation": "purchase",
+      "operations": ["refund"],
+      "is_tokenizable": true,
+      "auto_debit_enabled": true,
+      "payment_services": ["wallet"],
+      "tags": ["e_commerce", "demo"]
+    }
+  ]
 }
 ```
 
 :::note `customer_id` filter
-The `customer_id` parameter on the Payment Methods API is required for wallet discovery — it tells Ottu which customer's wallet balance to check. Support for this parameter is part of Redmine subticket 150892. Until that ships, wallet methods are surfaced automatically when you initialize the [Checkout SDK](../checkout-sdk/) with a `customer_id` on the session — you can skip the explicit discovery call and rely on the SDK to render the method when balance is positive.
+You don't need `customer_id` to discover wallet-capable gateways generically. If you do pass `customer_id` and that customer has a wallet enabled in the session currency, the wallet entry will be returned alongside the standard payment methods. To narrow the gateway list to wallet-capable PGs for later refunds, use `payment_services: ["wallet"]` as shown above.
 :::
 
 For the full request/response reference, headers, error codes, and supported filters, see the [Payment Methods API page](../payment-methods).
 
-#### 2. Initialize Checkout with wallet enabled
+#### 2. Create a Checkout session with the wallet-capable PGs
 
-Pass the `customer_id` when creating the session. On the SDK side, wallet appears automatically when the customer has positive balance — no extra init config is required beyond including `'wallet'` in `formsOfPayment` (or omitting `formsOfPayment` to show all methods).
+Call the [Checkout API](../checkout-api) with the `pg_codes` returned in step 1, plus the `customer_id` to enable the customer's wallet on this session. The response includes a `session_id` that you pass to the SDK in the next step.
+
+<CodeBlock language="bash" title="Create Checkout session with wallet enabled">{`curl --location '${OTTU_DEV_BASE_URL}/b/checkout/v1/pymt-txn/' \\
+  --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
+  --header 'Content-Type: application/json' \\
+  --data '{
+    "type": "e_commerce",
+    "pg_codes": ["ottu-sandbox"],
+    "amount": "12.500",
+    "currency_code": "KWD",
+    "customer_id": "cust_abc123",
+    "customer_email": "shopper@example.com",
+    "customer_phone": "+96550000000"
+  }'`}</CodeBlock>
+
+<CodeBlock language="json" title="Example response">{`{
+  "session_id": "sess_9f8e7d6c5b4a",
+  "checkout_url": "${OTTU_DEV_BASE_URL}/checkout/sess_9f8e7d6c5b4a",
+  "checkout_short_url": "${OTTU_DEV_BASE_URL}/c/sess_9f8e7d6c5b4a",
+  "expiration_time": "00:30:00"
+}`}</CodeBlock>
+
+The `session_id` returned here is what step 3 passes into `Checkout.init`. The `customer_id` is what links the session to that customer's wallet account — wallet appears in the SDK only when (a) the session has a `customer_id` and (b) the wallet account for `(merchant, customer_id, currency)` has positive balance.
+
+#### 3. Render the Checkout SDK with the session
+
+Add a mount point to your page — the SDK looks for an element matching `selector`:
+
+```html title="Mount point in your page"
+<div id="checkout"></div>
+```
+
+Then initialize the SDK with the `session_id` returned by step 2:
 
 ```javascript title="Checkout SDK init with wallet enabled"
 Checkout.init({
   selector: "checkout",
-  merchant_id: "yourdomain.ottu.com",
+  merchant_id: "sandbox.ottu.net", // use your merchant id
   apiKey: "YOUR_API_PUBLIC_KEY",
   session_id: "sess_9f8e7d6c5b4a",
-  formsOfPayment: ["wallet", "ottu_sandbox"], // or omit to show all
+  formsOfPayment: ["wallet", "ottu-sandbox"], // or omit to show all
 });
 ```
 
-#### 3. Customer applies wallet credit at checkout
+#### 4. Customer applies wallet credit at checkout
 
 The SDK reserves the required amount (or the full balance, whichever is lower). If the session amount exceeds the wallet balance, the customer is prompted to pick a second method for the remainder. On submit, all reservations confirm together. On success the wallet entry commits; on cancel, error, or four-hour timeout it auto-releases.
 
-#### 4. Read wallet state from your backend
+<ThemedImage
+  alt="Screenshot placeholder — the Checkout SDK rendering the wallet entry alongside other payment methods"
+  sources={{
+    light: useBaseUrl('/img/wallet-checkout-placeholder.svg'),
+    dark: useBaseUrl('/img/wallet-checkout-placeholder.svg'),
+  }}
+/>
 
-Use the three read APIs (see [API Reference](#api-reference)) to display balance, transaction history, or specific operations in your own UI.
+#### 5. (Optional) Read wallet state from your backend
+
+Reading wallet state from your backend is optional — the same balance, ledger, and operation views are available in the [Ottu dashboard](/business/wallet/). Use the read APIs only if you want to surface wallet operations to your end customers in your own UI. See the [API Reference](#api-reference) section below.
 
 ### Use Cases
 
@@ -197,9 +255,13 @@ The original payment session is linked to the wallet credit entry, visible in bo
 
 No. The service holds only ledger entries scoped by `merchant_id`, `customer_id`, and `currency`.
 
+#### Can I charge a wallet without the Checkout SDK?
+
+No. Wallet payments are initiated only through the Checkout SDK. There is no server-side API to debit a wallet directly from the merchant backend — the customer must confirm the payment in the SDK so the reservation lifecycle (reserve → commit or release) is bound to a real checkout session.
+
 #### Does wallet credit expire?
 
-No. Wallet credit does not expire today.
+No. Wallet credit does not expire.
 
 ## What's Next?
 

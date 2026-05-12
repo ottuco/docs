@@ -129,21 +129,7 @@ Instead of returning funds through the original payment gateway, you can refund 
 - You want to issue store credit, loyalty, or goodwill credit without payment-gateway fees.
 - The original gateway doesn't support refunds for that transaction type.
 
-Set `destination: "wallet"` on the refund operation request:
-
-```json title="POST /b/pbl/v2/operation/"
-{
-  "session_id": "sess_9f8e7d6c5b4a",
-  "operation": "refund",
-  "amount": "10.000",
-  "destination": "wallet",
-  "metadata": {
-    "reason": "goodwill_credit"
-  }
-}
-```
-
-The `destination` field defaults to `"gateway"` when omitted, preserving the original refund behavior. Setting `"wallet"` switches the destination — no other request fields change.
+Set `destination: "wallet"` on the refund operation request. The `destination` field defaults to `"pg"` when omitted, preserving the original refund behavior. Setting `"wallet"` switches the destination — no other request fields change. See the [API Reference](#api-reference) below for the full request schema and interactive try-it-out.
 
 :::tip Use `Tracking-Key` for idempotency
 Wallet credits are immutable — a duplicate refund-to-wallet call creates a second uneditable credit entry (the gateway path fails on duplicates; the wallet path does not). Always include the `Tracking-Key` header so retries deduplicate. See [the Guide above](#guide) for the full idempotency contract.
