@@ -1,13 +1,42 @@
 /**
- * Reusable sandbox session utility for interactive demos.
+ * Reusable Connect session utility for interactive demos.
  *
- * Used by: CheckoutDemo, RecurringDemo, and future Native Payments / mobile SDK demos.
- * Credentials are intentionally public — sandbox-only, already exposed in CodePen.
+ * Used by: CheckoutDemo, RecurringDemo, PaymentJourney, WalletDemo, and future
+ * Native Payments / mobile SDK demos.
+ *
+ * Credentials are intentionally public — sandbox-only merchants, no real money.
  */
 
-export const SANDBOX_MERCHANT_ID = "ksa.ottu.dev";
-export const SANDBOX_API_KEY = "88a460b42a0f8bec4011da23ce1d547bd04e8afc";
-const SANDBOX_AUTH_KEY = "uUjUqczM.P5PqlXx8zyuFUQVk19PLxfHBZu8rG4Uy";
+export interface ConnectEnv {
+  merchantId: string;
+  connectBaseUrl: string;
+  /** Authorization: Api-Key <…>  for /b/checkout, /b/pbl, etc. */
+  connectApiKey: string;
+  /** apiKey passed to Checkout.init() — the SDK widget key. */
+  sdkApiKey: string;
+}
+
+export const SANDBOX: ConnectEnv = {
+  merchantId: "sandbox.ottu.net",
+  connectBaseUrl: "https://sandbox.ottu.net",
+  connectApiKey: "Fxi63E9x.AiYMnCCXcBVr657gs4N3ex3MZdeAeWDy",
+  sdkApiKey: "13df331cb989d68313b9141e2094d3f042c6d157",
+};
+
+export const KSA: ConnectEnv = {
+  merchantId: "ksa.ottu.dev",
+  connectBaseUrl: "https://ksa.ottu.dev",
+  connectApiKey: "uUjUqczM.P5PqlXx8zyuFUQVk19PLxfHBZu8rG4Uy",
+  sdkApiKey: "88a460b42a0f8bec4011da23ce1d547bd04e8afc",
+};
+
+// ⬇️ THE GLOBAL SWITCH — change this one line to retarget every demo on the site.
+// Branch convention:
+//   • dev   → KSA      (deploys to docs.ottu.dev)
+//   • main  → SANDBOX  (deploys to docs.ottu.com)
+// Wallet only ships on ksa.ottu.dev today — if you switch to SANDBOX, the
+// WalletDemo will fail because sandbox has no wallet PG.
+export const ACTIVE_CONNECT: ConnectEnv = KSA;
 
 export interface CreateSessionOptions {
   pg_codes: string[];
@@ -17,12 +46,6 @@ export interface CreateSessionOptions {
   type?: string;
   /** Arbitrary extra fields merged into the request body (e.g., payment_type, agreement, payment_instrument, webhook_url) */
   extra?: Record<string, unknown>;
-  /** Override merchant host for the request URL. Defaults to SANDBOX_MERCHANT_ID. */
-  merchantId?: string;
-  /** Override Connect base URL (e.g., https://ksa.ottu.dev). Defaults to https://${SANDBOX_MERCHANT_ID}. */
-  connectBaseUrl?: string;
-  /** Override Api-Key. Defaults to SANDBOX_AUTH_KEY. */
-  apiKey?: string;
 }
 
 const FIRST_NAMES = [
@@ -66,14 +89,12 @@ export async function createSandboxSession(
     ...options.extra,
   };
 
-  const baseUrl = options.connectBaseUrl ?? `https://${options.merchantId ?? SANDBOX_MERCHANT_ID}`;
-  const apiKey = options.apiKey ?? SANDBOX_AUTH_KEY;
   const response = await fetch(
-    `${baseUrl}/b/checkout/v1/pymt-txn/`,
+    `${ACTIVE_CONNECT.connectBaseUrl}/b/checkout/v1/pymt-txn/`,
     {
       method: "POST",
       headers: {
-        Authorization: `Api-Key ${apiKey}`,
+        Authorization: `Api-Key ${ACTIVE_CONNECT.connectApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
@@ -104,11 +125,11 @@ export async function callAutoDebit(
   token: string
 ): Promise<any> {
   const response = await fetch(
-    `https://${SANDBOX_MERCHANT_ID}/b/pbl/v2/payment/auto-debit/`,
+    `${ACTIVE_CONNECT.connectBaseUrl}/b/pbl/v2/payment/auto-debit/`,
     {
       method: "POST",
       headers: {
-        Authorization: `Api-Key ${SANDBOX_AUTH_KEY}`,
+        Authorization: `Api-Key ${ACTIVE_CONNECT.connectApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ session_id: sessionId, token }),
@@ -137,12 +158,6 @@ export async function callPaymentMethods(options: {
   tokenizable?: boolean;
   auto_debit?: boolean;
   payment_services?: string[];
-  /** Override merchant host. Defaults to SANDBOX_MERCHANT_ID. */
-  merchantId?: string;
-  /** Override Connect base URL. Defaults to https://${SANDBOX_MERCHANT_ID}. */
-  connectBaseUrl?: string;
-  /** Override Api-Key. Defaults to SANDBOX_AUTH_KEY. */
-  apiKey?: string;
 }): Promise<any> {
   const body: Record<string, unknown> = {
     plugin: options.plugin ?? "payment_request",
@@ -155,14 +170,12 @@ export async function callPaymentMethods(options: {
   if (options.auto_debit != null) body.auto_debit = options.auto_debit;
   if (options.payment_services) body.payment_services = options.payment_services;
 
-  const baseUrl = options.connectBaseUrl ?? `https://${options.merchantId ?? SANDBOX_MERCHANT_ID}`;
-  const apiKey = options.apiKey ?? SANDBOX_AUTH_KEY;
   const response = await fetch(
-    `${baseUrl}/b/pbl/v2/payment-methods/`,
+    `${ACTIVE_CONNECT.connectBaseUrl}/b/pbl/v2/payment-methods/`,
     {
       method: "POST",
       headers: {
-        Authorization: `Api-Key ${apiKey}`,
+        Authorization: `Api-Key ${ACTIVE_CONNECT.connectApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
@@ -186,11 +199,11 @@ export async function callPaymentStatusQuery(
   sessionId: string
 ): Promise<any> {
   const response = await fetch(
-    `https://${SANDBOX_MERCHANT_ID}/b/pbl/v2/inquiry/`,
+    `${ACTIVE_CONNECT.connectBaseUrl}/b/pbl/v2/inquiry/`,
     {
       method: "POST",
       headers: {
-        Authorization: `Api-Key ${SANDBOX_AUTH_KEY}`,
+        Authorization: `Api-Key ${ACTIVE_CONNECT.connectApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ session_id: sessionId }),

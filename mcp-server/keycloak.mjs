@@ -1,27 +1,35 @@
-import { getActiveEnv } from "./walletDemoEnv.mjs";
+// Generic Keycloak `client_credentials` token client. Not tied to wallet.
+// Reusable for any future backend service that needs to call a Keycloak-protected
+// Ottu API on behalf of the docs site.
+//
+// Usage:
+//   import { getKeycloakToken } from "./keycloak.mjs";
+//   const token = await getKeycloakToken({
+//     url: "https://auth.ottu.dev",
+//     realm: "ksa.ottu.dev",
+//     clientId: "backend",
+//     clientSecret: process.env.KSA_KEYCLOAK_CLIENT_SECRET,
+//   });
 
 const CLOCK_SKEW_MS = 30_000;
+const tokenCache = new Map(); // cacheKey → { accessToken, expiresAtMs }
 
-let cachedToken = null; // { accessToken, expiresAtMs }
-
-export async function getAccessToken() {
+export async function getKeycloakToken({ url, realm, clientId, clientSecret }) {
+  if (!clientSecret) {
+    throw new Error(`Missing Keycloak client secret for ${clientId}@${realm}`);
+  }
+  const cacheKey = `${url}|${realm}|${clientId}`;
+  const cached = tokenCache.get(cacheKey);
   const now = Date.now();
-  if (cachedToken && cachedToken.expiresAtMs - CLOCK_SKEW_MS > now) {
-    return cachedToken.accessToken;
+  if (cached && cached.expiresAtMs - CLOCK_SKEW_MS > now) {
+    return cached.accessToken;
   }
 
-  const env = getActiveEnv();
-  if (!env.keycloak_client_secret) {
-    throw new Error(
-      `Missing Keycloak client secret. Set env var '${env.secret_var_names.keycloak_client_secret}'.`
-    );
-  }
-
-  const tokenUrl = `${env.keycloak_url}/auth/realms/${encodeURIComponent(env.keycloak_realm)}/protocol/openid-connect/token`;
+  const tokenUrl = `${url}/auth/realms/${encodeURIComponent(realm)}/protocol/openid-connect/token`;
   const body = new URLSearchParams({
     grant_type: "client_credentials",
-    client_id: env.keycloak_client_id,
-    client_secret: env.keycloak_client_secret,
+    client_id: clientId,
+    client_secret: clientSecret,
   });
 
   const response = await fetch(tokenUrl, {
@@ -36,9 +44,10 @@ export async function getAccessToken() {
   }
 
   const data = await response.json();
-  cachedToken = {
+  const entry = {
     accessToken: data.access_token,
     expiresAtMs: now + (data.expires_in ?? 300) * 1000,
   };
-  return cachedToken.accessToken;
+  tokenCache.set(cacheKey, entry);
+  return entry.accessToken;
 }
