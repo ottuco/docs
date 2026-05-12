@@ -260,10 +260,16 @@ const sidebars: SidebarsConfig = {
   // Business user-focused sidebar
   businessSidebar: [
     {
-      type: 'doc',
-      id: 'business/index',
-      label: 'Getting Started',
-    },
+      // Root category mirrors `developerSidebar`'s "Developers" wrapper so
+      // nested categories indent one level deeper. The cumulative left
+      // margin produces the tree visual (and the active-path indent guide)
+      // that the wallet category previously lacked. Clicking the header
+      // takes you to the business landing — same destination the previous
+      // standalone "Getting Started" entry pointed at.
+      type: 'category',
+      label: 'Business',
+      link: {type: 'doc', id: 'business/index'},
+      items: [
     {
       type: 'category',
       label: 'Payments',
@@ -410,6 +416,8 @@ const sidebars: SidebarsConfig = {
       ],
     },
     'business/compliance',
+      ],
+    },
   ],
 
 };
