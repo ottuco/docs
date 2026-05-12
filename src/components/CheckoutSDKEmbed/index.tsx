@@ -12,6 +12,7 @@ interface CheckoutSDKEmbedProps {
   onError?: (message: string) => void;
   callbacks?: CheckoutCallbacks;
   setupPreload?: any;
+  formsOfPayment?: string[];
 }
 
 let embedCounter = 0;
@@ -22,6 +23,7 @@ export default function CheckoutSDKEmbed({
   onError,
   callbacks,
   setupPreload,
+  formsOfPayment,
 }: CheckoutSDKEmbedProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerId] = useState(() => `checkout-sdk-embed-${++embedCounter}`);
@@ -30,10 +32,12 @@ export default function CheckoutSDKEmbed({
   const onErrorRef = useRef(onError);
   const callbacksRef = useRef(callbacks);
   const setupPreloadRef = useRef(setupPreload);
+  const formsOfPaymentRef = useRef(formsOfPayment);
   onReadyRef.current = onReady;
   onErrorRef.current = onError;
   callbacksRef.current = callbacks;
   setupPreloadRef.current = setupPreload;
+  formsOfPaymentRef.current = formsOfPayment;
 
   useEffect(() => {
     if (!sessionId || initedForSession.current === sessionId) return;
@@ -51,6 +55,7 @@ export default function CheckoutSDKEmbed({
           sessionId,
           callbacks: callbacksRef.current,
           setupPreload: setupPreloadRef.current,
+          formsOfPayment: formsOfPaymentRef.current,
           theme: CHECKOUT_SDK_THEME,
         });
         onReadyRef.current?.();

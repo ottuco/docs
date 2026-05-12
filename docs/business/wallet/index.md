@@ -1,7 +1,11 @@
 ---
 title: Wallet
 sidebar_label: Wallet
+toc_min_heading_level: 2
+toc_max_heading_level: 3
 ---
+
+import StepGuide from "@site/src/components/StepGuide";
 
 # Wallet
 
@@ -20,16 +24,141 @@ Wallet is a stored balance you can grant to a customer in any currency you accep
 3. **Customer returns** for a future order with your business.
 4. **They pay with wallet** — fully if the balance covers it, partially with another method otherwise.
 
-## When wallet is offered to the customer
+## Refund to Wallet
 
-The wallet shows up as a payment method when **both** conditions are met:
+Refunding to wallet credits the customer's wallet balance instead of returning funds through the payment gateway. The customer can spend the credit on their next order.
 
-- The customer has positive balance in the same currency as the order.
-- The order is set to capture immediately. Authorize-only orders do not show wallet.
+**When to use this:**
+
+- The customer's card has expired and a gateway refund would fail.
+- You want to issue store credit, loyalty, or goodwill credit without payment-gateway fees.
+- You are processing a goodwill compensation that wasn't tied to a specific payment.
+
+<StepGuide steps={[
+  {
+    title: "Open the transaction",
+    description: <>From <strong>Payment Management</strong>, open the paid transaction you want to refund.</>,
+    image: "/img/business/wallet/refund-01-transaction.png",
+    imageAlt: "Paid transaction opened in Payment Management",
+  },
+  {
+    title: "Click Refund",
+    description: <>Use the <strong>Refund</strong> button in the operations panel.</>,
+    image: "/img/business/wallet/refund-02-refund-button.png",
+    imageAlt: "Refund button highlighted in the operations panel",
+  },
+  {
+    title: "Choose destination: Wallet",
+    description: <>In the refund dialog, switch destination from <strong>Original Gateway</strong> to <strong>Wallet</strong>.</>,
+    image: "/img/business/wallet/refund-03-destination.png",
+    imageAlt: "Refund dialog with Wallet destination selected",
+  },
+  {
+    title: "Confirm amount and submit",
+    description: <>Enter the full or partial refund amount, add an optional reason, and click <strong>Confirm</strong>. The wallet balance is credited immediately.</>,
+    image: "/img/business/wallet/refund-04-confirm.png",
+    imageAlt: "Confirming the wallet refund amount",
+  },
+  {
+    title: "See the confirmation",
+    description: <>A success banner shows the new wallet balance for the customer. The refund appears in both the transaction history and the wallet ledger.</>,
+    image: "/img/business/wallet/refund-05-success.png",
+    imageAlt: "Refund-to-wallet success banner showing new balance",
+  },
+]} />
+
+The next time the customer reaches checkout in your store (same currency), they'll see **Wallet (X.XXX KWD)** as a payment method. See [Wallet at Checkout](#wallet-at-checkout) below for the customer-side flow.
+
+## Wallet at Checkout
+
+This section explains what your customer sees when they have a wallet balance and reach checkout — so you can answer support questions and design messaging on your own site.
+
+<WalletScenarios />
+
+:::note Reservation auto-release
+If a customer abandons, cancels, or fails a payment, the reserved wallet amount is restored to their balance about **four hours** later. The wait is intentional — it gives slow gateway confirmations time to land. There is no human in the loop.
+:::
+
+**Rules customers cannot change:**
+
+- They cannot choose how much wallet credit to apply — Ottu deducts the required amount automatically, no more.
+- They cannot transfer credit between currencies — each currency has its own wallet.
+- They cannot use wallet on authorize-only orders. Wallet supports immediate-capture flows only.
 
 :::warning Cross-currency wallet payments are not supported
-A KWD wallet cannot be used to pay a SAR order, and vice versa. Each currency maintains a separate wallet balance.
+The wallet only appears when its currency matches the order currency.
 :::
+
+**What you can do:**
+
+- Display the customer's wallet balance on your own site or app — call the [Wallet Accounts API](/developers/payments/wallet/#api-reference).
+- Refund any future order to the same wallet to top it up.
+- View full credit and debit history per customer in [Wallet Reporting](#wallet-reporting) below.
+
+## Wallet Reporting
+
+The dashboard provides three screens for tracking wallet activity: **Accounts**, **Ledger**, and **Operations**.
+
+### Accounts screen
+
+Lists every customer who has a wallet account with your business, with current balance per currency.
+
+<StepGuide steps={[
+  {
+    title: "Open Wallet → Accounts",
+    description: <>From the main navigation, go to <strong>Wallet → Accounts</strong>.</>,
+    image: "/img/business/wallet/reporting-01-accounts.png",
+    imageAlt: "Wallet Accounts screen in the dashboard",
+  },
+  {
+    title: "Search and filter",
+    description: <>Filter by customer ID, currency, or balance range. Sort by balance to find top-credit customers.</>,
+    image: "/img/business/wallet/reporting-02-filter.png",
+    imageAlt: "Filter and sort controls on the Accounts screen",
+  },
+  {
+    title: "Open an account",
+    description: <>Click any row to open the account's full ledger history for that customer and currency.</>,
+    image: "/img/business/wallet/reporting-03-detail.png",
+    imageAlt: "Individual wallet account ledger view",
+  },
+]} />
+
+### Ledger screen
+
+Shows every credit, debit, and reservation entry for an account. Entries are immutable — they cannot be edited or deleted. Corrections are made via reversals.
+
+Each entry shows:
+
+- **Entry ID** — unique identifier for the ledger row.
+- **Type** — `credit`, `debit`, or `reservation`.
+- **Amount** — signed amount in the wallet currency.
+- **Balance after** — wallet balance immediately after this entry.
+- **Funding source** — `refund_from_payment`, `manual_adjustment`, `promo`, or `goodwill` for credits.
+- **Linked session** — the original payment session this entry references, if any.
+- **Timestamp** — when the entry was recorded.
+
+![Ledger screen with columns visible](/img/business/wallet/reporting-04-ledger.png)
+
+### Operations screen
+
+Lists individual wallet operations (a single credit, debit, or reservation cycle) across all accounts. Useful for audit and reconciliation.
+
+![Operations screen with filters and operation rows](/img/business/wallet/reporting-05-operations.png)
+
+Filter by:
+
+- Operation type (credit / debit / reservation / commit / release)
+- Customer ID
+- Currency
+- Date range
+- Linked session ID
+
+### Exporting
+
+You can export Accounts, Ledger, or Operations data as **CSV** or **XLSX** for offline analysis and accounting.
+
+![Export dropdown showing CSV and XLSX options](/img/business/wallet/reporting-06-export.png)
 
 ## Things to know
 
@@ -38,10 +167,56 @@ A KWD wallet cannot be used to pay a SAR order, and vice versa. Each currency ma
 - **Automatic release.** If a customer abandons checkout, their reserved wallet funds are released automatically after about four hours. No action required from you.
 - **Immutable history.** Every credit, debit, and reservation is recorded permanently. Corrections are made by adding an opposing entry — never by editing the original.
 - **No expiry.** Wallet credit does not expire today.
+- **Wallet appears at checkout when:** the customer has positive balance in the order currency **and** the order is set to capture immediately. Authorize-only orders do not show wallet.
+
+## FAQ
+
+#### Can I refund partial amounts to wallet?
+
+Yes. Enter any amount up to the original payment amount.
+
+#### Can I refund to a wallet that doesn't exist yet?
+
+Yes. If the customer has no wallet account for that currency, one is created automatically on the first refund.
+
+#### Can I undo a refund-to-wallet?
+
+You cannot edit or delete the original credit — wallet history is immutable. You can issue an opposing debit entry (a reversal) to offset it. Contact [csd@ottu.com](mailto:csd@ottu.com) if you need help raising a reversal.
+
+#### Does the customer get notified?
+
+No, customers are not notified automatically when a wallet credit is issued today. If you want to notify them, message them through your own channels.
+
+#### Why doesn't wallet show for some orders?
+
+The order may be authorize-only, the customer may have zero balance in that currency, or the `customer_id` may differ between sessions. Check the order's `customer_id` matches the wallet's.
+
+#### What happens if the customer disputes the original payment after the refund-to-wallet?
+
+Disputes can be resolved manually. Contact [csd@ottu.com](mailto:csd@ottu.com) to raise a reversal.
+
+#### Does wallet credit expire?
+
+No, wallet credit does not expire today.
+
+#### If a customer cancels or their payment fails, when do they get their wallet credit back?
+
+Reserved wallet funds are automatically restored about four hours after an abandoned, cancelled, or failed payment. No action is needed.
+
+#### Can I edit a wallet entry?
+
+No. Entries are immutable. To correct an error, issue a reversal — an opposing debit or credit. Contact [csd@ottu.com](mailto:csd@ottu.com) for help.
+
+#### Can I close a customer's wallet?
+
+No. A wallet account opens automatically on the first refund-to-wallet and behaves as non-existent when the balance is zero — no maintenance needed.
+
+#### How do I find the original payment behind a wallet credit?
+
+Open the ledger entry — the **Linked session** field gives you the original payment's `session_id`. Click it to jump to the payment in Payment Management.
 
 ## What's Next?
 
-- [Refund to wallet](/business/wallet/refund-to-wallet) — the dashboard workflow.
-- [Wallet at checkout](/business/wallet/using-wallet-at-checkout) — what the customer sees.
-- [Wallet reporting](/business/wallet/reporting) — viewing balances and ledger.
 - [Wallet for developers](/developers/payments/wallet/) — API and SDK integration.
+- [Payment Management](/business/payment-management/) — viewing and managing all transactions.
+- [Refund to Wallet (developer reference)](/developers/operations#refund-to-wallet) — the API behind the dashboard refund flow.

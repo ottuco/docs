@@ -891,6 +891,7 @@ html[data-theme="dark"] .docusaurus-mermaid-container marker path {
   .col--3:has(.theme-doc-toc-desktop) {
     flex: 0 0 185px !important;
     max-width: 185px !important;
+    min-width: max-content !important;
   }
 
   /* Let main content column grow into the space freed by narrower TOC */
