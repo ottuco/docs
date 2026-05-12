@@ -149,40 +149,30 @@ All three routes share the same Node process. Same-origin in production (no CORS
 
 The `WalletDemo` (`/developers/payments/wallet/#live-demo`) cannot seed wallet balance from the browser — the wallet service requires Keycloak Bearer auth (`client_credentials` grant) and is a privileged "create money" endpoint. The architecture splits the work:
 
-1. **Browser** calls Payment Methods API (Connect Api-Key, public-by-design) to discover wallet-capable `pg_codes` filtered by `tags: ["demo"], payment_services: ["wallet"]`.
+1. **Browser** calls Payment Methods API (Connect Api-Key, public-by-design — `KSA_AUTH_KEY` const in `src/utils/sandbox.ts`) to discover wallet-capable `pg_codes` filtered by `tags: ["demo"], payment_services: ["wallet"]`.
 2. **Browser** POSTs `/seed-wallet` with `{customer_id, currency, amount, pg_code}`.
-3. **Backend (`mcp` service)** loads the active env from `wallet-demo-environments.yaml`, calls Keycloak for a JWT (cached in-process until `expires_at − 30s` skew), POSTs `${wallet_url}/wallet/credits` with `Authorization: Bearer ${token}` + `Merchant-Id` + a UUID `Idempotency-Key`. Returns the wallet service response verbatim.
+3. **Backend (`mcp` service)** mints a Keycloak token via `getKeycloakToken` (`mcp-server/keycloak.mjs`, cached in-process until `expires_at − 30s` skew), POSTs `${walletUrl}/wallet/credits` with `Authorization: Bearer ${token}` + `Merchant-Id` + a UUID `Idempotency-Key`. Returns the wallet service response verbatim.
 4. **Browser** calls Checkout API (Connect Api-Key again) to create the session.
 5. **Browser** mounts the Checkout SDK with `formsOfPayment: ["wallet", pg_code]`.
 
-The Keycloak client secret stays server-side. The Connect Api-Key is in the JS bundle (build-time env), matching the existing pattern of `SANDBOX_AUTH_KEY` in `src/utils/sandbox.ts` — sandbox-only, public-by-design.
+### Config Pattern: Constants, Not YAML
 
-### Per-Environment Config Pattern
+Per-merchant config matches the existing `SANDBOX_AUTH_KEY` pattern — **non-secret values are hardcoded constants**, only true secrets (the Keycloak client secret) come from env vars.
 
-`wallet-demo-environments.yaml` (repo root, committed) holds **public** per-merchant config; **secrets** live in env vars whose names are declared inside the YAML. One env var (`WALLET_DEMO_ENV`) picks the active entry. Mirrors the e2e_tests Bruno `environments/*.bru` + `.env.yaml` pattern.
+- **Frontend constants** (`src/utils/sandbox.ts`):
+  - `SANDBOX_MERCHANT_ID`, `SANDBOX_AUTH_KEY` — used by CheckoutDemo / RecurringDemo / PaymentJourney
+  - `KSA_MERCHANT_ID`, `KSA_CONNECT_BASE_URL`, `KSA_AUTH_KEY` — used by WalletDemo
+  - `src/utils/walletDemoConfig.ts` composes the demo's runtime knobs (currency, amounts, pg filter) on top of the KSA constants
 
-```yaml
-environments:
-  ksa.ottu.dev:
-    merchant_id: ksa.ottu.dev
-    connect_base_url: https://ksa.ottu.dev
-    wallet_url: https://wallet.ottu.dev
-    keycloak_url: https://auth.ottu.dev
-    keycloak_realm: ksa.ottu.dev
-    keycloak_client_id: backend
-    currency: KWD
-    seed_amount: "10.000"
-    session_amount: "8.000"
-    pg_filter: { plugin: e_commerce, type: sandbox, tags: [demo], payment_services: [wallet] }
-    secrets:
-      connect_api_key: WALLET_DEMO_KSA_OTTU_DEV_CONNECT_API_KEY
-      keycloak_client_secret: WALLET_DEMO_KSA_OTTU_DEV_KEYCLOAK_CLIENT_SECRET
-default: ksa.ottu.dev
-```
+- **Backend constants** (`mcp-server/config.mjs`):
+  - `KSA_OTTU_DEV` — `{merchantId, walletUrl, keycloak: {url, realm, clientId, clientSecretEnvVar}}`
+  - The `clientSecretEnvVar` name (`KSA_KEYCLOAK_CLIENT_SECRET`) is what `server.mjs` reads from `process.env` at call time
 
-**Slug convention**: env name uppercased with `.` → `_` (`ksa.ottu.dev` → `KSA_OTTU_DEV`). Loaders in `mcp-server/walletDemoEnv.mjs` (backend) and `docusaurus.config.ts` (build-time frontend injection via `customFields.walletDemo`) read both YAML and secrets accordingly.
+- **Generic Keycloak helper** (`mcp-server/keycloak.mjs`):
+  - `getKeycloakToken({url, realm, clientId, clientSecret})` — parameterized, cache keyed by `url|realm|clientId`
+  - Reusable for any future backend service that needs Keycloak — not coupled to wallet
 
-**To target a new merchant**: add an entry to the YAML, set its two secrets in DO, flip `WALLET_DEMO_ENV`. No code changes.
+**Adding a new merchant**: add new `KSA_*` constants in `sandbox.ts`, add a new config object in `mcp-server/config.mjs`, set the matching `*_KEYCLOAK_CLIENT_SECRET` env var in DO. No YAML, no env-var-naming convention.
 
 ### Wallet Endpoint Contract (gotchas)
 
@@ -198,26 +188,24 @@ See `mcp-server/server.mjs` `handleSeedWallet` for the canonical body shape.
 
 Two processes need to run: the Docusaurus dev server (`:3000`) and the `mcp-server` (`:8090`). The frontend `seedWalletViaBackend` helper auto-routes to `http://localhost:8090/` when `hostname === "localhost"`.
 
-1. Create `.env.local` at the repo root (gitignored) with the active env's secrets:
+1. Create `.env.local` at the repo root (gitignored) with the Keycloak secret:
    ```bash
-   WALLET_DEMO_ENV=ksa.ottu.dev
-   WALLET_DEMO_KSA_OTTU_DEV_CONNECT_API_KEY=<paste>
-   WALLET_DEMO_KSA_OTTU_DEV_KEYCLOAK_CLIENT_SECRET=<paste>
+   KSA_KEYCLOAK_CLIENT_SECRET=<paste-from-Keycloak-admin>
    ```
+   The frontend Connect Api-Key is hardcoded (see `KSA_AUTH_KEY` in `src/utils/sandbox.ts`), so the docs dev server needs no env vars.
 2. Run the two servers in separate terminals:
    ```bash
    npm run webhook:local     # mcp-server on :8090, loads .env.local
-   npm run start:local       # Docusaurus on :3000, loads .env.local (build-time)
+   npm start                 # Docusaurus on :3000
    ```
 
-Both `:local` scripts use Node's built-in `--env-file-if-exists=.env.local` (Node 20+). `npm run webhook` / `npm start` without `:local` work fine when env vars are already exported in the shell.
+`npm run webhook:local` uses Node 20+'s built-in `--env-file-if-exists=.env.local`. `npm run webhook` (no `:local`) works fine when `KSA_KEYCLOAK_CLIENT_SECRET` is already exported in the shell.
 
 ## Development Commands
 
 ```bash
 npm install                            # Install dependencies
-npm start                             # Development server (no .env.local loading)
-npm run start:local                   # Dev server + auto-load .env.local
+npm start                             # Development server
 npm run webhook                        # mcp-server on :8090 (no .env.local loading)
 npm run webhook:local                  # mcp-server + auto-load .env.local
 npm run build                         # Production build

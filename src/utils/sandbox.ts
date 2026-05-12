@@ -9,6 +9,12 @@ export const SANDBOX_MERCHANT_ID = "sandbox.ottu.net";
 export const SANDBOX_API_KEY = "13df331cb989d68313b9141e2094d3f042c6d157";
 const SANDBOX_AUTH_KEY = "Fxi63E9x.AiYMnCCXcBVr657gs4N3ex3MZdeAeWDy";
 
+// ksa.ottu.dev — dev merchant used by the WalletDemo (wallet only ships on dev today).
+// Same public-by-design leak model as SANDBOX_AUTH_KEY — sandbox merchant, no real money.
+export const KSA_MERCHANT_ID = "ksa.ottu.dev";
+export const KSA_CONNECT_BASE_URL = "https://ksa.ottu.dev";
+export const KSA_AUTH_KEY = "uUjUqczM.P5PqlXx8zyuFUQVk19PLxfHBZu8rG4Uy";
+
 export interface CreateSessionOptions {
   pg_codes: string[];
   amount?: string;

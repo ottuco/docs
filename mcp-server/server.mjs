@@ -3,8 +3,8 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { McpDocsServer } from "docusaurus-plugin-mcp-server";
-import { getActiveEnv } from "./walletDemoEnv.mjs";
-import { getAccessToken } from "./keycloak.mjs";
+import { KSA_OTTU_DEV } from "./config.mjs";
+import { getKeycloakToken } from "./keycloak.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3456;
@@ -142,19 +142,15 @@ async function handleSeedWallet(req, res) {
     return;
   }
 
-  let env;
-  try {
-    env = getActiveEnv();
-  } catch (err) {
-    console.error("[seed-wallet] config error:", err.message);
-    res.writeHead(500, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: "config_error", message: err.message }));
-    return;
-  }
-
+  const merchant = KSA_OTTU_DEV;
   let token;
   try {
-    token = await getAccessToken();
+    token = await getKeycloakToken({
+      url: merchant.keycloak.url,
+      realm: merchant.keycloak.realm,
+      clientId: merchant.keycloak.clientId,
+      clientSecret: process.env[merchant.keycloak.clientSecretEnvVar],
+    });
   } catch (err) {
     console.error("[seed-wallet] keycloak error:", err.message);
     res.writeHead(502, { "Content-Type": "application/json" });
@@ -166,12 +162,12 @@ async function handleSeedWallet(req, res) {
   const demoTag = `demo_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
   let upstream;
   try {
-    upstream = await fetch(`${env.wallet_url}/wallet/credits`, {
+    upstream = await fetch(`${merchant.walletUrl}/wallet/credits`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
-        "Merchant-Id": env.merchant_id,
+        "Merchant-Id": merchant.merchantId,
         "Idempotency-Key": idempotencyKey,
       },
       body: JSON.stringify({
@@ -184,7 +180,7 @@ async function handleSeedWallet(req, res) {
         provider: "",
         reference_number: `ref_${demoTag}`,
         order_no: `ord_${demoTag}`,
-        metadata: { source: "docs_walletdemo", synthetic: true, env: env.name },
+        metadata: { source: "docs_walletdemo", synthetic: true, merchant: merchant.merchantId },
       }),
     });
   } catch (err) {
@@ -195,7 +191,7 @@ async function handleSeedWallet(req, res) {
   }
 
   const text = await upstream.text();
-  console.log(`[seed-wallet] env=${env.name} merchant=${env.merchant_id} status=${upstream.status}`);
+  console.log(`[seed-wallet] merchant=${merchant.merchantId} status=${upstream.status}`);
   res.writeHead(upstream.status, { "Content-Type": "application/json" });
   res.end(text);
 }

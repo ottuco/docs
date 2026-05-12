@@ -1,60 +1,8 @@
-import fs from "node:fs";
-import path from "node:path";
-import yaml from "js-yaml";
 import { themes as prismThemes } from "prism-react-renderer";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
-
-// ── Wallet demo: load per-environment config ────────────────────────────────
-// Public config (URLs, currency, pg filter) lives in wallet-demo-environments.yaml.
-// Secrets come from env vars named by the YAML's `secrets` block. The active env
-// is picked by WALLET_DEMO_ENV (defaults to the YAML's `default`).
-type WalletDemoEnvEntry = {
-  merchant_id: string;
-  connect_base_url: string;
-  wallet_url: string;
-  keycloak_url: string;
-  keycloak_realm: string;
-  keycloak_client_id: string;
-  currency: string;
-  seed_amount: string;
-  session_amount: string;
-  pg_filter: {
-    plugin: string;
-    type?: string;
-    tags?: string[];
-    payment_services?: string[];
-  };
-  secrets: { connect_api_key: string; keycloak_client_secret: string };
-};
-type WalletDemoDoc = { environments: Record<string, WalletDemoEnvEntry>; default: string };
-
-const walletDemoDoc = yaml.load(
-  fs.readFileSync(path.resolve(__dirname, "wallet-demo-environments.yaml"), "utf8")
-) as WalletDemoDoc;
-const walletDemoEnvName = process.env.WALLET_DEMO_ENV || walletDemoDoc.default;
-const walletDemoEntry = walletDemoDoc.environments[walletDemoEnvName];
-if (!walletDemoEntry) {
-  throw new Error(
-    `[docusaurus.config] Unknown WALLET_DEMO_ENV='${walletDemoEnvName}'. ` +
-      `Known: ${Object.keys(walletDemoDoc.environments).join(", ")}`
-  );
-}
-const walletDemo = {
-  envName: walletDemoEnvName,
-  merchantId: walletDemoEntry.merchant_id,
-  connectBaseUrl: walletDemoEntry.connect_base_url,
-  currency: walletDemoEntry.currency,
-  seedAmount: walletDemoEntry.seed_amount,
-  sessionAmount: walletDemoEntry.session_amount,
-  pgFilter: walletDemoEntry.pg_filter,
-  // Same leak model as the existing SANDBOX_AUTH_KEY in src/utils/sandbox.ts —
-  // a public sandbox key, env-overridable per merchant. Missing key surfaces
-  // as a runtime error from the Payment Methods / Checkout API call.
-  apiKey: process.env[walletDemoEntry.secrets.connect_api_key] || "",
-};
 
 const config: Config = {
   title: "Ottu Documentation",
@@ -92,10 +40,6 @@ const config: Config = {
         "(function(){try{if(window.location.hash){document.documentElement.setAttribute('data-initial-hash-loading','true');}}catch(e){}})();",
     },
   ],
-
-  customFields: {
-    walletDemo,
-  },
 
   onBrokenLinks: "warn",
 

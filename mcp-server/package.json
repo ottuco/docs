@@ -8,8 +8,7 @@
     "test": "node test.mjs"
   },
   "dependencies": {
-    "docusaurus-plugin-mcp-server": "^0.11.0",
-    "js-yaml": "^4.1.0"
+    "docusaurus-plugin-mcp-server": "^0.11.0"
   },
   "engines": {
     "node": ">=20"
