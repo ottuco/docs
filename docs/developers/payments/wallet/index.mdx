@@ -199,16 +199,22 @@ A KWD wallet cannot be used to pay a SAR order, and vice versa. Each currency ma
 
 Three read APIs let you query wallet state from your backend. All three accept the standard [Ottu API key](/developers/getting-started/authentication) authentication and are `POST` endpoints — the request body carries the `customer_id` (and, where required, the `currency`) that scopes the query.
 
-<Tabs>
-  <TabItem value="accounts" label="List Wallet Accounts">
-    <ApiDocEmbed path="wallet-accounts.api.mdx" />
-  </TabItem>
-  <TabItem value="ledger" label="List Ledger Entries">
-    <ApiDocEmbed path="wallet-entries.api.mdx" />
-  </TabItem>
-  <TabItem value="operation" label="Get Operation by ID">
-    <ApiDocEmbed path="wallet-operation-details.api.mdx" />
-  </TabItem>
+<Tabs groupId="wallet-api" queryString>
+<TabItem value="accounts" label="List Wallet Accounts">
+
+<ApiDocEmbed path="wallet-accounts.api.mdx" />
+
+</TabItem>
+<TabItem value="ledger" label="List Ledger Entries">
+
+<ApiDocEmbed path="wallet-entries.api.mdx" />
+
+</TabItem>
+<TabItem value="operation" label="Get Operation by ID">
+
+<ApiDocEmbed path="wallet-operation-details.api.mdx" />
+
+</TabItem>
 </Tabs>
 
 ## Best Practices
