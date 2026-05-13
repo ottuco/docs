@@ -6,6 +6,7 @@ toc_max_heading_level: 3
 ---
 
 import StepGuide from "@site/src/components/StepGuide";
+import { businessWalletScenariosSteps } from "@site/src/data/wallet-scenarios";
 
 # Wallet
 
@@ -73,7 +74,7 @@ The next time the customer reaches checkout in your store (same currency), they'
 
 This section explains what your customer sees when they have a wallet balance and reach checkout — so you can answer support questions and design messaging on your own site.
 
-<WalletScenarios />
+<StepGuide steps={businessWalletScenariosSteps} />
 
 :::note Reservation auto-release
 If a customer abandons, cancels, or fails a payment, the reserved wallet amount is restored to their balance about **four hours** later. The wait is intentional — it gives slow gateway confirmations time to land. There is no human in the loop.

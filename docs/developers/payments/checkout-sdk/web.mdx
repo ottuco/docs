@@ -8,7 +8,8 @@ import FAQ, { FAQItem } from '@site/src/components/FAQ';
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import CheckoutDemo from "@site/src/components/CheckoutDemo";
-import WalletScenarios from "@site/src/components/WalletScenarios";
+import StepGuide from "@site/src/components/StepGuide";
+import { developerWalletScenariosSteps } from "@site/src/data/wallet-scenarios";
 
 The [Checkout SDK](./) is a JavaScript library provided by Ottu that allows you to easily integrate an Ottu-powered [checkout process](../#ottu-checkout-sdk-flow) into your web application. With the Checkout SDK, you can customize the look and feel of your checkout process, as well as which forms of payment are accepted.
 
@@ -941,7 +942,7 @@ For full balance behavior, partial-payment rules, and the four-hour reservation 
 The wallet only appears when its currency matches the order currency.
 :::
 
-<WalletScenarios />
+<StepGuide steps={developerWalletScenariosSteps} />
 
 ## Onsite Checkout
 
