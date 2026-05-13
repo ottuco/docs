@@ -54,8 +54,8 @@ Lead with what the feature does for their business. No code. Dashboard-focused w
 - **No jargon without definition** — first use of any payment domain term (MID, PG, tokenization, PCI DSS) links to the glossary
 - **Hyperlinks throughout** — link inline in body text where concepts are mentioned, don't batch all links at the bottom
 - **Code examples must be copy-paste ready** — runnable against the sandbox environment with only an API key substitution
-- **Demo `merchant_id`** — code samples that show the Checkout SDK `merchant_id` parameter MUST use `sandbox.ottu.net` (the sandbox demo merchant). Existing usage in `docs/developers/payments/checkout-sdk/web.mdx` is the canonical reference.
-- **API base URLs in code samples** — never hardcode `https://sandbox.ottu.net` or `https://ksa.ottu.dev` in fenced code blocks. Import the constant from `@site/src/constants/api` and render the sample with `<CodeBlock>` template literals. Default is `OTTU_CONNECT_BASE_URL`; use `OTTU_DEV_BASE_URL` only when the API surface isn't yet on public sandbox (e.g. wallet today). Canonical reference: `docs/developers/payments/wallet/index.mdx`.
+- **Demo `merchant_id`** — code samples that show the Checkout SDK `merchant_id` parameter MUST use `ksa.ottu.dev` (the demo merchant on Ottu's KSA dev environment). Existing usage in `docs/developers/payments/checkout-sdk/web.mdx` is the canonical reference.
+- **API base URLs in code samples** — never hardcode `https://ksa.ottu.dev` in fenced code blocks. Import `OTTU_CONNECT_BASE_URL` from `@site/src/constants/api` and render the sample with `<CodeBlock>` template literals. (`OTTU_DEV_BASE_URL` is a deprecated alias that now resolves to the same URL — prefer `OTTU_CONNECT_BASE_URL` in new code.) Canonical reference: `docs/developers/payments/wallet/index.mdx`.
 - **Multi-language code tabs** — use Docusaurus `<Tabs>` with `groupId="language"` in this order: cURL, Python, Node.js, PHP
 - **Self-contained** — don't redirect the reader to another page for essential information; include the key context on the current page with a link for deeper reading
 
@@ -149,7 +149,7 @@ All three routes share the same Node process. Same-origin in production (no CORS
 
 The `WalletDemo` (`/developers/payments/wallet/#live-demo`) cannot seed wallet balance from the browser — the wallet service requires Keycloak Bearer auth (`client_credentials` grant) and is a privileged "create money" endpoint. The architecture splits the work:
 
-1. **Browser** calls Payment Methods API (Connect Api-Key, public-by-design — `KSA_AUTH_KEY` const in `src/utils/sandbox.ts`) to discover wallet-capable `pg_codes` filtered by `tags: ["demo"], payment_services: ["wallet"]`.
+1. **Browser** calls Payment Methods API (Connect Api-Key, public-by-design — `ACTIVE_CONNECT.connectApiKey` from `src/utils/sandbox.ts`) to discover wallet-capable `pg_codes` filtered by `tags: ["demo"], payment_services: ["wallet"]`.
 2. **Browser** POSTs `/seed-wallet` with `{customer_id, currency, amount, pg_code}`.
 3. **Backend (`mcp` service)** mints a Keycloak token via `getKeycloakToken` (`mcp-server/keycloak.mjs`, cached in-process until `expires_at − 30s` skew), POSTs `${walletUrl}/wallet/credits` with `Authorization: Bearer ${token}` + `Merchant-Id` + a UUID `Idempotency-Key`. Returns the wallet service response verbatim.
 4. **Browser** calls Checkout API (Connect Api-Key again) to create the session.
@@ -157,12 +157,12 @@ The `WalletDemo` (`/developers/payments/wallet/#live-demo`) cannot seed wallet b
 
 ### Config Pattern: Constants, Not YAML
 
-Per-merchant config matches the existing `SANDBOX_AUTH_KEY` pattern — **non-secret values are hardcoded constants**, only true secrets (the Keycloak client secret) come from env vars.
+Per-merchant config is **non-secret hardcoded constants** — only true secrets (the Keycloak client secret) come from env vars.
 
-- **Frontend constants** (`src/utils/sandbox.ts`):
-  - `SANDBOX_MERCHANT_ID`, `SANDBOX_AUTH_KEY` — used by CheckoutDemo / RecurringDemo / PaymentJourney
-  - `KSA_MERCHANT_ID`, `KSA_CONNECT_BASE_URL`, `KSA_AUTH_KEY` — used by WalletDemo
-  - `src/utils/walletDemoConfig.ts` composes the demo's runtime knobs (currency, amounts, pg filter) on top of the KSA constants
+- **Frontend** (`src/utils/sandbox.ts`):
+  - `ConnectEnv` objects — `SANDBOX` (`sandbox.ottu.net`) and `KSA` (`ksa.ottu.dev`), each `{merchantId, connectBaseUrl, connectApiKey, sdkApiKey}`
+  - `ACTIVE_CONNECT` — the single global switch; every demo (CheckoutDemo / RecurringDemo / PaymentJourney / WalletDemo) reads its merchant host, Connect Api-Key, and SDK key from here. Currently `= KSA`. (Wallet only ships on `ksa.ottu.dev` today — switching to `SANDBOX` breaks the WalletDemo.)
+  - `src/utils/walletDemoConfig.ts` (`WALLET_DEMO`) holds only the demo's non-host knobs — currency, seed/session amounts, and the Payment Methods `pgFilter` — layered on top of `ACTIVE_CONNECT`
 
 - **Backend constants** (`mcp-server/config.mjs`):
   - `KSA_OTTU_DEV` — `{merchantId, walletUrl, keycloak: {url, realm, clientId, clientSecretEnvVar}}`
@@ -172,7 +172,7 @@ Per-merchant config matches the existing `SANDBOX_AUTH_KEY` pattern — **non-se
   - `getKeycloakToken({url, realm, clientId, clientSecret})` — parameterized, cache keyed by `url|realm|clientId`
   - Reusable for any future backend service that needs Keycloak — not coupled to wallet
 
-**Adding a new merchant**: add new `KSA_*` constants in `sandbox.ts`, add a new config object in `mcp-server/config.mjs`, set the matching `*_KEYCLOAK_CLIENT_SECRET` env var in DO. No YAML, no env-var-naming convention.
+**Adding a new merchant**: add a new `ConnectEnv` object in `sandbox.ts` (point `ACTIVE_CONNECT` at it to switch), add a matching config object in `mcp-server/config.mjs`, set the `*_KEYCLOAK_CLIENT_SECRET` env var in DO. No YAML, no env-var-naming convention.
 
 ### Wallet Endpoint Contract (gotchas)
 
@@ -192,7 +192,7 @@ Two processes need to run: the Docusaurus dev server (`:3000`) and the `mcp-serv
    ```bash
    KSA_KEYCLOAK_CLIENT_SECRET=<paste-from-Keycloak-admin>
    ```
-   The frontend Connect Api-Key is hardcoded (see `KSA_AUTH_KEY` in `src/utils/sandbox.ts`), so the docs dev server needs no env vars.
+   The frontend Connect Api-Key is hardcoded (see `ACTIVE_CONNECT` in `src/utils/sandbox.ts`), so the docs dev server needs no env vars.
 2. Run the two servers in separate terminals:
    ```bash
    npm run webhook:local     # mcp-server on :8090, loads .env.local

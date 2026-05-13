@@ -4,8 +4,10 @@ description: "Checkout API"
 hide_table_of_contents: true
 ---
 
+import CodeBlock from "@theme/CodeBlock";
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
+import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
 Ottu provides a comprehensive collection of APIs that offer a seamless and efficient way to test payments and enable merchants to accept and process transactions instantly. The Checkout API is the cornerstone of any payment initiation, whether it's [API-based](/developers/payments/checkout-api/) or [SDK-based](/developers/payments/checkout-sdk/).
 
@@ -333,7 +335,9 @@ Use One-Step Checkout when you:
 | :-------------: | --------------------------------------- | ----------------------------------------------------------------------------------------- |
 |   `apple_pay`   | Apple Pay digital wallet                | Apple Pay supported devices                                                               |
 |  `google_pay`   | Google Pay digital wallet               | Google Pay from Android or Chrome                                                         |
+|  `samsung_pay`  | Samsung Pay digital wallet              | Samsung Pay supported devices                                                             |
 |     `token`     | Token-based stored or recurring payment | [Auto-debit](/developers/cards-and-tokens/recurring-payments/) or saved card tokenized payments |
+|    `wallet`     | Ottu wallet balance                     | Spending a customer's [wallet](/developers/payments/wallet/) credit server-to-server (no SDK). The `payload` carries `wallet_code` — required only when the gateway has more than one wallet configured. |
 
 ### Rules & Restrictions
 
@@ -356,40 +360,35 @@ The `payment_instrument` parameter **must only be used in server-to-server integ
 
 ### Request Example: Apple Pay
 
-```json
-curl--location 'https://sandbox.ottu.net/b/checkout/v1/pymt-txn/'\
-  --header 'Authorization: Api-Key GYj5Na8H.29g9hqNjm11nORQMa2WiZwIBQQ49MdAL'\
-  --header 'Content-Type: application/json'\
-  --data - raw '{
-"type": "e_commerce",
-"pg_codes": [
-  "knet-apple"
-],
-"amount": "1",
-"currency_code": "KWD",
-"payment_instrument": {
-  "instrument_type": "apple_pay",
-  "payload": {
-    "paymentData": {
-      "data": "b1lwXgprLF8Ca/HeVwjVq3qHovPdwJ8M8IAYxG...",
-      "signature": "MIAGCSqGSIb3DQEHA...",
-      "header": {
-        "publicKeyHash": "aqFxqE8fnxrAP7...",
-        "ephemeralPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0D..."
+<CodeBlock language="bash" title="Create payment transaction with Apple Pay payment_instrument">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/' \\
+  --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
+  --header 'Content-Type: application/json' \\
+  --data-raw '{
+  "type": "e_commerce",
+  "pg_codes": ["knet-apple"],
+  "amount": "1",
+  "currency_code": "KWD",
+  "payment_instrument": {
+    "instrument_type": "apple_pay",
+    "payload": {
+      "paymentData": {
+        "data": "b1lwXgprLF8Ca/HeVwjVq3qHovPdwJ8M8IAYxG...",
+        "signature": "MIAGCSqGSIb3DQEHA...",
+        "header": {
+          "publicKeyHash": "aqFxqE8fnxrAP7...",
+          "ephemeralPublicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0D..."
+        },
+        "version": "EC_v1"
       },
-      "version": "EC_v1"
-    },
-    "paymentMethod": {
-      "displayName": "Visa 5766",
-      "network": "Visa",
-      "type": "debit"
-    },
-    "transactionIdentifier": "7134E7D22988391FA183A61A191AE14CD0..."
+      "paymentMethod": {
+        "displayName": "Visa 5766",
+        "network": "Visa",
+        "type": "debit"
+      },
+      "transactionIdentifier": "7134E7D22988391FA183A61A191AE14CD0..."
+    }
   }
-}
-}
-'
-```
+}'`}</CodeBlock>
 
 In this example, Ottu receives an Apple Pay token in `payment_instrument.payload` and uses it to authorize and capture the payment with the selected gateway.
 

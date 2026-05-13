@@ -3,9 +3,7 @@ title: Wallet
 description: Customer wallet credits — refund, store, and spend balances at checkout.
 toc_min_heading_level: 2
 toc_max_heading_level: 3
-# hide_table_of_contents intentionally NOT set until the <ApiDocEmbed> tabs
-# are restored in Task 22 (after Connect ships subticket 150892). Without the
-# right-column API panel, readers need the TOC for navigation.
+hide_table_of_contents: true
 ---
 
 import Tabs from "@theme/Tabs";
@@ -18,7 +16,7 @@ import WalletDemo from "@site/src/components/WalletDemo";
 import StepGuide from "@site/src/components/StepGuide";
 import { developerWalletScenariosSteps } from "@site/src/data/wallet-scenarios";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
-import { OTTU_DEV_BASE_URL } from "@site/src/constants/api";
+import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
 # Wallet
 
@@ -26,8 +24,8 @@ Wallet lets you refund customer payments to a stored balance keyed by merchant, 
 
 Authentication for merchant-facing endpoints follows the standard [Ottu API key](/developers/getting-started/authentication) flow — the same key you use for the [Checkout API](../checkout-api). Service-to-service auth between Ottu Connect and the wallet service uses OAuth 2.0 internally and is invisible to merchants.
 
-:::note Dev-environment base URL
-Wallet is currently available on Ottu's dev environment (`ksa.ottu.dev`). Every wallet API call in this guide targets that base URL. When wallet ships to the public sandbox (`sandbox.ottu.net`), update the base URL in your integration accordingly.
+:::note Base URL
+Every API call in this guide targets `ksa.ottu.dev`. Swap in your own merchant domain when you integrate.
 :::
 
 :::tip Boost Your Integration
@@ -73,7 +71,7 @@ Try the wallet flow below. The demo discovers a wallet-capable gateway, seeds a 
 
 Call the [Payment Methods API](../payment-methods) (`POST /b/pbl/v2/payment-methods/`) with `payment_services: ["wallet"]` to filter the gateway list to those that support wallet payments. Use these `pg_codes` when creating the Checkout session.
 
-<CodeBlock language="bash" title="Filter payment methods to wallet-capable PGs">{`curl --location '${OTTU_DEV_BASE_URL}/b/pbl/v2/payment-methods/' \\
+<CodeBlock language="bash" title="Filter payment methods to wallet-capable PGs">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/payment-methods/' \\
   --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
   --header 'Content-Type: application/json' \\
   --data '{
@@ -115,7 +113,7 @@ For the full request/response reference, headers, error codes, and supported fil
 
 Call the [Checkout API](../checkout-api) with the `pg_codes` returned in step 1, plus the `customer_id` to enable the customer's wallet on this session. The response includes a `session_id` that you pass to the SDK in the next step.
 
-<CodeBlock language="bash" title="Create Checkout session with wallet enabled">{`curl --location '${OTTU_DEV_BASE_URL}/b/checkout/v1/pymt-txn/' \\
+<CodeBlock language="bash" title="Create Checkout session with wallet enabled">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/' \\
   --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
   --header 'Content-Type: application/json' \\
   --data '{
@@ -130,8 +128,8 @@ Call the [Checkout API](../checkout-api) with the `pg_codes` returned in step 1,
 
 <CodeBlock language="json" title="Example response">{`{
   "session_id": "sess_9f8e7d6c5b4a",
-  "checkout_url": "${OTTU_DEV_BASE_URL}/checkout/sess_9f8e7d6c5b4a",
-  "checkout_short_url": "${OTTU_DEV_BASE_URL}/c/sess_9f8e7d6c5b4a",
+  "checkout_url": "${OTTU_CONNECT_BASE_URL}/checkout/sess_9f8e7d6c5b4a",
+  "checkout_short_url": "${OTTU_CONNECT_BASE_URL}/c/sess_9f8e7d6c5b4a",
   "expiration_time": "00:30:00"
 }`}</CodeBlock>
 
@@ -147,15 +145,13 @@ Add a mount point to your page — the SDK looks for an element matching `select
 
 Then initialize the SDK with the `session_id` returned by step 2:
 
-```javascript title="Checkout SDK init with wallet enabled"
-Checkout.init({
+<CodeBlock language="javascript" title="Checkout SDK init with wallet enabled">{`Checkout.init({
   selector: "checkout",
-  merchant_id: "sandbox.ottu.net", // use your merchant id
+  merchant_id: "${OTTU_CONNECT_BASE_URL.replace("https://", "")}", // use your merchant id
   apiKey: "YOUR_API_PUBLIC_KEY",
   session_id: "sess_9f8e7d6c5b4a",
   formsOfPayment: ["wallet", "ottu-sandbox"], // or omit to show all
-});
-```
+});`}</CodeBlock>
 
 #### 4. Customer applies wallet credit at checkout
 
@@ -201,27 +197,19 @@ A KWD wallet cannot be used to pay a SAR order, and vice versa. Each currency ma
 
 ## API Reference
 
-Three read APIs let you query wallet state from your backend. All three accept the standard Ottu API key authentication.
-
-:::note Interactive reference coming soon
-The interactive API reference for **List Wallet Accounts**, **List Ledger Entries**, and **Get Operation by ID** will appear here once the wallet endpoints are exposed on the public OpenAPI schema. The behavior, parameters, and response shapes are described above in the Step-by-Step section.
-:::
-
-{/* Restored in Task 22 once Connect ships the wallet proxy (Redmine subticket 150892):
+Three read APIs let you query wallet state from your backend. All three accept the standard [Ottu API key](/developers/getting-started/authentication) authentication and are `POST` endpoints — the request body carries the `customer_id` (and, where required, the `currency`) that scopes the query.
 
 <Tabs>
   <TabItem value="accounts" label="List Wallet Accounts">
-    <ApiDocEmbed path="developers/apis/wallet-accounts-list" />
+    <ApiDocEmbed path="wallet-accounts.api.mdx" />
   </TabItem>
   <TabItem value="ledger" label="List Ledger Entries">
-    <ApiDocEmbed path="developers/apis/wallet-ledger-list" />
+    <ApiDocEmbed path="wallet-entries.api.mdx" />
   </TabItem>
   <TabItem value="operation" label="Get Operation by ID">
-    <ApiDocEmbed path="developers/apis/wallet-operation-retrieve" />
+    <ApiDocEmbed path="wallet-operation-details.api.mdx" />
   </TabItem>
 </Tabs>
-
-*/}
 
 ## Best Practices
 
