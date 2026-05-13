@@ -56,7 +56,7 @@ Refunding to wallet credits the customer's wallet balance instead of returning f
   },
   {
     title: "See the confirmation",
-    description: <>A success Popup shows the refunded wallet balance for the customer. The refund appears in both the transaction history and the wallet ledger.</>,
+    description: <>A success popup shows the refunded wallet balance for the customer. The refund appears in both the transaction history and the wallet ledger.</>,
     image: "/img/business/wallet/refund-05-success.png",
     imageAlt: "Refund-to-wallet success banner showing new balance",
   },
@@ -161,11 +161,11 @@ Shows every credit, debit, and reservation entry for an account. Entries are imm
 
 Each entry shows:
 
-- **Entry ID** — unique identifier for the ledger row.
-- **Type** — `credit`, `debit`, or `reservation`.
+- **Operation ID** — unique identifier for the ledger row.
+- **Entry Type** — `credit_refund`, `debit_payment`, `debit_adjustment`, `credit_adjustment`, `reserve`, `release`, `expire`, or `reversal`.
 - **Amount** — signed amount in the wallet currency.
 - **Direction** — Whether it is `credit` or `debit`.
-- **Status** — Status of the entry.
+- **Status** — Current state of the entry (`pending`, `completed`, `failed`, etc.).
 - **Linked session** — the original payment session this entry references, if any.
 - **Timestamp** — when the entry was recorded.
 

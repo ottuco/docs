@@ -291,13 +291,13 @@ Refunding to wallet credits the customer's wallet balance instead of returning f
   },
   {
     title: "Confirm amount and submit",
-    description: <>Enter the full or partial refund amount, add an optional reason, and click <strong>Confirm</strong>. The wallet balance is credited immediately.</>,
+    description: <>Enter the full or partial refund amount, and click <strong>YES</strong>. The wallet balance is credited immediately.</>,
     image: "/img/business/wallet/refund-04-confirm.png",
     imageAlt: "Confirming the wallet refund amount",
   },
   {
     title: "See the confirmation",
-    description: <>A success banner shows the new wallet balance for the customer. The refund appears in both the transaction history and the wallet ledger.</>,
+    description: <>A success popup shows the refunded wallet balance for the customer. The refund appears in both the transaction history and the wallet ledger.</>,
     image: "/img/business/wallet/refund-05-success.png",
     imageAlt: "Refund-to-wallet success banner showing new balance",
   },
