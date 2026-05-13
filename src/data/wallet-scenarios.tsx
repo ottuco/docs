@@ -11,7 +11,7 @@ export const businessWalletScenariosSteps: Step[] = [
         methods.
       </>
     ),
-    image: "/img/developers/wallet/deactivate_wallet.png",
+    image: "/img/developers/wallet/deactivate_wallet_02.png",
     imageAlt: "Checkout showing Wallet as a payment method",
   },
   {
@@ -22,7 +22,7 @@ export const businessWalletScenariosSteps: Step[] = [
         amount is deducted. Any surplus stays in the wallet for the next order.
       </>
     ),
-    image: "/img/developers/wallet/full_coverage.png",
+    image: "/img/developers/wallet/full_coverage_02.png",
     imageAlt: "Wallet fully covering the order amount",
   },
   {
@@ -34,7 +34,7 @@ export const businessWalletScenariosSteps: Step[] = [
         together at submit.
       </>
     ),
-    image: "/img/developers/wallet/partial_coverage.png",
+    image: "/img/developers/wallet/partial_coverage_02.png",
     imageAlt: "Wallet plus another method for partial coverage",
   },
   {
@@ -45,6 +45,8 @@ export const businessWalletScenariosSteps: Step[] = [
         <strong>Pay</strong> — they cannot be spent twice in parallel sessions.
       </>
     ),
+     image: "/img/developers/wallet/wallet_reservetion.gif",
+     imageAlt: "Wallet in Dashboard",     
   },
   {
     title: "Automatic release",
@@ -55,6 +57,8 @@ export const businessWalletScenariosSteps: Step[] = [
         from your team.
       </>
     ),
+    image: "/img/developers/wallet/wallet_dashboard_02.png",
+    imageAlt: "Wallet in Dashboard",
   },
 ];
 
@@ -69,7 +73,7 @@ export const developerWalletScenariosSteps: Step[] = [
         <code>customer_id</code> on the Checkout API session.
       </>
     ),
-    image: "/img/developers/wallet/deactivate_wallet.png",
+    image: "/img/developers/wallet/deactivate_wallet_02.png",
     imageAlt: "Checkout SDK showing Wallet as a payment method with balance",
   },
   {
@@ -81,7 +85,7 @@ export const developerWalletScenariosSteps: Step[] = [
         wallet.
       </>
     ),
-    image: "/img/developers/wallet/full_coverage.png",
+    image: "/img/developers/wallet/full_coverage_02.png",
     imageAlt: "Wallet selected with full coverage of the session amount",
   },
   {
@@ -93,7 +97,7 @@ export const developerWalletScenariosSteps: Step[] = [
         reservations confirm together at submit.
       </>
     ),
-    image: "/img/developers/wallet/partial_coverage.png",
+    image: "/img/developers/wallet/partial_coverage_02.png",
     imageAlt: "Wallet plus card combined for partial coverage",
   },
   {

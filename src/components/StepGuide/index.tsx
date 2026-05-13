@@ -52,6 +52,7 @@ function ArrowDownIcon() {
   );
 }
 
+
 export default function StepGuide({ steps, startIndex = 1, nextSectionId }: StepGuideProps): React.ReactElement {
   const [active, setActive] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -160,10 +161,36 @@ export default function StepGuide({ steps, startIndex = 1, nextSectionId }: Step
         {/* Content */}
         <div className={styles.content}>
           <div className={styles.stepLabel}>Step {active + startIndex} of {total + startIndex - 1}</div>
-          <h4 className={styles.stepTitle}>{step.title}</h4>
-          {step.description && (
-            <div className={styles.stepDescription}>{step.description}</div>
-          )}
+          <div className={styles.titleStack}>
+            {steps.map((s, i) => (
+              <h4
+                key={i}
+                className={[
+                  styles.stepTitle,
+                  i === active ? styles.stepTitleActive : styles.stepTitleHidden,
+                ].join(" ")}
+                aria-hidden={i !== active}
+              >
+                {s.title}
+              </h4>
+            ))}
+          </div>
+          <div className={styles.descriptionStack}>
+            {steps.map((s, i) =>
+              s.description ? (
+                <div
+                  key={i}
+                  className={[
+                    styles.stepDescription,
+                    i === active ? styles.stepDescriptionActive : styles.stepDescriptionHidden,
+                  ].join(" ")}
+                  aria-hidden={i !== active}
+                >
+                  {s.description}
+                </div>
+              ) : null
+            )}
+          </div>
         </div>
 
         {/* Navigation */}
