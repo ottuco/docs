@@ -172,7 +172,7 @@ The Export Entries dialog lets you narrow the rows by Order Number, Session ID, 
 
 ![Step 1 — click Export Entries on the account detail page](/img/business/wallet/reporting-07-export-cursor-step-1.png)
 
-After you submit, the file is generated asynchronously. Open **Generated Reports → Wallet Exports** to find it; rows with a green download arrow are ready, a progressive circle means the file is in process, and an X means the file generation is failed.
+After you submit, the file is generated asynchronously. Open **Generated Reports → Wallet Exports** to find it; rows with a green download arrow are ready, a progressive circle means the file is in process, and an X means the file generation failed.
 
 ![Step 2 — download the generated file from Generated Reports → Wallet Exports](/img/business/wallet/reporting-07-export-cursor-step-2.png)
 
