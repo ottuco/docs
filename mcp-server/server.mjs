@@ -3,6 +3,8 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { McpDocsServer } from "docusaurus-plugin-mcp-server";
+import { KSA_OTTU_DEV } from "./config.mjs";
+import { getKeycloakToken } from "./keycloak.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3456;
@@ -89,6 +91,111 @@ function handleWebhookPoll(orderId, req, res) {
   );
 }
 
+// ── Wallet seed: backend proxy with Keycloak JWT ─────────────────────────────
+// The browser cannot hold the wallet service's client_credentials grant secret.
+// This handler mints a fresh Keycloak token (cached in keycloak.mjs) and forwards
+// the seed request to the wallet service for the active environment.
+
+const seedRateLimits = new Map(); // ip -> number[] (timestamps)
+const SEED_LIMIT_WINDOW_MS = 60_000;
+const SEED_LIMIT_MAX = 30;
+
+function clientIp(req) {
+  const fwd = req.headers["x-forwarded-for"];
+  if (typeof fwd === "string" && fwd.length > 0) return fwd.split(",")[0].trim();
+  return req.socket?.remoteAddress || "unknown";
+}
+
+function checkSeedRateLimit(req) {
+  const ip = clientIp(req);
+  const now = Date.now();
+  const recent = (seedRateLimits.get(ip) || []).filter((t) => now - t < SEED_LIMIT_WINDOW_MS);
+  if (recent.length >= SEED_LIMIT_MAX) {
+    seedRateLimits.set(ip, recent);
+    return false;
+  }
+  recent.push(now);
+  seedRateLimits.set(ip, recent);
+  return true;
+}
+
+async function handleSeedWallet(req, res) {
+  if (!checkSeedRateLimit(req)) {
+    res.writeHead(429, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "rate_limited" }));
+    return;
+  }
+
+  let body;
+  try {
+    body = await parseBody(req);
+  } catch {
+    res.writeHead(400, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "invalid_json" }));
+    return;
+  }
+
+  const { customer_id, currency, amount, pg_code } = body || {};
+  if (!customer_id || !currency || !amount || !pg_code) {
+    res.writeHead(400, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "missing_fields", required: ["customer_id", "currency", "amount", "pg_code"] }));
+    return;
+  }
+
+  const merchant = KSA_OTTU_DEV;
+  let token;
+  try {
+    token = await getKeycloakToken({
+      url: merchant.keycloak.url,
+      realm: merchant.keycloak.realm,
+      clientId: merchant.keycloak.clientId,
+      clientSecret: process.env[merchant.keycloak.clientSecretEnvVar],
+    });
+  } catch (err) {
+    console.error("[seed-wallet] keycloak error:", err.message);
+    res.writeHead(502, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "keycloak_error", message: err.message }));
+    return;
+  }
+
+  const idempotencyKey = crypto.randomUUID();
+  const demoTag = `demo_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  let upstream;
+  try {
+    upstream = await fetch(`${merchant.walletUrl}/wallet/credits`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        "Merchant-Id": merchant.merchantId,
+        "Idempotency-Key": idempotencyKey,
+      },
+      body: JSON.stringify({
+        customer_id,
+        currency,
+        amount,
+        funding_source_type: "promo",
+        session_id: `sess_${demoTag}`,
+        pg_code,
+        provider: "",
+        reference_number: `ref_${demoTag}`,
+        order_no: `ord_${demoTag}`,
+        metadata: { source: "docs_walletdemo", synthetic: true, merchant: merchant.merchantId },
+      }),
+    });
+  } catch (err) {
+    console.error("[seed-wallet] upstream fetch failed:", err.message);
+    res.writeHead(502, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "upstream_unreachable", message: err.message }));
+    return;
+  }
+
+  const text = await upstream.text();
+  console.log(`[seed-wallet] merchant=${merchant.merchantId} status=${upstream.status}`);
+  res.writeHead(upstream.status, { "Content-Type": "application/json" });
+  res.end(text);
+}
+
 // ── MCP Artifacts ────────────────────────────────────────────────────────────
 
 async function fetchArtifacts() {
@@ -150,7 +257,7 @@ async function start() {
   const httpServer = http.createServer(async (req, res) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-ottu-demo");
 
     if (req.method === "OPTIONS") {
       res.writeHead(204);
@@ -186,6 +293,18 @@ async function start() {
     const pollMatch = url.match(/^\/([^/]+)\/events\.json(?:\?.*)?$/);
     if (pollMatch && req.method === "GET") {
       handleWebhookPoll(pollMatch[1], req, res);
+      return;
+    }
+
+    // ── Wallet seed: POST / with x-ottu-demo: seed-wallet ──
+    // Ingress strips the /seed-wallet prefix, so the request arrives as POST /.
+    // The header marker disambiguates from the MCP POST /.
+    if (
+      req.method === "POST" &&
+      (url === "/" || url === "") &&
+      req.headers["x-ottu-demo"] === "seed-wallet"
+    ) {
+      await handleSeedWallet(req, res);
       return;
     }
 

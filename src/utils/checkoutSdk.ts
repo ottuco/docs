@@ -5,7 +5,7 @@
  * Used by: CheckoutDemo, PaymentJourney, RecurringDemo.
  */
 
-import { SANDBOX_MERCHANT_ID, SANDBOX_API_KEY } from "./sandbox";
+import { ACTIVE_CONNECT } from "./sandbox";
 
 /**
  * Checkout SDK script URL.
@@ -305,9 +305,9 @@ export function initCheckout(options: {
   }
   (window as any).Checkout.init({
     selector: options.selector,
-    merchant_id: SANDBOX_MERCHANT_ID,
+    merchant_id: ACTIVE_CONNECT.merchantId,
     session_id: options.sessionId,
-    apiKey: SANDBOX_API_KEY,
+    apiKey: ACTIVE_CONNECT.sdkApiKey,
     displayMode: options.displayMode ?? "column",
     ...(options.formsOfPayment && { formsOfPayment: options.formsOfPayment }),
     ...(options.setupPreload && { setupPreload: options.setupPreload }),

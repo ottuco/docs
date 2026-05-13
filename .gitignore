@@ -3,6 +3,7 @@ __IGNORED__
 
 # Dependencies
 /node_modules
+mcp-server/node_modules/
 
 # Production
 /build

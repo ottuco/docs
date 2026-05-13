@@ -133,11 +133,81 @@ docs/
 - **Base URL**: `/` (root)
 - **Branch Strategy**: main → production (docs.ottu.com), dev → staging (docs.ottu.dev)
 
+## Backend Service: `mcp-server`
+
+A small Node.js HTTP service in `mcp-server/server.mjs` deployed alongside the static site as the `mcp` component on DO App Platform. Three responsibilities, routed by ingress prefix:
+
+| Ingress prefix (stripped by DO) | Internal path | Purpose |
+|---|---|---|
+| `/mcp` | `POST /`, `POST /refresh`, `GET /health` | MCP protocol server for AI tools (Claude Code, Cursor, etc.) |
+| `/webhook` | `POST /:orderId`, `GET /:orderId/events.json` | Webhook relay for the PaymentJourney / RecurringDemo / WalletDemo demos |
+| `/seed-wallet` | `POST /` with header `x-ottu-demo: seed-wallet` | Wallet seed proxy — mints a Keycloak JWT (`client_credentials` grant) and calls the wallet service on behalf of the browser |
+
+All three routes share the same Node process. Same-origin in production (no CORS hop); CORS is wildcarded for local dev.
+
+### Wallet Demo Backend Architecture
+
+The `WalletDemo` (`/developers/payments/wallet/#live-demo`) cannot seed wallet balance from the browser — the wallet service requires Keycloak Bearer auth (`client_credentials` grant) and is a privileged "create money" endpoint. The architecture splits the work:
+
+1. **Browser** calls Payment Methods API (Connect Api-Key, public-by-design — `KSA_AUTH_KEY` const in `src/utils/sandbox.ts`) to discover wallet-capable `pg_codes` filtered by `tags: ["demo"], payment_services: ["wallet"]`.
+2. **Browser** POSTs `/seed-wallet` with `{customer_id, currency, amount, pg_code}`.
+3. **Backend (`mcp` service)** mints a Keycloak token via `getKeycloakToken` (`mcp-server/keycloak.mjs`, cached in-process until `expires_at − 30s` skew), POSTs `${walletUrl}/wallet/credits` with `Authorization: Bearer ${token}` + `Merchant-Id` + a UUID `Idempotency-Key`. Returns the wallet service response verbatim.
+4. **Browser** calls Checkout API (Connect Api-Key again) to create the session.
+5. **Browser** mounts the Checkout SDK with `formsOfPayment: ["wallet", pg_code]`.
+
+### Config Pattern: Constants, Not YAML
+
+Per-merchant config matches the existing `SANDBOX_AUTH_KEY` pattern — **non-secret values are hardcoded constants**, only true secrets (the Keycloak client secret) come from env vars.
+
+- **Frontend constants** (`src/utils/sandbox.ts`):
+  - `SANDBOX_MERCHANT_ID`, `SANDBOX_AUTH_KEY` — used by CheckoutDemo / RecurringDemo / PaymentJourney
+  - `KSA_MERCHANT_ID`, `KSA_CONNECT_BASE_URL`, `KSA_AUTH_KEY` — used by WalletDemo
+  - `src/utils/walletDemoConfig.ts` composes the demo's runtime knobs (currency, amounts, pg filter) on top of the KSA constants
+
+- **Backend constants** (`mcp-server/config.mjs`):
+  - `KSA_OTTU_DEV` — `{merchantId, walletUrl, keycloak: {url, realm, clientId, clientSecretEnvVar}}`
+  - The `clientSecretEnvVar` name (`KSA_KEYCLOAK_CLIENT_SECRET`) is what `server.mjs` reads from `process.env` at call time
+
+- **Generic Keycloak helper** (`mcp-server/keycloak.mjs`):
+  - `getKeycloakToken({url, realm, clientId, clientSecret})` — parameterized, cache keyed by `url|realm|clientId`
+  - Reusable for any future backend service that needs Keycloak — not coupled to wallet
+
+**Adding a new merchant**: add new `KSA_*` constants in `sandbox.ts`, add a new config object in `mcp-server/config.mjs`, set the matching `*_KEYCLOAK_CLIENT_SECRET` env var in DO. No YAML, no env-var-naming convention.
+
+### Wallet Endpoint Contract (gotchas)
+
+The wallet service (currently `https://wallet.ottu.dev`) has three rules the seed body must satisfy — verified empirically against the live service:
+
+- **URL has NO trailing slash**: `POST /wallet/credits` (not `/wallet/credits/` — that 404s)
+- **`Idempotency-Key` header MUST be a valid UUID** (the wallet service validates the shape with `code: invalid_idempotency_key`)
+- **`session_id` is required in the body**, even for a bootstrap seed not tied to a real Connect session — use a synthetic value like `sess_demo_<tag>`
+
+See `mcp-server/server.mjs` `handleSeedWallet` for the canonical body shape.
+
+## Local Development for the Wallet Demo
+
+Two processes need to run: the Docusaurus dev server (`:3000`) and the `mcp-server` (`:8090`). The frontend `seedWalletViaBackend` helper auto-routes to `http://localhost:8090/` when `hostname === "localhost"`.
+
+1. Create `.env.local` at the repo root (gitignored) with the Keycloak secret:
+   ```bash
+   KSA_KEYCLOAK_CLIENT_SECRET=<paste-from-Keycloak-admin>
+   ```
+   The frontend Connect Api-Key is hardcoded (see `KSA_AUTH_KEY` in `src/utils/sandbox.ts`), so the docs dev server needs no env vars.
+2. Run the two servers in separate terminals:
+   ```bash
+   npm run webhook:local     # mcp-server on :8090, loads .env.local
+   npm start                 # Docusaurus on :3000
+   ```
+
+`npm run webhook:local` uses Node 20+'s built-in `--env-file-if-exists=.env.local`. `npm run webhook` (no `:local`) works fine when `KSA_KEYCLOAK_CLIENT_SECRET` is already exported in the shell.
+
 ## Development Commands
 
 ```bash
 npm install                            # Install dependencies
 npm start                             # Development server
+npm run webhook                        # mcp-server on :8090 (no .env.local loading)
+npm run webhook:local                  # mcp-server + auto-load .env.local
 npm run build                         # Production build
 npm run serve                         # Test production build
 npm run typecheck                     # TypeScript validation
