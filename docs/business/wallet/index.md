@@ -138,7 +138,7 @@ Each entry shows:
 
 Filter by:
 
-- Entry type (credit / debit / reservation / commit / release)
+- Entry type (credit / debit / reserve / release)
 - Customer ID
 - Currency
 - Date range
@@ -151,14 +151,6 @@ Filter by:
 Lists individual wallet operations (a single credit, debit, or reservation cycle) across all accounts. Useful for audit and reconciliation.
 
 ![Operations screen with filters and operation rows](/img/business/wallet/reporting-05-operations.png)
-
-Filter by:
-
-- Entry type (credit / debit / reservation / commit / release)
-- Customer ID
-- Currency
-- Date range
-- Linked session ID
 
 ## Exporting
 
