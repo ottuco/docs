@@ -639,7 +639,11 @@ const sidebars: SidebarsConfig = {
               label: "Things to know",
               href: "/business/wallet#things-to-know",
             },
-            { type: "link", label: "FAQ", href: "/business/wallet#faq" },
+            {
+              type: "link",
+              label: "FAQ",
+              href: "/business/wallet#faq",
+            },
           ],
         },
         {
