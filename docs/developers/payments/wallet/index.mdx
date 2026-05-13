@@ -17,6 +17,7 @@ import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import WalletDemo from "@site/src/components/WalletDemo";
 import StepGuide from "@site/src/components/StepGuide";
 import { developerWalletScenariosSteps } from "@site/src/data/wallet-scenarios";
+import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import { OTTU_DEV_BASE_URL } from "@site/src/constants/api";
 
 # Wallet
@@ -231,33 +232,29 @@ The interactive API reference for **List Wallet Accounts**, **List Ledger Entrie
 
 ## FAQ
 
-#### Can a customer choose how much wallet credit to apply?
-
-No. Ottu computes the amount automatically based on session amount versus balance.
-
-#### What happens to a reservation if the customer abandons checkout?
-
-It is automatically released about four hours after the abandoned, cancelled, or failed payment. No human intervention is required.
-
-#### Is wallet available for authorization-only payments?
-
-No. Wallet supports immediate-capture sessions only.
-
-#### Where does refund-to-wallet data go?
-
-The original payment session is linked to the wallet credit entry, visible in both the wallet ledger and the operation log.
-
-#### Does the wallet store any customer PII?
-
-No. The service holds only ledger entries scoped by `merchant_id`, `customer_id`, and `currency`.
-
-#### Can I charge a wallet without the Checkout SDK?
-
-No. Wallet payments are initiated only through the Checkout SDK. There is no server-side API to debit a wallet directly from the merchant backend — the customer must confirm the payment in the SDK so the reservation lifecycle (reserve → commit or release) is bound to a real checkout session.
-
-#### Does wallet credit expire?
-
-No. Wallet credit does not expire.
+<FAQ>
+  <FAQItem question="Can a customer choose how much wallet credit to apply?">
+    No. Ottu computes the amount automatically based on session amount versus balance.
+  </FAQItem>
+  <FAQItem question="What happens to a reservation if the customer abandons checkout?">
+    It is automatically released about four hours after the abandoned, cancelled, or failed payment. No human intervention is required.
+  </FAQItem>
+  <FAQItem question="Is wallet available for authorization-only payments?">
+    No. Wallet supports immediate-capture sessions only.
+  </FAQItem>
+  <FAQItem question="Where does refund-to-wallet data go?">
+    The original payment session is linked to the wallet credit entry, visible in both the wallet ledger and the operation log.
+  </FAQItem>
+  <FAQItem question="Does the wallet store any customer PII?">
+    No. The service holds only ledger entries scoped by `merchant_id`, `customer_id`, and `currency`.
+  </FAQItem>
+  <FAQItem question="Can I charge a wallet without the Checkout SDK?">
+    No. Wallet payments are initiated only through the Checkout SDK. There is no server-side API to debit a wallet directly from the merchant backend — the customer must confirm the payment in the SDK so the reservation lifecycle (reserve → commit or release) is bound to a real checkout session.
+  </FAQItem>
+  <FAQItem question="Does wallet credit expire?">
+    No. Wallet credit does not expire.
+  </FAQItem>
+</FAQ>
 
 ## What's Next?
 

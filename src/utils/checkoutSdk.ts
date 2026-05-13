@@ -5,7 +5,7 @@
  * Used by: CheckoutDemo, PaymentJourney, RecurringDemo.
  */
 
-import { SANDBOX_MERCHANT_ID, SANDBOX_API_KEY } from "./sandbox";
+import { ACTIVE_CONNECT } from "./sandbox";
 
 /**
  * Checkout SDK script URL.
@@ -13,7 +13,7 @@ import { SANDBOX_MERCHANT_ID, SANDBOX_API_KEY } from "./sandbox";
  * Switch to https://assets.ottu.net/checkout/v3/checkout.min.js when released.
  */
 export const CHECKOUT_SDK_CDN_URL =
-  "https://150330.dd33t4o2i3w1b.amplifyapp.com/checkout/v3/checkout.min.js";
+  "https://assets.ottu.dev/checkout/v3/checkout.min.js";
 
 /** Default forms of payment shown in demos. */
 export const CHECKOUT_SDK_FORMS_OF_PAYMENT = [
@@ -305,9 +305,9 @@ export function initCheckout(options: {
   }
   (window as any).Checkout.init({
     selector: options.selector,
-    merchant_id: SANDBOX_MERCHANT_ID,
+    merchant_id: ACTIVE_CONNECT.merchantId,
     session_id: options.sessionId,
-    apiKey: SANDBOX_API_KEY,
+    apiKey: ACTIVE_CONNECT.sdkApiKey,
     displayMode: options.displayMode ?? "column",
     ...(options.formsOfPayment && { formsOfPayment: options.formsOfPayment }),
     ...(options.setupPreload && { setupPreload: options.setupPreload }),

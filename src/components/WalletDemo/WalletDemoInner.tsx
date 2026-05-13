@@ -106,15 +106,12 @@ export default function WalletDemoInner() {
         type: filter.type,
         tags: filter.tags,
         payment_services: filter.payment_services,
-        merchantId: WALLET_DEMO.merchantId,
-        connectBaseUrl: WALLET_DEMO.connectBaseUrl,
-        apiKey: WALLET_DEMO.apiKey,
       });
       const pgCodes = extractPgCodes(methodsResponse);
       if (pgCodes.length === 0) {
         dispatch({
           type: "ERROR",
-          message: `No wallet-capable gateways for ${WALLET_DEMO.currency} on ${WALLET_DEMO.merchantId}. Enable a PG with payment_services: ["wallet"] tagged "docs".`,
+          message: `No wallet-capable gateways for ${WALLET_DEMO.currency} on the active merchant. Enable a PG with payment_services: ["wallet"] tagged "docs".`,
         });
         return;
       }
@@ -138,9 +135,6 @@ export default function WalletDemoInner() {
         amount: WALLET_DEMO.sessionAmount,
         currency_code: WALLET_DEMO.currency,
         customer_id: customerId,
-        merchantId: WALLET_DEMO.merchantId,
-        connectBaseUrl: WALLET_DEMO.connectBaseUrl,
-        apiKey: WALLET_DEMO.apiKey,
       });
       dispatch({ type: "SESSION_CREATED", sessionId: session_id });
     } catch (err: any) {
@@ -163,11 +157,6 @@ export default function WalletDemoInner() {
   const sessionId =
     state.status === "sdk_loading" || state.status === "ready" || state.status === "complete"
       ? state.sessionId
-      : null;
-
-  const sdkPgCode =
-    state.status === "sdk_loading" || state.status === "ready" || state.status === "complete"
-      ? state.pgCode
       : null;
 
   const callbacks = useMemo(
@@ -262,7 +251,10 @@ export default function WalletDemoInner() {
           onReady={() => dispatch({ type: "SDK_READY" })}
           onError={(message) => dispatch({ type: "ERROR", message })}
           callbacks={callbacks}
-          formsOfPayment={sdkPgCode ? ["wallet", sdkPgCode] : ["wallet"]}
+          // formsOfPayment intentionally omitted — per the SDK docs the
+          // wallet method renders automatically when balance is present,
+          // and explicit ["wallet", pg_code] filters appear to suppress
+          // all rendering on the current Amplify-preview SDK build.
         />
       )}
     </div>
