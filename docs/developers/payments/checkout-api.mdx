@@ -358,11 +358,11 @@ The `payment_instrument` parameter **must only be used in server-to-server integ
 
 ### Request Example: Apple Pay
 
-```json
-curl--location 'https://ksa.ottu.dev/b/checkout/v1/pymt-txn/'\
-  --header 'Authorization: Api-Key <YOUR_API_KEY>'\
-  --header 'Content-Type: application/json'\
-  --data - raw '{
+```bash
+curl --location 'https://ksa.ottu.dev/b/checkout/v1/pymt-txn/' \
+  --header 'Authorization: Api-Key <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
 "type": "e_commerce",
 "pg_codes": [
   "knet-apple"

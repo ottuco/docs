@@ -100,6 +100,12 @@ const sidebar: SidebarsConfig = {
           label: "Get a single wallet operation by id",
           className: "api-method post",
         },
+        {
+          type: "doc",
+          id: "developers/apis/wallet-finalization-status",
+          label: "Get the finalization status of a payment session",
+          className: "api-method get",
+        },
       ],
     },
     {
