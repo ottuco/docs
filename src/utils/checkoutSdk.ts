@@ -13,7 +13,7 @@ import { ACTIVE_CONNECT } from "./sandbox";
  * Switch to https://assets.ottu.net/checkout/v3/checkout.min.js when released.
  */
 export const CHECKOUT_SDK_CDN_URL =
-  "https://150330.dd33t4o2i3w1b.amplifyapp.com/checkout/v3/checkout.min.js";
+  "https://assets.ottu.dev/checkout/v3/checkout.min.js";
 
 /** Default forms of payment shown in demos. */
 export const CHECKOUT_SDK_FORMS_OF_PAYMENT = [
