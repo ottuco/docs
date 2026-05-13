@@ -6,8 +6,10 @@ hide_table_of_contents: true
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import CodeBlock from "@theme/CodeBlock";
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import FAQ, { FAQItem } from '@site/src/components/FAQ';
+import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
 # Native Payments
 
@@ -104,10 +106,9 @@ graph LR
 <Tabs groupId="native-payment-provider" queryString>
 <TabItem value="apple-pay" label="Apple Pay">
 
-```bash
-curl -X POST "https://ksa.ottu.dev/b/pbl/v2/payment/apple-pay/" \
-  -H "Authorization: Api-Key your_api_key" \
-  -H "Content-Type: application/json" \
+<CodeBlock language="bash" title="Apple Pay native payment">{`curl -X POST "${OTTU_CONNECT_BASE_URL}/b/pbl/v2/payment/apple-pay/" \\
+  -H "Authorization: Api-Key your_api_key" \\
+  -H "Content-Type: application/json" \\
   -d '{
     "session_id": "your_session_id",
     "pg_code": "apple-pay-gateway",
@@ -128,16 +129,14 @@ curl -X POST "https://ksa.ottu.dev/b/pbl/v2/payment/apple-pay/" \
       },
       "transactionIdentifier": "transaction_id..."
     }
-  }'
-```
+  }'`}</CodeBlock>
 
 </TabItem>
 <TabItem value="google-pay" label="Google Pay">
 
-```bash
-curl -X POST "https://ksa.ottu.dev/b/pbl/v2/payment/google-pay/" \
-  -H "Authorization: Api-Key your_api_key" \
-  -H "Content-Type: application/json" \
+<CodeBlock language="bash" title="Google Pay native payment">{`curl -X POST "${OTTU_CONNECT_BASE_URL}/b/pbl/v2/payment/google-pay/" \\
+  -H "Authorization: Api-Key your_api_key" \\
+  -H "Content-Type: application/json" \\
   -d '{
     "session_id": "your_session_id",
     "pg_code": "google-pay-gateway",
@@ -152,21 +151,18 @@ curl -X POST "https://ksa.ottu.dev/b/pbl/v2/payment/google-pay/" \
         }
       }
     }
-  }'
-```
+  }'`}</CodeBlock>
 
 </TabItem>
 <TabItem value="auto-debit" label="Auto-Debit">
 
-```bash
-curl -X POST "https://ksa.ottu.dev/b/pbl/v2/payment/auto-debit/" \
-  -H "Authorization: Api-Key your_api_key" \
-  -H "Content-Type: application/json" \
+<CodeBlock language="bash" title="Auto-debit native payment">{`curl -X POST "${OTTU_CONNECT_BASE_URL}/b/pbl/v2/payment/auto-debit/" \\
+  -H "Authorization: Api-Key your_api_key" \\
+  -H "Content-Type: application/json" \\
   -d '{
     "session_id": "your_session_id",
     "token": "saved_card_token"
-  }'
-```
+  }'`}</CodeBlock>
 
 </TabItem>
 </Tabs>

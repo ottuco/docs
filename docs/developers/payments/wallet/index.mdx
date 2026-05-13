@@ -143,15 +143,13 @@ Add a mount point to your page — the SDK looks for an element matching `select
 
 Then initialize the SDK with the `session_id` returned by step 2:
 
-```javascript title="Checkout SDK init with wallet enabled"
-Checkout.init({
+<CodeBlock language="javascript" title="Checkout SDK init with wallet enabled">{`Checkout.init({
   selector: "checkout",
-  merchant_id: "ksa.ottu.dev", // use your merchant id
+  merchant_id: "${OTTU_CONNECT_BASE_URL.replace("https://", "")}", // use your merchant id
   apiKey: "YOUR_API_PUBLIC_KEY",
   session_id: "sess_9f8e7d6c5b4a",
   formsOfPayment: ["wallet", "ottu-sandbox"], // or omit to show all
-});
-```
+});`}</CodeBlock>
 
 #### 4. Customer applies wallet credit at checkout
 

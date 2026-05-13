@@ -55,7 +55,7 @@ Lead with what the feature does for their business. No code. Dashboard-focused w
 - **Hyperlinks throughout** — link inline in body text where concepts are mentioned, don't batch all links at the bottom
 - **Code examples must be copy-paste ready** — runnable against the sandbox environment with only an API key substitution
 - **Demo `merchant_id`** — code samples that show the Checkout SDK `merchant_id` parameter MUST use `ksa.ottu.dev` (the demo merchant on Ottu's KSA dev environment). Existing usage in `docs/developers/payments/checkout-sdk/web.mdx` is the canonical reference.
-- **API base URLs in code samples** — never hardcode `https://ksa.ottu.dev` in fenced code blocks. Import `OTTU_CONNECT_BASE_URL` from `@site/src/constants/api` and render the sample with `<CodeBlock>` template literals. (`OTTU_DEV_BASE_URL` still exists as a backwards-compatible alias of the same value.) Canonical reference: `docs/developers/payments/wallet/index.mdx`.
+- **API base URLs in code samples** — never hardcode `https://ksa.ottu.dev` in fenced code blocks. Import `OTTU_CONNECT_BASE_URL` from `@site/src/constants/api` and render the sample with `<CodeBlock>` template literals. (`OTTU_DEV_BASE_URL` is a deprecated alias that now resolves to the same URL — prefer `OTTU_CONNECT_BASE_URL` in new code.) Canonical reference: `docs/developers/payments/wallet/index.mdx`.
 - **Multi-language code tabs** — use Docusaurus `<Tabs>` with `groupId="language"` in this order: cURL, Python, Node.js, PHP
 - **Self-contained** — don't redirect the reader to another page for essential information; include the key context on the current page with a link for deeper reading
 
