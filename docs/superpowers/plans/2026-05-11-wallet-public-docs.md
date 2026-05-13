@@ -1834,7 +1834,7 @@ export async function createSandboxWalletCredit(
     {
       method: "POST",
       headers: {
-        Authorization: `Api-Key ${SANDBOX_AUTH_KEY}`,
+        Authorization: `Api-Key ${ACTIVE_CONNECT.sdkApiKey}`,
         "Content-Type": "application/json",
         "Merchant-Id": SANDBOX_MERCHANT_ID,
         "Idempotency-Key": idempotencyKey,
@@ -2035,7 +2035,7 @@ import {
   createSandboxSession,
   createSandboxWalletCredit,
   SANDBOX_MERCHANT_ID,
-  SANDBOX_API_KEY,
+  ACTIVE_CONNECT,
   type WalletCreditResult,
 } from "@site/src/utils/sandbox";
 import styles from "./styles.module.css";
@@ -2141,8 +2141,8 @@ export default function WalletDemoInner(): React.ReactElement {
 
     window.Checkout.init({
       selector: "wallet-demo-mount",
-      merchant_id: SANDBOX_MERCHANT_ID,
-      apiKey: SANDBOX_API_KEY,
+      merchant_id: ACTIVE_CONNECT.merchantId,
+      apiKey: ACTIVE_CONNECT.sdkApiKey,
       session_id: state.sessionId,
       formsOfPayment: ["wallet", "ottu_sandbox"],
     });

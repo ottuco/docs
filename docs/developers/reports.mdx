@@ -92,7 +92,7 @@ For S3-backed storage, the download returns a `302` redirect to a pre-signed S3 
 <StepGuide steps={[
   {
     title: "List available reports",
-    description: <><pre><code>{`curl -X GET "https://sandbox.ottu.net/b/api/v1/reports/files/?limit=10" \\
+    description: <><pre><code>{`curl -X GET "https://ksa.ottu.dev/b/api/v1/reports/files/?limit=10" \\
   -H "Api-Key: your_private_api_key"`}</code></pre>The response includes completed reports, each with a secure <code>download_action.url</code>. Use query parameters (see <a href="#api-reference">API Reference</a>) to filter by date, interval, or source.</>,
   },
   {

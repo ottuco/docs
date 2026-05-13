@@ -80,6 +80,36 @@ const sidebar: SidebarsConfig = {
     },
     {
       type: "category",
+      label: "Wallet",
+      items: [
+        {
+          type: "doc",
+          id: "developers/apis/wallet-accounts",
+          label: "List wallet accounts for a customer",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/apis/wallet-entries",
+          label: "List ledger entries on a customer's wallet account",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/apis/wallet-operation-details",
+          label: "Get a single wallet operation by id",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/apis/wallet-finalization-status",
+          label: "Get the finalization status of a payment session",
+          className: "api-method get",
+        },
+      ],
+    },
+    {
+      type: "category",
       label: "Invoice API",
       items: [
         {
@@ -120,7 +150,7 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
-          id: "developers/apis/apple-direct-payment",
+          id: "developers/apis/apple-native-payment",
           label: "Native Payment API(Apple Pay)",
           className: "api-method post",
         },
@@ -138,8 +168,14 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
-          id: "developers/apis/google-direct-payment",
+          id: "developers/apis/google-native-payment",
           label: "Native Payment API(Google Pay)",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/apis/wallet-native-payment",
+          label: "Native Payment API (Wallet)",
           className: "api-method post",
         },
       ],
