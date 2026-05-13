@@ -28,7 +28,7 @@ toc_max_heading_level: 3
   ### Preloading               ← setupPreload (if supported)
   ### Theme                    ← theme object, example themes, scenarios, supported values
 
-## Wallet Configuration
+## Payment Services
   ### Apple Pay                ← init config + button customization + gateway-specific notes (e.g., KNET)
   ### Google Pay               ← init config + button customization
   ### STC Bank                  ← init config + button customization
@@ -99,14 +99,14 @@ Properties are grouped into categories under `## Properties`, each as a `###`:
 | `### Preloading` | setupPreload | Performance optimization — pre-fetched transaction details |
 | `### Theme` | theme object | Appearance customization — examples, scenarios, supported CSS classes |
 
-Wallet-specific init objects (`applePayInit`, `googlePayInit`) are **NOT** properties — they belong under `## Wallet Configuration > ### [Wallet Name]`.
+Wallet-specific init objects (`applePayInit`, `googlePayInit`) are **NOT** properties — they belong under `## Payment Services > ### [Wallet Name]`.
 
-## Wallet Configuration
+## Payment Services
 
-All wallet-specific content is consolidated under `## Wallet Configuration`, grouped by wallet:
+All wallet-specific content is consolidated under `## Payment Services`, grouped by wallet:
 
 ```
-## Wallet Configuration
+## Payment Services
   ### Apple Pay
     #### applePayInit            ← init object, supported/unsupported properties
     #### Customize Button        ← button appearance, theme overrides
@@ -199,7 +199,7 @@ Not all sections apply to all platforms:
 | Installation | script tag | CocoaPods/SPM | Gradle | pub.dev |
 | Live Demo | CheckoutDemo component | N/A | N/A | Possible via Flutter Web |
 | Theme | Full CSS customization | Platform-specific | Platform-specific | Platform-specific |
-| Wallet Config | applePayInit, googlePayInit | Apple Pay native | Google Pay native | Both |
+| Payment Services | applePayInit, googlePayInit | Apple Pay native | Google Pay native | Both |
 | showPopup | Supported | May differ | May differ | May differ |
 
 Adapt section content to the platform, but keep the heading names and order consistent.
