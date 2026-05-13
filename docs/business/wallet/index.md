@@ -47,7 +47,7 @@ Refunding to wallet credits the customer's wallet balance instead of returning f
     title: "Click Refund to Wallet",
     description: <>Use the <strong>Refund to Wallet</strong> button in the operations panel.</>,
     image: "/img/business/wallet/refund-02-refund-button.png",
-    imageAlt: "Refund button highlighted in the operations panel",
+    imageAlt: "Refund to Wallet button highlighted in the operations panel",
   },
   {
     title: "Confirm amount and submit",
