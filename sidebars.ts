@@ -319,6 +319,7 @@ const sidebars: SidebarsConfig = {
         {type: 'link', label: 'Refund to Wallet',   href: '/business/wallet#refund-to-wallet'},
         {type: 'link', label: 'Wallet at Checkout', href: '/business/wallet#wallet-at-checkout'},
         {type: 'link', label: 'Wallet Reporting',   href: '/business/wallet#wallet-reporting'},
+        {type: 'link', label: 'Exporting',     href: '/business/wallet#exporting'},
         {type: 'link', label: 'Things to know',     href: '/business/wallet#things-to-know'},
         {type: 'link', label: 'FAQ',                href: '/business/wallet#faq'},
       ],

@@ -284,16 +284,10 @@ Refunding to wallet credits the customer's wallet balance instead of returning f
     imageAlt: "Paid transaction opened in Payment Management",
   },
   {
-    title: "Click Refund",
-    description: <>Use the <strong>Refund</strong> button in the operations panel.</>,
+    title: "Click Refund to Wallet",
+    description: <>Use the <strong>Refund to Wallet</strong> button in the operations panel.</>,
     image: "/img/business/wallet/refund-02-refund-button.png",
     imageAlt: "Refund button highlighted in the operations panel",
-  },
-  {
-    title: "Choose destination: Wallet",
-    description: <>In the refund dialog, switch destination from <strong>Original Gateway</strong> to <strong>Wallet</strong>.</>,
-    image: "/img/business/wallet/refund-03-destination.png",
-    imageAlt: "Refund dialog with Wallet destination selected",
   },
   {
     title: "Confirm amount and submit",
