@@ -35,6 +35,10 @@ Refunding to wallet credits the customer's wallet balance instead of returning f
 - You want to issue store credit, loyalty, or goodwill credit without payment-gateway fees.
 - You are processing a goodwill compensation that wasn't tied to a specific payment.
 
+{/* TODO #153887: replace the 5 refund-*.png images with real dashboard
+    screenshots of the Refund-to-Wallet flow (ksa.ottu.dev). Use a
+    synthetic customer ID (e.g. e2e_d05_*) and crop out any real customer
+    name, email, or order metadata before committing. */}
 <StepGuide steps={[
   {
     title: "Open the transaction",
@@ -74,6 +78,11 @@ The next time the customer reaches checkout in your store (same currency), they'
 
 This section explains what your customer sees when they have a wallet balance and reach checkout — so you can answer support questions and design messaging on your own site.
 
+{/* TODO #153887: coordinate with Farhan Tariq on these checkout-side
+    shots. He is producing the same Wallet-at-Checkout flow for the
+    Checkout SDK developer docs (#150388) — reuse his captures here so
+    the business and developer docs show identical screens. PII rule:
+    synthetic customer / order data only. */}
 <StepGuide steps={[
   {
     title: "Wallet appears as a method",
@@ -135,6 +144,9 @@ The dashboard provides three screens for tracking wallet activity: **Accounts**,
 
 Lists every customer who has a wallet account with your business, with current balance per currency.
 
+{/* TODO #153887: capture real Accounts / Ledger / Operations screens
+    from the dashboard. Filter the tables to show only e2e_* synthetic
+    customers before screenshotting — no real customer names. */}
 <StepGuide steps={[
   {
     title: "Open Wallet → Accounts",
@@ -190,7 +202,20 @@ Filter by:
 
 You can export Accounts, Ledger, or Operations data as **CSV** or **XLSX** for offline analysis and accounting.
 
+{/* TODO #153887: replace reporting-06-export.png with the real export
+    dropdown, and add the two-step cursor screenshots requested in the
+    walkthrough: (1) where the Export button lives, (2) where the file
+    lands once generated. Suggested filenames:
+      /img/business/wallet/reporting-07-export-cursor-step-1.png
+      /img/business/wallet/reporting-07-export-cursor-step-2.png */}
 ![Export dropdown showing CSV and XLSX options](/img/business/wallet/reporting-06-export.png)
+
+{/* TODO #153887: add the two-step cursor flow images here once captured.
+    Drop the reporting-06 reference above if the new pair replaces it.
+    Suggested embeds (uncomment when the PNGs land):
+      ![Step 1 — clicking Export](/img/business/wallet/reporting-07-export-cursor-step-1.png)
+      ![Step 2 — generated file ready for download](/img/business/wallet/reporting-07-export-cursor-step-2.png) */}
+
 
 ## Things to know
 
