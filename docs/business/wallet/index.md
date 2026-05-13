@@ -6,6 +6,7 @@ toc_max_heading_level: 3
 ---
 
 import StepGuide from "@site/src/components/StepGuide";
+import FAQ, { FAQItem } from "@site/src/components/FAQ";
 
 # Wallet
 
@@ -202,49 +203,41 @@ You can export Accounts, Ledger, or Operations data as **CSV** or **XLSX** for o
 
 ## FAQ
 
-#### Can I refund partial amounts to wallet?
-
-Yes. Enter any amount up to the original payment amount.
-
-#### Can I refund to a wallet that doesn't exist yet?
-
-Yes. If the customer has no wallet account for that currency, one is created automatically on the first refund.
-
-#### Can I undo a refund-to-wallet?
-
-You cannot edit or delete the original credit — wallet history is immutable. You can issue an opposing debit entry (a reversal) to offset it. Contact [csd@ottu.com](mailto:csd@ottu.com) if you need help raising a reversal.
-
-#### Does the customer get notified?
-
-No, customers are not notified automatically when a wallet credit is issued today. If you want to notify them, message them through your own channels.
-
-#### Why doesn't wallet show for some orders?
-
-The order may be authorize-only, the customer may have zero balance in that currency, or the `customer_id` may differ between sessions. Check the order's `customer_id` matches the wallet's.
-
-#### What happens if the customer disputes the original payment after the refund-to-wallet?
-
-Disputes can be resolved manually. Contact [csd@ottu.com](mailto:csd@ottu.com) to raise a reversal.
-
-#### Does wallet credit expire?
-
-No, wallet credit does not expire today.
-
-#### If a customer cancels or their payment fails, when do they get their wallet credit back?
-
-Reserved wallet funds are automatically restored about four hours after an abandoned, cancelled, or failed payment. No action is needed.
-
-#### Can I edit a wallet entry?
-
-No. Entries are immutable. To correct an error, issue a reversal — an opposing debit or credit. Contact [csd@ottu.com](mailto:csd@ottu.com) for help.
-
-#### Can I close a customer's wallet?
-
-No. A wallet account opens automatically on the first refund-to-wallet and behaves as non-existent when the balance is zero — no maintenance needed.
-
-#### How do I find the original payment behind a wallet credit?
-
-Open the ledger entry — the **Linked session** field gives you the original payment's `session_id`. Click it to jump to the payment in Payment Management.
+<FAQ>
+  <FAQItem question="Can I refund partial amounts to wallet?">
+    Yes. Enter any amount up to the original payment amount.
+  </FAQItem>
+  <FAQItem question="Can I refund to a wallet that doesn't exist yet?">
+    Yes. If the customer has no wallet account for that currency, one is created automatically on the first refund.
+  </FAQItem>
+  <FAQItem question="Can I undo a refund-to-wallet?">
+    You cannot edit or delete the original credit — wallet history is immutable. You can issue an opposing debit entry (a reversal) to offset it. Contact [csd@ottu.com](mailto:csd@ottu.com) if you need help raising a reversal.
+  </FAQItem>
+  <FAQItem question="Does the customer get notified?">
+    No, customers are not notified automatically when a wallet credit is issued today. If you want to notify them, message them through your own channels.
+  </FAQItem>
+  <FAQItem question="Why doesn't wallet show for some orders?">
+    The order may be authorize-only, the customer may have zero balance in that currency, or the `customer_id` may differ between sessions. Check the order's `customer_id` matches the wallet's.
+  </FAQItem>
+  <FAQItem question="What happens if the customer disputes the original payment after the refund-to-wallet?">
+    Disputes can be resolved manually. Contact [csd@ottu.com](mailto:csd@ottu.com) to raise a reversal.
+  </FAQItem>
+  <FAQItem question="Does wallet credit expire?">
+    No, wallet credit does not expire today.
+  </FAQItem>
+  <FAQItem question="If a customer cancels or their payment fails, when do they get their wallet credit back?">
+    Reserved wallet funds are automatically restored about four hours after an abandoned, cancelled, or failed payment. No action is needed.
+  </FAQItem>
+  <FAQItem question="Can I edit a wallet entry?">
+    No. Entries are immutable. To correct an error, issue a reversal — an opposing debit or credit. Contact [csd@ottu.com](mailto:csd@ottu.com) for help.
+  </FAQItem>
+  <FAQItem question="Can I close a customer's wallet?">
+    No. A wallet account opens automatically on the first refund-to-wallet and behaves as non-existent when the balance is zero — no maintenance needed.
+  </FAQItem>
+  <FAQItem question="How do I find the original payment behind a wallet credit?">
+    Open the ledger entry — the **Linked session** field gives you the original payment's `session_id`. Click it to jump to the payment in Payment Management.
+  </FAQItem>
+</FAQ>
 
 ## What's Next?
 
