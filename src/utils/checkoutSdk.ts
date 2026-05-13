@@ -26,7 +26,6 @@ export const CHECKOUT_SDK_FORMS_OF_PAYMENT = [
   "urPay",
 ];
 
-
 /** Full branded theme used in the CheckoutDemo on the SDK docs page. */
 export const CHECKOUT_SDK_THEME: Record<string, any> = {
   main: { padding: "0px", width: "100%" },
@@ -56,12 +55,14 @@ export const CHECKOUT_SDK_THEME: Record<string, any> = {
     "font-size": "16px",
     "font-style": "normal",
     "font-weight": "500",
-    "background-color": "#fafafa",
+    "background-color": "#f1f3f5",
     color: "#B00020",
     "border-width": "0px",
     "text-decoration": "underline",
   },
-  "terms-container": { margin: "0px 0px 0px 0px" },
+  "terms-container": {
+    margin: "0px 0px 0px 0px",
+  },
   "checkbox-label": {
     color: "#1A1A1A",
     "font-family": "Poppins",
@@ -86,16 +87,25 @@ export const CHECKOUT_SDK_THEME: Record<string, any> = {
     "font-size": "14px",
     "font-weight": "400",
   },
-  "pci-logos": { gap: "12px", margin: "20px 0px 0px 0px" },
-  "wallet-buttons": { margin: "12px 0px -6px 0px" },
+  "pci-logos": {
+    gap: "12px",
+    margin: "20px 0px 0px 0px",
+  },
+  "wallet-buttons": {
+    margin: "12px 0px -6px 0px",
+  },
   methods: {
     border: "#DADADA",
     "border-style": "solid",
     "border-width": "1px",
     "border-radius": "8px",
   },
-  "selected-method": { border: "#0053A4" },
-  border: { display: "none" },
+  "selected-method": {
+    border: "#0053A4",
+  },
+  border: {
+    display: "none",
+  },
   "amount-box": {
     padding: "16px 12px",
     margin: "0px 0px 0px 0px",
@@ -108,7 +118,7 @@ export const CHECKOUT_SDK_THEME: Record<string, any> = {
   "amount-label": {
     color: "#1A1A1A",
     "font-family": "Poppins",
-    "font-size": "20px",
+    "font-size": "16px",
     "font-weight": "600",
   },
   amount: {
@@ -120,10 +130,12 @@ export const CHECKOUT_SDK_THEME: Record<string, any> = {
   "card-background": {
     "background-color": "#ffffff",
     "border-bottom-radius": "8px",
-    "border-color": "#0053A4",
+    "border-color": "transparent",
     border: "solid",
   },
-  "card-input-border": { "border-radius": "8px" },
+  "card-input-border": {
+    "border-radius": "8px",
+  },
   "card-input-fields": {
     color: "#1A1A1A",
     "font-family": "Poppins",
@@ -136,7 +148,9 @@ export const CHECKOUT_SDK_THEME: Record<string, any> = {
     "font-family": "Poppins",
     "font-size": "16px",
   },
-  "field-error-border": { "border-color": "#dc3545" },
+  "field-error-border": {
+    "border-color": "#dc3545",
+  },
   "error-message": {
     color: "#dc3545",
     "font-family": "Poppins",
@@ -151,9 +165,16 @@ export const CHECKOUT_SDK_THEME: Record<string, any> = {
     "background-color": "#FFFFFF",
     "box-shadow": "0 0 4px rgba(0, 83, 164, 0.4)",
   },
-  "selected-checkbox": { "background-color": "#0053A4" },
+  "selected-checkbox": {
+    "background-color": "#0053A4",
+  },
+
   responsive: {
-    450: { "amount-box": { "justify-content": "space-between" } },
+    450: {
+      "amount-box": {
+        "justify-content": "space-between",
+      },
+    },
   },
 };
 
