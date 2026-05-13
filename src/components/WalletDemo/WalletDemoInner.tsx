@@ -159,11 +159,6 @@ export default function WalletDemoInner() {
       ? state.sessionId
       : null;
 
-  const sdkPgCode =
-    state.status === "sdk_loading" || state.status === "ready" || state.status === "complete"
-      ? state.pgCode
-      : null;
-
   const callbacks = useMemo(
     () => createDemoCallbacks(() => dispatch({ type: "COMPLETE" })),
     []
@@ -256,7 +251,10 @@ export default function WalletDemoInner() {
           onReady={() => dispatch({ type: "SDK_READY" })}
           onError={(message) => dispatch({ type: "ERROR", message })}
           callbacks={callbacks}
-          formsOfPayment={sdkPgCode ? ["wallet", sdkPgCode] : ["wallet"]}
+          // formsOfPayment intentionally omitted — per the SDK docs the
+          // wallet method renders automatically when balance is present,
+          // and explicit ["wallet", pg_code] filters appear to suppress
+          // all rendering on the current Amplify-preview SDK build.
         />
       )}
     </div>

@@ -71,7 +71,11 @@ export default function CheckoutSDKEmbed({
   }, [sessionId, containerId]);
 
   return (
-    <div style={{ minHeight: 380, marginTop: 16, borderRadius: 10, overflow: "hidden", border: "1px solid var(--ifm-global-border-color)" }}>
+    /* The Checkout SDK injects its own card-style frame (rounded border) into
+       #ottu-checkout-shadow-wrapper, so this wrapper stays borderless to avoid
+       a duplicated outer edge. minHeight gives the demo a stable footprint
+       while the SDK is loading. */
+    <div style={{ minHeight: 380, marginTop: 16 }}>
       <div id={containerId} ref={containerRef} />
     </div>
   );
