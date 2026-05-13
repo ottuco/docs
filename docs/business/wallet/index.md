@@ -36,10 +36,6 @@ Refunding to wallet credits the customer's wallet balance instead of returning f
 - You want to issue store credit, loyalty, or goodwill credit without payment-gateway fees.
 - You are processing a goodwill compensation that wasn't tied to a specific payment.
 
-{/* TODO #153887: replace the 5 refund-*.png images with real dashboard
-    screenshots of the Refund-to-Wallet flow (ksa.ottu.dev). Use a
-    synthetic customer ID (e.g. e2e_d05_*) and crop out any real customer
-    name, email, or order metadata before committing. */}
 <StepGuide steps={[
   {
     title: "Open the transaction",
@@ -48,28 +44,22 @@ Refunding to wallet credits the customer's wallet balance instead of returning f
     imageAlt: "Paid transaction opened in Payment Management",
   },
   {
-    title: "Click Refund",
-    description: <>Use the <strong>Refund</strong> button in the operations panel.</>,
+    title: "Click Refund to Wallet",
+    description: <>Use the <strong>Refund to Wallet</strong> button in the operations panel.</>,
     image: "/img/business/wallet/refund-02-refund-button.png",
-    imageAlt: "Refund button highlighted in the operations panel",
-  },
-  {
-    title: "Choose destination: Wallet",
-    description: <>In the refund dialog, switch destination from <strong>Original Gateway</strong> to <strong>Wallet</strong>.</>,
-    image: "/img/business/wallet/refund-03-destination.png",
-    imageAlt: "Refund dialog with Wallet destination selected",
+    imageAlt: "Refund to Wallet button highlighted in the operations panel",
   },
   {
     title: "Confirm amount and submit",
-    description: <>Enter the full or partial refund amount, add an optional reason, and click <strong>Confirm</strong>. The wallet balance is credited immediately.</>,
+    description: <>Enter the full or partial refund amount, and click <strong>YES</strong>. The wallet balance is credited immediately.</>,
     image: "/img/business/wallet/refund-04-confirm.png",
     imageAlt: "Confirming the wallet refund amount",
   },
   {
     title: "See the confirmation",
-    description: <>A success banner shows the new wallet balance for the customer. The refund appears in both the transaction history and the wallet ledger.</>,
+    description: <>A success popup shows the refunded wallet balance for the customer. The refund appears in both the transaction history and the wallet ledger.</>,
     image: "/img/business/wallet/refund-05-success.png",
-    imageAlt: "Refund-to-wallet success banner showing new balance",
+    imageAlt: "Refund-to-wallet success popup showing new balance",
   },
 ]} />
 
@@ -109,9 +99,6 @@ The dashboard provides three screens for tracking wallet activity: **Accounts**,
 
 Lists every customer who has a wallet account with your business, with current balance per currency.
 
-{/* TODO #153887: capture real Accounts / Ledger / Operations screens
-    from the dashboard. Filter the tables to show only e2e_* synthetic
-    customers before screenshotting — no real customer names. */}
 <StepGuide steps={[
   {
     title: "Open Wallet → Accounts",
@@ -121,7 +108,7 @@ Lists every customer who has a wallet account with your business, with current b
   },
   {
     title: "Search and filter",
-    description: <>Filter by customer ID, currency, or balance range. Sort by balance to find top-credit customers.</>,
+    description: <>Filter by customer ID, currency, or Status.</>,
     image: "/img/business/wallet/reporting-02-filter.png",
     imageAlt: "Filter and sort controls on the Accounts screen",
   },
@@ -139,15 +126,25 @@ Shows every credit, debit, and reservation entry for an account. Entries are imm
 
 Each entry shows:
 
-- **Entry ID** — unique identifier for the ledger row.
-- **Type** — `credit`, `debit`, or `reservation`.
+- **Operation ID** — unique identifier for the ledger row.
+- **Entry Type** — `credit_refund`, `debit_payment`, `debit_adjustment`, `credit_adjustment`, `reserve`, `release`, `expire`, or `reversal`.
 - **Amount** — signed amount in the wallet currency.
-- **Balance after** — wallet balance immediately after this entry.
-- **Funding source** — `refund_from_payment`, `manual_adjustment`, `promo`, or `goodwill` for credits.
+- **Direction** — High-level accounting direction: `credit` (balance increases) or `debit` (balance decreases). Use this for quick filtering; see Entry Type for the exact operation.
+- **Status** — Current state of the entry (`pending`, `completed`, `failed`, etc.).
 - **Linked session** — the original payment session this entry references, if any.
 - **Timestamp** — when the entry was recorded.
 
 ![Ledger screen with columns visible](/img/business/wallet/reporting-04-ledger.png)
+
+Filter by:
+
+- Entry type (credit / debit / reserve / release)
+- Customer ID
+- Currency
+- Date range
+- Linked session ID
+
+![Ledger screen with Filters visible](/img/business/wallet/reporting-ledger-filters.png)
 
 ### Operations screen
 
@@ -155,31 +152,21 @@ Lists individual wallet operations (a single credit, debit, or reservation cycle
 
 ![Operations screen with filters and operation rows](/img/business/wallet/reporting-05-operations.png)
 
-Filter by:
-
-- Operation type (credit / debit / reservation / commit / release)
-- Customer ID
-- Currency
-- Date range
-- Linked session ID
-
-### Exporting
+## Exporting
 
 You can export Accounts, Ledger, or Operations data as **CSV** or **XLSX** for offline analysis and accounting.
 
-{/* TODO #153887: replace reporting-06-export.png with the real export
-    dropdown, and add the two-step cursor screenshots requested in the
-    walkthrough: (1) where the Export button lives, (2) where the file
-    lands once generated. Suggested filenames:
-      /img/business/wallet/reporting-07-export-cursor-step-1.png
-      /img/business/wallet/reporting-07-export-cursor-step-2.png */}
-![Export dropdown showing CSV and XLSX options](/img/business/wallet/reporting-06-export.png)
+The Export Entries dialog lets you narrow the rows by Order Number, Session ID, Direction, Entry Type, Status, Provider, PG Code, or Date range, and choose **CSV** or **XLSX** as the output format.
 
-{/* TODO #153887: add the two-step cursor flow images here once captured.
-    Drop the reporting-06 reference above if the new pair replaces it.
-    Suggested embeds (uncomment when the PNGs land):
-      ![Step 1 — clicking Export](/img/business/wallet/reporting-07-export-cursor-step-1.png)
-      ![Step 2 — generated file ready for download](/img/business/wallet/reporting-07-export-cursor-step-2.png) */}
+![Export Entries dialog with filter fields and CSV / XLSX file-format options](/img/business/wallet/reporting-06-export.png)
+
+**Two-step walkthrough:**
+
+![Step 1 — click Export Entries on the account detail page](/img/business/wallet/reporting-07-export-cursor-step-1.png)
+
+After you submit, the file is generated asynchronously. Open **Generated Reports → Wallet Exports** to find it; rows with a green download arrow are ready, a progressive circle means the file is in process, and an X means the file generation failed.
+
+![Step 2 — download the generated file from Generated Reports → Wallet Exports](/img/business/wallet/reporting-07-export-cursor-step-2.png)
 
 
 ## Things to know
