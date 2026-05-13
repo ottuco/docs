@@ -105,7 +105,7 @@ graph LR
 <TabItem value="apple-pay" label="Apple Pay">
 
 ```bash
-curl -X POST "https://sandbox.ottu.net/b/pbl/v2/payment/apple-pay/" \
+curl -X POST "https://ksa.ottu.dev/b/pbl/v2/payment/apple-pay/" \
   -H "Authorization: Api-Key your_api_key" \
   -H "Content-Type: application/json" \
   -d '{
@@ -135,7 +135,7 @@ curl -X POST "https://sandbox.ottu.net/b/pbl/v2/payment/apple-pay/" \
 <TabItem value="google-pay" label="Google Pay">
 
 ```bash
-curl -X POST "https://sandbox.ottu.net/b/pbl/v2/payment/google-pay/" \
+curl -X POST "https://ksa.ottu.dev/b/pbl/v2/payment/google-pay/" \
   -H "Authorization: Api-Key your_api_key" \
   -H "Content-Type: application/json" \
   -d '{
@@ -159,7 +159,7 @@ curl -X POST "https://sandbox.ottu.net/b/pbl/v2/payment/google-pay/" \
 <TabItem value="auto-debit" label="Auto-Debit">
 
 ```bash
-curl -X POST "https://sandbox.ottu.net/b/pbl/v2/payment/auto-debit/" \
+curl -X POST "https://ksa.ottu.dev/b/pbl/v2/payment/auto-debit/" \
   -H "Authorization: Api-Key your_api_key" \
   -H "Content-Type: application/json" \
   -d '{
