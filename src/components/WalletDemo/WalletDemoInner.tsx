@@ -256,7 +256,7 @@ export default function WalletDemoInner() {
           onReady={() => dispatch({ type: "SDK_READY" })}
           onError={(message) => dispatch({ type: "ERROR", message })}
           callbacks={callbacks}
-          formsOfPayment={sdkPgCode ? ["wallet", sdkPgCode] : ["wallet"]}
+          formsOfPayment={sdkPgCode ? ["wallet", "jazz", "ottuPG"] : ["wallet"]}
         />
       )}
     </div>
