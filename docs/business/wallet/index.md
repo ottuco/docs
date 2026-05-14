@@ -122,29 +122,35 @@ Lists every customer who has a wallet account with your business, with current b
 
 ### Ledger screen
 
-Shows every credit, debit, and reservation entry for an account. Entries are immutable — they cannot be edited or deleted. Corrections are made via reversals.
+Every credit, debit, and reservation for an account lives in the ledger. Entries are **immutable** — corrections are made by adding reversal entries, never by editing the originals.
 
-Each entry shows:
+<StepGuide steps={[
+  {
+    title: "View the entries",
+    description: <>Open any account from the <strong>Accounts</strong> screen to see its full history — every credit, debit, and reservation, with the entry type, amount, direction, status, and linked payment session for each row.</>,
+    image: "/img/business/wallet/reporting-04-ledger.png",
+    imageAlt: "Ledger screen with entry rows visible",
+  },
+  {
+    title: "Filter the entries",
+    description: <>Use the <strong>Filter</strong> panel to narrow by entry type (credit, debit, reserve, release), status, currency, date range, or linked session ID.</>,
+    image: "/img/business/wallet/reporting-ledger-filters.png",
+    imageAlt: "Ledger screen with the filter panel open",
+  },
+]} />
+
+<details>
+<summary>What each column means</summary>
 
 - **Operation ID** — unique identifier for the ledger row.
 - **Entry Type** — `credit_refund`, `debit_payment`, `debit_adjustment`, `credit_adjustment`, `reserve`, `release`, `expire`, or `reversal`.
 - **Amount** — signed amount in the wallet currency.
-- **Direction** — High-level accounting direction: `credit` (balance increases) or `debit` (balance decreases). Use this for quick filtering; see Entry Type for the exact operation.
-- **Status** — Current state of the entry (`pending`, `completed`, `failed`, etc.).
+- **Direction** — high-level accounting direction: `credit` (balance increases) or `debit` (balance decreases). Use it for quick filtering; see Entry Type for the exact operation.
+- **Status** — current state of the entry (`pending`, `completed`, `failed`, etc.).
 - **Linked session** — the original payment session this entry references, if any.
 - **Timestamp** — when the entry was recorded.
 
-![Ledger screen with columns visible](/img/business/wallet/reporting-04-ledger.png)
-
-Filter by:
-
-- Entry type (credit / debit / reserve / release)
-- Customer ID
-- Currency
-- Date range
-- Linked session ID
-
-![Ledger screen with Filters visible](/img/business/wallet/reporting-ledger-filters.png)
+</details>
 
 ### Operations screen
 
@@ -154,19 +160,28 @@ Lists individual wallet operations (a single credit, debit, or reservation cycle
 
 ## Exporting
 
-You can export Accounts, Ledger, or Operations data as **CSV** or **XLSX** for offline analysis and accounting.
+Export Accounts or Ledger data as **CSV** or **XLSX** for offline analysis and accounting. Exports are generated asynchronously — you queue a report from the account, then pick it up from **Generated Reports** once it's ready.
 
-The Export Entries dialog lets you narrow the rows by Order Number, Session ID, Direction, Entry Type, Status, Provider, PG Code, or Date range, and choose **CSV** or **XLSX** as the output format.
-
-![Export Entries dialog with filter fields and CSV / XLSX file-format options](/img/business/wallet/reporting-06-export.png)
-
-**Two-step walkthrough:**
-
-![Step 1 — click Export Entries on the account detail page](/img/business/wallet/reporting-07-export-cursor-step-1.png)
-
-After you submit, the file is generated asynchronously. Open **Generated Reports → Wallet Exports** to find it; rows with a green download arrow are ready, a progressive circle means the file is in process, and an X means the file generation failed.
-
-![Step 2 — download the generated file from Generated Reports → Wallet Exports](/img/business/wallet/reporting-07-export-cursor-step-2.png)
+<StepGuide steps={[
+  {
+    title: "Click Export Entries",
+    description: <>From any account's detail page, click <strong>Export Entries</strong> next to the Filter button.</>,
+    image: "/img/business/wallet/reporting-04-ledger.png",
+    imageAlt: "Cursor pointing at the Export Entries button on the account detail page",
+  },
+  {
+    title: "Choose filters and format",
+    description: <>Narrow the rows by Order Number, Session ID, Direction, Entry Type, Status, Provider, PG Code, or Date range, pick <strong>CSV</strong> or <strong>XLSX</strong>, then click <strong>Export</strong>.</>,
+    image: "/img/business/wallet/reporting-06-export.png",
+    imageAlt: "Export Entries dialog with filter fields and CSV / XLSX file-format options",
+  },
+  {
+    title: "Download from Generated Reports",
+    description: <>Open <strong>Generated Reports → Wallet Exports</strong>. A green arrow means the file is ready to download, a progress circle means it's still processing, and an X means generation failed.</>,
+    image: "/img/business/wallet/reporting-07-export-cursor-step-2.png",
+    imageAlt: "Generated Reports → Wallet Exports list with download icons per row",
+  },
+]} />
 
 
 ## Things to know
