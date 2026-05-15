@@ -631,6 +631,11 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "link",
+              label: "Reconciliation",
+              href: "/business/wallet#reconciliation",
+            },
+            {
+              type: "link",
               label: "Exporting",
               href: "/business/wallet#exporting",
             },

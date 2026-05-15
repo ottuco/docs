@@ -158,6 +158,107 @@ Lists individual wallet operations (a single credit, debit, or reservation cycle
 
 ![Operations screen with filters and operation rows](/img/business/wallet/reporting-05-operations.png)
 
+## Reconciliation
+
+Wallet-enabled payments settle across two separate rails — the **wallet rail** (funds moved internally between Ottu wallet balances, no card scheme involved) and the **PG rail** (funds charged through a payment gateway and settled by the acquirer). A single customer order may use one rail or both, so your month-end reconciliation needs to account for both sources of funds.
+
+This section explains how Ottu represents a wallet-touched payment in your transaction records, and gives a step-by-step procedure for matching it against your wallet ledger and PG settlement files.
+
+### How a wallet payment appears in your records
+
+Ottu records every order as a **parent transaction** at the full order amount. When part (or all) of the order is paid from the customer's wallet, Ottu also creates a **child transaction** linked to the parent, carrying just the wallet portion. The child shares the same `session_id` as the parent but has its own `order_no`.
+
+There are three flows you will see:
+
+| Flow | Wallet covers | What you see in records |
+|---|---|---|
+| **A — Full wallet (checkout)** | 100% of the order | Parent at the full amount + **one child** at the same amount. No PG attempt. |
+| **B — Partial wallet + PG (checkout)** | Less than 100% | Parent at the full amount, with **one PG attempt** for the remainder + **one child** for the wallet portion. |
+| **C — Native wallet (express checkout)** | 100% of the order | Parent only. **No child transaction.** The wallet leg lives on the parent's single attempt. |
+
+:::note Why the parent shows a "blank" wallet attempt
+After the wallet leg settles, the parent transaction records a zero-amount attempt with the form of payment set to `wallet`. This is bookkeeping — it tells you the parent was finalized through the wallet rail. In partial-wallet flows (B), this blank attempt sits alongside the PG attempt; in full-wallet flows (A), it is the only parent attempt. You should treat it as a finalization marker, not as a separate charge.
+:::
+
+#### Example — partial wallet payment of 100.000 SAR
+
+A customer pays a 100.000 SAR order with 30.000 SAR from their wallet and 70.000 SAR on a card:
+
+| Object | Amount | State | Notes |
+|---|---|---|---|
+| Parent transaction | 100.000 SAR | `PAID` | The full order. |
+| Parent attempt #1 (PG) | 70.000 SAR | `SUCCESS` | Card charge — full PG fee on this leg.\* |
+| Parent attempt #2 (wallet) | 0 | `SUCCESS` | Blank finalization marker, `form_of_payment = wallet`. |
+| Child transaction | 30.000 SAR | `SUCCESS` | Linked to the parent — same `session_id`, new `order_no`. |
+| Child attempt | 30.000 SAR | `SUCCESS` | The wallet leg, fee = 0.\* |
+
+\*With the default fee mode (`fee_on_remainder`), PG fees apply only to the PG portion and the wallet leg is fee-free. If your account is configured for `fee_on_each_portion`, fees are split across both legs — confirm with your account manager which mode you are on before reconciling.
+
+**Reconciliation identity** you should always be able to verify on any wallet-touched parent:
+
+```
+parent.amount == wallet_portion + pg_portion
+```
+
+### Where to find the wallet portion of a payment
+
+Each parent transaction's webhook payload (and dashboard detail page) carries two arrays you will use during reconciliation:
+
+- **`transactions`** — the parent's child transactions. Empty for native flow (C); contains one entry for flows A and B.
+- **`customer_wallet_transactions`** — one entry per wallet provider that touched this payment. Each entry includes `provider_code`, `amount` (in the order currency), `currency`, `operation_id`, and the verbatim `wallet_response` from the wallet service.
+
+:::warning `customer_wallet_transactions` is omitted when no wallet was used
+The key is **not present at all** on payments that never touched a wallet. Your reconciliation script should treat a missing key the same as an empty list.
+:::
+
+**Multi-wallet stacking.** If your setup supports more than one wallet provider (for example, Ottu Wallet + Qitaf), `customer_wallet_transactions` will contain one entry per provider that contributed funds. Sum the `amount` fields to get the total wallet portion of the payment. Ordering is not guaranteed — treat the array as a set.
+
+**Cross-currency reservations.** When the wallet's native ledger currency differs from the order currency (rare, but possible), the entry includes `wallet_amount_native` and `wallet_currency` fields alongside `amount` and `currency`. Reconcile against the wallet ledger using the native values; use `amount`/`currency` for the order-side math.
+
+### Month-end reconciliation procedure
+
+Run this once per settlement period (typically monthly). The goal is to prove that every dirham of order revenue lands in exactly one of two places: your PG settlement file or your wallet ledger.
+
+<StepGuide steps={[
+  {
+    title: "Export your paid parent transactions",
+    description: <>Export every parent transaction in <strong>PAID</strong> state for the period from <strong>Payment Management</strong>. Note each transaction's <code>amount</code>, <code>currency_code</code>, <code>order_no</code>, and <code>session_id</code>.</>,
+  },
+  {
+    title: "Classify each payment by flow",
+    description: <>For each parent, check whether it has child transactions and wallet entries: <strong>no wallet entries</strong> → pure PG payment (no wallet to reconcile); <strong>wallet entries + child transactions</strong> → flow A (full wallet) or B (partial wallet + PG); <strong>wallet entries but no child transactions</strong> → flow C (native wallet).</>,
+  },
+  {
+    title: "Split each payment into wallet and PG portions",
+    description: <>Compute <code>wallet_total = sum of customer_wallet_transactions amounts</code> and <code>pg_total = parent.amount − wallet_total</code>. The two should add up to the parent amount exactly. If they don't, flag the transaction for investigation.</>,
+  },
+  {
+    title: "Match the PG portion against your gateway settlement",
+    description: <>For each parent with <code>pg_total &gt; 0</code>, find the matching line in your acquirer's settlement file (KNET, Mada, Visa, etc.) using the parent's <code>order_no</code> or the PG reference number. The PG amount should equal <code>pg_total</code>.</>,
+  },
+  {
+    title: "Match the wallet portion against your wallet ledger",
+    description: <>For each entry in <code>customer_wallet_transactions</code>, open the <strong>Operations</strong> screen (or call the wallet operations API) using the entry's <code>operation_id</code>. The wallet ledger should show a debit of the same amount. Sum all wallet debits across the period — they should equal your wallet-rail settlement total.</>,
+    image: "/img/business/wallet/reporting-05-operations.png",
+    imageAlt: "Operations screen used to look up a wallet operation by ID",
+  },
+  {
+    title: "Reconcile refunds-to-wallet separately",
+    description: <>For any parent with a refund child transaction whose attempt carries a wallet operation, the wallet ledger should show a matching <strong>credit</strong>. Match these by the parent's <code>session_id</code> or <code>order_no</code> — <strong>not</strong> by <code>operation_id</code>, because the original payment debit and the refund credit have different operation IDs.</>,
+  },
+]} />
+
+:::tip Use the Operations screen as your wallet-side source of truth
+Every wallet leg — debit, credit, reserve, release — has a single canonical row on the <strong>Operations</strong> screen, keyed by <code>operation_id</code>. When a number disagrees between the PG file and the parent transaction, the Operations row tells you what actually moved on the wallet rail.
+:::
+
+### Edge cases to watch for
+
+- **Abandoned or cancelled wallet payments.** If a customer reserves wallet funds but never completes the payment, the reservation is released automatically about four hours later. The released leg may still appear in `customer_wallet_transactions` so you can audit attempted-but-released holds — check the state of the parent transaction (`FAILED`, `CANCELLED`) before counting wallet amounts.
+- **Refund operation IDs differ from payment operation IDs.** A refund to wallet creates a fresh `operation_id` for the credit; it does not reuse the original payment's debit ID. Always match refunds to original payments through `session_id` or `order_no`, not through `operation_id`.
+- **Wallet response format is provider-specific.** The `wallet_response` field in `customer_wallet_transactions` is the verbatim body returned by the wallet service. Treat it as audit-only — do not parse it for reconciliation logic.
+- **Only the parent fires webhooks.** Child transactions do not emit their own webhooks. The child's state is always visible inside the parent's webhook payload under `transactions`.
+
 ## Exporting
 
 Export Accounts or Ledger data as **CSV** or **XLSX** for offline analysis and accounting. Exports are generated asynchronously — you queue a report from the account, then pick it up from **Generated Reports** once it's ready.
