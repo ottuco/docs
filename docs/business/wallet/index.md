@@ -190,7 +190,7 @@ Export Accounts or Ledger data as **CSV** or **XLSX** for offline analysis and a
 - **No PII.** The wallet service stores only the customer ID and balance — no card details, no personal information.
 - **Automatic release.** If a customer abandons checkout, their reserved wallet funds are released automatically after about four hours. No action required from you.
 - **Immutable history.** Every credit, debit, and reservation is recorded permanently. Corrections are made by adding an opposing entry — never by editing the original.
-- **No expiry.** Wallet credit does not expire today.
+- **No expiry.** Wallet credit does not expire.
 - **Wallet appears at checkout when:** the customer has positive balance in the order currency **and** the order is set to capture immediately. Authorize-only orders do not show wallet.
 
 ## FAQ
@@ -206,7 +206,7 @@ Export Accounts or Ledger data as **CSV** or **XLSX** for offline analysis and a
     You cannot edit or delete the original credit — wallet history is immutable. You can issue an opposing debit entry (a reversal) to offset it. Contact [csd@ottu.com](mailto:csd@ottu.com) if you need help raising a reversal.
   </FAQItem>
   <FAQItem question="Does the customer get notified?">
-    No, customers are not notified automatically when a wallet credit is issued today. If you want to notify them, message them through your own channels.
+    No, customers are not notified automatically when a wallet credit is issued. If you want to notify them, message them through your own channels.
   </FAQItem>
   <FAQItem question="Why doesn't wallet show for some orders?">
     The order may be authorize-only, the customer may have zero balance in that currency, or the `customer_id` may differ between sessions. Check the order's `customer_id` matches the wallet's.
@@ -215,7 +215,7 @@ Export Accounts or Ledger data as **CSV** or **XLSX** for offline analysis and a
     Disputes can be resolved manually. Contact [csd@ottu.com](mailto:csd@ottu.com) to raise a reversal.
   </FAQItem>
   <FAQItem question="Does wallet credit expire?">
-    No, wallet credit does not expire today.
+    No, wallet credit does not expire.
   </FAQItem>
   <FAQItem question="If a customer cancels or their payment fails, when do they get their wallet credit back?">
     Reserved wallet funds are automatically restored about four hours after an abandoned, cancelled, or failed payment. No action is needed.

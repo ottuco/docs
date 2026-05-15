@@ -243,7 +243,7 @@ Three read APIs let you query wallet state from your backend. All three accept t
     No. The service holds only ledger entries scoped by `merchant_id`, `customer_id`, and `currency`.
   </FAQItem>
   <FAQItem question="Can I charge a wallet without the Checkout SDK?">
-    No. Wallet payments are initiated only through the Checkout SDK. There is no server-side API to debit a wallet directly from the merchant backend — the customer must confirm the payment in the SDK so the reservation lifecycle (reserve → commit or release) is bound to a real checkout session.
+    Yes — through [One-Step Checkout](../checkout-api#one-step-checkout). Call the Checkout API with `payment_instrument.instrument_type: "wallet"` to debit a customer's wallet server-to-server in a single request, no SDK required. Include `wallet_code` in the payload only when the gateway has more than one wallet configured. If you're using the regular session-then-pay flow, the wallet appears in the Checkout SDK as described above.
   </FAQItem>
   <FAQItem question="Does wallet credit expire?">
     No. Wallet credit does not expire.
