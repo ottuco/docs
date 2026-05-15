@@ -63,7 +63,7 @@ Refunding to wallet credits the customer's wallet balance instead of returning f
   },
 ]} />
 
-The next time the customer reaches checkout in your store (same currency), they'll see **Wallet (X.XXX KWD)** as a payment method. See [Wallet at Checkout](#wallet-at-checkout) below for the customer-side flow.
+The next time the customer reaches checkout in your store (same currency), they'll see **Wallet (X.XXX USD)** as a payment method. See [Wallet at Checkout](#wallet-at-checkout) below for the customer-side flow.
 
 ## Wallet at Checkout
 
@@ -180,25 +180,68 @@ There are three flows you will see:
 After the wallet leg settles, the parent transaction records a zero-amount attempt with the form of payment set to `wallet`. This is bookkeeping — it tells you the parent was finalized through the wallet rail. In partial-wallet flows (B), this blank attempt sits alongside the PG attempt; in full-wallet flows (A), it is the only parent attempt. You should treat it as a finalization marker, not as a separate charge.
 :::
 
-#### Example — partial wallet payment of 100.000 SAR
+#### Amount fields on a wallet-touched payment
 
-A customer pays a 100.000 SAR order with 30.000 SAR from their wallet and 70.000 SAR on a card:
+On the parent transaction page, three amount fields together tell you how the order was paid:
 
-| Object | Amount | State | Notes |
-|---|---|---|---|
-| Parent transaction | 100.000 SAR | `PAID` | The full order. |
-| Parent attempt #1 (PG) | 70.000 SAR | `SUCCESS` | Card charge — full PG fee on this leg.\* |
-| Parent attempt #2 (wallet) | 0 | `SUCCESS` | Blank finalization marker, `form_of_payment = wallet`. |
-| Child transaction | 30.000 SAR | `SUCCESS` | Linked to the parent — same `session_id`, new `order_no`. |
-| Child attempt | 30.000 SAR | `SUCCESS` | The wallet leg, fee = 0.\* |
+- **`amount`** — the total transaction amount (the full order value).
+- **`settled_amount`** — the paid or authorized amount in the original currency, excluding fees. When the order is fully settled across both rails, this equals `amount`.
+- **`paid_amount`** — the total paid amount in the original currency, including fees, possibly after currency exchange. **This is the PG-rail total** — the portion the customer was actually charged through the gateway. Use it to check the PG-side number.
 
-\*With the default fee mode (`fee_on_remainder`), PG fees apply only to the PG portion and the wallet leg is fee-free. If your account is configured for `fee_on_each_portion`, fees are split across both legs — confirm with your account manager which mode you are on before reconciling.
+On the child transaction page, you'll see just `amount` — the wallet portion.
 
-**Reconciliation identity** you should always be able to verify on any wallet-touched parent:
+#### Example — partial wallet payment of 20.00 USD
+
+A customer pays a 20.00 USD order with 10.00 USD from their wallet and 10.00 USD on a card:
+
+**Parent transaction**
+
+| Field | Value | Notes |
+|---|---|---|
+| `amount` | 20.00 USD | Total order value. |
+| `settled_amount` | 20.00 USD | Total settled across both rails (PG + wallet). |
+| `paid_amount` | 10.00 USD | PG-rail charge actually paid by the customer. |
+| `state` | `PAID` | The order is fully paid. |
+
+**Child transaction** (linked to the parent — same `session_id`, new `order_no`)
+
+| Field | Value | Notes |
+|---|---|---|
+| `amount` | 10.00 USD | The wallet leg. |
+| `state` | `PAID` | Wallet leg committed. |
+
+**Reconciliation identity** — every wallet-touched parent satisfies this:
 
 ```
-parent.amount == wallet_portion + pg_portion
+parent.amount == parent.paid_amount + sum(child.amount for each wallet child)
 ```
+
+In plain English: **order total = PG-rail total + wallet-rail total.**
+
+For native wallet (express checkout) payments there is no child transaction — the wallet leg is recorded entirely on the parent. See [Where to find the wallet portion of a payment](#where-to-find-the-wallet-portion-of-a-payment) below for how to identify the wallet amount in that case.
+
+#### Where to find these fields in the dashboard
+
+<StepGuide steps={[
+  {
+    title: "Parent transaction — amount fields",
+    description: <>Open the parent transaction in <strong>Payment Management</strong>. The details panel shows <strong>Amount</strong>, <strong>Settled amount</strong>, and <strong>Paid amount</strong> stacked together — these are the three fields used in the example above.</>,
+    image: "/img/business/wallet/reconciliation-01-parent-amounts.png",
+    imageAlt: "Parent transaction detail page highlighting the Amount, Settled amount, and Paid amount fields",
+  },
+  {
+    title: "Linked child transaction",
+    description: <>From the parent, open the linked child transaction. The child's <strong>Amount</strong> is the wallet portion, and its <strong>Session ID</strong> matches the parent's.</>,
+    image: "/img/business/wallet/reconciliation-02-child-transaction.png",
+    imageAlt: "Child transaction detail page showing the wallet-portion amount and shared session ID",
+  },
+  {
+    title: "Operations screen — wallet leg",
+    description: <>On the <strong>Wallet → Operations</strong> screen, search by <code>operation_id</code> (from <code>customer_wallet_transactions</code>) to see the canonical wallet-side row for that leg.</>,
+    image: "/img/business/wallet/reporting-05-operations.png",
+    imageAlt: "Operations screen with a wallet operation row highlighted",
+  },
+]} />
 
 ### Where to find the wallet portion of a payment
 
@@ -217,24 +260,24 @@ The key is **not present at all** on payments that never touched a wallet. Your 
 
 ### Month-end reconciliation procedure
 
-Run this once per settlement period (typically monthly). The goal is to prove that every dirham of order revenue lands in exactly one of two places: your PG settlement file or your wallet ledger.
+Run this once per settlement period (typically monthly). The goal is to prove that every unit of order revenue lands in exactly one of two places: your PG settlement file or your wallet ledger.
 
 <StepGuide steps={[
   {
     title: "Export your paid parent transactions",
-    description: <>Export every parent transaction in <strong>PAID</strong> state for the period from <strong>Payment Management</strong>. Note each transaction's <code>amount</code>, <code>currency_code</code>, <code>order_no</code>, and <code>session_id</code>.</>,
+    description: <>Export every parent transaction in <strong>PAID</strong> state for the period from <strong>Payment Management</strong>. Note each transaction's <code>amount</code>, <code>paid_amount</code>, <code>settled_amount</code>, <code>currency_code</code>, <code>order_no</code>, and <code>session_id</code>.</>,
   },
   {
     title: "Classify each payment by flow",
-    description: <>For each parent, check whether it has child transactions and wallet entries: <strong>no wallet entries</strong> → pure PG payment (no wallet to reconcile); <strong>wallet entries + child transactions</strong> → flow A (full wallet) or B (partial wallet + PG); <strong>wallet entries but no child transactions</strong> → flow C (native wallet).</>,
+    description: <>For each parent, check whether it has child transactions and wallet entries: <strong>no wallet entries</strong> → pure PG payment (no wallet to reconcile); <strong>wallet entries + child transactions</strong> → full or partial wallet payment; <strong>wallet entries but no child transactions</strong> → native wallet (express checkout).</>,
   },
   {
     title: "Split each payment into wallet and PG portions",
-    description: <>Compute <code>wallet_total = sum of customer_wallet_transactions amounts</code> and <code>pg_total = parent.amount − wallet_total</code>. The two should add up to the parent amount exactly. If they don't, flag the transaction for investigation.</>,
+    description: <>For each wallet-touched parent: <code>pg_total = parent.paid_amount</code> and <code>wallet_total = sum of child transaction amounts</code> (or the single entry in <code>customer_wallet_transactions</code> for native flow). The two should add up to <code>parent.amount</code> exactly. If they don't, flag the transaction for investigation.</>,
   },
   {
     title: "Match the PG portion against your gateway settlement",
-    description: <>For each parent with <code>pg_total &gt; 0</code>, find the matching line in your acquirer's settlement file (KNET, Mada, Visa, etc.) using the parent's <code>order_no</code> or the PG reference number. The PG amount should equal <code>pg_total</code>.</>,
+    description: <>For each parent with <code>parent.paid_amount &gt; 0</code>, find the matching line in your payment gateway's settlement file using the parent's <code>order_no</code> or the PG reference number. The gateway-side amount should equal <code>parent.paid_amount</code>.</>,
   },
   {
     title: "Match the wallet portion against your wallet ledger",
@@ -287,7 +330,7 @@ Export Accounts or Ledger data as **CSV** or **XLSX** for offline analysis and a
 
 ## Things to know
 
-- **One wallet per currency.** A customer who buys in both KWD and SAR has two separate wallet balances.
+- **One wallet per currency.** A customer who buys in both EUR and USD has two separate wallet balances.
 - **No PII.** The wallet service stores only the customer ID and balance — no card details, no personal information.
 - **Automatic release.** If a customer abandons checkout, their reserved wallet funds are released automatically after about four hours. No action required from you.
 - **Immutable history.** Every credit, debit, and reservation is recorded permanently. Corrections are made by adding an opposing entry — never by editing the original.
