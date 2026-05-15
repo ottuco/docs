@@ -7,11 +7,11 @@ export const businessWalletScenariosSteps: Step[] = [
     description: (
       <>
         If the customer has balance in the order currency,{" "}
-        <strong>Wallet (X.XXX KWD)</strong> shows up alongside other payment
+        <strong>Wallet (200.00 USD)</strong> shows up alongside other payment
         methods.
       </>
     ),
-    image: "/img/developers/wallet/deactivate_wallet_02.png",
+    image: "/img/developers/wallet/wallet_shown.png",
     imageAlt: "Checkout showing Wallet as a payment method",
   },
   {
@@ -22,7 +22,7 @@ export const businessWalletScenariosSteps: Step[] = [
         amount is deducted. Any surplus stays in the wallet for the next order.
       </>
     ),
-    image: "/img/developers/wallet/full_coverage_02.png",
+    image: "/img/developers/wallet/full_coverage.png",
     imageAlt: "Wallet fully covering the order amount",
   },
   {
@@ -34,7 +34,7 @@ export const businessWalletScenariosSteps: Step[] = [
         together at submit.
       </>
     ),
-    image: "/img/developers/wallet/partial_coverage_02.png",
+    image: "/img/developers/wallet/partial_coverage.png",
     imageAlt: "Wallet plus another method for partial coverage",
   },
   {
@@ -42,14 +42,14 @@ export const businessWalletScenariosSteps: Step[] = [
     description: (
       <>
         Wallet funds are reserved the moment the customer hits{" "}
-        <strong>Pay</strong> — they cannot be spent twice in parallel sessions.
+        <strong>Toggle of Wallet(ON)</strong> — they cannot be spent twice in parallel sessions.
       </>
     ),
-     image: "/img/developers/wallet/wallet_reservetion.gif",
+     image: "/img/developers/wallet/wallet_reservation_03.gif",
      imageAlt: "Wallet in Dashboard",     
   },
   {
-    title: "Automatic release",
+    title: "Automatic release", 
     description: (
       <>
         If the customer abandons checkout or the payment fails, the reservation
@@ -57,7 +57,7 @@ export const businessWalletScenariosSteps: Step[] = [
         from your team.
       </>
     ),
-    image: "/img/developers/wallet/wallet_dashboard_02.png",
+    image: "/img/developers/wallet/wallet_dashboard.png",
     imageAlt: "Wallet in Dashboard",
   },
 ];
@@ -68,36 +68,36 @@ export const developerWalletScenariosSteps: Step[] = [
     description: (
       <>
         When the customer has positive balance in the session currency,{" "}
-        <strong>Wallet (150.000 KWD)</strong> renders alongside cards and other
+        <strong>Wallet (200.00 USD)</strong> renders alongside cards and other
         gateways. No SDK config is needed beyond passing{" "}
         <code>customer_id</code> on the Checkout API session.
       </>
     ),
-    image: "/img/developers/wallet/deactivate_wallet_02.png",
+    image: "/img/developers/wallet/wallet_shown.png",
     imageAlt: "Checkout SDK showing Wallet as a payment method with balance",
   },
   {
     title: "Full coverage: balance ≥ amount",
     description: (
       <>
-        Customer selects Wallet → SDK shows "50.000 KWD will be applied" →
+        Customer selects Wallet → SDK shows "100.00 USD will be applied" →
         submits → only the session amount is deducted. Surplus stays in the
         wallet.
       </>
     ),
-    image: "/img/developers/wallet/full_coverage_02.png",
+    image: "/img/developers/wallet/full_coverage.png",
     imageAlt: "Wallet selected with full coverage of the session amount",
   },
   {
     title: "Partial coverage: balance < amount",
     description: (
       <>
-        Customer selects Wallet → SDK shows "150.000 KWD will be applied; pick
-        a method for the remaining 100.000 KWD" → adds a card → both
+        Customer selects Wallet → SDK shows "200.00 USD will be applied; pick
+        a method for the remaining 100.00 USD" → adds a card → both
         reservations confirm together at submit.
       </>
     ),
-    image: "/img/developers/wallet/partial_coverage_02.png",
+    image: "/img/developers/wallet/partial_coverage.png",
     imageAlt: "Wallet plus card combined for partial coverage",
   },
   {
@@ -108,7 +108,7 @@ export const developerWalletScenariosSteps: Step[] = [
         offered. Wallet supports immediate-capture flows only.
       </>
     ),
-    image: "/img/developers/wallet/no_wallet.png",
+    image: "/img/developers/wallet/no_wallet_01.png",
     imageAlt: "Authorize-only checkout without wallet method",
   },
   {
