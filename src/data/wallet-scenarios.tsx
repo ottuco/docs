@@ -41,8 +41,8 @@ export const businessWalletScenariosSteps: Step[] = [
     title: "Reservation while paying",
     description: (
       <>
-        Wallet funds are reserved the moment the customer hits{" "}
-        <strong>Toggle of Wallet(ON)</strong> — they cannot be spent twice in parallel sessions.
+        Wallet funds are reserved the moment the customer turns the Wallet
+        toggle <strong>on</strong> — they cannot be spent twice in parallel sessions.
       </>
     ),
      image: "/img/developers/wallet/wallet_reservation_03.gif",
