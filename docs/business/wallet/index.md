@@ -39,15 +39,15 @@ Refunding to wallet credits the customer's wallet balance instead of returning f
 <StepGuide steps={[
   {
     title: "Click on the desired payment transaction",
-    description: <>From <strong>Payment Request Tranactions Screen</strong>, open the paid transaction you want to refund.</>,
+    description: <>From <strong>Payment Request Transactions Screen</strong>, open the paid transaction you want to refund.</>,
     image: "/img/business/wallet/payment-request-transactions.png",
     imageAlt: "Paid transaction opened in Payment Management",
   },
   {
-    title: "Open the action Menu",
+    title: "Open the action menu",
     description: <>From <strong>Payment Management Details</strong> page, open the action menu.</>,
     image: "/img/business/wallet/refund-01-transaction.png",
-    imageAlt: "Paid transaction opened in Payment Management",
+    imageAlt: "Action menu open on the payment transaction detail page",
   },
   {
     title: "Click Refund to Wallet",
