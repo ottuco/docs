@@ -244,7 +244,7 @@ For native wallet (express checkout) payments there is no child transaction — 
   {
     title: "Operations screen — wallet leg",
     description: <>On the <strong>Wallet → Operations</strong> screen, search by <code>operation_id</code> (from <code>customer_wallet_transactions</code>) to see the canonical wallet-side row for that leg.</>,
-    image: "/img/business/wallet/reporting-05-operations.png",
+    image: "/img/business/wallet/reporting-05-operations1.png",
     imageAlt: "Operations screen with a wallet operation row highlighted",
   },
 ]} />
@@ -272,14 +272,20 @@ Run this once per settlement period (typically monthly). The goal is to prove th
   {
     title: "Export your paid parent transactions",
     description: <>Export every parent transaction in <strong>PAID</strong> state for the period from <strong>Payment Management</strong>. Note each transaction's <code>amount</code>, <code>paid_amount</code>, <code>settled_amount</code>, <code>currency_code</code>, <code>order_no</code>, and <code>session_id</code>.</>,
+    image: "/img/business/wallet/recon-procedure-01-transactions-list.png",
+    imageAlt: "Payment Management → Transactions list with the Export Transactions button visible",
   },
   {
     title: "Classify each payment by flow",
     description: <>For each parent, check whether it has child transactions and wallet entries: <strong>no wallet entries</strong> → pure PG payment (no wallet to reconcile); <strong>wallet entries + child transactions</strong> → full or partial wallet payment; <strong>wallet entries but no child transactions</strong> → native wallet (express checkout).</>,
+    image: "/img/business/wallet/recon-procedure-02-classify.png",
+    imageAlt: "Parent transaction's CHILD TRANSACTIONS tab showing a linked wallet-leg row — the marker that classifies the parent as wallet-touched",
   },
   {
     title: "Split each payment into wallet and PG portions",
     description: <>For each wallet-touched parent: <code>pg_total = parent.paid_amount</code> and <code>wallet_total = sum of child transaction amounts</code> (or the single entry in <code>customer_wallet_transactions</code> for native flow). The two should add up to <code>parent.amount</code> exactly. If they don't, flag the transaction for investigation.</>,
+    image: "/img/business/wallet/recon-procedure-03-amount-split.png",
+    imageAlt: "Parent transaction's AMOUNT tab with Amount, Settled amount, and Paid amount fields — the values used to compute the wallet vs PG split",
   },
   {
     title: "Match the PG portion against your gateway settlement",
@@ -288,12 +294,14 @@ Run this once per settlement period (typically monthly). The goal is to prove th
   {
     title: "Match the wallet portion against your wallet ledger",
     description: <>For each entry in <code>customer_wallet_transactions</code>, open the <strong>Operations</strong> screen (or call the wallet operations API) using the entry's <code>operation_id</code>. The wallet ledger should show a debit of the same amount. Sum all wallet debits across the period — they should equal your wallet-rail settlement total.</>,
-    image: "/img/business/wallet/reporting-05-operations.png",
+    image: "/img/business/wallet/reporting-05-operations1.png",
     imageAlt: "Operations screen used to look up a wallet operation by ID",
   },
   {
     title: "Reconcile refunds-to-wallet separately",
     description: <>For any parent with a refund child transaction whose attempt carries a wallet operation, the wallet ledger should show a matching <strong>credit</strong>. Match these by the parent's <code>session_id</code> or <code>order_no</code> — <strong>not</strong> by <code>operation_id</code>, because the original payment debit and the refund credit have different operation IDs.</>,
+    image: "/img/business/wallet/recon-procedure-06-refund-credit.png",
+    imageAlt: "Wallet account detail showing credit_refund rows on the ledger — the wallet-side mirror of a refund-to-wallet operation",
   },
 ]} />
 
