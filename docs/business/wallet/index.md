@@ -38,10 +38,16 @@ Refunding to wallet credits the customer's wallet balance instead of returning f
 
 <StepGuide steps={[
   {
-    title: "Open the transaction",
-    description: <>From <strong>Payment Management</strong>, open the paid transaction you want to refund.</>,
-    image: "/img/business/wallet/refund-01-transaction.png",
+    title: "Click on the desired payment transaction",
+    description: <>From <strong>Payment Request Transactions Screen</strong>, open the paid transaction you want to refund.</>,
+    image: "/img/business/wallet/payment-request-transactions.png",
     imageAlt: "Paid transaction opened in Payment Management",
+  },
+  {
+    title: "Open the action menu",
+    description: <>From <strong>Payment Management Details</strong> page, open the action menu.</>,
+    image: "/img/business/wallet/refund-01-transaction.png",
+    imageAlt: "Action menu open on the payment transaction detail page",
   },
   {
     title: "Click Refund to Wallet",
@@ -103,7 +109,7 @@ Lists every customer who has a wallet account with your business, with current b
   {
     title: "Open Wallet → Accounts",
     description: <>From the main navigation, go to <strong>Wallet → Accounts</strong>.</>,
-    image: "/img/business/wallet/reporting-01-accounts.png",
+    image: "/img/business/wallet/reporting-01-accounts-listing.png",
     imageAlt: "Wallet Accounts screen in the dashboard",
   },
   {
@@ -310,7 +316,7 @@ Export Accounts or Ledger data as **CSV** or **XLSX** for offline analysis and a
   {
     title: "Click Export Entries",
     description: <>From any account's detail page, click <strong>Export Entries</strong> next to the Filter button.</>,
-    image: "/img/business/wallet/reporting-04-ledger.png",
+    image: "/img/business/wallet/reporting-06-ledger-exporting.png",
     imageAlt: "Cursor pointing at the Export Entries button on the account detail page",
   },
   {
@@ -322,7 +328,7 @@ Export Accounts or Ledger data as **CSV** or **XLSX** for offline analysis and a
   {
     title: "Download from Generated Reports",
     description: <>Open <strong>Generated Reports → Wallet Exports</strong>. A green arrow means the file is ready to download, a progress circle means it's still processing, and an X means generation failed.</>,
-    image: "/img/business/wallet/reporting-07-export-cursor-step-2.png",
+    image: "/img/business/wallet/reporting-07-export-cursor-step.png",
     imageAlt: "Generated Reports → Wallet Exports list with download icons per row",
   },
 ]} />
