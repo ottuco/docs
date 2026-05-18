@@ -9,6 +9,7 @@ import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import CheckoutDemo from "@site/src/components/CheckoutDemo";
 import StepGuide from "@site/src/components/StepGuide";
+import CSPGenerator from "@site/src/components/CSPGenerator";
 import { developerWalletScenariosSteps } from "@site/src/data/wallet-scenarios";
 
 The [Checkout SDK](./) is a JavaScript library provided by Ottu that allows you to easily integrate an Ottu-powered [checkout process](../#ottu-checkout-sdk-flow) into your web application. With the Checkout SDK, you can customize the look and feel of your checkout process, as well as which forms of payment are accepted.
@@ -1733,6 +1734,16 @@ Checkout.init({
   },
 });
 ```
+
+## Content Security Policy
+
+When you embed the Checkout SDK on your site, you need a Content Security Policy that allows the SDK to load its scripts, open payment iframes, and call Ottu's APIs. The generator below builds a ready-to-paste policy based on your environment and the payment methods you plan to offer.
+
+<CSPGenerator />
+
+:::note How origins are determined
+The base Ottu entries (`assets.ottu.net`, `*.ottu.net`, `*.ottu.com`) are always required — they cover the SDK script, payment iframes, and API calls. Each Form of Payment can add extra origins (for example, Apple Pay adds `applepay.cdn-apple.com` and the Apple Pay gateway endpoints). Toggle the FOPs you're enabling to see only the entries you actually need.
+:::
 
 ## FAQ
 
