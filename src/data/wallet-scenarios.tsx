@@ -7,11 +7,11 @@ export const businessWalletScenariosSteps: Step[] = [
     description: (
       <>
         If the customer has balance in the order currency,{" "}
-        <strong>Wallet (200.00 USD)</strong> shows up alongside other payment
+        <strong>Wallet (100.00 USD)</strong> shows up alongside other payment
         methods.
       </>
     ),
-    image: "/img/developers/wallet/wallet_shown.png",
+    image: "/img/developers/wallet/1wallet.png",
     imageAlt: "Checkout showing Wallet as a payment method",
   },
   {
@@ -22,7 +22,7 @@ export const businessWalletScenariosSteps: Step[] = [
         amount is deducted. Any surplus stays in the wallet for the next order.
       </>
     ),
-    image: "/img/developers/wallet/full_coverage.png",
+    image: "/img/developers/wallet/remaining wallet balance.png",
     imageAlt: "Wallet fully covering the order amount",
   },
   {
@@ -34,7 +34,7 @@ export const businessWalletScenariosSteps: Step[] = [
         together at submit.
       </>
     ),
-    image: "/img/developers/wallet/partial_coverage.png",
+    image: "/img/developers/wallet/partial_coverage_03.png",
     imageAlt: "Wallet plus another method for partial coverage",
   },
   {
@@ -57,7 +57,7 @@ export const businessWalletScenariosSteps: Step[] = [
         from your team.
       </>
     ),
-    image: "/img/developers/wallet/wallet_dashboard.png",
+    image: "/img/developers/wallet/2operations.png",
     imageAlt: "Wallet in Dashboard",
   },
 ];
@@ -68,12 +68,12 @@ export const developerWalletScenariosSteps: Step[] = [
     description: (
       <>
         When the customer has positive balance in the session currency,{" "}
-        <strong>Wallet (200.00 USD)</strong> renders alongside cards and other
+        <strong>Wallet (100.00 USD)</strong> renders alongside cards and other
         gateways. No SDK config is needed beyond passing{" "}
         <code>customer_id</code> on the Checkout API session.
       </>
     ),
-    image: "/img/developers/wallet/wallet_shown.png",
+    image: "/img/developers/wallet/1wallet.png",
     imageAlt: "Checkout SDK showing Wallet as a payment method with balance",
   },
   {
@@ -85,19 +85,19 @@ export const developerWalletScenariosSteps: Step[] = [
         wallet.
       </>
     ),
-    image: "/img/developers/wallet/full_coverage.png",
+    image: "/img/developers/wallet/remaining wallet balance.png",
     imageAlt: "Wallet selected with full coverage of the session amount",
   },
   {
     title: "Partial coverage: balance < amount",
     description: (
       <>
-        Customer selects Wallet → SDK shows "200.00 USD will be applied; pick
+        Customer selects Wallet → SDK shows "100.00 USD will be applied; pick
         a method for the remaining 100.00 USD" → adds a card → both
         reservations confirm together at submit.
       </>
     ),
-    image: "/img/developers/wallet/partial_coverage.png",
+    image: "/img/developers/wallet/partial_coverage_03.png",
     imageAlt: "Wallet plus card combined for partial coverage",
   },
   {
