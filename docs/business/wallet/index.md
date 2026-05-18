@@ -174,13 +174,12 @@ This section explains how Ottu represents a wallet-touched payment in your trans
 
 Ottu records every order as a **parent transaction** at the full order amount. When part (or all) of the order is paid from the customer's wallet, Ottu also creates a **child transaction** linked to the parent, carrying just the wallet portion. The child shares the same `session_id` as the parent but has its own `order_no`.
 
-There are three flows you will see:
+There are two flows you will see:
 
 | Flow | Wallet covers | What you see in records |
 |---|---|---|
 | **A — Full wallet (checkout)** | 100% of the order | Parent at the full amount + **one child** at the same amount. No PG attempt. |
 | **B — Partial wallet + PG (checkout)** | Less than 100% | Parent at the full amount, with **one PG attempt** for the remainder + **one child** for the wallet portion. |
-| **C — Native wallet (express checkout)** | 100% of the order | Parent only. **No child transaction.** The wallet leg lives on the parent's single attempt. |
 
 :::note Why the parent shows a "blank" wallet attempt
 After the wallet leg settles, the parent transaction records a zero-amount attempt with the form of payment set to `wallet`. This is bookkeeping — it tells you the parent was finalized through the wallet rail. In partial-wallet flows (B), this blank attempt sits alongside the PG attempt; in full-wallet flows (A), it is the only parent attempt. You should treat it as a finalization marker, not as a separate charge.
@@ -224,8 +223,6 @@ parent.amount == parent.paid_amount + sum(child.amount for each wallet child)
 
 In plain English: **order total = PG-rail total + wallet-rail total.**
 
-For native wallet (express checkout) payments there is no child transaction — the wallet leg is recorded entirely on the parent. See [Where to find the wallet portion of a payment](#where-to-find-the-wallet-portion-of-a-payment) below for how to identify the wallet amount in that case.
-
 #### Where to find these fields in the dashboard
 
 <StepGuide steps={[
@@ -253,7 +250,7 @@ For native wallet (express checkout) payments there is no child transaction — 
 
 Each parent transaction's webhook payload (and dashboard detail page) carries two arrays you will use during reconciliation:
 
-- **`transactions`** — the parent's child transactions. Empty for native flow (C); contains one entry for flows A and B.
+- **`transactions`** — the parent's child transactions. Contains one entry for the wallet leg of a wallet-touched payment.
 - **`customer_wallet_transactions`** — one entry per wallet provider that touched this payment. Each entry includes `provider_code`, `amount` (in the order currency), `currency`, `operation_id`, and the verbatim `wallet_response` from the wallet service.
 
 :::warning `customer_wallet_transactions` is omitted when no wallet was used
@@ -277,13 +274,13 @@ Run this once per settlement period (typically monthly). The goal is to prove th
   },
   {
     title: "Classify each payment by flow",
-    description: <>For each parent, check whether it has child transactions and wallet entries: <strong>no wallet entries</strong> → pure PG payment (no wallet to reconcile); <strong>wallet entries + child transactions</strong> → full or partial wallet payment; <strong>wallet entries but no child transactions</strong> → native wallet (express checkout).</>,
+    description: <>For each parent, check whether it has child transactions and wallet entries: <strong>no wallet entries</strong> → pure PG payment (no wallet to reconcile); <strong>wallet entries + child transactions</strong> → full or partial wallet payment.</>,
     image: "/img/business/wallet/recon-procedure-02-classify.png",
     imageAlt: "Parent transaction's CHILD TRANSACTIONS tab showing a linked wallet-leg row — the marker that classifies the parent as wallet-touched",
   },
   {
     title: "Split each payment into wallet and PG portions",
-    description: <>For each wallet-touched parent: <code>pg_total = parent.paid_amount</code> and <code>wallet_total = sum of child transaction amounts</code> (or the single entry in <code>customer_wallet_transactions</code> for native flow). The two should add up to <code>parent.amount</code> exactly. If they don't, flag the transaction for investigation.</>,
+    description: <>For each wallet-touched parent: <code>pg_total = parent.paid_amount</code> and <code>wallet_total = sum of child transaction amounts</code>. The two should add up to <code>parent.amount</code> exactly. If they don't, flag the transaction for investigation.</>,
     image: "/img/business/wallet/recon-procedure-03-amount-split.png",
     imageAlt: "Parent transaction's AMOUNT tab with Amount, Settled amount, and Paid amount fields — the values used to compute the wallet vs PG split",
   },

@@ -1589,16 +1589,7 @@ paths:
                   amount: "100.000"
                   destination: wallet
                 summary: Wallet Refund
-                description: Credits the refund to the wallet linked to the settling MID. Use this form when only one wallet is configured on the payment method — the wallet is resolved automatically.
-              WalletRefund(stackedWallets):
-                value:
-                  session_id: <add `session_id` here>
-                  operation: refund
-                  amount: "100.000"
-                  destination: wallet
-                  wallet_code: <add `wallet_code` here>
-                summary: Wallet Refund — explicit wallet
-                description: When the settling MID has more than one wallet configured (e.g. Ottu + Qitaf), `wallet_code` is required to identify which wallet should receive the credit. The value matches the active `WalletPaymentService.code` on that MID.
+                description: Credits the refund to the customer's wallet linked to the settling MID.
               IFGRefund:
                 value:
                   session_id: <add `session_id` here>
@@ -7443,9 +7434,6 @@ components:
 
             * `pg` - pg
             * `wallet` - wallet
-        wallet_code:
-          type: string
-          description: Identifies which wallet should receive the refund credit when `destination=wallet`. Required when the transaction stacked across multiple wallets (e.g. Ottu + Qitaf) — without it the refund target is ambiguous. Optional when only one wallet is configured on the payment method; in that case it falls back to the single active wallet.
       required:
         - operation
     OperationErrorResponse:

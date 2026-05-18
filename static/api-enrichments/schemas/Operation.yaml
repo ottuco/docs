@@ -9,6 +9,3 @@ properties:
       - `wallet` — funds are credited to the customer's [wallet]({{apiBaseUrl}}/payments/wallet/) balance for use at future Ottu checkouts. Requires that the settling payment method has an active wallet service and that the transaction has a `customer_id`. A wallet account is created automatically if one doesn't already exist for the `(merchant, customer_id, currency)` combination, and the credit is recorded as an immutable ledger entry linked to the original payment session.
 
       Cross-currency credits are not supported — the wallet credit currency always matches the original payment currency.
-  wallet_code:
-    description: |
-      Selects which wallet receives the credit when `destination` is `wallet`. **Required** when the settling payment method has more than one wallet configured (e.g. Ottu + Qitaf) — without it the refund target is ambiguous. **Optional** when only one wallet is configured; in that case it resolves automatically to the single active wallet. Ignored when `destination` is `pg`.
