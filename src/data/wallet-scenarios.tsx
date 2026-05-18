@@ -11,7 +11,7 @@ export const businessWalletScenariosSteps: Step[] = [
         methods.
       </>
     ),
-    image: "/img/developers/wallet/1wallet.png",
+    image: "/img/developers/wallet/wallet_available.png",
     imageAlt: "Checkout showing Wallet as a payment method",
   },
   {
@@ -22,7 +22,7 @@ export const businessWalletScenariosSteps: Step[] = [
         amount is deducted. Any surplus stays in the wallet for the next order.
       </>
     ),
-    image: "/img/developers/wallet/remaining wallet balance.png",
+    image: "/img/developers/wallet/full_coverage.png",
     imageAlt: "Wallet fully covering the order amount",
   },
   {
@@ -57,7 +57,7 @@ export const businessWalletScenariosSteps: Step[] = [
         from your team.
       </>
     ),
-    image: "/img/developers/wallet/2operations.png",
+    image: "/img/developers/wallet/refund_operation.png",
     imageAlt: "Wallet in Dashboard",
   },
 ];
@@ -73,7 +73,7 @@ export const developerWalletScenariosSteps: Step[] = [
         <code>customer_id</code> on the Checkout API session.
       </>
     ),
-    image: "/img/developers/wallet/1wallet.png",
+    image: "/img/developers/wallet/wallet_available.png",
     imageAlt: "Checkout SDK showing Wallet as a payment method with balance",
   },
   {
@@ -85,7 +85,7 @@ export const developerWalletScenariosSteps: Step[] = [
         wallet.
       </>
     ),
-    image: "/img/developers/wallet/remaining wallet balance.png",
+    image: "/img/developers/wallet/full_coverage.png",
     imageAlt: "Wallet selected with full coverage of the session amount",
   },
   {
