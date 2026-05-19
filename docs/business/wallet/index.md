@@ -97,6 +97,32 @@ The wallet only appears when its currency matches the order currency.
 - Refund any future order to the same wallet to top it up.
 - View full credit and debit history per customer in [Wallet Reporting](#wallet-reporting) below.
 
+## How fees are charged
+
+When an order carries a processing fee, the wallet and the payment gateway (PG) do not share that fee. Ottu applies one simple rule:
+
+> **The wallet leg is fee-free. The processing fee always lands on the PG remainder — the part of the order paid through the gateway.**
+
+The wallet only ever covers **principal** (the order amount itself). It never carries a fee. So whether a fee is charged at all depends on whether any part of the order still has to go through the PG.
+
+This produces three cases at checkout. The examples below all use the same order: **amount 50.000, fee 10.000, total 60.000**.
+
+| Case | Wallet balance | Wallet covers | PG covers | Fee charged | Customer pays |
+|---|---|---|---|---|---|
+| **No wallet** | 0 (or no wallet) | nothing | 50.000 principal + 10.000 fee | **10.000** | 60.000 |
+| **Partial wallet** | below the order amount — e.g. 30.000 | 30.000 principal | 20.000 principal + 10.000 fee | **10.000** | 30.000 |
+| **Full wallet** | at or above the order amount — e.g. 50.000 or 100.000 | 50.000 principal (full) | nothing — no PG hop | **0.000** | 0.000 |
+
+:::tip Full wallet coverage means no fee
+When the customer's wallet balance is **equal to or greater than the order amount**, the wallet covers the entire principal and the payment never reaches a gateway. With no PG remainder, there is no fee to charge — the customer pays exactly the order amount, and the **Pay** button shows `0.000`.
+:::
+
+**Why the fee never moves to the wallet.** The processing fee exists to cover the cost of the gateway transaction. A fully wallet-covered payment is an internal balance transfer with no gateway transaction, so there is no cost to pass on. Partial-wallet payments still hit the gateway for the remainder, so the full fee rides along on that PG leg — it is not split in proportion to how much the wallet covered.
+
+:::note Effect on a partial-wallet payment
+In the partial-wallet case above, the customer pays 30.000 at checkout, but only 20.000 of that is principal — the other 10.000 is the fee. The wallet still contributed its full 30.000 toward principal. The fee did not reduce the wallet's contribution; it was added on top of the PG leg.
+:::
+
 ## Wallet Reporting
 
 The dashboard provides three screens for tracking wallet activity: **Accounts**, **Ledger**, and **Operations**.
@@ -297,7 +323,7 @@ Run this once per settlement period (typically monthly). The goal is to prove th
   {
     title: "Reconcile refunds-to-wallet separately",
     description: <>For any parent with a refund child transaction whose attempt carries a wallet operation, the wallet ledger should show a matching <strong>credit</strong>. Match these by the parent's <code>session_id</code> or <code>order_no</code> — <strong>not</strong> by <code>operation_id</code>, because the original payment debit and the refund credit have different operation IDs.</>,
-    image: "/img/business/wallet/recon-procedure-06-refund-credit.png",
+    image: "/img/business/wallet/recon-procedure-04-refund-credit.png",
     imageAlt: "Wallet account detail showing credit_refund rows on the ledger — the wallet-side mirror of a refund-to-wallet operation",
   },
 ]} />

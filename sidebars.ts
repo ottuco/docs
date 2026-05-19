@@ -626,6 +626,11 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "link",
+              label: "How fees are charged",
+              href: "/business/wallet#how-fees-are-charged",
+            },
+            {
+              type: "link",
               label: "Wallet Reporting",
               href: "/business/wallet#wallet-reporting",
             },
