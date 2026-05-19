@@ -48,7 +48,6 @@ If a transaction has `knet` and `mpgs` `pg_code` but only `knet` supports Apple 
 - [x] Completed Apple Pay / Google Pay setup (if applicable).
 - [x] Selected the correct invocation model (client or backend).
 - [x] Used the appropriate API key type ([Public API Key](../getting-started/authentication.md#public-key) vs. [Private API Key](../getting-started/authentication.md#api-key-auth)).
-- [x] Sent wallet payment payload or gateway token (no raw card data).
 - [x] Implemented backend sync logic.
 
 ## Guide
