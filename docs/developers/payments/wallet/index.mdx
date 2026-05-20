@@ -197,7 +197,7 @@ A KWD wallet cannot be used to pay a SAR order, and vice versa. Each currency ma
 
 #### Wallet Transactions
 
-When a payment is settled with wallet credit, the payment details — returned by the [Checkout API retrieve](../checkout-api) call, the [PSQ inquiry](../psq), and [payment webhooks](../../webhooks/payment-events) — include a `customer_wallet_transactions` array. Each element is one wallet leg that contributed to the payment, so you can attribute every leg without a separate call to the wallet read APIs.
+When a payment is settled with wallet credit, the payment details — returned by the [Checkout API retrieve](../checkout-api) call, the [PSQ inquiry](../psq), and [payment webhooks](../../webhooks/payment-events#response-payment-webhook-customer_wallet_transactions) — include a `customer_wallet_transactions` array. Each element is one wallet leg that contributed to the payment, so you can attribute every leg without a separate call to the wallet read APIs.
 
 The key is omitted entirely when no wallet was involved. A single-wallet payment emits a one-element list; multi-wallet stacking (Ottu credit plus a loyalty wallet, for example) emits one element per provider.
 
@@ -235,6 +235,8 @@ Use these fields to keep your own system in sync:
 - **Reconciliation** — sum `amount` across the array to know how much of the payment wallet credit covered. The remainder (`paid_amount` minus the wallet total) is what the payment gateway settled, so you can split a single payment across the two funding sources in your books.
 - **Audit trail** — store `operation_id` against your order. Pass it to [Get Operation by ID](#api-reference) to pull every ledger entry the operation produced for a full audit record.
 - **System updates** — use `provider_code` to attribute the credit to the correct wallet program, and `created_at` / `modified_at` to timestamp the movement in your own ledger.
+
+Stacked-wallet setups (e.g., Ottu wallet + Qitaf) emit one record per provider in the same payload; single-wallet payments emit a one-element list — so you can reconcile multi-wallet payments without polling the wallet read APIs.
 
 ## API Reference
 
@@ -283,11 +285,17 @@ Three read APIs let you query wallet state from your backend. All three accept t
   <FAQItem question="Does the wallet store any customer PII?">
     No. The service holds only ledger entries scoped by `merchant_id`, `customer_id`, and `currency`.
   </FAQItem>
+  <FAQItem question="Can I charge a wallet without the Checkout SDK?">
+    Not at the moment. The wallet is only exposed as a form of payment through the [Checkout SDK](../checkout-sdk/) — create a session with the Checkout API, mount the SDK, and the wallet appears alongside the other configured payment methods.
+  </FAQItem>
   <FAQItem question="How does a customer pay from their wallet?">
     The wallet is charged through the regular session-then-pay flow: create a session with the Checkout API, then mount the [Checkout SDK](../checkout-sdk/) — the wallet appears as a form of payment as described above.
   </FAQItem>
   <FAQItem question="Does wallet credit expire?">
     No. Wallet credit does not expire.
+  </FAQItem>
+  <FAQItem question="How do I know which wallet(s) were charged for a payment?">
+    The payment webhook payload includes a [`customer_wallet_transactions`](../../webhooks/payment-events#response-payment-webhook-customer_wallet_transactions) array — one entry per wallet provider that contributed to the payment. For stacked-wallet setups (e.g., Ottu wallet + Qitaf), each provider emits its own entry; single-wallet payments emit a one-element list.
   </FAQItem>
 </FAQ>
 
