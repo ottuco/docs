@@ -195,6 +195,10 @@ See [Refund to Wallet](../../operations#refund-to-wallet) on the Operations page
 A KWD wallet cannot be used to pay a SAR order, and vice versa. Each currency maintains a separate wallet account.
 :::
 
+### Wallet details in payment webhooks
+
+When a wallet leg debits a session, the payment webhook delivered to your `webhook_url` carries the full wallet activity in a top-level [`customer_wallet_transactions`](../../webhooks/payment-events#response-payment-webhook-customer_wallet_transactions) array — one entry per wallet provider that contributed funds. Each entry includes the amount charged, the provider's `operation_id`, the ISO 4217 currency code, creation and modification timestamps, and the verbatim wallet-service response (status, `payment_entry_id`, `reserve_entry_id`). Stacked-wallet setups (e.g., Ottu wallet + Qitaf) emit one record per provider in the same webhook; single-wallet payments emit a one-element list — use it to reconcile multi-wallet payments without polling the wallet APIs.
+
 ## API Reference
 
 Three read APIs let you query wallet state from your backend. All three accept the standard [Ottu API key](/developers/getting-started/authentication) authentication and are `POST` endpoints — the request body carries the `customer_id` (and, where required, the `currency`) that scopes the query.
@@ -242,11 +246,17 @@ Three read APIs let you query wallet state from your backend. All three accept t
   <FAQItem question="Does the wallet store any customer PII?">
     No. The service holds only ledger entries scoped by `merchant_id`, `customer_id`, and `currency`.
   </FAQItem>
+  <FAQItem question="Can I charge a wallet without the Checkout SDK?">
+    Not at the moment. The wallet is only exposed as a form of payment through the [Checkout SDK](../checkout-sdk/) — create a session with the Checkout API, mount the SDK, and the wallet appears alongside the other configured payment methods.
+  </FAQItem>
   <FAQItem question="How does a customer pay from their wallet?">
     The wallet is charged through the regular session-then-pay flow: create a session with the Checkout API, then mount the [Checkout SDK](../checkout-sdk/) — the wallet appears as a form of payment as described above.
   </FAQItem>
   <FAQItem question="Does wallet credit expire?">
     No. Wallet credit does not expire.
+  </FAQItem>
+  <FAQItem question="How do I know which wallet(s) were charged for a payment?">
+    The payment webhook payload includes a [`customer_wallet_transactions`](../../webhooks/payment-events#response-payment-webhook-customer_wallet_transactions) array — one entry per wallet provider that contributed to the payment. For stacked-wallet setups (e.g., Ottu wallet + Qitaf), each provider emits its own entry; single-wallet payments emit a one-element list.
   </FAQItem>
 </FAQ>
 
