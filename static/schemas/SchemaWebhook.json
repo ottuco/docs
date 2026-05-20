@@ -302,15 +302,7 @@
             "type": "object",
             "description": "Full response returned by the wallet service for this leg."
           }
-        },
-        "required": [
-          "amount",
-          "created_at",
-          "currency",
-          "modified_at",
-          "operation_id",
-          "wallet_response"
-        ]
+        }
       },
       "readOnly": true,
       "description": "List of wallet legs that contributed to this payment — one entry per wallet provider (Ottu, Qitaf, …). Multi-wallet stacking emits multiple entries; full or single-wallet payments emit a one-element list. Omitted entirely (key absent) when no wallet was involved."
@@ -716,7 +708,6 @@
     "card_acceptance_criteria",
     "currency_code",
     "customer_address_country",
-    "customer_wallet_transactions",
     "fee",
     "gateway_account",
     "gateway_name",

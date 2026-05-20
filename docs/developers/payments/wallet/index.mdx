@@ -195,6 +195,47 @@ See [Refund to Wallet](../../operations#refund-to-wallet) on the Operations page
 A KWD wallet cannot be used to pay a SAR order, and vice versa. Each currency maintains a separate wallet account.
 :::
 
+#### Wallet Transactions
+
+When a payment is settled with wallet credit, the payment details — returned by the [Checkout API retrieve](../checkout-api) call, the [PSQ inquiry](../psq), and [payment webhooks](../../webhooks/payment-events) — include a `customer_wallet_transactions` array. Each element is one wallet leg that contributed to the payment, so you can attribute every leg without a separate call to the wallet read APIs.
+
+The key is omitted entirely when no wallet was involved. A single-wallet payment emits a one-element list; multi-wallet stacking (Ottu credit plus a loyalty wallet, for example) emits one element per provider.
+
+| Field | Type | Description |
+|---|---|---|
+| `provider_code` | string | Stable identifier of the wallet provider that handled this leg — e.g. `wallet_ottu`. Empty for legacy native payments where the provider wasn't recorded. |
+| `amount` | string | Amount charged from this wallet leg. |
+| `currency` | string | ISO 4217 currency code of the leg. |
+| `operation_id` | string | Wallet service operation ID — the join key to the wallet ledger. |
+| `wallet_response` | object | Full raw response from the wallet service for this leg. |
+| `created_at` | string (date-time) | When the wallet transaction was created. |
+| `modified_at` | string (date-time) | When the wallet transaction was last modified. |
+
+```json title="customer_wallet_transactions in a payment details response"
+"customer_wallet_transactions": [
+  {
+    "provider_code": "wallet_ottu",
+    "amount": "5.000",
+    "currency": "KWD",
+    "operation_id": "op_7c2f9a1e4b",
+    "wallet_response": {
+      "amount": "5.000",
+      "currency": "KWD",
+      "status": "completed",
+      "operation_id": "op_7c2f9a1e4b"
+    },
+    "created_at": "2026-05-20T09:14:33Z",
+    "modified_at": "2026-05-20T09:14:35Z"
+  }
+]
+```
+
+Use these fields to keep your own system in sync:
+
+- **Reconciliation** — sum `amount` across the array to know how much of the payment wallet credit covered. The remainder (`paid_amount` minus the wallet total) is what the payment gateway settled, so you can split a single payment across the two funding sources in your books.
+- **Audit trail** — store `operation_id` against your order. Pass it to [Get Operation by ID](#api-reference) to pull every ledger entry the operation produced for a full audit record.
+- **System updates** — use `provider_code` to attribute the credit to the correct wallet program, and `created_at` / `modified_at` to timestamp the movement in your own ledger.
+
 ## API Reference
 
 Three read APIs let you query wallet state from your backend. All three accept the standard [Ottu API key](/developers/getting-started/authentication) authentication and are `POST` endpoints — the request body carries the `customer_id` (and, where required, the `currency`) that scopes the query.

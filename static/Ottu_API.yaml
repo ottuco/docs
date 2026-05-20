@@ -5351,13 +5351,6 @@ components:
           type: string
           format: date-time
           description: Wallet transaction last modification timestamp.
-      required:
-        - amount
-        - created_at
-        - currency
-        - modified_at
-        - operation_id
-        - wallet_response
     DirectPaymentResponse:
       type: object
       properties:
@@ -5616,7 +5609,6 @@ components:
         - card_acceptance_criteria
         - currency_code
         - customer_address_country
-        - customer_wallet_transactions
         - fee
         - gateway_account
         - gateway_name
@@ -8722,7 +8714,6 @@ components:
         - card_acceptance_criteria
         - currency_code
         - customer_address_country
-        - customer_wallet_transactions
         - fee
         - gateway_account
         - gateway_name
