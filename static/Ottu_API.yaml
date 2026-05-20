@@ -609,7 +609,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/AttachmentUploadClientErrors"
           description: ""
-  /b/checkout/v1/wallet/accounts/:
+  /b/wallet/ottu/v1/accounts/:
     post:
       operationId: wallet_accounts
       description: |-
@@ -700,7 +700,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/GenericErrorMessage"
           description: ""
-  /b/checkout/v1/wallet/entries/:
+  /b/wallet/ottu/v1/entries/:
     post:
       operationId: wallet_entries
       description: |-
@@ -787,7 +787,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/GenericErrorMessage"
           description: ""
-  /b/checkout/v1/wallet/operations/:
+  /b/wallet/ottu/v1/operations/:
     post:
       operationId: wallet_operation_details
       description: |-
