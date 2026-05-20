@@ -609,7 +609,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/AttachmentUploadClientErrors"
           description: ""
-  /b/checkout/v1/wallet/accounts/:
+  /b/wallet/ottu/v1/accounts/:
     post:
       operationId: wallet_accounts
       description: |-
@@ -700,7 +700,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/GenericErrorMessage"
           description: ""
-  /b/checkout/v1/wallet/entries/:
+  /b/wallet/ottu/v1/entries/:
     post:
       operationId: wallet_entries
       description: |-
@@ -787,7 +787,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/GenericErrorMessage"
           description: ""
-  /b/checkout/v1/wallet/operations/:
+  /b/wallet/ottu/v1/operations/:
     post:
       operationId: wallet_operation_details
       description: |-
@@ -5351,13 +5351,6 @@ components:
           type: string
           format: date-time
           description: Wallet transaction last modification timestamp.
-      required:
-        - amount
-        - created_at
-        - currency
-        - modified_at
-        - operation_id
-        - wallet_response
     DirectPaymentResponse:
       type: object
       properties:
@@ -5616,7 +5609,6 @@ components:
         - card_acceptance_criteria
         - currency_code
         - customer_address_country
-        - customer_wallet_transactions
         - fee
         - gateway_account
         - gateway_name
@@ -8722,7 +8714,6 @@ components:
         - card_acceptance_criteria
         - currency_code
         - customer_address_country
-        - customer_wallet_transactions
         - fee
         - gateway_account
         - gateway_name

@@ -1,0 +1,9 @@
+# Overrides for: components/schemas/WalletEntriesRequest
+# Request body for the wallet ledger entries endpoint (List Ledger Entries).
+#
+# Keeps the API explorer "Try it" example minimal — only the two required
+# fields, scoped to the sandbox-usd demo customer in USD.
+
+_example:
+  customer_id: sandbox-usd
+  currency: USD
