@@ -191,6 +191,10 @@ When the session is configured for authorization-only (no immediate capture), wa
 
 See [Refund to Wallet](../../operations#refund-to-wallet) on the Operations page for the full API and behavior. The refund endpoint accepts `destination: "wallet"` to credit the wallet instead of reversing through the gateway.
 
+:::warning Wallet-paid transactions cannot be refunded
+A transaction settled with wallet credit cannot be refunded back to the wallet — or to any other destination. Once a customer spends their balance at checkout, that leg of the payment is final.
+:::
+
 :::warning Cross-currency wallet payments are not supported
 A KWD wallet cannot be used to pay a SAR order, and vice versa. Each currency maintains a separate wallet account.
 :::
