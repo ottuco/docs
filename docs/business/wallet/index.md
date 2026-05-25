@@ -91,6 +91,10 @@ If a customer abandons, cancels, or fails a payment, the reserved wallet amount 
 The wallet only appears when its currency matches the order currency.
 :::
 
+:::note Offering multiple payment gateways on one checkout
+If a checkout offers several payment gateways, make sure at most **one wallet per wallet provider** can be used for the order currency. If two gateways each carry a wallet from the same provider for that currency, the checkout cannot be created. See [Only one wallet per provider per checkout](/developers/payments/wallet/#2-create-a-checkout-session-with-the-wallet-capable-pgs) in the developer docs.
+:::
+
 **What you can do:**
 
 - Display the customer's wallet balance on your own site or app — call the [Wallet Accounts API](/developers/payments/wallet/#api-reference).

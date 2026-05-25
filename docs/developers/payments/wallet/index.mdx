@@ -135,6 +135,32 @@ Call the [Checkout API](../checkout-api) with the `pg_codes` returned in step 1,
 
 The `session_id` returned here is what step 3 passes into `Checkout.init`. The `customer_id` is what links the session to that customer's wallet account — wallet appears in the SDK only when (a) the session has a `customer_id` and (b) the wallet account for `(merchant, customer_id, currency)` has positive balance.
 
+:::warning Only one wallet per provider may be available per checkout
+When you list several payment gateways in `pg_codes`, Ottu checks the wallets behind them. If two or more of the selected gateways each carry a wallet from the **same wallet provider** that can be used for the transaction's currency, the checkout creation request is rejected with **HTTP 400** — the checkout page could not unambiguously show which wallet balance to apply. Choose your `pg_codes` so that at most one wallet per provider is available for the transaction.
+:::
+
+For example, the request below lists two gateways — `gateway-a` and `gateway-b` — that each have a wallet from the same provider available in `KWD`:
+
+<CodeBlock language="bash" title="Request that triggers the error — POST /checkout/v1/pymt-txn">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/' \\
+  --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
+  --header 'Content-Type: application/json' \\
+  --data '{
+    "type": "payment_request",
+    "amount": "10.000",
+    "currency_code": "KWD",
+    "pg_codes": ["gateway-a", "gateway-b"]
+  }'`}</CodeBlock>
+
+Because both gateways expose a same-provider wallet for `KWD`, the request fails:
+
+```json title="Response — 400 Bad Request"
+{
+  "pg_codes": [
+    "Multiple wallets of the same provider are available for this currency across the selected payment gateways. Only one wallet per provider may be available for a transaction."
+  ]
+}
+```
+
 #### 3. Render the Checkout SDK with the session
 
 Add a mount point to your page — the SDK looks for an element matching `selector`:
@@ -191,13 +217,56 @@ When the session is configured for authorization-only (no immediate capture), wa
 
 See [Refund to Wallet](../../operations#refund-to-wallet) on the Operations page for the full API and behavior. The refund endpoint accepts `destination: "wallet"` to credit the wallet instead of reversing through the gateway.
 
+:::warning Wallet-paid transactions cannot be refunded
+A transaction settled with wallet credit cannot be refunded back to the wallet — or to any other destination. Once a customer spends their balance at checkout, that leg of the payment is final.
+:::
+
 :::warning Cross-currency wallet payments are not supported
 A KWD wallet cannot be used to pay a SAR order, and vice versa. Each currency maintains a separate wallet account.
 :::
 
-### Wallet details in payment webhooks
+#### Wallet Transactions
 
-When a wallet leg debits a session, the payment webhook delivered to your `webhook_url` carries the full wallet activity in a top-level [`customer_wallet_transactions`](../../webhooks/payment-events#response-payment-webhook-customer_wallet_transactions) array — one entry per wallet provider that contributed funds. Each entry includes the amount charged, the provider's `operation_id`, the ISO 4217 currency code, creation and modification timestamps, and the verbatim wallet-service response (status, `payment_entry_id`, `reserve_entry_id`). Stacked-wallet setups (e.g., Ottu wallet + Qitaf) emit one record per provider in the same webhook; single-wallet payments emit a one-element list — use it to reconcile multi-wallet payments without polling the wallet APIs.
+When a payment is settled with wallet credit, the payment details — returned by the [Checkout API retrieve](../checkout-api) call, the [PSQ inquiry](../psq), and [payment webhooks](../../webhooks/payment-events#response-payment-webhook-customer_wallet_transactions) — include a `customer_wallet_transactions` array. Each element is one wallet leg that contributed to the payment, so you can attribute every leg without a separate call to the wallet read APIs.
+
+The key is omitted entirely when no wallet was involved. A single-wallet payment emits a one-element list; multi-wallet stacking (Ottu credit plus a loyalty wallet, for example) emits one element per provider.
+
+| Field | Type | Description |
+|---|---|---|
+| `provider_code` | string | Stable identifier of the wallet provider that handled this leg — e.g. `wallet_ottu`. Empty for legacy native payments where the provider wasn't recorded. |
+| `amount` | string | Amount charged from this wallet leg. |
+| `currency` | string | ISO 4217 currency code of the leg. |
+| `operation_id` | string | Wallet service operation ID — the join key to the wallet ledger. |
+| `wallet_response` | object | Full raw response from the wallet service for this leg. |
+| `created_at` | string (date-time) | When the wallet transaction was created. |
+| `modified_at` | string (date-time) | When the wallet transaction was last modified. |
+
+```json title="customer_wallet_transactions in a payment details response"
+"customer_wallet_transactions": [
+  {
+    "provider_code": "wallet_ottu",
+    "amount": "5.000",
+    "currency": "KWD",
+    "operation_id": "op_7c2f9a1e4b",
+    "wallet_response": {
+      "amount": "5.000",
+      "currency": "KWD",
+      "status": "completed",
+      "operation_id": "op_7c2f9a1e4b"
+    },
+    "created_at": "2026-05-20T09:14:33Z",
+    "modified_at": "2026-05-20T09:14:35Z"
+  }
+]
+```
+
+Use these fields to keep your own system in sync:
+
+- **Reconciliation** — sum `amount` across the array to know how much of the payment wallet credit covered. The remainder (`paid_amount` minus the wallet total) is what the payment gateway settled, so you can split a single payment across the two funding sources in your books.
+- **Audit trail** — store `operation_id` against your order. Pass it to [Get Operation by ID](#api-reference) to pull every ledger entry the operation produced for a full audit record.
+- **System updates** — use `provider_code` to attribute the credit to the correct wallet program, and `created_at` / `modified_at` to timestamp the movement in your own ledger.
+
+Stacked-wallet setups (e.g., Ottu wallet + Qitaf) emit one record per provider in the same payload; single-wallet payments emit a one-element list — so you can reconcile multi-wallet payments without polling the wallet read APIs.
 
 ## API Reference
 
