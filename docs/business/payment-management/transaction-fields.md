@@ -51,8 +51,7 @@ The timestamp of the most recent state change. Useful for reconciliation and ide
 
 ### type
 
-The kind of transaction, this is set when the transaction is created and never changes afterwards.
-Its values:
+The kind of transaction. This is set when the transaction is created and never changes afterwards. Its values:
 
 - `e_commerce` — initiated from an external storefront (Shopify, WooCommerce, Magento, custom checkout) via the [E-commerce Payment](/glossary#term-e-commerce-payment) flow.
 - `payment_request` — a merchant-initiated [Payment Request](/glossary#term-payment-request), typically delivered to the customer as a payment link.
@@ -429,7 +428,7 @@ The postal code of the customer's billing address. May be sent to the payment ga
 
 ### customer_shipping_address
 
-The customer's shipping address — where the product or service will be delivered. May be used for fraud prevention and displayed on invoices, receipts, and other communications.
+The customer's shipping address — where the product or service will be delivered. A structured object with sub-fields (`line1`, `line2`, `city`, `state`, `country`, `postal_code`). May be used for fraud prevention and displayed on invoices, receipts, and other communications.
 
 ---
 
@@ -437,9 +436,9 @@ The customer's shipping address — where the product or service will be deliver
 
 ### redirect_url
 
-The URL the customer is sent back to after they finish paying. Only used when the webhook delivery is success. Ottu appends [`order_no`](#order_no), [`reference_number`](#reference_number), and [`session_id`](#session_id) as query parameters.
+The URL the customer is sent back to after they finish paying. Only used when the webhook delivery is successful. Ottu appends [`order_no`](#order_no), [`reference_number`](#reference_number), and [`session_id`](#session_id) as query parameters.
 
-### disclosure_url
+### webhook_url
 
 The [webhook URL](/business/settings/webhooks) where Ottu sends a POST request with the payment result after the customer completes the payment session. The payment result is included in the request body.
 
@@ -468,7 +467,6 @@ The notification settings for this transaction, including which channels (email,
 A list of email addresses for recipients who will receive email notifications sent to the customer regarding their payment.
 
 ### notification_set
-
 
 ---
 
@@ -545,6 +543,10 @@ The bulk-upload batch this transaction belongs to.
 ### booking_event
 
 ### attempt_reference
+
+---
+
+## Internal & diagnostic fields
 
 <details>
 <summary>Internal & diagnostic fields (10) — expand to see one-line notes</summary>
