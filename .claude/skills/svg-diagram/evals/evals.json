@@ -1,0 +1,47 @@
+{
+  "skill_name": "svg-diagram",
+  "notes": "Baseline = no skill (creating a new skill). Each eval is a realistic docs-author request covering one core use case: build-from-prose (small, security-flavored), convert-an-existing-Mermaid, and synthesize-a-large-end-to-end. The shared expectations encode the skill's hard invariants; eval-specific ones check task fidelity. Subjective quality (composition, premium feel, right accent choice) is judged in the human review viewer, not asserted here.",
+  "shared_expectations": [
+    "Produced both a light and a dark SVG file",
+    "Both SVGs are well-formed XML",
+    "Light and dark differ only inside the <style> block (theme parity)",
+    "Uses Poppins; the string 'Inter' never appears",
+    "Accent is Ottu blue #0B82BE; no orange/green/pink node fills",
+    "Restraint: at most 2 accent nodes and at most 1 danger node",
+    "Accessibility: role='img' with a non-empty <title> and <desc>",
+    "Root <svg> scales (has viewBox, no width/height)",
+    "Embeds via <ThemedImage> with light and dark sources"
+  ],
+  "evals": [
+    {
+      "id": 1,
+      "name": "webhook-hmac-flow",
+      "prompt": "Our webhooks overview page is all text and could really use a diagram. Can you add one that shows how a signed webhook works end to end: Ottu POSTs a payment-outcome event to the merchant's webhook_url, the event carries an HMAC-SHA256 signature, and the merchant recomputes and verifies that signature before trusting the payload, then responds 200 OK. It should look like the diagram on our architecture page and work in dark mode too.",
+      "expected_output": "A light+dark pair of SVGs in Ottu's restrained style: neutral nodes for Ottu's webhook sender and the merchant receiver, the HMAC signature/verification given appropriate emphasis, a solid POST arrow and a 200 OK response, Poppins, #0B82BE accent, accessibility block, and the <ThemedImage> snippet. Light and dark differ only in <style>.",
+      "files": [],
+      "expectations": ["Represents the HMAC signature / verification step"]
+    },
+    {
+      "id": 2,
+      "name": "convert-recurring-mermaid",
+      "prompt": "I want to get rid of the Mermaid diagram on our recurring payments page (docs/developers/cards-and-tokens/recurring-payments.mdx) and replace it with a hand-built diagram that matches our architecture page, including light and dark mode. The current Mermaid shows the CIT/MIT recurring flow: the Merchant creates a Checkout session (CIT), the Customer pays and saves the card, a webhook returns the token, then the Merchant charges the saved token via the Auto-Debit API (MIT) and gets a result webhook back. The Auto-Debit API is the key piece.",
+      "expected_output": "Two themed SVGs faithfully preserving the CIT/MIT flow and actors (Merchant, Checkout API, Customer, Auto-Debit API), Auto-Debit API as the single accent node, dashed async webhook returns, accessibility block, and a <ThemedImage> snippet that replaces the ```mermaid``` fence. Light/dark parity.",
+      "files": [],
+      "expectations": [
+        "Preserves the flow: includes Checkout and Auto-Debit, with an accent node",
+        "Replaces the Mermaid fence (snippet uses ThemedImage, no triple-backtick mermaid)"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "payment-journey-overview",
+      "prompt": "Our payment journey is explained only in prose and it's hard to follow. I'd like a diagram of the whole flow: the merchant backend creates a session via the Checkout API, Ottu returns a session_id and checkout_url, the merchant presents the checkout UI to the customer, the customer pays, Ottu routes the payment to the gateway, then Ottu notifies the merchant by webhook and redirects the customer back. Make it premium like our architecture diagram, in light and dark.",
+      "expected_output": "Two themed SVGs of the end-to-end journey with merchant, the Ottu platform (dashed container), and gateway. Despite ~6-7 boxes, only 1-2 accent nodes (restraint); labeled arrows carrying verbs; a dashed async webhook return; accessibility block; and the <ThemedImage> snippet. Light/dark differ only in <style>.",
+      "files": [],
+      "expectations": [
+        "Groups Ottu services in a dashed platform container (container-bg)",
+        "Includes a dashed asynchronous return path"
+      ]
+    }
+  ]
+}

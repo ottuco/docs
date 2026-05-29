@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360"
+     role="img" aria-labelledby="diagram-title diagram-desc" preserveAspectRatio="xMidYMid meet">
+  <!-- Replace the title with a few words, and the desc with a full spoken-aloud description.
+       Author the ids plainly; inline-svg.py suffixes them with your slug. -->
+  <title id="diagram-title">REPLACE: short diagram title</title>
+  <desc id="diagram-desc">REPLACE: one or two sentences describing the whole flow, the way you would say it out loud. This is the alt text for screen readers.</desc>
+
+  <defs>
+    <!-- One shared arrow marker; its colour comes from the .arrow-head CLASS so the
+         dark override restyles it for free. id="arrow" is fine here — inline-svg.py
+         renames it to arrow-<slug> and rewrites the url(#arrow) references. -->
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path class="arrow-head" d="M0,1 L9,5 L0,9 z" />
+    </marker>
+
+    <!-- LIGHT palette tokens — verbatim from references/design-tokens.md.
+         Author ONLY these light rules, unscoped. scripts/inline-svg.py then scopes
+         every selector under the diagram's ottu-dgm scope class and appends the
+         dark-theme overrides to make this one file theme-aware. Do not hand-write
+         dark rules. (Avoid a double hyphen inside XML comments — it is illegal.) -->
+    <style>
+      .node { fill: #FFFFFF; stroke: #D4D4D4; stroke-width: 1.4; }
+      .accent { fill: #0B82BE; stroke: #0B82BE; stroke-width: 1.4; }
+      .danger { fill: #ED2833; stroke: #ED2833; stroke-width: 1.4; }
+      .container-bg { fill: #F6FAFD; stroke: #0B82BE; stroke-dasharray: 5 5; stroke-width: 1.2; opacity: 0.85; }
+      .platform-label { fill: #0B82BE; font: 700 10px 'Poppins', system-ui, -apple-system, sans-serif; letter-spacing: 1.6px; }
+      .label { fill: #302F37; font: 600 13px 'Poppins', system-ui, -apple-system, sans-serif; }
+      .label-white { fill: #FFFFFF; font: 600 13px 'Poppins', system-ui, -apple-system, sans-serif; }
+      .sub { fill: #6B6B72; font: 400 11px 'Poppins', system-ui, -apple-system, sans-serif; }
+      .sub-white { fill: #FFFFFF; font: 400 11px 'Poppins', system-ui, -apple-system, sans-serif; opacity: 0.9; }
+      .divider { stroke: #E0E0E3; stroke-width: 1; }
+      .arrow { fill: none; stroke: #8B8A90; stroke-width: 1.4; }
+      .arrow-head { fill: #8B8A90; }
+      .arrow-label { fill: #6B6B72; font: 500 10px 'Poppins', system-ui, -apple-system, sans-serif; letter-spacing: 0.3px; }
+      .arrow-label-bg { fill: #F6FAFD; }
+    </style>
+  </defs>
+
+  <!-- ============================================================
+       Everything below is PLACEHOLDER composition. Delete what you
+       don't need, rename the labels, and re-lay-out for your flow.
+       Keep columns aligned and use AT MOST 1–2 .accent nodes.
+       ============================================================ -->
+
+  <!-- Boundary container (draw first so it sits behind the nodes). Optional. -->
+  <rect class="container-bg" x="300" y="40" width="320" height="280" rx="14" />
+  <text class="platform-label" x="320" y="66">OTTU PLATFORM</text>
+
+  <!-- External actor / service (neutral) -->
+  <rect class="node" x="40" y="150" width="180" height="60" rx="8" />
+  <text class="label" x="130" y="178" text-anchor="middle">Merchant Backend</text>
+  <text class="sub"   x="130" y="196" text-anchor="middle">Your server</text>
+
+  <!-- The ONE accent node — the Ottu thing this diagram is about -->
+  <rect class="accent" x="320" y="145" width="200" height="70" rx="8" />
+  <text class="label-white" x="420" y="175" text-anchor="middle">Ottu Service</text>
+  <text class="sub-white"   x="420" y="195" text-anchor="middle">Api-Key auth</text>
+
+  <!-- Supporting / downstream node (neutral) -->
+  <rect class="node" x="680" y="150" width="180" height="60" rx="8" />
+  <text class="label" x="770" y="178" text-anchor="middle">Downstream</text>
+  <text class="sub"   x="770" y="196" text-anchor="middle">e.g. gateway</text>
+
+  <!-- Solid synchronous arrow with a label chip -->
+  <path class="arrow" d="M 220 180 L 320 180" marker-end="url(#arrow)" />
+  <rect class="arrow-label-bg" x="238" y="168" width="64" height="14" rx="3" />
+  <text class="arrow-label" x="270" y="179" text-anchor="middle">REST call</text>
+
+  <path class="arrow" d="M 520 180 L 680 180" marker-end="url(#arrow)" />
+  <rect class="arrow-label-bg" x="566" y="168" width="48" height="14" rx="3" />
+  <text class="arrow-label" x="590" y="179" text-anchor="middle">routes</text>
+
+  <!-- Dashed async / return path -->
+  <path class="arrow" d="M 680 200 Q 450 300 220 200" stroke-dasharray="4 3" marker-end="url(#arrow)" />
+  <rect class="arrow-label-bg" x="412" y="284" width="76" height="14" rx="3" />
+  <text class="arrow-label" x="450" y="295" text-anchor="middle">webhook</text>
+</svg>

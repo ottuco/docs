@@ -8,9 +8,8 @@ hide_table_of_contents: true
 
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
-import ThemedImage from "@theme/ThemedImage";
-import useBaseUrl from "@docusaurus/useBaseUrl";
 import CodeBlock from "@theme/CodeBlock";
+import WalletFlowDiagram from "@site/src/diagrams/WalletFlowDiagram";
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import WalletDemo from "@site/src/components/WalletDemo";
 import StepGuide from "@site/src/components/StepGuide";
@@ -43,13 +42,7 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 ### Workflow
 
-<ThemedImage
-  alt="Ottu wallet flow: the merchant backend refunds through Ottu Connect to the Wallet Service. On the next checkout, the SDK reads the wallet balance, reserves it on submit, charges any remainder through the payment gateway, and Ottu Connect commits the reservation on success."
-  sources={{
-    light: useBaseUrl('/img/wallet-flow-light.svg'),
-    dark: useBaseUrl('/img/wallet-flow-dark.svg'),
-  }}
-/>
+<WalletFlowDiagram />
 
 Wallet credit is created when a merchant refunds with `destination: "wallet"` — see [Refund to Wallet](../../operations#refund-to-wallet). Once a customer has positive balance in the session currency, the developer journey to spend it is:
 
