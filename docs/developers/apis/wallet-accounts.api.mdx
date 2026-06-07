@@ -44,6 +44,8 @@ Accounts are created lazily: one exists only after the first credit lands in tha
 `balance` reflects confirmed funds only; `available_balance` is `balance` minus the amounts held by in-flight checkout reservations, and is what the customer can actually spend right now. Results are cursor-paginated — pass the `pagination.cursor` value from the `next` object to fetch the following page.
 
 
+<span style={{display:"none"}}>{"curl --location 'https://ksa.ottu.dev/b/wallet/ottu/v1/accounts/' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Api-Key YOUR_API_KEY' \\\n--data '{\n  \"customer_id\": \"sandbox-usd\",\n  \"currency\": \"USD\"\n}'"}</span>
+
 <Heading
   id={"request"}
   as={"h2"}
