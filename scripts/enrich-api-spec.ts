@@ -85,6 +85,7 @@ interface OperationEnrichment {
   description_prepend?: string;
   description_replace?: string;
   parameters?: Record<string, ParameterOverride>;
+  mcp_hint?: string;
 }
 
 interface OperationsFile {
@@ -319,6 +320,10 @@ function enrichOperations(
       }
 
       operation.description = description;
+
+      if (enrichment.mcp_hint) {
+        operation["mcp_hint"] = enrichment.mcp_hint;
+      }
 
       // Apply parameter overrides (example, description)
       if (enrichment.parameters && Array.isArray(operation.parameters)) {
