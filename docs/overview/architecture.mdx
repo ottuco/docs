@@ -3,8 +3,7 @@ title: Architecture at a Glance
 description: How Ottu's REST API, Checkout SDK, orchestration engine, and webhooks fit together, and where your merchant systems plug in.
 ---
 
-import ThemedImage from '@theme/ThemedImage';
-import useBaseUrl from '@docusaurus/useBaseUrl';
+import ArchitectureDiagram from '@site/src/diagrams/ArchitectureDiagram';
 
 # Architecture at a Glance
 
@@ -12,13 +11,7 @@ Ottu is a payment orchestration platform that sits between your systems, 45+ pay
 
 ## High-Level Architecture
 
-<ThemedImage
-  alt="Ottu platform architecture: the merchant backend calls the REST API, the merchant frontend embeds the Checkout SDK for the customer, the orchestration engine routes to the payment gateway, and webhooks send HMAC-signed events back to the merchant backend."
-  sources={{
-    light: useBaseUrl('/img/architecture-light.svg'),
-    dark: useBaseUrl('/img/architecture-dark.svg'),
-  }}
-/>
+<ArchitectureDiagram />
 
 The merchant backend is always the API caller. The customer only interacts with the checkout UI. See [Payment Journey](/developers/payments/payment-journey/) for the step-by-step flow.
 

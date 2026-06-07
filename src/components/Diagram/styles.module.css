@@ -1,0 +1,26 @@
+/* Layout only. All colours/theming live inside each SVG's own scoped <style>
+   block (see the svg-diagram skill), so this file never needs touching when the
+   palette changes. */
+
+.diagram {
+  margin: 1.75rem 0;
+  text-align: center;
+}
+
+/* The injected SVG scales to the content column but never blows up on wide
+   viewports. `:global(svg)` targets the dangerouslySetInnerHTML child, which
+   isn't a CSS-module class. */
+.canvas :global(svg) {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.caption {
+  margin-top: 0.65rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--ifm-color-emphasis-600);
+}

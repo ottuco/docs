@@ -50,6 +50,66 @@ If a transaction has `knet` and `mpgs` `pg_code` but only `knet` supports Apple 
 - [x] Used the appropriate API key type ([Public API Key](../getting-started/authentication.md#public-key) vs. [Private API Key](../getting-started/authentication.md#api-key-auth)).
 - [x] Implemented backend sync logic.
 
+### Configuring your native wallet from the session response
+
+Before you can render an Apple Pay or Google Pay button, you have to build the wallet's payment request. Several of those values — the gateway identifier, the gateway merchant ID, your wallet merchant ID — **must come from Ottu, not from your own configuration**. Ottu already returns them per transaction in the session response, so you never have to hardcode them.
+
+:::warning[`gateway_merchant_id` is not your wallet `merchant_id`]
+These are two different values and they are **not interchangeable**:
+
+- **`gateway_merchant_id`** — the **payment gateway's** merchant identifier (for example, your MPGS merchant ID). This is what goes into the wallet's gateway tokenization setting (`gatewayMerchantId` for Google Pay).
+- **`merchant_id`** — your **wallet** (Google / Apple) merchant identifier (for example, a Google Pay `BCR2DN…` ID). It is used only for the wallet's own merchant info.
+
+Putting the wallet `merchant_id` where the gateway expects `gateway_merchant_id` is a common, hard-to-diagnose mistake: the wallet sheet renders and produces a token, but the gateway rejects that token at the payment step (MPGS, for example, returns *"not authorized to use this Google Pay payment token"*). Always read both values from the session response per transaction — never hardcode them.
+:::
+
+#### Where the fields live
+
+The wallet configuration is returned under `sdk_setup_preload_payload.payment_services[]` — **one object per configured wallet**. Request it by setting `include_sdk_setup_preload=true` when you [create or retrieve the session](/developers/payments/checkout-api/).
+
+These values are **not** in the top-level `payment_methods` array (which can be empty for native flows). Read each wallet's config from `payment_services[]`, matched by its `flow` discriminator (`"google_pay"` or `"apple_pay"`) and its `pg_code`.
+
+#### Google Pay
+
+Map each `payment_services[]` field to its [Google Pay](https://developers.google.com/pay/api/web/reference/request-objects) request setting:
+
+| `payment_services[]` field | Google Pay setting | Notes |
+|---|---|---|
+| `gateway` | tokenization `gateway` | e.g. `mpgs` |
+| `gateway_merchant_id` | tokenization `gatewayMerchantId` | the **gateway's** merchant ID — *not* your Google merchant ID |
+| `merchant_id` | `merchantInfo.merchantId` | your Google Pay (`BCR2DN…`) merchant ID |
+| `merchant_name` | `merchantInfo.merchantName` | display name |
+| `environment` | Google Pay environment | `PRODUCTION` / `TEST` |
+| `currency_code` | transaction currency | |
+| `country_code` | transaction country | |
+| `total_price` | transaction total | |
+
+After Google Pay returns the token, POST it to the native endpoint (`payment_url`, i.e. `POST /pbl/v2/payment/google-pay/`) with `session_id`, `pg_code`, and the payload — as shown in [Step-by-Step](#step-by-step) below.
+
+#### Apple Pay
+
+Apple Pay's `payment_services[]` entry has a **different field set** — verified against the live SDK response, it does *not* mirror Google Pay:
+
+| `payment_services[]` field | Apple Pay payment request use | Notes |
+|---|---|---|
+| `merchant_id` | Apple Pay merchant identifier | the `merchantIdentifier` used when validating the merchant session |
+| `domain` | merchant domain | the registered domain used for Apple Pay merchant/session validation |
+| `shop_name` | display name | shown on the Apple Pay sheet |
+| `currency_code` | payment request currency | |
+| `country_code` | payment request country | |
+| `amount` | payment request total | Apple Pay uses `amount` here, not `total_price` |
+| `session_id` | Ottu session | used for the merchant-session validation step |
+| `validation_url` | Ottu validation endpoint | your client calls this to validate the Apple Pay merchant session before showing the sheet |
+
+:::note Apple Pay does not expose gateway tokenization fields
+Unlike Google Pay, the Apple Pay entry does **not** contain `gateway` or `gateway_merchant_id`, and there is **no `environment` field**:
+
+- The gateway tokenization (the equivalent of Google Pay's `gatewayMerchantId`) is handled by Ottu server-side during the merchant-session validation (`validation_url`) and decryption — you do not set it in the client payment request.
+- The Apple Pay environment (sandbox vs. production) is determined by the Apple account and device, not by a value in the response.
+:::
+
+After Apple Pay returns the encrypted `paymentData`, POST it to the native endpoint (`payment_url`, i.e. `POST /pbl/v2/payment/apple-pay/`) with `session_id`, `pg_code`, and the payload — as shown in [Step-by-Step](#step-by-step) below.
+
 ## Guide
 
 ### Workflow
