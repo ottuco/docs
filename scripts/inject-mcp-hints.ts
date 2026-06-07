@@ -1,9 +1,18 @@
 /**
- * MCP Hint Injector
+ * MCP Curl Example Injector
  *
- * Reads mcp_hint fields from the enriched OpenAPI spec and injects hidden JSX
- * spans into the corresponding generated .api.mdx files so the MCP server
- * indexes the hint text without it being visible to users.
+ * Auto-generates a runnable curl example for every API operation in the
+ * enriched OpenAPI spec — using the same conversion and snippet-generation
+ * pipeline the interactive ApiExplorer uses under the hood (openapi-to-postmanv2
+ * to build a Postman collection, postman-code-generators to render the curl,
+ * and the openapi-docs plugin's own sampleRequestFromSchema for body examples)
+ * — and injects each one as a visually-hidden <span> into the matching
+ * generated .api.mdx file.
+ *
+ * The ApiExplorer already renders an interactive curl example for human
+ * readers, so this hidden copy exists purely so the MCP server's static-HTML
+ * indexer can return a usable request example via docs_fetch, without
+ * duplicating it visibly on the page.
  *
  * Runs after docusaurus gen-api-docs as part of npm run gen-api.
  * Reads from: static/Ottu_API_enriched.yaml  (written by npm run enrich-api)
@@ -13,12 +22,34 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as yaml from "js-yaml";
+import RefParser from "@apidevtools/json-schema-ref-parser";
+import openapiToPostman from "openapi-to-postmanv2";
+// @ts-expect-error — no published type declarations
+import sdk from "postman-collection";
+// @ts-expect-error — no published type declarations
+import codegen from "postman-code-generators";
+import { sampleRequestFromSchema } from "docusaurus-plugin-openapi-docs/lib/openapi/createRequestExample.js";
 
 const ROOT = path.resolve(__dirname, "..");
 const SOURCES_FILE = path.join(ROOT, "static", "api-sources.yaml");
 const API_DOCS_DIR = path.join(ROOT, "docs", "developers", "apis");
 
 const INJECTION_ANCHOR = /^<Heading\s*\n\s*id=\{"request"\}/m;
+
+const HTTP_METHODS = ["get", "post", "put", "patch", "delete", "options", "head"] as const;
+
+// Mirrors the default values of the "cURL" variant options the ApiExplorer
+// uses (docusaurus-theme-openapi-docs CodeSnippets/languages.json).
+const CURL_OPTIONS = {
+  multiLine: true,
+  longFormat: true,
+  lineContinuationCharacter: "\\",
+  quoteType: "single",
+  requestTimeoutInSeconds: 0,
+  followRedirect: true,
+  trimRequestBody: false,
+  silent: false,
+};
 
 interface SourceConfig {
   enrichedOutput: string;
@@ -28,18 +59,119 @@ interface ApiSourcesConfig {
   sources: Record<string, SourceConfig>;
 }
 
+interface OperationMatcher {
+  operationId: string;
+  method: string;
+  pathRegex: RegExp;
+  operation: any;
+}
+
 function operationIdToFilename(operationId: string): string {
   return operationId.replace(/_/g, "-") + ".api.mdx";
 }
 
-function injectHint(mdxContent: string, hint: string): string {
-  const span = `<span style={{display:"none"}}>${hint}</span>\n\n`;
+// Same templating as the openapi-docs plugin's bindCollectionToApiItems —
+// turns "/foo/{id}/bar" into a regex that matches "/foo/<anything>/bar".
+function pathTemplateToRegex(pathTemplate: string): RegExp {
+  const withTokens = pathTemplate.replace(/\{[^}]+\}/g, "__OPENAPI_PATH_PARAM__");
+  const escaped = withTokens.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = escaped.replace(/__OPENAPI_PATH_PARAM__/g, "[^/]+");
+  return new RegExp(`^${pattern}$`);
+}
+
+function buildOperationMatchers(spec: any): OperationMatcher[] {
+  const matchers: OperationMatcher[] = [];
+  for (const [pathTemplate, pathItem] of Object.entries<any>(spec.paths || {})) {
+    for (const method of HTTP_METHODS) {
+      const operation = pathItem[method];
+      if (operation?.operationId) {
+        matchers.push({
+          operationId: operation.operationId,
+          method,
+          pathRegex: pathTemplateToRegex(pathTemplate),
+          operation,
+        });
+      }
+    }
+  }
+  return matchers;
+}
+
+// Mirrors the openapi-docs plugin's createPostmanCollection: strip servers
+// (they break the conversion) and run the spec through openapi-to-postmanv2.
+async function buildPostmanCollection(spec: any): Promise<any> {
+  const data = JSON.parse(JSON.stringify(spec));
+  delete data.servers;
+  for (const pathItem of Object.values<any>(data.paths || {})) {
+    delete pathItem.servers;
+    for (const method of HTTP_METHODS) delete pathItem[method]?.servers;
+  }
+  return new Promise((resolve, reject) => {
+    const schemaPack = new openapiToPostman.SchemaPack({ type: "json", data }, { schemaFaker: false });
+    schemaPack.convert((err: any, result: any) => {
+      if (err || !result?.result) return reject(err || result?.reason);
+      resolve(new sdk.Collection(result.output[0].data));
+    });
+  });
+}
+
+function collectionItems(collection: any): any[] {
+  const items: any[] = [];
+  collection.forEachItem((item: any) => items.push(item));
+  return items;
+}
+
+// Point the request at the real sandbox host, turn placeholder path/query
+// values into readable {param} templates, and attach the API key header —
+// the same masked-credential placeholder shape the ApiExplorer shows.
+function applyServerAndAuth(request: any, baseUrl: string): void {
+  request.url.protocol = undefined;
+  request.url.host = [baseUrl];
+  request.url.variables.each((variable: any) => {
+    variable.value = `{${variable.key}}`;
+  });
+  request.url.query.each((param: any) => {
+    param.value = `{${param.key}}`;
+  });
+  request.headers.add({ key: "Authorization", value: "Api-Key YOUR_API_KEY" });
+}
+
+// Reuse the plugin's own example generator so the body in the curl matches
+// the example shown in the page's request schema — only handles JSON bodies,
+// which covers every write endpoint that matters for an MCP example.
+function applyJsonBody(request: any, operation: any): void {
+  const jsonContent = operation.requestBody?.content?.["application/json"];
+  if (!jsonContent?.schema) return;
+  const example = sampleRequestFromSchema(jsonContent.schema);
+  if (example === undefined) return;
+  request.body = new sdk.RequestBody({
+    mode: "raw",
+    raw: JSON.stringify(example, null, 2),
+    options: { raw: { language: "json" } },
+  });
+  request.headers.upsert({ key: "Content-Type", value: "application/json" });
+}
+
+function generateCurl(request: any): Promise<string> {
+  return new Promise((resolve, reject) => {
+    codegen.convert("curl", "cURL", request, CURL_OPTIONS, (err: any, snippet: string) => {
+      if (err) return reject(err);
+      resolve(snippet);
+    });
+  });
+}
+
+function injectSpan(mdxContent: string, curl: string): string | null {
+  // Curl text contains literal `{`/`}` (path templates, JSON bodies), which
+  // MDX would otherwise try to parse as JS expressions in raw text. Wrapping
+  // it as a JS string expression — {"..."} — sidesteps that entirely.
+  const span = `<span style={{display:"none"}}>{${JSON.stringify(curl)}}</span>\n\n`;
   const match = INJECTION_ANCHOR.exec(mdxContent);
-  if (!match) return mdxContent;
+  if (!match) return null;
   return mdxContent.slice(0, match.index) + span + mdxContent.slice(match.index);
 }
 
-function processSource(enrichedSpecPath: string): number {
+async function processSource(enrichedSpecPath: string): Promise<number> {
   if (!fs.existsSync(enrichedSpecPath)) {
     console.error(`  ERROR: Enriched spec not found: ${enrichedSpecPath}`);
     console.error(`  Run "npm run enrich-api" first.`);
@@ -47,41 +179,64 @@ function processSource(enrichedSpecPath: string): number {
   }
 
   const spec = yaml.load(fs.readFileSync(enrichedSpecPath, "utf-8")) as any;
-  const paths = spec.paths || {};
+  const baseUrl = spec.servers?.[0]?.url;
+  if (!baseUrl) {
+    console.warn(`  WARN: Spec has no servers[0].url — skipping curl generation`);
+    return 0;
+  }
+
+  // Dereferenced copy: operation matching and body example generation both
+  // need resolved $refs (sampleRequestFromSchema can't fake a bare $ref).
+  const dereferenced = await RefParser.dereference(JSON.parse(JSON.stringify(spec)), {
+    mutateInputSchema: false,
+  });
+  const matchers = buildOperationMatchers(dereferenced);
+  const collection = await buildPostmanCollection(spec);
+
   let injected = 0;
 
-  for (const pathItem of Object.values<any>(paths)) {
-    for (const method of ["get", "post", "put", "patch", "delete", "options", "head"]) {
-      const op = pathItem[method];
-      if (!op?.mcp_hint || !op?.operationId) continue;
+  for (const item of collectionItems(collection)) {
+    const request = item.request;
+    const method = request.method.toLowerCase();
+    const requestPath = request.url.getPath({ unresolved: true });
+    const matcher = matchers.find((m) => m.method === method && m.pathRegex.test(requestPath));
+    if (!matcher) continue;
 
-      const filename = operationIdToFilename(op.operationId);
-      const mdxPath = path.join(API_DOCS_DIR, filename);
+    applyServerAndAuth(request, baseUrl);
+    applyJsonBody(request, matcher.operation);
 
-      if (!fs.existsSync(mdxPath)) {
-        console.warn(`  WARN: No .api.mdx found for ${op.operationId} (expected ${filename})`);
-        continue;
-      }
-
-      const original = fs.readFileSync(mdxPath, "utf-8");
-      const patched = injectHint(original, op.mcp_hint);
-
-      if (patched === original) {
-        console.warn(`  WARN: Injection anchor not found in ${filename}`);
-        continue;
-      }
-
-      fs.writeFileSync(mdxPath, patched, "utf-8");
-      console.log(`  Injected hint into ${filename}`);
-      injected++;
+    let curl: string;
+    try {
+      curl = await generateCurl(request);
+    } catch (err) {
+      console.warn(`  WARN: Failed to generate curl for ${matcher.operationId}: ${err}`);
+      continue;
     }
+
+    const filename = operationIdToFilename(matcher.operationId);
+    const mdxPath = path.join(API_DOCS_DIR, filename);
+    if (!fs.existsSync(mdxPath)) {
+      console.warn(`  WARN: No .api.mdx found for ${matcher.operationId} (expected ${filename})`);
+      continue;
+    }
+
+    const original = fs.readFileSync(mdxPath, "utf-8");
+    const patched = injectSpan(original, curl);
+    if (patched === null) {
+      console.warn(`  WARN: Injection anchor not found in ${filename}`);
+      continue;
+    }
+
+    fs.writeFileSync(mdxPath, patched, "utf-8");
+    console.log(`  Injected curl example into ${filename}`);
+    injected++;
   }
 
   return injected;
 }
 
-function main(): void {
-  console.log("\nMCP Hint Injector");
+async function main(): Promise<void> {
+  console.log("\nMCP Curl Example Injector");
 
   const config = yaml.load(fs.readFileSync(SOURCES_FILE, "utf-8")) as ApiSourcesConfig;
   let total = 0;
@@ -89,7 +244,7 @@ function main(): void {
   for (const [name, source] of Object.entries(config.sources)) {
     console.log(`\n  ── ${name} ──`);
     const enrichedSpecPath = path.resolve(ROOT, source.enrichedOutput);
-    total += processSource(enrichedSpecPath);
+    total += await processSource(enrichedSpecPath);
   }
 
   console.log(`\n  Done — ${total} file(s) patched\n`);
