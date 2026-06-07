@@ -16,6 +16,7 @@ operations:
     permissions:
       - $perm:api_key_admin
       - $perm:basic_auth_view_checkout
+    mcp_hint: 'curl -X GET "{{sandboxUrl}}/b/checkout/v1/pymt-txn/{session_id}/" -H "Authorization: Api-Key YOUR_API_KEY"'
 
   full_update_payment_transaction_checkout:
     permissions:
