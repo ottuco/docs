@@ -620,6 +620,14 @@ function processSource(name: string, config: SourceConfig): void {
   info("Resolving template variables...");
   const enrichedSpec = resolveVariablesDeep(spec, variables);
 
+  // 9b. Point the API-explorer "Base URL" at the docs sandbox host. The raw
+  // spec's servers come from Ottu core (e.g. ksa.ottu.dev); override them here
+  // so the value is controlled by `sandboxUrl` in _variables.yaml and survives
+  // a re-fetch of the raw spec.
+  if (variables.sandboxUrl) {
+    enrichedSpec.servers = [{ url: variables.sandboxUrl }];
+  }
+
   // 10. Write output
   info("Writing enriched spec...");
   const output = yaml.dump(enrichedSpec, {

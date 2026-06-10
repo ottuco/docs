@@ -7,9 +7,10 @@
  * in `./sandbox` — flip that one global to retarget every demo on the site.
  */
 export const WALLET_DEMO = {
-  currency: "KWD",
-  seedAmount: "10.000",
-  sessionAmount: "8.000",
+  // Wallet on sandbox.ottu.net is enabled for USD only (PG `ottu-sandbox-usd`).
+  currency: "USD",
+  seedAmount: "10.00",
+  sessionAmount: "8.00",
   pgFilter: {
     plugin: "e_commerce",
     type: "sandbox",

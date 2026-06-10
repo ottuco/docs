@@ -17,3 +17,20 @@ export const KSA_OTTU_DEV = {
     clientSecretEnvVar: "KSA_KEYCLOAK_CLIENT_SECRET",
   },
 };
+
+// Active docs merchant — the WalletDemo seeds wallet credit here. Shares the
+// wallet service + Keycloak host with KSA; only the realm, merchant id, and
+// secret differ. Confirmed in Keycloak (auth.ottu.dev): realm
+// `sandbox.ottu.net`, client `backend` (Client Id and Secret authenticator).
+export const SANDBOX_OTTU_NET = {
+  merchantId: "sandbox.ottu.net",
+  walletUrl: "https://wallet.ottu.dev",
+  keycloak: {
+    url: "https://auth.ottu.dev",
+    realm: "sandbox.ottu.net",
+    clientId: "backend",
+    // Client secret resolved from process.env.SANDBOX_KEYCLOAK_CLIENT_SECRET
+    // at the call site (mcp-server/server.mjs handleSeedWallet).
+    clientSecretEnvVar: "SANDBOX_KEYCLOAK_CLIENT_SECRET",
+  },
+};

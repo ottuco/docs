@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { McpDocsServer } from "docusaurus-plugin-mcp-server";
-import { KSA_OTTU_DEV } from "./config.mjs";
+import { SANDBOX_OTTU_NET } from "./config.mjs";
 import { getKeycloakToken } from "./keycloak.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -142,7 +142,7 @@ async function handleSeedWallet(req, res) {
     return;
   }
 
-  const merchant = KSA_OTTU_DEV;
+  const merchant = SANDBOX_OTTU_NET;
   let token;
   try {
     token = await getKeycloakToken({
