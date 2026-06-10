@@ -125,8 +125,9 @@ function collectionItems(collection: any): any[] {
 // values into readable {param} templates, and attach the API key header —
 // the same masked-credential placeholder shape the ApiExplorer shows.
 function applyServerAndAuth(request: any, baseUrl: string): void {
-  request.url.protocol = undefined;
-  request.url.host = [baseUrl];
+  const parsed = new URL(`https://${baseUrl.replace(/^https?:\/\//, "")}`);
+  request.url.protocol = parsed.protocol.replace(":", "");
+  request.url.host = parsed.hostname.split(".");
   request.url.variables.each((variable: any) => {
     variable.value = `{${variable.key}}`;
   });
