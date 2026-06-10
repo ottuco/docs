@@ -38,6 +38,11 @@ const API_DOCS_DIR = path.join(ROOT, "docs", "developers", "apis");
 // regardless of how docusaurus-plugin-openapi-docs formats the JSX between them.
 const INJECTION_ANCHOR = /<Heading\s+id=\{"request"\}/;
 
+// Marks a previously-injected curl block — lets reruns on already-patched
+// files (e.g. running this script standalone, without a clean-api-docs pass)
+// skip rather than inject a second copy.
+const INJECTED_MARKER = '<pre style={{display:"none"}}>';
+
 const HTTP_METHODS = ["get", "post", "put", "patch", "delete", "options", "head"] as const;
 
 // Mirrors the default values of the "cURL" variant options the ApiExplorer
@@ -174,7 +179,7 @@ function injectSpan(mdxContent: string, curl: string): string | null {
   // nodes (CommonMark rules) — turning `session_id` and `https://` into
   // `session\_id` and `https\://` in the docs_fetch output. Code blocks are
   // emitted verbatim, so <pre> keeps the curl copy-paste-safe.
-  const span = `<pre style={{display:"none"}}>{${JSON.stringify(curl)}}</pre>\n\n`;
+  const span = `${INJECTED_MARKER}{${JSON.stringify(curl)}}</pre>\n\n`;
   const match = INJECTION_ANCHOR.exec(mdxContent);
   if (!match) return null;
   return mdxContent.slice(0, match.index) + span + mdxContent.slice(match.index);
@@ -239,6 +244,8 @@ async function processSource(enrichedSpecPath: string): Promise<SourceResult> {
     }
 
     const original = fs.readFileSync(mdxPath, "utf-8");
+    if (original.includes(INJECTED_MARKER)) continue;
+
     const patched = injectSpan(original, curl);
     if (patched === null) {
       failures.push(`Injection anchor not found in ${filename}`);
