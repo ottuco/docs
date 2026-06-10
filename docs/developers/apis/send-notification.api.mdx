@@ -40,7 +40,7 @@ import Translate from "@docusaurus/Translate";
 Send a notification using a pre-configured mail template. Requires `template_id` and `channel` (email, sms, or whatsapp).
 
 
-<span style={{display:"none"}}>{"curl --location 'https://ksa.ottu.dev/b/pbl/v2/send-notification/' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Api-Key YOUR_API_KEY' \\\n--data-raw '{\n  \"channel\": \"email\",\n  \"template_id\": \"payment-request-mail\",\n  \"to\": \"customer@example.com\"\n}'"}</span>
+<pre style={{display:"none"}}>{"curl --location 'https://ksa.ottu.dev/b/pbl/v2/send-notification/' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Api-Key YOUR_API_KEY' \\\n--data-raw '{\n  \"channel\": \"email\",\n  \"template_id\": \"payment-request-mail\",\n  \"to\": \"customer@example.com\"\n}'"}</pre>
 
 <Heading
   id={"request"}

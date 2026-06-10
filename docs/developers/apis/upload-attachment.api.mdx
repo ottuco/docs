@@ -46,7 +46,7 @@ Upload a file, attach it to a transaction if `session_id` or `order_no` is provi
 | [Basic Auth](/developers/getting-started/authentication/#basic-auth) | `Can add payment requests` or `Can add e-commerce payments` |
 
 
-<span style={{display:"none"}}>{"curl --location 'https://ksa.ottu.dev/b/checkout/v1/upload-attachment/' \\\n--header 'Content-Type: multipart/form-data' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Api-Key YOUR_API_KEY' \\\n--form 'file=@\"/path/to/file\"' \\\n--form 'shortify_attachment_url=\"false\"' \\\n--form 'order_no=\"<string>\"' \\\n--form 'session_id=\"<string>\"'"}</span>
+<pre style={{display:"none"}}>{"curl --location 'https://ksa.ottu.dev/b/checkout/v1/upload-attachment/' \\\n--header 'Content-Type: multipart/form-data' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Api-Key YOUR_API_KEY' \\\n--form 'file=@\"/path/to/file\"' \\\n--form 'shortify_attachment_url=\"false\"' \\\n--form 'order_no=\"<string>\"' \\\n--form 'session_id=\"<string>\"'"}</pre>
 
 <Heading
   id={"request"}

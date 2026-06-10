@@ -48,7 +48,7 @@ This endpoint allows you to retrieve the available payment methods for a specifi
 > **Gateway permission**: `Can use pg_code` — grants access to the specific [payment gateway](/developers/payments/payment-methods/) (e.g., "Can use Credit Card")
 
 
-<span style={{display:"none"}}>{"curl --location 'https://ksa.ottu.dev/b/pbl/v2/payment-methods/' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Api-Key YOUR_API_KEY' \\\n--data '{\n  \"plugin\": \"payment_request\",\n  \"operation\": \"purchase\",\n  \"currencies\": [\n    \"KWD\"\n  ],\n  \"type\": \"sandbox\",\n  \"tags\": [\n    \"demo\"\n  ]\n}'"}</span>
+<pre style={{display:"none"}}>{"curl --location 'https://ksa.ottu.dev/b/pbl/v2/payment-methods/' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Api-Key YOUR_API_KEY' \\\n--data '{\n  \"plugin\": \"payment_request\",\n  \"operation\": \"purchase\",\n  \"currencies\": [\n    \"KWD\"\n  ],\n  \"type\": \"sandbox\",\n  \"tags\": [\n    \"demo\"\n  ]\n}'"}</pre>
 
 <Heading
   id={"request"}
