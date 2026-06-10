@@ -48,6 +48,8 @@ Typical use case: The merchant collects the Apple Pay token on their frontend an
 | [Basic Auth](/developers/getting-started/authentication/#basic-auth) | `Can add payment requests` or `Can add e-commerce payments` |
 
 
+<pre style={{display:"none"}}>{"curl --location 'https://ksa.ottu.dev/b/pbl/v2/payment/apple-pay/' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Api-Key YOUR_API_KEY' \\\n--data '{\n  \"payload\": {\n    \"paymentData\": {\n      \"version\": \"string\",\n      \"data\": \"string\",\n      \"signature\": \"string\",\n      \"header\": {\n        \"ephemeralPublicKey\": \"string\",\n        \"wrappedKey\": \"string\",\n        \"publicKeyHash\": \"string\",\n        \"transactionId\": \"string\"\n      }\n    },\n    \"paymentMethod\": {\n      \"displayName\": \"string\",\n      \"network\": \"string\",\n      \"type\": \"string\"\n    },\n    \"transactionIdentifier\": \"string\"\n  },\n  \"pg_code\": \"string\",\n  \"session_id\": \"string\"\n}'"}</pre>
+
 <Heading
   id={"request"}
   as={"h2"}
