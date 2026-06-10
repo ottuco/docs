@@ -7,6 +7,7 @@ hide_table_of_contents: true
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import FAQ, { FAQItem } from '@site/src/components/FAQ';
 import StepGuide from "@site/src/components/StepGuide";
+import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
 # Invoice API
 
@@ -109,7 +110,7 @@ VAL CALC fields are optional validators. If provided, Ottu checks them against i
     title: "Handle the response",
     description: <><strong>Response</strong> (key fields):<br /><br /><pre><code>{`{
   "amount": 5.815,
-  "checkout_url": "https://sandbox.ottu.net/b/checkout/redirect/start/?session_id=...",
+  "checkout_url": "${OTTU_CONNECT_BASE_URL}/b/checkout/redirect/start/?session_id=...",
   "session_id": "9ba4c834f55f1e5476b9d9ea47ec7b12f61f9511",
   "invoice_pdf_url": "https://e.pay.kn/HWiDBBAQ8WBn",
   "state": "created",

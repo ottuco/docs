@@ -1,0 +1,9 @@
+# Overrides for: components/schemas/WalletAccountsRequest
+# Request body for the wallet accounts endpoint (List Wallet Accounts).
+#
+# Keeps the API explorer "Try it" example minimal, scoped to the
+# sandbox-usd demo customer in USD.
+
+_example:
+  customer_id: sandbox-usd
+  currency: USD

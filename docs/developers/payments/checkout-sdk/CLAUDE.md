@@ -28,11 +28,15 @@ toc_max_heading_level: 3
   ### Preloading               ← setupPreload (if supported)
   ### Theme                    ← theme object, example themes, scenarios, supported values
 
-## Wallet Configuration
+## Payment Services
   ### Apple Pay                ← init config + button customization + gateway-specific notes (e.g., KNET)
   ### Google Pay               ← init config + button customization
   ### STC Bank                  ← init config + button customization
   ### urpay                    ← init config + button customization
+
+## Onsite Checkout              ← inline card-entry flow via Ottu's Jazz SDK; only applies when 'jazz' is in formsOfPayment
+  ### How to enable
+  ### Flow
 
 ## Callbacks
   ### errorCallback
@@ -95,14 +99,14 @@ Properties are grouped into categories under `## Properties`, each as a `###`:
 | `### Preloading` | setupPreload | Performance optimization — pre-fetched transaction details |
 | `### Theme` | theme object | Appearance customization — examples, scenarios, supported CSS classes |
 
-Wallet-specific init objects (`applePayInit`, `googlePayInit`) are **NOT** properties — they belong under `## Wallet Configuration > ### [Wallet Name]`.
+Wallet-specific init objects (`applePayInit`, `googlePayInit`) are **NOT** properties — they belong under `## Payment Services > ### [Wallet Name]`.
 
-## Wallet Configuration
+## Payment Services
 
-All wallet-specific content is consolidated under `## Wallet Configuration`, grouped by wallet:
+All wallet-specific content is consolidated under `## Payment Services`, grouped by wallet:
 
 ```
-## Wallet Configuration
+## Payment Services
   ### Apple Pay
     #### applePayInit            ← init object, supported/unsupported properties
     #### Customize Button        ← button appearance, theme overrides
@@ -121,6 +125,22 @@ All wallet-specific content is consolidated under `## Wallet Configuration`, gro
 - Init config objects (`applePayInit`, `googlePayInit`) live here, not under Properties
 - Button customization is `#### Customize Button` (not "Customize Apple Pay button")
 - Gateway-specific notes (KNET-Apple Pay) fold into the wallet section as a `####`, not a standalone `###`
+
+## Onsite Checkout
+
+Documents the inline card-entry flow rendered via Ottu's Jazz SDK. The section only applies when `'jazz'` is present in `formsOfPayment`; otherwise the SDK falls back to the standard redirect-to-gateway flow.
+
+```
+## Onsite Checkout
+  ### How to enable           ← short paragraph + Checkout.init code sample including 'jazz'
+  ### Flow                    ← numbered customer-facing steps, anchoring to successCallback / errorCallback / cancelCallback
+```
+
+**Rules:**
+- Sits between `## Wallet Configuration` and `## Callbacks`
+- Use a `:::note` admonition under `### How to enable` to point merchants at `csd@ottu.com` for tier-based enablement and to describe the redirect fallback
+- Do NOT duplicate the `formsOfPayment` enumeration here — link back to it from the intro
+- Apply the same heading rules to other SDK pages (iOS / Android / Flutter) only if those platforms render onsite forms inline
 
 ## Callbacks
 
@@ -179,7 +199,7 @@ Not all sections apply to all platforms:
 | Installation | script tag | CocoaPods/SPM | Gradle | pub.dev |
 | Live Demo | CheckoutDemo component | N/A | N/A | Possible via Flutter Web |
 | Theme | Full CSS customization | Platform-specific | Platform-specific | Platform-specific |
-| Wallet Config | applePayInit, googlePayInit | Apple Pay native | Google Pay native | Both |
+| Payment Services | applePayInit, googlePayInit | Apple Pay native | Google Pay native | Both |
 | showPopup | Supported | May differ | May differ | May differ |
 
 Adapt section content to the platform, but keep the heading names and order consistent.

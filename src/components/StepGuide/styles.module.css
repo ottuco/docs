@@ -168,19 +168,60 @@
   margin-bottom: 4px;
 }
 
+.titleStack {
+  display: grid;
+  margin: 0 0 6px;
+}
+
 .stepTitle {
+  grid-row: 1;
+  grid-column: 1;
   font-size: 17px;
   font-weight: 600;
   color: var(--ifm-heading-color);
-  margin: 0 0 6px;
+  margin: 0;
   line-height: 1.4;
 }
 
+.stepTitleActive {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.25s ease;
+}
+
+.stepTitleHidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 0.25s ease, visibility 0s 0.25s;
+}
+
+.descriptionStack {
+  display: grid;
+}
+
 .stepDescription {
+  grid-row: 1;
+  grid-column: 1;
   font-size: 14px;
   color: var(--ifm-font-color-base);
   line-height: 1.6;
   margin: 0;
+}
+
+.stepDescriptionActive {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.25s ease;
+}
+
+.stepDescriptionHidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 0.25s ease, visibility 0s 0.25s;
 }
 
 /* ── Navigation buttons ────────────────────────────── */

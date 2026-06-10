@@ -9,6 +9,7 @@ import RecurringDemo from "@site/src/components/RecurringDemo";
 import TestCardCallout from "@site/src/components/TestCardCallout";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import StepGuide from "@site/src/components/StepGuide";
+import RecurringFlow from "@site/src/diagrams/RecurringFlow";
 
 # Recurring Payments & Auto-Debit
 
@@ -67,25 +68,13 @@ Only **one card** can be linked to an agreement at any time. To change the card,
 
 ### Workflow
 
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
-graph LR
-    A([Merchant]) -->|CIT: create session| B[Checkout API]
-    B -->|Checkout page| C([Customer])
-    C -->|Pays + saves card| B
-    B -->|Webhook with token| A
-    A -->|MIT: charge token| D[Auto-Debit API]
-    D -->|Result webhook| A
-
-    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
-    class D accent
-```
+<RecurringFlow />
 
 1. **CIT** — Merchant creates a session with `payment_type: auto_debit` and an `agreement` object.
 2. **Payment** — Customer enters their card via the Checkout SDK or hosted page and completes 3DS authentication.
 3. **Webhook** — Ottu delivers the token. Save `token.token` and `token.pg_code` for future charges.
-4. **MIT** — Merchant charges the token by creating a new session, then calling the Auto-Debit API (or using [One-Step Checkout](/developers/payments/checkout-api#one-step-checkout)).
-5. **Result** — Webhook confirms the charge. No customer interaction needed.
+4. **MIT** — Merchant charges the token by creating a new session, then calling the Native Payments API (or using [One-Step Checkout](/developers/payments/checkout-api#one-step-checkout)).
+5. **Result** — The Native Payments API (or One-Step Checkout) returns the payment result **directly in the API response** — there is no webhook for MIT charges. No customer interaction needed.
 
 ### Live Demo
 
@@ -172,10 +161,10 @@ Experience the complete recurring payment lifecycle. Save a test card, watch the
 
 Once you have the token, you can charge the customer automatically using either of the following approaches.
 
-**Two-Step (Checkout API + Auto-Debit API):**
+**Two-Step (Checkout API + Native Payments API):**
 
 1. Create a new session via the [Checkout API](/developers/payments/checkout-api/) with the same `pg_code`, `agreement.id`, and `customer_id`
-2. Call the Auto-Debit API with the `session_id` and `token`:
+2. Call the Native Payments API with the `session_id` and `token`:
 
 ```json title="POST /b/pbl/v2/auto-debit/ — Charge Saved Card"
 {

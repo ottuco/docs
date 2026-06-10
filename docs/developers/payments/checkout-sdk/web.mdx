@@ -8,6 +8,8 @@ import FAQ, { FAQItem } from '@site/src/components/FAQ';
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import CheckoutDemo from "@site/src/components/CheckoutDemo";
+import StepGuide from "@site/src/components/StepGuide";
+import { developerWalletScenariosSteps } from "@site/src/data/wallet-scenarios";
 
 The [Checkout SDK](./) is a JavaScript library provided by Ottu that allows you to easily integrate an Ottu-powered [checkout process](../#ottu-checkout-sdk-flow) into your web application. With the Checkout SDK, you can customize the look and feel of your checkout process, as well as which forms of payment are accepted.
 
@@ -138,6 +140,8 @@ The available options for `formsOfPayment` are:
 - `redirect`: A method where customers are redirected to a payment gateway or a third-party payment processor to complete their payment.
 - `stcPay`: A method where customers enter their mobile number and provide an OTP send to their mobile number to complete their payment.
 - `urPay`: A method where customers enter their mobile number and provide an OTP send to their mobile number to complete their payment.
+- `jazz`: Renders Ottu's onsite card form inline using the Jazz SDK, so customers enter their card details directly on the merchant page instead of being redirected. See [Onsite Checkout](#onsite-checkout) for setup details.
+- `wallet`: The Ottu Wallet payment method that allows customers to spend their stored balance at checkout.
 
 #### displayMode _`string`_
 
@@ -247,7 +251,7 @@ Checkout.init({
     ```javascript
     Checkout.init({
       selector: "checkout",
-      merchant_id: 'domain',
+      merchant_id: 'ksa.ottu.dev', // use your merchant id
       session_id: 'session_id',
       apiKey: 'apiKey',
       theme: {
@@ -334,7 +338,7 @@ Checkout.init({
     ```javascript
     Checkout.init({
       selector: "checkout",
-      merchant_id: "domain",
+      merchant_id: "ksa.ottu.dev", // use your merchant id
       session_id: "session_id",
       apiKey: "apiKey",
       theme: {
@@ -375,7 +379,7 @@ Checkout.init({
     ```javascript
     Checkout.init({
       selector: "checkout",
-      merchant_id: "domain",
+      merchant_id: "ksa.ottu.dev", // use your merchant id
       session_id: "session_id",
       apiKey: "apiKey",
       googlePayInit: {
@@ -443,7 +447,7 @@ Checkout.init({
 ```javascript
 Checkout.init({
   selector: "checkout",
-  merchant_id: "domain",
+  merchant_id: "ksa.ottu.dev", // use your merchant id
   session_id: "session_id",
   apiKey: "apiKey",
   theme: {
@@ -476,7 +480,7 @@ However, Google Pay supports an additional property `buttonSizeMode` property, w
 ```javascript
 Checkout.init({
   selector: "checkout",
-  merchant_id: "domain",
+  merchant_id: "ksa.ottu.dev", // use your merchant id
   session_id: "session_id",
   apiKey: "apiKey",
   theme: {
@@ -555,7 +559,7 @@ However, `stcPay` and `urPay` can supported any `css` collor in `buttonColor.`
 ```javascript
 Checkout.init({
   selector: "checkout",
-  merchant_id: "domain",
+  merchant_id: "ksa.ottu.dev", // use your merchant id
   session_id: "session_id",
   apiKey: "apiKey",
   lang: "en",
@@ -572,7 +576,7 @@ Checkout.init({
 });
 ```
 
-## Wallet Configuration
+## Payment Services
 
 ### Apple Pay
 
@@ -613,7 +617,7 @@ In addition to above properties, users have the capability to customize the Appl
 ```javascript
 Checkout.init({
     selector: "checkout",
-    merchant_id: 'domain',
+    merchant_id: 'ksa.ottu.dev', // use your merchant id
     session_id: 'session_id',
     apiKey: 'apiKey',
     // Default values configured for Apple Pay
@@ -928,11 +932,61 @@ Checkout.init({
 
 <figure><img src="/img/checkout-sdk/urpay%20Button.png" alt="urpay button in Web SDK" /><figcaption></figcaption></figure>
 
+### Ottu Wallet
+
+When a customer has wallet credit in the session currency, the SDK renders a **Wallet** payment method automatically — no init config is required. Pass the `customer_id` when creating the session, and either include `'wallet'` in `formsOfPayment` or omit `formsOfPayment` to show all available methods. Wallet is hidden for authorize-only sessions.
+
+For full balance behavior, partial-payment rules, and the four-hour reservation auto-release, see the [Wallet section](/developers/payments/wallet/).
+
+:::warning Cross-currency wallet payments are not supported
+The wallet only appears when its currency matches the order currency.
+:::
+
+<StepGuide steps={developerWalletScenariosSteps} />
+
+## Onsite Checkout
+
+Onsite Checkout lets customers enter their card details directly on your page, without being redirected to a separate payment gateway page. The card form is rendered inside a PCI-compliant iframe hosted by Ottu's **Jazz SDK** and embedded inline within the Checkout SDK container, so the entire payment flow — card entry, 3D Secure challenge, and final result — happens on the merchant page.
+
+### How to enable
+
+Onsite Checkout is loaded when `'jazz'` is part of the [`formsOfPayment`](#formsofpayment-array) array passed to [`Checkout.init`](#checkoutinit). Whether you need to change anything depends on whether you currently pass `formsOfPayment` at all:
+
+- **If you don't pass `formsOfPayment`**, no change is required, by default all forms of payment are enabled, including `'jazz'`.
+- **If you do pass `formsOfPayment` explicitly**, make sure `'jazz'` is included alongside your other entries. Forms of payment that are not listed will not be rendered.
+
+```javascript
+Checkout.init({
+  selector: "checkout",
+  merchant_id: "ksa.ottu.dev", // use your merchant id
+  apiKey: "<public-key>",
+  session_id: "<session-id>",
+  formsOfPayment: ["jazz", "tokenPay", "applePay"],
+});
+```
+
+:::note
+
+Onsite Checkout is enabled per merchant according to your available tier. To enable it for your account, contact [csd@ottu.com](mailto:csd@ottu.com).
+
+If `'jazz'` is omitted, or if a payment method has not been enabled for onsite checkout on your account, the Checkout SDK falls back automatically to the standard redirect-to-gateway flow for that method.
+:::
+
+### Flow
+
+From the customer's perspective, an onsite payment looks like this:
+
+1. The customer selects a card-based payment method in the checkout.
+2. The card form (rendered by the Jazz SDK) appears inline inside the checkout container.
+3. The customer enters their card details and clicks **Pay**.
+4. If the card issuer requires 3D Secure, the challenge runs in-flow without leaving the page.
+5. When the payment finishes, the SDK invokes [`successCallback`](#successcallback), [`errorCallback`](#errorcallback), or [`cancelCallback`](#cancelcallback) depending on the outcome.
+
 ## Callbacks
 
 In the Checkout SDK, callback functions play a vital role in providing real-time updates on the status of payment transactions. `Callbacks` enhance the user experience by enabling seamless and efficient handling of various payment scenarios, such as errors, successful payments, and cancellations.
 
-Please note that due to technical constraints associated with off-site redirection during the payment process, the `successCallback` and `cancelCallback` functions are only called for on-site checkouts. However, the `errorCallback` function is called for any kind of payments. On-site checkouts include options such as Apple Pay, Google Pay, payments with saved cards, and on-site card form transactions, which support callback functionality for a seamless user experience.
+Please note that due to technical constraints associated with off-site redirection during the payment process, the `successCallback` and `cancelCallback` functions are only called for on-site checkouts. However, the `errorCallback` function is called for any kind of payments. On-site checkouts include options such as Apple Pay, Google Pay, payments with saved cards, and [onsite card form](#onsite-checkout) transactions, which support callback functionality for a seamless user experience.
 
 ### errorCallback
 
@@ -1104,7 +1158,7 @@ window.beforePayment = function (data) {
 
 #### Apply Discount Based on Card PAN
 
-In `tokenPay` and `cardPay` payment methods, the SDK passes the card details to the `beforePayment` callback. This allows you to identify the card brand or specific bank (via PAN) and apply a discount dynamically.
+In `tokenPay` and `jazz` payment methods, the SDK passes the card details to the `beforePayment` callback. This allows you to identify the card brand or specific bank (via PAN) and apply a discount dynamically.
 
 **Implementation Steps:**
 
@@ -1184,7 +1238,7 @@ window.successCallback = (data) => {
 };
 Checkout.init({
   selector: "checkout",
-  merchant_id: "domain",
+  merchant_id: "ksa.ottu.dev", // use your merchant id
   session_id: "session_id",
   apiKey: "apiKey",
 });
@@ -1192,7 +1246,7 @@ Checkout.init({
 
 ##### **Card Data Structure**
 
-When `tokenPay` or `cardPay` is used, the `paymentData` argument in the hook will contain the following `card` object:
+When `tokenPay` or `jazz` is used, the `paymentData` argument in the hook will contain the following `card` object. The same shape is also delivered for [Onsite Checkout](#onsite-checkout) payments, so any logic written against this structure works for both the gateway-redirect and onsite flows.
 
 JSON
 
@@ -1534,7 +1588,7 @@ function unfreezeBasket() {
 
 Checkout.init({
   selector: "checkout",
-  merchant_id: "sandbox.ottu.net",
+  merchant_id: "ksa.ottu.dev", // use your merchant id
   session_id: "session_id",
   apiKey: "apiKey",
   lang: "en",
@@ -1640,7 +1694,7 @@ Checkout init function
 ```javascript
 Checkout.init({
   selector: "checkout",
-  merchant_id: "sandbox.ottu.net",
+  merchant_id: "ksa.ottu.dev", // use your merchant id
   session_id: "session_id",
   apiKey: "apiKey",
   lang: "en", // en or ar default en

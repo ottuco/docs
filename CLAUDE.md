@@ -54,6 +54,8 @@ Lead with what the feature does for their business. No code. Dashboard-focused w
 - **No jargon without definition** — first use of any payment domain term (MID, PG, tokenization, PCI DSS) links to the glossary
 - **Hyperlinks throughout** — link inline in body text where concepts are mentioned, don't batch all links at the bottom
 - **Code examples must be copy-paste ready** — runnable against the sandbox environment with only an API key substitution
+- **Demo `merchant_id`** — code samples that show the Checkout SDK `merchant_id` parameter MUST use `ksa.ottu.dev` (the demo merchant on Ottu's KSA dev environment). Existing usage in `docs/developers/payments/checkout-sdk/web.mdx` is the canonical reference.
+- **API base URLs in code samples** — never hardcode `https://ksa.ottu.dev` in fenced code blocks. Import `OTTU_CONNECT_BASE_URL` from `@site/src/constants/api` and render the sample with `<CodeBlock>` template literals. (`OTTU_DEV_BASE_URL` is a deprecated alias that now resolves to the same URL — prefer `OTTU_CONNECT_BASE_URL` in new code.) Canonical reference: `docs/developers/payments/wallet/index.mdx`.
 - **Multi-language code tabs** — use Docusaurus `<Tabs>` with `groupId="language"` in this order: cURL, Python, Node.js, PHP
 - **Self-contained** — don't redirect the reader to another page for essential information; include the key context on the current page with a link for deeper reading
 
@@ -131,11 +133,81 @@ docs/
 - **Base URL**: `/` (root)
 - **Branch Strategy**: main → production (docs.ottu.com), dev → staging (docs.ottu.dev)
 
+## Backend Service: `mcp-server`
+
+A small Node.js HTTP service in `mcp-server/server.mjs` deployed alongside the static site as the `mcp` component on DO App Platform. Three responsibilities, routed by ingress prefix:
+
+| Ingress prefix (stripped by DO) | Internal path | Purpose |
+|---|---|---|
+| `/mcp` | `POST /`, `POST /refresh`, `GET /health` | MCP protocol server for AI tools (Claude Code, Cursor, etc.) |
+| `/webhook` | `POST /:orderId`, `GET /:orderId/events.json` | Webhook relay for the PaymentJourney / RecurringDemo / WalletDemo demos |
+| `/seed-wallet` | `POST /` with header `x-ottu-demo: seed-wallet` | Wallet seed proxy — mints a Keycloak JWT (`client_credentials` grant) and calls the wallet service on behalf of the browser |
+
+All three routes share the same Node process. Same-origin in production (no CORS hop); CORS is wildcarded for local dev.
+
+### Wallet Demo Backend Architecture
+
+The `WalletDemo` (`/developers/payments/wallet/#live-demo`) cannot seed wallet balance from the browser — the wallet service requires Keycloak Bearer auth (`client_credentials` grant) and is a privileged "create money" endpoint. The architecture splits the work:
+
+1. **Browser** calls Payment Methods API (Connect Api-Key, public-by-design — `ACTIVE_CONNECT.connectApiKey` from `src/utils/sandbox.ts`) to discover wallet-capable `pg_codes` filtered by `tags: ["demo"], payment_services: ["wallet"]`.
+2. **Browser** POSTs `/seed-wallet` with `{customer_id, currency, amount, pg_code}`.
+3. **Backend (`mcp` service)** mints a Keycloak token via `getKeycloakToken` (`mcp-server/keycloak.mjs`, cached in-process until `expires_at − 30s` skew), POSTs `${walletUrl}/wallet/credits` with `Authorization: Bearer ${token}` + `Merchant-Id` + a UUID `Idempotency-Key`. Returns the wallet service response verbatim.
+4. **Browser** calls Checkout API (Connect Api-Key again) to create the session.
+5. **Browser** mounts the Checkout SDK with `formsOfPayment: ["wallet", pg_code]`.
+
+### Config Pattern: Constants, Not YAML
+
+Per-merchant config is **non-secret hardcoded constants** — only true secrets (the Keycloak client secret) come from env vars.
+
+- **Frontend** (`src/utils/sandbox.ts`):
+  - `ConnectEnv` objects — `SANDBOX` (`sandbox.ottu.net`) and `KSA` (`ksa.ottu.dev`), each `{merchantId, connectBaseUrl, connectApiKey, sdkApiKey}`
+  - `ACTIVE_CONNECT` — the single global switch; every demo (CheckoutDemo / RecurringDemo / PaymentJourney / WalletDemo) reads its merchant host, Connect Api-Key, and SDK key from here. Currently `= KSA`. (Wallet only ships on `ksa.ottu.dev` today — switching to `SANDBOX` breaks the WalletDemo.)
+  - `src/utils/walletDemoConfig.ts` (`WALLET_DEMO`) holds only the demo's non-host knobs — currency, seed/session amounts, and the Payment Methods `pgFilter` — layered on top of `ACTIVE_CONNECT`
+
+- **Backend constants** (`mcp-server/config.mjs`):
+  - `KSA_OTTU_DEV` — `{merchantId, walletUrl, keycloak: {url, realm, clientId, clientSecretEnvVar}}`
+  - The `clientSecretEnvVar` name (`KSA_KEYCLOAK_CLIENT_SECRET`) is what `server.mjs` reads from `process.env` at call time
+
+- **Generic Keycloak helper** (`mcp-server/keycloak.mjs`):
+  - `getKeycloakToken({url, realm, clientId, clientSecret})` — parameterized, cache keyed by `url|realm|clientId`
+  - Reusable for any future backend service that needs Keycloak — not coupled to wallet
+
+**Adding a new merchant**: add a new `ConnectEnv` object in `sandbox.ts` (point `ACTIVE_CONNECT` at it to switch), add a matching config object in `mcp-server/config.mjs`, set the `*_KEYCLOAK_CLIENT_SECRET` env var in DO. No YAML, no env-var-naming convention.
+
+### Wallet Endpoint Contract (gotchas)
+
+The wallet service (currently `https://wallet.ottu.dev`) has three rules the seed body must satisfy — verified empirically against the live service:
+
+- **URL has NO trailing slash**: `POST /wallet/credits` (not `/wallet/credits/` — that 404s)
+- **`Idempotency-Key` header MUST be a valid UUID** (the wallet service validates the shape with `code: invalid_idempotency_key`)
+- **`session_id` is required in the body**, even for a bootstrap seed not tied to a real Connect session — use a synthetic value like `sess_demo_<tag>`
+
+See `mcp-server/server.mjs` `handleSeedWallet` for the canonical body shape.
+
+## Local Development for the Wallet Demo
+
+Two processes need to run: the Docusaurus dev server (`:3000`) and the `mcp-server` (`:8090`). The frontend `seedWalletViaBackend` helper auto-routes to `http://localhost:8090/` when `hostname === "localhost"`.
+
+1. Create `.env.local` at the repo root (gitignored) with the Keycloak secret:
+   ```bash
+   KSA_KEYCLOAK_CLIENT_SECRET=<paste-from-Keycloak-admin>
+   ```
+   The frontend Connect Api-Key is hardcoded (see `ACTIVE_CONNECT` in `src/utils/sandbox.ts`), so the docs dev server needs no env vars.
+2. Run the two servers in separate terminals:
+   ```bash
+   npm run webhook:local     # mcp-server on :8090, loads .env.local
+   npm start                 # Docusaurus on :3000
+   ```
+
+`npm run webhook:local` uses Node 20+'s built-in `--env-file-if-exists=.env.local`. `npm run webhook` (no `:local`) works fine when `KSA_KEYCLOAK_CLIENT_SECRET` is already exported in the shell.
+
 ## Development Commands
 
 ```bash
 npm install                            # Install dependencies
 npm start                             # Development server
+npm run webhook                        # mcp-server on :8090 (no .env.local loading)
+npm run webhook:local                  # mcp-server + auto-load .env.local
 npm run build                         # Production build
 npm run serve                         # Test production build
 npm run typecheck                     # TypeScript validation
@@ -158,6 +230,48 @@ npm run update-api                    # Full pipeline: fetch + gen-api
 - **Business Sidebar** (`businessSidebar`): User-focused documentation flow
 
 All sidebars defined in `sidebars.ts`. Auto-generated API reference uses `{type: 'autogenerated', dirName: 'developers/apis'}`.
+
+### Sidebar sub-menu patterns
+
+Two patterns coexist in `sidebars.ts`. Pick deliberately; mixing them on a single feature is what produces the "sideways" / inconsistent look reported in ticket #153887.
+
+**Pattern A — `type: 'link'` anchor sub-menu (single-page deep-dive).** Each sub-section is a sidebar entry whose `href` points to an in-page anchor on a single long doc. Use when one page tells the full story and the sub-menu is just an in-page table of contents. Examples: `developers/payments/checkout-api`, `developers/payments/payment-methods`, `business/wallet`.
+
+```ts
+{
+  type: 'category',
+  label: 'Wallet',
+  link: {type: 'doc', id: 'business/wallet/index'},  // the single doc
+  items: [
+    {type: 'link', label: 'Why use Wallet',     href: '/business/wallet#why-use-wallet'},
+    {type: 'link', label: 'How it works',       href: '/business/wallet#how-it-works'},
+    // ...one entry per ## heading on the page
+  ],
+},
+```
+
+**Pattern B — `type: 'doc'` multi-page category.** Each child is its own `.md`/`.mdx` file. Use when each child is substantial enough to deserve a standalone page (per-platform SDK guides, per-endpoint API references). Example: `developers/payments/checkout-sdk` with one page per platform.
+
+```ts
+{
+  type: 'category',
+  label: 'Checkout SDK',
+  link: {type: 'doc', id: 'developers/payments/checkout-sdk/index'},
+  items: [
+    {type: 'doc', id: 'developers/payments/checkout-sdk/web',     label: 'Web'},
+    {type: 'doc', id: 'developers/payments/checkout-sdk/ios',     label: 'iOS'},
+    // ...
+  ],
+},
+```
+
+**Rules for Pattern A (the one most subtly easy to break):**
+
+- Every `href` hash MUST match a heading id on the linked page. Docusaurus generates the id from the heading text via slug rules (lower-case, hyphenated, no punctuation). If the heading reads `## Why use Wallet`, the id is `why-use-wallet`, so the `href` must be `/business/wallet#why-use-wallet`. Drift in either direction silently breaks the in-page scroll.
+- Use the heading level you'd actually use on the page — sub-section anchor entries usually map to `##` (h2) headings. Deeper sub-anchors (`###`, h3) inflate the sub-menu and rarely look good.
+- The category's `link.id` is the canonical doc; the `type: 'link'` items are navigation only — they don't create routes.
+
+**Visual depth note:** the tree-indent visual ("black bar" on the left of the active path) is driven by nesting depth, not by a special CSS class. Items at level-3+ get the cumulative left-margin guide. `developerSidebar` wraps everything in a top-level `Developers` category for exactly this reason; `businessSidebar` does the same with a top-level `Business` category. Don't flatten either root — you'll lose the tree guide.
 
 ## Technical Constraints
 

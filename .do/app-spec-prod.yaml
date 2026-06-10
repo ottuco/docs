@@ -21,6 +21,11 @@ ingress:
         path:
           prefix: /webhook
     - component:
+        name: mcp
+      match:
+        path:
+          prefix: /seed-wallet
+    - component:
         name: docs
       match:
         path:
@@ -49,3 +54,7 @@ services:
         value: "https://docs.ottu.com"
       - key: PORT
         value: "3456"
+      - key: KSA_KEYCLOAK_CLIENT_SECRET
+        scope: RUN_TIME
+        type: SECRET
+        value: ""

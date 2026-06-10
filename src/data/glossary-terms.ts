@@ -138,6 +138,12 @@ const glossaryTerms: GlossaryTerm[] = [
       "Electronic payment systems like Apple Pay, Google Pay, or PayPal that store payment information digitally.",
   },
   {
+    term: "E-commerce Payment",
+    id: "e-commerce-payment",
+    definition:
+      "An Ottu object that represents a customer-initiated intent to pay originating from an integrated external storefront (Shopify, WooCommerce, Magento, custom checkout, etc.). Contains all the details needed to process a payment, with Ottu acting as the payment processor behind the external system's checkout flow.",
+  },
+  {
     term: "Embedded Checkout",
     id: "embedded-checkout",
     definition:
@@ -283,6 +289,13 @@ const glossaryTerms: GlossaryTerm[] = [
     aliases: ["Payment Gateway Code"],
   },
   {
+    term: "Payment Attempt",
+    id: "payment-attempt",
+    definition:
+      "A single try to settle a PaymentTransaction through a specific payment gateway. Owns the per-attempt FSM state (PENDING → AUTHORIZED / PAID / FAILED / CANCELED / COD / ERROR), the unique reference_number sent to the PG, and the raw gateway response. A PaymentTransaction can have many PaymentAttempts (e.g., customer's card declines, they retry with another gateway), but at most one reaches a terminal \"paid\" state.",
+    aliases: ["PaymentAttempt"],
+  },
+  {
     term: "Payment Gateway",
     id: "payment-gateway",
     definition:
@@ -293,7 +306,14 @@ const glossaryTerms: GlossaryTerm[] = [
     term: "Payment Request",
     id: "payment-request",
     definition:
-      "An Ottu object that represents a customer's intent to pay. Contains all the details needed to process a payment.",
+      "A PaymentTransaction representing a merchant-initiated intent to collect payment from a customer, typically delivered as a payment link via email, SMS, or WhatsApp. Contains all the details needed to process a payment.",
+  },
+  {
+    term: "Payment Transaction",
+    id: "payment-transaction",
+    definition:
+      "The top-level Ottu object representing a customer's intent to pay. Holds the merchant's order context (amount, currency, customer details, allowed gateways, callback URLs, type — e_commerce / payment_request / bulk / etc.) and tracks the overall payment lifecycle via FSM state. One PaymentTransaction corresponds to one logical \"thing being paid for.\"",
+    aliases: ["PaymentTransaction"],
   },
   {
     term: "Processing Fee",
@@ -419,6 +439,24 @@ const glossaryTerms: GlossaryTerm[] = [
     id: "void",
     definition:
       "Canceling an authorized transaction before it's captured. This releases the hold on the customer's funds without any money changing hands.",
+  },
+  {
+    term: "Wallet",
+    id: "wallet",
+    definition:
+      "A stored balance held by Ottu for a customer in a specific currency, used as a payment method at checkout. Wallet accounts are keyed by merchant, customer, and currency; each currency maintains a separate balance.",
+  },
+  {
+    term: "Wallet Credit",
+    id: "wallet-credit",
+    definition:
+      "An immutable ledger entry that adds funds to a wallet, typically issued via a refund-to-wallet operation. Credits cannot be edited or deleted; corrections are made by issuing an opposing entry.",
+  },
+  {
+    term: "Wallet Reservation",
+    id: "wallet-reservation",
+    definition:
+      "A temporary hold on wallet funds during checkout. Reservations commit on payment success and are automatically released approximately four hours after an abandoned, cancelled, or failed payment.",
   },
   {
     term: "Webhook",

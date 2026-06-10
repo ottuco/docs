@@ -1,13 +1,46 @@
 /**
- * Reusable sandbox session utility for interactive demos.
+ * Reusable Connect session utility for interactive demos.
  *
- * Used by: CheckoutDemo, RecurringDemo, and future Native Payments / mobile SDK demos.
- * Credentials are intentionally public — sandbox-only, already exposed in CodePen.
+ * Used by: CheckoutDemo, RecurringDemo, PaymentJourney, WalletDemo, and future
+ * Native Payments / mobile SDK demos.
+ *
+ * Credentials are intentionally public — sandbox-only merchants, no real money.
  */
 
-export const SANDBOX_MERCHANT_ID = "sandbox.ottu.net";
-export const SANDBOX_API_KEY = "13df331cb989d68313b9141e2094d3f042c6d157";
-const SANDBOX_AUTH_KEY = "Fxi63E9x.AiYMnCCXcBVr657gs4N3ex3MZdeAeWDy";
+export interface ConnectEnv {
+  merchantId: string;
+  connectBaseUrl: string;
+  /** Authorization: Api-Key <…>  for /b/checkout, /b/pbl, etc. */
+  connectApiKey: string;
+  /** apiKey passed to Checkout.init() — the SDK widget key. */
+  sdkApiKey: string;
+}
+
+export const SANDBOX: ConnectEnv = {
+  merchantId: "sandbox.ottu.net",
+  connectBaseUrl: "https://sandbox.ottu.net",
+  connectApiKey: "Fxi63E9x.AiYMnCCXcBVr657gs4N3ex3MZdeAeWDy",
+  sdkApiKey: "13df331cb989d68313b9141e2094d3f042c6d157",
+};
+
+export const KSA: ConnectEnv = {
+  merchantId: "ksa.ottu.dev",
+  connectBaseUrl: "https://ksa.ottu.dev",
+  connectApiKey: "uUjUqczM.P5PqlXx8zyuFUQVk19PLxfHBZu8rG4Uy",
+  sdkApiKey: "88a460b42a0f8bec4011da23ce1d547bd04e8afc",
+};
+
+// ⬇️ THE GLOBAL SWITCH — change this one line to retarget every demo on the site.
+// Both branches (dev → docs.ottu.dev, main → docs.ottu.com) currently use KSA:
+// it is the only environment that hosts the full public API surface + wallet,
+// so every demo and every code sample (via OTTU_CONNECT_BASE_URL) resolves the
+// host through here.
+//
+// Do NOT point main at SANDBOX — sandbox.ottu.net has no wallet PG, so the
+// WalletDemo and every wallet code sample would break in production. Move to a
+// per-branch ConnectEnv (or a build-time env override) only once a
+// production-grade sandbox also hosts wallet.
+export const ACTIVE_CONNECT: ConnectEnv = KSA;
 
 export interface CreateSessionOptions {
   pg_codes: string[];
@@ -61,11 +94,11 @@ export async function createSandboxSession(
   };
 
   const response = await fetch(
-    `https://${SANDBOX_MERCHANT_ID}/b/checkout/v1/pymt-txn/`,
+    `${ACTIVE_CONNECT.connectBaseUrl}/b/checkout/v1/pymt-txn/`,
     {
       method: "POST",
       headers: {
-        Authorization: `Api-Key ${SANDBOX_AUTH_KEY}`,
+        Authorization: `Api-Key ${ACTIVE_CONNECT.connectApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
@@ -96,11 +129,11 @@ export async function callAutoDebit(
   token: string
 ): Promise<any> {
   const response = await fetch(
-    `https://${SANDBOX_MERCHANT_ID}/b/pbl/v2/payment/auto-debit/`,
+    `${ACTIVE_CONNECT.connectBaseUrl}/b/pbl/v2/payment/auto-debit/`,
     {
       method: "POST",
       headers: {
-        Authorization: `Api-Key ${SANDBOX_AUTH_KEY}`,
+        Authorization: `Api-Key ${ACTIVE_CONNECT.connectApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ session_id: sessionId, token }),
@@ -128,6 +161,7 @@ export async function callPaymentMethods(options: {
   tags?: string[];
   tokenizable?: boolean;
   auto_debit?: boolean;
+  payment_services?: string[];
 }): Promise<any> {
   const body: Record<string, unknown> = {
     plugin: options.plugin ?? "payment_request",
@@ -138,13 +172,14 @@ export async function callPaymentMethods(options: {
   if (options.tags) body.tags = options.tags;
   if (options.tokenizable != null) body.tokenizable = options.tokenizable;
   if (options.auto_debit != null) body.auto_debit = options.auto_debit;
+  if (options.payment_services) body.payment_services = options.payment_services;
 
   const response = await fetch(
-    `https://${SANDBOX_MERCHANT_ID}/b/pbl/v2/payment-methods/`,
+    `${ACTIVE_CONNECT.connectBaseUrl}/b/pbl/v2/payment-methods/`,
     {
       method: "POST",
       headers: {
-        Authorization: `Api-Key ${SANDBOX_AUTH_KEY}`,
+        Authorization: `Api-Key ${ACTIVE_CONNECT.connectApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
@@ -168,11 +203,11 @@ export async function callPaymentStatusQuery(
   sessionId: string
 ): Promise<any> {
   const response = await fetch(
-    `https://${SANDBOX_MERCHANT_ID}/b/pbl/v2/inquiry/`,
+    `${ACTIVE_CONNECT.connectBaseUrl}/b/pbl/v2/inquiry/`,
     {
       method: "POST",
       headers: {
-        Authorization: `Api-Key ${SANDBOX_AUTH_KEY}`,
+        Authorization: `Api-Key ${ACTIVE_CONNECT.connectApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ session_id: sessionId }),
@@ -222,4 +257,11 @@ export function getWebhookRelayUrl(): string {
  */
 export function extractPgCodes(pmResponse: any): string[] {
   return (pmResponse?.payment_methods ?? []).map((pg: any) => pg.code);
+}
+
+/**
+ * Generate a fresh demo customer_id (used by WalletDemo when seeding a wallet).
+ */
+export function generateDemoCustomerId(): string {
+  return `demo_${Math.random().toString(36).slice(2, 10)}`;
 }

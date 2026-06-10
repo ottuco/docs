@@ -1,0 +1,11 @@
+# Overrides for: components/schemas/Operation — the request body of POST /b/pbl/v2/operation/
+
+properties:
+  destination:
+    description: |
+      Where refund proceeds are credited. Applies only when `operation` is `refund`; ignored for every other operation type. Defaults to `pg`.
+
+      - `pg` (default) — funds are returned through the original payment gateway, exactly as a refund behaves without this field.
+      - `wallet` — funds are credited to the customer's [wallet]({{apiBaseUrl}}/payments/wallet/) balance for use at future Ottu checkouts. Requires that the settling payment method has an active wallet service and that the transaction has a `customer_id`. A wallet account is created automatically if one doesn't already exist for the `(merchant, customer_id, currency)` combination, and the credit is recorded as an immutable ledger entry linked to the original payment session.
+
+      Cross-currency credits are not supported — the wallet credit currency always matches the original payment currency.

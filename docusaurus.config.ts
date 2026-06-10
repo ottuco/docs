@@ -71,6 +71,7 @@ const config: Config = {
           sidebarPath: "./sidebars.ts",
           docItemComponent: "@theme/ApiItem",
           showLastUpdateTime: true,
+          exclude: ["superpowers/**"],
         },
         blog: false,
         theme: {

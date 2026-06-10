@@ -30,6 +30,12 @@ Process payments directly when you manage your own UI — Apple Pay buttons, Goo
 
 [**Go to Native Payments →**](native-payments.md)
 
+### Wallet (Stored Balance)
+
+Refund payments to a customer's wallet balance instead of returning funds via the original gateway. Customers can spend wallet credit at any future Ottu checkout in the same currency — fully or partially alongside another payment method.
+
+[**Go to Wallet →**](wallet/index.mdx)
+
 ### Sandbox & Test Cards
 
 Test your integration with sandbox credentials and test card numbers before going live. Each gateway has its own set of test cards with specific card numbers, expiry dates, and CVV values.
