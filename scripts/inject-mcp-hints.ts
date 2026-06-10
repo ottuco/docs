@@ -180,7 +180,16 @@ function injectSpan(mdxContent: string, curl: string): string | null {
   return mdxContent.slice(0, match.index) + span + mdxContent.slice(match.index);
 }
 
-async function processSource(enrichedSpecPath: string): Promise<number> {
+interface SourceResult {
+  injected: number;
+  failures: string[];
+  // Set when the whole source couldn't be processed at all — distinct from
+  // `failures`, which are per-operation. One bad source means every
+  // operation in it was skipped, not "N operations failed."
+  error?: string;
+}
+
+async function processSource(enrichedSpecPath: string): Promise<SourceResult> {
   if (!fs.existsSync(enrichedSpecPath)) {
     console.error(`  ERROR: Enriched spec not found: ${enrichedSpecPath}`);
     console.error(`  Run "npm run enrich-api" first.`);
@@ -190,8 +199,7 @@ async function processSource(enrichedSpecPath: string): Promise<number> {
   const spec = yaml.load(fs.readFileSync(enrichedSpecPath, "utf-8")) as any;
   const baseUrl = spec.servers?.[0]?.url;
   if (!baseUrl) {
-    console.warn(`  WARN: Spec has no servers[0].url — skipping curl generation`);
-    return 0;
+    return { injected: 0, failures: [], error: "Spec has no servers[0].url — skipping curl generation for all operations" };
   }
 
   // Dereferenced copy: operation matching and body example generation both
@@ -203,6 +211,7 @@ async function processSource(enrichedSpecPath: string): Promise<number> {
   const collection = await buildPostmanCollection(spec);
 
   let injected = 0;
+  const failures: string[] = [];
 
   for (const item of collectionItems(collection)) {
     const request = item.request;
@@ -218,21 +227,21 @@ async function processSource(enrichedSpecPath: string): Promise<number> {
     try {
       curl = await generateCurl(request);
     } catch (err) {
-      console.warn(`  WARN: Failed to generate curl for ${matcher.operationId}: ${err}`);
+      failures.push(`Failed to generate curl for ${matcher.operationId}: ${err}`);
       continue;
     }
 
     const filename = operationIdToFilename(matcher.operationId);
     const mdxPath = path.join(API_DOCS_DIR, filename);
     if (!fs.existsSync(mdxPath)) {
-      console.warn(`  WARN: No .api.mdx found for ${matcher.operationId} (expected ${filename})`);
+      failures.push(`No .api.mdx found for ${matcher.operationId} (expected ${filename})`);
       continue;
     }
 
     const original = fs.readFileSync(mdxPath, "utf-8");
     const patched = injectSpan(original, curl);
     if (patched === null) {
-      console.warn(`  WARN: Injection anchor not found in ${filename}`);
+      failures.push(`Injection anchor not found in ${filename}`);
       continue;
     }
 
@@ -241,7 +250,7 @@ async function processSource(enrichedSpecPath: string): Promise<number> {
     injected++;
   }
 
-  return injected;
+  return { injected, failures };
 }
 
 async function main(): Promise<void> {
@@ -249,11 +258,30 @@ async function main(): Promise<void> {
 
   const config = yaml.load(fs.readFileSync(SOURCES_FILE, "utf-8")) as ApiSourcesConfig;
   let total = 0;
+  const failures: string[] = [];
+  const sourceErrors: string[] = [];
 
   for (const [name, source] of Object.entries(config.sources)) {
     console.log(`\n  ── ${name} ──`);
     const enrichedSpecPath = path.resolve(ROOT, source.enrichedOutput);
-    total += await processSource(enrichedSpecPath);
+    const result = await processSource(enrichedSpecPath);
+    total += result.injected;
+    failures.push(...result.failures);
+    if (result.error) sourceErrors.push(`${name}: ${result.error}`);
+  }
+
+  if (sourceErrors.length > 0) {
+    console.error(`\n  ${sourceErrors.length} source(s) could not be processed:`);
+    for (const error of sourceErrors) console.error(`    - ${error}`);
+  }
+
+  if (failures.length > 0) {
+    console.error(`\n  ${failures.length} curl example(s) failed to inject:`);
+    for (const failure of failures) console.error(`    - ${failure}`);
+  }
+
+  if (sourceErrors.length > 0 || failures.length > 0) {
+    process.exit(1);
   }
 
   console.log(`\n  Done — ${total} file(s) patched\n`);
