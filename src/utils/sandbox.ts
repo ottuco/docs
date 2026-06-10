@@ -30,16 +30,14 @@ export const KSA: ConnectEnv = {
   sdkApiKey: "88a460b42a0f8bec4011da23ce1d547bd04e8afc",
 };
 
-// ⬇️ THE GLOBAL SWITCH — change this one line to retarget every demo on the site.
-// Both branches (dev → docs.ottu.dev, main → docs.ottu.com) currently use KSA:
-// it is the only environment that hosts the full public API surface + wallet,
-// so every demo and every code sample (via OTTU_CONNECT_BASE_URL) resolves the
-// host through here.
-//
-// Do NOT point main at SANDBOX — sandbox.ottu.net has no wallet PG, so the
-// WalletDemo and every wallet code sample would break in production. Move to a
-// per-branch ConnectEnv (or a build-time env override) only once a
-// production-grade sandbox also hosts wallet.
+// ⬇️ THE GLOBAL SWITCH for the LIVE interactive demos (Checkout / Recurring /
+// PaymentJourney / Wallet) + the API-explorer "try it". docs.ottu.com must
+// advertise only sandbox.ottu.net; the static code samples already do
+// (OTTU_CONNECT_BASE_URL). These LIVE surfaces stay on KSA for now ONLY because
+// the wallet demo needs a wallet-enabled gateway — present on ksa.ottu.dev,
+// absent on sandbox.ottu.net (verified: 0 wallet PGs vs 15 on KSA). Flip to
+// SANDBOX once a wallet-enabled sandbox.ottu.net merchant + the sandbox wallet
+// service/Keycloak (mcp-server/config.mjs) exist.
 export const ACTIVE_CONNECT: ConnectEnv = KSA;
 
 export interface CreateSessionOptions {

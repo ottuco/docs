@@ -20,7 +20,7 @@ POST https://<your-domain>.ottu.net/b/checkout/v1/pymt-txn/
 There are no separate sandbox and production URLs. The **MID (Merchant Identification Number)** configuration in the Ottu admin panel determines whether a payment gateway runs in sandbox or production mode. You can test with:
 
 - **Your own instance** — configure a MID as sandbox in the admin panel. Recommended for testing your specific gateway configuration.
-- **Shared sandbox** — `ksa.ottu.dev` has all payment gateways active in sandbox mode. Useful for quick tests without configuring your own instance.
+- **Shared sandbox** — `sandbox.ottu.net` has all payment gateways active in sandbox mode. Useful for quick tests without configuring your own instance.
 :::
 
 ## API Endpoints
@@ -197,7 +197,7 @@ When you exceed the limit, the API returns `429 Too Many Requests`. Implement ex
 
 | Option | URL | Best for |
 |--------|-----|----------|
-| **Shared sandbox** | `ksa.ottu.dev` | Quick tests — all gateways active, public credentials available |
+| **Shared sandbox** | `sandbox.ottu.net` | Quick tests — all gateways active, public credentials available |
 | **Your own instance** | `<your-domain>.ottu.net` | Integration testing — verify your specific MID and gateway configuration |
 
 **Recommended workflow:** Start with the shared sandbox for rapid prototyping, then switch to your own instance to test with your actual gateway configuration before going live.
