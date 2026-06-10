@@ -111,7 +111,7 @@ export default function WalletDemoInner() {
       if (pgCodes.length === 0) {
         dispatch({
           type: "ERROR",
-          message: `No wallet-capable gateways for ${WALLET_DEMO.currency} on the active merchant. Enable a PG with payment_services: ["wallet"] tagged "docs".`,
+          message: `No wallet-capable gateways for ${WALLET_DEMO.currency} on the active merchant. Enable a PG with payment_services: ["wallet"] tagged "demo".`,
         });
         return;
       }
