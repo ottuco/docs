@@ -9,12 +9,13 @@ import FormTextInput from "@theme/ApiExplorer/FormTextInput";
 import { useTypedDispatch, useTypedSelector } from "@theme/ApiItem/hooks";
 import { OPENAPI_AUTH } from "@theme/translationIds";
 import React, { Fragment, useEffect } from "react";
+import { ACTIVE_CONNECT } from "@site/src/utils/sandbox";
 
 const DEFAULT_USERNAME = "demo_user";
 const DEFAULT_PASSWORD = "WY4Q9I1d5kHH3nJ";
-// Public demo key on ksa.ottu.dev. Bare key only — the explorer prepends
-// the "Api-Key " prefix when it builds the Authorization header.
-const DEFAULT_API_KEY = "uUjUqczM.P5PqlXx8zyuFUQVk19PLxfHBZu8rG4Uy";
+// Public sandbox demo key — tracks ACTIVE_CONNECT (sandbox.ottu.net). Bare key
+// only; the explorer prepends the "Api-Key " prefix for the Authorization header.
+const DEFAULT_API_KEY = ACTIVE_CONNECT.connectApiKey;
 
 export default function Authorization(): React.JSX.Element | null {
   const data = useTypedSelector((state: any) => state.auth.data);

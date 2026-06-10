@@ -31,14 +31,12 @@ export const KSA: ConnectEnv = {
 };
 
 // ⬇️ THE GLOBAL SWITCH for the LIVE interactive demos (Checkout / Recurring /
-// PaymentJourney / Wallet) + the API-explorer "try it". docs.ottu.com must
-// advertise only sandbox.ottu.net; the static code samples already do
-// (OTTU_CONNECT_BASE_URL). These LIVE surfaces stay on KSA for now ONLY because
-// the wallet demo needs a wallet-enabled gateway — present on ksa.ottu.dev,
-// absent on sandbox.ottu.net (verified: 0 wallet PGs vs 15 on KSA). Flip to
-// SANDBOX once a wallet-enabled sandbox.ottu.net merchant + the sandbox wallet
-// service/Keycloak (mcp-server/config.mjs) exist.
-export const ACTIVE_CONNECT: ConnectEnv = KSA;
+// PaymentJourney / Wallet) + the API-explorer "try it". docs.ottu.com
+// advertises only sandbox.ottu.net, so everything runs on SANDBOX.
+// The wallet gateway is live on sandbox.ottu.net for USD only — PG
+// `ottu-sandbox-usd`, payment_services `ottu-wallet`, tagged `demo` — so the
+// WalletDemo seeds and charges in USD (see walletDemoConfig.ts).
+export const ACTIVE_CONNECT: ConnectEnv = SANDBOX;
 
 export interface CreateSessionOptions {
   pg_codes: string[];

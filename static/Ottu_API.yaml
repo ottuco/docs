@@ -9885,4 +9885,4 @@ components:
       name: Authorization
       description: Token-based authentication with required prefix "Token"
 servers:
-  - url: https://ksa.ottu.dev
+  - url: https://sandbox.ottu.net
