@@ -166,7 +166,13 @@ function injectSpan(mdxContent: string, curl: string): string | null {
   // Curl text contains literal `{`/`}` (path templates, JSON bodies), which
   // MDX would otherwise try to parse as JS expressions in raw text. Wrapping
   // it as a JS string expression — {"..."} — sidesteps that entirely.
-  const span = `<span style={{display:"none"}}>{${JSON.stringify(curl)}}</span>\n\n`;
+  //
+  // <pre>, not <span>: the MCP plugin converts page HTML to Markdown via
+  // rehype-remark/remark-stringify, which escapes `_` and `:` in plain text
+  // nodes (CommonMark rules) — turning `session_id` and `https://` into
+  // `session\_id` and `https\://` in the docs_fetch output. Code blocks are
+  // emitted verbatim, so <pre> keeps the curl copy-paste-safe.
+  const span = `<pre style={{display:"none"}}>{${JSON.stringify(curl)}}</pre>\n\n`;
   const match = INJECTION_ANCHOR.exec(mdxContent);
   if (!match) return null;
   return mdxContent.slice(0, match.index) + span + mdxContent.slice(match.index);
