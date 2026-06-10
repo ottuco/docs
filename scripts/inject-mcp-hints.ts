@@ -34,7 +34,9 @@ const ROOT = path.resolve(__dirname, "..");
 const SOURCES_FILE = path.join(ROOT, "static", "api-sources.yaml");
 const API_DOCS_DIR = path.join(ROOT, "docs", "developers", "apis");
 
-const INJECTION_ANCHOR = /^<Heading\s*\n\s*id=\{"request"\}/m;
+// Whitespace/indentation-agnostic: matches `<Heading` ... `id={"request"}`
+// regardless of how docusaurus-plugin-openapi-docs formats the JSX between them.
+const INJECTION_ANCHOR = /<Heading\s+id=\{"request"\}/;
 
 const HTTP_METHODS = ["get", "post", "put", "patch", "delete", "options", "head"] as const;
 
