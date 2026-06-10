@@ -8,6 +8,7 @@ import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import GatewayTimingChart from "@site/src/components/GatewayTimingChart";
 import FAQ, { FAQItem } from '@site/src/components/FAQ';
 import StepGuide from "@site/src/components/StepGuide";
+import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
 # Payment Status Query
 
@@ -92,7 +93,7 @@ This ensures merchants only receive webhooks with final, actionable payment stat
 <StepGuide steps={[
   {
     title: "Send an inquiry request",
-    description: <>Provide at least one identifier — <code>session_id</code> or <code>order_no</code>:<br /><br /><pre><code>{`curl -X POST "https://ksa.ottu.dev/b/pbl/v2/inquiry/" \\
+    description: <>Provide at least one identifier — <code>session_id</code> or <code>order_no</code>:<br /><br /><pre><code>{`curl -X POST "${OTTU_CONNECT_BASE_URL}/b/pbl/v2/inquiry/" \\
   -H "Authorization: Api-Key your_private_api_key" \\
   -H "Content-Type: application/json" \\
   -d '{"session_id": "your_session_id"}'`}</code></pre></>,

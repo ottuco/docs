@@ -31,11 +31,15 @@ export const KSA: ConnectEnv = {
 };
 
 // ⬇️ THE GLOBAL SWITCH — change this one line to retarget every demo on the site.
-// Branch convention:
-//   • dev   → KSA      (deploys to docs.ottu.dev)
-//   • main  → SANDBOX  (deploys to docs.ottu.com)
-// Wallet only ships on ksa.ottu.dev today — if you switch to SANDBOX, the
-// WalletDemo will fail because sandbox has no wallet PG.
+// Both branches (dev → docs.ottu.dev, main → docs.ottu.com) currently use KSA:
+// it is the only environment that hosts the full public API surface + wallet,
+// so every demo and every code sample (via OTTU_CONNECT_BASE_URL) resolves the
+// host through here.
+//
+// Do NOT point main at SANDBOX — sandbox.ottu.net has no wallet PG, so the
+// WalletDemo and every wallet code sample would break in production. Move to a
+// per-branch ConnectEnv (or a build-time env override) only once a
+// production-grade sandbox also hosts wallet.
 export const ACTIVE_CONNECT: ConnectEnv = KSA;
 
 export interface CreateSessionOptions {
