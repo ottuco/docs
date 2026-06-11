@@ -10,7 +10,6 @@ import TestCardCallout from "@site/src/components/TestCardCallout";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import StepGuide from "@site/src/components/StepGuide";
 import RecurringFlow from "@site/src/diagrams/RecurringFlow";
-import OneStepMITFlow from "@site/src/diagrams/OneStepMITFlow";
 
 # Recurring Payments & Auto-Debit
 
@@ -35,8 +34,8 @@ Before implementing auto-debit, ensure you have:
 - A [webhook endpoint](/developers/webhooks/) configured to receive payment notifications
 - Familiarity with the [User Cards API](/developers/cards-and-tokens/user-cards/) for card management
 
-:::note[One pg_code per auto-debit transaction]
-An auto-debit transaction must route through a **single** gateway. Always pass exactly **one** [`pg_code`](/developers/payments/payment-methods/) — for an MID that has auto-debit enabled — when you create the CIT session and on every subsequent MIT charge. Use the **same** `pg_code` for the whole lifetime of the agreement.
+:::note[One `pg_code` per auto-debit payment]
+An auto-debit payment must route through a single gateway. Always pass exactly one [`pg_code`](/developers/payments/payment-methods/) — for an MID that has auto-debit enabled — when you create the CIT session and on every subsequent MIT charge. Use the same `pg_code` for the whole lifetime of the agreement.
 :::
 
 ## Guide
@@ -48,8 +47,8 @@ Auto-debit payments involve two types of transactions:
 - **CIT (Cardholder Initiated Transaction)** — The first payment where the customer is present, enters their card details, and authorizes future charges. This establishes the agreement and saves the card token.
 - **MIT (Merchant Initiated Transaction)** — Subsequent automatic charges triggered by the merchant using the saved token. The customer is not present during these transactions.
 
-:::warning[A successful CIT is required before any MIT]
-Ottu **enforces** the CIT-before-MIT order. The Native Payments API validates that a **successful CIT exists** for the customer/agreement before it allows a merchant-initiated charge. Attempting an MIT against a token that never completed a customer-present CIT is rejected with a **validation error**.
+:::note[A successful CIT is required before any MIT]
+A CIT must complete successfully before you can run an MIT. The Native Payments API checks for a successful CIT on the customer's agreement, so a token that never completed a customer-present CIT can't be charged.
 :::
 
 #### Agreement
@@ -170,17 +169,7 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/
 
 #### Subsequent Payments (MIT)
 
-Once you have the token, you can charge the customer automatically — no customer interaction required.
-
-**Before calling the Native Payments API, ensure:**
-
-- ✅ A successful [CIT](#key-concepts) exists for this customer/agreement
-- ✅ You have the `token` from the first payment
-- ✅ You're using a `pg_code` for an MID that has auto-debit enabled
-
-There are two ways to charge the saved token. The **two-step** flow creates a session and then charges it; [**One-Step Checkout**](/developers/payments/checkout-api#one-step-checkout) collapses both into a single call by passing the token in `payment_instrument`:
-
-<OneStepMITFlow />
+Once you have the token, you can charge the customer automatically using either of the following approaches.
 
 ##### Two-Step (Checkout API + Native Payments API)
 
