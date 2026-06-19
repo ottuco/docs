@@ -198,25 +198,33 @@
 }
 
 .descriptionStack {
-  display: grid;
+  position: relative;
 }
 
 .stepDescription {
-  grid-row: 1;
-  grid-column: 1;
   font-size: 14px;
   color: var(--ifm-font-color-base);
   line-height: 1.6;
   margin: 0;
 }
 
+/* Active slide stays in normal flow so the carousel sizes to the
+   current step's content — not to the tallest step. */
 .stepDescriptionActive {
+  position: relative;
   opacity: 1;
   visibility: visible;
   transition: opacity 0.25s ease;
 }
 
+/* Hidden slides are pulled out of flow so they don't inflate the
+   height (which left a large empty gap on shorter steps). They stay
+   stacked on top for the opacity crossfade. */
 .stepDescriptionHidden {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
