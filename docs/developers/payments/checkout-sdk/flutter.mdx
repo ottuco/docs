@@ -847,6 +847,28 @@ However, the following examples demonstrate how they function on both platforms.
 
 It is needed to add a section like below in a `*.dart` file of the app:
 
+```dart
+OttuCheckoutWidget(
+  arguments: widget.checkoutArguments,
+  verifyPayment: _verifyPayment,
+  successCallback: (message) => _handleSuccess(message),
+  cancelCallback: (message) => _handleCancel(message),
+  errorCallback: (message) => _handleError(message),
+),
+
+void _handleSuccess(String message) {
+  _checkoutMessage.value = ("Success", message);
+}
+
+void _handleCancel(String message) {
+  _checkoutMessage.value = ("Cancel", message);
+}
+
+void _handleError(String message) {
+  _checkoutMessage.value = ("Error", message);
+}
+```
+
 ```swift
 @override
 void didChangeDependencies() {
