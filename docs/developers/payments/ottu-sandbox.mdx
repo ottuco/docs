@@ -1,0 +1,587 @@
+---
+title: Ottu Sandbox
+sidebar_label: Ottu Sandbox
+hide_table_of_contents: true
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import CodeBlock from "@theme/CodeBlock";
+import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
+import FAQ, { FAQItem } from "@site/src/components/FAQ";
+import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
+
+# Ottu Sandbox
+
+The **Ottu Sandbox** is a built-in, simulated payment gateway. It lets you run every payment scenario end-to-end — success, failure, refunds, tokens, recurring charges, authorizations — **without touching a live gateway, a real bank, or real money**. You configure it like any other gateway (it gets its own `pg_code`), create transactions against it through the standard [Checkout API](/developers/payments/checkout-api/), and the outcome is **deterministic**: you decide it in advance.
+
+:::tip[For business stakeholders]
+Think of the Ottu Sandbox as a flight simulator for payments. Your team can rehearse a customer paying, a card being declined, a refund being issued, or a subscription renewing — repeatedly and safely — before a single real transaction is processed. It is the fastest way to validate an integration, demo a flow, or reproduce a support issue.
+:::
+
+:::note[What this page covers]
+This page documents the **Ottu Sandbox simulator gateway** specifically. For the catalog of test card numbers used with *real* gateways' own sandboxes (KNET, MPGS, Checkout.com, etc.), see [Sandbox & Test Cards](/developers/payments/sandbox).
+:::
+
+## When to Use
+
+- **Integration testing** — validate your Checkout API calls, webhook handling, and order reconciliation before going live.
+- **Reproducing outcomes on demand** — deterministically trigger a success, a decline, or a gateway error to test each of your code paths.
+- **Demos and UAT** — walk a stakeholder through a complete payment, refund, or recurring flow with no financial risk.
+- **CI / automated tests** — drive predictable payment results from an automated test suite (the asynchronous `extra` mechanism is designed for exactly this).
+- **Recurring / tokenization rehearsals** — practice the full CIT → MIT lifecycle (save a card, then auto-debit it) end-to-end.
+
+## How Outcome Control Works
+
+The single most important concept: **with the Ottu Sandbox you choose the result of a payment in advance.** There are **two independent ways** to do that — pick the one that matches how the payment is initiated.
+
+| Mechanism | You control the outcome with… | Applies to | When the outcome is applied |
+| --- | --- | --- | --- |
+| **A — Card / token driven** *(synchronous)* | the **test card number** the customer enters, or the **token** you charge | Hosted checkout, tokenization, auto-debit (CIT & MIT) | Immediately, at the moment of payment |
+| **B — `extra` driven** *(asynchronous)* | the `sandbox_inquiry_result` value in the Checkout `extra` object | Any flow resolved by a status **inquiry** (e.g. unattended / timed-out sessions) | Later, by a background inquiry — no customer interaction needed |
+
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
+graph TD
+    A([Create session against the Sandbox PG]) --> B{How is the payment made?}
+    B -->|Customer / merchant submits a card or token| C[Mechanism A: outcome = the test card / token]
+    B -->|Left to resolve by inquiry| D[Mechanism B: outcome = extra.sandbox_inquiry_result]
+    C --> E([Deterministic result: paid / failed / error])
+    D --> E
+
+    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
+    class E accent
+```
+
+:::warning[A note on the "`extra` decides the outcome" model]
+The Sandbox is often described as "the merchant sets the outcome in `extra`." That is precise for **Mechanism B (the asynchronous inquiry path)** only. For interactive checkout, tokenization, and auto-debit (**Mechanism A**), the outcome is decided by the **test card number / token** that is submitted — `extra` is not consulted on those paths. This page documents both accurately so there are no surprises.
+:::
+
+## Setup
+
+You need three things before running any scenario:
+
+1. **An Ottu Sandbox gateway (MID) [configured](/developers/payments/payment-methods#activating-payment-gateway-codes)** on a **non-production** environment (e.g. your `*.ottu.dev` / sandbox subdomain). It is set up in the Ottu Dashboard like any other gateway. The Sandbox is intended for dev/UAT servers — see [Limitations](#limitations).
+2. **The MID's `pg_code`** — pass it in `pg_codes` when creating a session, exactly as you would for any real gateway.
+3. **A valid API key** for the [Checkout API](/developers/payments/checkout-api/). Examples below use `Authorization: Api-Key <YOUR_API_KEY>`.
+
+### MID configuration prerequisites
+
+A freshly created Ottu Sandbox MID has the advanced capabilities **switched off by default**. Enable the ones your scenario needs in the Ottu Dashboard (Payment Gateway settings) — otherwise the corresponding API calls are rejected at validation:
+
+| Capability you want to test | MID setting to enable | Default |
+| --- | --- | --- |
+| **Tokenization / save card** | `Tokenizable` (`is_tokenizable`) | Off |
+| **Auto-debit (recurring / MIT)** | `Auto debit enabled` (`auto_debit_enabled`) | Off |
+| **Refund** | add `refund` to the MID's **Operations** | Off (empty) |
+| **Authorization** (auth & capture) | set **Operation** to `authorize` | `purchase` |
+
+:::danger[If you skip this, "nothing works"]
+With a vanilla Sandbox MID, refund returns *"refund operation is not enabled for this MID"*, auto-debit is rejected, and authorize never happens (every payment settles as `paid`). Always enable the capability for the scenario you are testing first.
+:::
+
+#### Checklist
+
+- [x] Ottu Sandbox MID created on a non-production environment.
+- [x] Captured the MID's `pg_code`.
+- [x] Enabled `is_tokenizable` (for saved-card / auto-debit scenarios).
+- [x] Enabled `auto_debit_enabled` (for MIT scenarios).
+- [x] Added `refund` to Operations (for refund scenarios).
+- [x] Set Operation to `authorize` (only for the authorization scenario).
+- [x] A `webhook_url` endpoint ready to receive results (recommended).
+
+## Test Cards
+
+On the hosted Sandbox page (and as token values), these three cards drive the outcome. They are not real PANs and never reach a bank.
+
+| Card number | Outcome | Payment attempt result |
+| --- | --- | --- |
+| `411111111111111` | **Success** | Payment succeeds |
+| `411111111111112` | **Failed** | Payment declined |
+| `411111111111113` | **Error** | Gateway error (message: *"Simulated error"*) |
+| any other value | **Rejected** | Treated as an unknown card (canceled) |
+
+:::info[The Sandbox token *is* the card number]
+When you save a Sandbox card, its **token is the card number itself** (e.g. `411111111111111`). This is what makes recurring testing predictable: charging the token `411111111111111` always succeeds, `411111111111112` always declines. Real gateways issue opaque tokens; the Sandbox keeps it simple on purpose.
+:::
+
+## Guide
+
+Each scenario below lists its **prerequisites**, the **exact request**, and the **expected result**. All examples are copy-pasteable — replace the API key, `pg_code`, and `session_id` with your own.
+
+---
+
+### Scenario 1 — Hosted Checkout (full redirect flow)
+
+The customer is redirected to Ottu's hosted Sandbox page, picks a test card, and the result flows back to you via webhook — exactly like a real hosted gateway.
+
+**Prerequisites:** a Sandbox MID (`pg_code`). For UX testing, a `webhook_url` to receive the result.
+
+**Step 1 — Create the session** ([Checkout API](/developers/payments/checkout-api/)):
+
+<CodeBlock language="bash" title="Create a hosted-checkout session against the Sandbox PG">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/' \\
+  --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
+  --header 'Content-Type: application/json' \\
+  --data-raw '{
+    "type": "e_commerce",
+    "pg_codes": ["ottu-sandbox"],
+    "amount": "10.000",
+    "currency_code": "KWD",
+    "order_no": "SANDBOX-0001",
+    "webhook_url": "https://yourwebsite.com/webhook"
+  }'`}</CodeBlock>
+
+**Response (abridged):**
+
+```json title="Checkout response"
+{
+  "session_id": "037ad20c32615e7bc2f9620fd0aec912423e06c4",
+  "checkout_url": "https://<your-subdomain>.ottu.dev/b/checkout/redirect/start/?session_id=037ad20c...",
+  "state": "created"
+}
+```
+
+**Step 2 — Send the customer to `checkout_url`.** They land on the hosted Ottu Sandbox page, which shows the amount, transaction details, and the three test cards. The customer clicks a test card (or types its number) and submits.
+
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
+graph LR
+    A([Your backend]) -->|Create session| B[Checkout API]
+    B -->|checkout_url| A
+    A -->|Redirect customer| C[Ottu Sandbox pay page]
+    C -->|Customer picks a test card| D{Outcome}
+    D --> E[Webhook to your server]
+    D --> F[Customer redirected to result page]
+
+    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
+    class C accent
+```
+
+**Step 3 — Outcome.** The submitted card decides the result, the transaction transitions accordingly, and (if you supplied a `webhook_url`) Ottu posts a [payment notification](/developers/webhooks/payment-events) to your server:
+
+| Card entered | Payment attempt | Transaction state |
+| --- | --- | --- |
+| `411111111111111` | `success` | **`paid`** |
+| `411111111111112` | `failed` | `attempted` → retryable, or **`failed`** when retries are disabled |
+| `411111111111113` | `error` (*"Simulated error"*) | `attempted` → retryable, or **`failed`** when retries are disabled |
+| any other value | `canceled` (unknown card) | `attempted`, or **`canceled`** when retries are disabled |
+
+:::note[Why a decline may show `attempted`, not `failed`]
+Sessions created via the Checkout API support **multiple attempts** by default, so a single decline moves the transaction to `attempted` (the customer can retry) rather than to the terminal `failed`. It only goes straight to `failed`/`canceled` when multi-attempt is disabled on the MID. See [Payment States](/developers/reference/payment-states#multi-attempt-logic).
+:::
+
+---
+
+### Scenario 2 — Predefined Outcome via `extra` (asynchronous)
+
+This is **Mechanism B**: pin the outcome at creation time and let a background **inquiry** apply it later — no customer, no pay page. Ideal for automated tests and unattended flows.
+
+The Sandbox reads two keys from the Checkout `extra` object:
+
+| `extra` key | Values | Meaning |
+| --- | --- | --- |
+| `sandbox_inquiry_result` | `success` · `failed` · `error` | The outcome the inquiry will apply. Defaults to `success` when omitted or invalid. |
+| `expires_in_minutes` | integer (minutes) | Arms the auto-inquiry: schedules the outcome to be applied after this delay. |
+
+**Prerequisites:** a Sandbox MID on a **non-production** environment (the auto-scheduler is disabled in production — see [Limitations](#limitations)).
+
+**Request** — create the session with both keys in `extra`:
+
+<Tabs groupId="sandbox-extra-outcome" queryString>
+<TabItem value="success" label="Success">
+
+```json title="POST /b/checkout/v1/pymt-txn/ — body"
+{
+  "type": "e_commerce",
+  "pg_codes": ["ottu-sandbox"],
+  "amount": "10.000",
+  "currency_code": "KWD",
+  "webhook_url": "https://yourwebsite.com/webhook",
+  "extra": {
+    "sandbox_inquiry_result": "success",
+    "expires_in_minutes": 5
+  }
+}
+```
+
+After ~5 minutes a background inquiry settles the transaction to **`paid`** and your webhook fires.
+
+</TabItem>
+<TabItem value="failed" label="Failed">
+
+```json title="POST /b/checkout/v1/pymt-txn/ — body"
+{
+  "type": "e_commerce",
+  "pg_codes": ["ottu-sandbox"],
+  "amount": "10.000",
+  "currency_code": "KWD",
+  "webhook_url": "https://yourwebsite.com/webhook",
+  "extra": {
+    "sandbox_inquiry_result": "failed",
+    "expires_in_minutes": 5
+  }
+}
+```
+
+The inquiry settles the transaction to **`failed`**.
+
+</TabItem>
+<TabItem value="error" label="Error">
+
+```json title="POST /b/checkout/v1/pymt-txn/ — body"
+{
+  "type": "e_commerce",
+  "pg_codes": ["ottu-sandbox"],
+  "amount": "10.000",
+  "currency_code": "KWD",
+  "webhook_url": "https://yourwebsite.com/webhook",
+  "extra": {
+    "sandbox_inquiry_result": "error",
+    "expires_in_minutes": 5
+  }
+}
+```
+
+The inquiry records a gateway **error** (*"Simulated error"*).
+
+</TabItem>
+</Tabs>
+
+:::tip[How it works]
+On a non-production server, creating a session that carries **both** `sandbox_inquiry_result` and `expires_in_minutes` schedules a one-time background job. When it runs, it asks the Sandbox for the transaction status, and the Sandbox returns whatever you put in `sandbox_inquiry_result`. If the customer already completed the same session interactively (Scenario 1) before the timer fires, the scheduled job is a no-op — the real, card-driven result stands.
+:::
+
+:::info[`sandbox_inquiry_result` also applies to manual inquiries]
+The same `extra` value is honored by **any** status inquiry on the transaction — for example a [Payment Status Query](/developers/payments/psq/) — not just the scheduled one. The `expires_in_minutes` key only controls the *automatic* scheduling.
+:::
+
+---
+
+### Scenario 3 — Tokenization & Saving a Card (CIT)
+
+A **CIT (Cardholder-Initiated Transaction)** is the first, customer-present payment that saves a card for future use. On the Sandbox this is a hosted checkout where the customer ticks **"Save card"** (or where the transaction is `auto_debit`, which saves the card automatically).
+
+**Prerequisites:** MID with `is_tokenizable` enabled; the session must include a `customer_id`.
+
+**Request** — create a session with `customer_id` and (for recurring) `payment_type: auto_debit` + an `agreement`:
+
+<CodeBlock language="bash" title="Create a CIT session that saves a card">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/' \\
+  --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
+  --header 'Content-Type: application/json' \\
+  --data-raw '{
+    "type": "e_commerce",
+    "payment_type": "auto_debit",
+    "pg_codes": ["ottu-sandbox"],
+    "amount": "10.000",
+    "currency_code": "KWD",
+    "customer_id": "cust-123",
+    "webhook_url": "https://yourwebsite.com/webhook",
+    "agreement": {
+      "id": "agr-001",
+      "type": "recurring",
+      "amount_variability": "fixed",
+      "frequency": "monthly"
+    }
+  }'`}</CodeBlock>
+
+**Outcome.** Send the customer to `checkout_url`, have them pay with the **Success** card `411111111111111` and tick **Save card**. The transaction becomes `paid`, a saved card is created for `cust-123`, and the webhook delivers the token:
+
+```json title="Webhook (token delivered)"
+{
+  "session_id": "4a462681df6aab64e27cedc9bbf733cd6442578b",
+  "result": "success",
+  "state": "paid",
+  "payment_type": "auto_debit",
+  "customer_id": "cust-123",
+  "agreement": { "id": "agr-001", "type": "recurring" },
+  "token": {
+    "token": "411111111111111",
+    "customer_id": "cust-123",
+    "brand": "VISA",
+    "number": "**** 1111",
+    "pg_code": "ottu-sandbox",
+    "agreements": ["agr-001"]
+  }
+}
+```
+
+:::note[The outcome is set by the card, not by `extra`]
+For tokenization the result is decided by the card used: `411111111111111` saves successfully, `411111111111112` declines, `411111111111113` errors. Save `token.token` and `token.pg_code` — you will use them in Scenario 4. See [Recurring Payments](/developers/cards-and-tokens/recurring-payments/) for the full token lifecycle.
+:::
+
+---
+
+### Scenario 4 — Auto-Debit with a Saved Token (MIT)
+
+A **MIT (Merchant-Initiated Transaction)** charges a previously saved token with the customer absent — the basis of subscriptions and recurring billing.
+
+**Prerequisites:**
+
+- MID with `auto_debit_enabled` enabled.
+- A **prior successful CIT** for the same `customer_id`, on the **same MID**, under the **same `agreement.id`** (Scenario 3). The Sandbox enforces this — an MIT without a matching CIT is rejected with *"No Cardholder Initiated Transaction (CIT) found."*
+- A new `auto_debit` session for the same customer/agreement, and its `session_id`.
+
+You can charge the token two ways:
+
+<Tabs groupId="sandbox-mit" queryString>
+<TabItem value="two-step" label="Two-Step (Auto-Debit API)">
+
+Create a new `auto_debit` session, then charge the saved token:
+
+<CodeBlock language="bash" title="Charge a saved token (MIT)">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/auto-debit/' \\
+  --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
+  --header 'Content-Type: application/json' \\
+  --header 'Idempotency-Key: <unique-uuid>' \\
+  --data-raw '{
+    "session_id": "<new_auto_debit_session_id>",
+    "token": "411111111111111"
+  }'`}</CodeBlock>
+
+</TabItem>
+<TabItem value="one-step" label="One-Step (payment_instrument)">
+
+Create and charge in a single call using [`payment_instrument`](/developers/payments/checkout-api#one-step-checkout):
+
+```json title="POST /b/checkout/v1/pymt-txn/ — body"
+{
+  "type": "e_commerce",
+  "payment_type": "auto_debit",
+  "pg_codes": ["ottu-sandbox"],
+  "amount": "10.000",
+  "currency_code": "KWD",
+  "customer_id": "cust-123",
+  "webhook_url": "https://yourwebsite.com/webhook",
+  "agreement": { "id": "agr-001", "type": "recurring" },
+  "payment_instrument": {
+    "instrument_type": "token",
+    "payload": { "token": "411111111111111" }
+  }
+}
+```
+
+</TabItem>
+</Tabs>
+
+**Outcome.** The result is decided by the **token** charged, and is returned **directly in the API response** (MIT charges do not produce a separate webhook):
+
+| Token charged | Result | HTTP |
+| --- | --- | --- |
+| `411111111111111` | `success` → transaction `paid` | `200` |
+| `411111111111112` | `failed` | `400` |
+| any other value | `error` (*"Simulated error"*) | `400` |
+
+```json title="Auto-debit response (success)"
+{
+  "result": "success",
+  "message": "successful payment",
+  "pg_response": {}
+}
+```
+
+:::warning[Simulating a *failed* MIT is intentionally awkward]
+Because a valid MIT requires a successful CIT first, and a CIT is established with the **Success** card, the natural saved token is `411111111111111` — which always succeeds. To rehearse a *failed* recurring charge, drive it through the asynchronous [`extra` mechanism](#scenario-2--predefined-outcome-via-extra-asynchronous) (`sandbox_inquiry_result: "failed"`) instead of trying to charge a declining token.
+:::
+
+:::tip[Idempotency]
+The Auto-Debit API honors the `Idempotency-Key` header — retrying with the same key returns the original result instead of double-charging. See the [API Reference](#api-reference).
+:::
+
+---
+
+### Scenario 5 — Refund (full & partial)
+
+Refund a settled Sandbox payment through the unified [Operations API](/developers/operations/).
+
+**Prerequisites:** a transaction in `paid` state on a MID that has **`refund` enabled** in its Operations.
+
+<Tabs groupId="sandbox-refund" queryString>
+<TabItem value="full" label="Full refund">
+
+Omit `amount` to refund the full remaining balance:
+
+```json title="POST /b/pbl/v2/operation/ — body"
+{
+  "operation": "refund",
+  "session_id": "<paid_session_id>"
+}
+```
+
+</TabItem>
+<TabItem value="partial" label="Partial refund">
+
+Pass a smaller `amount` to refund part of it. You can repeat partial refunds until the original amount is exhausted:
+
+```json title="POST /b/pbl/v2/operation/ — body"
+{
+  "operation": "refund",
+  "session_id": "<paid_session_id>",
+  "amount": "4.000"
+}
+```
+
+</TabItem>
+</Tabs>
+
+**Outcome.** Every **eligible** refund on the Sandbox **succeeds** and creates a [child transaction](/developers/reference/payment-states#child-payment-transactions) in the `refunded` state for the refunded amount. The parent's refunded balance is updated.
+
+:::warning[Sandbox refund rules]
+- **Over-refunding is rejected**, not clamped: *"The amount specified is greater than the amount available for refund."*
+- Multiple partial refunds are allowed, cumulatively bounded by the original amount.
+- The Sandbox refund **always succeeds** — it cannot simulate a declined/rejected refund.
+- Include a [`Tracking-Key`](/developers/operations#guide) header to make refunds idempotent.
+:::
+
+---
+
+### Scenario 6 — Authorize & Capture
+
+An **authorization** reserves funds without collecting them; a **capture** settles them later.
+
+:::danger[Important: capture & void are not yet available on the Ottu Sandbox]
+On the current Sandbox you can create and observe an **authorization**, but the **capture** and **void** legs are **not implemented** — calling them returns HTTP `400` with *"Operation not implemented."* The full authorize → capture lifecycle therefore **cannot be completed on the Sandbox today**. To exercise capture/void end-to-end, use a real gateway's sandbox (e.g. MPGS) that supports them. (See [Limitations](#limitations).)
+:::
+
+**What you can test — the authorization leg:**
+
+**Prerequisites:** a Sandbox MID with **Operation = `authorize`**.
+
+**Request** — create and pay a session as usual (Scenario 1) using the **Success** card `411111111111111`.
+
+**Outcome.** Instead of `paid`, the transaction settles in the **`authorized`** state — funds reserved, awaiting capture.
+
+```json title="Webhook / status"
+{
+  "session_id": "9a1c...",
+  "result": "success",
+  "state": "authorized"
+}
+```
+
+**Attempting to capture or void** (for completeness — both are rejected today):
+
+```json title="POST /b/pbl/v2/operation/ — body"
+{
+  "operation": "capture",
+  "session_id": "<authorized_session_id>",
+  "amount": "10.000"
+}
+```
+
+```json title="Response (current Sandbox behavior)"
+{
+  "result": "failed",
+  "operation": "capture",
+  "message": "Operation not implemented."
+}
+```
+
+---
+
+### Scenario 7 — Testing a Failed Webhook Delivery
+
+The ticket lists "failed to post webhook" as an outcome to validate. To set expectations clearly: **this is not a Sandbox-controlled outcome** (there is no `extra` switch for it). Webhook delivery is a **platform-wide** behavior, and the Sandbox is simply a convenient, free way to trigger it.
+
+**How to reproduce it:**
+
+1. Create a session whose `webhook_url` points at an endpoint that **fails** — unreachable host, or one that returns a non-`2xx` status, or one that times out.
+2. Pay with the **Success** card `411111111111111` so a result exists to disclose, which makes Ottu attempt the webhook.
+
+**What you will observe:**
+
+- The payment itself still succeeds (`paid`) — webhook delivery is independent of the payment result.
+- The failure is recorded on the payment attempt (`disclosure_url_error`); `disclosed_to_merchant` stays `false`.
+- **Retries happen only on timeouts** (governed by your Webhook settings); a non-`2xx` or connection error is **not** retried.
+- If enabled, Ottu emails a webhook-error alert to the configured address.
+
+:::note[No `webhook_url`, no webhook]
+If you don't supply a `webhook_url` on the Checkout request, **no payment webhook is sent at all** — Ottu just redirects the customer to the result page. Always set `webhook_url` when testing delivery.
+:::
+
+## Outcome Reference
+
+A consolidated map of every Sandbox trigger and its result.
+
+| Surface | Trigger | Result | Final state |
+| --- | --- | --- | --- |
+| Hosted pay page | card `411111111111111` | success | `paid` (or `authorized` if Operation = authorize) |
+| Hosted pay page | card `411111111111112` | failed | `attempted` / `failed` |
+| Hosted pay page | card `411111111111113` | error (*Simulated error*) | `attempted` / `failed` |
+| Hosted pay page | any other card | rejected (unknown card) | `attempted` / `canceled` |
+| Auto-debit / token charge | token `411111111111111` | success | `paid` |
+| Auto-debit / token charge | token `411111111111112` | failed | `400` |
+| Auto-debit / token charge | any other token | error (*Simulated error*) | `400` |
+| Tokenization (save card) | card `411111111111111` | success | card saved |
+| Tokenization (save card) | card `411111111111112` | failed | not saved |
+| Inquiry (`extra`) | `sandbox_inquiry_result: success` (default) | success | `paid` |
+| Inquiry (`extra`) | `sandbox_inquiry_result: failed` | failed | `failed` |
+| Inquiry (`extra`) | `sandbox_inquiry_result: error` | error | error |
+| Refund | any eligible refund | always success | child `refunded` |
+| Apple Pay / Google Pay | any payload | always success | `paid` |
+| Capture / Void | any request | **not implemented** | `400` |
+
+## Limitations
+
+For an accurate picture (especially for production planning):
+
+- **Capture & void are not implemented** on the Sandbox — only the authorization leg of auth-and-capture is observable. See [Scenario 6](#scenario-6--authorize--capture).
+- **Refund always succeeds** — the Sandbox cannot simulate a declined or rejected refund.
+- **Apple Pay / Google Pay always succeed** — there is no failure simulation for wallet payments on the Sandbox.
+- **The asynchronous `extra` outcome scheduler runs on non-production only.** On a production-flagged server, sessions created with `sandbox_inquiry_result` + `expires_in_minutes` will not auto-resolve. Use a dev/UAT environment.
+- **`extra` does not drive interactive outcomes** — for hosted checkout, tokenization, and auto-debit the result is set by the card/token, not by `extra`.
+
+## API Reference
+
+The Sandbox uses the same APIs as any gateway. The interactive schemas:
+
+<Tabs groupId="sandbox-api" queryString>
+<TabItem value="checkout" label="Create Session">
+
+<ApiDocEmbed path="create-payment-transaction-checkout.api.mdx" />
+
+</TabItem>
+<TabItem value="auto-debit" label="Auto-Debit">
+
+<ApiDocEmbed path="auto-debit.api.mdx" />
+
+</TabItem>
+<TabItem value="operations" label="Operations (Refund)">
+
+<ApiDocEmbed path="public-operations.api.mdx" />
+
+</TabItem>
+</Tabs>
+
+## FAQ
+
+<FAQ>
+  <FAQItem question="Is the Ottu Sandbox the same as the test cards page?">
+    No. This page is about the **Ottu Sandbox simulator gateway** — a built-in gateway that fakes payment outcomes. The [Sandbox & Test Cards](/developers/payments/sandbox) page lists test card numbers for *real* gateways' own sandboxes (KNET, MPGS, etc.).
+  </FAQItem>
+  <FAQItem question="Does the Sandbox charge real money?">
+    Never. It processes nothing externally — all outcomes are simulated inside Ottu. The card numbers are not real PANs.
+  </FAQItem>
+  <FAQItem question="How do I get a successful payment versus a decline?">
+    Use the **test card / token**: `411111111111111` succeeds, `411111111111112` declines, `411111111111113` errors. For unattended flows, set `sandbox_inquiry_result` in `extra` instead.
+  </FAQItem>
+  <FAQItem question="Why does my Sandbox refund / auto-debit get rejected?">
+    The capability is probably disabled on the MID. Enable `refund` in Operations for refunds, `auto_debit_enabled` for auto-debit, and `is_tokenizable` for saving cards. See [Setup](#setup).
+  </FAQItem>
+  <FAQItem question="Can I test capture and void on the Sandbox?">
+    Not currently. You can create an **authorization** (set the MID Operation to `authorize`), but capture/void return *"Operation not implemented."* Use a real gateway's sandbox for the full capture lifecycle. See [Limitations](#limitations).
+  </FAQItem>
+  <FAQItem question="My predefined `extra` outcome never applied. Why?">
+    The automatic inquiry scheduler runs on **non-production** environments only, and the session must carry **both** `sandbox_inquiry_result` and `expires_in_minutes`. On a production-flagged server it does nothing.
+  </FAQItem>
+  <FAQItem question="Can I simulate a failed recurring (MIT) charge?">
+    Indirectly. Because an MIT requires a prior successful CIT (established with the Success card), the saved token always succeeds. To rehearse a failed recurring charge, use the asynchronous `extra` mechanism with `sandbox_inquiry_result: "failed"`.
+  </FAQItem>
+</FAQ>
+
+## What's Next?
+
+- [**Checkout API**](/developers/payments/checkout-api/) — Create the sessions every scenario starts from
+- [**Recurring Payments**](/developers/cards-and-tokens/recurring-payments/) — The full CIT → MIT token lifecycle
+- [**Operations**](/developers/operations/) — Refund, capture, and void in depth
+- [**Payment States**](/developers/reference/payment-states/) — How outcomes map to transaction states
+- [**Webhooks**](/developers/webhooks/payment-events/) — Receive and verify payment results
+- [**Sandbox & Test Cards**](/developers/payments/sandbox) — Test cards for real gateways' sandboxes

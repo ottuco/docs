@@ -36,6 +36,12 @@ Refund payments to a customer's wallet balance instead of returning funds via th
 
 [**Go to Wallet →**](wallet/index.mdx)
 
+### Ottu Sandbox (Simulated Gateway)
+
+A built-in, simulated payment gateway for testing every payment scenario end-to-end — success, failure, refunds, tokens, recurring charges, authorizations — with no live gateway and no real money. You decide the outcome in advance via the test card you use or the Checkout `extra` object.
+
+[**Go to Ottu Sandbox →**](ottu-sandbox.mdx)
+
 ### Sandbox & Test Cards
 
 Test your integration with sandbox credentials and test card numbers before going live. Each gateway has its own set of test cards with specific card numbers, expiry dates, and CVV values.
