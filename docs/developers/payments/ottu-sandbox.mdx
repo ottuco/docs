@@ -13,7 +13,7 @@ import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
 # Ottu Sandbox
 
-The **Ottu Sandbox** is a built-in, simulated payment gateway. It lets you run every payment scenario end-to-end — success, failure, refunds, tokens, recurring charges, authorizations — **without touching a live gateway, a real bank, or real money**. You configure it like any other gateway (it gets its own `pg_code`), create transactions against it through the standard [Checkout API](/developers/payments/checkout-api/), and the outcome is **deterministic**: you decide it in advance.
+The **Ottu Sandbox** is a built-in, simulated payment gateway. It lets you run every payment scenario end-to-end — success, failure, refunds, tokens, recurring charges, authorizations, captures, voids, and wallet payments (Apple / Google / Samsung Pay) — **without touching a live gateway, a real bank, or real money**. You configure it like any other gateway (it gets its own `pg_code`), create transactions against it through the standard [Checkout API](/developers/payments/checkout-api/), and the outcome is **deterministic**: you decide it in advance.
 
 :::tip[For business stakeholders]
 Think of the Ottu Sandbox as a flight simulator for payments. Your team can rehearse a customer paying, a card being declined, a refund being issued, or a subscription renewing — repeatedly and safely — before a single real transaction is processed. It is the fastest way to validate an integration, demo a flow, or reproduce a support issue.
@@ -30,15 +30,17 @@ This page documents the **Ottu Sandbox simulator gateway** specifically. For the
 - **Demos and UAT** — walk a stakeholder through a complete payment, refund, or recurring flow with no financial risk.
 - **CI / automated tests** — drive predictable payment results from an automated test suite (the asynchronous `extra` mechanism is designed for exactly this).
 - **Recurring / tokenization rehearsals** — practice the full CIT → MIT lifecycle (save a card, then auto-debit it) end-to-end.
+- **Realistic response-shape testing** — mimic a real gateway's response payload (KNET, MPGS, CyberSource, …) to validate your webhook parsing and reconciliation without calling the live gateway.
 
 ## How Outcome Control Works
 
-The single most important concept: **with the Ottu Sandbox you choose the result of a payment in advance.** There are **two independent ways** to do that — pick the one that matches how the payment is initiated.
+The single most important concept: **with the Ottu Sandbox you choose the result of a payment in advance.** There are **three independent ways** to do that — pick the one that matches how the payment is initiated.
 
 | Mechanism | You control the outcome with… | Applies to | When the outcome is applied |
 | --- | --- | --- | --- |
 | **A — Card / token driven** *(synchronous)* | the **test card number** the customer enters, or the **token** you charge | Hosted checkout, tokenization, auto-debit (CIT & MIT) | Immediately, at the moment of payment |
-| **B — `extra` driven** *(asynchronous)* | the `sandbox_inquiry_result` value in the Checkout `extra` object | Any flow resolved by a status **inquiry** (e.g. unattended / timed-out sessions) | Later, by a background inquiry — no customer interaction needed |
+| **B — `sandbox_inquiry_result`** *(asynchronous)* | the `sandbox_inquiry_result` value in the Checkout `extra` object | Any flow resolved by a status **inquiry** (e.g. unattended / timed-out sessions) | Later, by a background inquiry — no customer interaction needed |
+| **C — `sandbox_result`** *(card-less surfaces)* | a `sandbox_result` value (`success` · `failed` · `error`) in the **operation request's `extra`** (capture / void) or the **transaction's `extra`** (wallets) | Capture, void, and Apple / Google / Samsung Pay — surfaces with no card to pick | At the moment the operation or wallet payment runs |
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
@@ -46,15 +48,17 @@ graph TD
     A([Create session against the Sandbox PG]) --> B{How is the payment made?}
     B -->|Customer / merchant submits a card or token| C[Mechanism A: outcome = the test card / token]
     B -->|Left to resolve by inquiry| D[Mechanism B: outcome = extra.sandbox_inquiry_result]
+    B -->|Capture / void / wallet| F[Mechanism C: outcome = extra.sandbox_result]
     C --> E([Deterministic result: paid / failed / error])
     D --> E
+    F --> E
 
     classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
     class E accent
 ```
 
-:::warning[A note on the "`extra` decides the outcome" model]
-The Sandbox is often described as "the merchant sets the outcome in `extra`." That is precise for **Mechanism B (the asynchronous inquiry path)** only. For interactive checkout, tokenization, and auto-debit (**Mechanism A**), the outcome is decided by the **test card number / token** that is submitted — `extra` is not consulted on those paths. This page documents both accurately so there are no surprises.
+:::warning[`extra` is consulted only on the non-interactive paths]
+The Sandbox is often described as "the merchant sets the outcome in `extra`." That is precise for **Mechanism B** (the asynchronous inquiry path, `sandbox_inquiry_result`) and **Mechanism C** (capture / void / wallets, `sandbox_result`). For interactive checkout, tokenization, and auto-debit (**Mechanism A**), the outcome is decided by the **test card number / token** that is submitted — `extra` is not consulted on those paths. The two keys are distinct and never overlap: `sandbox_inquiry_result` drives inquiries; `sandbox_result` drives capture, void, and wallet payments. Any unrecognized value (or an absent key) defaults to **`success`**.
 :::
 
 ## Setup
@@ -74,7 +78,9 @@ A freshly created Ottu Sandbox MID has the advanced capabilities **switched off 
 | **Tokenization / save card** | `Tokenizable` (`is_tokenizable`) | Off |
 | **Auto-debit (recurring / MIT)** | `Auto debit enabled` (`auto_debit_enabled`) | Off |
 | **Refund** | add `refund` to the MID's **Operations** | Off (empty) |
-| **Authorization** (auth & capture) | set **Operation** to `authorize` | `purchase` |
+| **Authorization & capture** | set **Operation** to `authorize` | `purchase` |
+| **Void** | add `void` to the MID's **Operations** | Off (empty) |
+| **Apple / Google / Samsung Pay** | add the wallet's service configuration to the MID | Off |
 
 :::danger[If you skip this, "nothing works"]
 With a vanilla Sandbox MID, refund returns *"refund operation is not enabled for this MID"*, auto-debit is rejected, and authorize never happens (every payment settles as `paid`). Always enable the capability for the scenario you are testing first.
@@ -87,12 +93,14 @@ With a vanilla Sandbox MID, refund returns *"refund operation is not enabled for
 - [x] Enabled `is_tokenizable` (for saved-card / auto-debit scenarios).
 - [x] Enabled `auto_debit_enabled` (for MIT scenarios).
 - [x] Added `refund` to Operations (for refund scenarios).
-- [x] Set Operation to `authorize` (only for the authorization scenario).
+- [x] Set Operation to `authorize` (for the authorize / capture scenario).
+- [x] Added `void` to Operations (for the void scenario).
+- [x] Configured the relevant wallet service (for Apple / Google / Samsung Pay scenarios).
 - [x] A `webhook_url` endpoint ready to receive results (recommended).
 
 ## Test Cards
 
-On the hosted Sandbox page (and as token values), these three cards drive the outcome. They are not real PANs and never reach a bank.
+On the hosted Sandbox page (and as token values), these cards drive the outcome. They are not real PANs and never reach a bank.
 
 | Card number | Outcome | Payment attempt result |
 | --- | --- | --- |
@@ -100,6 +108,14 @@ On the hosted Sandbox page (and as token values), these three cards drive the ou
 | `411111111111112` | **Failed** | Payment declined |
 | `411111111111113` | **Error** | Gateway error (message: *"Simulated error"*) |
 | any other value | **Rejected** | Treated as an unknown card (canceled) |
+
+Three further cards **enroll and tokenize successfully** on the first (CIT) payment but **decline when later charged as a saved token** (MIT) — purpose-built to rehearse failed recurring charges without server-side changes (see [Scenario 5](#scenario-5--auto-debit-with-a-saved-token-mit)):
+
+| Card number | First payment (CIT) | Saved-token charge (MIT) | Decline reason surfaced |
+| --- | --- | --- | --- |
+| `411111111111114` | succeeds, card saved | **declined** | *Transaction declined by the issuing bank.* |
+| `411111111111115` | succeeds, card saved | **declined** | *Card expired.* |
+| `411111111111116` | succeeds, card saved | **declined** | *Insufficient funds.* |
 
 :::info[The Sandbox token *is* the card number]
 When you save a Sandbox card, its **token is the card number itself** (e.g. `411111111111111`). This is what makes recurring testing predictable: charging the token `411111111111111` always succeeds, `411111111111112` always declines. Real gateways issue opaque tokens; the Sandbox keeps it simple on purpose.
@@ -172,7 +188,96 @@ Sessions created via the Checkout API support **multiple attempts** by default, 
 
 ---
 
-### Scenario 2 — Predefined Outcome via `extra` (asynchronous)
+### Scenario 2 — Mimic a Real Gateway's Response Shape
+
+By default the Sandbox stores a minimal stub (`{"card_number": "…"}`) as the gateway response. When you need your integration to handle a **real gateway's response shape** — the exact JSON that **KNET, MPGS, CyberSource, Ottu PG, or MyFatoorah** returns — the hosted pay page can **mimic** it. This lets you exercise your webhook parsing, reconciliation, and gateway-specific handling against production-shaped payloads without ever calling the live gateway.
+
+:::info[What "mimic" changes — and what it does not]
+The mimic selector only changes the **shape of the stored `gateway_response`**. It does **not** change the result: the **test card still decides** success / failed / error. Picking **KNET + the Failed card** produces a KNET-shaped *decline*; **KNET + the Success card** produces a KNET-shaped *capture*. The payload is realistic (with freshly randomized identifiers each run) and is stored **verbatim** — Ottu does not re-interpret it, so the transaction state always matches the card.
+:::
+
+**Applies to:** the hosted checkout pay page only (Scenario 1). It is a manual QA aid — the asynchronous `extra` path ([Scenario 3](#scenario-3--predefined-outcome-via-extra-asynchronous)) and token charges ([Scenario 5](#scenario-5--auto-debit-with-a-saved-token-mit)) do not use it.
+
+**Prerequisites:** same as Scenario 1 — a Sandbox MID (`pg_code`) and, to see the result delivered, a `webhook_url`.
+
+**Steps:**
+
+1. Create a hosted-checkout session exactly as in [Scenario 1](#scenario-1--hosted-checkout-full-redirect-flow) and send the customer to `checkout_url`.
+2. On the Sandbox pay page, under **"Mimic PG Response" (optional)**, click the logo of the gateway you want to imitate — **KNET, MPGS, CyberSource, Ottu PG, or MyFatoorah**. (Click the active logo again to clear the selection and fall back to the default stub.)
+3. Click a **test card** to choose the outcome, then press **Pay**.
+
+**Result.** The transaction settles per the card, and the stored response — surfaced in the **`gateway_response`** field of your [payment webhook](/developers/webhooks/payment-events) (and in the dashboard transaction details) — matches the chosen gateway's real shape:
+
+<Tabs groupId="sandbox-mimic" queryString>
+<TabItem value="knet" label="KNET (Success card)">
+
+KNET + the **Success** card → a `CAPTURED` response, the same shape your KNET integration parses:
+
+```json title="webhook → gateway_response (KNET)"
+{
+  "result": "CAPTURED",
+  "auth": "B65880",
+  "ref": "461580512345",
+  "authRespCode": "00",
+  "avr": "N",
+  "paymentid": "100202412345678901",
+  "tranid": "987654321012345",
+  "trackid": "<your reference_number>",
+  "postdate": "0623",
+  "amt": "10.000"
+}
+```
+
+</TabItem>
+<TabItem value="mpgs" label="MPGS (Failed card)">
+
+MPGS + the **Failed** card → a `FAILURE` / `DECLINED` response:
+
+```json title="webhook → gateway_response (MPGS)"
+{
+  "result": "FAILURE",
+  "status": "FAILED",
+  "order": { "id": "A1B2C3D4E5F6", "status": "FAILED" },
+  "transaction": [
+    { "id": "1234567890_0_pay", "response": { "gatewayCode": "DECLINED" } }
+  ]
+}
+```
+
+</TabItem>
+<TabItem value="cybersource" label="CyberSource (Success card)">
+
+CyberSource + the **Success** card → an `ACCEPT` decision:
+
+```json title="webhook → gateway_response (CyberSource)"
+{
+  "decision": "ACCEPT",
+  "reason_code": "100",
+  "message": "Request was processed successfully.",
+  "transaction_id": "1234567890123456789012",
+  "auth_code": "831000",
+  "req_reference_number": "<your reference_number>",
+  "req_amount": "10.000",
+  "req_currency": "KWD",
+  "req_transaction_type": "sale",
+  "req_payment_method": "card"
+}
+```
+
+</TabItem>
+</Tabs>
+
+:::note[Identifiers are randomized; outcome fields are fixed]
+Every mimic run generates fresh identifiers (`paymentid`, `tranid`, `order.id`, `transaction_id`, …) so repeated tests never collide. Only the **shape** and the **outcome-specific fields** (`result`, `gatewayCode`, `decision`, …) are deterministic; amounts and currency echo your session. Ottu PG and MyFatoorah follow the same principle in their own response shapes.
+:::
+
+:::tip[When to use mimic vs. the default stub]
+Use mimic when you are validating code that **reads the raw gateway response** — reconciliation jobs, response-shape assertions, or gateway-specific webhook handling. For ordinary outcome testing (paid / failed / error) you don't need it; the default stub is enough.
+:::
+
+---
+
+### Scenario 3 — Predefined Outcome via `extra` (asynchronous)
 
 This is **Mechanism B**: pin the outcome at creation time and let a background **inquiry** apply it later — no customer, no pay page. Ideal for automated tests and unattended flows.
 
@@ -257,7 +362,7 @@ The same `extra` value is honored by **any** status inquiry on the transaction �
 
 ---
 
-### Scenario 3 — Tokenization & Saving a Card (CIT)
+### Scenario 4 — Tokenization & Saving a Card (CIT)
 
 A **CIT (Cardholder-Initiated Transaction)** is the first, customer-present payment that saves a card for future use. On the Sandbox this is a hosted checkout where the customer ticks **"Save card"** (or where the transaction is `auto_debit`, which saves the card automatically).
 
@@ -306,19 +411,19 @@ A **CIT (Cardholder-Initiated Transaction)** is the first, customer-present paym
 ```
 
 :::note[The outcome is set by the card, not by `extra`]
-For tokenization the result is decided by the card used: `411111111111111` saves successfully, `411111111111112` declines, `411111111111113` errors. Save `token.token` and `token.pg_code` — you will use them in Scenario 4. See [Recurring Payments](/developers/cards-and-tokens/recurring-payments/) for the full token lifecycle.
+For tokenization the result is decided by the card used: `411111111111111` saves successfully, `411111111111112` declines, `411111111111113` errors. Save `token.token` and `token.pg_code` — you will use them in Scenario 5. See [Recurring Payments](/developers/cards-and-tokens/recurring-payments/) for the full token lifecycle.
 :::
 
 ---
 
-### Scenario 4 — Auto-Debit with a Saved Token (MIT)
+### Scenario 5 — Auto-Debit with a Saved Token (MIT)
 
 A **MIT (Merchant-Initiated Transaction)** charges a previously saved token with the customer absent — the basis of subscriptions and recurring billing.
 
 **Prerequisites:**
 
 - MID with `auto_debit_enabled` enabled.
-- A **prior successful CIT** for the same `customer_id`, on the **same MID**, under the **same `agreement.id`** (Scenario 3). The Sandbox enforces this — an MIT without a matching CIT is rejected with *"No Cardholder Initiated Transaction (CIT) found."*
+- A **prior successful CIT** for the same `customer_id`, on the **same MID**, under the **same `agreement.id`** (Scenario 4). The Sandbox enforces this — an MIT without a matching CIT is rejected with *"No Cardholder Initiated Transaction (CIT) found."*
 - A new `auto_debit` session for the same customer/agreement, and its `session_id`.
 
 You can charge the token two ways:
@@ -364,22 +469,41 @@ Create and charge in a single call using [`payment_instrument`](/developers/paym
 
 **Outcome.** The result is decided by the **token** charged, and is returned **directly in the API response** (MIT charges do not produce a separate webhook):
 
-| Token charged | Result | HTTP |
+| Saved token charged | Result | HTTP |
 | --- | --- | --- |
 | `411111111111111` | `success` → transaction `paid` | `200` |
-| `411111111111112` | `failed` | `400` |
-| any other value | `error` (*"Simulated error"*) | `400` |
+| `411111111111114` | `failed` — *Transaction declined by the issuing bank.* | `400` |
+| `411111111111115` | `failed` — *Card expired.* | `400` |
+| `411111111111116` | `failed` — *Insufficient funds.* | `400` |
+| any other token | `error` (*"Simulated error"*) | `400` |
 
-```json title="Auto-debit response (success)"
+Only cards that **enroll successfully at CIT** can become saved tokens — the Success card and the three MIT-failure cards. (The `…112`/`…113` cards fail at CIT, so they can never be saved.)
+
+On success the response is the **full payment object** (the same shape as a [payment webhook](/developers/webhooks/payment-events)); a decline returns an error envelope:
+
+```json title="Auto-debit response — success (HTTP 200, abridged)"
 {
+  "session_id": "4a462681df6aab64e27cedc9bbf733cd6442578b",
   "result": "success",
-  "message": "successful payment",
-  "pg_response": {}
+  "state": "paid",
+  "amount": "10.000",
+  "currency_code": "KWD",
+  "payment_type": "auto_debit",
+  "customer_id": "cust-123",
+  "agreement": { "id": "agr-001", "type": "recurring" },
+  "gateway_response": {}
 }
 ```
 
-:::warning[Simulating a *failed* MIT is intentionally awkward]
-Because a valid MIT requires a successful CIT first, and a CIT is established with the **Success** card, the natural saved token is `411111111111111` — which always succeeds. To rehearse a *failed* recurring charge, drive it through the asynchronous [`extra` mechanism](#scenario-2--predefined-outcome-via-extra-asynchronous) (`sandbox_inquiry_result: "failed"`) instead of trying to charge a declining token.
+```json title="Auto-debit response — decline (HTTP 400)"
+{
+  "detail": "Card expired.",
+  "result": "failed"
+}
+```
+
+:::tip[Simulating a failed recurring charge]
+Run the CIT ([Scenario 4](#scenario-4--tokenization--saving-a-card-cit)) with one of the **MIT-failure cards** (`411111111111114` / `411111111111115` / `411111111111116`) — they enroll and save exactly like the Success card — then charge the resulting saved token. The MIT then **declines** with the matching reason (issuer decline / expired card / insufficient funds), so you can exercise your dunning and retry logic end-to-end.
 :::
 
 :::tip[Idempotency]
@@ -388,7 +512,7 @@ The Auto-Debit API honors the `Idempotency-Key` header — retrying with the sam
 
 ---
 
-### Scenario 5 — Refund (full & partial)
+### Scenario 6 — Refund (full & partial)
 
 Refund a settled Sandbox payment through the unified [Operations API](/developers/operations/).
 
@@ -433,21 +557,18 @@ Pass a smaller `amount` to refund part of it. You can repeat partial refunds unt
 
 ---
 
-### Scenario 6 — Authorize & Capture
+### Scenario 7 — Authorize, Capture & Void
 
-An **authorization** reserves funds without collecting them; a **capture** settles them later.
+An **authorization** reserves funds without collecting them; a **capture** settles them later; a **void** releases the hold without charging. The Sandbox simulates the **full lifecycle**, including failed captures and voids.
 
-:::danger[Important: capture & void are not yet available on the Ottu Sandbox]
-On the current Sandbox you can create and observe an **authorization**, but the **capture** and **void** legs are **not implemented** — calling them returns HTTP `400` with *"Operation not implemented."* The full authorize → capture lifecycle therefore **cannot be completed on the Sandbox today**. To exercise capture/void end-to-end, use a real gateway's sandbox (e.g. MPGS) that supports them. (See [Limitations](#limitations).)
-:::
+**Prerequisites:**
 
-**What you can test — the authorization leg:**
+- A Sandbox MID with **Operation = `authorize`** — required for both the authorization and the capture.
+- To void, also add **`void`** to the MID's **Operations**.
 
-**Prerequisites:** a Sandbox MID with **Operation = `authorize`**.
+#### Step 1 — Authorize
 
-**Request** — create and pay a session as usual (Scenario 1) using the **Success** card `411111111111111`.
-
-**Outcome.** Instead of `paid`, the transaction settles in the **`authorized`** state — funds reserved, awaiting capture.
+Create and pay a session as in [Scenario 1](#scenario-1--hosted-checkout-full-redirect-flow) with the **Success** card `411111111111111`. Instead of `paid`, the transaction settles in the **`authorized`** state — funds reserved, awaiting capture or void.
 
 ```json title="Webhook / status"
 {
@@ -457,27 +578,72 @@ On the current Sandbox you can create and observe an **authorization**, but the 
 }
 ```
 
-**Attempting to capture or void** (for completeness — both are rejected today):
+#### Step 2 — Capture
+
+Capture settles an authorized transaction through the [Operations API](/developers/operations/). Omit `amount` to capture the full authorized amount, or pass a smaller `amount` for a **partial capture** (repeatable until the authorized amount is exhausted).
+
+<Tabs groupId="sandbox-capture" queryString>
+<TabItem value="full" label="Full capture">
+
+```json title="POST /b/pbl/v2/operation/ — body"
+{
+  "operation": "capture",
+  "session_id": "<authorized_session_id>"
+}
+```
+
+</TabItem>
+<TabItem value="partial" label="Partial capture">
 
 ```json title="POST /b/pbl/v2/operation/ — body"
 {
   "operation": "capture",
   "session_id": "<authorized_session_id>",
-  "amount": "10.000"
+  "amount": "4.000"
 }
 ```
 
-```json title="Response (current Sandbox behavior)"
+</TabItem>
+</Tabs>
+
+A successful capture creates a [child transaction](/developers/reference/payment-states#child-payment-transactions) in the **`paid`** state for the captured amount and returns a `Processed amount - <amount>` message; the parent's captured balance is updated.
+
+**Simulating a failed capture.** Add `sandbox_result` to the operation's `extra` ([Mechanism C](#how-outcome-control-works)). On `failed`/`error` the capture is rejected, **no child transaction is created**, and the parent stays `authorized`:
+
+```json title="POST /b/pbl/v2/operation/ — simulate a declined capture"
 {
-  "result": "failed",
   "operation": "capture",
-  "message": "Operation not implemented."
+  "session_id": "<authorized_session_id>",
+  "extra": { "sandbox_result": "failed" }
 }
 ```
+
+| `extra.sandbox_result` | Capture result | Parent state after |
+| --- | --- | --- |
+| omitted / `success` | child `paid` created | `paid` (full) or still `authorized` (partial) |
+| `failed` | rejected — *"Simulated decline"* | stays `authorized` |
+| `error` | rejected — *"Simulated error"* | stays `authorized` |
+
+#### Step 3 — Void
+
+Void releases an authorization **in full** (the `amount` field is ignored). It requires `void` in the MID's Operations and is only available **before** any capture.
+
+```json title="POST /b/pbl/v2/operation/ — body"
+{
+  "operation": "void",
+  "session_id": "<authorized_session_id>"
+}
+```
+
+A successful void creates a child transaction in the **`voided`** state for the full authorized amount. As with capture, `extra.sandbox_result: "failed"` (or `"error"`) simulates a rejected void that leaves the transaction `authorized`.
+
+:::note[Capture *or* void — not both]
+A transaction can be **either** captured **or** voided. Void is rejected once any capture child exists (*"This transaction is not eligible for void."*), and capture is rejected once the transaction is voided. Both operations also require the MID's default currency to match the transaction currency.
+:::
 
 ---
 
-### Scenario 7 — Testing a Failed Webhook Delivery
+### Scenario 8 — Testing a Failed Webhook Delivery
 
 The ticket lists "failed to post webhook" as an outcome to validate. To set expectations clearly: **this is not a Sandbox-controlled outcome** (there is no `extra` switch for it). Webhook delivery is a **platform-wide** behavior, and the Sandbox is simply a convenient, free way to trigger it.
 
@@ -497,6 +663,39 @@ The ticket lists "failed to post webhook" as an outcome to validate. To set expe
 If you don't supply a `webhook_url` on the Checkout request, **no payment webhook is sent at all** — Ottu just redirects the customer to the result page. Always set `webhook_url` when testing delivery.
 :::
 
+---
+
+### Scenario 9 — Wallet Payments (Apple Pay, Google Pay & Samsung Pay)
+
+The Sandbox simulates all three device wallets. They are initiated the usual way (via the Ottu SDK / native wallet sheet); the Sandbox ignores the wallet payload contents and decides the outcome from the transaction's `extra`.
+
+**Prerequisites:** the wallet you want to test must be **enabled on the Sandbox MID** — add the corresponding Apple Pay / Google Pay / Samsung Pay service configuration in the Dashboard, exactly as you would for a real gateway. (The Sandbox already wires the handlers for all three; the service configuration is what makes a wallet appear as a payment option.)
+
+**Default outcome.** Every wallet payment **succeeds** — the transaction becomes `paid` (or `authorized` if the MID Operation is `authorize`).
+
+**Simulating failure / error.** Wallet payments carry no card and no per-call `extra`, so the outcome is read from the **transaction's `extra`** ([Mechanism C](#how-outcome-control-works)) — set it when you create the session:
+
+```json title="POST /b/checkout/v1/pymt-txn/ — body (simulate a declined wallet payment)"
+{
+  "type": "e_commerce",
+  "pg_codes": ["ottu-sandbox"],
+  "amount": "10.000",
+  "currency_code": "KWD",
+  "webhook_url": "https://yourwebsite.com/webhook",
+  "extra": { "sandbox_result": "failed" }
+}
+```
+
+| `extra.sandbox_result` | Wallet result | Final state |
+| --- | --- | --- |
+| omitted / `success` | payment succeeds | `paid` (or `authorized`) |
+| `failed` | declined — *"Simulated decline"* | `attempted` / `failed` |
+| `error` | gateway error — *"Simulated error"* | `attempted` / `failed` |
+
+:::note[All three wallets behave identically]
+Apple Pay, Google Pay and Samsung Pay share the same simulator logic — only the configured service differs. The same `sandbox_result` value drives whichever wallet the customer uses, and it is read from the transaction's `extra`, not from the wallet payload.
+:::
+
 ## Outcome Reference
 
 A consolidated map of every Sandbox trigger and its result.
@@ -507,27 +706,31 @@ A consolidated map of every Sandbox trigger and its result.
 | Hosted pay page | card `411111111111112` | failed | `attempted` / `failed` |
 | Hosted pay page | card `411111111111113` | error (*Simulated error*) | `attempted` / `failed` |
 | Hosted pay page | any other card | rejected (unknown card) | `attempted` / `canceled` |
+| Tokenization (save card) | card `411111111111111` or `…114/115/116` | success | card saved |
+| Tokenization (save card) | card `411111111111112` / `…113` | failed / error | not saved |
 | Auto-debit / token charge | token `411111111111111` | success | `paid` |
-| Auto-debit / token charge | token `411111111111112` | failed | `400` |
+| Auto-debit / token charge | token `…114` / `…115` / `…116` | failed (issuer decline / expired / insufficient) | `400` |
 | Auto-debit / token charge | any other token | error (*Simulated error*) | `400` |
-| Tokenization (save card) | card `411111111111111` | success | card saved |
-| Tokenization (save card) | card `411111111111112` | failed | not saved |
-| Inquiry (`extra`) | `sandbox_inquiry_result: success` (default) | success | `paid` |
-| Inquiry (`extra`) | `sandbox_inquiry_result: failed` | failed | `failed` |
-| Inquiry (`extra`) | `sandbox_inquiry_result: error` | error | error |
+| Inquiry | `extra.sandbox_inquiry_result: success` (default) | success | `paid` |
+| Inquiry | `extra.sandbox_inquiry_result: failed` | failed | `failed` |
+| Inquiry | `extra.sandbox_inquiry_result: error` | error | error |
+| Capture | default / `extra.sandbox_result: success` | success | child `paid` |
+| Capture | `extra.sandbox_result: failed` / `error` | rejected (*Simulated decline / error*) | stays `authorized` |
+| Void | default / `extra.sandbox_result: success` | success | child `voided` |
+| Void | `extra.sandbox_result: failed` / `error` | rejected (*Simulated decline / error*) | stays `authorized` |
+| Apple / Google / Samsung Pay | default / `extra.sandbox_result: success` | success | `paid` (or `authorized`) |
+| Apple / Google / Samsung Pay | `extra.sandbox_result: failed` / `error` | declined / error | `attempted` / `failed` |
 | Refund | any eligible refund | always success | child `refunded` |
-| Apple Pay / Google Pay | any payload | always success | `paid` |
-| Capture / Void | any request | **not implemented** | `400` |
 
 ## Limitations
 
 For an accurate picture (especially for production planning):
 
-- **Capture & void are not implemented** on the Sandbox — only the authorization leg of auth-and-capture is observable. See [Scenario 6](#scenario-6--authorize--capture).
-- **Refund always succeeds** — the Sandbox cannot simulate a declined or rejected refund.
-- **Apple Pay / Google Pay always succeed** — there is no failure simulation for wallet payments on the Sandbox.
-- **The asynchronous `extra` outcome scheduler runs on non-production only.** On a production-flagged server, sessions created with `sandbox_inquiry_result` + `expires_in_minutes` will not auto-resolve. Use a dev/UAT environment.
-- **`extra` does not drive interactive outcomes** — for hosted checkout, tokenization, and auto-debit the result is set by the card/token, not by `extra`.
+- **Refund always succeeds** — the Sandbox cannot simulate a declined or rejected refund. Capture, void and wallet payments *can* be made to fail (via `sandbox_result`); refund cannot.
+- **No 3-D Secure (3DS) simulation** — the Sandbox does not present a 3DS challenge or redirect; the outcome is decided directly by the card / token / `sandbox_result`.
+- **Mimic only changes the response shape** — selecting a gateway under [Mimic PG Response](#scenario-2--mimic-a-real-gateways-response-shape) does not change the outcome (the card still decides) and the mimicked payload is stored verbatim, not re-processed.
+- **The asynchronous `sandbox_inquiry_result` scheduler runs on non-production only.** On a production-flagged server, sessions created with `sandbox_inquiry_result` + `expires_in_minutes` will not auto-resolve. Use a dev/UAT environment.
+- **`extra` does not drive interactive card outcomes** — for hosted checkout, tokenization, and auto-debit the result is set by the card/token. `extra` (`sandbox_inquiry_result`, `sandbox_result`) only drives the inquiry, capture, void and wallet paths.
 
 ## API Reference
 
@@ -566,14 +769,20 @@ The Sandbox uses the same APIs as any gateway. The interactive schemas:
   <FAQItem question="Why does my Sandbox refund / auto-debit get rejected?">
     The capability is probably disabled on the MID. Enable `refund` in Operations for refunds, `auto_debit_enabled` for auto-debit, and `is_tokenizable` for saving cards. See [Setup](#setup).
   </FAQItem>
+  <FAQItem question="How do I mimic a real gateway's response (e.g. KNET or MPGS) on the Sandbox?">
+    On the hosted Sandbox pay page, pick a gateway under **"Mimic PG Response"** before choosing a test card. The Sandbox then stores a `gateway_response` shaped exactly like that gateway (KNET, MPGS, CyberSource, Ottu PG, or MyFatoorah) returns — surfaced in your webhook's `gateway_response` field — while the **test card still decides** success / failed / error. See [Scenario 2](#scenario-2--mimic-a-real-gateways-response-shape).
+  </FAQItem>
   <FAQItem question="Can I test capture and void on the Sandbox?">
-    Not currently. You can create an **authorization** (set the MID Operation to `authorize`), but capture/void return *"Operation not implemented."* Use a real gateway's sandbox for the full capture lifecycle. See [Limitations](#limitations).
+    Yes — the full authorize → capture → void lifecycle is simulated. Set the MID Operation to `authorize` (and add `void` to Operations for void), authorize a payment, then capture or void it. To simulate a *declined* capture/void, add `{"sandbox_result": "failed"}` (or `"error"`) to the operation request's `extra`. See [Scenario 7](#scenario-7--authorize-capture--void).
+  </FAQItem>
+  <FAQItem question="How do I test Apple Pay, Google Pay or Samsung Pay (and make one fail)?">
+    Enable the wallet's service on the Sandbox MID (as for any gateway) and pay through it — it succeeds by default. To simulate a decline/error, create the session with `{"sandbox_result": "failed"}` (or `"error"`) in the transaction's `extra`. See [Scenario 9](#scenario-9--wallet-payments-apple-pay-google-pay--samsung-pay).
   </FAQItem>
   <FAQItem question="My predefined `extra` outcome never applied. Why?">
-    The automatic inquiry scheduler runs on **non-production** environments only, and the session must carry **both** `sandbox_inquiry_result` and `expires_in_minutes`. On a production-flagged server it does nothing.
+    The automatic inquiry scheduler runs on **non-production** environments only, and the session must carry **both** `sandbox_inquiry_result` and `expires_in_minutes`. On a production-flagged server it does nothing. (Note: capture/void/wallet failures use a different key, `sandbox_result`, which has no scheduler and is not environment-gated.)
   </FAQItem>
   <FAQItem question="Can I simulate a failed recurring (MIT) charge?">
-    Indirectly. Because an MIT requires a prior successful CIT (established with the Success card), the saved token always succeeds. To rehearse a failed recurring charge, use the asynchronous `extra` mechanism with `sandbox_inquiry_result: "failed"`.
+    Yes. Run the first (CIT) payment with one of the **MIT-failure cards** — `411111111111114` (issuer decline), `411111111111115` (expired), or `411111111111116` (insufficient funds). They enroll and save like the Success card, but the saved token **declines** when later charged. See [Scenario 5](#scenario-5--auto-debit-with-a-saved-token-mit).
   </FAQItem>
 </FAQ>
 
