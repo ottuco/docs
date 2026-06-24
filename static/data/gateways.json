@@ -2163,10 +2163,7 @@
       "Visa",
       "Mastercard",
       "American Express",
-      "Maestro",
-      "JCB",
-      "UnionPay",
-      "mada"
+      "UnionPay"
     ],
     "digitalWallets": [
       "Apple Pay",
@@ -2275,15 +2272,6 @@
         "note": "3DS"
       },
       {
-        "cardNumber": "5641 8209 0009 7002",
-        "expiry": "Any future",
-        "cvv": "123",
-        "brand": "Maestro",
-        "status": "success",
-        "statusLabel": "Success",
-        "note": "3DS"
-      },
-      {
         "cardNumber": "3714 496353 98431",
         "expiry": "Any future",
         "cvv": "1234",
@@ -2298,23 +2286,6 @@
         "brand": "American Express",
         "status": "success",
         "statusLabel": "Success"
-      },
-      {
-        "cardNumber": "3566 0020 2014 0006",
-        "expiry": "Any future",
-        "cvv": "123",
-        "brand": "JCB",
-        "status": "success",
-        "statusLabel": "Success"
-      },
-      {
-        "cardNumber": "4464 0400 0000 0007",
-        "expiry": "Any future",
-        "cvv": "123",
-        "brand": "mada",
-        "status": "success",
-        "statusLabel": "Success",
-        "note": "3DS"
       },
       {
         "cardNumber": "4000 0000 0000 0002",
