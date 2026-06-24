@@ -252,7 +252,6 @@ const config: Config = {
         excludeRoutes: [
           "/404*",
           "/search*",
-          "/business/*",
           "/developers/reference/*",
           "/overview/changelog*",
         ],
