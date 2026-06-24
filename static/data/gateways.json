@@ -2150,9 +2150,7 @@
     ],
     "currencies": [
       "AED",
-      "SAR",
-      "JOD",
-      "BHD"
+      "SAR"
     ],
     "inquiryMinutes": 8,
     "operations": [
