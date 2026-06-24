@@ -2152,10 +2152,7 @@
       "AED",
       "SAR",
       "JOD",
-      "BHD",
-      "USD",
-      "GBP",
-      "EUR"
+      "BHD"
     ],
     "inquiryMinutes": 8,
     "operations": [
@@ -2177,7 +2174,6 @@
     ],
     "digitalWallets": [
       "Apple Pay",
-      "Google Pay",
       "Samsung Pay",
       "PayPal",
       "Tabby",
