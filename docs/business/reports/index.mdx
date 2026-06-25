@@ -35,3 +35,44 @@ Every export produces a **CSV file** you can open in Excel, Google Sheets, or an
 :::tip
 If you need reports delivered automatically on a schedule — for example, a daily CSV emailed to your finance team — see [Transaction Report Configuration](/business/settings/transaction-reports) under Settings.
 :::
+
+## Generate a Report
+
+The most common way to generate a report is from the **Transactions** page. You apply filters to narrow the data to what you need, then click **Export** to queue the file.
+
+<StepGuide steps={[
+  {
+    title: "Open the Transactions page",
+    description: <>From the Ottu Dashboard, go to <strong>Payment Request</strong> (a <a href="/business/plugins">plugin</a> in the left sidebar) and click <strong>Transactions</strong>. All payment transactions for your account are listed here.</>,
+    image: "/img/business/reports/transactions-01-open.png",
+    imageAlt: "Ottu Dashboard with Transactions page open under Payment Request plugin",
+  },
+  {
+    title: "Apply filters (optional)",
+    description: <>Use the <strong>Filter</strong> button to narrow the data before exporting. You can filter by date range, payment status, payment gateway, amount, and more. Filtering first means your exported file contains only the rows you need — making it faster to generate and easier to work with.<br /><br />Click <strong>Search</strong> after setting your filters to preview the results.</>,
+    image: "/img/business/reports/transactions-02-filter.png",
+    imageAlt: "Filter panel open on the Transactions page with date range and status selected",
+  },
+  {
+    title: "Click Export",
+    description: <>Click the <strong>Export</strong> button (top-right of the transactions table). Ottu queues the report for generation. You will see a confirmation message — the file is not ready instantly.</>,
+    image: "/img/business/reports/transactions-03-export.png",
+    imageAlt: "Export button highlighted on the Transactions page toolbar",
+  },
+  {
+    title: "Wait for the file to be ready",
+    description: <>The report is generated in the background. For small exports (a few hundred rows) this takes seconds. For large exports (thousands of rows), it may take a minute or two. You do not need to stay on this page.</>,
+    image: "/img/business/reports/transactions-04-queued.png",
+    imageAlt: "Confirmation notification showing the report has been queued for generation",
+  },
+  {
+    title: "Download from Generated Reports",
+    description: <>Once ready, your file appears in <strong>Generated Reports</strong>. See <a href="#download-your-reports">Download Your Reports</a> below for the full walkthrough.</>,
+    image: "/img/business/reports/transactions-05-ready.png",
+    imageAlt: "Generated Reports page showing the newly created report file ready to download",
+  },
+]} />
+
+:::warning
+Exports include **all columns currently visible in your transactions table**. If you have added custom columns via Table Headers, those columns will appear in the export too. To control which columns are exported, adjust your table headers before clicking Export. See [Transaction Insights](/business/payment-management/transaction-insights) for how to manage table columns.
+:::
