@@ -791,14 +791,14 @@ The SDK supports multiple instances of onsite checkout payments. Therefore, for 
 No fees are displayed for onsite checkout instances. This is due to the support for multiple multi-card (omni PG) configurations. The presence of multiple payment icons is used to indicate this multi-card feature.
 :::
 
-## Ottu Wallet
+## M-Wallet
 
-When a customer has wallet credit in the session currency, the SDK renders a **Wallet** payment method automatically — no init config is required. Pass the `customer_id` when creating the session, and either include `'wallet'` in `formsOfPayment` or omit `formsOfPayment` to show all available methods. Wallet is hidden for authorize-only sessions.
+When a customer has M-Wallet credit in the session currency, the SDK renders a **Wallet** payment method automatically — no init config is required. Pass the `customer_id` when creating the session, and either include `'wallet'` in `formsOfPayment` or omit `formsOfPayment` to show all available methods. M-Wallet is hidden for authorize-only sessions.
 
-For full balance behavior, partial-payment rules, and the four-hour reservation auto-release, see the [Wallet section](/developers/payments/wallet/).
+For full balance behavior, partial-payment rules, and the four-hour reservation auto-release, see the [M-Wallet section](/developers/payments/wallet/).
 
-:::warning Cross-currency wallet payments are not supported
-The wallet only appears when its currency matches the order currency.
+:::warning Cross-currency M-Wallet payments are not supported
+The M-Wallet only appears when its currency matches the order currency.
 :::
 
 <StepGuide steps={[
@@ -810,7 +810,7 @@ The wallet only appears when its currency matches the order currency.
   },
   {
     title: "Full coverage: balance ≥ amount",
-    description: <>Customer selects Wallet → SDK shows "10.000 KWD will be applied" → submits → only the session amount is deducted. Surplus stays in the wallet.</>,
+    description: <>Customer selects Wallet → SDK shows "10.000 KWD will be applied" → submits → only the session amount is deducted. Surplus stays in the M-Wallet.</>,
     image: "/img/developers/wallet/sdk-02-full-coverage-flutter.png",
     imageAlt: "Flutter wallet selected with full coverage",
   },
@@ -821,14 +821,14 @@ The wallet only appears when its currency matches the order currency.
     imageAlt: "Flutter wallet plus card combined for partial coverage",
   },
   {
-    title: "Authorize-only: wallet hidden",
-    description: <>When the session is configured for authorization-only, wallet is not offered. Wallet supports immediate-capture flows only.</>,
+    title: "Authorize-only: M-Wallet hidden",
+    description: <>When the session is configured for authorization-only, M-Wallet is not offered. M-Wallet supports immediate-capture flows only.</>,
     image: "/img/developers/wallet/sdk-04-authorize-hidden-flutter.png",
     imageAlt: "Flutter authorize-only checkout without wallet method",
   },
   {
     title: "Try it",
-    description: <>The live demo seeds a fresh wallet for a generated customer_id and launches the SDK with wallet enabled. Use the demo on the <a href="/developers/payments/wallet/">Wallet overview page</a>.</>,
+    description: <>The live demo seeds a fresh M-Wallet for a generated customer_id and launches the SDK with M-Wallet enabled. Use the demo on the <a href="/developers/payments/wallet/">M-Wallet overview page</a>.</>,
     image: "/img/developers/wallet/sdk-05-live-demo.png",
     imageAlt: "Wallet live demo entry point",
   },

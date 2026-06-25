@@ -12,7 +12,7 @@ operations:
 
       Use `session_id` or `order_no` to identify the target transaction. For `refund` and `capture`, specify `amount` (defaults to full/remaining amount). For `void`, always applies to the full amount.
 
-      Refunds can target the **original payment gateway** (default) or the **customer's wallet** by setting `destination: "wallet"`. See [Refund to Wallet]({{apiBaseUrl}}/operations#refund-to-wallet) and the [Wallet integration page]({{apiBaseUrl}}/payments/wallet/) for full behavior.
+      Refunds can target the **original payment gateway** (default) or the **customer's wallet** by setting `destination: "wallet"`. See [Refund to Wallet]({{apiBaseUrl}}/operations#refund-to-m-wallet) and the [Wallet integration page]({{apiBaseUrl}}/payments/wallet/) for full behavior.
 
       Include `Tracking-Key` header on external operations to prevent duplicates and retrieve status.
 

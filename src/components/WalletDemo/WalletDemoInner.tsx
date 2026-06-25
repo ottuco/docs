@@ -63,8 +63,8 @@ function reducer(state: State, action: Action): State {
 }
 
 const STEPS = [
-  "Fetching wallet-capable payment methods...",
-  "Seeding wallet balance...",
+  "Fetching M-Wallet-capable payment methods...",
+  "Seeding M-Wallet balance...",
   "Creating payment session...",
   "Loading Checkout SDK...",
 ];
@@ -111,7 +111,7 @@ export default function WalletDemoInner() {
       if (pgCodes.length === 0) {
         dispatch({
           type: "ERROR",
-          message: `No wallet-capable gateways for ${WALLET_DEMO.currency} on the active merchant. Enable a PG with payment_services: ["wallet"] tagged "demo".`,
+          message: `No M-Wallet-capable gateways for ${WALLET_DEMO.currency} on the active merchant. Enable a PG with payment_services: ["wallet"] tagged "demo".`,
         });
         return;
       }
@@ -168,9 +168,9 @@ export default function WalletDemoInner() {
     <div className={styles.container}>
       {state.status === "idle" && (
         <div className={styles.idleCard}>
-          <h3 className={styles.idleTitle}>Try Wallet at Checkout</h3>
+          <h3 className={styles.idleTitle}>Try M-Wallet at Checkout</h3>
           <p className={styles.idleDescription}>
-            Seed a fresh customer's wallet through the docs backend, then pay with it in
+            Seed a fresh customer's M-Wallet through the docs backend, then pay with it in
             the embedded SDK. No real charges.
           </p>
           <button className={styles.launchButton} onClick={launch}>
@@ -186,7 +186,7 @@ export default function WalletDemoInner() {
           </span>
           <h3 className={styles.completeTitle}>Payment Complete</h3>
           <p className={styles.completeDescription}>
-            The wallet balance was applied to the session. In a real integration the
+            The M-Wallet balance was applied to the session. In a real integration the
             customer would be redirected to your confirmation page and your server would
             receive a webhook notification.
           </p>

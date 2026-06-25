@@ -11,7 +11,7 @@ operations:
     description_replace: |
       Returns the customer's wallet accounts — one per currency — with confirmed and available balances.
 
-      Accounts are created lazily: one exists only after the first credit lands in that currency (a [refund to wallet]({{apiBaseUrl}}/operations/#refund-to-wallet), a manual adjustment, a promo, or a goodwill credit). A customer who has never received a wallet credit in a given currency has no account in that currency, and none is returned — `count: 0` with an empty `results` array is a valid response.
+      Accounts are created lazily: one exists only after the first credit lands in that currency (a [refund to wallet]({{apiBaseUrl}}/operations/#refund-to-m-wallet), a manual adjustment, a promo, or a goodwill credit). A customer who has never received a wallet credit in a given currency has no account in that currency, and none is returned — `count: 0` with an empty `results` array is a valid response.
 
       `balance` reflects confirmed funds only; `available_balance` is `balance` minus the amounts held by in-flight checkout reservations, and is what the customer can actually spend right now. Results are cursor-paginated — pass the `pagination.cursor` value from the `next` object to fetch the following page.
 
@@ -33,4 +33,4 @@ operations:
     description_replace: |
       Returns a single wallet operation by its `operation_id`, together with every ledger entry it produced. An operation is the atomic unit of work the wallet performs — a reservation, a refund, a deduction, an adjustment, or a reversal — and rolls up one or more ledger entries under one identifier.
 
-      Use this when you have an operation ID from an earlier response — for example the operation returned by a [refund to wallet]({{apiBaseUrl}}/operations/#refund-to-wallet) — and you want the canonical record for audit or reconciliation. A reservation operation, for instance, produces a `reserve` entry that is later closed by a `debit_payment` entry from the deduction operation; both are returned here.
+      Use this when you have an operation ID from an earlier response — for example the operation returned by a [refund to wallet]({{apiBaseUrl}}/operations/#refund-to-m-wallet) — and you want the canonical record for audit or reconciliation. A reservation operation, for instance, produces a `reserve` entry that is later closed by a `debit_payment` entry from the deduction operation; both are returned here.

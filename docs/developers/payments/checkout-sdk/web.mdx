@@ -141,7 +141,7 @@ The available options for `formsOfPayment` are:
 - `stcPay`: A method where customers enter their mobile number and provide an OTP send to their mobile number to complete their payment.
 - `urPay`: A method where customers enter their mobile number and provide an OTP send to their mobile number to complete their payment.
 - `jazz`: Renders Ottu's onsite card form inline using the Jazz SDK, so customers enter their card details directly on the merchant page instead of being redirected. See [Onsite Checkout](#onsite-checkout) for setup details.
-- `wallet`: The Ottu Wallet payment method that allows customers to spend their stored balance at checkout.
+- `wallet`: The M-Wallet payment method that allows customers to spend their stored balance at checkout.
 
 #### displayMode _`string`_
 
@@ -932,14 +932,14 @@ Checkout.init({
 
 <figure><img src="/img/checkout-sdk/urpay%20Button.png" alt="urpay button in Web SDK" /><figcaption></figcaption></figure>
 
-### Ottu Wallet
+### M-Wallet
 
-When a customer has wallet credit in the session currency, the SDK renders a **Wallet** payment method automatically — no init config is required. Pass the `customer_id` when creating the session, and either include `'wallet'` in `formsOfPayment` or omit `formsOfPayment` to show all available methods. Wallet is hidden for authorize-only sessions.
+When a customer has M-Wallet credit in the session currency, the SDK renders a **Wallet** payment method automatically — no init config is required. Pass the `customer_id` when creating the session, and either include `'wallet'` in `formsOfPayment` or omit `formsOfPayment` to show all available methods. M-Wallet is hidden for authorize-only sessions.
 
-For full balance behavior, partial-payment rules, and the four-hour reservation auto-release, see the [Wallet section](/developers/payments/wallet/).
+For full balance behavior, partial-payment rules, and the four-hour reservation auto-release, see the [M-Wallet section](/developers/payments/wallet/).
 
-:::warning Cross-currency wallet payments are not supported
-The wallet only appears when its currency matches the order currency.
+:::warning Cross-currency M-Wallet payments are not supported
+The M-Wallet only appears when its currency matches the order currency.
 :::
 
 <StepGuide steps={developerWalletScenariosSteps} />

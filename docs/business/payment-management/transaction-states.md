@@ -52,7 +52,7 @@ Child transactions are created when a merchant performs an operation (capture, r
 | Child State         | Parent State      | Description                                                                                                              |
 | ------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | **Paid**            | Authorized        | A portion or all of the authorized amount has been captured. A child transaction record is created to track the capture. |
-| **Refunded**        | Authorized / Paid | A partial or full refund has been returned to the customer (to the original gateway or to the customer's [wallet](/business/wallet#refund-to-wallet)). |
+| **Refunded**        | Authorized / Paid | A partial or full refund has been returned to the customer (to the original gateway or to the customer's [M-Wallet](/business/wallet#refund-to-m-wallet)). |
 | **Refund-queued**   | Authorized / Paid | The refund is awaiting bank approval.                                                                                    |
 | **Refund-rejected** | Authorized / Paid | The bank did not approve the refund.                                                                                     |
 | **Voided**          | Authorized        | The authorized amount has been reversed. The full amount (including any fee) is returned to the customer.                |
