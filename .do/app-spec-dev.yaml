@@ -47,6 +47,13 @@ services:
     http_port: 3456
     health_check:
       http_path: /health
+      # Bare /health used DO defaults (1s timeout, 0s initial delay), which killed
+      # the instance during cold start (exit 128) and failed the whole deploy.
+      initial_delay_seconds: 30
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 9
     instance_size_slug: apps-s-1vcpu-0.5gb
     instance_count: 1
     envs:
@@ -55,6 +62,10 @@ services:
       - key: PORT
         value: "3456"
       - key: KSA_KEYCLOAK_CLIENT_SECRET
+        scope: RUN_TIME
+        type: SECRET
+        value: ""
+      - key: SANDBOX_KEYCLOAK_CLIENT_SECRET
         scope: RUN_TIME
         type: SECRET
         value: ""
