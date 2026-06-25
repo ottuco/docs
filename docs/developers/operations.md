@@ -121,7 +121,7 @@ Returns funds to the customer. Applicable to `paid` or captured transactions. Fo
 
 ##### Refund to M-Wallet {#refund-to-wallet}
 
-Instead of returning funds through the original payment gateway, you can refund a payment directly to the customer's **M-Wallet** balance. The customer can then spend that credit at any future Ottu checkout in the same currency. See [M-Wallet](/developers/payments/wallet/) for the full feature overview.
+Instead of returning funds through the original payment gateway, you can refund a payment directly to the customer's **wallet** balance. The customer can then spend that credit at any future Ottu checkout in the same currency. See [M-Wallet](/developers/payments/wallet/) for the full feature overview.
 
 **When to use:**
 
@@ -132,27 +132,27 @@ Instead of returning funds through the original payment gateway, you can refund 
 Set `destination: "wallet"` on the refund operation request. The `destination` field defaults to `"pg"` when omitted, preserving the original refund behavior. See the [API Reference](#api-reference) below for the full request schema and interactive try-it-out.
 
 :::tip Use `Tracking-Key` for idempotency
-M-Wallet credits are immutable — a duplicate refund-to-M-Wallet call creates a second uneditable credit entry (the gateway path fails on duplicates; the M-Wallet path does not). Always include the `Tracking-Key` header so retries deduplicate. See [the Guide above](#guide) for the full idempotency contract.
+Wallet credits are immutable — a duplicate refund-to-wallet call creates a second uneditable credit entry (the gateway path fails on duplicates; the wallet path does not). Always include the `Tracking-Key` header so retries deduplicate. See [the Guide above](#guide) for the full idempotency contract.
 :::
 
 **Behavior:**
 
-- An M-Wallet account is created automatically if one doesn't exist for the (merchant, customer, currency) combination.
+- A wallet account is created automatically if one doesn't exist for the (merchant, customer, currency) combination.
 - The credit is recorded as an immutable ledger entry — corrections require an opposing reversal entry.
 - The original payment session is linked to the credit entry for audit.
-- No PII is stored on the M-Wallet service.
-- Disputes against the original payment after a refund-to-M-Wallet can be resolved manually — contact [csd@ottu.com](mailto:csd@ottu.com) to raise a reversal.
+- No PII is stored on the wallet service.
+- Disputes against the original payment after a refund-to-wallet can be resolved manually — contact [csd@ottu.com](mailto:csd@ottu.com) to raise a reversal.
 
 **Errors:**
 
 | HTTP | Code | When |
 |------|------|------|
-| 400 | `account_inactive` | M-Wallet account is suspended |
-| 400 | `policy_violation` | Refund amount violates an M-Wallet policy rule |
+| 400 | `account_inactive` | Wallet account is suspended |
+| 400 | `policy_violation` | Refund amount violates a wallet policy rule |
 | 409 | `idempotency_conflict` | Same Idempotency-Key reused with different payload |
 | 422 | `validation_error` | Schema validation failed on the refund payload |
 
-For the full M-Wallet integration, including the read APIs and SDK behavior, see [M-Wallet](/developers/payments/wallet/). For the merchant dashboard workflow, see [Refund to M-Wallet (business docs)](/business/wallet#refund-to-wallet).
+For the full wallet integration, including the read APIs and SDK behavior, see [M-Wallet](/developers/payments/wallet/). For the merchant dashboard workflow, see [Refund to M-Wallet (business docs)](/business/wallet#refund-to-wallet).
 
 ##### Void {#void}
 

@@ -18,8 +18,8 @@ export const businessWalletScenariosSteps: Step[] = [
     title: "Full coverage",
     description: (
       <>
-        If the M-Wallet balance is enough to cover the order, only the order
-        amount is deducted. Any surplus stays in the M-Wallet for the next order.
+        If the wallet balance is enough to cover the order, only the order
+        amount is deducted. Any surplus stays in the wallet for the next order.
       </>
     ),
     image: "/img/developers/wallet/full_coverage.png",
@@ -41,7 +41,7 @@ export const businessWalletScenariosSteps: Step[] = [
     title: "Reservation while paying",
     description: (
       <>
-        M-Wallet funds are reserved the moment the customer turns the Wallet
+        Wallet funds are reserved the moment the customer turns the Wallet
         toggle <strong>ON</strong> — they cannot be spent twice in parallel sessions.
       </>
     ),
@@ -82,7 +82,7 @@ export const developerWalletScenariosSteps: Step[] = [
       <>
         Customer selects Wallet → SDK shows "100.00 USD will be applied" →
         submits → only the session amount is deducted. Surplus stays in the
-        M-Wallet.
+        wallet.
       </>
     ),
     image: "/img/developers/wallet/full_coverage.png",
@@ -101,11 +101,11 @@ export const developerWalletScenariosSteps: Step[] = [
     imageAlt: "Wallet plus card combined for partial coverage",
   },
   {
-    title: "Authorize-only: M-Wallet hidden",
+    title: "Authorize-only: wallet hidden",
     description: (
       <>
-        When the session is configured for authorization-only, M-Wallet is not
-        offered. M-Wallet supports immediate-capture flows only.
+        When the session is configured for authorization-only, wallet is not
+        offered. Wallet supports immediate-capture flows only.
       </>
     ),
     image: "/img/developers/wallet/no_wallet_01.png",
@@ -115,9 +115,9 @@ export const developerWalletScenariosSteps: Step[] = [
     title: "Try it",
     description: (
       <>
-        The live demo seeds a fresh M-Wallet for a generated customer_id and
-        launches the SDK with M-Wallet enabled. Use the demo on the{" "}
-        <a href="/developers/payments/wallet/#live-demo">M-Wallet overview page</a>.
+        The live demo seeds a fresh wallet for a generated customer_id and
+        launches the SDK with wallet enabled. Use the demo on the{" "}
+        <a href="/developers/payments/wallet/#live-demo">Wallet overview page</a>.
       </>
     ),
   },

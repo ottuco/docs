@@ -1,6 +1,6 @@
 ---
 title: M-Wallet
-description: Customer M-Wallet credits — refund, store, and spend balances at checkout.
+description: Customer wallet credits — refund, store, and spend balances at checkout.
 toc_min_heading_level: 2
 toc_max_heading_level: 3
 hide_table_of_contents: true
@@ -19,9 +19,9 @@ import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
 # M-Wallet
 
-M-Wallet (merchant wallet) lets you refund customer payments to a stored balance keyed by merchant, customer, and currency, then let the customer spend that credit at any future Ottu checkout in the same currency. No PII is stored on the M-Wallet service.
+M-Wallet (merchant wallet) lets you refund customer payments to a stored balance keyed by merchant, customer, and currency, then let the customer spend that credit at any future Ottu checkout in the same currency. No PII is stored on the wallet service.
 
-Authentication for merchant-facing endpoints follows the standard [Ottu API key](/developers/getting-started/authentication) flow — the same key you use for the [Checkout API](../checkout-api). Service-to-service auth between Ottu Connect and the M-Wallet service uses OAuth 2.0 internally and is invisible to merchants.
+Authentication for merchant-facing endpoints follows the standard [Ottu API key](/developers/getting-started/authentication) flow — the same key you use for the [Checkout API](../checkout-api). Service-to-service auth between Ottu Connect and the wallet service uses OAuth 2.0 internally and is invisible to merchants.
 
 :::note Base URL
 Every API call in this guide targets <code>{OTTU_CONNECT_BASE_URL}</code>. Swap in your own merchant domain when you integrate.
@@ -35,8 +35,8 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 - Refunding without returning funds to the original card or gateway — loyalty, goodwill, or voucher use cases.
 - Letting customers carry over balance between sessions.
-- Reducing payment-gateway fees by spending M-Wallet credit before charging a card.
-- Multi-currency merchants — each currency maintains its own M-Wallet account.
+- Reducing payment-gateway fees by spending wallet credit before charging a card.
+- Multi-currency merchants — each currency maintains its own wallet account.
 
 ## Guide
 
@@ -44,27 +44,27 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 <WalletFlowDiagram />
 
-M-Wallet credit is created when a merchant refunds with `destination: "wallet"` — see [Refund to M-Wallet](../../operations#refund-to-wallet). Once a customer has positive balance in the session currency, the developer journey to spend it is:
+Wallet credit is created when a merchant refunds with `destination: "wallet"` — see [Refund to Wallet](../../operations#refund-to-wallet). Once a customer has positive balance in the session currency, the developer journey to spend it is:
 
-1. **Filter the payment methods** — call the [Payment Methods API](../payment-methods) with `payment_services: ["wallet"]` to get the M-Wallet-capable `pg_codes`.
-2. **Create a Checkout session** — call the [Checkout API](../checkout-api) with those `pg_codes` and the `customer_id`. The `customer_id` is what binds the session to that customer's M-Wallet account.
-3. **Initialize the Checkout SDK** — the SDK fetches the M-Wallet balance from Ottu Connect and renders "Wallet (X.XXX CCC)" alongside the other payment methods.
-4. **Customer applies M-Wallet on submit** — Ottu Connect reserves the required amount (or the full balance, whichever is lower). Any shortfall is charged through the selected gateway.
+1. **Filter the payment methods** — call the [Payment Methods API](../payment-methods) with `payment_services: ["wallet"]` to get the wallet-capable `pg_codes`.
+2. **Create a Checkout session** — call the [Checkout API](../checkout-api) with those `pg_codes` and the `customer_id`. The `customer_id` is what binds the session to that customer's wallet account.
+3. **Initialize the Checkout SDK** — the SDK fetches the wallet balance from Ottu Connect and renders "Wallet (X.XXX CCC)" alongside the other payment methods.
+4. **Customer applies wallet on submit** — Ottu Connect reserves the required amount (or the full balance, whichever is lower). Any shortfall is charged through the selected gateway.
 5. **Commit or release** — on success the reservation commits to a debit entry; on abandon, cancel, or failure it auto-releases after about four hours.
 
 ### Live Demo
 
-Try the M-Wallet flow below. The demo discovers an M-Wallet-capable gateway, seeds a fresh customer's M-Wallet through the docs backend, creates a Checkout session, and mounts the SDK so you can pay with M-Wallet. Screenshots of the merchant-side flow are on the [business M-Wallet pages](/business/wallet/).
+Try the wallet flow below. The demo discovers a wallet-capable gateway, seeds a fresh customer's wallet through the docs backend, creates a Checkout session, and mounts the SDK so you can pay with wallet. Screenshots of the merchant-side flow are on the [business wallet pages](/business/wallet/).
 
 <WalletDemo />
 
 ### Step-by-Step
 
-#### 1. List the M-Wallet-capable payment gateways {#1-list-the-wallet-capable-payment-gateways}
+#### 1. List the wallet-capable payment gateways
 
-Call the [Payment Methods API](../payment-methods) (`POST /b/pbl/v2/payment-methods/`) with `payment_services: ["wallet"]` to filter the gateway list to those that support M-Wallet payments. Use these `pg_codes` when creating the Checkout session.
+Call the [Payment Methods API](../payment-methods) (`POST /b/pbl/v2/payment-methods/`) with `payment_services: ["wallet"]` to filter the gateway list to those that support wallet payments. Use these `pg_codes` when creating the Checkout session.
 
-<CodeBlock language="bash" title="Filter payment methods to M-Wallet-capable PGs">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/payment-methods/' \\
+<CodeBlock language="bash" title="Filter payment methods to wallet-capable PGs">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/payment-methods/' \\
   --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
   --header 'Content-Type: application/json' \\
   --data '{
@@ -75,7 +75,7 @@ Call the [Payment Methods API](../payment-methods) (`POST /b/pbl/v2/payment-meth
     "tags": ["demo"]
   }'`}</CodeBlock>
 
-```json title="Example response (M-Wallet-enabled PG)"
+```json title="Example response (wallet-enabled PG)"
 {
   "customer_payment_methods": [],
   "payment_methods": [
@@ -97,16 +97,16 @@ Call the [Payment Methods API](../payment-methods) (`POST /b/pbl/v2/payment-meth
 ```
 
 :::note `customer_id` filter
-You don't need `customer_id` to discover M-Wallet-capable gateways generically. If you do pass `customer_id` and that customer has an M-Wallet enabled in the session currency, the M-Wallet entry will be returned alongside the standard payment methods. To narrow the gateway list to M-Wallet-capable PGs for later refunds, use `payment_services: ["wallet"]` as shown above.
+You don't need `customer_id` to discover wallet-capable gateways generically. If you do pass `customer_id` and that customer has a wallet enabled in the session currency, the wallet entry will be returned alongside the standard payment methods. To narrow the gateway list to wallet-capable PGs for later refunds, use `payment_services: ["wallet"]` as shown above.
 :::
 
 For the full request/response reference, headers, error codes, and supported filters, see the [Payment Methods API page](../payment-methods).
 
-#### 2. Create a Checkout session with the M-Wallet-capable PGs {#2-create-a-checkout-session-with-the-wallet-capable-pgs}
+#### 2. Create a Checkout session with the wallet-capable PGs
 
-Call the [Checkout API](../checkout-api) with the `pg_codes` returned in step 1, plus the `customer_id` to enable the customer's M-Wallet on this session. The response includes a `session_id` that you pass to the SDK in the next step.
+Call the [Checkout API](../checkout-api) with the `pg_codes` returned in step 1, plus the `customer_id` to enable the customer's wallet on this session. The response includes a `session_id` that you pass to the SDK in the next step.
 
-<CodeBlock language="bash" title="Create Checkout session with M-Wallet enabled">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/' \\
+<CodeBlock language="bash" title="Create Checkout session with wallet enabled">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/' \\
   --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
   --header 'Content-Type: application/json' \\
   --data '{
@@ -126,7 +126,7 @@ Call the [Checkout API](../checkout-api) with the `pg_codes` returned in step 1,
   "expiration_time": "00:30:00"
 }`}</CodeBlock>
 
-The `session_id` returned here is what step 3 passes into `Checkout.init`. The `customer_id` is what links the session to that customer's M-Wallet account — M-Wallet appears in the SDK only when (a) the session has a `customer_id` and (b) the M-Wallet account for `(merchant, customer_id, currency)` has positive balance.
+The `session_id` returned here is what step 3 passes into `Checkout.init`. The `customer_id` is what links the session to that customer's wallet account — wallet appears in the SDK only when (a) the session has a `customer_id` and (b) the wallet account for `(merchant, customer_id, currency)` has positive balance.
 
 :::warning Only one wallet per provider may be available per checkout
 When you list several payment gateways in `pg_codes`, Ottu checks the wallets behind them. If two or more of the selected gateways each carry a wallet from the **same wallet provider** that can be used for the transaction's currency, the checkout creation request is rejected with **HTTP 400** — the checkout page could not unambiguously show which wallet balance to apply. Choose your `pg_codes` so that at most one wallet per provider is available for the transaction.
@@ -164,7 +164,7 @@ Add a mount point to your page — the SDK looks for an element matching `select
 
 Then initialize the SDK with the `session_id` returned by step 2:
 
-<CodeBlock language="javascript" title="Checkout SDK init with M-Wallet enabled">{`Checkout.init({
+<CodeBlock language="javascript" title="Checkout SDK init with wallet enabled">{`Checkout.init({
   selector: "checkout",
   merchant_id: "${OTTU_CONNECT_BASE_URL.replace("https://", "")}", // use your merchant id
   apiKey: "YOUR_API_PUBLIC_KEY",
@@ -172,29 +172,29 @@ Then initialize the SDK with the `session_id` returned by step 2:
   formsOfPayment: ["wallet", "ottu-sandbox"], // or omit to show all
 });`}</CodeBlock>
 
-#### 4. Customer applies M-Wallet credit at checkout {#4-customer-applies-wallet-credit-at-checkout}
+#### 4. Customer applies wallet credit at checkout
 
-The SDK reserves the required amount (or the full balance, whichever is lower). If the session amount exceeds the M-Wallet balance, the customer is prompted to pick a second method for the remainder. On submit, all reservations confirm together. On success the M-Wallet entry commits; on cancel, error, or four-hour timeout it auto-releases.
+The SDK reserves the required amount (or the full balance, whichever is lower). If the session amount exceeds the wallet balance, the customer is prompted to pick a second method for the remainder. On submit, all reservations confirm together. On success the wallet entry commits; on cancel, error, or four-hour timeout it auto-releases.
 
 <StepGuide steps={developerWalletScenariosSteps} />
 
-#### 5. (Optional) Read M-Wallet state from your backend {#5-optional-read-wallet-state-from-your-backend}
+#### 5. (Optional) Read wallet state from your backend
 
-Reading M-Wallet state from your backend is optional — the same balance, ledger, and operation views are available in the [Ottu dashboard](/business/wallet/). Use the read APIs only if you want to surface M-Wallet operations to your end customers in your own UI. See the [API Reference](#api-reference) section below.
+Reading wallet state from your backend is optional — the same balance, ledger, and operation views are available in the [Ottu dashboard](/business/wallet/). Use the read APIs only if you want to surface wallet operations to your end customers in your own UI. See the [API Reference](#api-reference) section below.
 
 ### Use Cases
 
-#### Partial payments (M-Wallet plus another method) {#partial-payments-wallet-plus-another-method}
+#### Partial payments (wallet plus another method)
 
 Three balance-versus-amount cases:
 
-| M-Wallet balance vs amount | Behavior |
+| Wallet balance vs amount | Behavior |
 |---|---|
-| Balance ≥ amount | Only `amount` is deducted. Surplus stays in the M-Wallet. |
-| Balance == amount | M-Wallet fully covers; balance becomes 0. |
+| Balance ≥ amount | Only `amount` is deducted. Surplus stays in the wallet. |
+| Balance == amount | Wallet fully covers; balance becomes 0. |
 | Balance &lt; amount | Full balance is consumed; customer pays the difference with another method. |
 
-Customers cannot choose how much M-Wallet credit to apply — Ottu computes it automatically.
+Customers cannot choose how much wallet credit to apply — Ottu computes it automatically.
 
 #### Reservation lifecycle
 
@@ -202,25 +202,25 @@ Customers cannot choose how much M-Wallet credit to apply — Ottu computes it a
 - **Committed** on payment success.
 - **Released automatically** about four hours after an abandoned, cancelled, or failed payment. No human intervention.
 
-#### M-Wallet hidden for authorize-only sessions {#wallet-hidden-for-authorize-only-sessions}
+#### Wallet hidden for authorize-only sessions
 
-When the session is configured for authorization-only (no immediate capture), M-Wallet is not offered as a payment method. M-Wallet supports immediate-capture flows only.
+When the session is configured for authorization-only (no immediate capture), wallet is not offered as a payment method. Wallet supports immediate-capture flows only.
 
-#### Refunding to M-Wallet {#refunding-to-wallet}
+#### Refunding to wallet
 
-See [Refund to M-Wallet](../../operations#refund-to-wallet) on the Operations page for the full API and behavior. The refund endpoint accepts `destination: "wallet"` to credit the M-Wallet instead of reversing through the gateway.
+See [Refund to Wallet](../../operations#refund-to-wallet) on the Operations page for the full API and behavior. The refund endpoint accepts `destination: "wallet"` to credit the wallet instead of reversing through the gateway.
 
-:::warning M-Wallet-paid transactions cannot be refunded
-A transaction settled with M-Wallet credit cannot be refunded back to the M-Wallet — or to any other destination. Once a customer spends their balance at checkout, that leg of the payment is final.
+:::warning Wallet-paid transactions cannot be refunded
+A transaction settled with wallet credit cannot be refunded back to the wallet — or to any other destination. Once a customer spends their balance at checkout, that leg of the payment is final.
 :::
 
-:::warning Cross-currency M-Wallet payments are not supported
-A KWD M-Wallet cannot be used to pay a SAR order, and vice versa. Each currency maintains a separate M-Wallet account.
+:::warning Cross-currency wallet payments are not supported
+A KWD wallet cannot be used to pay a SAR order, and vice versa. Each currency maintains a separate wallet account.
 :::
 
 #### Wallet Transactions
 
-When a payment is settled with wallet credit, the payment details — returned by the [Checkout API retrieve](../checkout-api) call, the [PSQ inquiry](../psq), and [payment webhooks](../../webhooks/payment-events#response-payment-webhook-customer_wallet_transactions) — include a `customer_wallet_transactions` array. Each element is one wallet leg that contributed to the payment, so you can attribute every leg without a separate call to the M-Wallet read APIs.
+When a payment is settled with wallet credit, the payment details — returned by the [Checkout API retrieve](../checkout-api) call, the [PSQ inquiry](../psq), and [payment webhooks](../../webhooks/payment-events#response-payment-webhook-customer_wallet_transactions) — include a `customer_wallet_transactions` array. Each element is one wallet leg that contributed to the payment, so you can attribute every leg without a separate call to the wallet read APIs.
 
 The key is omitted entirely when no wallet was involved. A single-wallet payment emits a one-element list; multi-wallet stacking (M-Wallet credit plus a loyalty wallet, for example) emits one element per provider.
 
@@ -259,11 +259,11 @@ Use these fields to keep your own system in sync:
 - **Audit trail** — store `operation_id` against your order. Pass it to [Get Operation by ID](#api-reference) to pull every ledger entry the operation produced for a full audit record.
 - **System updates** — use `provider_code` to attribute the credit to the correct wallet program, and `created_at` / `modified_at` to timestamp the movement in your own ledger.
 
-Stacked-wallet setups (e.g., M-Wallet + Qitaf) emit one record per provider in the same payload; single-wallet payments emit a one-element list — so you can reconcile multi-wallet payments without polling the M-Wallet read APIs.
+Stacked-wallet setups (e.g., M-Wallet + Qitaf) emit one record per provider in the same payload; single-wallet payments emit a one-element list — so you can reconcile multi-wallet payments without polling the wallet read APIs.
 
 ## API Reference
 
-Three read APIs let you query M-Wallet state from your backend. All three accept the standard [Ottu API key](/developers/getting-started/authentication) authentication and are `POST` endpoints — the request body carries the `customer_id` (and, where required, the `currency`) that scopes the query.
+Three read APIs let you query wallet state from your backend. All three accept the standard [Ottu API key](/developers/getting-started/authentication) authentication and are `POST` endpoints — the request body carries the `customer_id` (and, where required, the `currency`) that scopes the query.
 
 <Tabs groupId="wallet-api" queryString>
 <TabItem value="accounts" label="List Wallet Accounts">
@@ -288,34 +288,34 @@ Three read APIs let you query M-Wallet state from your backend. All three accept
 - **Discover per session.** Always call [Payment Methods API](../payment-methods) per session — don't assume balance from a prior call.
 - **Display balance fresh.** Call List Accounts on page load if you show balance in your own UI. Cache only briefly; balance changes on every payment.
 - **Append-only ledger.** Never derive balance client-side from history — rely on the Accounts endpoint for authoritative balance.
-- **Match the currency.** For multi-currency merchants, present the M-Wallet matching the session currency only.
+- **Match the currency.** For multi-currency merchants, present the wallet matching the session currency only.
 
 ## FAQ
 
 <FAQ>
-  <FAQItem question="Can a customer choose how much M-Wallet credit to apply?">
+  <FAQItem question="Can a customer choose how much wallet credit to apply?">
     No. Ottu computes the amount automatically based on session amount versus balance.
   </FAQItem>
   <FAQItem question="What happens to a reservation if the customer abandons checkout?">
     It is automatically released about four hours after the abandoned, cancelled, or failed payment. No human intervention is required.
   </FAQItem>
-  <FAQItem question="Is M-Wallet available for authorization-only payments?">
-    No. M-Wallet supports immediate-capture sessions only.
+  <FAQItem question="Is wallet available for authorization-only payments?">
+    No. Wallet supports immediate-capture sessions only.
   </FAQItem>
-  <FAQItem question="Where does refund-to-M-Wallet data go?">
-    The original payment session is linked to the M-Wallet credit entry, visible in both the M-Wallet ledger and the operation log.
+  <FAQItem question="Where does refund-to-wallet data go?">
+    The original payment session is linked to the wallet credit entry, visible in both the wallet ledger and the operation log.
   </FAQItem>
-  <FAQItem question="Does M-Wallet store any customer PII?">
+  <FAQItem question="Does the wallet store any customer PII?">
     No. The service holds only ledger entries scoped by `merchant_id`, `customer_id`, and `currency`.
   </FAQItem>
-  <FAQItem question="Can I charge an M-Wallet without the Checkout SDK?">
-    Not at the moment. The M-Wallet is only exposed as a form of payment through the [Checkout SDK](../checkout-sdk/) — create a session with the Checkout API, mount the SDK, and the M-Wallet appears alongside the other configured payment methods.
+  <FAQItem question="Can I charge a wallet without the Checkout SDK?">
+    Not at the moment. The wallet is only exposed as a form of payment through the [Checkout SDK](../checkout-sdk/) — create a session with the Checkout API, mount the SDK, and the wallet appears alongside the other configured payment methods.
   </FAQItem>
-  <FAQItem question="How does a customer pay from their M-Wallet?">
-    The M-Wallet is charged through the regular session-then-pay flow: create a session with the Checkout API, then mount the [Checkout SDK](../checkout-sdk/) — the M-Wallet appears as a form of payment as described above.
+  <FAQItem question="How does a customer pay from their wallet?">
+    The wallet is charged through the regular session-then-pay flow: create a session with the Checkout API, then mount the [Checkout SDK](../checkout-sdk/) — the wallet appears as a form of payment as described above.
   </FAQItem>
-  <FAQItem question="Does M-Wallet credit expire?">
-    No. M-Wallet credit does not expire.
+  <FAQItem question="Does wallet credit expire?">
+    No. Wallet credit does not expire.
   </FAQItem>
   <FAQItem question="How do I know which wallet(s) were charged for a payment?">
     The payment webhook payload includes a [`customer_wallet_transactions`](../../webhooks/payment-events#response-payment-webhook-customer_wallet_transactions) array — one entry per wallet provider that contributed to the payment. For stacked-wallet setups (e.g., M-Wallet + Qitaf), each provider emits its own entry; single-wallet payments emit a one-element list.
@@ -324,7 +324,7 @@ Three read APIs let you query M-Wallet state from your backend. All three accept
 
 ## What's Next?
 
-- [Refund to M-Wallet (Operations)](../../operations#refund-to-wallet) — the refund API change that creates M-Wallet credits.
-- [Checkout SDK — M-Wallet section](../checkout-sdk/web#ottu-wallet) — how M-Wallet appears in the SDK.
+- [Refund to M-Wallet (Operations)](../../operations#refund-to-wallet) — the refund API change that creates wallet credits.
+- [Checkout SDK — M-Wallet section](../checkout-sdk/web#ottu-wallet) — how wallet appears in the SDK.
 - [Payment Methods API](../payment-methods) — discovering available payment methods.
 - [M-Wallet for merchants](/business/wallet/) — business-side documentation.

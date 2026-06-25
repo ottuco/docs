@@ -934,12 +934,12 @@ Checkout.init({
 
 ### M-Wallet {#ottu-wallet}
 
-When a customer has M-Wallet credit in the session currency, the SDK renders a **Wallet** payment method automatically — no init config is required. Pass the `customer_id` when creating the session, and either include `'wallet'` in `formsOfPayment` or omit `formsOfPayment` to show all available methods. M-Wallet is hidden for authorize-only sessions.
+When a customer has wallet credit in the session currency, the SDK renders a **Wallet** payment method automatically — no init config is required. Pass the `customer_id` when creating the session, and either include `'wallet'` in `formsOfPayment` or omit `formsOfPayment` to show all available methods. Wallet is hidden for authorize-only sessions.
 
-For full balance behavior, partial-payment rules, and the four-hour reservation auto-release, see the [M-Wallet section](/developers/payments/wallet/).
+For full balance behavior, partial-payment rules, and the four-hour reservation auto-release, see the [Wallet section](/developers/payments/wallet/).
 
-:::warning Cross-currency M-Wallet payments are not supported
-The M-Wallet only appears when its currency matches the order currency.
+:::warning Cross-currency wallet payments are not supported
+The wallet only appears when its currency matches the order currency.
 :::
 
 <StepGuide steps={developerWalletScenariosSteps} />
