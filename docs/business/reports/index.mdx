@@ -76,3 +76,57 @@ The most common way to generate a report is from the **Transactions** page. You 
 :::warning
 Exports include **all columns currently visible in your transactions table**. If you have added custom columns via Table Headers, those columns will appear in the export too. To control which columns are exported, adjust your table headers before clicking Export. See [Transaction Insights](/business/payment-management/transaction-insights) for how to manage table columns.
 :::
+
+## Export Sources
+
+Ottu offers export from multiple screens in the dashboard. Each export source produces a CSV in the same **Generated Reports** download center.
+
+### Transactions
+
+The main export source. Covers all payment transactions created through any [plugin](/business/plugins) — Payment Request, E-Commerce, Bulk Payment Request, and others.
+
+**Where:** Dashboard → Payment Request → Transactions → **Export**
+
+**What you get:** One row per transaction, including amount, currency, payment status, gateway, creation date, customer details, and any custom columns you have configured.
+
+### Wallet Reports
+
+If your account uses the [Wallet](/business/wallet/) feature, you can export wallet activity (credits, debits, and balance history) from the wallet reports screen.
+
+**Where:** Dashboard → Wallet → Reports → **Export**
+
+**What you get:** One row per wallet event, including the event type (credit/debit), amount, currency, customer ID, and timestamp.
+
+<StepGuide steps={[
+  {
+    title: "Open Wallet Reports",
+    description: <>From the Ottu Dashboard, navigate to <strong>Wallet</strong> in the left sidebar, then click <strong>Reports</strong>.</>,
+    image: "/img/business/reports/wallet-export-01-open.png",
+    imageAlt: "Wallet Reports page open in the Ottu Dashboard",
+  },
+  {
+    title: "Apply date filters",
+    description: <>Use the date range filter to scope the wallet activity you want to export, then click <strong>Search</strong>.</>,
+    image: "/img/business/reports/wallet-export-02-filter.png",
+    imageAlt: "Date range filter applied on the Wallet Reports page",
+  },
+  {
+    title: "Click Export",
+    description: <>Click <strong>Export</strong>. The file is queued and will appear in <a href="#download-your-reports">Generated Reports</a> once ready.</>,
+    image: "/img/business/reports/wallet-export-03-export.png",
+    imageAlt: "Export button on the Wallet Reports toolbar",
+  },
+]} />
+
+### Other Export Sources
+
+The following additional screens in Ottu also offer an Export button. Each works the same way — click Export, wait for the file to appear in Generated Reports.
+
+| Section | How to reach it |
+|---|---|
+| **Bulk Payment Requests** | Dashboard → Bulk Payment Request → Transactions → Export |
+| **E-Commerce Orders** | Dashboard → E-Commerce → Orders → Export |
+
+:::note
+The exact sections available in your dashboard depend on which [plugins](/business/plugins) are enabled for your merchant account. If a section listed above is not visible, it may not be activated. Contact your Ottu account manager to enable it.
+:::
