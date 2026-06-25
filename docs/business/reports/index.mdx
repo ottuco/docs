@@ -12,3 +12,26 @@ import StepGuide from "@site/src/components/StepGuide";
 Ottu lets you export and download your payment data at any time. Whether you need a snapshot of today's transactions or a record of wallet activity, the reports system gives you a file you can open in Excel, share with your finance team, or archive for compliance.
 
 This guide covers everything from generating your first export to re-downloading a file you created last week.
+
+## How it works
+
+When you export data from any screen in Ottu — the Transactions page, wallet activity, or other sections — Ottu queues a file to be generated in the background. This usually takes a few seconds to a few minutes depending on how many records are included.
+
+Once the file is ready, it appears in the **Generated Reports** page, where you can download it at any time. You do not need to wait on the screen where you clicked Export — you can close the browser, come back later, and the file will still be there.
+
+:::note
+Generated reports are private to your account. Other staff members on your merchant account can see their own reports but not yours unless they have admin access.
+:::
+
+### What gets exported
+
+Every export produces a **CSV file** you can open in Excel, Google Sheets, or any spreadsheet tool.
+
+| What you export | Where you start | What the file contains |
+|---|---|---|
+| Payment transactions | Transactions page | Payment links, amounts, statuses, gateway info |
+| Wallet activity | Wallet reports screen | Wallet credits, debits, and balances |
+
+:::tip
+If you need reports delivered automatically on a schedule — for example, a daily CSV emailed to your finance team — see [Transaction Report Configuration](/business/settings/transaction-reports) under Settings.
+:::
