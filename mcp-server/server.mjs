@@ -202,9 +202,12 @@ async function fetchArtifacts() {
   const dataUrl = `${BASE_URL}/_mcp-data`;
   console.log(`Fetching MCP artifacts from ${dataUrl}...`);
 
+  // Bound each fetch so a stalled docs origin (e.g. mid-deploy) can't hang the
+  // "ready" transition forever — fetchWithRetry then advances to the next attempt.
+  const opts = { signal: AbortSignal.timeout(20000) };
   const [docsRes, indexRes] = await Promise.all([
-    fetch(`${dataUrl}/docs.json`),
-    fetch(`${dataUrl}/search-index.json`),
+    fetch(`${dataUrl}/docs.json`, opts),
+    fetch(`${dataUrl}/search-index.json`, opts),
   ]);
 
   if (!docsRes.ok || !indexRes.ok) {
