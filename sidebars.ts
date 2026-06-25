@@ -601,6 +601,33 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: "category",
+          label: "Reports",
+          link: { type: "doc", id: "business/reports/index" },
+          items: [
+            {
+              type: "link",
+              label: "How it works",
+              href: "/business/reports#how-it-works",
+            },
+            {
+              type: "link",
+              label: "Generate a Report",
+              href: "/business/reports#generate-a-report",
+            },
+            {
+              type: "link",
+              label: "Export Sources",
+              href: "/business/reports#export-sources",
+            },
+            {
+              type: "link",
+              label: "Download Your Reports",
+              href: "/business/reports#download-your-reports",
+            },
+          ],
+        },
+        {
+          type: "category",
           label: "Wallet",
           link: { type: "doc", id: "business/wallet/index" },
           items: [
