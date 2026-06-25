@@ -791,7 +791,7 @@ The SDK supports multiple instances of onsite checkout payments. Therefore, for 
 No fees are displayed for onsite checkout instances. This is due to the support for multiple multi-card (omni PG) configurations. The presence of multiple payment icons is used to indicate this multi-card feature.
 :::
 
-## M-Wallet
+## M-Wallet {#ottu-wallet}
 
 When a customer has M-Wallet credit in the session currency, the SDK renders a **Wallet** payment method automatically — no init config is required. Pass the `customer_id` when creating the session, and either include `'wallet'` in `formsOfPayment` or omit `formsOfPayment` to show all available methods. M-Wallet is hidden for authorize-only sessions.
 

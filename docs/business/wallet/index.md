@@ -13,7 +13,7 @@ import FAQ, { FAQItem } from "@site/src/components/FAQ";
 
 M-Wallet (merchant wallet) is a stored balance you can grant to a customer in any currency you accept. Once a customer has M-Wallet credit, they can spend it at checkout — fully or partially — on any future order with your business.
 
-## Why use M-Wallet
+## Why use M-Wallet {#why-use-wallet}
 
 - **Refund without returning funds to the original card.** Useful when cards expire, or when you want to issue store credit instead of cash back.
 - **Issue goodwill credit or promotional balances** without payment-gateway fees.
@@ -26,7 +26,7 @@ M-Wallet (merchant wallet) is a stored balance you can grant to a customer in an
 3. **Customer returns** for a future order with your business.
 4. **They pay with M-Wallet** — fully if the balance covers it, partially with another method otherwise.
 
-## Refund to M-Wallet
+## Refund to M-Wallet {#refund-to-wallet}
 
 Refunding to M-Wallet credits the customer's M-Wallet balance instead of returning funds through the payment gateway. The customer can spend the credit on their next order.
 
@@ -69,9 +69,9 @@ Refunding to M-Wallet credits the customer's M-Wallet balance instead of returni
   },
 ]} />
 
-The next time the customer reaches checkout in your store (same currency), they'll see **Wallet (X.XXX USD)** as a payment method. See [M-Wallet at Checkout](#m-wallet-at-checkout) below for the customer-side flow.
+The next time the customer reaches checkout in your store (same currency), they'll see **Wallet (X.XXX USD)** as a payment method. See [M-Wallet at Checkout](#wallet-at-checkout) below for the customer-side flow.
 
-## M-Wallet at Checkout
+## M-Wallet at Checkout {#wallet-at-checkout}
 
 This section explains what your customer sees when they have an M-Wallet balance and reach checkout — so you can answer support questions and design messaging on your own site.
 
@@ -92,14 +92,14 @@ The M-Wallet only appears when its currency matches the order currency.
 :::
 
 :::note Offering multiple payment gateways on one checkout
-If a checkout offers several payment gateways, make sure at most **one wallet per wallet provider** can be used for the order currency. If two gateways each carry a wallet from the same provider for that currency, the checkout cannot be created. See [Only one wallet per provider per checkout](/developers/payments/wallet/#2-create-a-checkout-session-with-the-m-wallet-capable-pgs) in the developer docs.
+If a checkout offers several payment gateways, make sure at most **one wallet per wallet provider** can be used for the order currency. If two gateways each carry a wallet from the same provider for that currency, the checkout cannot be created. See [Only one wallet per provider per checkout](/developers/payments/wallet/#2-create-a-checkout-session-with-the-wallet-capable-pgs) in the developer docs.
 :::
 
 **What you can do:**
 
 - Display the customer's M-Wallet balance on your own site or app — call the [M-Wallet Accounts API](/developers/payments/wallet/#api-reference).
 - Refund any future order to the same M-Wallet to top it up.
-- View full credit and debit history per customer in [M-Wallet Reporting](#m-wallet-reporting) below.
+- View full credit and debit history per customer in [M-Wallet Reporting](#wallet-reporting) below.
 
 ## How fees are charged
 
@@ -127,7 +127,7 @@ When the customer's M-Wallet balance is **equal to or greater than the order amo
 In the partial-M-Wallet case above, the customer pays 30.000 at checkout, but only 20.000 of that is principal — the other 10.000 is the fee. The M-Wallet still contributed its full 30.000 toward principal. The fee did not reduce the M-Wallet's contribution; it was added on top of the PG leg.
 :::
 
-## M-Wallet Reporting
+## M-Wallet Reporting {#wallet-reporting}
 
 The dashboard provides three screens for tracking M-Wallet activity: **Accounts**, **Ledger**, and **Operations**.
 
@@ -200,7 +200,7 @@ M-Wallet-enabled payments settle across two separate rails — the **M-Wallet ra
 
 This section explains how Ottu represents an M-Wallet-touched payment in your transaction records, and gives a step-by-step procedure for matching it against your M-Wallet ledger and PG settlement files.
 
-### How an M-Wallet payment appears in your records
+### How an M-Wallet payment appears in your records {#how-a-wallet-payment-appears-in-your-records}
 
 Ottu records every order as a **parent transaction** at the full order amount. When part (or all) of the order is paid from the customer's M-Wallet, Ottu also creates a **child transaction** linked to the parent, carrying just the M-Wallet portion. The child shares the same `session_id` as the parent but has its own `order_no`.
 
@@ -215,7 +215,7 @@ There are two flows you will see:
 After the M-Wallet leg settles, the parent transaction records a zero-amount attempt with the form of payment set to `wallet`. This is bookkeeping — it tells you the parent was finalized through the M-Wallet rail. In partial-M-Wallet flows (B), this blank attempt sits alongside the PG attempt; in full-M-Wallet flows (A), it is the only parent attempt. You should treat it as a finalization marker, not as a separate charge.
 :::
 
-#### Amount fields on an M-Wallet-touched payment
+#### Amount fields on an M-Wallet-touched payment {#amount-fields-on-a-wallet-touched-payment}
 
 On the parent transaction page, three amount fields together tell you how the order was paid:
 
@@ -225,7 +225,7 @@ On the parent transaction page, three amount fields together tell you how the or
 
 On the child transaction page, you'll see just `amount` — the M-Wallet portion.
 
-#### Example — partial M-Wallet payment of 20.00 USD
+#### Example — partial M-Wallet payment of 20.00 USD {#example--partial-wallet-payment-of-2000-usd}
 
 A customer pays a 20.00 USD order with 10.00 USD from their M-Wallet and 10.00 USD on a card:
 
@@ -276,7 +276,7 @@ In plain English: **order total = PG-rail total + M-Wallet-rail total.**
   },
 ]} />
 
-### Where to find the M-Wallet portion of a payment
+### Where to find the M-Wallet portion of a payment {#where-to-find-the-wallet-portion-of-a-payment}
 
 Each parent transaction's webhook payload (and dashboard detail page) carries two arrays you will use during reconciliation:
 
@@ -420,4 +420,4 @@ Export Accounts or Ledger data as **CSV** or **XLSX** for offline analysis and a
 
 - [M-Wallet for developers](/developers/payments/wallet/) — API and SDK integration.
 - [Payment Management](/business/payment-management/) — viewing and managing all transactions.
-- [Refund to M-Wallet (developer reference)](/developers/operations#refund-to-m-wallet) — the API behind the dashboard refund flow.
+- [Refund to M-Wallet (developer reference)](/developers/operations#refund-to-wallet) — the API behind the dashboard refund flow.

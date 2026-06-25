@@ -607,7 +607,7 @@ const sidebars: SidebarsConfig = {
             {
               type: "link",
               label: "Why use M-Wallet",
-              href: "/business/wallet#why-use-m-wallet",
+              href: "/business/wallet#why-use-wallet",
             },
             {
               type: "link",
@@ -617,12 +617,12 @@ const sidebars: SidebarsConfig = {
             {
               type: "link",
               label: "Refund to M-Wallet",
-              href: "/business/wallet#refund-to-m-wallet",
+              href: "/business/wallet#refund-to-wallet",
             },
             {
               type: "link",
               label: "M-Wallet at Checkout",
-              href: "/business/wallet#m-wallet-at-checkout",
+              href: "/business/wallet#wallet-at-checkout",
             },
             {
               type: "link",
@@ -632,7 +632,7 @@ const sidebars: SidebarsConfig = {
             {
               type: "link",
               label: "M-Wallet Reporting",
-              href: "/business/wallet#m-wallet-reporting",
+              href: "/business/wallet#wallet-reporting",
             },
             {
               type: "link",

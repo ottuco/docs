@@ -119,7 +119,7 @@ Settles authorized funds. Only applicable to `authorized` transactions. Supports
 
 Returns funds to the customer. Applicable to `paid` or captured transactions. For authorized transactions, a capture must be completed first. Supports full or partial refund. Ottu offers an [approval feature](/business/operations/refund-void-access-control) for refunds, enabling a checker role to approve or reject requests.
 
-##### Refund to M-Wallet {#refund-to-m-wallet}
+##### Refund to M-Wallet {#refund-to-wallet}
 
 Instead of returning funds through the original payment gateway, you can refund a payment directly to the customer's **M-Wallet** balance. The customer can then spend that credit at any future Ottu checkout in the same currency. See [M-Wallet](/developers/payments/wallet/) for the full feature overview.
 
@@ -152,7 +152,7 @@ M-Wallet credits are immutable — a duplicate refund-to-M-Wallet call creates a
 | 409 | `idempotency_conflict` | Same Idempotency-Key reused with different payload |
 | 422 | `validation_error` | Schema validation failed on the refund payload |
 
-For the full M-Wallet integration, including the read APIs and SDK behavior, see [M-Wallet](/developers/payments/wallet/). For the merchant dashboard workflow, see [Refund to M-Wallet (business docs)](/business/wallet#refund-to-m-wallet).
+For the full M-Wallet integration, including the read APIs and SDK behavior, see [M-Wallet](/developers/payments/wallet/). For the merchant dashboard workflow, see [Refund to M-Wallet (business docs)](/business/wallet#refund-to-wallet).
 
 ##### Void {#void}
 
@@ -180,7 +180,7 @@ Select the operation to see its example payload and the full interactive API sch
 <ApiDocEmbed path="public-operations.api.mdx" />
 
 </TabItem>
-<TabItem value="refund-to-m-wallet" label="Refund to M-Wallet">
+<TabItem value="refund-to-wallet" label="Refund to M-Wallet">
 
 ```json title="Example Request"
 {

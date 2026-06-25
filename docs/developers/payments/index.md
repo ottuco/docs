@@ -30,7 +30,7 @@ Process payments directly when you manage your own UI — Apple Pay buttons, Goo
 
 [**Go to Native Payments →**](native-payments.md)
 
-### M-Wallet (Stored Balance)
+### M-Wallet (Stored Balance) {#wallet-stored-balance}
 
 Refund payments to a customer's M-Wallet balance instead of returning funds via the original gateway. Customers can spend M-Wallet credit at any future Ottu checkout in the same currency — fully or partially alongside another payment method.
 

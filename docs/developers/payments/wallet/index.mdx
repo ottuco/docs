@@ -44,7 +44,7 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 <WalletFlowDiagram />
 
-M-Wallet credit is created when a merchant refunds with `destination: "wallet"` — see [Refund to M-Wallet](../../operations#refund-to-m-wallet). Once a customer has positive balance in the session currency, the developer journey to spend it is:
+M-Wallet credit is created when a merchant refunds with `destination: "wallet"` — see [Refund to M-Wallet](../../operations#refund-to-wallet). Once a customer has positive balance in the session currency, the developer journey to spend it is:
 
 1. **Filter the payment methods** — call the [Payment Methods API](../payment-methods) with `payment_services: ["wallet"]` to get the M-Wallet-capable `pg_codes`.
 2. **Create a Checkout session** — call the [Checkout API](../checkout-api) with those `pg_codes` and the `customer_id`. The `customer_id` is what binds the session to that customer's M-Wallet account.
@@ -60,7 +60,7 @@ Try the M-Wallet flow below. The demo discovers an M-Wallet-capable gateway, see
 
 ### Step-by-Step
 
-#### 1. List the M-Wallet-capable payment gateways
+#### 1. List the M-Wallet-capable payment gateways {#1-list-the-wallet-capable-payment-gateways}
 
 Call the [Payment Methods API](../payment-methods) (`POST /b/pbl/v2/payment-methods/`) with `payment_services: ["wallet"]` to filter the gateway list to those that support M-Wallet payments. Use these `pg_codes` when creating the Checkout session.
 
@@ -102,7 +102,7 @@ You don't need `customer_id` to discover M-Wallet-capable gateways generically. 
 
 For the full request/response reference, headers, error codes, and supported filters, see the [Payment Methods API page](../payment-methods).
 
-#### 2. Create a Checkout session with the M-Wallet-capable PGs
+#### 2. Create a Checkout session with the M-Wallet-capable PGs {#2-create-a-checkout-session-with-the-wallet-capable-pgs}
 
 Call the [Checkout API](../checkout-api) with the `pg_codes` returned in step 1, plus the `customer_id` to enable the customer's M-Wallet on this session. The response includes a `session_id` that you pass to the SDK in the next step.
 
@@ -172,19 +172,19 @@ Then initialize the SDK with the `session_id` returned by step 2:
   formsOfPayment: ["wallet", "ottu-sandbox"], // or omit to show all
 });`}</CodeBlock>
 
-#### 4. Customer applies M-Wallet credit at checkout
+#### 4. Customer applies M-Wallet credit at checkout {#4-customer-applies-wallet-credit-at-checkout}
 
 The SDK reserves the required amount (or the full balance, whichever is lower). If the session amount exceeds the M-Wallet balance, the customer is prompted to pick a second method for the remainder. On submit, all reservations confirm together. On success the M-Wallet entry commits; on cancel, error, or four-hour timeout it auto-releases.
 
 <StepGuide steps={developerWalletScenariosSteps} />
 
-#### 5. (Optional) Read M-Wallet state from your backend
+#### 5. (Optional) Read M-Wallet state from your backend {#5-optional-read-wallet-state-from-your-backend}
 
 Reading M-Wallet state from your backend is optional — the same balance, ledger, and operation views are available in the [Ottu dashboard](/business/wallet/). Use the read APIs only if you want to surface M-Wallet operations to your end customers in your own UI. See the [API Reference](#api-reference) section below.
 
 ### Use Cases
 
-#### Partial payments (M-Wallet plus another method)
+#### Partial payments (M-Wallet plus another method) {#partial-payments-wallet-plus-another-method}
 
 Three balance-versus-amount cases:
 
@@ -202,13 +202,13 @@ Customers cannot choose how much M-Wallet credit to apply — Ottu computes it a
 - **Committed** on payment success.
 - **Released automatically** about four hours after an abandoned, cancelled, or failed payment. No human intervention.
 
-#### M-Wallet hidden for authorize-only sessions
+#### M-Wallet hidden for authorize-only sessions {#wallet-hidden-for-authorize-only-sessions}
 
 When the session is configured for authorization-only (no immediate capture), M-Wallet is not offered as a payment method. M-Wallet supports immediate-capture flows only.
 
-#### Refunding to M-Wallet
+#### Refunding to M-Wallet {#refunding-to-wallet}
 
-See [Refund to M-Wallet](../../operations#refund-to-m-wallet) on the Operations page for the full API and behavior. The refund endpoint accepts `destination: "wallet"` to credit the M-Wallet instead of reversing through the gateway.
+See [Refund to M-Wallet](../../operations#refund-to-wallet) on the Operations page for the full API and behavior. The refund endpoint accepts `destination: "wallet"` to credit the M-Wallet instead of reversing through the gateway.
 
 :::warning M-Wallet-paid transactions cannot be refunded
 A transaction settled with M-Wallet credit cannot be refunded back to the M-Wallet — or to any other destination. Once a customer spends their balance at checkout, that leg of the payment is final.
@@ -324,7 +324,7 @@ Three read APIs let you query M-Wallet state from your backend. All three accept
 
 ## What's Next?
 
-- [Refund to M-Wallet (Operations)](../../operations#refund-to-m-wallet) — the refund API change that creates M-Wallet credits.
-- [Checkout SDK — M-Wallet section](../checkout-sdk/web#m-wallet) — how M-Wallet appears in the SDK.
+- [Refund to M-Wallet (Operations)](../../operations#refund-to-wallet) — the refund API change that creates M-Wallet credits.
+- [Checkout SDK — M-Wallet section](../checkout-sdk/web#ottu-wallet) — how M-Wallet appears in the SDK.
 - [Payment Methods API](../payment-methods) — discovering available payment methods.
 - [M-Wallet for merchants](/business/wallet/) — business-side documentation.
