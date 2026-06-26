@@ -255,6 +255,20 @@ const config: Config = {
           "/developers/reference/*",
           "/overview/changelog*",
         ],
+        // FlexSearch index tuning (replaces the former patch-package patch,
+        // which was version-pinned to 0.11.0 and silently broke on upgrade).
+        // The plugin's defaults — tokenize "forward", resolution 9, and a
+        // depth-2 bidirectional context — balloon the generated search-index
+        // export to ~290MB over full page content, which OOM'd the mcp
+        // service on deploy. "strict" (whole stemmed words, no prefix
+        // expansion) + resolution 3 + no context keeps it to a few MB. The
+        // plugin's default encode() still lowercases + stems, so queries
+        // match normalized words. Keep this in sync with mcp-server/server.mjs.
+        flexsearch: {
+          tokenize: "strict",
+          resolution: 3,
+          context: false,
+        },
       },
     ],
     ["docusaurus-markdown-source-plugin", { docsPath: "/" }],

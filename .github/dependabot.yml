@@ -15,6 +15,12 @@ updates:
           - "*"
     commit-message:
       prefix: "build(deps)"
+    # docusaurus-plugin-mcp-server is upgraded manually: its FlexSearch index
+    # config must be kept in sync between docusaurus.config.ts (build) and
+    # mcp-server/server.mjs (runtime), and the wrong defaults OOM the mcp
+    # service on deploy. Auto-bumps would ship that mismatch unattended.
+    ignore:
+      - dependency-name: "docusaurus-plugin-mcp-server"
 
   - package-ecosystem: "npm"
     directory: "/mcp-server"
@@ -27,3 +33,6 @@ updates:
           - "*"
     commit-message:
       prefix: "build(deps)"
+    # See note above — manual upgrades only for this package.
+    ignore:
+      - dependency-name: "docusaurus-plugin-mcp-server"
