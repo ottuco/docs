@@ -238,6 +238,53 @@ graph LR
 
 Use the response values to reconcile the payment in your backend and update your order state.
 
+### Idempotency
+
+Native Payments are **direct-charge** endpoints — a single request charges the customer immediately. A flaky network or an over-eager retry can therefore send the same charge twice. To make a charge safe to retry, send an **`Idempotency-Key`** request header with a value unique to that charge attempt (a UUID is ideal):
+
+<CodeBlock language="bash" title="Apple Pay native payment with Idempotency-Key">{`curl -X POST "${OTTU_CONNECT_BASE_URL}/b/pbl/v2/payment/apple-pay/" \\
+  -H "Authorization: Api-Key your_api_key" \\
+  -H "Content-Type: application/json" \\
+  -H "Idempotency-Key: 5f3b9c2a-1e4d-4a7b-9c8e-2d6f0a1b3c4d" \\
+  -d '{ "session_id": "your_session_id", "pg_code": "apple-pay-gateway", "payload": { } }'`}</CodeBlock>
+
+**How it works** — the key is scoped to the transaction (its [`session_id`](/developers/payments/checkout-api/)):
+
+1. If the same key was **already recorded** on the transaction by a previous **successful** charge, the endpoint rejects the request with **`409 Conflict`** *before any charge is attempted* — so a retry can never double-charge the customer.
+2. The key is **recorded only after a successful charge**. If a charge fails, its key is *not* stored, so you can safely retry the same key — a genuine retry of a failed payment still goes through.
+3. **Omitting the header** keeps the original behavior — no replay protection. Existing integrations are unaffected.
+
+A rejected replay returns:
+
+```json title="409 Conflict — replayed Idempotency-Key"
+{
+  "detail": "Duplicate request detected. Idempotency-Key already used.",
+  "result": "failed"
+}
+```
+
+The same `Idempotency-Key` contract applies to every direct-charge endpoint:
+
+| Endpoint | Charge |
+|---|---|
+| `POST /b/pbl/v2/payment/apple-pay/` | Apple Pay |
+| `POST /b/pbl/v2/payment/google-pay/` | Google Pay |
+| `POST /b/pbl/v2/payment/auto-debit/` | Saved-token / recurring |
+| `POST /b/pbl/v2/payment/wallet/` | [M-Wallet](/developers/payments/wallet/) balance |
+| `POST /b/pbl/v2/payment/cash/` | Cash acknowledgement |
+
+:::tip
+Generate one `Idempotency-Key` per charge attempt and reuse it across retries of *that* attempt. Reusing a fresh UUID for an unrelated charge would defeat the protection.
+:::
+
+:::note Idempotency-Key vs. Tracking-Key
+This is distinct from the [`Tracking-Key`](/developers/operations#guide) header used by the [Operations API](/developers/operations) (refund, capture, void). A replayed `Tracking-Key` *returns the latest status* of the original operation, whereas a replayed `Idempotency-Key` on a direct charge is *rejected with 409*. Use `Idempotency-Key` for charges, `Tracking-Key` for operations.
+:::
+
+:::warning Concurrent duplicates
+Two identical requests fired at the exact same moment are serialized internally — the first to acquire the charge proceeds and the other is rejected with `409 Conflict`. Still, prefer sequential retries (wait for a response or timeout before retrying) over firing concurrent duplicates.
+:::
+
 ### Use Cases
 
 The general [Setup](#setup) prerequisites and [checklist](#checklist) apply to all providers below.
@@ -326,6 +373,10 @@ Select the payment provider to see its full interactive API schema:
 
   <FAQItem question="Can I charge saved tokens automatically?">
     Yes, use **Native Payments** for tokenized or recurring payments.
+  </FAQItem>
+
+  <FAQItem question="How do I stop a retry from charging the customer twice?">
+    Send an [`Idempotency-Key`](#idempotency) header with a value unique to that charge attempt. A replay of a key from a previous **successful** charge is rejected with `409 Conflict` before any charge happens. The key is stored only after success, so retrying a **failed** charge with the same key still works.
   </FAQItem>
 </FAQ>
 
