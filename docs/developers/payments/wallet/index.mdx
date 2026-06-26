@@ -1,5 +1,5 @@
 ---
-title: Wallet
+title: M-Wallet
 description: Customer wallet credits — refund, store, and spend balances at checkout.
 toc_min_heading_level: 2
 toc_max_heading_level: 3
@@ -17,9 +17,9 @@ import { developerWalletScenariosSteps } from "@site/src/data/wallet-scenarios";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
-# Wallet
+# M-Wallet
 
-Wallet lets you refund customer payments to a stored balance keyed by merchant, customer, and currency, then let the customer spend that credit at any future Ottu checkout in the same currency. No PII is stored on the wallet service.
+M-Wallet (merchant wallet) lets you refund customer payments to a stored balance keyed by merchant, customer, and currency, then let the customer spend that credit at any future Ottu checkout in the same currency. No PII is stored on the wallet service.
 
 Authentication for merchant-facing endpoints follows the standard [Ottu API key](/developers/getting-started/authentication) flow — the same key you use for the [Checkout API](../checkout-api). Service-to-service auth between Ottu Connect and the wallet service uses OAuth 2.0 internally and is invisible to merchants.
 
@@ -222,7 +222,7 @@ A KWD wallet cannot be used to pay a SAR order, and vice versa. Each currency ma
 
 When a payment is settled with wallet credit, the payment details — returned by the [Checkout API retrieve](../checkout-api) call, the [PSQ inquiry](../psq), and [payment webhooks](../../webhooks/payment-events#response-payment-webhook-customer_wallet_transactions) — include a `customer_wallet_transactions` array. Each element is one wallet leg that contributed to the payment, so you can attribute every leg without a separate call to the wallet read APIs.
 
-The key is omitted entirely when no wallet was involved. A single-wallet payment emits a one-element list; multi-wallet stacking (Ottu credit plus a loyalty wallet, for example) emits one element per provider.
+The key is omitted entirely when no wallet was involved. A single-wallet payment emits a one-element list; multi-wallet stacking (M-Wallet credit plus a loyalty wallet, for example) emits one element per provider.
 
 | Field | Type | Description |
 |---|---|---|
@@ -259,7 +259,7 @@ Use these fields to keep your own system in sync:
 - **Audit trail** — store `operation_id` against your order. Pass it to [Get Operation by ID](#api-reference) to pull every ledger entry the operation produced for a full audit record.
 - **System updates** — use `provider_code` to attribute the credit to the correct wallet program, and `created_at` / `modified_at` to timestamp the movement in your own ledger.
 
-Stacked-wallet setups (e.g., Ottu wallet + Qitaf) emit one record per provider in the same payload; single-wallet payments emit a one-element list — so you can reconcile multi-wallet payments without polling the wallet read APIs.
+Stacked-wallet setups (e.g., M-Wallet + Qitaf) emit one record per provider in the same payload; single-wallet payments emit a one-element list — so you can reconcile multi-wallet payments without polling the wallet read APIs.
 
 ## API Reference
 
@@ -318,13 +318,13 @@ Three read APIs let you query wallet state from your backend. All three accept t
     No. Wallet credit does not expire.
   </FAQItem>
   <FAQItem question="How do I know which wallet(s) were charged for a payment?">
-    The payment webhook payload includes a [`customer_wallet_transactions`](../../webhooks/payment-events#response-payment-webhook-customer_wallet_transactions) array — one entry per wallet provider that contributed to the payment. For stacked-wallet setups (e.g., Ottu wallet + Qitaf), each provider emits its own entry; single-wallet payments emit a one-element list.
+    The payment webhook payload includes a [`customer_wallet_transactions`](../../webhooks/payment-events#response-payment-webhook-customer_wallet_transactions) array — one entry per wallet provider that contributed to the payment. For stacked-wallet setups (e.g., M-Wallet + Qitaf), each provider emits its own entry; single-wallet payments emit a one-element list.
   </FAQItem>
 </FAQ>
 
 ## What's Next?
 
-- [Refund to Wallet (Operations)](../../operations#refund-to-wallet) — the refund API change that creates wallet credits.
-- [Checkout SDK — Ottu Wallet section](../checkout-sdk/web#ottu-wallet) — how wallet appears in the SDK.
+- [Refund to M-Wallet (Operations)](../../operations#refund-to-wallet) — the refund API change that creates wallet credits.
+- [Checkout SDK — M-Wallet section](../checkout-sdk/web#ottu-wallet) — how wallet appears in the SDK.
 - [Payment Methods API](../payment-methods) — discovering available payment methods.
-- [Wallet for merchants](/business/wallet/) — business-side documentation.
+- [M-Wallet for merchants](/business/wallet/) — business-side documentation.

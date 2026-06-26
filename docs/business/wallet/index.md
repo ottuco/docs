@@ -1,6 +1,6 @@
 ---
-title: Wallet
-sidebar_label: Wallet
+title: M-Wallet
+sidebar_label: M-Wallet
 toc_min_heading_level: 2
 toc_max_heading_level: 3
 ---
@@ -9,11 +9,11 @@ import StepGuide from "@site/src/components/StepGuide";
 import { businessWalletScenariosSteps } from "@site/src/data/wallet-scenarios";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 
-# Wallet
+# M-Wallet
 
-Wallet is a stored balance you can grant to a customer in any currency you accept. Once a customer has wallet credit, they can spend it at checkout — fully or partially — on any future order with your business.
+M-Wallet (merchant wallet) is a stored balance you can grant to a customer in any currency you accept. Once a customer has wallet credit, they can spend it at checkout — fully or partially — on any future order with your business.
 
-## Why use Wallet
+## Why use M-Wallet {#why-use-wallet}
 
 - **Refund without returning funds to the original card.** Useful when cards expire, or when you want to issue store credit instead of cash back.
 - **Issue goodwill credit or promotional balances** without payment-gateway fees.
@@ -26,7 +26,7 @@ Wallet is a stored balance you can grant to a customer in any currency you accep
 3. **Customer returns** for a future order with your business.
 4. **They pay with wallet** — fully if the balance covers it, partially with another method otherwise.
 
-## Refund to Wallet
+## Refund to M-Wallet {#refund-to-wallet}
 
 Refunding to wallet credits the customer's wallet balance instead of returning funds through the payment gateway. The customer can spend the credit on their next order.
 
@@ -69,9 +69,9 @@ Refunding to wallet credits the customer's wallet balance instead of returning f
   },
 ]} />
 
-The next time the customer reaches checkout in your store (same currency), they'll see **Wallet (X.XXX USD)** as a payment method. See [Wallet at Checkout](#wallet-at-checkout) below for the customer-side flow.
+The next time the customer reaches checkout in your store (same currency), they'll see **Wallet (X.XXX USD)** as a payment method. See [M-Wallet at Checkout](#wallet-at-checkout) below for the customer-side flow.
 
-## Wallet at Checkout
+## M-Wallet at Checkout {#wallet-at-checkout}
 
 This section explains what your customer sees when they have a wallet balance and reach checkout — so you can answer support questions and design messaging on your own site.
 
@@ -99,7 +99,7 @@ If a checkout offers several payment gateways, make sure at most **one wallet pe
 
 - Display the customer's wallet balance on your own site or app — call the [Wallet Accounts API](/developers/payments/wallet/#api-reference).
 - Refund any future order to the same wallet to top it up.
-- View full credit and debit history per customer in [Wallet Reporting](#wallet-reporting) below.
+- View full credit and debit history per customer in [M-Wallet Reporting](#wallet-reporting) below.
 
 ## How fees are charged
 
@@ -127,7 +127,7 @@ When the customer's wallet balance is **equal to or greater than the order amoun
 In the partial-wallet case above, the customer pays 30.000 at checkout, but only 20.000 of that is principal — the other 10.000 is the fee. The wallet still contributed its full 30.000 toward principal. The fee did not reduce the wallet's contribution; it was added on top of the PG leg.
 :::
 
-## Wallet Reporting
+## M-Wallet Reporting {#wallet-reporting}
 
 The dashboard provides three screens for tracking wallet activity: **Accounts**, **Ledger**, and **Operations**.
 
@@ -196,7 +196,7 @@ Lists individual wallet operations (a single credit, debit, or reservation cycle
 
 ## Reconciliation
 
-Wallet-enabled payments settle across two separate rails — the **wallet rail** (funds moved internally between Ottu wallet balances, no card scheme involved) and the **PG rail** (funds charged through a payment gateway and settled by the acquirer). A single customer order may use one rail or both, so your month-end reconciliation needs to account for both sources of funds.
+Wallet-enabled payments settle across two separate rails — the **wallet rail** (funds moved internally between wallet balances, no card scheme involved) and the **PG rail** (funds charged through a payment gateway and settled by the acquirer). A single customer order may use one rail or both, so your month-end reconciliation needs to account for both sources of funds.
 
 This section explains how Ottu represents a wallet-touched payment in your transaction records, and gives a step-by-step procedure for matching it against your wallet ledger and PG settlement files.
 
@@ -287,7 +287,7 @@ Each parent transaction's webhook payload (and dashboard detail page) carries tw
 The key is **not present at all** on payments that never touched a wallet. Your reconciliation script should treat a missing key the same as an empty list.
 :::
 
-**Multi-wallet stacking.** If your setup supports more than one wallet provider (for example, Ottu Wallet + Qitaf), `customer_wallet_transactions` will contain one entry per provider that contributed funds. Sum the `amount` fields to get the total wallet portion of the payment. Ordering is not guaranteed — treat the array as a set.
+**Multi-wallet stacking.** If your setup supports more than one wallet provider (for example, M-Wallet + Qitaf), `customer_wallet_transactions` will contain one entry per provider that contributed funds. Sum the `amount` fields to get the total wallet portion of the payment. Ordering is not guaranteed — treat the array as a set.
 
 **Cross-currency reservations.** When the wallet's native ledger currency differs from the order currency (rare, but possible), the entry includes `wallet_amount_native` and `wallet_currency` fields alongside `amount` and `currency`. Reconcile against the wallet ledger using the native values; use `amount`/`currency` for the order-side math.
 
@@ -418,6 +418,6 @@ Export Accounts or Ledger data as **CSV** or **XLSX** for offline analysis and a
 
 ## What's Next?
 
-- [Wallet for developers](/developers/payments/wallet/) — API and SDK integration.
+- [M-Wallet for developers](/developers/payments/wallet/) — API and SDK integration.
 - [Payment Management](/business/payment-management/) — viewing and managing all transactions.
-- [Refund to Wallet (developer reference)](/developers/operations#refund-to-wallet) — the API behind the dashboard refund flow.
+- [Refund to M-Wallet (developer reference)](/developers/operations#refund-to-wallet) — the API behind the dashboard refund flow.
