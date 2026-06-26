@@ -21,6 +21,13 @@ updates:
     # service on deploy. Auto-bumps would ship that mismatch unattended.
     ignore:
       - dependency-name: "docusaurus-plugin-mcp-server"
+      # docusaurus-theme-openapi-docs is swizzled (src/theme/Schema, SchemaItem,
+      # RequestSchema, ResponseSchema, ApiExplorer/*). Minor bumps change its
+      # internal API and break our swizzled components — e.g. 5.1.0 emptied
+      # translationIds, breaking Request/ResponseSchema. Upgrade manually with
+      # swizzle reconciliation, and keep its sibling plugin in lockstep.
+      - dependency-name: "docusaurus-theme-openapi-docs"
+      - dependency-name: "docusaurus-plugin-openapi-docs"
 
   - package-ecosystem: "npm"
     directory: "/mcp-server"
