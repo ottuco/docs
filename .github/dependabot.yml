@@ -1,0 +1,29 @@
+# Dependabot configuration.
+# Groups all npm updates per ecosystem into a single PR so security/version
+# bumps arrive batched instead of one PR per package. Two ecosystems: the
+# Docusaurus site at the repo root and the mcp-server backend.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      npm-root:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "build(deps)"
+
+  - package-ecosystem: "npm"
+    directory: "/mcp-server"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      npm-mcp-server:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "build(deps)"
