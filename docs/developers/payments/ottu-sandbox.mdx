@@ -190,7 +190,7 @@ Sessions created via the Checkout API support **multiple attempts** by default, 
 
 ### Scenario 2 — Mimic a Real Gateway's Response Shape
 
-By default the Sandbox stores a minimal stub (`{"card_number": "…"}`) as the gateway response. When you need your integration to handle a **real gateway's response shape** — the exact JSON that **KNET, MPGS, CyberSource, Ottu PG, or MyFatoorah** returns — the hosted pay page can **mimic** it. This lets you exercise your webhook parsing, reconciliation, and gateway-specific handling against production-shaped payloads without ever calling the live gateway.
+By default the Sandbox stores a minimal stub (`{"card_number": "…"}`) as the gateway response. When you need your integration to handle a **real gateway's response shape** — the exact JSON that **KNET, MPGS, CyberSource, or MyFatoorah** returns — the hosted pay page can **mimic** it. This lets you exercise your webhook parsing, reconciliation, and gateway-specific handling against production-shaped payloads without ever calling the live gateway.
 
 :::info[What "mimic" changes — and what it does not]
 The mimic selector only changes the **shape of the stored `gateway_response`**. It does **not** change the result: the **test card still decides** success / failed / error. Picking **KNET + the Failed card** produces a KNET-shaped *decline*; **KNET + the Success card** produces a KNET-shaped *capture*. The payload is realistic (with freshly randomized identifiers each run) and is stored **verbatim** — Ottu does not re-interpret it, so the transaction state always matches the card.
@@ -203,7 +203,7 @@ The mimic selector only changes the **shape of the stored `gateway_response`**. 
 **Steps:**
 
 1. Create a hosted-checkout session exactly as in [Scenario 1](#scenario-1--hosted-checkout-full-redirect-flow) and send the customer to `checkout_url`.
-2. On the Sandbox pay page, under **"Mimic PG Response" (optional)**, click the logo of the gateway you want to imitate — **KNET, MPGS, CyberSource, Ottu PG, or MyFatoorah**. (Click the active logo again to clear the selection and fall back to the default stub.)
+2. On the Sandbox pay page, under **"Mimic PG Response" (optional)**, click the logo of the gateway you want to imitate — **KNET, MPGS, CyberSource, or MyFatoorah**. (Click the active logo again to clear the selection and fall back to the default stub.)
 3. Click a **test card** to choose the outcome, then press **Pay**.
 
 **Result.** The transaction settles per the card, and the stored response — surfaced in the **`gateway_response`** field of your [payment webhook](/developers/webhooks/payment-events) (and in the dashboard transaction details) — matches the chosen gateway's real shape:
@@ -268,7 +268,7 @@ CyberSource + the **Success** card → an `ACCEPT` decision:
 </Tabs>
 
 :::note[Identifiers are randomized; outcome fields are fixed]
-Every mimic run generates fresh identifiers (`paymentid`, `tranid`, `order.id`, `transaction_id`, …) so repeated tests never collide. Only the **shape** and the **outcome-specific fields** (`result`, `gatewayCode`, `decision`, …) are deterministic; amounts and currency echo your session. Ottu PG and MyFatoorah follow the same principle in their own response shapes.
+Every mimic run generates fresh identifiers (`paymentid`, `tranid`, `order.id`, `transaction_id`, …) so repeated tests never collide. Only the **shape** and the **outcome-specific fields** (`result`, `gatewayCode`, `decision`, …) are deterministic; amounts and currency echo your session. MyFatoorah follows the same principle in its own response shape.
 :::
 
 :::tip[When to use mimic vs. the default stub]
@@ -770,7 +770,7 @@ The Sandbox uses the same APIs as any gateway. The interactive schemas:
     The capability is probably disabled on the MID. Enable `refund` in Operations for refunds, `auto_debit_enabled` for auto-debit, and `is_tokenizable` for saving cards. See [Setup](#setup).
   </FAQItem>
   <FAQItem question="How do I mimic a real gateway's response (e.g. KNET or MPGS) on the Sandbox?">
-    On the hosted Sandbox pay page, pick a gateway under **"Mimic PG Response"** before choosing a test card. The Sandbox then stores a `gateway_response` shaped exactly like that gateway (KNET, MPGS, CyberSource, Ottu PG, or MyFatoorah) returns — surfaced in your webhook's `gateway_response` field — while the **test card still decides** success / failed / error. See [Scenario 2](#scenario-2--mimic-a-real-gateways-response-shape).
+    On the hosted Sandbox pay page, pick a gateway under **"Mimic PG Response"** before choosing a test card. The Sandbox then stores a `gateway_response` shaped exactly like that gateway (KNET, MPGS, CyberSource, or MyFatoorah) returns — surfaced in your webhook's `gateway_response` field — while the **test card still decides** success / failed / error. See [Scenario 2](#scenario-2--mimic-a-real-gateways-response-shape).
   </FAQItem>
   <FAQItem question="Can I test capture and void on the Sandbox?">
     Yes — the full authorize → capture → void lifecycle is simulated. Set the MID Operation to `authorize` (and add `void` to Operations for void), authorize a payment, then capture or void it. To simulate a *declined* capture/void, add `{"sandbox_result": "failed"}` (or `"error"`) to the operation request's `extra`. See [Scenario 7](#scenario-7--authorize-capture--void).
