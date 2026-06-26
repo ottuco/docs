@@ -85,6 +85,10 @@ All operations use the same endpoint: `POST /b/pbl/v2/operation/`
 
     If you send a subsequent request with the same `Tracking-Key` and `session_id`, Ottu returns the latest status of the original operation instead of creating a new one. The key is stored in the child transaction data on success.
 
+    :::note `Tracking-Key` is for operations, not charges
+    Direct-charge endpoints ([Native Payments](/developers/payments/native-payments#idempotency) — Apple Pay, Google Pay, auto-debit, wallet, cash) use a separate **`Idempotency-Key`** header instead. A replayed `Tracking-Key` *returns the original operation's status*, whereas a replayed `Idempotency-Key` on a charge is *rejected with `409 Conflict`* before charging.
+    :::
+
 3. **Handle the response** — on success, the response includes the child transaction details (amount, state, gateway response). On failure, an error message indicates why the operation was rejected.
 
 :::tip
