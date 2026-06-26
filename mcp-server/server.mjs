@@ -312,6 +312,15 @@ async function start() {
       indexPath: INDEX_PATH,
       name: "ottu-docs",
       baseUrl: BASE_URL,
+      // Must match the build-side FlexSearch config in docusaurus.config.ts.
+      // The query-side index is reconstructed from the artifact, so its
+      // tokenizer/resolution have to mirror how the index was built or
+      // lookups won't match. Replaces the former 0.11.0 patch-package patch.
+      flexsearch: {
+        tokenize: "strict",
+        resolution: 3,
+        context: false,
+      },
     });
     ready = true;
   }
