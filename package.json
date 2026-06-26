@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "postinstall": "patch-package",
     "docusaurus": "docusaurus",
     "fetch-api": "tsx scripts/fetch-api-schema.ts",
     "enrich-api": "tsx scripts/enrich-api-spec.ts",
@@ -47,6 +48,7 @@
     "docusaurus-plugin-openapi-docs": "^5.0.0",
     "docusaurus-theme-openapi-docs": "^5.0.0",
     "openapi-to-postmanv2": "^6.0.0",
+    "patch-package": "^8.0.1",
     "postman-code-generators": "^2.1.0",
     "postman-collection": "^5.2.0",
     "tsx": "^4.21.0",
