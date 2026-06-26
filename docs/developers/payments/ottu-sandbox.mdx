@@ -647,7 +647,7 @@ The ticket lists "failed to post webhook" as an outcome to validate. To set expe
 **What you will observe:**
 
 - The payment itself still succeeds (`paid`) — webhook delivery is independent of the payment result.
-- The failure is recorded on the payment attempt (`disclosure_url_error`); `disclosed_to_merchant` stays `false`.
+- The failure is recorded on the payment attempt in `disclosure_url_error` — the field to check to detect a failed delivery.
 - **Retries happen only on timeouts** (governed by your Webhook settings); a non-`2xx` or connection error is **not** retried.
 - If enabled, Ottu emails a webhook-error alert to the configured address.
 
