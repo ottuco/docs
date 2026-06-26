@@ -281,18 +281,8 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
-                  label: "How Outcome Control Works",
-                  href: "/developers/payments/ottu-sandbox#how-outcome-control-works",
-                },
-                {
-                  type: "link",
                   label: "Setup",
                   href: "/developers/payments/ottu-sandbox#setup",
-                },
-                {
-                  type: "link",
-                  label: "Test Cards",
-                  href: "/developers/payments/ottu-sandbox#test-cards",
                 },
                 {
                   type: "link",
@@ -301,8 +291,13 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
-                  label: "Limitations",
-                  href: "/developers/payments/ottu-sandbox#limitations",
+                  label: "API Reference",
+                  href: "/developers/payments/ottu-sandbox#api-reference",
+                },
+                {
+                  type: "link",
+                  label: "Best Practices",
+                  href: "/developers/payments/ottu-sandbox#best-practices",
                 },
                 {
                   type: "link",
