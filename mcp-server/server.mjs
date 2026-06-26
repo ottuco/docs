@@ -14,6 +14,14 @@ const DATA_DIR = path.join(__dirname, "data");
 const DOCS_PATH = path.join(DATA_DIR, "docs.json");
 const INDEX_PATH = path.join(DATA_DIR, "search-index.json");
 
+// The flexsearch search index (built by docusaurus-plugin-mcp-server) can balloon
+// far beyond the docs themselves because of contextual indexing over full page
+// content. Loading a multi-hundred-MB index OOMs this small service and fails the
+// deploy readiness probe — taking the whole docs site's deployment down with it.
+// Above this cap we skip loading the index and run search-degraded (doc lookups +
+// webhook relay still work) instead of crashing. Shrink the index to restore search.
+const MAX_INDEX_BYTES = 50 * 1024 * 1024; // 50 MB
+
 // ── Webhook Relay ────────────────────────────────────────────────────────────
 // In-memory store for webhook payloads, keyed by orderId. Clients poll for
 // updates via GET /:orderId/events.json?since=<id> — SSE was dropped because
@@ -198,6 +206,31 @@ async function handleSeedWallet(req, res) {
 
 // ── MCP Artifacts ────────────────────────────────────────────────────────────
 
+// Read a fetch body (web ReadableStream) into a UTF-8 string, returning null if
+// the decoded byte count exceeds maxBytes. Counting decoded chunks (not the
+// Content-Length header) is what makes the cap robust against gzip.
+async function readCapped(body, maxBytes) {
+  if (!body) return null;
+  const reader = body.getReader();
+  const chunks = [];
+  let total = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > maxBytes) {
+        await reader.cancel();
+        return null;
+      }
+      chunks.push(Buffer.from(value));
+    }
+  } finally {
+    reader.releaseLock?.();
+  }
+  return Buffer.concat(chunks).toString("utf8");
+}
+
 async function fetchArtifacts() {
   const dataUrl = `${BASE_URL}/_mcp-data`;
   console.log(`Fetching MCP artifacts from ${dataUrl}...`);
@@ -218,7 +251,20 @@ async function fetchArtifacts() {
 
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(DOCS_PATH, await docsRes.text());
-  fs.writeFileSync(INDEX_PATH, await indexRes.text());
+
+  // Guard against an oversized index (see MAX_INDEX_BYTES). Content-Length is
+  // unreliable — the docs origin gzips responses, so the header reports the
+  // compressed size while the body decompresses to something far larger. So we
+  // stream the (decoded) body and bail past the cap, bounding memory regardless.
+  const indexText = await readCapped(indexRes.body, MAX_INDEX_BYTES);
+  if (indexText === null) {
+    fs.writeFileSync(INDEX_PATH, "{}");
+    console.warn(
+      `Search index exceeds the ${MAX_INDEX_BYTES / 1048576}MB cap — skipping load. MCP search is DEGRADED until the index is shrunk; doc lookups and webhook relay are unaffected.`
+    );
+  } else {
+    fs.writeFileSync(INDEX_PATH, indexText);
+  }
 
   const docsSize = (fs.statSync(DOCS_PATH).size / 1024).toFixed(0);
   const indexSize = (fs.statSync(INDEX_PATH).size / 1024).toFixed(0);
