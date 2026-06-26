@@ -270,6 +270,43 @@ const sidebars: SidebarsConfig = {
               ],
             },
             {
+              type: "category",
+              label: "Ottu Sandbox",
+              link: { type: "doc", id: "developers/payments/ottu-sandbox" },
+              items: [
+                {
+                  type: "link",
+                  label: "When to Use",
+                  href: "/developers/payments/ottu-sandbox#when-to-use",
+                },
+                {
+                  type: "link",
+                  label: "Setup",
+                  href: "/developers/payments/ottu-sandbox#setup",
+                },
+                {
+                  type: "link",
+                  label: "Guide",
+                  href: "/developers/payments/ottu-sandbox#guide",
+                },
+                {
+                  type: "link",
+                  label: "API Reference",
+                  href: "/developers/payments/ottu-sandbox#api-reference",
+                },
+                {
+                  type: "link",
+                  label: "Best Practices",
+                  href: "/developers/payments/ottu-sandbox#best-practices",
+                },
+                {
+                  type: "link",
+                  label: "FAQ",
+                  href: "/developers/payments/ottu-sandbox#faq",
+                },
+              ],
+            },
+            {
               type: "doc",
               id: "developers/payments/sandbox",
               label: "Sandbox & Test Cards",
