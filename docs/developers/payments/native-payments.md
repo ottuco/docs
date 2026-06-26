@@ -240,7 +240,7 @@ Use the response values to reconcile the payment in your backend and update your
 
 ### Idempotency
 
-Native Payments are **direct-charge** endpoints — a single request charges the customer immediately. A flaky network or an over-eager retry can therefore send the same charge twice. To make a charge safe to retry, send an **`Idempotency-Key`** request header with a value unique to that charge attempt (a UUID is ideal):
+Native Payments are **direct-charge** endpoints: one request charges the customer immediately, so a flaky network or an over-eager retry can charge twice. To make a charge safe to retry, send an **`Idempotency-Key`** request header. Generate one value per charge attempt — a UUID works well — and send that *same* value on every retry of that attempt; a fresh value for the same charge would defeat the protection:
 
 <CodeBlock language="bash" title="Apple Pay native payment with Idempotency-Key">{`curl -X POST "${OTTU_CONNECT_BASE_URL}/b/pbl/v2/payment/apple-pay/" \\
   -H "Authorization: Api-Key your_api_key" \\
@@ -248,13 +248,15 @@ Native Payments are **direct-charge** endpoints — a single request charges the
   -H "Idempotency-Key: 5f3b9c2a-1e4d-4a7b-9c8e-2d6f0a1b3c4d" \\
   -d '{ "session_id": "your_session_id", "pg_code": "apple-pay-gateway", "payload": { } }'`}</CodeBlock>
 
-**How it works** — the key is scoped to the transaction (its [`session_id`](/developers/payments/checkout-api/)):
+The key is scoped to the transaction (its [`session_id`](/developers/payments/checkout-api/)) and recorded **only after a successful charge**. That single rule produces three behaviors:
 
-1. If the same key was **already recorded** on the transaction by a previous **successful** charge, the endpoint rejects the request with **`409 Conflict`** *before any charge is attempted* — so a retry can never double-charge the customer.
-2. The key is **recorded only after a successful charge**. If a charge fails, its key is *not* stored, so you can safely retry the same key — a genuine retry of a failed payment still goes through.
-3. **Omitting the header** keeps the original behavior — no replay protection. Existing integrations are unaffected.
+| Scenario | What happens |
+|---|---|
+| Replaying a key from a **successful** charge | Rejected with `409 Conflict` **before any charge** — the customer is never double-charged |
+| Reusing a key after a **failed** charge | The charge proceeds — failed payments stay retryable, because the key was never recorded |
+| Sending **no** `Idempotency-Key` header | No replay protection — unchanged behavior, existing integrations unaffected |
 
-A rejected replay returns:
+A blocked replay returns `409 Conflict`:
 
 ```json title="409 Conflict — replayed Idempotency-Key"
 {
@@ -263,7 +265,7 @@ A rejected replay returns:
 }
 ```
 
-The same `Idempotency-Key` contract applies to every direct-charge endpoint:
+The contract applies to every direct-charge endpoint:
 
 | Endpoint | Charge |
 |---|---|
@@ -273,16 +275,12 @@ The same `Idempotency-Key` contract applies to every direct-charge endpoint:
 | `POST /b/pbl/v2/payment/wallet/` | [M-Wallet](/developers/payments/wallet/) balance |
 | `POST /b/pbl/v2/payment/cash/` | Cash acknowledgement |
 
-:::tip
-Generate one `Idempotency-Key` per charge attempt and reuse it across retries of *that* attempt. Reusing a fresh UUID for an unrelated charge would defeat the protection.
-:::
-
 :::note Idempotency-Key vs. Tracking-Key
 This is distinct from the [`Tracking-Key`](/developers/operations#guide) header used by the [Operations API](/developers/operations) (refund, capture, void). A replayed `Tracking-Key` *returns the latest status* of the original operation, whereas a replayed `Idempotency-Key` on a direct charge is *rejected with 409*. Use `Idempotency-Key` for charges, `Tracking-Key` for operations.
 :::
 
 :::warning Concurrent duplicates
-Two identical requests fired at the exact same moment are serialized internally — the first to acquire the charge proceeds and the other is rejected with `409 Conflict`. Still, prefer sequential retries (wait for a response or timeout before retrying) over firing concurrent duplicates.
+Two identical requests sent at the same instant are serialized internally — the first to claim the charge proceeds, the other gets `409 Conflict`. Prefer sequential retries (wait for a response or timeout before retrying) over firing duplicates in parallel.
 :::
 
 ### Use Cases
