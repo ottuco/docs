@@ -242,11 +242,13 @@ Use the response values to reconcile the payment in your backend and update your
 
 Native Payments are **direct-charge** endpoints: one request charges the customer immediately, so a flaky network or an over-eager retry can charge twice. To make a charge safe to retry, send an **`Idempotency-Key`** request header. Generate one value per charge attempt — a UUID works well — and send that *same* value on every retry of that attempt; a fresh value for the same charge would defeat the protection:
 
-<CodeBlock language="bash" title="Apple Pay native payment with Idempotency-Key">{`curl -X POST "${OTTU_CONNECT_BASE_URL}/b/pbl/v2/payment/apple-pay/" \\
+<CodeBlock language="bash" title="Auto-debit charge with Idempotency-Key">{`curl -X POST "${OTTU_CONNECT_BASE_URL}/b/pbl/v2/payment/auto-debit/" \\
   -H "Authorization: Api-Key your_api_key" \\
   -H "Content-Type: application/json" \\
   -H "Idempotency-Key: 5f3b9c2a-1e4d-4a7b-9c8e-2d6f0a1b3c4d" \\
-  -d '{ "session_id": "your_session_id", "pg_code": "apple-pay-gateway", "payload": { } }'`}</CodeBlock>
+  -d '{ "session_id": "your_session_id", "token": "saved_card_token" }'`}</CodeBlock>
+
+The same `Idempotency-Key` header works on every direct-charge endpoint — Apple Pay, Google Pay, wallet, and cash included.
 
 The key is scoped to the transaction (its [`session_id`](/developers/payments/checkout-api/)) and recorded **only after a successful charge**. That single rule produces three behaviors:
 
@@ -276,7 +278,7 @@ The contract applies to every direct-charge endpoint:
 | `POST /b/pbl/v2/payment/cash/` | Cash acknowledgement |
 
 :::note Idempotency-Key vs. Tracking-Key
-This is distinct from the [`Tracking-Key`](/developers/operations#guide) header used by the [Operations API](/developers/operations) (refund, capture, void). A replayed `Tracking-Key` *returns the latest status* of the original operation, whereas a replayed `Idempotency-Key` on a direct charge is *rejected with 409*. Use `Idempotency-Key` for charges, `Tracking-Key` for operations.
+This is distinct from the [`Tracking-Key`](/developers/operations#step-by-step) header used by the [Operations API](/developers/operations) (refund, capture, void). A replayed `Tracking-Key` *returns the latest status* of the original operation, whereas a replayed `Idempotency-Key` on a direct charge is *rejected with 409*. Use `Idempotency-Key` for charges, `Tracking-Key` for operations.
 :::
 
 :::warning Concurrent duplicates
