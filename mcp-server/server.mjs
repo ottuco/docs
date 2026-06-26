@@ -303,6 +303,19 @@ async function start() {
   let mcpServer = null;
   let ready = false;
 
+  // Build (or rebuild) the in-memory MCP server from the artifact files currently
+  // on disk. Reused by startup and by POST /refresh — so a refresh actually
+  // reloads the index instead of only re-downloading the files.
+  function buildMcpServer() {
+    mcpServer = new McpDocsServer({
+      docsPath: DOCS_PATH,
+      indexPath: INDEX_PATH,
+      name: "ottu-docs",
+      baseUrl: BASE_URL,
+    });
+    ready = true;
+  }
+
   const httpServer = http.createServer(async (req, res) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -329,6 +342,7 @@ async function start() {
     if (req.method === "POST" && url === "/refresh") {
       try {
         await fetchArtifacts();
+        buildMcpServer(); // reload the in-memory index, not just the files on disk
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ status: "refreshed" }));
       } catch (err) {
@@ -391,13 +405,7 @@ async function start() {
   // Fetch artifacts in background — don't block webhook relay
   fetchWithRetry()
     .then(() => {
-      mcpServer = new McpDocsServer({
-        docsPath: DOCS_PATH,
-        indexPath: INDEX_PATH,
-        name: "ottu-docs",
-        baseUrl: BASE_URL,
-      });
-      ready = true;
+      buildMcpServer();
       console.log("MCP server ready.");
     })
     .catch((err) => {
