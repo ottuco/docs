@@ -2144,13 +2144,15 @@
     "name": "Telr",
     "countries": [
       "UAE",
-      "Saudi Arabia"
+      "KSA"
     ],
     "currencies": [
       "AED",
-      "SAR"
+      "SAR",
+      "BHD",
+      "JOD"
     ],
-    "inquiryMinutes": 8,
+    "inquiryMinutes": 10,
     "operations": [
       "purchase"
     ],
@@ -2158,7 +2160,15 @@
     "category": "gateway",
     "operationMode": "purchase",
     "logo": "telr.svg",
-    "acceptedAt": [],
+    "acceptedAt": [
+      "First Abu Dhabi Bank",
+      "Emirates NBD",
+      "Mashreq",
+      "Abu Dhabi Commercial Bank",
+      "Commercial Bank of Dubai",
+      "Bank AlJazira",
+      "Saudi Awwal Bank"
+    ],
     "cardBrands": [
       "Visa",
       "Mastercard",
@@ -2166,8 +2176,6 @@
       "UnionPay"
     ],
     "digitalWallets": [
-      "Apple Pay",
-      "Samsung Pay",
       "PayPal",
       "Tabby",
       "STC Pay",
