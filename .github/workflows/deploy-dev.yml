@@ -41,14 +41,44 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger DigitalOcean App Platform Deployment
+        id: deploy
         run: |
           echo "Deploying to staging environment..."
 
-          curl -X POST \
+          resp=$(curl -sS -X POST \
             -H "Authorization: Bearer ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" \
             -H "Content-Type: application/json" \
             "https://api.digitalocean.com/v2/apps/${{ secrets.DO_APP_ID_DEV }}/deployments" \
-            --fail-with-body
+            --fail-with-body)
+          id=$(echo "$resp" | jq -r '.deployment.id')
+          echo "Triggered deployment $id"
+          echo "deployment_id=$id" >> "$GITHUB_OUTPUT"
 
-      - name: Deployment Triggered
-        run: echo "Deployment triggered successfully"
+      # Wait for the deployment to go live, then refresh the MCP index so search
+      # reflects the just-published docs (the mcp loads the index from the public
+      # URL at startup, which during a deploy is still the previous build).
+      # Best-effort: this step must never fail the workflow.
+      - name: Wait for deploy, then refresh MCP index
+        run: |
+          app="${{ secrets.DO_APP_ID_DEV }}"
+          id="${{ steps.deploy.outputs.deployment_id }}"
+          if [ -z "$id" ] || [ "$id" = "null" ]; then
+            echo "No deployment id — skipping refresh."; exit 0
+          fi
+          for i in $(seq 1 60); do
+            phase=$(curl -sS \
+              -H "Authorization: Bearer ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" \
+              "https://api.digitalocean.com/v2/apps/$app/deployments/$id" \
+              | jq -r '.deployment.phase')
+            echo "deployment $id phase=$phase"
+            case "$phase" in
+              ACTIVE)
+                echo "Deployment live — refreshing MCP index..."
+                curl -sS -X POST https://docs.ottu.dev/mcp/refresh && echo " MCP index refreshed"
+                exit 0 ;;
+              ERROR|CANCELED|SUPERSEDED)
+                echo "Deployment ended as $phase — skipping refresh."; exit 0 ;;
+            esac
+            sleep 15
+          done
+          echo "Timed out waiting for ACTIVE — skipping refresh."; exit 0

@@ -209,7 +209,7 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "category",
-              label: "Wallet",
+              label: "M-Wallet",
               link: { type: "doc", id: "developers/payments/wallet/index" },
               items: [
                 {
@@ -266,6 +266,43 @@ const sidebars: SidebarsConfig = {
                   type: "doc",
                   id: "developers/payments/checkout-sdk/flutter",
                   label: "Flutter",
+                },
+              ],
+            },
+            {
+              type: "category",
+              label: "Ottu Sandbox",
+              link: { type: "doc", id: "developers/payments/ottu-sandbox" },
+              items: [
+                {
+                  type: "link",
+                  label: "When to Use",
+                  href: "/developers/payments/ottu-sandbox#when-to-use",
+                },
+                {
+                  type: "link",
+                  label: "Setup",
+                  href: "/developers/payments/ottu-sandbox#setup",
+                },
+                {
+                  type: "link",
+                  label: "Guide",
+                  href: "/developers/payments/ottu-sandbox#guide",
+                },
+                {
+                  type: "link",
+                  label: "API Reference",
+                  href: "/developers/payments/ottu-sandbox#api-reference",
+                },
+                {
+                  type: "link",
+                  label: "Best Practices",
+                  href: "/developers/payments/ottu-sandbox#best-practices",
+                },
+                {
+                  type: "link",
+                  label: "FAQ",
+                  href: "/developers/payments/ottu-sandbox#faq",
                 },
               ],
             },
@@ -628,12 +665,12 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: "category",
-          label: "Wallet",
+          label: "M-Wallet",
           link: { type: "doc", id: "business/wallet/index" },
           items: [
             {
               type: "link",
-              label: "Why use Wallet",
+              label: "Why use M-Wallet",
               href: "/business/wallet#why-use-wallet",
             },
             {
@@ -643,12 +680,12 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "link",
-              label: "Refund to Wallet",
+              label: "Refund to M-Wallet",
               href: "/business/wallet#refund-to-wallet",
             },
             {
               type: "link",
-              label: "Wallet at Checkout",
+              label: "M-Wallet at Checkout",
               href: "/business/wallet#wallet-at-checkout",
             },
             {
@@ -658,7 +695,7 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "link",
-              label: "Wallet Reporting",
+              label: "M-Wallet Reporting",
               href: "/business/wallet#wallet-reporting",
             },
             {

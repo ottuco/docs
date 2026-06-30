@@ -168,7 +168,7 @@ export default function WalletDemoInner() {
     <div className={styles.container}>
       {state.status === "idle" && (
         <div className={styles.idleCard}>
-          <h3 className={styles.idleTitle}>Try Wallet at Checkout</h3>
+          <h3 className={styles.idleTitle}>Try M-Wallet at Checkout</h3>
           <p className={styles.idleDescription}>
             Seed a fresh customer's wallet through the docs backend, then pay with it in
             the embedded SDK. No real charges.

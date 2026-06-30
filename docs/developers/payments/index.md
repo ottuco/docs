@@ -30,11 +30,17 @@ Process payments directly when you manage your own UI — Apple Pay buttons, Goo
 
 [**Go to Native Payments →**](native-payments.md)
 
-### Wallet (Stored Balance)
+### M-Wallet (Stored Balance) {#wallet-stored-balance}
 
 Refund payments to a customer's wallet balance instead of returning funds via the original gateway. Customers can spend wallet credit at any future Ottu checkout in the same currency — fully or partially alongside another payment method.
 
-[**Go to Wallet →**](wallet/index.mdx)
+[**Go to M-Wallet →**](wallet/index.mdx)
+
+### Ottu Sandbox (Simulated Gateway)
+
+A built-in, simulated payment gateway for testing every payment scenario end-to-end — success, failure, refunds, tokens, recurring charges, authorizations — with no live gateway and no real money. You decide the outcome in advance via the test card you use or the Checkout `extra` object.
+
+[**Go to Ottu Sandbox →**](ottu-sandbox.mdx)
 
 ### Sandbox & Test Cards
 

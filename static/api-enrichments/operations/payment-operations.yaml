@@ -25,30 +25,47 @@ operations:
 
       Requires at least one identifier: `session_id` or `order_no`.
 
+  # ── Idempotency-Key on direct-charge endpoints (#144299) ──
+  # Shared note appended to every server-to-server charge endpoint so the
+  # interactive API reference documents the replay-protection contract. The
+  # `&idempotency_note` anchor keeps the wording identical across surfaces.
   auto_debit:
     permissions:
       - $perm:api_key_admin
       - $perm:basic_auth_auto_debit
+    description_append: &idempotency_note |-
+      **Idempotency.** Pass an `Idempotency-Key` request header to make this charge safe to retry. If the same key was already recorded on the transaction by a previous **successful** charge, the request is rejected with `409 Conflict` **before any charge is attempted** — so a network retry can never double-charge the customer. The key is stored only after a successful charge, so retrying a **failed** charge with the same key is still allowed. Omitting the header preserves the original, non-idempotent behavior. See [Native Payments → Idempotency]({{apiBaseUrl}}/payments/native-payments#idempotency) for the full contract.
 
   auto_debit_2:
     permissions:
       - $perm:api_key_admin
       - $perm:basic_auth_auto_debit
+    description_append: *idempotency_note
 
   apple_native_payment:
     permissions:
       - $perm:api_key_admin
       - $perm:basic_auth_native_payment
+    description_append: *idempotency_note
 
   google_native_payment:
     permissions:
       - $perm:api_key_admin
       - $perm:basic_auth_native_payment
+    description_append: *idempotency_note
+
+  wallet_native_payment:
+    permissions:
+      - $perm:api_key_admin
+      - $perm:basic_auth_native_payment
+    description_append: *idempotency_note
 
   cash_payment_acknowledgement:
     permissions:
       - $perm:api_key_admin
+    description_append: *idempotency_note
 
   cash_payment_acknowledgement_2:
     permissions:
       - $perm:api_key_admin
+    description_append: *idempotency_note

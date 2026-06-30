@@ -8,7 +8,7 @@ export default function WalletDemo(): React.JSX.Element {
       fallback={
         <div className={styles.container}>
           <div className={styles.idleCard}>
-            <h3 className={styles.idleTitle}>Try Wallet at Checkout</h3>
+            <h3 className={styles.idleTitle}>Try M-Wallet at Checkout</h3>
             <p className={styles.idleDescription}>Loading…</p>
           </div>
         </div>
