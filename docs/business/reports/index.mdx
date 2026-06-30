@@ -6,6 +6,7 @@ toc_max_heading_level: 3
 ---
 
 import StepGuide from "@site/src/components/StepGuide";
+import { walletExportSteps } from "@site/src/data/wallet-export-steps";
 
 # Reports
 
@@ -91,32 +92,13 @@ The main export source. Covers all payment transactions created through any [plu
 
 ### Wallet Reports
 
-If your account uses the [Wallet](/business/wallet/) feature, you can export wallet activity (credits, debits, and balance history) from the wallet reports screen.
+If your account uses the [M-Wallet](/business/wallet/) feature, you can export wallet ledger entries — credits, debits, and operations — directly from any customer wallet account.
 
-**Where:** Dashboard → Wallet → Reports → **Export**
+**Where:** Dashboard → Wallet → Accounts → (open an account) → **Export Entries**
 
-**What you get:** One row per wallet event, including the event type (credit/debit), amount, currency, customer ID, and timestamp.
+**What you get:** One row per wallet ledger entry, including event type (credit/debit/reservation), amount, currency, customer ID, status, and linked payment session.
 
-<StepGuide steps={[
-  {
-    title: "Open Wallet Reports",
-    description: <>From the Ottu Dashboard, navigate to <strong>Wallet</strong> in the left sidebar, then click <strong>Reports</strong>.</>,
-    image: "/img/business/reports/wallet-export-01-open.png",
-    imageAlt: "Wallet Reports page open in the Ottu Dashboard",
-  },
-  {
-    title: "Apply date filters",
-    description: <>Use the date range filter to scope the wallet activity you want to export, then click <strong>Search</strong>.</>,
-    image: "/img/business/reports/wallet-export-02-filter.png",
-    imageAlt: "Date range filter applied on the Wallet Reports page",
-  },
-  {
-    title: "Click Export",
-    description: <>Click <strong>Export</strong>. The file is queued and will appear in <a href="#download-your-reports">Generated Reports</a> once ready.</>,
-    image: "/img/business/reports/wallet-export-03-export.png",
-    imageAlt: "Export button on the Wallet Reports toolbar",
-  },
-]} />
+<StepGuide steps={walletExportSteps} />
 
 ### Other Export Sources
 
@@ -140,25 +122,25 @@ All files you have exported — from any screen — are collected in one place: 
     title: "Open Generated Reports",
     description: <>From the Ottu Dashboard, click <strong>Generated Reports</strong> in the left sidebar. You will see a list of all reports you have queued, sorted with the most recent at the top.</>,
     image: "/img/business/reports/generated-reports-01-open.png",
-    imageAlt: "Generated Reports page showing a list of report files with statuses",
+    imageAlt: "Generated Reports page showing a table of exported report files",
   },
   {
-    title: "Check the report status",
-    description: <>Each report shows a status badge:<br /><br /><ul><li><strong>Pending</strong> — the file is still being generated, check back in a moment</li><li><strong>Ready</strong> — the file is available to download</li><li><strong>Failed</strong> — generation encountered an error; try exporting again</li></ul></>,
+    title: "Find your report in the list",
+    description: <>The table lists each export with its date, module, format, report type, number of records, file size, the data range it covers (<strong>Duration</strong>), who exported it, and an expiry date (<strong>Available Until</strong>). Your most recent export appears at the top. If you just queued a report and the download icon has not appeared yet, the file is still being generated — wait a moment and refresh the page.</>,
     image: "/img/business/reports/generated-reports-02-statuses.png",
-    imageAlt: "Close-up of report status badges: Pending, Ready, and Failed",
+    imageAlt: "Generated Reports table showing columns: Export Date, Module, Format, Report Type, Records, Size, Duration, Available Until, Exported By, and a download icon",
   },
   {
-    title: "Download the file",
-    description: <>Click the <strong>Download</strong> button next to a <em>Ready</em> report. The CSV file saves to your browser's default Downloads folder.</>,
+    title: "Click the download icon",
+    description: <>Click the green <strong>download icon</strong> (↓) in the rightmost column next to your report. The CSV file saves to your browser's default Downloads folder.</>,
     image: "/img/business/reports/generated-reports-03-download.png",
-    imageAlt: "Download button highlighted next to a Ready report",
+    imageAlt: "Download icon highlighted in the rightmost column next to a report row",
   },
   {
-    title: "Re-download anytime",
-    description: <>Ready reports stay in the list indefinitely. You can click <strong>Download</strong> again at any time to get another copy of the same file. Nothing changes between downloads — the file reflects the data at the moment you clicked Export.</>,
+    title: "Re-download before the expiry date",
+    description: <>Each report shows an <strong>Available Until</strong> date — typically 30 days from when you exported it. You can click the download icon again at any time before that date to get another copy. Nothing changes between downloads — the file reflects the data at the moment you clicked Export.</>,
     image: "/img/business/reports/generated-reports-04-redownload.png",
-    imageAlt: "Generated Reports list showing an older report still available to re-download",
+    imageAlt: "Generated Reports list showing the Available Until date column next to older reports still available to download",
   },
 ]} />
 
