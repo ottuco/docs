@@ -52,6 +52,8 @@ export const BANK_LOGOS: Record<string, string> = {
   ADIB: "adib.png",
   "Abu Dhabi Islamic Bank": "adib.png",
   FAB: "fab.png",
+  "First Abu Dhabi Bank": "fab.svg",
+  "Emirates NBD": "emirates-nbd.png",
   Mashreq: "mashreq.png",
   // International banks
   ICBC: "icbc.png",
@@ -116,6 +118,7 @@ export const CURRENCY_FLAGS: Record<string, string> = {
   OMR: "om.png",
   QAR: "qa.png",
   SAR: "sa.png",
+  JOD: "jo.svg",
   EGP: "eg.png",
   INR: "in.png",
   IDR: "id.png",
