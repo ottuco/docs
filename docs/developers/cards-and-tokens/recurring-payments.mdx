@@ -15,10 +15,6 @@ import RecurringFlow from "@site/src/diagrams/RecurringFlow";
 
 Auto-debit is a financial arrangement where a customer authorizes a merchant to automatically deduct money from their saved card. This covers subscriptions, installments, recurring billing, and event-based charges — all processed without the customer needing to be present after the initial setup.
 
-:::tip[Boost Your Integration]
-Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
-:::
-
 ## When to Use
 
 - **Subscriptions** — monthly or annual recurring charges for SaaS, memberships, or content
@@ -28,13 +24,19 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/
 
 ## Setup
 
+New to Ottu? Run through the [Quick Start](/developers/getting-started/) to make your first API call and to set up [Authentication](/developers/getting-started/authentication/) — every auto-debit charge is a server-to-server request signed with your [private API key](/developers/getting-started/authentication/#api-key-auth).
+
 Before implementing auto-debit, ensure you have:
 
-- A [Payment Gateway](/developers/payments/payment-methods/) with auto-debit capability enabled
+- A [Payment Gateway](/developers/payments/payment-methods/) (MID) with auto-debit enabled — only **one** gateway can be used per auto-debit transaction (see the note below)
 - The [Checkout API](/developers/payments/checkout-api/) for creating payment sessions
 - [Tokenization](/developers/cards-and-tokens/tokenization/) set up — cards must be tokenized before they can be auto-debited
 - A [webhook endpoint](/developers/webhooks/) configured to receive payment notifications
 - Familiarity with the [User Cards API](/developers/cards-and-tokens/user-cards/) for card management
+
+:::note[One `pg_code` per auto-debit payment]
+An auto-debit payment must route through a single gateway. Always pass exactly one [`pg_code`](/developers/payments/payment-methods/) — for an MID that has auto-debit enabled — when you create the CIT session and on every subsequent MIT charge. Use the same `pg_code` for the whole lifetime of the agreement.
+:::
 
 ## Guide
 
@@ -44,6 +46,10 @@ Auto-debit payments involve two types of transactions:
 
 - **CIT (Cardholder Initiated Transaction)** — The first payment where the customer is present, enters their card details, and authorizes future charges. This establishes the agreement and saves the card token.
 - **MIT (Merchant Initiated Transaction)** — Subsequent automatic charges triggered by the merchant using the saved token. The customer is not present during these transactions.
+
+:::note[A successful CIT is required before any MIT]
+A CIT must complete successfully before you can run an MIT. The Native Payments API checks for a successful CIT on the customer's agreement, so a token that never completed a customer-present CIT can't be charged.
+:::
 
 #### Agreement
 
@@ -73,7 +79,7 @@ Only **one card** can be linked to an agreement at any time. To change the card,
 1. **CIT** — Merchant creates a session with `payment_type: auto_debit` and an `agreement` object.
 2. **Payment** — Customer enters their card via the Checkout SDK or hosted page and completes 3DS authentication.
 3. **Webhook** — Ottu delivers the token. Save `token.token` and `token.pg_code` for future charges.
-4. **MIT** — Merchant charges the token by creating a new session, then calling the Native Payments API (or using [One-Step Checkout](/developers/payments/checkout-api#one-step-checkout)).
+4. **MIT** — Merchant charges the token by creating a new session, then calling the [Native Payments API](/developers/payments/native-payments/) (or using [One-Step Checkout](/developers/payments/checkout-api#one-step-checkout) for a single call).
 5. **Result** — The Native Payments API (or One-Step Checkout) returns the payment result **directly in the API response** — there is no webhook for MIT charges. No customer interaction needed.
 
 ### Live Demo
@@ -86,6 +92,10 @@ Experience the complete recurring payment lifecycle. Save a test card, watch the
 
 ### Step-by-Step
 
+:::tip[Boost Your Integration]
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
+:::
+
 #### First Payment (CIT)
 
 <StepGuide steps={[
@@ -94,10 +104,10 @@ Experience the complete recurring payment lifecycle. Save a test card, watch the
     description: <>Before creating a session, call the <a href="/developers/payments/payment-methods/">Payment Methods API</a> with <code>auto_debit: true</code> to discover which gateways support tokenization and auto-debit.<br /><br /><pre><code>{`POST /b/pbl/v2/payment-methods/
 
 {
-  "plugin": "payment_request",
-  "operation": "purchase",
-  "currencies": ["KWD"],
-  "auto_debit": true
+"plugin": "payment_request",
+"operation": "purchase",
+"currencies": ["KWD"],
+"auto_debit": true
 }`}</code></pre> Use the returned <code>pg_codes</code> in the next step.</>,
   },
   {
@@ -105,54 +115,54 @@ Experience the complete recurring payment lifecycle. Save a test card, watch the
     description: <>Create a session with <code>payment_type: auto_debit</code> and the <code>agreement</code> object. Use a unique <code>customer_id</code> per customer — all future MIT charges and saved cards are associated with this ID.<br /><br /><pre><code>{`POST /b/checkout/v1/pymt-txn/
 
 {
-  "type": "e_commerce",
-  "amount": "200.00",
-  "payment_type": "auto_debit",
-  "currency_code": "KWD",
-  "pg_codes": ["credit-card"],
-  "customer_id": "cust_123",
-  "webhook_url": "https://yourwebsite.com/webhook",
-  "agreement": {
-    "id": "A123456789",
-    "type": "recurring",
-    "amount_variability": "fixed",
-    "start_date": "01/04/2026",
-    "expiry_date": "01/04/2027",
-    "cycle_interval_days": 30,
-    "total_cycles": 12,
-    "frequency": "monthly",
-    "seller": {
-      "name": "Your-Business-Name",
-      "short_name": "YBN",
-      "category_code": "1234"
-    }
-  }
+"type": "e_commerce",
+"amount": "200.00",
+"payment_type": "auto_debit",
+"currency_code": "KWD",
+"pg_codes": ["credit-card"],
+"customer_id": "cust_123",
+"webhook_url": "https://yourwebsite.com/webhook",
+"agreement": {
+"id": "A123456789",
+"type": "recurring",
+"amount_variability": "fixed",
+"start_date": "01/04/2026",
+"expiry_date": "01/04/2027",
+"cycle_interval_days": 30,
+"total_cycles": 12,
+"frequency": "monthly",
+"seller": {
+"name": "Your-Business-Name",
+"short_name": "YBN",
+"category_code": "1234"
+}
+}
 }`}</code></pre></>,
   },
   {
     title: "Collect Card Details",
-    description: <>Collect the customer's card using one of these options:<br /><br />• <strong><a href="../payments/checkout-sdk/">Checkout SDK</a></strong> (recommended) — initialize with the <code>session_id</code><br />• <strong>Redirect to <code>checkout_url</code></strong> — sends the customer to Ottu's hosted checkout page<br />• <strong>Redirect to <code>payment_methods.redirect_url</code></strong> — sends the customer directly to a specific gateway's card entry page</>,
+    description: <>Collect the customer's card using one of these options:<br /><br />• <strong><a href="/developers/payments/checkout-sdk/">Checkout SDK</a></strong> (recommended) — initialize with the <code>session_id</code><br />• <strong>Redirect to <code>checkout_url</code></strong> — sends the customer to Ottu's hosted checkout page<br />• <strong>Redirect to <code>payment_methods.redirect_url</code></strong> — sends the customer directly to a specific gateway's card entry page</>,
   },
   {
     title: "Receive Webhook with Token",
-    description: <>After the customer completes the payment, Ottu sends a <a href="../webhooks/payment-events">webhook notification</a> with the token:<br /><br /><pre><code>{`{
-  "session_id": "4a462681df6aab64e27cedc9bbf733cd6442578b",
-  "result": "success",
-  "state": "paid",
-  "payment_type": "auto_debit",
-  "customer_id": "cust_123",
-  "agreement": {
-    "id": "A123456789",
-    "type": "recurring"
-  },
-  "token": {
-    "token": "9923965822244314",
-    "customer_id": "cust_123",
-    "brand": "VISA",
-    "number": "\*\*\*\* 1019",
-    "pg_code": "credit-card",
-    "agreements": ["A123456789"]
-  }
+    description: <>After the customer completes the payment, Ottu sends a <a href="/developers/webhooks/payment-events/">webhook notification</a> with the token:<br /><br /><pre><code>{`{
+"session_id": "4a462681df6aab64e27cedc9bbf733cd6442578b",
+"result": "success",
+"state": "paid",
+"payment_type": "auto_debit",
+"customer_id": "cust_123",
+"agreement": {
+"id": "A123456789",
+"type": "recurring"
+},
+"token": {
+"token": "9923965822244314",
+"customer_id": "cust_123",
+"brand": "VISA",
+"number": "\*\*\*\* 1019",
+"pg_code": "credit-card",
+"agreements": ["A123456789"]
+}
 }`}</code></pre><strong>Save the <code>token.token</code> and <code>token.pg_code</code></strong> — you'll need them for subsequent charges.</>,
 },
 ]} nextSectionId="subsequent-payments-mit" />
@@ -161,12 +171,12 @@ Experience the complete recurring payment lifecycle. Save a test card, watch the
 
 Once you have the token, you can charge the customer automatically using either of the following approaches.
 
-**Two-Step (Checkout API + Native Payments API):**
+##### Two-Step (Checkout API + Native Payments API)
 
 1. Create a new session via the [Checkout API](/developers/payments/checkout-api/) with the same `pg_code`, `agreement.id`, and `customer_id`
-2. Call the Native Payments API with the `session_id` and `token`:
+2. Call the [Native Payments API](/developers/payments/native-payments/) with the `session_id` and `token`:
 
-```json title="POST /b/pbl/v2/auto-debit/ — Charge Saved Card"
+```json title="POST /b/pbl/v2/payment/auto-debit/ — Charge Saved Card"
 {
   "session_id": "19aa7cd3cfc43d9d7641f6c433767b25cbcd6c18",
   "token": "9923965822244314"
@@ -177,9 +187,9 @@ Once you have the token, you can charge the customer automatically using either 
 Use the **same** `pg_code`, `agreement.id`, and `customer_id` as the first payment. The amount may vary if the agreement's `amount_variability` is set to `"variable"`.
 :::
 
-**One-Step (Checkout API with `payment_instrument`):**
+##### [One-Step](/developers/payments/checkout-api#one-step-checkout) (Checkout API with `payment_instrument`) — Recommended
 
-Combine session creation and payment in a single call using [`payment_instrument`](/developers/payments/checkout-api#one-step-checkout). To see this in action, try the [Live Demo](#live-demo) above.
+Skip the separate charge call entirely. Pass the saved token in [`payment_instrument`](/developers/payments/checkout-api#one-step-checkout) and the [Checkout API](/developers/payments/checkout-api/) creates the session **and** charges the token in a single request, returning the payment result directly in the response. To see this in action, try the [Live Demo](#live-demo) above.
 
 ```json title="POST /b/checkout/v1/pymt-txn/ — One-Step Checkout"
 {
@@ -247,7 +257,7 @@ For recurring billing, notify customers before each charge:
 
 ## API Reference
 
-<ApiDocEmbed path="auto-debit.api.mdx" />
+<ApiDocEmbed path="auto-debit-2.api.mdx" />
 
 ## Best Practices
 
@@ -300,6 +310,16 @@ For recurring billing, notify customers before each charge:
     API](/developers/payments/checkout-api/) responses directly. However, the
     SDK simplifies UI implementation and is required for certain payment methods
     like Apple Pay and Google Pay.
+  </FAQItem>
+  <FAQItem question="What happens if I trigger an MIT without a successful CIT?">
+    The Native Payments API rejects it with a validation error. A successful,
+    customer-present [CIT](#key-concepts) must exist for the customer/agreement
+    before any merchant-initiated charge is allowed.
+  </FAQItem>
+  <FAQItem question="Can I use different gateways for the CIT and the MIT charges?">
+    No. An auto-debit agreement is tied to a single gateway — use the **same**
+    [`pg_code`](/developers/payments/payment-methods/) (for an MID with
+    auto-debit enabled) on the CIT and on every MIT charge.
   </FAQItem>
 </FAQ>
 
