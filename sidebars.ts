@@ -634,6 +634,8 @@ const sidebars: SidebarsConfig = {
             "business/payment-management/transaction-insights",
             "business/payment-management/transaction-states",
             "business/payment-management/notifications-timing",
+            "business/payment-management/transaction-fields",
+            "business/payment-management/attempt-fields",
           ],
         },
         {
