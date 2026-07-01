@@ -55,6 +55,10 @@ export const BANK_LOGOS: Record<string, string> = {
   "First Abu Dhabi Bank": "fab.svg",
   "Emirates NBD": "emirates-nbd.png",
   Mashreq: "mashreq.png",
+  "Abu Dhabi Commercial Bank": "adcb.svg",
+  "Commercial Bank of Dubai": "cbd.svg",
+  "Bank AlJazira": "aljazira.svg",
+  "Saudi Awwal Bank": "sab.svg",
   // International banks
   ICBC: "icbc.png",
   Citi: "citi.png",
