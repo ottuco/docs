@@ -82,6 +82,10 @@ Call the [Payment Methods API](../payment-methods) (`POST /b/pbl/v2/payment-meth
     {
       "code": "ottu-sandbox",
       "name": "Ottu Sandbox",
+      "connector": {
+        "identifier": "ottu_sandbox",
+        "processor": "ottu_sandbox"
+      },
       "is_sandbox": true,
       "default_currency": "KWD",
       "accepted_currencies": ["KWD", "SAR", "AED", "USD", "BHD"],
@@ -100,7 +104,7 @@ Call the [Payment Methods API](../payment-methods) (`POST /b/pbl/v2/payment-meth
 You don't need `customer_id` to discover wallet-capable gateways generically. If you do pass `customer_id` and that customer has a wallet enabled in the session currency, the wallet entry will be returned alongside the standard payment methods. To narrow the gateway list to wallet-capable PGs for later refunds, use `payment_services: ["wallet"]` as shown above.
 :::
 
-For the full request/response reference, headers, error codes, and supported filters, see the [Payment Methods API page](../payment-methods).
+For the full request/response reference, headers, error codes, and supported filters — including the [`connector`](../payment-methods#connector) object that identifies each method's gateway and processor — see the [Payment Methods API page](../payment-methods).
 
 #### 2. Create a Checkout session with the wallet-capable PGs
 
