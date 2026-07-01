@@ -135,6 +135,14 @@ To test Apple Pay, use Apple's approved test cards at [developer.apple.com/apple
 
 <TestCardsTable gateway="tap" />
 
+## <GatewayBadge gateway="telr" />Telr
+
+<TestCardsTable gateway="telr" />
+
+:::note Decline simulation
+To simulate a specific decline, use CVV `041` (Insufficient Funds) with any Telr test card. For on-hold (fraud review), use CVV `999`. In general, pad any [Telr response code](https://docs.telr.com/reference/authorisation-response-codes.md) with a leading zero to make it 3 digits and use that as the CVV.
+:::
+
 ## <GatewayBadge gateway="upg" />UPG (EBC)
 
 <TestCardsTable gateway="upg" />

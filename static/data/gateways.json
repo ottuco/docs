@@ -2140,6 +2140,173 @@
     "testCards": []
   },
   {
+    "slug": "telr",
+    "name": "Telr",
+    "countries": [
+      "UAE",
+      "KSA"
+    ],
+    "currencies": [
+      "AED",
+      "SAR",
+      "BHD",
+      "JOD"
+    ],
+    "inquiryMinutes": 10,
+    "operations": [
+      "purchase"
+    ],
+    "integrationType": "redirect",
+    "category": "gateway",
+    "operationMode": "purchase",
+    "logo": "telr.svg",
+    "acceptedAt": [
+      "First Abu Dhabi Bank",
+      "Emirates NBD",
+      "Mashreq",
+      "Abu Dhabi Commercial Bank",
+      "Commercial Bank of Dubai",
+      "Bank AlJazira",
+      "Saudi Awwal Bank"
+    ],
+    "cardBrands": [
+      "Visa",
+      "Mastercard",
+      "American Express",
+      "UnionPay"
+    ],
+    "digitalWallets": [
+      "PayPal",
+      "Tabby",
+      "STC Pay",
+      "URPay"
+    ],
+    "testCards": [
+      {
+        "cardNumber": "4000 0000 0000 0002",
+        "expiry": "Any future",
+        "cvv": "123",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "4111 1111 1111 1111",
+        "expiry": "Any future",
+        "cvv": "123",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS"
+      },
+      {
+        "cardNumber": "4444 3333 2222 1111",
+        "expiry": "Any future",
+        "cvv": "123",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS"
+      },
+      {
+        "cardNumber": "4444 4244 4444 4440",
+        "expiry": "Any future",
+        "cvv": "123",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS"
+      },
+      {
+        "cardNumber": "4444 4444 4444 4448",
+        "expiry": "Any future",
+        "cvv": "123",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS"
+      },
+      {
+        "cardNumber": "4012 8888 8888 1881",
+        "expiry": "Any future",
+        "cvv": "123",
+        "brand": "Visa",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS"
+      },
+      {
+        "cardNumber": "5105 1051 0510 5100",
+        "expiry": "Any future",
+        "cvv": "123",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "5454 5454 5454 5454",
+        "expiry": "Any future",
+        "cvv": "123",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS"
+      },
+      {
+        "cardNumber": "5555 5555 5555 4444",
+        "expiry": "Any future",
+        "cvv": "123",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS"
+      },
+      {
+        "cardNumber": "5555 5555 5555 5557",
+        "expiry": "Any future",
+        "cvv": "123",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS"
+      },
+      {
+        "cardNumber": "5581 5822 2222 2229",
+        "expiry": "Any future",
+        "cvv": "123",
+        "brand": "Mastercard",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "3DS"
+      },
+      {
+        "cardNumber": "3714 496353 98431",
+        "expiry": "Any future",
+        "cvv": "1234",
+        "brand": "American Express",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "3434 3434 3434 343",
+        "expiry": "Any future",
+        "cvv": "1234",
+        "brand": "American Express",
+        "status": "success",
+        "statusLabel": "Success"
+      },
+      {
+        "cardNumber": "4000 0000 0000 0002",
+        "expiry": "Any future",
+        "cvv": "041",
+        "brand": "Visa",
+        "status": "declined",
+        "statusLabel": "Declined",
+        "note": "Insufficient Funds — use CVV 041 (response code padded to 3 digits) with any card to simulate a specific decline"
+      }
+    ]
+  },
+  {
     "slug": "upayments",
     "name": "UPayments",
     "countries": [
