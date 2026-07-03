@@ -70,6 +70,40 @@ graph LR
 
 3. **Customer sees current payment options** — the checkout page displays only the active, relevant payment methods. When gateway configurations change, the API automatically reflects the updates — no code changes needed.
 
+### Connector {#connector}
+
+Every entry in `payment_methods` includes a `connector` object. It answers two questions your integration often needs: **which gateway integration is this**, and **which processor does it settle through?** Reach for it whenever your code has to recognize a specific gateway — for branding, routing rules, analytics, or reconciliation.
+
+```json title="A payment method with its connector"
+{
+  "code": "kpay-prod",
+  "connector": {
+    "identifier": "kpay",
+    "processor": "knet"
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `connector.identifier` | `string` | The stable, unique identifier of the connector — for example `knet`, `kpay`, `cybersource`, or `csuc`. It does not change, so this is the value to match on when you need to detect one specific gateway. |
+| `connector.processor` | `string` | The processor the connector routes through — for example `knet` or `cybersource`. It is equal to `identifier` for most connectors, and differs only when several connectors share the same processor. Group by this field when you care about the underlying network rather than the exact integration. |
+
+**Why two fields?** Ottu sometimes offers more than one connector for the same processor. When that happens, the connectors have different `identifier` values but the same `processor`:
+
+| `connector.identifier` | `connector.processor` | What it is |
+|------------------------|-----------------------|------------|
+| `knet` | `knet` | The KNET connector |
+| `kpay` | `knet` | KPay — a second connector that also settles through KNET |
+| `cybersource` | `cybersource` | The CyberSource connector |
+| `csuc` | `cybersource` | CyberSource Unified Checkout — a second connector on CyberSource |
+
+So `identifier` tells you the exact integration, while `processor` groups the connectors that reach the same payment network.
+
+:::tip Match on `connector`, not `code`
+The `code` field is a slug tied to one gateway configuration that a merchant can rename at any time, so it is not a reliable way to detect a gateway in your code. Read `connector.identifier` (the exact integration) or `connector.processor` (its processor family) instead. `connector` is additive — it was added alongside the existing fields, and nothing was removed.
+:::
+
 ### Use Cases
 
 #### Expanding Payment Options

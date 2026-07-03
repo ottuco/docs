@@ -5319,6 +5319,21 @@ components:
         - $ref: "#/components/schemas/NestedFieldErrors"
         - $ref: "#/components/schemas/GenericErrorMessage"
         - $ref: "#/components/schemas/OperationErrorResponse"
+    Connector:
+      type: object
+      description: Identifies the payment method's underlying gateway integration and the processor it routes through. Present on every payment-method entry, giving consumers a stable connector identity that is independent of the merchant-renamable `code`.
+      properties:
+        identifier:
+          type: string
+          readOnly: true
+          description: The stable, unique identifier of the connector, such as `knet`, `kpay`, `cybersource`, or `csuc`. It does not change, so use it to reliably detect one specific gateway.
+        processor:
+          type: string
+          readOnly: true
+          description: "The processor the connector routes through, such as `knet` or `cybersource`. Equal to `identifier` for most connectors; differs only when several connectors share one processor (for example `kpay` routes through `knet`, and `csuc` routes through `cybersource`)."
+      required:
+        - identifier
+        - processor
     CustomerWalletTransaction:
       type: object
       description: |-
@@ -7529,6 +7544,11 @@ components:
           type: string
           readOnly: true
           description: Represents the payment gateway internal name defined in Ottu.
+        connector:
+          allOf:
+            - $ref: "#/components/schemas/Connector"
+          readOnly: true
+          description: The connector behind this payment method — its unique `identifier` and the `processor` it routes through. See [Connector]({{apiBaseUrl}}/payments/payment-methods/#connector) for the identifier-vs-processor concept.
         is_sandbox:
           type: boolean
           readOnly: true
@@ -7635,6 +7655,7 @@ components:
         - accepted_currencies
         - auto_debit_enabled
         - code
+        - connector
         - default_currency
         - is_sandbox
         - is_tokenizable
@@ -8051,6 +8072,11 @@ components:
         name:
           type: string
           description: The name of the payment method.
+        connector:
+          allOf:
+            - $ref: "#/components/schemas/Connector"
+          readOnly: true
+          description: The connector behind this payment method — its unique `identifier` and the `processor` it routes through. See [Connector]({{apiBaseUrl}}/payments/payment-methods/#connector) for the identifier-vs-processor concept.
         type:
           enum:
             - e_commerce
@@ -8104,6 +8130,7 @@ components:
       required:
         - amount
         - code
+        - connector
         - currency_code
         - fee
         - fee_description
