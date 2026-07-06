@@ -175,7 +175,7 @@ const sidebar: SidebarsConfig = {
         {
           type: "doc",
           id: "developers/apis/wallet-native-payment",
-          label: "Native Payment API (Wallet)",
+          label: "M-Wallet Payment API",
           className: "api-method post",
         },
       ],

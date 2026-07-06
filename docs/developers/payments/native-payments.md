@@ -248,7 +248,7 @@ Native Payments are **direct-charge** endpoints: one request charges the custome
   -H "Idempotency-Key: 5f3b9c2a-1e4d-4a7b-9c8e-2d6f0a1b3c4d" \\
   -d '{ "session_id": "your_session_id", "token": "saved_card_token" }'`}</CodeBlock>
 
-The same `Idempotency-Key` header works on every direct-charge endpoint — Apple Pay, Google Pay, wallet, and cash included.
+The same `Idempotency-Key` header works on every direct-charge endpoint — Apple Pay, Google Pay, Auto-Debit, and cash included. It is documented per endpoint in the [API Reference](#api-reference) below (as a request header).
 
 The key is scoped to the transaction (its [`session_id`](/developers/payments/checkout-api/)) and recorded **only after a successful charge**. That single rule produces three behaviors:
 
@@ -258,31 +258,8 @@ The key is scoped to the transaction (its [`session_id`](/developers/payments/ch
 | Reusing a key after a **failed** charge | The charge proceeds — failed payments stay retryable, because the key was never recorded |
 | Sending **no** `Idempotency-Key` header | No replay protection — unchanged behavior, existing integrations unaffected |
 
-A blocked replay returns `409 Conflict`:
-
-```json title="409 Conflict — replayed Idempotency-Key"
-{
-  "detail": "Duplicate request detected. Idempotency-Key already used.",
-  "result": "failed"
-}
-```
-
-The contract applies to every direct-charge endpoint:
-
-| Endpoint | Charge |
-|---|---|
-| `POST /b/pbl/v2/payment/apple-pay/` | Apple Pay |
-| `POST /b/pbl/v2/payment/google-pay/` | Google Pay |
-| `POST /b/pbl/v2/payment/auto-debit/` | Saved-token / recurring |
-| `POST /b/pbl/v2/payment/wallet/` | [M-Wallet](/developers/payments/wallet/) balance |
-| `POST /b/pbl/v2/payment/cash/` | Cash acknowledgement |
-
 :::note Idempotency-Key vs. Tracking-Key
 This is distinct from the [`Tracking-Key`](/developers/operations#step-by-step) header used by the [Operations API](/developers/operations) (refund, capture, void). A replayed `Tracking-Key` *returns the latest status* of the original operation, whereas a replayed `Idempotency-Key` on a direct charge is *rejected with 409*. Use `Idempotency-Key` for charges, `Tracking-Key` for operations.
-:::
-
-:::warning Concurrent duplicates
-Two identical requests sent at the same instant are serialized internally — the first to claim the charge proceeds, the other gets `409 Conflict`. Prefer sequential retries (wait for a response or timeout before retrying) over firing duplicates in parallel.
 :::
 
 ### Use Cases
@@ -344,6 +321,11 @@ Select the payment provider to see its full interactive API schema:
 <TabItem value="auto-debit" label="Auto-Debit">
 
 <ApiDocEmbed path="auto-debit.api.mdx" />
+
+</TabItem>
+<TabItem value="cash" label="Cash">
+
+<ApiDocEmbed path="cash-payment-acknowledgement-2.api.mdx" />
 
 </TabItem>
 </Tabs>

@@ -49,7 +49,7 @@ The customer has the option of choosing from different payment methods.
 4. Apple Pay: A type of payment service, Apple Pay is only available for iOS devices.
 
 :::note Identifying payment methods programmatically
-The SDK fetches and renders the available payment methods for you, so you normally don't handle the list yourself. If you build a custom payment-selection UI instead, call the [Payment Methods API](../payment-methods) directly — each method includes a [`connector`](../payment-methods#connector) object that identifies its gateway (`connector.identifier`) and the processor it routes through (`connector.processor`).
+The SDK fetches and renders the available payment methods for you, so you normally don't handle the list yourself. If you build a custom payment-selection UI instead, call the [Payment Methods API](../payment-methods) directly — each method includes a [`connector`](../payment-methods#api-reference) object that identifies its gateway (`connector.identifier`) and the processor it routes through (`connector.processor`).
 :::
 
 <figure><img src="/img/checkout-sdk/diagram%20copy.png" alt="Payment method selection flow diagram" /><figcaption></figcaption></figure>
