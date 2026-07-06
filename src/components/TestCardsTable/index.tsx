@@ -1,6 +1,6 @@
 import React from "react";
 import gatewaysData from "@site/static/data/gateways.json";
-import type { Gateway } from "@site/src/types/gateway";
+import type { Gateway, TestCard } from "@site/src/types/gateway";
 import styles from "./styles.module.css";
 
 const gatewayMap = new Map(
@@ -60,25 +60,35 @@ export function GatewayBadge({ gateway, logo }: { gateway?: string; logo?: strin
 }
 
 interface TestCardsTableProps {
-  gateway: string;
+  /** Look up cards from the shared gateway catalog by slug. */
+  gateway?: string;
+  /** Or pass an explicit card set (e.g. the Ottu Sandbox cards) to reuse this UI without a catalog entry. */
+  cards?: TestCard[];
+  /** Optional note rendered above the table. */
+  notes?: string;
 }
 
 export default function TestCardsTable({
   gateway,
+  cards,
+  notes,
 }: TestCardsTableProps): React.JSX.Element | null {
-  const gw = gatewayMap.get(gateway);
-  if (!gw) return null;
-  if (gw.testCards.length === 0 && !gw.testCardNotes) return null;
+  const gw = gateway ? gatewayMap.get(gateway) : undefined;
+  const testCards = cards ?? gw?.testCards ?? [];
+  const testCardNotes = notes ?? gw?.testCardNotes;
+  const docsUrl = gw?.docsUrl;
 
-  const hasNote = gw.testCards.some((c) => c.note);
+  if (testCards.length === 0 && !testCardNotes) return null;
+
+  const hasNote = testCards.some((c) => c.note);
 
   return (
     <div className={styles.section}>
-      {gw.testCardNotes && (
-        <div className={styles.notes}>{gw.testCardNotes}</div>
+      {testCardNotes && (
+        <div className={styles.notes}>{testCardNotes}</div>
       )}
 
-      {gw.testCards.length > 0 && (
+      {testCards.length > 0 && (
         <table className={styles.table}>
           <thead>
             <tr>
@@ -91,7 +101,7 @@ export default function TestCardsTable({
             </tr>
           </thead>
           <tbody>
-            {gw.testCards.map((card, i) => (
+            {testCards.map((card, i) => (
               <tr key={i}>
                 <td>
                   <span
@@ -123,9 +133,9 @@ export default function TestCardsTable({
         </table>
       )}
 
-      {gw.docsUrl && (
+      {docsUrl && (
         <a
-          href={gw.docsUrl}
+          href={docsUrl}
           target="_blank"
           rel="noopener noreferrer"
           className={styles.docsLink}

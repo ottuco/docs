@@ -993,6 +993,13 @@ paths:
             default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
           description: Private API key to be provided in the format `Api-Key <key>`.
           required: true
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+            format: uuid
+          required: false
+          description: "Optional. A unique UUID that makes this direct charge safe to retry. Send the *same* value on every retry of one charge attempt: a replay of a key from a **successful** charge is rejected with `409 Conflict` before any charge, while a key from a **failed** charge stays retryable. Omit it to keep the previous behavior."
       tags:
         - Payment Operations
       requestBody:
@@ -1696,6 +1703,14 @@ paths:
 
         Typical use case: The merchant collects the Apple Pay token on their frontend and sends it to this endpoint along with session and amount information.
       summary: Native Payment API(Apple Pay)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+            format: uuid
+          required: false
+          description: "Optional. A unique UUID that makes this direct charge safe to retry. Send the *same* value on every retry of one charge attempt: a replay of a key from a **successful** charge is rejected with `409 Conflict` before any charge, while a key from a **failed** charge stays retryable. Omit it to keep the previous behavior."
       tags:
         - Payment Operations
       requestBody:
@@ -1747,6 +1762,13 @@ paths:
             default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
           description: Private API key to be provided in the format `Api-Key <key>`.
           required: true
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+            format: uuid
+          required: false
+          description: "Optional. A unique UUID that makes this direct charge safe to retry. Send the *same* value on every retry of one charge attempt: a replay of a key from a **successful** charge is rejected with `409 Conflict` before any charge, while a key from a **failed** charge stays retryable. Omit it to keep the previous behavior."
       tags:
         - Payment Operations
       requestBody:
@@ -1789,6 +1811,14 @@ paths:
       operationId: cash_payment_acknowledgement_2
       description: "**⚠️ DEPRECATED**: This endpoint (`cash-payment/`) is deprecated and will be removed in future releases.<br/>Please migrate to the new endpoint at `payment/cash/` for acknowledging cash payments.<br/><br/>This endpoint handles cash payment acknowledgement requests.<br/>📝 **NOTE**: Optional fields may not be represented in the response body."
       summary: Cash Payment Acknowledgement (Deprecated)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+            format: uuid
+          required: false
+          description: "Optional. A unique UUID that makes this direct charge safe to retry. Send the *same* value on every retry of one charge attempt: a replay of a key from a **successful** charge is rejected with `409 Conflict` before any charge, while a key from a **failed** charge stays retryable. Omit it to keep the previous behavior."
       tags:
         - Payment Operations
       requestBody:
@@ -1834,6 +1864,14 @@ paths:
 
         Typical use case: The merchant collects the Google Pay token on their frontend and sends it to this endpoint along with session and amount information.
       summary: Native Payment API(Google Pay)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+            format: uuid
+          required: false
+          description: "Optional. A unique UUID that makes this direct charge safe to retry. Send the *same* value on every retry of one charge attempt: a replay of a key from a **successful** charge is rejected with `409 Conflict` before any charge, while a key from a **failed** charge stays retryable. Omit it to keep the previous behavior."
       tags:
         - Payment Operations
       requestBody:
@@ -1877,7 +1915,7 @@ paths:
         Allows merchants to charge a customer's wallet balance directly via server-to-server integration. The wallet service is identified by `instrument_type=wallet` in the checkout transaction. 
 
         The payment is processed using the customer's wallet account linked to the transaction's `customer_id`. No additional payload is required from the customer — the wallet service handles the debit internally.
-      summary: Native Payment API (Wallet)
+      summary: M-Wallet Payment API
       tags:
         - Payment Operations
       requestBody:
@@ -7548,7 +7586,7 @@ components:
           allOf:
             - $ref: "#/components/schemas/Connector"
           readOnly: true
-          description: The connector behind this payment method — its unique `identifier` and the `processor` it routes through. See [Connector]({{apiBaseUrl}}/payments/payment-methods/#connector) for the identifier-vs-processor concept.
+          description: "The connector behind this payment method: its stable `identifier` (the exact gateway integration, e.g. `knet`, `kpay`, `cybersource`, `csuc`) and the `processor` it routes through (equal to `identifier` for most connectors; differs only when several connectors share one processor, e.g. `kpay` routes through `knet`). Prefer this over the merchant-renamable `code` when your integration needs to detect a specific gateway."
         is_sandbox:
           type: boolean
           readOnly: true
@@ -8076,7 +8114,7 @@ components:
           allOf:
             - $ref: "#/components/schemas/Connector"
           readOnly: true
-          description: The connector behind this payment method — its unique `identifier` and the `processor` it routes through. See [Connector]({{apiBaseUrl}}/payments/payment-methods/#connector) for the identifier-vs-processor concept.
+          description: "The connector behind this payment method: its stable `identifier` (the exact gateway integration, e.g. `knet`, `kpay`, `cybersource`, `csuc`) and the `processor` it routes through (equal to `identifier` for most connectors; differs only when several connectors share one processor, e.g. `kpay` routes through `knet`). Prefer this over the merchant-renamable `code` when your integration needs to detect a specific gateway."
         type:
           enum:
             - e_commerce
