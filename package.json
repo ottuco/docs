@@ -40,19 +40,19 @@
     "sass": "^1.101.0"
   },
   "devDependencies": {
-    "@apidevtools/json-schema-ref-parser": "^15.4.0",
+    "@apidevtools/json-schema-ref-parser": "^15.5.0",
     "@docusaurus/module-type-aliases": "^3.10.0",
     "@docusaurus/tsconfig": "^3.10.1",
     "@docusaurus/types": "^3.10.1",
     "@types/js-yaml": "^4.0.9",
     "docusaurus-plugin-openapi-docs": "^5.0.0",
     "docusaurus-theme-openapi-docs": "^5.0.0",
-    "openapi-to-postmanv2": "^6.0.0",
+    "openapi-to-postmanv2": "^6.3.0",
     "patch-package": "^8.0.1",
     "postman-code-generators": "^2.1.0",
     "postman-collection": "^5.2.0",
-    "tsx": "^4.21.0",
-    "typescript": "^6.0.3"
+    "tsx": "^4.23.0",
+    "typescript": "^7.0.2"
   },
   "browserslist": {
     "production": [
