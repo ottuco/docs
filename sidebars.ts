@@ -532,6 +532,23 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: "category",
+          label: "MCP Tools",
+          link: { type: "doc", id: "developers/mcp-tools/index" },
+          items: [
+            {
+              type: "doc",
+              id: "developers/mcp-tools/index",
+              label: "Overview",
+            },
+            {
+              type: "doc",
+              id: "developers/mcp-tools/pg-capabilities",
+              label: "PG Capabilities",
+            },
+          ],
+        },
+        {
+          type: "category",
           label: "Reference",
           link: { type: "doc", id: "developers/reference/error-codes" },
           items: [
