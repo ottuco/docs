@@ -26,7 +26,7 @@ Generated reports are private to your account. Other staff members on your merch
 
 ### What gets exported
 
-Every export produces a **CSV file** you can open in Excel, Google Sheets, or any spreadsheet tool.
+Every export produces a spreadsheet file you can open in Excel, Google Sheets, or any spreadsheet tool. You choose the format when you export — **CSV** or **XLSX**.
 
 | What you export | Where you start | What the file contains |
 |---|---|---|
@@ -39,7 +39,7 @@ If you need reports delivered automatically on a schedule — for example, a dai
 
 ## Generate a Report
 
-The most common way to generate a report is from the **Transactions** page. You apply filters to narrow the data to what you need, then click **Export** to queue the file.
+The most common way to generate a report is from the **Transactions** page. You apply filters to narrow the data to what you need, then click **Export Transactions** to queue the file.
 
 <StepGuide steps={[
   {
@@ -55,10 +55,10 @@ The most common way to generate a report is from the **Transactions** page. You 
     imageAlt: "Filter panel open on the Transactions page with date range and status selected",
   },
   {
-    title: "Click Export",
-    description: <>Click the <strong>Export</strong> button (top-right of the transactions table). Ottu queues the report for generation. You will see a confirmation message — the file is not ready instantly.</>,
+    title: "Choose your columns and format",
+    description: <>Click the <strong>Export Transactions</strong> button (in the toolbar above the transactions table, next to <strong>Filter</strong>) to open the export panel. Here you decide exactly what the file contains:<br /><br /><strong>Columns</strong> — tick the fields you want. They are grouped by source: <strong>Default</strong> holds the core transaction fields (Id, Created, State, Type, Gateway Code, Amount, Currency Code, Order No, Reference Number, Payment Service, Initiator), while <strong>Pg Attribute</strong> holds values returned by the payment gateway, such as Auth Code. Hover the <strong>ⓘ</strong> icon next to a field to see what it means.<br /><br /><strong>Timezone</strong> — pick the timezone used for date and time columns in the file.<br /><br /><strong>File type</strong> — choose <strong>CSV</strong> or <strong>XLSX</strong>.<br /><br />Click <strong>EXPORT</strong> at the bottom of the panel to queue the report.</>,
     image: "/img/business/reports/transactions-03-export.png",
-    imageAlt: "Export button highlighted on the Transactions page toolbar",
+    imageAlt: "Export panel open on the Transactions page showing column checkboxes grouped under Default and Pg Attribute, a timezone selector, and CSV/XLSX file type options",
   },
   {
     title: "Wait for the file to be ready",
@@ -75,7 +75,11 @@ The most common way to generate a report is from the **Transactions** page. You 
 ]} />
 
 :::warning
-Exports include **all columns currently visible in your transactions table**. If you have added custom columns via Table Headers, those columns will appear in the export too. To control which columns are exported, adjust your table headers before clicking Export. See [Transaction Insights](/business/payment-management/transaction-insights) for how to manage table columns.
+The columns in your exported file are the ones you tick in the **export panel** — not the columns visible in your transactions table. Changing your table headers does not change the export, and vice versa. Check the panel before every export to make sure the fields you need are ticked.
+:::
+
+:::tip
+Set the **Timezone** in the export panel to match the timezone your finance team works in. Otherwise date and time columns may appear shifted by several hours once the file is opened, and reconciling against your own records gets confusing.
 :::
 
 ## Export Sources
@@ -86,7 +90,7 @@ Ottu offers export from multiple screens in the dashboard. Each export source pr
 
 The main export source. Covers all payment transactions created through any [plugin](/business/plugins) — Payment Request, E-Commerce, Bulk Payment Request, and others.
 
-**Where:** Dashboard → Payment Request → Transactions → **Export**
+**Where:** Dashboard → Payment Request → Transactions → **Export Transactions**
 
 **What you get:** One row per transaction, including amount, currency, payment status, gateway, creation date, customer details, and any custom columns you have configured.
 
