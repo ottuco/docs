@@ -241,6 +241,48 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "category",
+              label: "Loyalty",
+              link: { type: "doc", id: "developers/payments/loyalty" },
+              items: [
+                {
+                  type: "link",
+                  label: "Supported Providers",
+                  href: "/developers/payments/loyalty#supported-providers",
+                },
+                {
+                  type: "link",
+                  label: "When to Use",
+                  href: "/developers/payments/loyalty#when-to-use",
+                },
+                {
+                  type: "link",
+                  label: "Setup",
+                  href: "/developers/payments/loyalty#setup",
+                },
+                {
+                  type: "link",
+                  label: "Guide",
+                  href: "/developers/payments/loyalty#guide",
+                },
+                {
+                  type: "link",
+                  label: "API Reference",
+                  href: "/developers/payments/loyalty#api-reference",
+                },
+                {
+                  type: "link",
+                  label: "Best Practices",
+                  href: "/developers/payments/loyalty#best-practices",
+                },
+                {
+                  type: "link",
+                  label: "FAQ",
+                  href: "/developers/payments/loyalty#faq",
+                },
+              ],
+            },
+            {
+              type: "category",
               label: "Checkout SDK",
               link: {
                 type: "doc",
