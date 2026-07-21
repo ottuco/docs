@@ -1,0 +1,30 @@
+# Overrides for: components/schemas/Loyalty
+#
+# The raw descriptions generated from Ottu core describe `reference` and
+# `metadata` as "forwarded to the loyalty provider". Neither is: the Qitaf
+# adapter deliberately drops `reference` (its only candidate slot, `CashierId`,
+# means a cashier enrolled in STC's incentive programme — sending an order_no
+# there routed every reward to /earn/reward-incentive and drew an undocumented
+# HTTP 500), and no adapter reads `metadata` at all. Both overrides below state
+# what actually reaches the provider.
+
+properties:
+  enabled:
+    description: |
+      `Required` field. Set to `true` to opt this transaction into loyalty rewards.
+
+      The customer earns points when **both** conditions hold: `enabled` is `true`, **and** the `pg_code` that settles the transaction is linked to an active wallet service whose provider declares the post-purchase reward capability (currently [STC Qitaf]({{apiBaseUrl}}/payments/loyalty/)). The reward is issued once the transaction reaches the `paid` state.
+
+      Omitting the `loyalty` object entirely — or setting `enabled` to `false` — sends **no** reward request, even for a fully paid transaction. Ottu returns no error and no warning in that case, so a missing flag looks identical to a successful reward. See [Loyalty]({{apiBaseUrl}}/payments/loyalty/) for the full behaviour.
+
+  reference:
+    description: |
+      `Optional` field. Merchant-side loyalty reference — a campaign ID, program code, or your own audit label. Maximum 128 characters. Defaults to the transaction's `order_no` when omitted.
+
+      **Not transmitted to Qitaf.** Ottu records this value against the reward operation for your own reconciliation, but the Qitaf earn API has no general-purpose reference field, so nothing is sent to STC. Treat `reference` as an internal label, not a value the loyalty provider will see.
+
+  metadata:
+    description: |
+      `Optional` field. Opaque key/value pairs stored alongside the transaction and echoed back in the checkout response.
+
+      **Not transmitted to any loyalty provider.** Ottu persists `metadata` on the payment transaction, but no provider adapter reads it. Use it for merchant-side correlation only — campaign IDs, segment codes, or audit references you resolve in your own system.

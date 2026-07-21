@@ -36,7 +36,9 @@ customer_last_name:
 
 customer_phone:
   description: |
-    Customer phone number associated with the payment. This might be sent to the payment gateway and depending on the gateway, it may trigger a click to pay process on the payment page. The phone number will also be included in the invoice, receipt, email, and displayed on the payment page. It becomes a **required** parameter if the merchant wants to enable KFAST on KNET (KFAST is a tokenization feature on KPay page, which works with UDF3 mapped with `customer_phone`), or if SMS [notifications]({{apiBaseUrl}}/notifications/) are enabled. Otherwise, it remains **optional**.
+    Customer phone number associated with the payment. This might be sent to the payment gateway and depending on the gateway, it may trigger a click to pay process on the payment page. The phone number will also be included in the invoice, receipt, email, and displayed on the payment page. It becomes a **required** parameter if the merchant wants to enable KFAST on KNET (KFAST is a tokenization feature on KPay page, which works with UDF3 mapped with `customer_phone`), or if SMS [notifications]({{apiBaseUrl}}/notifications/) are enabled, or if the transaction opts into [loyalty rewards]({{apiBaseUrl}}/payments/loyalty/) with `loyalty.enabled=true`. Otherwise, it remains **optional**.
+
+    For [loyalty]({{apiBaseUrl}}/payments/loyalty/), this is the field the reward is issued against — STC Qitaf identifies a loyalty account by mobile number, never by `customer_id`. Send a Saudi mobile number in any of `05XXXXXXXX`, `5XXXXXXXX`, `+9665XXXXXXXX`, `009665XXXXXXXX`, or `9665XXXXXXXX`; Ottu normalizes the country code and any spaces, hyphens, or parentheses. A missing, masked, or non-Saudi number silently skips the reward — no error is returned.
 
 customer_id:
   description: |
