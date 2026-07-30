@@ -10,11 +10,11 @@
 
 api_key_admin:
   auth_method: "[API Key]({{apiBaseUrl}}/getting-started/authentication/#api-key-auth)"
-  permissions: "All permissions (admin access)"
+  permissions: "Full-access keys: all permissions. Scoped keys: the permission listed for this operation — see [API Key Permissions]({{apiBaseUrl}}/reference/api-key-permissions/)"
 
 api_key_only:
   auth_method: "[API Key]({{apiBaseUrl}}/getting-started/authentication/#api-key-auth)"
-  permissions: "Required (Basic Auth not supported for this endpoint)"
+  permissions: "Required (Basic Auth not supported for this endpoint). Full-access keys: allowed. Scoped keys: see [API Key Permissions]({{apiBaseUrl}}/reference/api-key-permissions/)"
 
 # ── Checkout API ──────────────────────────────────────────────
 
