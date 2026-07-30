@@ -538,6 +538,11 @@ const sidebars: SidebarsConfig = {
               id: "developers/reference/payment-states",
               label: "Payment States",
             },
+            {
+              type: "doc",
+              id: "developers/reference/api-key-permissions",
+              label: "API Key Permissions",
+            },
           ],
         },
       ],
