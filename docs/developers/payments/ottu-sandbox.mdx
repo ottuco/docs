@@ -37,13 +37,13 @@ This page documents the **Ottu Sandbox simulator gateway** specifically. For the
 
 You need only two things:
 
-1. **An Ottu Sandbox gateway (MID)** configured on a **non-production** environment — a dev, UAT, or sandbox subdomain on **your own Connect server**. You test the Sandbox exactly the way you'd test KNET or MPGS on your own installation: it gets its own `pg_code`. It is intended for non-production servers only — production disables the Sandbox's asynchronous inquiry scheduler (see [Best Practices](#best-practices)).
+1. **An Ottu Sandbox gateway (MID)** configured on **your own Connect server**. The Sandbox can run on **any Ottu environment** — dev, UAT, staging, *or production* — so you can rehearse a specific flow on the very server that flow will run on. You test it exactly the way you'd test KNET or MPGS on your own installation: it gets its own `pg_code`, kept separate from your live gateways, and no traffic ever leaves Ottu. The only environment-dependent piece is the *automatic* inquiry scheduler ([`expires_in_minutes`](#the-extra-object)), which stays off on production-flagged servers — see [Best Practices](#best-practices).
 2. **A valid API key** for the [Checkout API](/developers/payments/checkout-api/). Examples below use `Authorization: Api-Key <YOUR_API_KEY>`.
 
 Then pass the Sandbox `pg_code` in `pg_codes` when you create a session — that is the entire setup.
 
 :::note[Capabilities are provisioned for you]
-Advanced capabilities — tokenization, auto-debit, refund, authorize/void, and wallets — are enabled on your Sandbox MID by Ottu. A self-serve API for merchants to create Sandbox MIDs and toggle these flags on the fly is on the way; see [API Reference](#api-reference). Until it ships, ask Ottu to enable the capability your scenario needs — otherwise the corresponding call is rejected at validation.
+Advanced capabilities — tokenization, auto-debit, refund, authorize/void, and wallets — are enabled on your Sandbox MID by Ottu. Ask Ottu to enable the capability your scenario needs — otherwise the corresponding call is rejected at validation rather than simulated.
 :::
 
 ## Guide
@@ -69,8 +69,8 @@ From there, there are **three independent ways** to set the outcome — pick the
 | Mechanism | You control the outcome with… | Applies to |
 | --- | --- | --- |
 | **Test card / token** *(synchronous)* | the **test card number** the customer enters, or the **token** you charge | Hosted checkout, tokenization, auto-debit (CIT & MIT) |
-| **[`sandbox_inquiry_result`](#the-extra-object)** *(asynchronous)* | a value in the Checkout `extra` object | Any flow resolved by a status **inquiry** (e.g. unattended / timed-out sessions) |
-| **[`sandbox_result`](#the-extra-object)** *(card-less surfaces)* | a value in the operation's or transaction's `extra` | Capture, void, and Apple / Google / Samsung Pay — surfaces with no card to pick |
+| **[`sandbox_inquiry_result`](#the-extra-object)** *(asynchronous)* | a value in the Checkout [`extra`](/developers/getting-started/api-fundamentals#custom-data) object | Any flow resolved by a status [**inquiry**](/developers/payments/psq/) (e.g. unattended / timed-out sessions) |
+| **[`sandbox_result`](#the-extra-object)** *(status override)* | a value in the operation's or transaction's [`extra`](/developers/getting-started/api-fundamentals#custom-data) | Capture, void, and Apple / Google / Samsung Pay — the payment is still made with a test card, but this key decides the resulting status |
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
@@ -78,7 +78,7 @@ graph TD
     A([Create session against the Sandbox PG]) --> B{How is the payment made?}
     B -->|Customer / merchant submits a card or token| C[Outcome = the test card / token]
     B -->|Left to resolve by inquiry| D[Outcome = extra.sandbox_inquiry_result]
-    B -->|Capture / void / wallet| F[Outcome = extra.sandbox_result]
+    B -->|Capture / void / wallet payment| F[Outcome = extra.sandbox_result]
     C --> E([Deterministic result: paid / failed / error])
     D --> E
     F --> E
@@ -92,7 +92,6 @@ graph TD
 On the hosted Sandbox page (and as token values), these cards drive the outcome. They are not real PANs, are not subject to Luhn validation, and never reach a bank.
 
 <TestCardsTable
-  notes="The Sandbox cards are 15 digits (one shorter than a standard 16-digit Visa PAN) — they are fixed test identifiers, not real card numbers. Expiry and CVV are ignored. Any value other than the cards below is treated as an unknown card and canceled."
   cards={[
     { cardNumber: "411111111111111", expiry: "Any", cvv: "Any", brand: "Visa (test)", status: "success", statusLabel: "Success", note: "Payment succeeds" },
     { cardNumber: "411111111111112", expiry: "Any", cvv: "Any", brand: "Visa (test)", status: "declined", statusLabel: "Failed", note: "Payment declined" },
@@ -116,12 +115,12 @@ When you save a Sandbox card, its **token is the card number itself** (e.g. `411
 
 ### The `extra` object
 
-For flows with **no card to pick** — background inquiries, captures, voids, and wallet payments — you set the outcome by adding a key to the Checkout `extra` object when you create the session (or to an operation request's `extra`):
+Some outcomes aren't decided by a card. Background inquiries, captures, and voids have no card in play at all, and a wallet payment (Apple / Google / Samsung Pay) *is* still made with a Sandbox test card — but its resulting status is taken from `extra`, not from the card. You set that outcome by adding a key to the Checkout [`extra`](/developers/getting-started/api-fundamentals#custom-data) object when you create the session (or to an operation request's `extra`):
 
 | `extra` key | Values | Applies to | Effect |
 | --- | --- | --- | --- |
-| `sandbox_inquiry_result` | `success` · `failed` · `error` | Any flow resolved by a status **inquiry** (unattended / timed-out sessions) | The outcome a background or manual inquiry applies. Defaults to `success`. |
-| `sandbox_result` | `success` · `failed` · `error` | **Capture**, **void**, and **wallet** payments | The outcome of that operation or wallet payment. Defaults to `success`. |
+| `sandbox_inquiry_result` | `success` · `failed` · `error` | Any flow resolved by a status [**inquiry**](/developers/payments/psq/) (unattended / timed-out sessions) | The outcome a background or manual inquiry applies. Defaults to `success`. |
+| `sandbox_result` | `success` · `failed` · `error` | **Capture**, **void**, and **wallet** payments | The final status of that operation or wallet payment — for wallets it takes precedence over the test card that was used. Defaults to `success`. |
 | `expires_in_minutes` | integer | Pairs with `sandbox_inquiry_result` | Arms an auto-inquiry to apply the outcome after N minutes (**non-production only**). |
 
 ```json title="POST /b/checkout/v1/pymt-txn/ — pin an unattended session to fail after 5 minutes"
@@ -140,8 +139,8 @@ For flows with **no card to pick** — background inquiries, captures, voids, an
 
 The same `sandbox_inquiry_result` value is also honored by **any** manual status inquiry on the transaction (e.g. a [Payment Status Query](/developers/payments/psq/)) — `expires_in_minutes` only controls the *automatic* scheduling.
 
-:::info[`extra` is consulted only on the non-interactive paths]
-On the interactive paths — hosted checkout, tokenization, and auto-debit — the outcome is decided by the **test card / token** that is submitted; `extra` is not consulted there. The two keys never overlap: `sandbox_inquiry_result` drives inquiries, and `sandbox_result` drives capture, void, and wallet payments. Any unrecognized value (or an absent key) defaults to **`success`**.
+:::info[Which mechanism wins]
+On the card paths — hosted checkout, tokenization, and auto-debit — the outcome is decided by the **test card / token** that is submitted; `extra` is not consulted there. On a **wallet** payment the customer still pays with a test card, but the transaction's final status comes from `sandbox_result`. The two keys never overlap: `sandbox_inquiry_result` drives inquiries, `sandbox_result` drives capture, void, and wallet payments. Any unrecognized value (or an absent key) defaults to **`success`**.
 :::
 
 ### What You Can Test
@@ -155,7 +154,7 @@ The Sandbox exercises the **same APIs as production**, so anything you build wit
 | **Recurring / auto-debit (MIT)** | Charge a saved token via the Auto-Debit API. Use `…114` / `…115` / `…116` to rehearse a **declined** recurring charge. | [Recurring Payments](/developers/cards-and-tokens/recurring-payments/) |
 | **Refund (full & partial)** | Run the `refund` operation on a `paid` transaction. Sandbox refunds always succeed; over-refunding is rejected, not clamped. | [Operations](/developers/operations/) |
 | **Authorize, capture & void** | Use a MID whose Operation is `authorize`, then capture or void via Operations. Simulate a declined capture/void with [`extra.sandbox_result`](#the-extra-object). | [Operations](/developers/operations/) |
-| **Wallet payments (Apple / Google / Samsung Pay)** | Pay through the wallet — succeeds by default. Simulate a decline/error with [`extra.sandbox_result`](#the-extra-object) on the session. | [Native Payments](/developers/payments/native-payments/) |
+| **Wallet payments (Apple / Google / Samsung Pay)** | Complete the wallet sheet with a Sandbox test card — the payment succeeds by default. Set [`extra.sandbox_result`](#the-extra-object) on the session to force a decline or error whichever card was used. | [Native Payments](/developers/payments/native-payments/) |
 | **Mimic a real gateway's response shape** | On the hosted pay page, pick **KNET / MPGS / CyberSource / MyFatoorah** under **"Mimic PG Response"**. The stored `gateway_response` takes that gateway's shape while the test card still decides the outcome. | — |
 | **Failed webhook delivery** | Point `webhook_url` at an endpoint that returns a non-`2xx` status or times out; the payment still succeeds and the delivery failure is recorded in `disclosure_url_error`. | [Webhooks](/developers/webhooks/payment-events) |
 
@@ -171,17 +170,13 @@ The Sandbox is driven entirely through the standard Ottu APIs you already use �
 - [**Auto-Debit API**](/developers/cards-and-tokens/recurring-payments/) — charge saved tokens (MIT)
 - [**Operations API**](/developers/operations/) — refund, capture, and void
 
-:::note[Managing Sandbox MIDs & capabilities — coming soon]
-A dedicated API for merchants to **create Sandbox MIDs** and toggle their capability flags (enable refund, tokenization, auto-debit, authorize/void, wallets) on the fly is in development. Until it ships, Ottu provisions these for you. This section will link the full API reference once it is available.
-:::
-
 ## Best Practices
 
 Get repeatable results from the Sandbox — and know where its simulation stops, so you don't plan production behavior around something it cannot model.
 
-- **Test on a non-production environment.** The Sandbox — and especially the `extra`-driven async inquiry scheduler (`sandbox_inquiry_result` + `expires_in_minutes`) — is meant for dev/UAT servers. On a production-flagged server those sessions never auto-resolve.
-- **Drive interactive outcomes with the card, not `extra`.** For hosted checkout, tokenization, and auto-debit the result is set by the test card / token. `extra` (`sandbox_inquiry_result`, `sandbox_result`) only governs the inquiry, capture, void, and wallet paths — it is ignored on the interactive card paths.
-- **Enable the capability you're testing.** Refund, tokenization, auto-debit, authorize/void, and wallets must be enabled on the Sandbox MID (provisioned by Ottu today; self-serve [API](#api-reference) coming). Otherwise the call is rejected at validation, not simulated.
+- **Any environment works — with one exception.** A Sandbox MID can be configured on any Ottu server, production included, so you can rehearse a flow where it actually runs. The only environment-dependent piece is the *automatic* inquiry scheduler (`sandbox_inquiry_result` + `expires_in_minutes`): on a production-flagged server those sessions never auto-resolve, so trigger the inquiry yourself with a [Payment Status Query](/developers/payments/psq/) — it honors the same `sandbox_inquiry_result` value.
+- **On the card paths, the card decides.** For hosted checkout, tokenization, and auto-debit the result is set by the test card / token, and `extra` is ignored. `sandbox_inquiry_result` governs inquiries; `sandbox_result` governs capture, void, and wallet payments — including the wallet case, where a test card is submitted but does not decide the status.
+- **Enable the capability you're testing.** Refund, tokenization, auto-debit, authorize/void, and wallets must be enabled on the Sandbox MID by Ottu. Otherwise the call is rejected at validation, not simulated.
 - **Don't rely on the Sandbox for declined refunds or 3DS.** Refund always succeeds — it cannot simulate a declined or rejected refund (capture, void, and wallets *can* be failed via `sandbox_result`). There is also no 3-D Secure challenge or redirect. Test those flows against a real gateway's sandbox.
 
 ## FAQ
@@ -197,7 +192,7 @@ Get repeatable results from the Sandbox — and know where its simulation stops,
     Use the **test card / token**: `411111111111111` succeeds, `411111111111112` declines, `411111111111113` errors (see [Test Cards](#test-cards)). For unattended flows, set `sandbox_inquiry_result` in [`extra`](#the-extra-object) instead.
   </FAQItem>
   <FAQItem question="Why does my Sandbox refund / auto-debit get rejected?">
-    The capability is probably not enabled on the MID. Refund needs `refund` in Operations, auto-debit needs auto-debit enabled, and saving cards needs tokenization enabled. Ottu provisions these on your Sandbox MID (a self-serve API is coming) — see [Setup](#setup).
+    The capability is probably not enabled on the MID. Refund needs `refund` in Operations, auto-debit needs auto-debit enabled, and saving cards needs tokenization enabled. Ottu provisions these on your Sandbox MID — see [Setup](#setup).
   </FAQItem>
   <FAQItem question="Can I simulate a failed recurring (MIT) charge?">
     Yes. Run the first (CIT) payment with one of the **MIT-failure cards** — `411111111111114` (issuer decline), `411111111111115` (expired), or `411111111111116` (insufficient funds). They enroll and save like the Success card, but the saved token **declines** when later charged. See [Test Cards](#test-cards) and [Recurring Payments](/developers/cards-and-tokens/recurring-payments/).
