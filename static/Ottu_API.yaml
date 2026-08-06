@@ -1653,6 +1653,115 @@ paths:
               schema:
                 $ref: "#/components/schemas/GenericErrorMessage"
           description: ""
+  /b/pbl/v2/osb/create/:
+    post:
+      operationId: create_ottu_sandbox_mid
+      description: 'Provisions an Ottu Sandbox payment gateway MID with its full configuration, so a test
+        environment can be set up without going through the admin.
+
+
+        ### What it does
+
+        - Creates (or reuses) the `ottu_sandbox` gateway row.
+
+        - Resolves the currencies you pass into an exchange configuration, reusing an existing one when
+        it already covers them.
+
+        - Creates the MID itself. The MID is always a **sandbox** MID - a production MID cannot be minted
+        here.
+
+
+        ### Required fields
+
+        | field | description |
+
+        |---|---|
+
+        | `name_en` | Display name shown in the checkout SDK, dashboard and emails. |
+
+        | `currency_code` | ISO 4217 code of the MID''s default currency. Must already exist. |
+
+        | `tags` | One or more business-vertical tags (e.g. `demo`, `e_commerce`). |
+
+
+        ### Notable optional fields
+
+        - `code` - the identifier used in API calls and URLs. Derived from `name_en` when omitted; must
+        be unique across every gateway MID.
+
+        - `extra_currency_codes` - additional currencies the MID accepts.
+
+        - `operations` - post-payment operations. The sandbox supports `refund` and `void`; `void` requires
+        `operation` to be `authorize`.
+
+        - `is_tokenizable` / `auto_debit_enabled` - enable card saving and MIT charges.
+
+
+        ### Rate limit
+
+        5 MIDs per hour per caller (per user, or per API key). The 6th call returns **429**.
+
+
+        ### Common responses
+
+        - **201** - the MID was created; the body is its full configuration.
+
+        - **400** - validation error, keyed by field.
+
+        - **401** - missing or invalid credentials.
+
+        - **429** - hourly provisioning limit reached.'
+      summary: Create an Ottu Sandbox MID
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+          default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+        description: Private API key to be provided in the format `Api-Key <key>`.
+        required: true
+      tags:
+      - Ottu Sandbox
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OttuSandboxMIDCreate"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/OttuSandboxMIDCreate"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/OttuSandboxMIDCreate"
+        required: true
+      security:
+      - SSO_JWT_Auth: []
+      - tokenAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OttuSandboxMID"
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OttuSandboxMIDErrors"
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ''
   /b/pbl/v2/payment-methods/:
     post:
       operationId: get_payment_methods
@@ -7534,6 +7643,1521 @@ components:
         - detail
         - operation
         - result
+    OttuSandboxMID:
+      type: object
+      description: Read representation of a sandbox MID, returned once it is provisioned.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        gateway_name:
+          type: string
+          readOnly: true
+        code:
+          type: string
+          description: Code to identify the settings in the API/URLs/etc
+          maxLength: 16
+          pattern: ^[-a-zA-Z0-9_]+$
+        name_en:
+          type:
+          - string
+          - 'null'
+          title: Name [en]
+          description: 'Name to be displayed in dropdown or anywhere else the settings are being shown.
+            IE: ''Knet'' or ''Knet demo'''
+          maxLength: 50
+        name_ar:
+          type:
+          - string
+          - 'null'
+          title: Name [ar]
+          description: 'Name to be displayed in dropdown or anywhere else the settings are being shown.
+            IE: ''Knet'' or ''Knet demo'''
+          maxLength: 50
+        description:
+          type: string
+          description: Optional description text that will be displayed alongside the payment method in
+            the checkout SDK. Use this to provide additional context messages, or instructions to customers
+            about this payment option.
+        is_active:
+          type: boolean
+          title: Is active?
+          description: Designates if this object is active, can be used and displayed on site.
+        type:
+          enum:
+          - sandbox
+          - production
+          type: string
+          description: '* `sandbox` - Sandbox
+
+            * `production` - Production'
+          x-spec-enum-id: df081db980375d31
+        operation:
+          enum:
+          - purchase
+          - authorize
+          type: string
+          description: '* `purchase` - Purchase
+
+            * `authorize` - Authorize'
+          x-spec-enum-id: fef9cc64394d1c3e
+        operations:
+          oneOf:
+          - {}
+          - type: 'null'
+          description: Add operations that are available for this payment gateway.
+        currency_code:
+          type: string
+          readOnly: true
+        extra_currency_codes:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        payment_method_type:
+          enum:
+          - bnpl
+          - ottu_pg
+          - pg
+          - aggregator
+          - click_to_pay
+          - aba_payway
+          - ''
+          - null
+          type:
+          - string
+          - 'null'
+          x-spec-enum-id: c8d44ec258bd0e6c
+          description: "\n            Designates the type of payment method. Options include:\n\n\n  \
+            \          - 'Flex': Indicates a flexible payment method such as 'Buy Now, Pay Later' (BNPL).\n\
+            \n\n            - 'Redirect PG': Indicates a payment method that redirects to a payment gateway,\
+            \ such as a KNET payment URL.\n\n\n            - 'OttuPG': Indicates a specific type of payment\
+            \ method.\n\n\n            - 'Aggregator': Indicates a payment method that aggregates multiple\
+            \ payment options.\n\n\n            - 'Click To Pay': Indicates a payment method that allows\
+            \ users to pay with a single click, typically used for saved payment methods or wallets.\n\
+            \n\n            - 'ABA PayWay': Indicates a payment method that offers additional sub-options\
+            \ for customization, and their options will appear on the payment page.\n\n\n            Note:\
+            \ If this field is left blank, the payment method will be considered as OttuPG or Redirect\
+            \ PG, depending on other factors.\n\n\n            \n\n* `bnpl` - BNPL\n* `ottu_pg` - OttuPG\n\
+            * `pg` - Redirect PG\n* `aggregator` - Aggregator\n* `click_to_pay` - Click To Pay\n* `aba_payway`\
+            \ - ABA PayWay"
+        bank_code:
+          type: string
+          description: Issuing bank/provider for this MID.
+          maxLength: 50
+        plugins:
+          description: Define plugins where this gateway settings will be available
+        tags:
+          description: Business vertical tags for categorizing this payment method (e.g. e_commerce, pos,
+            invoicing).
+        displayable:
+          type: boolean
+          description: Disabling this flag will hide the PG payment method from the customer.To be used
+            solely for payment services (Apple Pay, Samsung Pay, etc), when the payment service is under
+            a different MID.
+        can_have_multiple_attempts:
+          type: boolean
+          title: Allow Multiple Attempts
+          description: If disabled, the transaction will reach a final state upon receiving a callback
+            and will not be re-attempted again.
+        is_tokenizable:
+          type: boolean
+          title: Is Tokenizable?
+          description: Enable this flag to allow tokenization for this payment gateway.
+        auto_debit_enabled:
+          type: boolean
+          title: Is Auto Debit Enabled?
+          description: Enable this flag to allow mid to perform auto debit operation.
+        form_fields:
+          title: Form Fields Configuration
+          description: 'Configure form field visibility and requirements for Jazz SDK and OttuPG hosted
+            payment page. Example: {''name'': {''display'': true, ''required'': true}}'
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - code
+      - created
+      - currency_code
+      - extra_currency_codes
+      - gateway_name
+      - id
+    OttuSandboxMIDCreate:
+      type: object
+      description: 'Write representation: every option a sandbox MID exposes.
+
+
+        `type` is deliberately absent - a MID minted here is always a sandbox one.'
+      properties:
+        gateway_name:
+          enum:
+          - ottu_sandbox
+          type: string
+          x-spec-enum-id: 5ace108db8bd2318
+          writeOnly: true
+          default: ottu_sandbox
+          description: 'Gateway is addressed by its constant name, never by id.
+
+
+            * `ottu_sandbox` - Ottu Sandbox'
+        name_en:
+          type: string
+          maxLength: 50
+        name_ar:
+          type: string
+          default: ''
+          maxLength: 50
+        code:
+          oneOf:
+          - type: string
+            default: ''
+            maxLength: 16
+            pattern: ^[-a-zA-Z0-9_]+$
+          - type: string
+            maxLength: 0
+        description:
+          type: string
+          description: Optional description text that will be displayed alongside the payment method in
+            the checkout SDK. Use this to provide additional context messages, or instructions to customers
+            about this payment option.
+        is_active:
+          type: boolean
+          title: Is active?
+          description: Designates if this object is active, can be used and displayed on site.
+        operation:
+          enum:
+          - purchase
+          - authorize
+          type: string
+          description: '* `purchase` - Purchase
+
+            * `authorize` - Authorize'
+          x-spec-enum-id: fef9cc64394d1c3e
+        operations:
+          type: array
+          items:
+            enum:
+            - refund
+            - void
+            type: string
+            description: '* `refund` - refund
+
+              * `void` - void'
+            x-spec-enum-id: fa10dba4538451d9
+        currency_code:
+          enum:
+          - AED
+          - AFN
+          - ALL
+          - AMD
+          - ANG
+          - AOA
+          - ARS
+          - AUD
+          - AWG
+          - AZN
+          - BAM
+          - BBD
+          - BDT
+          - BGN
+          - BHD
+          - BIF
+          - BMD
+          - BND
+          - BOB
+          - BOV
+          - BRL
+          - BSD
+          - BTN
+          - BWP
+          - BYN
+          - BZD
+          - CAD
+          - CDF
+          - CHE
+          - CHF
+          - CHW
+          - CLF
+          - CLP
+          - CNY
+          - COP
+          - COU
+          - CRC
+          - CUC
+          - CUP
+          - CVE
+          - CZK
+          - DJF
+          - DKK
+          - DOP
+          - DZD
+          - EGP
+          - ERN
+          - ETB
+          - EUR
+          - FJD
+          - FKP
+          - GBP
+          - GEL
+          - GHS
+          - GIP
+          - GMD
+          - GNF
+          - GTQ
+          - GYD
+          - HKD
+          - HNL
+          - HRK
+          - HTG
+          - HUF
+          - IDR
+          - ILS
+          - INR
+          - IQD
+          - IRR
+          - ISK
+          - JMD
+          - JOD
+          - JPY
+          - KES
+          - KGS
+          - KHR
+          - KMF
+          - KPW
+          - KRW
+          - KWD
+          - KYD
+          - KZT
+          - LAK
+          - LBP
+          - LKR
+          - LRD
+          - LSL
+          - LYD
+          - MAD
+          - MDL
+          - MGA
+          - MKD
+          - MMK
+          - MNT
+          - MOP
+          - MRU
+          - MUR
+          - MVR
+          - MWK
+          - MXN
+          - MXV
+          - MYR
+          - MZN
+          - NAD
+          - NGN
+          - NIO
+          - NOK
+          - NPR
+          - NZD
+          - OMR
+          - PAB
+          - PEN
+          - PGK
+          - PHP
+          - PKR
+          - PLN
+          - PYG
+          - QAR
+          - RON
+          - RSD
+          - RUB
+          - RWF
+          - SAR
+          - SBD
+          - SCR
+          - SDG
+          - SEK
+          - SGD
+          - SHP
+          - SLE
+          - SLL
+          - SOS
+          - SRD
+          - SSP
+          - STN
+          - SVC
+          - SYP
+          - SZL
+          - THB
+          - TJS
+          - TMT
+          - TND
+          - TOP
+          - TRY
+          - TTD
+          - TWD
+          - TZS
+          - UAH
+          - UGX
+          - USD
+          - USN
+          - UYI
+          - UYU
+          - UYW
+          - UZS
+          - VED
+          - VES
+          - VND
+          - VUV
+          - WST
+          - XAF
+          - XAG
+          - XAU
+          - XBA
+          - XBB
+          - XBC
+          - XBD
+          - XCD
+          - XDR
+          - XOF
+          - XPD
+          - XPF
+          - XPT
+          - XSU
+          - XTS
+          - XUA
+          - XXX
+          - YER
+          - ZAR
+          - ZMW
+          - ZWL
+          type: string
+          description: '* `AED` - AED
+
+            * `AFN` - AFN
+
+            * `ALL` - ALL
+
+            * `AMD` - AMD
+
+            * `ANG` - ANG
+
+            * `AOA` - AOA
+
+            * `ARS` - ARS
+
+            * `AUD` - AUD
+
+            * `AWG` - AWG
+
+            * `AZN` - AZN
+
+            * `BAM` - BAM
+
+            * `BBD` - BBD
+
+            * `BDT` - BDT
+
+            * `BGN` - BGN
+
+            * `BHD` - BHD
+
+            * `BIF` - BIF
+
+            * `BMD` - BMD
+
+            * `BND` - BND
+
+            * `BOB` - BOB
+
+            * `BOV` - BOV
+
+            * `BRL` - BRL
+
+            * `BSD` - BSD
+
+            * `BTN` - BTN
+
+            * `BWP` - BWP
+
+            * `BYN` - BYN
+
+            * `BZD` - BZD
+
+            * `CAD` - CAD
+
+            * `CDF` - CDF
+
+            * `CHE` - CHE
+
+            * `CHF` - CHF
+
+            * `CHW` - CHW
+
+            * `CLF` - CLF
+
+            * `CLP` - CLP
+
+            * `CNY` - CNY
+
+            * `COP` - COP
+
+            * `COU` - COU
+
+            * `CRC` - CRC
+
+            * `CUC` - CUC
+
+            * `CUP` - CUP
+
+            * `CVE` - CVE
+
+            * `CZK` - CZK
+
+            * `DJF` - DJF
+
+            * `DKK` - DKK
+
+            * `DOP` - DOP
+
+            * `DZD` - DZD
+
+            * `EGP` - EGP
+
+            * `ERN` - ERN
+
+            * `ETB` - ETB
+
+            * `EUR` - EUR
+
+            * `FJD` - FJD
+
+            * `FKP` - FKP
+
+            * `GBP` - GBP
+
+            * `GEL` - GEL
+
+            * `GHS` - GHS
+
+            * `GIP` - GIP
+
+            * `GMD` - GMD
+
+            * `GNF` - GNF
+
+            * `GTQ` - GTQ
+
+            * `GYD` - GYD
+
+            * `HKD` - HKD
+
+            * `HNL` - HNL
+
+            * `HRK` - HRK
+
+            * `HTG` - HTG
+
+            * `HUF` - HUF
+
+            * `IDR` - IDR
+
+            * `ILS` - ILS
+
+            * `INR` - INR
+
+            * `IQD` - IQD
+
+            * `IRR` - IRR
+
+            * `ISK` - ISK
+
+            * `JMD` - JMD
+
+            * `JOD` - JOD
+
+            * `JPY` - JPY
+
+            * `KES` - KES
+
+            * `KGS` - KGS
+
+            * `KHR` - KHR
+
+            * `KMF` - KMF
+
+            * `KPW` - KPW
+
+            * `KRW` - KRW
+
+            * `KWD` - KWD
+
+            * `KYD` - KYD
+
+            * `KZT` - KZT
+
+            * `LAK` - LAK
+
+            * `LBP` - LBP
+
+            * `LKR` - LKR
+
+            * `LRD` - LRD
+
+            * `LSL` - LSL
+
+            * `LYD` - LYD
+
+            * `MAD` - MAD
+
+            * `MDL` - MDL
+
+            * `MGA` - MGA
+
+            * `MKD` - MKD
+
+            * `MMK` - MMK
+
+            * `MNT` - MNT
+
+            * `MOP` - MOP
+
+            * `MRU` - MRU
+
+            * `MUR` - MUR
+
+            * `MVR` - MVR
+
+            * `MWK` - MWK
+
+            * `MXN` - MXN
+
+            * `MXV` - MXV
+
+            * `MYR` - MYR
+
+            * `MZN` - MZN
+
+            * `NAD` - NAD
+
+            * `NGN` - NGN
+
+            * `NIO` - NIO
+
+            * `NOK` - NOK
+
+            * `NPR` - NPR
+
+            * `NZD` - NZD
+
+            * `OMR` - OMR
+
+            * `PAB` - PAB
+
+            * `PEN` - PEN
+
+            * `PGK` - PGK
+
+            * `PHP` - PHP
+
+            * `PKR` - PKR
+
+            * `PLN` - PLN
+
+            * `PYG` - PYG
+
+            * `QAR` - QAR
+
+            * `RON` - RON
+
+            * `RSD` - RSD
+
+            * `RUB` - RUB
+
+            * `RWF` - RWF
+
+            * `SAR` - SAR
+
+            * `SBD` - SBD
+
+            * `SCR` - SCR
+
+            * `SDG` - SDG
+
+            * `SEK` - SEK
+
+            * `SGD` - SGD
+
+            * `SHP` - SHP
+
+            * `SLE` - SLE
+
+            * `SLL` - SLL
+
+            * `SOS` - SOS
+
+            * `SRD` - SRD
+
+            * `SSP` - SSP
+
+            * `STN` - STN
+
+            * `SVC` - SVC
+
+            * `SYP` - SYP
+
+            * `SZL` - SZL
+
+            * `THB` - THB
+
+            * `TJS` - TJS
+
+            * `TMT` - TMT
+
+            * `TND` - TND
+
+            * `TOP` - TOP
+
+            * `TRY` - TRY
+
+            * `TTD` - TTD
+
+            * `TWD` - TWD
+
+            * `TZS` - TZS
+
+            * `UAH` - UAH
+
+            * `UGX` - UGX
+
+            * `USD` - USD
+
+            * `USN` - USN
+
+            * `UYI` - UYI
+
+            * `UYU` - UYU
+
+            * `UYW` - UYW
+
+            * `UZS` - UZS
+
+            * `VED` - VED
+
+            * `VES` - VES
+
+            * `VND` - VND
+
+            * `VUV` - VUV
+
+            * `WST` - WST
+
+            * `XAF` - XAF
+
+            * `XAG` - XAG
+
+            * `XAU` - XAU
+
+            * `XBA` - XBA
+
+            * `XBB` - XBB
+
+            * `XBC` - XBC
+
+            * `XBD` - XBD
+
+            * `XCD` - XCD
+
+            * `XDR` - XDR
+
+            * `XOF` - XOF
+
+            * `XPD` - XPD
+
+            * `XPF` - XPF
+
+            * `XPT` - XPT
+
+            * `XSU` - XSU
+
+            * `XTS` - XTS
+
+            * `XUA` - XUA
+
+            * `XXX` - XXX
+
+            * `YER` - YER
+
+            * `ZAR` - ZAR
+
+            * `ZMW` - ZMW
+
+            * `ZWL` - ZWL'
+          x-spec-enum-id: 1314c690acf1c093
+          writeOnly: true
+        extra_currency_codes:
+          type: array
+          items:
+            enum:
+            - AED
+            - AFN
+            - ALL
+            - AMD
+            - ANG
+            - AOA
+            - ARS
+            - AUD
+            - AWG
+            - AZN
+            - BAM
+            - BBD
+            - BDT
+            - BGN
+            - BHD
+            - BIF
+            - BMD
+            - BND
+            - BOB
+            - BOV
+            - BRL
+            - BSD
+            - BTN
+            - BWP
+            - BYN
+            - BZD
+            - CAD
+            - CDF
+            - CHE
+            - CHF
+            - CHW
+            - CLF
+            - CLP
+            - CNY
+            - COP
+            - COU
+            - CRC
+            - CUC
+            - CUP
+            - CVE
+            - CZK
+            - DJF
+            - DKK
+            - DOP
+            - DZD
+            - EGP
+            - ERN
+            - ETB
+            - EUR
+            - FJD
+            - FKP
+            - GBP
+            - GEL
+            - GHS
+            - GIP
+            - GMD
+            - GNF
+            - GTQ
+            - GYD
+            - HKD
+            - HNL
+            - HRK
+            - HTG
+            - HUF
+            - IDR
+            - ILS
+            - INR
+            - IQD
+            - IRR
+            - ISK
+            - JMD
+            - JOD
+            - JPY
+            - KES
+            - KGS
+            - KHR
+            - KMF
+            - KPW
+            - KRW
+            - KWD
+            - KYD
+            - KZT
+            - LAK
+            - LBP
+            - LKR
+            - LRD
+            - LSL
+            - LYD
+            - MAD
+            - MDL
+            - MGA
+            - MKD
+            - MMK
+            - MNT
+            - MOP
+            - MRU
+            - MUR
+            - MVR
+            - MWK
+            - MXN
+            - MXV
+            - MYR
+            - MZN
+            - NAD
+            - NGN
+            - NIO
+            - NOK
+            - NPR
+            - NZD
+            - OMR
+            - PAB
+            - PEN
+            - PGK
+            - PHP
+            - PKR
+            - PLN
+            - PYG
+            - QAR
+            - RON
+            - RSD
+            - RUB
+            - RWF
+            - SAR
+            - SBD
+            - SCR
+            - SDG
+            - SEK
+            - SGD
+            - SHP
+            - SLE
+            - SLL
+            - SOS
+            - SRD
+            - SSP
+            - STN
+            - SVC
+            - SYP
+            - SZL
+            - THB
+            - TJS
+            - TMT
+            - TND
+            - TOP
+            - TRY
+            - TTD
+            - TWD
+            - TZS
+            - UAH
+            - UGX
+            - USD
+            - USN
+            - UYI
+            - UYU
+            - UYW
+            - UZS
+            - VED
+            - VES
+            - VND
+            - VUV
+            - WST
+            - XAF
+            - XAG
+            - XAU
+            - XBA
+            - XBB
+            - XBC
+            - XBD
+            - XCD
+            - XDR
+            - XOF
+            - XPD
+            - XPF
+            - XPT
+            - XSU
+            - XTS
+            - XUA
+            - XXX
+            - YER
+            - ZAR
+            - ZMW
+            - ZWL
+            type: string
+            description: '* `AED` - AED
+
+              * `AFN` - AFN
+
+              * `ALL` - ALL
+
+              * `AMD` - AMD
+
+              * `ANG` - ANG
+
+              * `AOA` - AOA
+
+              * `ARS` - ARS
+
+              * `AUD` - AUD
+
+              * `AWG` - AWG
+
+              * `AZN` - AZN
+
+              * `BAM` - BAM
+
+              * `BBD` - BBD
+
+              * `BDT` - BDT
+
+              * `BGN` - BGN
+
+              * `BHD` - BHD
+
+              * `BIF` - BIF
+
+              * `BMD` - BMD
+
+              * `BND` - BND
+
+              * `BOB` - BOB
+
+              * `BOV` - BOV
+
+              * `BRL` - BRL
+
+              * `BSD` - BSD
+
+              * `BTN` - BTN
+
+              * `BWP` - BWP
+
+              * `BYN` - BYN
+
+              * `BZD` - BZD
+
+              * `CAD` - CAD
+
+              * `CDF` - CDF
+
+              * `CHE` - CHE
+
+              * `CHF` - CHF
+
+              * `CHW` - CHW
+
+              * `CLF` - CLF
+
+              * `CLP` - CLP
+
+              * `CNY` - CNY
+
+              * `COP` - COP
+
+              * `COU` - COU
+
+              * `CRC` - CRC
+
+              * `CUC` - CUC
+
+              * `CUP` - CUP
+
+              * `CVE` - CVE
+
+              * `CZK` - CZK
+
+              * `DJF` - DJF
+
+              * `DKK` - DKK
+
+              * `DOP` - DOP
+
+              * `DZD` - DZD
+
+              * `EGP` - EGP
+
+              * `ERN` - ERN
+
+              * `ETB` - ETB
+
+              * `EUR` - EUR
+
+              * `FJD` - FJD
+
+              * `FKP` - FKP
+
+              * `GBP` - GBP
+
+              * `GEL` - GEL
+
+              * `GHS` - GHS
+
+              * `GIP` - GIP
+
+              * `GMD` - GMD
+
+              * `GNF` - GNF
+
+              * `GTQ` - GTQ
+
+              * `GYD` - GYD
+
+              * `HKD` - HKD
+
+              * `HNL` - HNL
+
+              * `HRK` - HRK
+
+              * `HTG` - HTG
+
+              * `HUF` - HUF
+
+              * `IDR` - IDR
+
+              * `ILS` - ILS
+
+              * `INR` - INR
+
+              * `IQD` - IQD
+
+              * `IRR` - IRR
+
+              * `ISK` - ISK
+
+              * `JMD` - JMD
+
+              * `JOD` - JOD
+
+              * `JPY` - JPY
+
+              * `KES` - KES
+
+              * `KGS` - KGS
+
+              * `KHR` - KHR
+
+              * `KMF` - KMF
+
+              * `KPW` - KPW
+
+              * `KRW` - KRW
+
+              * `KWD` - KWD
+
+              * `KYD` - KYD
+
+              * `KZT` - KZT
+
+              * `LAK` - LAK
+
+              * `LBP` - LBP
+
+              * `LKR` - LKR
+
+              * `LRD` - LRD
+
+              * `LSL` - LSL
+
+              * `LYD` - LYD
+
+              * `MAD` - MAD
+
+              * `MDL` - MDL
+
+              * `MGA` - MGA
+
+              * `MKD` - MKD
+
+              * `MMK` - MMK
+
+              * `MNT` - MNT
+
+              * `MOP` - MOP
+
+              * `MRU` - MRU
+
+              * `MUR` - MUR
+
+              * `MVR` - MVR
+
+              * `MWK` - MWK
+
+              * `MXN` - MXN
+
+              * `MXV` - MXV
+
+              * `MYR` - MYR
+
+              * `MZN` - MZN
+
+              * `NAD` - NAD
+
+              * `NGN` - NGN
+
+              * `NIO` - NIO
+
+              * `NOK` - NOK
+
+              * `NPR` - NPR
+
+              * `NZD` - NZD
+
+              * `OMR` - OMR
+
+              * `PAB` - PAB
+
+              * `PEN` - PEN
+
+              * `PGK` - PGK
+
+              * `PHP` - PHP
+
+              * `PKR` - PKR
+
+              * `PLN` - PLN
+
+              * `PYG` - PYG
+
+              * `QAR` - QAR
+
+              * `RON` - RON
+
+              * `RSD` - RSD
+
+              * `RUB` - RUB
+
+              * `RWF` - RWF
+
+              * `SAR` - SAR
+
+              * `SBD` - SBD
+
+              * `SCR` - SCR
+
+              * `SDG` - SDG
+
+              * `SEK` - SEK
+
+              * `SGD` - SGD
+
+              * `SHP` - SHP
+
+              * `SLE` - SLE
+
+              * `SLL` - SLL
+
+              * `SOS` - SOS
+
+              * `SRD` - SRD
+
+              * `SSP` - SSP
+
+              * `STN` - STN
+
+              * `SVC` - SVC
+
+              * `SYP` - SYP
+
+              * `SZL` - SZL
+
+              * `THB` - THB
+
+              * `TJS` - TJS
+
+              * `TMT` - TMT
+
+              * `TND` - TND
+
+              * `TOP` - TOP
+
+              * `TRY` - TRY
+
+              * `TTD` - TTD
+
+              * `TWD` - TWD
+
+              * `TZS` - TZS
+
+              * `UAH` - UAH
+
+              * `UGX` - UGX
+
+              * `USD` - USD
+
+              * `USN` - USN
+
+              * `UYI` - UYI
+
+              * `UYU` - UYU
+
+              * `UYW` - UYW
+
+              * `UZS` - UZS
+
+              * `VED` - VED
+
+              * `VES` - VES
+
+              * `VND` - VND
+
+              * `VUV` - VUV
+
+              * `WST` - WST
+
+              * `XAF` - XAF
+
+              * `XAG` - XAG
+
+              * `XAU` - XAU
+
+              * `XBA` - XBA
+
+              * `XBB` - XBB
+
+              * `XBC` - XBC
+
+              * `XBD` - XBD
+
+              * `XCD` - XCD
+
+              * `XDR` - XDR
+
+              * `XOF` - XOF
+
+              * `XPD` - XPD
+
+              * `XPF` - XPF
+
+              * `XPT` - XPT
+
+              * `XSU` - XSU
+
+              * `XTS` - XTS
+
+              * `XUA` - XUA
+
+              * `XXX` - XXX
+
+              * `YER` - YER
+
+              * `ZAR` - ZAR
+
+              * `ZMW` - ZMW
+
+              * `ZWL` - ZWL'
+            x-spec-enum-id: 1314c690acf1c093
+            writeOnly: true
+          writeOnly: true
+        payment_method_type:
+          enum:
+          - bnpl
+          - ottu_pg
+          - pg
+          - aggregator
+          - click_to_pay
+          - aba_payway
+          - ''
+          type: string
+          description: '* `bnpl` - BNPL
+
+            * `ottu_pg` - OttuPG
+
+            * `pg` - Redirect PG
+
+            * `aggregator` - Aggregator
+
+            * `click_to_pay` - Click To Pay
+
+            * `aba_payway` - ABA PayWay'
+          x-spec-enum-id: c8d44ec258bd0e6c
+          default: ''
+        bank_code:
+          enum:
+          - ''
+          - nbk
+          - abk
+          - gulf_bank
+          - kfh
+          - kib
+          - boubyan
+          - burgan
+          - warba
+          - cbk
+          - anb
+          - bsf
+          - snb
+          - jazbank
+          - nbo
+          - bank_muscat
+          - alsohar
+          - afs
+          type: string
+          description: '* `` - ---------
+
+            * `nbk` - National Bank of Kuwait
+
+            * `abk` - Ahly Bank of Kuwait
+
+            * `gulf_bank` - Gulf Bank
+
+            * `kfh` - Kuwait Finance House
+
+            * `kib` - Kuwait International Bank
+
+            * `boubyan` - Boubyan Bank
+
+            * `burgan` - Burgan Bank
+
+            * `warba` - Warba Bank
+
+            * `cbk` - Commercial Bank of Kuwait
+
+            * `anb` - Arab National Bank
+
+            * `bsf` - Banque Saudi Fransi
+
+            * `snb` - Saudi National Bank
+
+            * `jazbank` - Al Jazira Bank
+
+            * `nbo` - National Bank of Oman
+
+            * `bank_muscat` - Bank Muscat
+
+            * `alsohar` - Alsohar Bank
+
+            * `afs` - Arab Financial Services'
+          x-spec-enum-id: ee22420088430570
+          default: ''
+        plugins:
+          type: array
+          items:
+            enum:
+            - payment_request
+            - bulk
+            - customer_payment
+            - e_commerce
+            - catalogue
+            - legacy
+            - event
+            - food_ordering
+            - iata
+            - real_estate
+            - payout
+            type: string
+            description: '* `payment_request` - Payment request
+
+              * `bulk` - Bulk
+
+              * `customer_payment` - Customer payment
+
+              * `e_commerce` - E-Commerce
+
+              * `catalogue` - Catalogue
+
+              * `legacy` - Legacy API
+
+              * `event` - Event
+
+              * `food_ordering` - Food ordering
+
+              * `iata` - IATA
+
+              * `real_estate` - Real Estate
+
+              * `payout` - Payout'
+            x-spec-enum-id: 306ad5290fad8d6c
+        tags:
+          type: array
+          items:
+            enum:
+            - e_commerce
+            - crm
+            - pos
+            - invoicing
+            - subscriptions
+            - marketplace
+            - mobile_app
+            - ticket_booking
+            - donations
+            - government
+            - education
+            - healthcare
+            - insurance
+            - logistics
+            - hospitality
+            - real_estate
+            - retail
+            - telecom
+            - utilities
+            - demo
+            - test
+            type: string
+            description: '* `e_commerce` - E-Commerce
+
+              * `crm` - CRM
+
+              * `pos` - Point of Sale
+
+              * `invoicing` - Invoicing
+
+              * `subscriptions` - Subscriptions
+
+              * `marketplace` - Marketplace
+
+              * `mobile_app` - Mobile App
+
+              * `ticket_booking` - Ticket Booking
+
+              * `donations` - Donations
+
+              * `government` - Government
+
+              * `education` - Education
+
+              * `healthcare` - Healthcare
+
+              * `insurance` - Insurance
+
+              * `logistics` - Logistics
+
+              * `hospitality` - Hospitality
+
+              * `real_estate` - Real Estate
+
+              * `retail` - Retail
+
+              * `telecom` - Telecom
+
+              * `utilities` - Utilities
+
+              * `demo` - Demo
+
+              * `test` - Test'
+            x-spec-enum-id: 51968db8c9e71b0f
+        displayable:
+          type: boolean
+          description: Disabling this flag will hide the PG payment method from the customer.To be used
+            solely for payment services (Apple Pay, Samsung Pay, etc), when the payment service is under
+            a different MID.
+        can_have_multiple_attempts:
+          type: boolean
+          title: Allow Multiple Attempts
+          description: If disabled, the transaction will reach a final state upon receiving a callback
+            and will not be re-attempted again.
+        is_tokenizable:
+          type: boolean
+          title: Is Tokenizable?
+          description: Enable this flag to allow tokenization for this payment gateway.
+        auto_debit_enabled:
+          type: boolean
+          title: Is Auto Debit Enabled?
+          description: Enable this flag to allow mid to perform auto debit operation.
+        form_fields:
+          type: object
+          additionalProperties: {}
+      required:
+      - currency_code
+      - name_en
+      - tags
+    OttuSandboxMIDErrors:
+      oneOf:
+      - $ref: "#/components/schemas/FieldErrors"
+      - $ref: "#/components/schemas/GenericErrorMessage"
     PGCodeValidation:
       type: object
       properties:
