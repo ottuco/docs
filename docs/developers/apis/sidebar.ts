@@ -228,6 +228,18 @@ const sidebar: SidebarsConfig = {
         },
       ],
     },
+    {
+      type: "category",
+      label: "Ottu Sandbox",
+      items: [
+        {
+          type: "doc",
+          id: "developers/apis/create-ottu-sandbox-mid",
+          label: "Create an Ottu Sandbox MID",
+          className: "api-method post",
+        },
+      ],
+    },
   ],
 };
 

@@ -1,12 +1,14 @@
 ---
 title: Ottu Sandbox
 sidebar_label: Ottu Sandbox
+hide_table_of_contents: true
 ---
 
 import CodeBlock from "@theme/CodeBlock";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 import TestCardsTable from "@site/src/components/TestCardsTable";
+import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 
 # Ottu Sandbox
 
@@ -40,11 +42,34 @@ You need only two things:
 1. **An Ottu Sandbox gateway (MID)** configured on **your own Connect server**. The Sandbox can run on **any Ottu environment** — dev, UAT, staging, *or production* — so you can rehearse a specific flow on the very server that flow will run on. You test it exactly the way you'd test KNET or MPGS on your own installation: it gets its own `pg_code`, kept separate from your live gateways, and no traffic ever leaves Ottu. The only environment-dependent piece is the *automatic* inquiry scheduler ([`expires_in_minutes`](#the-extra-object)), which stays off on production-flagged servers — see [Best Practices](#best-practices).
 2. **A valid API key** for the [Checkout API](/developers/payments/checkout-api/). Examples below use `Authorization: Api-Key <YOUR_API_KEY>`.
 
-Then pass the Sandbox `pg_code` in `pg_codes` when you create a session — that is the entire setup.
+Then pass the Sandbox `pg_code` in `pg_codes` when you create a session — that is the entire setup. If you don't have a Sandbox MID yet, you can provision one yourself in a single call — see [Provisioning a Sandbox MID](#provisioning-a-sandbox-mid) below.
 
-:::note[Capabilities are provisioned for you]
-Advanced capabilities — tokenization, auto-debit, refund, authorize/void, and wallets — are enabled on your Sandbox MID by Ottu. Ask Ottu to enable the capability your scenario needs — otherwise the corresponding call is rejected at validation rather than simulated.
+:::note[MID capabilities default to OFF]
+Tokenization, auto-debit, and authorize/void are **off** on a new MID until you turn them on. You can set them at creation time with `is_tokenizable`, `auto_debit_enabled`, `operation`, and `operations` (see [Provisioning a Sandbox MID](#provisioning-a-sandbox-mid)) instead of clicking through the dashboard. Wallet support is still provisioned by Ottu. A call against a capability the MID doesn't have is rejected at validation rather than simulated.
 :::
+
+### Provisioning a Sandbox MID
+
+`POST /b/pbl/v2/osb/create/` provisions a Sandbox MID with its full configuration in one call, so you can stand up a test environment without going through the admin. The complete request and response schemas — every field, its type, enum values, constraints and defaults — are in the [API Reference](#api-reference).
+
+Three things about it are worth knowing before your first call, because none of them are visible in the schema:
+
+:::note[Authentication — three accepted modes]
+This endpoint accepts a **private** API key (`Authorization: Api-Key <private_key>`), a logged-in user's **JWT**, or a **Keycloak JWT** — both JWTs as `Authorization: Bearer <token>`. A **public** API key is rejected with `401`, and so is Basic auth. Reaching for the public key first is the most likely mistake. See [Authentication](/developers/getting-started/authentication).
+:::
+
+:::tip[Send OPTIONS first]
+`OPTIONS` on the same URL, with the same auth, returns every field with its allowed values under `actions.POST` — including **the currency codes that actually exist on your server**. Currencies are per-installation, so this is the only reliable way to know what `currency_code` will accept.
+
+<CodeBlock language="bash">{`curl --location --request OPTIONS '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/osb/create/' \\
+  --header 'Authorization: Api-Key <YOUR_PRIVATE_API_KEY>'`}</CodeBlock>
+:::
+
+:::warning[A MID with no plugins is invisible]
+`plugins` is optional, but a MID created without it will not appear anywhere in the product — not in the checkout SDK, not in the dashboard, not in the Payment Methods API. Pass the plugins you actually use, e.g. `["e_commerce", "payment_request"]`. Separately, the 5-per-hour provisioning limit is counted **per caller** (per user or per API key) and only **successful** creations consume quota — a run of `400`s while you get the payload right will not lock you out.
+:::
+
+The MID is always a **sandbox** MID; `type` is not a request field and a production MID can never be minted here. The `code` it returns is the `pg_code` you pass to the [Checkout API](/developers/payments/checkout-api/) — omit it and it is derived from `name_en` and capped at 16 characters.
 
 ## Guide
 
@@ -164,11 +189,15 @@ Sessions created via the Checkout API support **multiple attempts** by default, 
 
 ## API Reference
 
-The Sandbox is driven entirely through the standard Ottu APIs you already use — there is **no Sandbox-specific request format**. The full interactive schemas live with each API:
+Payments against the Sandbox use the standard Ottu APIs you already use — there is **no Sandbox-specific request format** for them. The full interactive schemas live with each API:
 
 - [**Checkout API**](/developers/payments/checkout-api/) — create sessions (`pg_codes: ["<your-sandbox-pg_code>"]`)
 - [**Auto-Debit API**](/developers/cards-and-tokens/recurring-payments/) — charge saved tokens (MIT)
 - [**Operations API**](/developers/operations/) — refund, capture, and void
+
+The one Sandbox-specific endpoint is the provisioning call. Expand any field for its type, enum values, constraints and defaults, and use the sample request as a starting point.
+
+<ApiDocEmbed path="create-ottu-sandbox-mid.api.mdx" />
 
 ## Best Practices
 
@@ -176,7 +205,7 @@ Get repeatable results from the Sandbox — and know where its simulation stops,
 
 - **Any environment works — with one exception.** A Sandbox MID can be configured on any Ottu server, production included, so you can rehearse a flow where it actually runs. The only environment-dependent piece is the *automatic* inquiry scheduler (`sandbox_inquiry_result` + `expires_in_minutes`): on a production-flagged server those sessions never auto-resolve, so trigger the inquiry yourself with a [Payment Status Query](/developers/payments/psq/) — it honors the same `sandbox_inquiry_result` value.
 - **On the card paths, the card decides.** For hosted checkout, tokenization, and auto-debit the result is set by the test card / token, and `extra` is ignored. `sandbox_inquiry_result` governs inquiries; `sandbox_result` governs capture, void, and wallet payments — including the wallet case, where a test card is submitted but does not decide the status.
-- **Enable the capability you're testing.** Refund, tokenization, auto-debit, authorize/void, and wallets must be enabled on the Sandbox MID by Ottu. Otherwise the call is rejected at validation, not simulated.
+- **Enable the capability you're testing.** MID capabilities default to off. Set `is_tokenizable`, `auto_debit_enabled`, `operation`, and `operations` when you [create the MID](#provisioning-a-sandbox-mid) — it is one call, and it beats discovering the gap halfway through a test run. Wallets are provisioned by Ottu. A call against a capability the MID doesn't have is rejected at validation, not simulated.
 - **Don't rely on the Sandbox for declined refunds or 3DS.** Refund always succeeds — it cannot simulate a declined or rejected refund (capture, void, and wallets *can* be failed via `sandbox_result`). There is also no 3-D Secure challenge or redirect. Test those flows against a real gateway's sandbox.
 
 ## FAQ
@@ -192,7 +221,7 @@ Get repeatable results from the Sandbox — and know where its simulation stops,
     Use the **test card / token**: `411111111111111` succeeds, `411111111111112` declines, `411111111111113` errors (see [Test Cards](#test-cards)). For unattended flows, set `sandbox_inquiry_result` in [`extra`](#the-extra-object) instead.
   </FAQItem>
   <FAQItem question="Why does my Sandbox refund / auto-debit get rejected?">
-    The capability is probably not enabled on the MID. Refund needs `refund` in Operations, auto-debit needs auto-debit enabled, and saving cards needs tokenization enabled. Ottu provisions these on your Sandbox MID — see [Setup](#setup).
+    The capability is probably not enabled on the MID — they all default to off. Refund needs `refund` in `operations`, auto-debit needs `auto_debit_enabled`, and saving cards needs `is_tokenizable`. Set them when you [create the MID](#provisioning-a-sandbox-mid), or ask Ottu to enable them on an existing one.
   </FAQItem>
   <FAQItem question="Can I simulate a failed recurring (MIT) charge?">
     Yes. Run the first (CIT) payment with one of the **MIT-failure cards** — `411111111111114` (issuer decline), `411111111111115` (expired), or `411111111111116` (insufficient funds). They enroll and save like the Success card, but the saved token **declines** when later charged. See [Test Cards](#test-cards) and [Recurring Payments](/developers/cards-and-tokens/recurring-payments/).
