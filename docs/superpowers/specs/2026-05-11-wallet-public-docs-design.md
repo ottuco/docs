@@ -1,7 +1,7 @@
 # Wallet Public Documentation — Design
 
-**Ticket:** [Redmine #150388](https://pm.kuwaitnet.com/issues/150388) — Wallet Service Integration for Merchant Refund Credits
-**Docs subticket:** [Redmine #150394](https://pm.kuwaitnet.com/issues/150394) — Public Integration Documentation for Merchants
+**Ticket:** [Redmine #150388](https://orbit.ottu.com/issues/150388) — Wallet Service Integration for Merchant Refund Credits
+**Docs subticket:** [Redmine #150394](https://orbit.ottu.com/issues/150394) — Public Integration Documentation for Merchants
 **Branch:** `task/150388-wallet-docs` (forked from `dev`)
 **Date:** 2026-05-11
 
