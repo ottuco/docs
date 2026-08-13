@@ -26,6 +26,10 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/
 - **On-demand billing** — charge customers when events occur (e.g., account top-ups, usage-based billing)
 - **Recurring invoices** — automatically collect payment on invoice due dates
 
+:::tip Want Ottu to run the billing schedule instead?
+Auto-debit puts you in charge of the schedule — your system decides when each CIT/MIT charge happens, and you build the retry and dunning logic. If you'd rather hand all of that to Ottu after a single checkout call, see [AutoPay](/developers/payments/autopay/) — it owns the schedule, retries, dunning, and gives customers a self-service page.
+:::
+
 ## Setup
 
 Before implementing auto-debit, ensure you have:
