@@ -102,7 +102,7 @@ Every subscription gets its own private page (the product calls it "Manage Subsc
 From this page, a customer can:
 
 - View their plan, status, and next charge date
-- Look back through their full billing history — each cycle's date, amount and outcome
+- See every billing cycle — date, amount and outcome — including the next one, which appears as `Scheduled` before it is charged
 - Add a new card
 - Switch which saved card is their active one
 - Pay an outstanding balance directly

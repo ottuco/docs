@@ -113,8 +113,8 @@ const SVG = String.raw`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 
   <text class="arrow-label" x="705" y="127" text-anchor="middle">submits payment</text>
 
   <path class="arrow" d="M 550 300 L 608 270" marker-end="url(#arrow-autopay-flow)" />
-  <rect class="arrow-label-bg" x="560" y="248" width="90" height="14" rx="3" />
-  <text class="arrow-label" x="605" y="259" text-anchor="middle">ongoing</text>
+  <rect class="arrow-label-bg" x="548" y="290" width="60" height="14" rx="3" />
+  <text class="arrow-label" x="578" y="301" text-anchor="middle">ongoing</text>
 </svg>`;
 
 export default function AutoPayFlowDiagram(): React.JSX.Element {
