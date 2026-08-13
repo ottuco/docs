@@ -241,6 +241,38 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "category",
+              label: "AutoPay",
+              link: { type: "doc", id: "developers/payments/autopay/index" },
+              items: [
+                {
+                  type: "link",
+                  label: "When to Use",
+                  href: "/developers/payments/autopay#when-to-use",
+                },
+                {
+                  type: "link",
+                  label: "Guide",
+                  href: "/developers/payments/autopay#guide",
+                },
+                {
+                  type: "link",
+                  label: "API Reference",
+                  href: "/developers/payments/autopay#api-reference",
+                },
+                {
+                  type: "link",
+                  label: "Best Practices",
+                  href: "/developers/payments/autopay#best-practices",
+                },
+                {
+                  type: "link",
+                  label: "FAQ",
+                  href: "/developers/payments/autopay#faq",
+                },
+              ],
+            },
+            {
+              type: "category",
               label: "Loyalty",
               link: { type: "doc", id: "developers/payments/loyalty" },
               items: [
@@ -754,6 +786,63 @@ const sidebars: SidebarsConfig = {
               type: "link",
               label: "FAQ",
               href: "/business/wallet#faq",
+            },
+          ],
+        },
+        {
+          type: "category",
+          label: "AutoPay",
+          link: { type: "doc", id: "business/autopay/index" },
+          items: [
+            {
+              type: "link",
+              label: "Why use AutoPay",
+              href: "/business/autopay#why-use-autopay",
+            },
+            {
+              type: "link",
+              label: "How it works",
+              href: "/business/autopay#how-it-works",
+            },
+            {
+              type: "link",
+              label: "Subscription lifecycle",
+              href: "/business/autopay#subscription-lifecycle",
+            },
+            {
+              type: "link",
+              label: "Billing cycles",
+              href: "/business/autopay#billing-cycles",
+            },
+            {
+              type: "link",
+              label: "Retries and dunning",
+              href: "/business/autopay#retries-and-dunning",
+            },
+            {
+              type: "link",
+              label: "Customer self-service page",
+              href: "/business/autopay#customer-self-service-page",
+            },
+            {
+              type: "link",
+              label: "Notifications",
+              href: "/business/autopay#notifications",
+            },
+            {
+              type: "link",
+              label: "Setting up AutoPay",
+              href: "/business/autopay#setting-up-autopay",
+            },
+            {
+              type: "link",
+              label: "Things to know",
+              href: "/business/autopay#things-to-know",
+            },
+            {
+              type: "link",
+              label: "FAQ",
+              href: "/business/autopay#faq",
             },
           ],
         },
