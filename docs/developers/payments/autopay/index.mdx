@@ -32,7 +32,7 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 - **Subscriptions and SaaS billing** — monthly or yearly plans where you don't want to build and operate a billing scheduler.
 - **You want Ottu to handle dunning** — failed-charge retries, the past-due state, and recovery emails happen automatically.
 - **You want a customer self-service surface** without building one — a hosted page for viewing status, paying an outstanding balance, updating the card, or canceling.
-- **You have no plan catalogue to manage** — there's no "create a plan" step; pricing and scheduling are just fields on your checkout call.
+- **You have no plan catalog to manage** — there's no "create a plan" step; pricing and scheduling are just fields on your checkout call.
 
 :::tip Choosing between AutoPay and Auto-Debit
 Use AutoPay when you want Ottu to own the whole subscription lifecycle after one checkout call. If you'd rather run the billing schedule and retry logic yourself and just charge a saved card on demand, use [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments) instead — it's the closer fit for installments, on-demand billing, and cases where your own system needs to decide exactly when a charge happens.
@@ -214,7 +214,7 @@ $session = json_decode($response, true);`}</CodeBlock>
 | `end_date` | date | No | Nullable; must be strictly after `start_date`. |
 | `description` | string | No | Max 255 characters. |
 | `retry_count` | integer | No | 1–10. Overrides the default of 3 retries (4 total attempts) — see [Retries & Dunning](#retries-and-dunning). |
-| `notification_preferences` | object | No | Free-form — Connect does not validate it. See [Notifications](#notifications). |
+| `notification_preferences` | object | No | Per-subscription email toggles — `pre_charge_enabled`, `failure_enabled`, `final_failure_enabled`, booleans defaulting to `true`. Connect does not validate it. See [Notifications](#notifications). |
 
 Fields you don't send are dropped rather than sent as `null`, so AutoPay applies its own defaults instead of a default you didn't intend.
 
@@ -248,7 +248,7 @@ This error reads like something is wrong with your `agreement` object — it isn
     "limit": 50
   }'`}</CodeBlock>
 
-All filter fields are optional: `status`, `customer_id`, `created_after`, `created_before`, `limit` (default 20, max 100), `offset`. The response is the standard paginated envelope — `count`, `next`, `previous`, `results` — and each item in `results` is shaped like the [Retrieve a subscription](#retrieve-a-subscription) response below.
+All filter fields are optional: `status`, `customer_id`, `created_after`, `created_before`, `limit` (default 20, max 100), `offset`. The response is the standard paginated envelope — `count`, `next`, `previous`, `results`. Each item in `results` is a slim summary — `id`, `customer_id`, `customer_email`, `frequency`, `recurring_amount`, `currency`, `status`, `next_billing_date`, `created_at` — not the full subscription object. For the active card and latest-cycle detail, call [Retrieve a subscription](#retrieve-a-subscription) with the item's `id`.
 
 #### 3. Retrieve a subscription {#retrieve-a-subscription}
 
@@ -366,7 +366,7 @@ Note also that `regenerate-page-token` is deliberately **not** idempotent — ea
 }
 ```
 
-Cycle `status` values: `scheduled` (charge pending), `processing` (charge in flight), `paid`, `failed` (all retries exhausted — the subscription is now `past_due`). See [Billing Cycles](#billing-cycles) for how cycles are generated and [Retries & Dunning](#retries-and-dunning) for the retry schedule that gets a cycle from `scheduled` to `failed`.
+Cycle `status` values: `scheduled` (charge pending), `processing` (charge in flight), `retry_scheduled` (an attempt failed and the next automatic retry is queued), `paid`, `failed` (all retries exhausted — the subscription is now `past_due`), and `canceled` (the cycle was canceled along with the subscription). See [Billing Cycles](#billing-cycles) for how cycles are generated and [Retries & Dunning](#retries-and-dunning) for the retry schedule that gets a cycle from `scheduled` to `failed`.
 
 ### Use Cases
 
@@ -410,7 +410,15 @@ AutoPay sends three email types, each available in English and Arabic:
 - **Payment failed** — sent after a retry attempt fails (but before all retries are exhausted).
 - **Final failure** — sent when a cycle's retries are exhausted, with a recovery link to the self-service page.
 
-Reminder timing depends on `frequency`: monthly subscriptions get **one** reminder, 2 days before the charge; yearly subscriptions get **three**, at 30, 10, and 3 days before. Each of the three email types can be turned off independently per subscription via `notification_preferences` on the `autopay` block. Because Connect doesn't validate that object, a typo'd key fails silently rather than erroring — double-check the keys you send.
+Reminder timing depends on `frequency`: monthly subscriptions get **one** reminder, 2 days before the charge; yearly subscriptions get **three**, at 30, 10, and 3 days before. Each of the three email types can be turned off independently per subscription via `notification_preferences` on the `autopay` block. The object takes three boolean keys, each defaulting to `true`:
+
+| Key | Controls |
+|---|---|
+| `pre_charge_enabled` | The upcoming-charge reminder. |
+| `failure_enabled` | The payment-failed email sent while retries remain. |
+| `final_failure_enabled` | The final-failure email sent when retries are exhausted. |
+
+Because Connect doesn't validate the object, a typo'd key fails silently rather than erroring — an unrecognized key is simply ignored and the default stays on.
 
 #### Customer Self-Service Page {#customer-self-service-page}
 
@@ -437,7 +445,7 @@ AutoPay's endpoints aren't in the public OpenAPI schema yet, so there's no inter
 - **Send `Idempotency-Key` (UUID v4) on Cancel** — but not on Regenerate Page Token, which is deliberately non-idempotent. Sending one there does nothing; retrying the call on a timeout revokes a link a second time.
 - **Deliver `page_url` yourself, every time.** AutoPay never notifies the customer when you regenerate — a stale link left undelivered is a customer who can't self-serve.
 - **Treat `past_due` as sticky.** AutoPay never auto-cancels it — build your own monitoring or reminder cadence around subscriptions stuck in that state if your business needs one.
-- **Match `notification_preferences` keys exactly.** Connect passes the object through without validating it, so a misspelled key silently does nothing instead of erroring.
+- **Match `notification_preferences` keys exactly.** Connect passes the object through without validating it, so a misspelled key silently does nothing instead of erroring. The three valid keys are listed under [Notifications](#notifications).
 - **Don't assume `card_acceptance_criteria.min_expiry_time` defaults for you.** Auto-debit defaults it to 30 days; AutoPay does not apply that default — set it explicitly if your integration relies on it.
 - **Keep filters in the body on List.** It's a POST for a reason — never move `customer_id` into a query string yourself.
 
@@ -465,8 +473,8 @@ AutoPay's endpoints aren't in the public OpenAPI schema yet, so there's no inter
   <FAQItem question="Do failed-charge retries use exponential backoff?">
     No. Retries are spaced a flat one hour apart. The default is 3 retries (4 total attempts), configurable per subscription from 1–10 via `retry_count`.
   </FAQItem>
-  <FAQItem question="Do I need to set up a plan catalogue before creating subscriptions?">
-    No — AutoPay has no plan catalogue. Pricing (`recurring_amount`), schedule (`frequency`, `start_date`), and a free-text `description` are just fields on the checkout call itself.
+  <FAQItem question="Do I need to set up a plan catalog before creating subscriptions?">
+    No — AutoPay has no plan catalog. Pricing (`recurring_amount`), schedule (`frequency`, `start_date`), and a free-text `description` are just fields on the checkout call itself.
   </FAQItem>
   <FAQItem question="How do I know when the customer finishes the first payment (CIT)?">
     Poll [Retrieve a subscription](#retrieve-a-subscription) and check `status` — it moves off `pending_setup` once the CIT resolves. If you set `webhook_url` on the checkout call, your existing Ottu [payment webhook](/developers/webhooks/payment-events) for that session fires as usual too.

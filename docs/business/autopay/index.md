@@ -122,13 +122,13 @@ The page is a single scrolling view — customer details, subscription summary, 
   },
   {
     title: "Trialing",
-    description: <>A banner counts down to the trial's end, when the saved card is charged. Cancelling first means no charge at all.</>,
+    description: <>A banner counts down to the trial's end, when the saved card is charged. Canceling first means no charge at all.</>,
     image: "/img/business/autopay/portal-02-trialing.png",
     imageAlt: "Trialing subscription with a banner counting down to the trial's end date",
   },
   {
     title: "Cancellation pending",
-    description: <>Access runs to the end of the paid period, with <strong>Reactivate subscription</strong> available until it does.</>,
+    description: <>Access runs to the end of the paid period, with <strong>Reactivate subscription</strong> available until then.</>,
     image: "/img/business/autopay/portal-03-canceled-pending-reactivation.png",
     imageAlt: "Canceled subscription pending the end of its period, with a Reactivate subscription option",
   },
@@ -311,7 +311,7 @@ Before your first subscription, make sure you have:
 4. **At least one tokenizable payment gateway that supports auto-debit, in the currency you're billing in.** AutoPay needs somewhere to actually save and charge the customer's card.
 5. **The three notification templates registered, in English and Arabic** — upcoming charge, payment failed, and final failure. Ottu support sets these up on your account, the same way [notification templates](/business/notifications/) are configured for one-off payments.
 
-AutoPay has no plan catalogue to configure up front — there's no separate list of products or prices to set up in advance. The plan name is just a free-text label, and the price is whatever amount your team passes when it makes the checkout call that creates the subscription. See the [developer AutoPay docs](/developers/payments/autopay/#api-reference) for the exact request shape.
+AutoPay has no plan catalog to configure up front — there's no separate list of products or prices to set up in advance. The plan name is just a free-text label, and the price is whatever amount your team passes when it makes the checkout call that creates the subscription. See the [developer AutoPay docs](/developers/payments/autopay/#api-reference) for the exact request shape.
 
 :::note No merchant dashboard yet
 Everything above — enabling AutoPay, creating a subscription, looking one up, canceling it — happens through the API or through Ottu support today. A dashboard view of your AutoPay subscriptions is planned for a later phase.
