@@ -10,15 +10,15 @@ import FAQ, { FAQItem } from "@site/src/components/FAQ";
 
 # AutoPay
 
-AutoPay turns a subscription into a single checkout call. Once it's set up, AutoPay generates every billing cycle, charges the saved card, retries failed charges, emails the customer, and gives them a self-service page to manage their own subscription — so your team isn't running a billing engine by hand.
+AutoPay turns a subscription into a single checkout call. After that, AutoPay generates every billing cycle, charges the saved card, retries failed charges, emails the customer, and hosts a self-service page where the customer manages their own subscription.
 
 ## Why use AutoPay {#why-use-autopay}
 
-- **Stop hand-building a billing engine.** AutoPay owns the schedule, the retries, the dunning emails, and the customer-facing self-service page — your integration is a single checkout call per subscription, not an ongoing job.
-- **Recover more failed payments without lifting a finger.** Every declined card is retried automatically, and the customer is emailed at each stage — no missed renewals just because nobody noticed a failure.
-- **Give customers a place to help themselves.** Status, billing history, saved cards, and cancellation all live on one page you send them — fewer "what's my next charge" support tickets.
+- **Run subscriptions without building a billing engine.** AutoPay owns the schedule, the retries, the dunning emails, and the customer self-service page. Your integration is one checkout call per subscription.
+- **Recover failed payments automatically.** Every declined card is retried and the customer is emailed at each stage, so a renewal doesn't lapse because nobody noticed.
+- **Give customers somewhere to self-serve.** Status, billing history, saved cards, and cancellation all live on one page you send them.
 
-The difference comes down to who's in the driver's seat once the first charge goes through:
+The difference is who owns the billing schedule after the first charge:
 
 | | Self-managed recurring billing | AutoPay subscriptions |
 |---|---|---|
@@ -56,7 +56,7 @@ A subscription moves through a small set of states from the moment it's created 
 Three of these are worth calling out specifically:
 
 - **A zero first charge creates a trial, not an active subscription.** If the first amount your checkout call charges is zero, the subscription starts in Trialing rather than Active — useful for free-trial plans where the real charge only happens once the first billing cycle comes due.
-- **Past Due only happens after every retry is used up.** A single declined card doesn't move the needle — AutoPay retries automatically first (see [Retries and dunning](#retries-and-dunning)). Only once the whole retry sequence for a cycle is exhausted does the subscription flip to Past Due.
+- **Past Due only happens after every retry is used up.** A single declined card changes nothing; AutoPay retries automatically first (see [Retries and dunning](#retries-and-dunning)). The subscription moves to Past Due only once the whole retry sequence for a cycle is exhausted.
 - **Paying the outstanding balance is what moves a subscription back to Active.** The moment the customer pays what's owed — from their self-service page — the subscription returns to Active. There's no separate merchant-side action that does this; it's the customer's payment that clears it.
 
 :::tip
@@ -116,29 +116,29 @@ The page is a single scrolling view — customer details, subscription summary, 
 <StepGuide steps={[
   {
     title: "Active",
-    description: <>Plan name, price, status badge, next payment date, and <strong>Cancel Subscription</strong> at the top. Below it: every saved card (click one to make it the active card), and the full payment history — all on the same page. There's no outstanding balance on an active subscription, so there's nothing to pay here.</>,
+    description: <>Plan, status, next payment date, saved cards, and payment history on one page. Nothing is outstanding, so there is nothing to pay.</>,
     image: "/img/business/autopay/portal-01-summary-active.png",
     imageAlt: "Active subscription: customer details, subscription summary, payment methods, and payment history all on one page",
   },
   {
     title: "Trialing",
-    description: <>The banner counts down to the trial's end and states plainly what happens next: the saved card is charged once the trial ends, and nothing is charged if the customer cancels first.</>,
+    description: <>A banner counts down to the trial's end, when the saved card is charged. Cancelling first means no charge at all.</>,
     image: "/img/business/autopay/portal-02-trialing.png",
     imageAlt: "Trialing subscription with a banner counting down to the trial's end date",
   },
   {
     title: "Cancellation pending",
-    description: <>The customer has canceled, but access — and the option to undo it — runs until the end of the period they already paid for, with a <strong>Reactivate subscription</strong> button ready if they change their mind.</>,
+    description: <>Access runs to the end of the paid period, with <strong>Reactivate subscription</strong> available until it does.</>,
     image: "/img/business/autopay/portal-03-canceled-pending-reactivation.png",
     imageAlt: "Canceled subscription pending the end of its period, with a Reactivate subscription option",
   },
   {
     title: "Expired",
-    description: <>Billing has stopped because the subscription reached its end date. The plan, the dates and the full payment history stay readable, but every action is gone. Expired is final — a customer who wants to continue needs a brand-new subscription, not a reactivation.</>,
+    description: <>Billing stopped at the subscription's end date. History stays readable, every action is gone. Continuing means a new subscription.</>,
   },
   {
     title: "No cards saved",
-    description: <>The empty state a customer sees before they've added a payment method — <strong>Add Card</strong> is the only way forward.</>,
+    description: <>The empty state before a payment method is added. <strong>Add Card</strong> is the only action.</>,
     image: "/img/business/autopay/portal-05-no-cards.png",
     imageAlt: "Empty payment methods state with no saved cards",
   },
@@ -151,13 +151,13 @@ A cancellation the customer starts always takes effect at the end of their curre
 <StepGuide steps={[
   {
     title: "Confirm the cancellation",
-    description: <>The confirmation dialog states exactly when access ends and what happens after: no more charges, data retained for a short window, and the option to reactivate anytime before the period is up.</>,
+    description: <>The dialog states when access ends, that no further charges follow, and that reactivation stays open until then.</>,
     image: "/img/business/autopay/cancellation-01-confirm.png",
     imageAlt: "Cancellation confirmation dialog stating access continues until the end of the paid period",
   },
   {
     title: "Optional cancellation reason",
-    description: <>A short reason list the customer can walk through — the dialog says it plainly: optional, but helpful for improving the product.</>,
+    description: <>A short reason list, clearly marked optional.</>,
     image: "/img/business/autopay/cancellation-02-reason-options.png",
     imageAlt: "Optional cancellation reason selection dialog",
   },
@@ -176,13 +176,13 @@ When a subscription is Past Due, **Pay Now** on the self-service page collects t
 <StepGuide steps={[
   {
     title: "Accept terms, if asked",
-    description: <>Some payment gateways require the customer to accept terms and conditions before the charge can run.</>,
+    description: <>Some gateways require the customer to accept terms before the charge runs.</>,
     image: "/img/business/autopay/recovery-03-payment-terms-alert.png",
     imageAlt: "Terms and conditions alert shown before completing an outstanding-balance payment",
   },
   {
     title: "Payment confirmed",
-    description: <>The balance clears and, per <a href="#subscription-lifecycle">Subscription lifecycle</a>, the subscription moves back to Active.</>,
+    description: <>The balance clears and the subscription returns to <a href="#subscription-lifecycle">Active</a>.</>,
     image: "/img/business/autopay/recovery-02-payment-confirmed.png",
     imageAlt: "Payment confirmed screen after clearing an outstanding balance",
   },
@@ -205,25 +205,25 @@ A customer opening a page that's loading, expired, no longer recognized, or unre
 <StepGuide steps={[
   {
     title: "Loading",
-    description: <>The normal in-between state while the page fetches the subscription — the same look regardless of what happens next.</>,
+    description: <>Shown while the page fetches the subscription.</>,
     image: "/img/business/autopay/states-01-loading.png",
     imageAlt: "Loading state while the self-service page fetches subscription details",
   },
   {
     title: "Link expired",
-    description: <>Shown once a link has aged out. The page offers to email a fresh one — but if you've regenerated the link yourself, deliver the new one directly rather than relying on this.</>,
+    description: <>Shown once a link has aged out. The page offers to email a fresh one; if you regenerated it yourself, send the new link directly.</>,
     image: "/img/business/autopay/states-02-magic-link-expired.png",
     imageAlt: "Expired self-service link screen",
   },
   {
     title: "Link not recognized",
-    description: <>Shown for a link that's malformed or no longer matches an active token — including one you've just regenerated away.</>,
+    description: <>Shown for a malformed link, or one you have just regenerated away.</>,
     image: "/img/business/autopay/states-03-magic-link-invalid.png",
     imageAlt: "Invalid or unrecognized self-service link screen",
   },
   {
     title: "Connection problem",
-    description: <>A generic fetch failure — the page is explicit that nothing about the subscription has changed, and the customer just needs to retry.</>,
+    description: <>A fetch failure. The page confirms nothing has changed and invites a retry.</>,
     image: "/img/business/autopay/states-04-network-error.png",
     imageAlt: "Network error screen shown when the self-service page cannot reach the server",
   },
@@ -240,12 +240,12 @@ AutoPay sends three emails over a subscription's life, each available in English
 
 ### Upcoming charge
 
-A heads-up before money moves, so a declined or forgotten card doesn't come as a surprise.
+Sent before money moves, so a declined or forgotten card doesn't come as a surprise.
 
 <StepGuide steps={[
   {
     title: "English",
-    description: <>Total amount, billing date, and the card on file — with a link to manage the subscription or update the payment method.</>,
+    description: <>Amount, billing date, and the card on file, with a link to manage the subscription.</>,
     image: "/img/business/autopay/notifications-01-upcoming-charge-en.png",
     imageAlt: "Upcoming charge reminder email in English",
   },
@@ -264,7 +264,7 @@ Sent when a charge attempt fails and AutoPay still has retries left to run — a
 <StepGuide steps={[
   {
     title: "English",
-    description: <>States the failure reason, when the next automatic retry runs, and offers a direct way to update the payment method or retry immediately.</>,
+    description: <>The failure reason, when the next retry runs, and a link to update the card.</>,
     image: "/img/business/autopay/notifications-03-payment-failed-en.png",
     imageAlt: "Payment failed email in English",
   },
@@ -287,7 +287,7 @@ The final-failure email talks about the customer's access being suspended — th
 <StepGuide steps={[
   {
     title: "English",
-    description: <>The outstanding balance, the reason every retry failed, and what happens next in your product if it isn't resolved.</>,
+    description: <>The outstanding balance, why every retry failed, and what happens next in your product.</>,
     image: "/img/business/autopay/notifications-05-final-failure-en.png",
     imageAlt: "Final failure email in English with outstanding balance and next steps",
   },
