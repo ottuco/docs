@@ -36,6 +36,12 @@ Refund payments to a customer's wallet balance instead of returning funds via th
 
 [**Go to M-Wallet →**](wallet/index.mdx)
 
+### AutoPay (Managed Subscriptions) {#autopay-managed-subscriptions}
+
+Set up recurring billing with a single checkout call. AutoPay owns the schedule after that — it generates each billing cycle, retries failed charges, sends dunning emails, and gives customers a self-service page to manage their own subscription.
+
+[**Go to AutoPay →**](autopay/index.mdx)
+
 ### Ottu Sandbox (Simulated Gateway)
 
 A built-in, simulated payment gateway for testing every payment scenario end-to-end — success, failure, refunds, tokens, recurring charges, authorizations — with no live gateway and no real money. You decide the outcome in advance via the test card you use or the Checkout `extra` object.
@@ -75,6 +81,7 @@ flowchart LR
 | Mobile app | Checkout API + Checkout SDK | Recommended |
 | Custom Apple Pay / Google Pay buttons | Checkout API + Native Payments | Advanced |
 | Server-to-server (saved cards) | Checkout API (One-Step Checkout) | Advanced |
+| Recurring subscriptions (Ottu manages billing) | Checkout API + AutoPay | Recommended |
 
 ## Prerequisites
 
