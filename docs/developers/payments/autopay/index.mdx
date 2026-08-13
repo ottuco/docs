@@ -17,7 +17,7 @@ import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
 AutoPay is Ottu's fully managed subscription engine. With [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments), **you** own the billing schedule — your system decides when to charge the saved card, retries failures, and emails the customer. With AutoPay (`payment_type: "auto_pay"`), **Ottu** owns all of that instead: you make one [Checkout API](../checkout-api) call to set up the subscription, and from there AutoPay generates each [billing cycle](/glossary/#term-billing-cycle), retries failed charges, notifies the customer, and gives them a self-service page — no scheduler, retry loop, or [dunning](/glossary/#term-dunning) emails to build yourself.
 
-Merchant-facing management (list, retrieve, cancel, and the rest) is REST-API-only in this phase — there is no AutoPay dashboard screen yet. Authentication for the Checkout API call that creates a subscription follows the standard [Ottu API key](/developers/getting-started/authentication) flow. The six subscription-management endpoints below use a different mechanism — see [Step-by-Step](#step-by-step) for details.
+Merchant-facing management (list, retrieve, cancel, and the rest) is REST-API-only in this phase — there is no AutoPay dashboard screen yet. Every call on this page, including the six subscription-management endpoints, uses the standard [Ottu API key](/developers/getting-started/authentication) flow — there is no separate credential to obtain.
 
 :::note Base URL
 Every API call in this guide targets <code>{OTTU_CONNECT_BASE_URL}</code>. Swap in your own merchant domain when you integrate.
@@ -52,21 +52,16 @@ Use AutoPay when you want Ottu to own the whole subscription lifecycle after one
 
 ### Step-by-Step {#step-by-step}
 
-Two different credentials are in play here. **Step 1** (creating a subscription) is a normal [Checkout API](../checkout-api) call authenticated with your `Authorization: Api-Key` — same as every other checkout session. **Steps 2–6** (managing subscriptions you've already created) run on AutoPay's own API and authenticate with a Keycloak JWT instead:
+One credential covers everything here. **Step 1** (creating a subscription) is a normal [Checkout API](../checkout-api) call. **Steps 2–6** (managing subscriptions you've already created) reach AutoPay through Ottu Connect at `/b/pbl/v2/subscriptions/`. Both authenticate the same way, with the [API key](/developers/getting-started/authentication) you already use:
 
 ```
-Authorization: Bearer <jwt_token>
-Merchant-Id: merchant.ottu.net
+Authorization: Api-Key <YOUR_API_KEY>
 ```
 
-`Merchant-Id` resolves both the tenant and the Keycloak realm used to validate the token — it's required on every call to the six endpoints below, GET or POST.
+You never talk to AutoPay directly and you never handle a subscription-specific credential — Connect resolves your merchant from the API key and forwards the call.
 
-:::warning Getting the JWT isn't documented yet
-The [authentication guide](/developers/getting-started/authentication) covers the `Api-Key` flow used in Step 1, but not the Keycloak client-credentials flow the six management endpoints need — the realm, client ID and grant details aren't published yet. Until they are, ask your Ottu contact for the credentials and the token endpoint for your merchant. You can create subscriptions today without this; you need it to list, retrieve, cancel, or manage the customer link.
-:::
-
-:::warning The path in front of `/subscriptions/` isn't final
-Steps 2–6 are shown on AutoPay's own paths — `/subscriptions/...` straight off the base URL. Your integration reaches them through Ottu Connect, which mounts them under a prefix that hasn't been published yet. Everything else on these six endpoints is accurate: the headers, the request bodies, the responses, and the behaviour. Only the path in front of `/subscriptions/` is subject to change — confirm it with your Ottu contact before you hardcode it. Step 1 is unaffected; its `/b/checkout/v1/pymt-txn/` path is the standard Checkout API path and is stable.
+:::note Two different surfaces, one host
+Both the merchant API and the customer self-service page live on your Connect domain, at different paths. The merchant endpoints below sit under `/b/pbl/v2/subscriptions/`. The customer page is served at `/<lang>/subscription/<page_token>` — see [Customer Self-Service Page](#customer-self-service-page). Your integration only ever calls the first; the second is what you hand to the customer.
 :::
 
 #### 1. Create a subscription
@@ -240,11 +235,10 @@ This error reads like something is wrong with your `agreement` object — it isn
 
 #### 2. List subscriptions
 
-`POST /subscriptions/` — yes, a POST that only reads. Filter parameters live in the request body on purpose, so `customer_id` never lands in server access logs.
+`POST /b/pbl/v2/subscriptions/` — yes, a POST that only reads. Filter parameters live in the request body on purpose, so `customer_id` never lands in server access logs.
 
-<CodeBlock language="bash" title="List active subscriptions for a customer">{`curl --location '${OTTU_CONNECT_BASE_URL}/subscriptions/' \\
-  --header 'Authorization: Bearer <jwt_token>' \\
-  --header 'Merchant-Id: merchant.ottu.net' \\
+<CodeBlock language="bash" title="List active subscriptions for a customer">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/' \\
+  --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
   --header 'Content-Type: application/json' \\
   --data '{
     "customer_id": "cust_12345",
@@ -256,9 +250,8 @@ All filter fields are optional: `status`, `customer_id`, `created_after`, `creat
 
 #### 3. Retrieve a subscription {#retrieve-a-subscription}
 
-<CodeBlock language="bash" title="Get subscription detail">{`curl --location '${OTTU_CONNECT_BASE_URL}/subscriptions/sub_abc123/' \\
-  --header 'Authorization: Bearer <jwt_token>' \\
-  --header 'Merchant-Id: merchant.ottu.net'`}</CodeBlock>
+<CodeBlock language="bash" title="Get subscription detail">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/sub_abc123/' \\
+  --header 'Authorization: Api-Key <YOUR_API_KEY>'`}</CodeBlock>
 
 ```json title="Example response — 200 OK"
 {
@@ -274,12 +267,20 @@ All filter fields are optional: `status`, `customer_id`, `created_after`, `creat
   "start_date": "2026-04-24",
   "end_date": "2027-04-24",
   "billing_anchor_day": 24,
+  "setup_session_id": "sess_9f8e7d6c5b4a",
   "agreement_id": "AGR-abc123",
+  "amount_variability": "fixed",
+  "cycle_interval_days": 30,
+  "total_cycles": 12,
   "notification_config": null,
   "status": "active",
   "cancel_at_period_end": false,
   "canceled_at": null,
+  "cancellation_initiator": null,
+  "cancellation_reason": null,
+  "cancellation_note": null,
   "next_billing_date": "2026-05-24",
+  "description": "Pro Plan — Monthly",
   "merchant_reference": "ref-001",
   "plan_name": "Pro Plan",
   "language": "en",
@@ -303,11 +304,10 @@ All filter fields are optional: `status`, `customer_id`, `created_after`, `creat
 
 #### 4. Cancel a subscription {#cancel-a-subscription}
 
-`POST /subscriptions/{subscription_id}/cancel/` requires an `Idempotency-Key` header (UUID v4) — this is a mutation, and a retried network call must not double-cancel.
+`POST /b/pbl/v2/subscriptions/{subscription_id}/cancel/` requires an `Idempotency-Key` header (UUID v4) — this is a mutation, and a retried network call must not double-cancel.
 
-<CodeBlock language="bash" title="Cancel immediately">{`curl --location '${OTTU_CONNECT_BASE_URL}/subscriptions/sub_abc123/cancel/' \\
-  --header 'Authorization: Bearer <jwt_token>' \\
-  --header 'Merchant-Id: merchant.ottu.net' \\
+<CodeBlock language="bash" title="Cancel immediately">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/sub_abc123/cancel/' \\
+  --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
   --header 'Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000' \\
   --header 'Content-Type: application/json' \\
   --data '{"mode": "immediate"}'`}</CodeBlock>
@@ -322,9 +322,8 @@ The customer self-service page (below) can only schedule a cancellation for the 
 
 The merchant delivers a per-subscription link to the customer; the signed token in the URL is the credential — see [Customer Self-Service Page](#customer-self-service-page) for what the customer can do with it. Two endpoints manage that link:
 
-<CodeBlock language="bash" title="Regenerate the page token (revokes the old link instantly)">{`curl --location --request POST '${OTTU_CONNECT_BASE_URL}/subscriptions/sub_abc123/regenerate-page-token/' \\
-  --header 'Authorization: Bearer <jwt_token>' \\
-  --header 'Merchant-Id: merchant.ottu.net'`}</CodeBlock>
+<CodeBlock language="bash" title="Regenerate the page token (revokes the old link instantly)">{`curl --location --request POST '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/sub_abc123/regenerate-page-token/' \\
+  --header 'Authorization: Api-Key <YOUR_API_KEY>'`}</CodeBlock>
 
 ```json title="Example response — 200 OK"
 {
@@ -333,9 +332,8 @@ The merchant delivers a per-subscription link to the customer; the signed token 
 }
 ```
 
-<CodeBlock language="bash" title="Read the current link without rotating it">{`curl --location '${OTTU_CONNECT_BASE_URL}/subscriptions/sub_abc123/page-link/' \\
-  --header 'Authorization: Bearer <jwt_token>' \\
-  --header 'Merchant-Id: merchant.ottu.net'`}</CodeBlock>
+<CodeBlock language="bash" title="Read the current link without rotating it">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/sub_abc123/page-link/' \\
+  --header 'Authorization: Api-Key <YOUR_API_KEY>'`}</CodeBlock>
 
 :::warning Regenerating revokes the old link instantly — and silently
 The old `page_token` stops working the moment you call regenerate — before you've delivered the new one. AutoPay does **not** notify the customer. You must send them the new `page_url` yourself, or they'll hit a dead link. Use `page-link` (not `regenerate-page-token`) when you just need to re-send a link that should keep working — regenerating is only for revoking a compromised or lost one.
@@ -345,9 +343,8 @@ Note also that `regenerate-page-token` is deliberately **not** idempotent — ea
 
 #### 6. Billing cycle history
 
-<CodeBlock language="bash" title="List billing cycles">{`curl --location '${OTTU_CONNECT_BASE_URL}/subscriptions/sub_abc123/cycles/?limit=10&offset=0' \\
-  --header 'Authorization: Bearer <jwt_token>' \\
-  --header 'Merchant-Id: merchant.ottu.net'`}</CodeBlock>
+<CodeBlock language="bash" title="List billing cycles">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/sub_abc123/cycles/?limit=10&offset=0' \\
+  --header 'Authorization: Api-Key <YOUR_API_KEY>'`}</CodeBlock>
 
 ```json title="Example response — 200 OK"
 {
