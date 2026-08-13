@@ -134,7 +134,7 @@ The page is a single scrolling view — customer details, subscription summary, 
   },
   {
     title: "Expired",
-    description: <>Billing has stopped for good and the banner says so plainly, with the data-retention window stated up front. The page still offers a way to pick things back up.</>,
+    description: <>Billing has stopped for good and the banner says so plainly, with the data-retention window stated up front. Expired is final — there is no way back from it. A customer who wants to continue needs a brand-new subscription, not a reactivation.</>,
     image: "/img/business/autopay/portal-04-expired.png",
     imageAlt: "Expired subscription with billing stopped and a data-retention notice",
   },
