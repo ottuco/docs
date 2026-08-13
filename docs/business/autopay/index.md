@@ -102,7 +102,7 @@ Every subscription gets its own private page (the product calls it "Manage Subsc
 From this page, a customer can:
 
 - View their plan, status, and next charge date
-- Look back through their full billing history, with downloadable invoices
+- Look back through their full billing history — each cycle's date, amount and outcome
 - Add a new card
 - Switch which saved card is their active one
 - Pay an outstanding balance directly
@@ -116,7 +116,7 @@ The page is a single scrolling view — customer details, subscription summary, 
 <StepGuide steps={[
   {
     title: "Active",
-    description: <>Plan name, price, status badge, next payment date, and a <strong>Pay Now</strong> / <strong>Cancel Subscription</strong> pair at the top. Below it: every saved card (click one to make it the active card), and the full payment history with invoice downloads — all on the same page.</>,
+    description: <>Plan name, price, status badge, next payment date, and <strong>Cancel Subscription</strong> at the top. Below it: every saved card (click one to make it the active card), and the full payment history — all on the same page. There's no outstanding balance on an active subscription, so there's nothing to pay here.</>,
     image: "/img/business/autopay/portal-01-summary-active.png",
     imageAlt: "Active subscription: customer details, subscription summary, payment methods, and payment history all on one page",
   },
@@ -192,9 +192,9 @@ When a subscription is Past Due, **Pay Now** on the self-service page collects t
 
 ### Managing saved cards
 
-Customers can hold several cards on file and switch which one is active with a single click — no need to remove the old one first. Adding a new card opens a standard card-entry form right on the page; removing one asks for a final confirmation, since it can't be undone.
+Customers can hold several cards on file and switch which one is active with a single click. Adding a new card opens a standard card-entry form right on the page, and the newly added card can be made active immediately — the next charge then uses it instead of the previous one.
 
-![Confirming removal of a saved card, which cannot be undone](/img/business/autopay/cards-01-delete-confirm.png)
+Saved cards are never deleted. AutoPay keeps every card a customer has used as part of the subscription's record, so a card that is no longer active still explains what paid for an earlier cycle. Switching the active card is the only card management a customer needs — there is no removal step to walk them through.
 
 :::warning Regenerating a customer's link revokes the old one instantly
 If you regenerate a subscription's self-service link, the previous link stops working immediately — and AutoPay does not tell the customer. Whatever channel delivered the first link (email, your own account area, a support reply), you need to deliver the new one the same way, or the customer is simply locked out with no explanation.
