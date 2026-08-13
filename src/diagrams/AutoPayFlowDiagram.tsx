@@ -10,20 +10,22 @@ import Diagram from "@site/src/components/Diagram";
  * the page theme. To change it, edit the source SVG and re-run inline-svg.py.
  *
  * Accuracy notes (per the page's Step-by-Step / Use Cases):
- *  - Subscription creation is SYNCHRONOUS: Ottu Connect commits the checkout
- *    transaction, then calls AutoPay before returning the 201 response — this is
- *    a direct call, not a webhook, so the arrow is solid, not dashed.
- *  - AutoPay never touches cardholder data. The CIT charge is processed by Ottu
- *    Connect; the Checkout Page sits OUTSIDE the Ottu Platform box (same
- *    convention as RecurringFlow) because it may be Ottu-hosted or a
- *    self-hosted SDK embed.
- *  - After the CIT settles, ownership of billing cycles, retries, dunning, and
- *    the customer self-service page moves to AutoPay — the merchant makes no
- *    further calls to keep the subscription running.
+ *  - Subscription creation is SYNCHRONOUS — the result comes back on the same
+ *    response, not later by webhook, so the arrow is solid, not dashed.
+ *  - The Checkout Page sits OUTSIDE the Ottu Platform box (same convention as
+ *    RecurringFlow) because it may be Ottu-hosted or a self-hosted SDK embed.
+ *  - After the CIT settles, billing cycles, retries, dunning, and the customer
+ *    self-service page are all handled for the merchant — no further calls are
+ *    needed to keep the subscription running.
+ *
+ * PUBLIC SURFACE: this diagram, its <title>/<desc> and the alt text below all
+ * ship to merchants. Describe only what a merchant calls and sees. Ottu's
+ * internal service topology — which service commits, which one is called next,
+ * what proxies what — must not appear here. (Established 2026-08-13.)
  */
 const SVG = String.raw`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 460" role="img" aria-labelledby="ap-title-autopay-flow ap-desc-autopay-flow" preserveAspectRatio="xMidYMid meet" class="ottu-dgm--autopay-flow">
   <title id="ap-title-autopay-flow">AutoPay subscription flow</title>
-  <desc id="ap-desc-autopay-flow">The merchant makes one Checkout API call with payment_type auto_pay. Ottu Connect commits the transaction and calls AutoPay synchronously, which creates the subscription. The merchant redirects the customer to the checkout page, where the customer enters their card and pays the first charge, the CIT. From then on, AutoPay owns the billing cycles, retries, dunning, and the customer self-service page — the merchant makes no further calls to keep the subscription running.</desc>
+  <desc id="ap-desc-autopay-flow">The merchant makes one Checkout API call with payment_type auto_pay, and AutoPay creates the subscription synchronously. The merchant redirects the customer to the checkout page, where the customer enters their card and pays the first charge, the CIT. From then on the billing cycles, retries, dunning, and the customer self-service page are all handled for the merchant, who makes no further calls to keep the subscription running.</desc>
 
   <defs>
     <marker id="arrow-autopay-flow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
@@ -74,31 +76,22 @@ const SVG = String.raw`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 
   <text class="label" x="810" y="46" text-anchor="middle">Checkout Page</text>
   <text class="sub" x="810" y="66" text-anchor="middle">Ottu-hosted or SDK embed</text>
 
-  <!-- Ottu Connect (accent) -->
-  <rect class="accent" x="330" y="160" width="220" height="76" rx="8" />
-  <text class="label-white" x="440" y="192" text-anchor="middle">Ottu Connect</text>
-  <text class="sub-white" x="440" y="214" text-anchor="middle">Commits the transaction</text>
-
   <!-- AutoPay (accent) -->
-  <rect class="accent" x="330" y="280" width="220" height="76" rx="8" />
-  <text class="label-white" x="440" y="312" text-anchor="middle">AutoPay</text>
-  <text class="sub-white" x="440" y="334" text-anchor="middle">Creates the subscription</text>
+  <rect class="accent" x="330" y="200" width="220" height="90" rx="8" />
+  <text class="label-white" x="440" y="238" text-anchor="middle">AutoPay</text>
+  <text class="sub-white" x="440" y="260" text-anchor="middle">Creates the subscription</text>
 
   <!-- Ongoing ownership -->
   <rect class="node" x="610" y="230" width="290" height="150" rx="8" />
-  <text class="label" x="755" y="264" text-anchor="middle">Owned by AutoPay</text>
+  <text class="label" x="755" y="264" text-anchor="middle">Handled for you</text>
   <text class="sub" x="755" y="286" text-anchor="middle">Billing cycles · retries</text>
   <text class="sub" x="755" y="306" text-anchor="middle">Dunning · notifications</text>
   <text class="sub" x="755" y="326" text-anchor="middle">Customer self-service page</text>
 
   <!-- Arrows -->
-  <path class="arrow" d="M 230 168 C 270 168 300 190 330 198" marker-end="url(#arrow-autopay-flow)" />
-  <rect class="arrow-label-bg" x="236" y="150" width="130" height="14" rx="3" />
-  <text class="arrow-label" x="301" y="161" text-anchor="middle">checkout call · auto_pay</text>
-
-  <path class="arrow" d="M 440 236 L 440 280" marker-end="url(#arrow-autopay-flow)" />
-  <rect class="arrow-label-bg" x="450" y="251" width="150" height="14" rx="3" />
-  <text class="arrow-label" x="525" y="262" text-anchor="middle">creates subscription · sync</text>
+  <path class="arrow" d="M 230 172 C 270 172 300 210 330 236" marker-end="url(#arrow-autopay-flow)" />
+  <rect class="arrow-label-bg" x="236" y="154" width="130" height="14" rx="3" />
+  <text class="arrow-label" x="301" y="165" text-anchor="middle">checkout call · auto_pay</text>
 
   <path class="arrow" d="M 130 130 L 120 78" marker-end="url(#arrow-autopay-flow)" />
   <rect class="arrow-label-bg" x="58" y="96" width="124" height="14" rx="3" />
@@ -108,20 +101,20 @@ const SVG = String.raw`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 
   <rect class="arrow-label-bg" x="380" y="10" width="150" height="14" rx="3" />
   <text class="arrow-label" x="455" y="21" text-anchor="middle">enters card · pays (CIT)</text>
 
-  <path class="arrow" d="M 760 80 C 740 115 620 145 552 172" marker-end="url(#arrow-autopay-flow)" />
-  <rect class="arrow-label-bg" x="650" y="116" width="110" height="14" rx="3" />
-  <text class="arrow-label" x="705" y="127" text-anchor="middle">submits payment</text>
+  <path class="arrow" d="M 760 80 C 740 120 620 160 552 212" marker-end="url(#arrow-autopay-flow)" />
+  <rect class="arrow-label-bg" x="650" y="122" width="110" height="14" rx="3" />
+  <text class="arrow-label" x="705" y="133" text-anchor="middle">submits payment</text>
 
-  <path class="arrow" d="M 550 300 L 608 270" marker-end="url(#arrow-autopay-flow)" />
-  <rect class="arrow-label-bg" x="548" y="290" width="60" height="14" rx="3" />
-  <text class="arrow-label" x="578" y="301" text-anchor="middle">ongoing</text>
+  <path class="arrow" d="M 550 268 L 608 295" marker-end="url(#arrow-autopay-flow)" />
+  <rect class="arrow-label-bg" x="546" y="288" width="60" height="14" rx="3" />
+  <text class="arrow-label" x="576" y="299" text-anchor="middle">ongoing</text>
 </svg>`;
 
 export default function AutoPayFlowDiagram(): React.JSX.Element {
   return (
     <Diagram
       svg={SVG}
-      alt="AutoPay subscription flow: the merchant makes one Checkout API call with payment_type auto_pay; Ottu Connect commits the transaction and calls AutoPay synchronously, which creates the subscription; the merchant redirects the customer to the checkout page to pay the first charge (the CIT); from then on AutoPay owns the billing cycles, retries, dunning, and the customer self-service page."
+      alt="AutoPay subscription flow: the merchant makes one Checkout API call with payment_type auto_pay and AutoPay creates the subscription synchronously; the merchant redirects the customer to the checkout page to pay the first charge (the CIT); from then on the billing cycles, retries, dunning, and the customer self-service page are all handled for the merchant."
     />
   );
 }

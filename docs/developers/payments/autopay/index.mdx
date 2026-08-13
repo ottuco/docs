@@ -45,20 +45,20 @@ Use AutoPay when you want Ottu to own the whole subscription lifecycle after one
 <AutoPayFlowDiagram />
 
 1. **Merchant creates a subscription** — one [Checkout API](../checkout-api) call with `payment_type: "auto_pay"`, an `agreement` object, and an `autopay` block describing the schedule.
-2. **Ottu Connect commits and calls AutoPay synchronously** — the checkout transaction commits first, then Connect calls AutoPay before returning the response. If AutoPay rejects the request, Connect marks the transaction failed and you get no usable `session_id`.
+2. **The subscription is created synchronously** — you get the result in the same response, not later by webhook. If the subscription can't be created, the transaction is marked failed and you get a 4xx with no usable `session_id`.
 3. **Subscription created** — the 201 response carries `extra.autopay.subscription_id`, your handle on the [subscription](/glossary/#term-subscription) going forward.
 4. **Customer pays the CIT** — you redirect the customer to the checkout page (Checkout SDK or hosted page) from the `session_id`, same as any other Checkout API session. They enter their card and complete the first charge.
 5. **AutoPay owns everything after** — billing cycles, retries, dunning emails, and the customer self-service page. You don't call anything to keep the subscription running.
 
 ### Step-by-Step {#step-by-step}
 
-One credential covers everything here. **Step 1** (creating a subscription) is a normal [Checkout API](../checkout-api) call. **Steps 2–6** (managing subscriptions you've already created) reach AutoPay through Ottu Connect at `/b/pbl/v2/subscriptions/`. Both authenticate the same way, with the [API key](/developers/getting-started/authentication) you already use:
+One credential covers everything here. **Step 1** (creating a subscription) is a normal [Checkout API](../checkout-api) call. **Steps 2–6** (managing subscriptions you've already created) use `/b/pbl/v2/subscriptions/` on the same host. Both authenticate the same way, with the [API key](/developers/getting-started/authentication) you already use:
 
 ```
 Authorization: Api-Key <YOUR_API_KEY>
 ```
 
-You never talk to AutoPay directly and you never handle a subscription-specific credential — Connect resolves your merchant from the API key and forwards the call.
+There is no second credential to obtain and no separate endpoint to configure.
 
 :::note Two different surfaces, one host
 Both the merchant API and the customer self-service page live on your Connect domain, at different paths. The merchant endpoints below sit under `/b/pbl/v2/subscriptions/`. The customer page is served at `/<lang>/subscription/<page_token>` — see [Customer Self-Service Page](#customer-self-service-page). Your integration only ever calls the first; the second is what you hand to the customer.
