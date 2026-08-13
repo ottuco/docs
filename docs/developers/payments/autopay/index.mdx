@@ -61,6 +61,10 @@ Merchant-Id: merchant.ottu.net
 
 `Merchant-Id` resolves both the tenant and the Keycloak realm used to validate the token — it's required on every call to the six endpoints below, GET or POST.
 
+:::warning Getting the JWT isn't documented yet
+The [authentication guide](/developers/getting-started/authentication) covers the `Api-Key` flow used in Step 1, but not the Keycloak client-credentials flow the six management endpoints need — the realm, client ID and grant details aren't published yet. Until they are, ask your Ottu contact for the credentials and the token endpoint for your merchant. You can create subscriptions today without this; you need it to list, retrieve, cancel, or manage the customer link.
+:::
+
 #### 1. Create a subscription
 
 Call the [Checkout API](../checkout-api) with `payment_type: "auto_pay"`. Three things are easy to miss: `agreement` is required and — unlike `auto_debit` — `agreement.id` is required inside it too; `customer_id` is required; and `customer_email` is required (see [Error Handling](#error-handling-missing-customer-email) below for what happens if you skip it).
@@ -209,7 +213,6 @@ $session = json_decode($response, true);`}</CodeBlock>
 | `start_date` | date | Yes | `YYYY-MM-DD`. |
 | `end_date` | date | No | Nullable; must be strictly after `start_date`. |
 | `description` | string | No | Max 255 characters. |
-| `retry_window_days` | integer | No | 1–30. |
 | `retry_count` | integer | No | 1–10. Overrides the default of 3 retries (4 total attempts) — see [Retries & Dunning](#retries-and-dunning). |
 | `notification_preferences` | object | No | Free-form — Connect does not validate it. See [Notifications](#notifications). |
 
