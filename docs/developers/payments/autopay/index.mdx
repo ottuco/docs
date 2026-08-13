@@ -15,7 +15,7 @@ import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
 # AutoPay
 
-AutoPay is Ottu's fully managed subscription engine. With [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments), **you** own the billing schedule — your system decides when to charge the saved card, retries failures, and emails the customer. With AutoPay (`payment_type: "auto_pay"`), **Ottu** owns all of that instead: you make one [Checkout API](../checkout-api) call to set up the subscription, and from there AutoPay generates each billing cycle, retries failed charges, notifies the customer, and gives them a self-service page — no scheduler, retry loop, or dunning emails to build yourself.
+AutoPay is Ottu's fully managed subscription engine. With [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments), **you** own the billing schedule — your system decides when to charge the saved card, retries failures, and emails the customer. With AutoPay (`payment_type: "auto_pay"`), **Ottu** owns all of that instead: you make one [Checkout API](../checkout-api) call to set up the subscription, and from there AutoPay generates each [billing cycle](/glossary/#term-billing-cycle), retries failed charges, notifies the customer, and gives them a self-service page — no scheduler, retry loop, or [dunning](/glossary/#term-dunning) emails to build yourself.
 
 Merchant-facing management (list, retrieve, cancel, and the rest) is REST-API-only in this phase — there is no AutoPay dashboard screen yet. Authentication for the Checkout API call that creates a subscription follows the standard [Ottu API key](/developers/getting-started/authentication) flow. The six subscription-management endpoints below use a different mechanism — see [Step-by-Step](#step-by-step) for details.
 
@@ -46,7 +46,7 @@ Use AutoPay when you want Ottu to own the whole subscription lifecycle after one
 
 1. **Merchant creates a subscription** — one [Checkout API](../checkout-api) call with `payment_type: "auto_pay"`, an `agreement` object, and an `autopay` block describing the schedule.
 2. **Ottu Connect commits and calls AutoPay synchronously** — the checkout transaction commits first, then Connect calls AutoPay before returning the response. If AutoPay rejects the request, Connect marks the transaction failed and you get no usable `session_id`.
-3. **Subscription created** — the 201 response carries `extra.autopay.subscription_id`, your handle on the subscription going forward.
+3. **Subscription created** — the 201 response carries `extra.autopay.subscription_id`, your handle on the [subscription](/glossary/#term-subscription) going forward.
 4. **Customer pays the CIT** — you redirect the customer to the checkout page (Checkout SDK or hosted page) from the `session_id`, same as any other Checkout API session. They enter their card and complete the first charge.
 5. **AutoPay owns everything after** — billing cycles, retries, dunning emails, and the customer self-service page. You don't call anything to keep the subscription running.
 
@@ -63,6 +63,10 @@ Merchant-Id: merchant.ottu.net
 
 :::warning Getting the JWT isn't documented yet
 The [authentication guide](/developers/getting-started/authentication) covers the `Api-Key` flow used in Step 1, but not the Keycloak client-credentials flow the six management endpoints need — the realm, client ID and grant details aren't published yet. Until they are, ask your Ottu contact for the credentials and the token endpoint for your merchant. You can create subscriptions today without this; you need it to list, retrieve, cancel, or manage the customer link.
+:::
+
+:::warning The path in front of `/subscriptions/` isn't final
+Steps 2–6 are shown on AutoPay's own paths — `/subscriptions/...` straight off the base URL. Your integration reaches them through Ottu Connect, which mounts them under a prefix that hasn't been published yet. Everything else on these six endpoints is accurate: the headers, the request bodies, the responses, and the behaviour. Only the path in front of `/subscriptions/` is subject to change — confirm it with your Ottu contact before you hardcode it. Step 1 is unaffected; its `/b/checkout/v1/pymt-txn/` path is the standard Checkout API path and is stable.
 :::
 
 #### 1. Create a subscription
@@ -437,7 +441,7 @@ Unlike the merchant [Cancel](#cancel-a-subscription) endpoint, a cancellation in
 ## API Reference
 
 :::note Interactive reference coming soon
-AutoPay's endpoints aren't in the public OpenAPI schema yet, so there's no interactive explorer here for the moment. Every request and response shown above is copy-paste accurate — see [Step-by-Step](#step-by-step) for the full set of six endpoints with cURL examples.
+AutoPay's endpoints aren't in the public OpenAPI schema yet, so there's no interactive explorer here for the moment. See [Step-by-Step](#step-by-step) for the full set of six endpoints with cURL examples. The request bodies, responses, and behaviour documented there are accurate; the path the six management endpoints sit behind is not yet final, and is flagged in that section.
 :::
 
 ## Best Practices

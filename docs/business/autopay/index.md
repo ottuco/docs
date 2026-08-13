@@ -10,11 +10,11 @@ import FAQ, { FAQItem } from "@site/src/components/FAQ";
 
 # AutoPay
 
-AutoPay turns a subscription into a single checkout call. After that, AutoPay generates every billing cycle, charges the saved card, retries failed charges, emails the customer, and hosts a self-service page where the customer manages their own subscription.
+AutoPay turns a [subscription](/glossary/#term-subscription) into a single checkout call. After that, AutoPay generates every [billing cycle](/glossary/#term-billing-cycle), charges the saved card, retries failed charges, emails the customer, and hosts a self-service page where the customer manages their own subscription.
 
 ## Why use AutoPay {#why-use-autopay}
 
-- **Run subscriptions without building a billing engine.** AutoPay owns the schedule, the retries, the dunning emails, and the customer self-service page. Your integration is one checkout call per subscription.
+- **Run subscriptions without building a billing engine.** AutoPay owns the schedule, the retries, the [dunning](/glossary/#term-dunning) emails, and the customer self-service page. Your integration is one checkout call per subscription.
 - **Recover failed payments automatically.** Every declined card is retried and the customer is emailed at each stage, so a renewal doesn't lapse because nobody noticed.
 - **Give customers somewhere to self-serve.** Status, billing history, saved cards, and cancellation all live on one page you send them.
 
