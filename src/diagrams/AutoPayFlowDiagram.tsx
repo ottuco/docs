@@ -89,7 +89,7 @@ const SVG = String.raw`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 
   <text class="sub" x="755" y="326" text-anchor="middle">Customer self-service page</text>
 
   <!-- Arrows -->
-  <path class="arrow" d="M 230 172 C 270 172 300 210 330 236" marker-end="url(#arrow-autopay-flow)" />
+  <path class="arrow" d="M 230 172 C 258 172 272 192 296 214" marker-end="url(#arrow-autopay-flow)" />
   <rect class="arrow-label-bg" x="236" y="154" width="130" height="14" rx="3" />
   <text class="arrow-label" x="301" y="165" text-anchor="middle">checkout call · auto_pay</text>
 
@@ -101,9 +101,9 @@ const SVG = String.raw`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 
   <rect class="arrow-label-bg" x="380" y="10" width="150" height="14" rx="3" />
   <text class="arrow-label" x="455" y="21" text-anchor="middle">enters card · pays (CIT)</text>
 
-  <path class="arrow" d="M 760 80 C 740 120 620 160 552 212" marker-end="url(#arrow-autopay-flow)" />
-  <rect class="arrow-label-bg" x="650" y="122" width="110" height="14" rx="3" />
-  <text class="arrow-label" x="705" y="133" text-anchor="middle">submits payment</text>
+  <path class="arrow" d="M 762 82 C 752 92 724 100 704 110" marker-end="url(#arrow-autopay-flow)" />
+  <rect class="arrow-label-bg" x="600" y="88" width="110" height="14" rx="3" />
+  <text class="arrow-label" x="655" y="99" text-anchor="middle">submits payment</text>
 
   <path class="arrow" d="M 550 268 L 608 295" marker-end="url(#arrow-autopay-flow)" />
   <rect class="arrow-label-bg" x="546" y="288" width="60" height="14" rx="3" />
