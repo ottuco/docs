@@ -51,11 +51,11 @@ A subscription moves through a small set of states from the moment it's created 
 | Past Due | A charge failed and every retry on that cycle has been used up. The subscription is not canceled — it's waiting for the balance to be paid. |
 | Canceled | Billing has stopped — either the customer canceled (their access continues until the end of the period they already paid for) or your team canceled it directly (effective immediately). |
 | Expired | Billing has stopped because the subscription reached a defined end date, rather than being canceled outright. |
-| Setup Failed | The very first charge attempt didn't go through. Unlike the two states above, this one isn't final — the subscription moves back to pending setup so setup can be tried again. |
+| Setup Failed | The very first charge attempt didn't go through. Unlike the two states above, this one isn't final — the subscription moves back to Pending setup so setup can be tried again. |
 
 Three of these are worth calling out specifically:
 
-- **A $0 first charge creates a trial, not an active subscription.** If the first amount your checkout call charges is zero, the subscription starts in Trialing rather than Active — useful for free-trial plans where the real charge only happens once the first billing cycle comes due.
+- **A zero first charge creates a trial, not an active subscription.** If the first amount your checkout call charges is zero, the subscription starts in Trialing rather than Active — useful for free-trial plans where the real charge only happens once the first billing cycle comes due.
 - **Past Due only happens after every retry is used up.** A single declined card doesn't move the needle — AutoPay retries automatically first (see [Retries and dunning](#retries-and-dunning)). Only once the whole retry sequence for a cycle is exhausted does the subscription flip to Past Due.
 - **Paying the outstanding balance is what moves a subscription back to Active.** The moment the customer pays what's owed — from their self-service page — the subscription returns to Active. There's no separate merchant-side action that does this; it's the customer's payment that clears it.
 
@@ -102,7 +102,7 @@ Every subscription gets its own private page (the product calls it "Manage Subsc
 From this page, a customer can:
 
 - View their plan, status, and next charge date
-- See every billing cycle — date, amount and outcome — including the next one, which appears as `Scheduled` before it is charged
+- See every billing cycle — date, amount and outcome — including the next one, which is listed as **Scheduled** before it is charged
 - Add a new card
 - Switch which saved card is their active one
 - Pay an outstanding balance directly
@@ -320,7 +320,7 @@ Everything above — enabling AutoPay, creating a subscription, looking one up, 
 ## Things to know {#things-to-know}
 
 - **A Past Due subscription never cancels itself.** It stays Past Due until the customer pays or your team cancels it — see [Retries and dunning](#retries-and-dunning).
-- **A $0 first charge starts a trial, not an active subscription.**
+- **A zero first charge starts a trial, not an active subscription.**
 - **Cycles are generated one at a time.** The next one isn't created until the current one is paid — see [Billing cycles](#billing-cycles).
 - **The amount on a cycle is locked in when that cycle is generated**, not read fresh from the subscription at charge time.
 - **Regenerating a customer's self-service link kills the old one instantly, silently.** Deliver the new one yourself.
@@ -342,7 +342,7 @@ Everything above — enabling AutoPay, creating a subscription, looking one up, 
   <FAQItem question="Does my customer get notified when I regenerate their self-service link?">
     No. The old link stops working the instant you regenerate, and AutoPay doesn't tell the customer — you need to deliver the new link yourself.
   </FAQItem>
-  <FAQItem question="What happens if the first charge on a new subscription is $0?">
+  <FAQItem question="What happens if the first charge on a new subscription is zero?">
     It starts in Trialing instead of Active. The real charge happens at the next billing cycle.
   </FAQItem>
   <FAQItem question="How does a past-due subscription get back to active?">
