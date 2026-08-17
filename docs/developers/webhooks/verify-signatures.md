@@ -7,6 +7,18 @@ sidebar_label: Verify Signatures
 
 To ensure the integrity and authenticity of the [webhook notifications](/developers/webhooks/payment-events) sent to the merchant, Ottu employs a signing mechanism based on HMAC (Hash-based Message Authentication Code). By leveraging HMAC, Ottu can guarantee that the webhook's content remains untampered during transmission.
 
+:::danger Breaking change: the signature scheme has changed
+The way Ottu builds the string it signs has been rewritten. **Any verifier written against the previous scheme will reject every payload it receives**, including payloads for merchants who never use AutoPay or any other new feature.
+
+Three things changed:
+
+1. Each field is now written as `path=value`, and the pairs are joined with a **newline** (`\n`). Previously the key and value were concatenated with no separator and no delimiter between pairs.
+2. The signed set grew from 18 flat fields to **26 fields**, eight of which are **dotted paths into nested objects** such as `token.token` and `extra.merchant_id`.
+3. Fields whose value is empty or otherwise falsy are now **skipped**. Previously a present-but-empty field was included.
+
+If you use [ottu-py](https://github.com/ottuco/ottu-py), upgrade it in lockstep with this change; its `verify_signature` implements the same wire contract. If you verify signatures yourself, update your code using the [reference implementations](#specific-examples) below before this reaches your environment.
+:::
+
 ## Important Components
 
 #### 1. HMAC Key (Secret Key)
@@ -14,173 +26,304 @@ To ensure the integrity and authenticity of the [webhook notifications](/develop
 - This is the backbone of the signing and verification process. Merchants can retrieve their unique HMAC Key from the Webhook Configuration panel within Ottu's admin dashboard [here](/developers/webhooks).
 - It's paramount that this key remains confidential. Always store it securely and avoid exposing it to the public.
 
-#### 2. Fields for Signature
+#### 2. Fields for Signature {#2-fields-for-signature}
 
-The signature is not derived from every field in the webhook payload. See payload example [here](/developers/webhooks/payment-events#payload-example-paid). Only specific fields are considered. These are:
+The signature is not derived from every field in the payload. See payload example [here](/developers/webhooks/payment-events#payload-example-paid). Only the following 26 paths are signed, listed here in the exact sort order used to build the signed string:
 
-- amount
-- currency_code
-- customer_first_name
-- customer_last_name
-- customer_email
-- customer_phone
-- customer_address_line1
-- customer_address_line2
-- customer_address_city
-- customer_address_state
-- customer_address_country
-- customer_address_postal_code
-- gateway_account
-- gateway_name
-- order_no
-- reference_number
-- result
-- state
+```
+agreement.id
+amount
+currency_code
+customer_address_city
+customer_address_country
+customer_address_line1
+customer_address_line2
+customer_address_postal_code
+customer_address_state
+customer_email
+customer_first_name
+customer_last_name
+customer_phone
+extra.autopay.subscription_id
+extra.merchant_id
+gateway_account
+gateway_name
+order_no
+payment_type
+reference_number
+result
+session_id
+state
+token.customer_id
+token.pg_code
+token.token
+```
+
+**Dotted paths address nested objects.** A path such as `token.pg_code` means "the `pg_code` key inside the `token` object", not a top-level field literally named `token.pg_code`. Walk the payload one segment at a time; if any segment is missing, or the value at the end is not an object when more segments remain, treat the whole path as absent.
+
+**Eight of these are newly signed**, and they are the ones existing verifiers miss: `session_id`, `payment_type`, `agreement.id`, `token.token`, `token.pg_code`, `token.customer_id`, `extra.merchant_id`, and `extra.autopay.subscription_id`.
+
+:::note Why `session_id` is now signed
+`session_id` identifies the payment session the notification belongs to. Leaving it unsigned meant a captured webhook could be replayed against a different session while its signature still verified. Signing it binds each notification to exactly one session and closes that replay hole.
+:::
+
+**`token.brand` and `token.number` are deliberately *not* signed.** They exist for display (showing "MASTERCARD •••• 0008" in a UI) and are excluded on purpose. Do not add them to your verifier.
 
 **Key Considerations**:
 
-1. Fields not present in the webhook payload or those with an empty string value are not considered when constructing the signature.
-2. Only fields present in the above list and in the payload with valid non-empty values are considered for signature generation.
-
-This update ensures that developers understand the significance of field presence and their values in the payload when constructing the HMAC signature.
+1. A path that is absent from the payload is skipped.
+2. A path whose value is empty or otherwise falsy — `""`, `null`, `0`, `false`, `[]`, `{}` — is also skipped. **An empty string signs identically to an absent key.** This is a change from the previous scheme, which included present-but-empty values.
+3. Values are used exactly as they appear in the payload, with no type coercion, trimming, or case folding.
 
 #### 3. Signature Creation
 
-- Fields from the payload are extracted based on the aforementioned list, sorted alphabetically by key name, and then concatenated to form a unique message string.
-- This string, combined with the HMAC Key, is used to create the **HMAC-SHA256** signature. This resultant signature is then dispatched with the [webhook notification](/developers/webhooks/payment-events).
+1. Sort the 26 paths above alphabetically. (The list is already in sorted order, so you can hard-code it as shown.)
+2. For each path in that order, resolve it against the payload. Skip it if it is missing or falsy.
+3. Render each surviving path as `path=value`.
+4. Join the rendered pairs with a single newline character, `\n`. There is no trailing newline.
+5. Compute **HMAC-SHA256** over that string using your HMAC Key, and hex-encode the result.
+
+The resulting signature is dispatched with the [webhook notification](/developers/webhooks/payment-events) in the `signature` field.
 
 #### 4. Verification by Merchant
 
-- On receipt of the webhook, merchants should rebuild the message string, using the listed fields.
-- Generate an HMAC signature using their stored [HMAC Key](/developers/webhooks).
-- If the computed signature corresponds to the provided one, the payload's authenticity is confirmed. Any discrepancies suggest potential tampering.
+- On receipt, rebuild the signed string from the payload you received, using the steps above.
+- Generate an HMAC signature using your stored [HMAC Key](/developers/webhooks).
+- Compare it to the `signature` field on the payload. Use a constant-time comparison (`hmac.compare_digest` in Python, `hash_equals` in PHP, `crypto.timingSafeEqual` in Node.js) rather than `==`.
+- If they match, the payload is authentic. Any discrepancy suggests tampering, or a verifier still running the old scheme.
+
+## Where signatures appear {#where-signatures-appear}
+
+This is not a webhooks-only change. The same `signature` field, computed the same way, is returned by the synchronous responses of these endpoints:
+
+| Endpoint | Notes |
+|---|---|
+| `POST /b/pbl/v2/payment/auto-debit` | Charging a saved token (MIT) |
+| `POST /b/pbl/v2/payment/apple-pay` | [Native payments](/developers/payments/native-payments/) |
+| `POST /b/pbl/v2/payment/google-pay` | [Native payments](/developers/payments/native-payments/) |
+| `POST /b/pbl/v2/payment/cash` | Cash / COD acknowledgement |
+| `POST /b/pbl/v2/sign` | Signs a payload you supply, using your HMAC Key |
+
+Those four payment responses share the payment-webhook body shape, so they also carry `extra.merchant_id` (see below). If you verify the signature on a synchronous response as well as on the webhook, both code paths need the update.
+
+`POST /b/pbl/v2/sign` is useful while migrating: post a payload to it and compare the signature it returns against what your own implementation produces for the same payload.
+
+## Payload additions you should know about {#payload-additions}
+
+Two related additions land alongside this change, and the distinction between them matters for security.
+
+**`extra.merchant_id` is always present now**, even when you sent no `extra` object on the checkout call. It holds your merchant domain, and it **is** inside the signed set.
+
+**A top-level `autopay` block may be present** on payments created through [AutoPay](/developers/payments/autopay/). It sits at the top level of the payload, *not* under `extra`, and contains `subscription_id`, `subscription_status`, `cycle_number`, `cycle_status`, `next_billing_date` and `event_type`.
+
+:::warning The top-level `autopay` block is not covered by the signature
+It is fetched live from the AutoPay service while the response is being assembled, with a short timeout, and is **silently omitted** if that lookup times out or fails. Treat it as informational only:
+
+- **Never** make a security or money-moving decision based on it. Use the signed [`extra.autopay.subscription_id`](#2-fields-for-signature) to identify the subscription, then read authoritative state from the [subscription endpoints](/developers/payments/autopay/#step-by-step).
+- Its absence means the lookup did not complete. It does **not** mean the payment is not an AutoPay payment.
+- `event_type` can be `null`. Null means the setup outcome is still undecided — it does **not** mean the setup succeeded.
+:::
 
 ## Example
 
-For illustration purposes, let's consider a sample webhook payload and a hypothetical HMAC key.
+Consider this payload and a hypothetical HMAC key.
 
 **Webhook Payload**:
 
 ```json
 {
-  "amount": "86.000",
+  "amount": "49.990",
   "currency_code": "KWD",
-  "customer_first_name": "example-customer"
+  "customer_email": "customer@example.com",
+  "customer_first_name": "Jane",
+  "customer_last_name": "",
+  "gateway_account": "credit-card",
+  "gateway_name": "mpgs",
+  "order_no": "ORD-1001",
+  "payment_type": "auto_pay",
+  "reference_number": "betabulkAQ5DJ",
+  "result": "success",
+  "session_id": "a12f71075a834a34d692736ac43a212fcebfb6ec",
+  "state": "paid",
+  "agreement": { "id": "AGR-abc123" },
+  "extra": {
+    "merchant_id": "merchant.ottu.net",
+    "autopay": { "subscription_id": "sub_abc123" }
+  },
+  "token": {
+    "token": "9491500736137502",
+    "pg_code": "credit-card",
+    "customer_id": "cust_12345",
+    "brand": "MASTERCARD",
+    "number": "**** 0008"
+  }
 }
 ```
 
 **HMAC Key**: `pu9MpX3yPR`
 
-Given this payload and key, the steps to construct the HMAC signature are:
+The signed string built from it is exactly this — 18 lines, joined by `\n`, with no trailing newline:
 
-1. Sort the payload keys.
-2. Use the list of specific fields (as defined in the [Fields for Signature](#2-fields-for-signature) section) to extract values from the payload.
-3. Concatenate the key-value pairs.
-4. Apply the HMAC algorithm using the **SHA256** hash function and the provided HMAC key.
+```text title="Canonical string"
+agreement.id=AGR-abc123
+amount=49.990
+currency_code=KWD
+customer_email=customer@example.com
+customer_first_name=Jane
+extra.autopay.subscription_id=sub_abc123
+extra.merchant_id=merchant.ottu.net
+gateway_account=credit-card
+gateway_name=mpgs
+order_no=ORD-1001
+payment_type=auto_pay
+reference_number=betabulkAQ5DJ
+result=success
+session_id=a12f71075a834a34d692736ac43a212fcebfb6ec
+state=paid
+token.customer_id=cust_12345
+token.pg_code=credit-card
+token.token=9491500736137502
+```
 
-Following these steps, the resulting signature is:
+Note what is missing from it, and why:
 
-`6143b8ad4bd283540721ab000f6de746e722231aaaa90bc38f639081d3ff9f67`
+- `customer_last_name` is present in the payload but empty, so it is skipped.
+- `token.brand` and `token.number` are present but are not in the signed set.
+- The eight address and phone paths are absent from the payload, so they are skipped.
 
-Developers should compare this generated signature to the signature received in the webhook payload to validate its authenticity.
+Applying HMAC-SHA256 with the key above gives:
+
+`4ea44c61554e6b64feeb82e6bfc724dc1c46bf183596f5375f5cb12cca14b7ef`
+
+Compare that against the `signature` field on the payload you received.
 
 ## Signature Generation
 
-Ensuring the integrity and authenticity of webhook payloads is paramount for the security of both the service provider and the merchants. To achieve this, an HMAC (Hash-Based Message Authentication Code) signature is generated and sent along with the payload. This signature needs to be validated at the merchant's end to confirm that the data has not been tampered with. For the convenience of developers working with different programming languages, we provide ready-to-use code snippets in various popular languages to generate and verify this HMAC signature. This section showcases how to compute the HMAC signature for the payload in languages like [Python](#python), [PHP](#php), [Java](#java), [.NET (C#)](#net-c), [Node.js](#nodejs) [Ruby](#ruby), and [Go](#go).
+Ensuring the integrity and authenticity of payloads is paramount for the security of both the service provider and the merchants. To achieve this, an HMAC signature is generated and sent along with the payload, and this signature needs to be validated at the merchant's end. Each implementation below follows the [signature creation](#3-signature-creation) steps exactly; use the payload, key and digest in the [example](#example) as a test vector to confirm your build of it. Snippets are provided for [Python](#python), [PHP](#php), [Java](#java), [.NET (C#)](#net-c), [Node.js](#nodejs), [Ruby](#ruby), and [Go](#go).
+
+:::tip Test your implementation before you need it
+Run your updated verifier against the payload and key in the [example](#example) above. If it produces `4ea44c61…`, it implements the current scheme correctly.
+:::
 
 ## Specific Examples
 
 ### Python
 
-Python function for generating the HMAC signature given a payload and an HMAC key:
-
 ```python title="Python"
-import hmac
 import hashlib
+import hmac
+
+SIGNED_FIELDS = [
+    "agreement.id",
+    "amount",
+    "currency_code",
+    "customer_address_city",
+    "customer_address_country",
+    "customer_address_line1",
+    "customer_address_line2",
+    "customer_address_postal_code",
+    "customer_address_state",
+    "customer_email",
+    "customer_first_name",
+    "customer_last_name",
+    "customer_phone",
+    "extra.autopay.subscription_id",
+    "extra.merchant_id",
+    "gateway_account",
+    "gateway_name",
+    "order_no",
+    "payment_type",
+    "reference_number",
+    "result",
+    "session_id",
+    "state",
+    "token.customer_id",
+    "token.pg_code",
+    "token.token",
+]
+
+_MISSING = object()
+
+
+def _resolve_path(payload, path):
+    """Walk a dotted path through nested dicts. Returns _MISSING if absent."""
+    current = payload
+    for part in path.split("."):
+        if not isinstance(current, dict) or part not in current:
+            return _MISSING
+        current = current[part]
+    return current
+
 
 def generate_hmac_signature(payload, hmac_key):
-    # List of fields that are considered for the HMAC signature
-    keys = [
-        "amount",
-        "currency_code",
-        "customer_first_name",
-        "customer_last_name",
-        "customer_email",
-        "customer_phone",
-        "customer_address_line1",
-        "customer_address_line2",
-        "customer_address_city",
-        "customer_address_state",
-        "customer_address_country",
-        "customer_address_postal_code",
-        "gateway_name",
-        "gateway_account",
-        "order_no",
-        "reference_number",
-        "result",
-        "state",
-    ]
-
-    # Extract and sort the payload keys based on the 'keys' list, and ignore any missing or empty string values
-    message = [(k, payload[k]) for k in sorted(payload) if k in keys and payload[k]]
-
-    # Concatenate the key-value pairs
-    message_str = "".join([f"{k}{v}" for (k, v) in message])
-
-    # Compute the HMAC signature
-    digest = hmac.new(
+    parts = []
+    for path in sorted(SIGNED_FIELDS):
+        value = _resolve_path(payload, path)
+        if value is _MISSING or not value:
+            continue
+        parts.append(f"{path}={value}")
+    message = "\n".join(parts)
+    return hmac.new(
         bytes(hmac_key, encoding="utf8"),
-        bytes(message_str, encoding="utf8"),
-        digestmod=hashlib.sha256
+        bytes(message, encoding="utf8"),
+        digestmod=hashlib.sha256,
     ).hexdigest()
 
-    return digest
 
-# Test
-payload = {
-   "amount":"86.000",
-   "currency_code":"KWD",
-   "customer_first_name":"example-customer"
-}
-hmac_key = "pu9MpX3yPR"
-
-print(generate_hmac_signature(payload, hmac_key))
+def verify(payload, hmac_key):
+    expected = generate_hmac_signature(payload, hmac_key)
+    return hmac.compare_digest(expected, payload.get("signature", ""))
 ```
 
-When you run this code, the printed result should match the provided HMAC signature: `6143b8ad4bd283540721ab000f6de746e722231aaaa90bc38f639081d3ff9f67`.
+Running `generate_hmac_signature` against the payload and key from the [example](#example) prints `4ea44c61554e6b64feeb82e6bfc724dc1c46bf183596f5375f5cb12cca14b7ef`.
 
 ### PHP
 
 ```php title="PHP"
 <?php
 
-function generateHmacSignature($payload, $hmacKey) {
-    $keys = [
-        "amount", "currency_code", "customer_first_name",
-        "customer_last_name", "customer_email", "customer_phone",
-        // ... [add all the other keys here] ...
-        "reference_number", "result", "state"
-    ];
+const SIGNED_FIELDS = [
+    "agreement.id", "amount", "currency_code",
+    "customer_address_city", "customer_address_country",
+    "customer_address_line1", "customer_address_line2",
+    "customer_address_postal_code", "customer_address_state",
+    "customer_email", "customer_first_name", "customer_last_name",
+    "customer_phone", "extra.autopay.subscription_id", "extra.merchant_id",
+    "gateway_account", "gateway_name", "order_no", "payment_type",
+    "reference_number", "result", "session_id", "state",
+    "token.customer_id", "token.pg_code", "token.token",
+];
 
-    $message = "";
-    foreach ($keys as $key) {
-        if (isset($payload[$key]) && $payload[$key] !== "") {
-            $message .= $key . $payload[$key];
+function resolvePath(array $payload, string $path) {
+    $current = $payload;
+    foreach (explode('.', $path) as $part) {
+        if (!is_array($current) || !array_key_exists($part, $current)) {
+            return null;
         }
+        $current = $current[$part];
     }
-
-    return hash_hmac('sha256', $message, $hmacKey);
+    return $current;
 }
 
-// Test
-$payload = [
-    "amount" => "86.000",
-    "currency_code" => "KWD",
-    "customer_first_name" => "example-customer"
-];
-$hmacKey = "pu9MpX3yPR";
+function generateHmacSignature(array $payload, string $hmacKey): string {
+    $fields = SIGNED_FIELDS;
+    sort($fields);
 
-echo generateHmacSignature($payload, $hmacKey);
+    $parts = [];
+    foreach ($fields as $path) {
+        $value = resolvePath($payload, $path);
+        if ($value === null || $value === '' || $value === false || $value === 0 || $value === []) {
+            continue;
+        }
+        $parts[] = $path . '=' . $value;
+    }
+
+    return hash_hmac('sha256', implode("\n", $parts), $hmacKey);
+}
+
+function verify(array $payload, string $hmacKey): bool {
+    return hash_equals(generateHmacSignature($payload, $hmacKey), $payload['signature'] ?? '');
+}
 ?>
 ```
 
@@ -190,71 +333,74 @@ echo generateHmacSignature($payload, $hmacKey);
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 public class SignatureGenerator {
 
-    public static String generateHmacSignature(Map<String, String> payload, String hmacKey) throws Exception {
-        String[] keys = {
-            "amount",
-            "currency_code",
-            "customer_first_name",
-            "customer_last_name",
-            "customer_email",
-            "customer_phone",
-            "customer_address_line1",
-            "customer_address_line2",
-            "customer_address_city",
-            "customer_address_state",
-            "customer_address_country",
-            "customer_address_postal_code",
-            "gateway_name",
-            "gateway_account",
-            "order_no",
-            "reference_number",
-            "result",
-            "state",
-        };
+    private static final List<String> SIGNED_FIELDS = Arrays.asList(
+        "agreement.id", "amount", "currency_code",
+        "customer_address_city", "customer_address_country",
+        "customer_address_line1", "customer_address_line2",
+        "customer_address_postal_code", "customer_address_state",
+        "customer_email", "customer_first_name", "customer_last_name",
+        "customer_phone", "extra.autopay.subscription_id", "extra.merchant_id",
+        "gateway_account", "gateway_name", "order_no", "payment_type",
+        "reference_number", "result", "session_id", "state",
+        "token.customer_id", "token.pg_code", "token.token"
+    );
 
-        List<String> sortedKeys = new ArrayList<>();
-        StringBuilder message = new StringBuilder();
-        for (String key : keys) {
-            if (payload.containsKey(key) && !payload.get(key).isEmpty()) {
-              sortedKeys.add(key);
+    @SuppressWarnings("unchecked")
+    private static Object resolvePath(Map<String, Object> payload, String path) {
+        Object current = payload;
+        for (String part : path.split("\\.")) {
+            if (!(current instanceof Map)) {
+                return null;
             }
+            Map<String, Object> node = (Map<String, Object>) current;
+            if (!node.containsKey(part)) {
+                return null;
+            }
+            current = node.get(part);
         }
-        Collections.sort(sortedKeys);
-        for (String key : sortedKeys)
-        {
-              message.append(key).append(payload.get(key));
-        }
+        return current;
+    }
 
+    private static boolean isFalsy(Object value) {
+        if (value == null) return true;
+        if (value instanceof String) return ((String) value).isEmpty();
+        if (value instanceof Boolean) return !((Boolean) value);
+        if (value instanceof Number) return ((Number) value).doubleValue() == 0d;
+        if (value instanceof Map) return ((Map<?, ?>) value).isEmpty();
+        if (value instanceof List) return ((List<?>) value).isEmpty();
+        return false;
+    }
+
+    public static String generateHmacSignature(Map<String, Object> payload, String hmacKey)
+            throws Exception {
+        List<String> fields = new java.util.ArrayList<>(SIGNED_FIELDS);
+        java.util.Collections.sort(fields);
+
+        StringJoiner message = new StringJoiner("\n");
+        for (String path : fields) {
+            Object value = resolvePath(payload, path);
+            if (isFalsy(value)) {
+                continue;
+            }
+            message.add(path + "=" + value);
+        }
 
         Mac sha256HMAC = Mac.getInstance("HmacSHA256");
-        SecretKeySpec secretKey = new SecretKeySpec(hmacKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-        sha256HMAC.init(secretKey);
-
+        sha256HMAC.init(new SecretKeySpec(hmacKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
         byte[] hashBytes = sha256HMAC.doFinal(message.toString().getBytes(StandardCharsets.UTF_8));
+
         StringBuilder sb = new StringBuilder();
         for (byte b : hashBytes) {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
-    }
-
-    public static void main(String[] args) throws Exception {
-        Map<String, String> payload = new HashMap<>();
-        payload.put("amount", "86.000");
-        payload.put("currency_code", "KWD");
-        payload.put("customer_first_name", "example-customer");
-
-        String hmacKey = "pu9MpX3yPR";
-
-        System.out.println(generateHmacSignature(payload, hmacKey));
     }
 }
 ```
@@ -264,39 +410,59 @@ public class SignatureGenerator {
 ```csharp title="C# (.NET)"
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
 public class SignatureGenerator {
-    public static string GenerateHmacSignature(Dictionary<string, string> payload, string hmacKey) {
-        string[] keys = {
-            "amount", "currency_code", "customer_first_name",
-            // ... [add all the other keys here] ...
-            "reference_number", "result", "state"
-        };
+    private static readonly string[] SignedFields = {
+        "agreement.id", "amount", "currency_code",
+        "customer_address_city", "customer_address_country",
+        "customer_address_line1", "customer_address_line2",
+        "customer_address_postal_code", "customer_address_state",
+        "customer_email", "customer_first_name", "customer_last_name",
+        "customer_phone", "extra.autopay.subscription_id", "extra.merchant_id",
+        "gateway_account", "gateway_name", "order_no", "payment_type",
+        "reference_number", "result", "session_id", "state",
+        "token.customer_id", "token.pg_code", "token.token"
+    };
 
-        StringBuilder message = new StringBuilder();
-        foreach (string key in keys) {
-            if (payload.ContainsKey(key) && !String.IsNullOrEmpty(payload[key])) {
-                message.Append(key).Append(payload[key]);
+    private static object ResolvePath(IDictionary<string, object> payload, string path) {
+        object current = payload;
+        foreach (var part in path.Split('.')) {
+            if (!(current is IDictionary<string, object> node) || !node.ContainsKey(part)) {
+                return null;
             }
+            current = node[part];
         }
+        return current;
+    }
 
-        using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(hmacKey))) {
-            byte[] hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(message.ToString()));
-            return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+    private static bool IsFalsy(object value) {
+        switch (value) {
+            case null: return true;
+            case string s: return s.Length == 0;
+            case bool b: return !b;
+            case int i: return i == 0;
+            case double d: return d == 0d;
+            case System.Collections.ICollection c: return c.Count == 0;
+            default: return false;
         }
     }
 
-    static void Main(string[] args) {
-        var payload = new Dictionary<string, string> {
-            {"amount", "86.000"},
-            {"currency_code", "KWD"},
-            {"customer_first_name", "example-customer"}
-        };
-        string hmacKey = "pu9MpX3yPR";
+    public static string GenerateHmacSignature(IDictionary<string, object> payload, string hmacKey) {
+        var parts = SignedFields
+            .OrderBy(f => f, StringComparer.Ordinal)
+            .Select(path => new { path, value = ResolvePath(payload, path) })
+            .Where(x => !IsFalsy(x.value))
+            .Select(x => $"{x.path}={x.value}");
 
-        Console.WriteLine(GenerateHmacSignature(payload, hmacKey));
+        var message = string.Join("\n", parts);
+
+        using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(hmacKey))) {
+            byte[] hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(message));
+            return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+        }
     }
 }
 ```
@@ -306,37 +472,76 @@ public class SignatureGenerator {
 ```javascript title="Node.js"
 const crypto = require("crypto");
 
-function generateHmacSignature(payload, hmacKey) {
-  const keys = [
-    "amount",
-    "currency_code",
-    "customer_first_name",
-    // ... [add all the other keys here] ...
-    "reference_number",
-    "result",
-    "state",
-  ];
+const SIGNED_FIELDS = [
+  "agreement.id",
+  "amount",
+  "currency_code",
+  "customer_address_city",
+  "customer_address_country",
+  "customer_address_line1",
+  "customer_address_line2",
+  "customer_address_postal_code",
+  "customer_address_state",
+  "customer_email",
+  "customer_first_name",
+  "customer_last_name",
+  "customer_phone",
+  "extra.autopay.subscription_id",
+  "extra.merchant_id",
+  "gateway_account",
+  "gateway_name",
+  "order_no",
+  "payment_type",
+  "reference_number",
+  "result",
+  "session_id",
+  "state",
+  "token.customer_id",
+  "token.pg_code",
+  "token.token",
+];
 
-  const sortedKeys = Object.keys(payload).sort();
-  const messageArray = sortedKeys
-    .filter((key) => keys.includes(key))
-    .map((key) => [key, payload[key]]);
-  const message = messageArray.map(([k, v]) => `${k}${v}`).join("");
+const MISSING = Symbol("missing");
 
-  const hmac = crypto.createHmac("sha256", hmacKey);
-  hmac.update(message);
-
-  return hmac.digest("hex");
+function resolvePath(payload, path) {
+  let current = payload;
+  for (const part of path.split(".")) {
+    if (
+      current === null ||
+      typeof current !== "object" ||
+      Array.isArray(current) ||
+      !Object.prototype.hasOwnProperty.call(current, part)
+    ) {
+      return MISSING;
+    }
+    current = current[part];
+  }
+  return current;
 }
 
-const payload = {
-  amount: "86.000",
-  currency_code: "KWD",
-  customer_first_name: "example-customer",
-};
-const hmacKey = "pu9MpX3yPR";
+function isFalsy(value) {
+  if (!value) return true; // "", 0, false, null, undefined
+  if (Array.isArray(value)) return value.length === 0;
+  if (typeof value === "object") return Object.keys(value).length === 0;
+  return false;
+}
 
-console.log(generateHmacSignature(payload, hmacKey));
+function generateHmacSignature(payload, hmacKey) {
+  const parts = [];
+  for (const path of [...SIGNED_FIELDS].sort()) {
+    const value = resolvePath(payload, path);
+    if (value === MISSING || isFalsy(value)) continue;
+    parts.push(`${path}=${value}`);
+  }
+
+  return crypto.createHmac("sha256", hmacKey).update(parts.join("\n")).digest("hex");
+}
+
+function verify(payload, hmacKey) {
+  const expected = Buffer.from(generateHmacSignature(payload, hmacKey), "utf8");
+  const received = Buffer.from(payload.signature || "", "utf8");
+  return expected.length === received.length && crypto.timingSafeEqual(expected, received);
+}
 ```
 
 ### Ruby
@@ -344,35 +549,48 @@ console.log(generateHmacSignature(payload, hmacKey));
 ```ruby title="Ruby"
 require 'openssl'
 
-def generate_hmac_signature(payload, hmac_key)
-    keys = [
-        'amount', 'currency_code', 'customer_first_name',
-        # ... [add all the other keys here] ...
-        'reference_number', 'result', 'state'
-    ]
+SIGNED_FIELDS = [
+  'agreement.id', 'amount', 'currency_code',
+  'customer_address_city', 'customer_address_country',
+  'customer_address_line1', 'customer_address_line2',
+  'customer_address_postal_code', 'customer_address_state',
+  'customer_email', 'customer_first_name', 'customer_last_name',
+  'customer_phone', 'extra.autopay.subscription_id', 'extra.merchant_id',
+  'gateway_account', 'gateway_name', 'order_no', 'payment_type',
+  'reference_number', 'result', 'session_id', 'state',
+  'token.customer_id', 'token.pg_code', 'token.token'
+].freeze
 
-    message = ""
-    keys.each do |key|
-        if payload[key] && payload[key] != ''
-            message += key + payload[key]
-        end
-    end
+MISSING = Object.new
 
-    digest = OpenSSL::HMAC.hexdigest('sha256', hmac_key, message)
-    return digest
+def resolve_path(payload, path)
+  current = payload
+  path.split('.').each do |part|
+    return MISSING unless current.is_a?(Hash) && current.key?(part)
+    current = current[part]
+  end
+  current
 end
 
-# Test
-payload = {
-    "amount" => "86.000",
-    "currency_code" => "KWD",
-    "customer_first_name" => "example-customer"
-}
+def falsy?(value)
+  value.nil? || value == false || value == '' || value == 0 ||
+    (value.respond_to?(:empty?) && value.empty?)
+end
 
+def generate_hmac_signature(payload, hmac_key)
+  parts = SIGNED_FIELDS.sort.filter_map do |path|
+    value = resolve_path(payload, path)
+    next if value.equal?(MISSING) || falsy?(value)
+    "#{path}=#{value}"
+  end
 
-hmac_key = "pu9MpX3yPR"
+  OpenSSL::HMAC.hexdigest('sha256', hmac_key, parts.join("\n"))
+end
 
-puts generate_hmac_signature(payload, hmac_key)
+def verify(payload, hmac_key)
+  expected = generate_hmac_signature(payload, hmac_key)
+  OpenSSL.secure_compare(expected, payload['signature'].to_s)
+end
 ```
 
 ### Go
@@ -380,110 +598,104 @@ puts generate_hmac_signature(payload, hmac_key)
 ```go title="Go"
 package main
 
-import(
-    "crypto/hmac"
-    "crypto/sha256"
-    "encoding/hex"
-    "fmt"
-    "sort"
-    "strings"
+import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/hex"
+	"fmt"
+	"sort"
+	"strings"
 )
 
-func SignMerchantPayload(payload map[string] interface {}, key string) string {
-    // Define keys in sorted order
-    keys: = [] string {
-        "amount",
-        "currency_code",
-        "customer_email",
-        "customer_first_name",
-        "customer_last_name",
-        "customer_phone",
-        "gateway_account",
-        "gateway_name",
-        "order_no",
-        "reference_number",
-        "result",
-        "state",
-    }
-
-    // Sort the keys
-    sort.Strings(keys)
-
-    // Create the message by concatenating key-value pairs
-    var message strings.Builder
-    for _,
-    k: = range keys {
-        v: = fmt.Sprintf("%v", payload[k]) // Get value as string
-        if v != "" {
-            message.WriteString(k + v)
-        }
-    }
-
-    // Generate the HMAC
-    h: = hmac.New(sha256.New, [] byte(key))
-    h.Write([] byte(message.String()))
-    digest: = hex.EncodeToString(h.Sum(nil))
-
-    return digest
+var signedFields = []string{
+	"agreement.id",
+	"amount",
+	"currency_code",
+	"customer_address_city",
+	"customer_address_country",
+	"customer_address_line1",
+	"customer_address_line2",
+	"customer_address_postal_code",
+	"customer_address_state",
+	"customer_email",
+	"customer_first_name",
+	"customer_last_name",
+	"customer_phone",
+	"extra.autopay.subscription_id",
+	"extra.merchant_id",
+	"gateway_account",
+	"gateway_name",
+	"order_no",
+	"payment_type",
+	"reference_number",
+	"result",
+	"session_id",
+	"state",
+	"token.customer_id",
+	"token.pg_code",
+	"token.token",
 }
 
-func main() {
-    // Example payload
-    payload: = map[string] interface {} {
-        "amount": "14.000",
-        "amount_details": map[string] interface {} {
-            "currency_code": "KWD",
-            "amount": "14.000",
-            "total": "14.000",
-            "fee": "0.000",
-        },
-        "currency_code": "KWD",
-        "customer_email": "example@gmail.com",
-        "customer_first_name": "name",
-        "customer_id": "1",
-        "customer_last_name": "last name",
-        "customer_phone": "+96500000000",
-        "fee": "0.000 KWD",
-        "gateway_account": "credit-card",
-        "gateway_name": "mpgs",
-        "gateway_response": map[string] interface {} {},
-        "initiator": map[string] interface {} {},
-        "is_sandbox": true,
-        "order_no": "4567f45оkgkh6hjаhjg77hjh5645",
-        "paid_amount": "14.000",
-        "payment_type": "one_off",
-        "pg_params": map[string] interface {} {},
-        "reference_number": "sandboxAQ5DJ",
-        "result": "success",
-        "session_id": "a12f71075a834a34d692736ac43a212fcebfb6ec",
-        "settled_amount": "14.000",
-        "signature": "293023d42eec624fc92b869812a53ee97c98398a80511537deaa27501ff378c3",
-        "state": "paid",
-        "timestamp_utc": "2024-04-17 08:46:21",
-        "token": map[string] interface {} {
-            "customer_id": "1",
-            "brand": "MASTERCARD",
-            "name_on_card": "Test Test",
-            "number": "**** 0008",
-            "expiry_month": "01",
-            "expiry_year": "39",
-            "token": "9491500736137502",
-            "pg_code": "credit-card",
-            "pg": "mpgs",
-            "is_preferred": true,
-            "is_expired": false,
-            "will_expire_soon": false,
-            "cvv_required": true,
-            "agreements": [] interface {} {},
-        },
-    }
+// resolvePath walks a dotted path through nested maps.
+// The second return value reports whether the path was found.
+func resolvePath(payload map[string]interface{}, path string) (interface{}, bool) {
+	var current interface{} = payload
+	for _, part := range strings.Split(path, ".") {
+		node, ok := current.(map[string]interface{})
+		if !ok {
+			return nil, false
+		}
+		current, ok = node[part]
+		if !ok {
+			return nil, false
+		}
+	}
+	return current, true
+}
 
-    // Example HMAC key
-    key: = "your_hmac_key"
+func isFalsy(value interface{}) bool {
+	switch v := value.(type) {
+	case nil:
+		return true
+	case string:
+		return v == ""
+	case bool:
+		return !v
+	case float64:
+		return v == 0
+	case int:
+		return v == 0
+	case []interface{}:
+		return len(v) == 0
+	case map[string]interface{}:
+		return len(v) == 0
+	}
+	return false
+}
 
-    // Sign the payload
-    signature: = SignMerchantPayload(payload, key)
-    fmt.Println("Signature:", signature)
+func SignMerchantPayload(payload map[string]interface{}, key string) string {
+	fields := append([]string(nil), signedFields...)
+	sort.Strings(fields)
+
+	var parts []string
+	for _, path := range fields {
+		value, found := resolvePath(payload, path)
+		if !found || isFalsy(value) {
+			continue
+		}
+		parts = append(parts, fmt.Sprintf("%s=%v", path, value))
+	}
+
+	h := hmac.New(sha256.New, []byte(key))
+	h.Write([]byte(strings.Join(parts, "\n")))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+func Verify(payload map[string]interface{}, key string) bool {
+	expected := SignMerchantPayload(payload, key)
+	received, _ := payload["signature"].(string)
+	return subtle.ConstantTimeCompare([]byte(expected), []byte(received)) == 1
 }
 ```
 
@@ -495,4 +707,5 @@ The above examples provide a way for developers in different languages to genera
 
 - [**Payment Events**](/developers/webhooks/payment-events/) — Payment webhook payload reference
 - [**Operation Events**](/developers/webhooks/operation-events/) — Operation webhook payload reference
+- [**AutoPay**](/developers/payments/autopay/) — Subscriptions, and the `autopay` payload blocks described above
 - [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration

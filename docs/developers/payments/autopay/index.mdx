@@ -17,7 +17,7 @@ import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
 AutoPay is Ottu's fully managed subscription engine. With [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments), **you** own the billing schedule — your system decides when to charge the saved card, retries failures, and emails the customer. With AutoPay (`payment_type: "auto_pay"`), **Ottu** owns all of that instead: you make one [Checkout API](../checkout-api) call to set up the subscription, and from there AutoPay generates each [billing cycle](/glossary/#term-billing-cycle), retries failed charges, notifies the customer, and gives them a self-service page — no scheduler, retry loop, or [dunning](/glossary/#term-dunning) emails to build yourself.
 
-Merchant-facing management (list, retrieve, cancel, and the rest) is REST-API-only in this phase — there is no AutoPay dashboard screen yet. Every call on this page, including the six subscription-management endpoints, uses the standard [Ottu API key](/developers/getting-started/authentication) flow — there is no separate credential to obtain.
+Merchant-facing management (list, retrieve, cancel, and the rest) is REST-API-only in this phase — there is no AutoPay dashboard screen yet. Every call on this page, including the five subscription-management endpoints, uses the standard [Ottu API key](/developers/getting-started/authentication) flow — there is no separate credential to obtain.
 
 :::note Base URL
 Every API call in this guide targets <code>{OTTU_CONNECT_BASE_URL}</code>. Swap in your own merchant domain when you integrate.
@@ -248,6 +248,29 @@ This error reads like something is wrong with your `agreement` object — it isn
 
 All filter fields are optional: `status`, `customer_id`, `created_after`, `created_before`, `limit` (default 20, max 100), `offset`. The response is the standard paginated envelope — `count`, `next`, `previous`, `results`. Each item in `results` is a slim summary — `id`, `customer_id`, `customer_email`, `frequency`, `recurring_amount`, `currency`, `status`, `next_billing_date`, `created_at` — not the full subscription object. For the active card and latest-cycle detail, call [Retrieve a subscription](#retrieve-a-subscription) with the item's `id`.
 
+##### Paging through the list {#paging-through-the-list}
+
+`next` and `previous` are absolute URLs on your own Connect domain, and they carry `limit` and `offset` in the **query string**, even though you sent them in the body:
+
+```json title="Example response — 200 OK (truncated)"
+{
+  "count": 503,
+  "next": "https://<your-ottu-domain>/b/pbl/v2/subscriptions/?limit=1&offset=1",
+  "previous": null,
+  "results": [{"id": "sub_jzxTLIBY3LT090lkbe4y9XBX", "status": "pending_setup"}]
+}
+```
+
+Three rules follow from that, and the first one catches almost everyone:
+
+1. **Follow the link with `POST`, not `GET`.** The endpoint is POST-only. A `GET` on the `next` URL returns `405 {"detail": "Method \"GET\" not allowed."}`. Reuse the same verb, headers and API key you used for the first page.
+2. **The body is optional when you follow a link.** Because `limit` and `offset` are already in the query string, `POST`ing the `next` URL with an empty body `{}` returns the correct page. If you want your original filters applied to that page too, resend them in the body.
+3. **Query parameters win over body parameters.** When both carry `limit` or `offset`, the query string overrides the body. Posting `{"offset": 1}` to a URL ending `?offset=5` returns the page at offset 5, not 1. Other filters (`status`, `customer_id`, `created_after`, `created_before`) are read from the body only.
+
+:::note Why the links point at your domain
+AutoPay builds `next` and `previous` against its own internal host, which merchants cannot reach. Connect rewrites both onto the URL you called before returning the response, so the links are always followable with the credentials you already hold. The same rewrite applies to [billing cycle history](#billing-cycle-history).
+:::
+
 #### 3. Retrieve a subscription {#retrieve-a-subscription}
 
 <CodeBlock language="bash" title="Get subscription detail">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/sub_abc123/' \\
@@ -320,10 +343,11 @@ The customer self-service page (below) can only schedule a cancellation for the 
 
 #### 5. Manage the customer self-service link {#manage-the-customer-self-service-link}
 
-The merchant delivers a per-subscription link to the customer; the signed token in the URL is the credential — see [Customer Self-Service Page](#customer-self-service-page) for what the customer can do with it. Two endpoints manage that link:
+The merchant delivers a per-subscription link to the customer; the signed token in the URL is the credential — see [Customer Self-Service Page](#customer-self-service-page) for what the customer can do with it. One endpoint manages that link, and it requires an `Idempotency-Key` header (UUID v4). Connect rejects the call with `400` before it reaches AutoPay if the header is missing:
 
 <CodeBlock language="bash" title="Regenerate the page token (revokes the old link instantly)">{`curl --location --request POST '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/sub_abc123/regenerate-page-token/' \\
-  --header 'Authorization: Api-Key <YOUR_API_KEY>'`}</CodeBlock>
+  --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
+  --header 'Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000'`}</CodeBlock>
 
 ```json title="Example response — 200 OK"
 {
@@ -332,16 +356,15 @@ The merchant delivers a per-subscription link to the customer; the signed token 
 }
 ```
 
-<CodeBlock language="bash" title="Read the current link without rotating it">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/sub_abc123/page-link/' \\
-  --header 'Authorization: Api-Key <YOUR_API_KEY>'`}</CodeBlock>
-
 :::warning Regenerating revokes the old link instantly — and silently
-The old `page_token` stops working the moment you call regenerate — before you've delivered the new one. AutoPay does **not** notify the customer. You must send them the new `page_url` yourself, or they'll hit a dead link. Use `page-link` (not `regenerate-page-token`) when you just need to re-send a link that should keep working — regenerating is only for revoking a compromised or lost one.
+The old `page_token` stops working the moment you call regenerate, before you've delivered the new one. AutoPay does **not** notify the customer. You must send them the new `page_url` yourself, or they'll hit a dead link. Treat this endpoint as the recovery path for a compromised or lost link, not as a way to re-send a working one.
 
-Note also that `regenerate-page-token` is deliberately **not** idempotent — each call mints a new token and kills the old one, so it does not take (or need) an `Idempotency-Key` header. Retrying it on a timeout will revoke a link a second time.
+**Store the `page_url` when you create the subscription.** Connect does not expose a read-only "fetch the current link" endpoint, so regenerating is the only way to obtain a link you did not keep, and it destroys the one the customer is already using.
+
+**The required `Idempotency-Key` does not make this call idempotent.** Connect rejects the request without the header, but replaying the *same* key still mints a fresh token and revokes the previous one. There is no replay protection here, so a blind retry after a timeout will invalidate a link you may have just delivered. Confirm the outcome before retrying.
 :::
 
-#### 6. Billing cycle history
+#### 6. Billing cycle history {#billing-cycle-history}
 
 <CodeBlock language="bash" title="List billing cycles">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/sub_abc123/cycles/?limit=10&offset=0' \\
   --header 'Authorization: Api-Key <YOUR_API_KEY>'`}</CodeBlock>
@@ -368,6 +391,16 @@ Note also that `regenerate-page-token` is deliberately **not** idempotent — ea
 ```
 
 Cycle `status` values: `scheduled` (charge pending), `processing` (charge in flight), `retry_scheduled` (an attempt failed and the next automatic retry is queued), `paid`, `failed` (all retries exhausted — the subscription is now `past_due`), and `canceled` (the cycle was canceled along with the subscription). See [Billing Cycles](#billing-cycles) for how cycles are generated and [Retries & Dunning](#retries-and-dunning) for the retry schedule that gets a cycle from `scheduled` to `failed`.
+
+Pagination works the same way as [the subscription list](#paging-through-the-list), with one difference that makes it simpler: this endpoint is a `GET`, so `limit` and `offset` belong in the query string and `next` / `previous` can be followed directly with `GET`. Connect rewrites both links onto your Connect domain, as it does for the list:
+
+```json title="next / previous on a paginated cycles response"
+{
+  "count": 2,
+  "next": "https://<your-ottu-domain>/b/pbl/v2/subscriptions/sub_abc123/cycles/?limit=1&offset=1",
+  "previous": null
+}
+```
 
 ### Use Cases
 
@@ -438,7 +471,9 @@ Unlike the merchant [Cancel](#cancel-a-subscription) endpoint, a cancellation in
 ## API Reference
 
 :::note Interactive reference coming soon
-AutoPay's endpoints aren't in the public OpenAPI schema yet, so there's no interactive explorer here for the moment. See [Step-by-Step](#step-by-step) for the full set of six endpoints with cURL examples. The request bodies, responses, and behaviour documented there are accurate; the path the six management endpoints sit behind is not yet final, and is flagged in that section.
+The interactive explorer is not published yet. See [Step-by-Step](#step-by-step) for all five subscription-management endpoints with cURL examples, plus the [Checkout API](../checkout-api) call that creates a subscription.
+
+The paths are final and verified against a live deployment: every management endpoint sits under `/b/pbl/v2/subscriptions/` on your Connect domain. The endpoints are `POST /` (list), `GET /{subscription_id}/`, `POST /{subscription_id}/cancel/`, `GET /{subscription_id}/cycles/` and `POST /{subscription_id}/regenerate-page-token/`. There is no merchant-facing endpoint for reading a hosted-page link without rotating it.
 :::
 
 ## Best Practices
