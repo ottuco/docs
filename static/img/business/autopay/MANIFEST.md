@@ -1,39 +1,44 @@
 # AutoPay asset manifest (#158913 / #158914)
 
-Business page: `docs/business/autopay/index.md` (authored by Ankit in PR #169).
-This file records how the **assets** map onto that page. Paths are site-root.
+Business page: `docs/business/autopay/index.md` (authored by Ankit). This records the
+asset → page mapping and which images are **real betabulk captures** vs Menna's mockups.
 
-## Screenshots
+## Screenshots — real betabulk captures (John Doe subs)
 
-The 20 customer-portal + notification screenshots (from Menna) shipped in **#169**
-and are wired into Ankit's StepGuides. This lane adds one more:
+| Image | Source state | Slider / section |
+|-------|--------------|------------------|
+| portal-01-summary-active.png | Active sub | Self-service → What it looks like (**replaces the wrong mockup**) |
+| portal-02-trialing.png | Trialing sub | Self-service → What it looks like |
+| portal-03-canceled-pending-reactivation.png | Cancellation-pending sub (canceled-at-period-end) | Self-service → What it looks like |
+| portal-04-expired.png | Expired sub | Self-service → What it looks like (**newly wired — step was image-less**) |
+| portal-05-no-cards.png | Setup-failed sub (no card) | Self-service → What it looks like |
+| recovery-01-past-due.png | Past-due sub | Retries and dunning |
+| states-03-magic-link-invalid.png | Corrupted token | If a link stops working |
+| cards-02-add-card.png | Add-card checkout | Managing saved cards |
 
-| Image | Wired into (section) | Role |
-|-------|----------------------|------|
-| cards-02-add-card.png | The customer self-service page → Managing saved cards | The add-card secure checkout (betabulk, John Doe). Fills the "no add-card screenshot" gap noted in #169. |
+## Screenshots — still Menna's mockups (kept, per review)
 
-## Videos (#158914) — Remotion clips, poster-first `<VideoEmbed>`
+| Image | Why not a real capture |
+|-------|------------------------|
+| reactivation-01-confirm.png, cancellation-01-confirm.png, cancellation-02-reason-options.png | **Modal dialogs.** Ankit provided a cancellation-pending sub (portal-03 captured from it ✓), but the dialogs need an interactive click on the live portal, and interactive browser automation isn't viable in this environment (CDP `Page.captureScreenshot` times out; the extension viewport is capped at 360px). **Capture via Menna or a follow-up session** — the sub URLs are ready. |
+| recovery-02-payment-confirmed.png | Needs a completed payment (card entry) — kept as mockup per review. |
+| states-01-loading.png, states-02-magic-link-expired.png, states-04-network-error.png | Transient / can't forge a validly-signed-but-expired token / needs offline sim — kept per review. |
+| notifications-01…06 | Email templates, not reachable from a subscription URL — kept per review. |
 
-| Clip | Wired into (section) |
-|------|----------------------|
-| setup-subscription.mp4    | How it works |
-| self-service-tour.mp4     | The customer self-service page |
-| add-card-flow.mp4         | The customer self-service page → Managing saved cards |
-| retry-to-recovery.mp4     | Retries and dunning |
-| notification-emails.mp4   | Notifications |
+## Videos (#158914) — rebuilt from the REAL screenshots
 
-## Not applicable / deferred (with reason)
+Clips now sequence the real betabulk screenshots via the `Reel` component (see
+`remotion/`), not synthetic mockups. `<VideoEmbed>` in `docs/business/autopay/index.md`:
 
-| Item | Reason |
-|------|--------|
-| Merchant: subscription as merchant sees it | No merchant dashboard for AutoPay — REST-API-only this phase (confirmed by Dacian 2026-08-13, and stated on the business page). |
-| Merchant: subscription list with filters | Same — no merchant dashboard. |
-| Add-card confirm state (cards-03) | Needs a test-card entry (a human action); deferred to Menna. |
+| Clip | Section | Screens used |
+|------|---------|--------------|
+| setup-subscription | How it works | portal-01, notifications-01 |
+| self-service-tour | Self-service page | portal-01, cards-02, recovery-01 |
+| add-card-flow | Managing saved cards | portal-01, cards-02 |
+| retry-to-recovery | Retries and dunning | recovery-01, recovery-02 (mockup) |
+| notification-emails | Notifications | notifications-01/03/05 (mockups) |
 
-## Known issue flagged in #169 — portal-01 recapture
+## N/A (no dashboard this phase)
 
-`portal-01-summary-active.png` is a mockup that contradicts the real product
-(shows an invoice Download column AutoPay has no invoices for, a Pay Now on an
-*active* subscription, adrift dates). Ankit flagged it for @Junaid / @Menna:
-recut or straight-recapture from betabulk (John Doe portal is seedable). Highest-
-value screenshot task remaining.
+Merchant-side R3 screens (subscription as merchant sees it, list with filters) — AutoPay
+is REST-API-only, no merchant dashboard (confirmed by Dacian 2026-08-13).

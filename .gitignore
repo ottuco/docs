@@ -43,3 +43,4 @@ yarn-error.log*
 # Remotion (isolated workspace — renders are committed to static/video/, not built here)
 remotion/node_modules/
 remotion/out/
+remotion/public/

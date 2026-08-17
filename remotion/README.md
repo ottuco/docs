@@ -5,11 +5,14 @@ with [Remotion](https://www.remotion.dev). This is an **isolated workspace** —
 has its own `package.json`, `tsconfig.json`, and `node_modules`, and is **never**
 part of the Docusaurus site build.
 
-> **⚠️ TODO(#158914) — clips are first-cut placeholders.** The five compositions in
-> `src/compositions/` are storyboards that do **not** yet match the real product.
-> They must be revisited and re-recorded once Ankit shares the betabulk AutoPay
-> scenario URLs, with copy aligned to his clip scripts (#158914 R5). After editing a
-> composition, re-run `npm run render` to refresh the committed MP4s in
+> **Clips are built from the REAL product screenshots.** Each composition
+> (`src/compositions/`) uses the `Reel` component to sequence the actual betabulk
+> screenshots (from `static/img/business/autopay/`) with captions and crossfades — no
+> synthetic mockups. `scripts/render-all.mjs` copies those screenshots into
+> `public/screens/` (gitignored) before rendering, so `staticFile("screens/…")`
+> resolves. A few slides still use Menna's images where a live capture isn't possible
+> (`recovery-02-payment-confirmed`, the notification emails). After changing a
+> screenshot or a composition, re-run `npm run render` to refresh the MP4s in
 > `../static/video/autopay/`.
 
 ## Hosting decision — committed, compressed MP4 in `static/`

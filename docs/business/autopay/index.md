@@ -9,10 +9,9 @@ import StepGuide from "@site/src/components/StepGuide";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import VideoEmbed from "@site/src/components/VideoEmbed";
 
-{/* TODO(#158914): The AutoPay <VideoEmbed> clips below are FIRST-CUT PLACEHOLDERS and do
-    not yet match the real product. Revisit / re-record them once Ankit shares the betabulk
-    AutoPay scenario URLs, then replace the files in static/video/autopay/ (the embed paths
-    stay the same). Compositions live in remotion/src/compositions/. */}
+{/* The AutoPay <VideoEmbed> clips below are built from the real betabulk screenshots
+    (sequenced via the Reel component). To refresh: update a screenshot or composition in
+    remotion/, run `npm run render`, and the files in static/video/autopay/ update in place. */}
 
 # AutoPay
 
@@ -159,6 +158,8 @@ The page is a single scrolling view — customer details, subscription summary, 
   {
     title: "Expired",
     description: <>Billing stopped at the subscription's end date. History stays readable, every action is gone. Continuing means a new subscription.</>,
+    image: "/img/business/autopay/portal-04-expired.png",
+    imageAlt: "Expired subscription: billing stopped at the end date, actions removed, history still readable",
   },
   {
     title: "No cards saved",

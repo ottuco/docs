@@ -1,6 +1,7 @@
 import React from "react";
 import { Composition } from "remotion";
 import { VIDEO } from "./theme";
+import { reelDuration } from "./components/Reel";
 import { SetupSubscription } from "./compositions/SetupSubscription";
 import { SelfServiceTour } from "./compositions/SelfServiceTour";
 import { RetryToRecovery } from "./compositions/RetryToRecovery";
@@ -11,35 +12,10 @@ const base = { fps: VIDEO.fps, width: VIDEO.width, height: VIDEO.height };
 
 export const RemotionRoot: React.FC = () => (
   <>
-    <Composition
-      id="setup-subscription"
-      component={SetupSubscription}
-      durationInFrames={VIDEO.fps * 14}
-      {...base}
-    />
-    <Composition
-      id="self-service-tour"
-      component={SelfServiceTour}
-      durationInFrames={VIDEO.fps * 12}
-      {...base}
-    />
-    <Composition
-      id="retry-to-recovery"
-      component={RetryToRecovery}
-      durationInFrames={VIDEO.fps * 12}
-      {...base}
-    />
-    <Composition
-      id="notification-emails"
-      component={NotificationEmails}
-      durationInFrames={VIDEO.fps * 8}
-      {...base}
-    />
-    <Composition
-      id="add-card-flow"
-      component={AddCardFlow}
-      durationInFrames={VIDEO.fps * 11}
-      {...base}
-    />
+    <Composition id="setup-subscription" component={SetupSubscription} durationInFrames={reelDuration(2)} {...base} />
+    <Composition id="self-service-tour" component={SelfServiceTour} durationInFrames={reelDuration(3)} {...base} />
+    <Composition id="retry-to-recovery" component={RetryToRecovery} durationInFrames={reelDuration(2)} {...base} />
+    <Composition id="notification-emails" component={NotificationEmails} durationInFrames={reelDuration(3)} {...base} />
+    <Composition id="add-card-flow" component={AddCardFlow} durationInFrames={reelDuration(2)} {...base} />
   </>
 );
