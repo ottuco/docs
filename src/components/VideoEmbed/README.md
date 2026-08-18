@@ -33,8 +33,12 @@ import VideoEmbed from "@site/src/components/VideoEmbed";
   bytes are fetched until the reader clicks — good for page weight.
 - **Muted + `playsInline`.** Clips are silent by design; `playsInline` avoids
   fullscreen hijack on iOS.
-- **Reduced motion.** When the OS requests reduced motion, the video does not
-  autoplay after the click (`autoPlay={!reduced}`); the reader controls playback.
+- **Plays on the first click.** `autoPlay` is unconditional, because the
+  `<video>` only mounts from the poster's own click handler — playback here is
+  always user-initiated. It was previously gated on `prefers-reduced-motion`,
+  which that preference does not call for (it governs *unsolicited* motion) and
+  which made the reader click twice: once on the poster, again on the native
+  control.
 - **Theme-aware.** Uses the same border/radius/shadow tokens as `StepGuide`.
 
 ## Hosting
