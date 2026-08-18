@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 import styles from "./styles.module.css";
 
@@ -13,19 +13,6 @@ export interface VideoEmbedProps {
   aspectRatio?: string;
 }
 
-function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const on = () => setReduced(mq.matches);
-    mq.addEventListener?.("change", on);
-    return () => mq.removeEventListener?.("change", on);
-  }, []);
-  return reduced;
-}
-
 export default function VideoEmbed({
   src,
   poster,
@@ -34,13 +21,17 @@ export default function VideoEmbed({
   aspectRatio = "16 / 9",
 }: VideoEmbedProps): React.ReactElement {
   const [playing, setPlaying] = useState(false);
-  const reduced = usePrefersReducedMotion();
   const srcUrl = useBaseUrl(src);
   const posterUrl = useBaseUrl(poster);
 
   return (
     <figure className={styles.figure} style={{ maxWidth: width }}>
       <div className={styles.frame} style={{ aspectRatio }}>
+        {/* `playing` only becomes true from the poster click below, so autoplay
+            here is user-initiated. `prefers-reduced-motion` governs UNSOLICITED
+            motion; gating on it made the reader click twice — once on the
+            poster, again on the native control — to start a video they had
+            already asked for. */}
         {playing ? (
           <video
             className={styles.video}
@@ -49,7 +40,7 @@ export default function VideoEmbed({
             controls
             muted
             playsInline
-            autoPlay={!reduced}
+            autoPlay
             preload="none"
           />
         ) : (
