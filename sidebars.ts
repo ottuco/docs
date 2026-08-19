@@ -628,6 +628,11 @@ const sidebars: SidebarsConfig = {
             { type: "link", label: "Guide", href: "/developers/reports#guide" },
             {
               type: "link",
+              label: "Refund Export",
+              href: "/developers/reports#generating-a-refund-export",
+            },
+            {
+              type: "link",
               label: "API Reference",
               href: "/developers/reports#api-reference",
             },
