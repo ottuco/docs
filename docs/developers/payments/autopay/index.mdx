@@ -525,12 +525,46 @@ Two things to know about it:
 
 ## Best Practices
 
-- **Send `Idempotency-Key` (UUID v4) on Cancel** — but not on Regenerate Page Token, which is deliberately non-idempotent. Sending one there does nothing; retrying the call on a timeout revokes a link a second time.
+- **Send `Idempotency-Key` (UUID v4) on both Cancel and Regenerate Page Token.** Connect rejects either call with `400` if the header is missing. On Cancel it also gives you real replay protection, so retrying a timed-out call with the same key is safe. On Regenerate it does **not**: the header is required but reusing the same key still mints a new token and revokes the old one, so never retry that call blindly.
 - **Deliver `page_url` yourself, every time.** AutoPay never notifies the customer when you regenerate — a stale link left undelivered is a customer who can't self-serve.
 - **Treat `past_due` as sticky.** AutoPay never auto-cancels it — build your own monitoring or reminder cadence around subscriptions stuck in that state if your business needs one.
 - **Match `notification_preferences` keys exactly.** Connect passes the object through without validating it, so a misspelled key silently does nothing instead of erroring. The three valid keys are listed under [Notifications](#notifications).
 - **Don't assume `card_acceptance_criteria.min_expiry_time` defaults for you.** Auto-debit defaults it to 30 days; AutoPay does not apply that default — set it explicitly if your integration relies on it.
 - **Keep filters in the body on List.** It's a POST for a reason — never move `customer_id` into a query string yourself.
+
+## Compatibility Notes {#compatibility-notes}
+
+Two behaviours will look like bugs if you have not seen them documented.
+
+### `auto_pay` appears as `auto_debit` in SDK and gateway payloads {#auto-pay-appears-as-auto-debit}
+
+`auto_pay` is meaningful only to Connect, which orchestrates the subscription. Everything downstream treats the payment as an ordinary auto-debit charge, so `payment_type` is deliberately rewritten to `auto_debit` in:
+
+- the **[Checkout SDK](../checkout-sdk/web) preload payload** served for the session, and
+- payloads handed to **ottu_pg**.
+
+Create a session with `payment_type: "auto_pay"`, then read the SDK payload for that `session_id`, and you will see `payment_type: "auto_debit"` with no `autopay` key. That is expected, not a defect. Your own record of the payment type stays `auto_pay`: the Checkout API response, the [webhook](/developers/webhooks/payment-events/) and the signed field set all report `auto_pay`.
+
+### Cards saved before the CIT agreement fix are not backfilled {#cards-saved-before-the-agreement-fix}
+
+An earlier defect meant a CIT paid with `payment_type: "auto_pay"` saved its token with an **empty `agreements` list**, because the code that binds the agreement to the saved card keyed off an exact `auto_debit` check and skipped `auto_pay` entirely.
+
+Because a merchant-initiated charge is authorised by matching the agreement recorded on the card, every later MIT against such a token is rejected:
+
+```json title="Symptom — MIT against a card saved by a pre-fix auto_pay CIT"
+{
+  "detail": "No Cardholder Initiated Transaction (CIT) found. Before initiating an auto-debit request, ensure a successful CIT payment has been made by the customer.",
+  "result": "failed"
+}
+```
+
+The message points at a missing CIT, but the CIT did happen and did succeed. What is missing is the agreement binding on the saved card, which is what the lookup actually matches on.
+
+:::warning Affected cards are not repaired automatically
+The fix binds the agreement for every mandate-carrying payment type going forward, but **existing tokens are not backfilled**. A card saved by an `auto_pay` CIT before the fix keeps its empty `agreements` list and will keep failing on MIT.
+
+Recovery is to run a fresh CIT for that customer so a new token is saved with the agreement bound. Subscriptions created after the fix are unaffected.
+:::
 
 ## FAQ
 

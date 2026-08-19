@@ -124,9 +124,70 @@ flowchart TD
    "settled_amount":"10.000",
    "signature":"60bf40cf******",
    "state":"paid",
-   "timestamp_utc":"2023-11-02 09:00:07"
+   "timestamp_utc":"2023-11-02 09:00:07",
+   "extra":{
+      "merchant_id":"your-merchant.ottu.net"
+   }
 }
 ```
+
+## The `extra.merchant_id` field {#extra-merchant-id}
+
+`extra` now always contains a `merchant_id` key holding your merchant domain, even when you sent no `extra` object when creating the session. Anything you did send in `extra` is preserved alongside it.
+
+`extra.merchant_id` is part of the [signed field set](/developers/webhooks/verify-signatures/#2-fields-for-signature), so it is covered by the `signature` and safe to trust once you have verified the payload. It is useful when one endpoint receives webhooks for several merchant accounts.
+
+## The `autopay` block {#autopay-block}
+
+Payments belonging to an [AutoPay](/developers/payments/autopay/) subscription may carry an additional `autopay` object. Note where it sits: at the **top level** of the payload, not inside `extra`.
+
+```json title="Payload excerpt — an AutoPay renewal"
+{
+   "amount":"49.990",
+   "result":"success",
+   "state":"paid",
+   "signature":"60bf40cf******",
+   "extra":{
+      "merchant_id":"your-merchant.ottu.net",
+      "autopay":{
+         "subscription_id":"sub_abc123"
+      }
+   },
+   "autopay":{
+      "subscription_id":"sub_abc123",
+      "subscription_status":"active",
+      "cycle_number":3,
+      "cycle_status":"paid",
+      "next_billing_date":"2026-10-01",
+      "event_type":"cycle_paid"
+   }
+}
+```
+
+| Field | Description |
+|---|---|
+| `subscription_id` | The AutoPay subscription this payment belongs to. |
+| `subscription_status` | Subscription status at the moment the webhook was assembled, for example `active`, `past_due`, `canceled`. |
+| `cycle_number` | Sequential number of the billing cycle being charged. Nullable. |
+| `cycle_status` | Status of that billing cycle, for example `paid`, `retry_scheduled`, `failed`. Nullable. |
+| `next_billing_date` | Next scheduled billing date, or `null` when nothing further is scheduled. |
+| `event_type` | What happened, from AutoPay's point of view. Can be `null`. |
+
+:::danger The top-level `autopay` block is not signed — never trust it
+Two blocks carry a `subscription_id`, and only one of them is trustworthy.
+
+- **`extra.autopay.subscription_id` is signed.** It is inside the HMAC, so once you have [verified the signature](/developers/webhooks/verify-signatures/) you can rely on it. Use this one to identify the subscription.
+- **The top-level `autopay` block is not signed.** It is added *after* the signature is computed, so it is not covered by the HMAC at all. Treat it as a display convenience.
+
+The top-level block is also fetched live from the AutoPay service while the webhook is being assembled, with a **2 second timeout**, and is **silently omitted** if that call times out or fails.
+
+Two consequences worth designing for:
+
+- **Its absence proves nothing.** A payment with no `autopay` block may still be an AutoPay payment whose lookup did not complete in time. Do not infer "this is not a subscription payment" from a missing block.
+- **`event_type: null` does not mean success.** Null means the outcome is still undecided, not that setup or the charge succeeded. Read `result` and `state` for the payment outcome, and the [subscription endpoints](/developers/payments/autopay/#step-by-step) for authoritative subscription state.
+
+Never make a security or money-moving decision from the top-level `autopay` block.
+:::
 
 ## Acknowledging a Payment
 
