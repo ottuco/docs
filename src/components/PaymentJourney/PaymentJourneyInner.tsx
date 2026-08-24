@@ -551,7 +551,7 @@ export default function PaymentJourneyInner() {
           ) : (state.status === "step2_done" || isStepExpanded(3)) && state.sessionId ? (
             <>
               <ApiPanel label="POST /b/checkout/v1/pymt-txn/" data={{
-                type: "payment_request",
+                type: PLUGIN,
                 pg_codes: state.pgCodes,
                 amount: "20",
                 currency_code: state.selectedCurrency,

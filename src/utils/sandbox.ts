@@ -53,7 +53,12 @@ export interface CreateSessionOptions {
   amount?: string;
   currency_code?: string;
   customer_id?: string;
-  type?: PaymentPlugin;
+  /**
+   * Required for the same reason as `plugin` on `callPaymentMethods`: a session
+   * type that disagrees with the plugin the gateways were discovered for gets
+   * pg_codes the session cannot accept (#159191).
+   */
+  type: PaymentPlugin;
   /** Arbitrary extra fields merged into the request body (e.g., payment_type, agreement, payment_instrument, webhook_url) */
   extra?: Record<string, unknown>;
 }
@@ -89,7 +94,7 @@ export async function createSandboxSession(
   options: CreateSessionOptions
 ): Promise<SessionResult> {
   const body = {
-    type: options.type ?? "payment_request",
+    type: options.type,
     pg_codes: options.pg_codes,
     amount: options.amount ?? "20",
     currency_code: options.currency_code ?? "KWD",
