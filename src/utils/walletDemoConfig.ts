@@ -6,12 +6,14 @@
  * The merchant host / Api-Key / SDK key all come from `ACTIVE_CONNECT`
  * in `./sandbox` — flip that one global to retarget every demo on the site.
  */
+import type { PaymentPlugin } from "./sandbox";
+
 export const WALLET_DEMO = {
   currency: "KWD",
   seedAmount: "10.000",
   sessionAmount: "8.000",
   pgFilter: {
-    plugin: "e_commerce",
+    plugin: "e_commerce" as PaymentPlugin,
     type: "sandbox",
     tags: ["demo"],
     payment_services: ["wallet"],

@@ -38,12 +38,22 @@ export const KSA: ConnectEnv = {
 // WalletDemo will fail because sandbox has no wallet PG.
 export const ACTIVE_CONNECT: ConnectEnv = KSA;
 
+/**
+ * The Ottu plugin a payment belongs to.
+ *
+ * Same vocabulary on both sides of the flow: it is the `plugin` filter on the
+ * Payment Methods API and the `type` of the Checkout API session. A gateway
+ * enabled for one plugin is not necessarily enabled for the other, so the two
+ * calls in a single demo must always use the same value.
+ */
+export type PaymentPlugin = "e_commerce" | "payment_request";
+
 export interface CreateSessionOptions {
   pg_codes: string[];
   amount?: string;
   currency_code?: string;
   customer_id?: string;
-  type?: string;
+  type?: PaymentPlugin;
   /** Arbitrary extra fields merged into the request body (e.g., payment_type, agreement, payment_instrument, webhook_url) */
   extra?: Record<string, unknown>;
 }
@@ -151,7 +161,13 @@ export async function callAutoDebit(
  */
 export async function callPaymentMethods(options: {
   currencies: string[];
-  plugin?: string;
+  /**
+   * Required: gateways are enabled per plugin, so discovery must state which
+   * plugin the caller is about to create a session for. Defaulting this is what
+   * let CheckoutDemo discover `payment_request` gateways and then ask for an
+   * `e_commerce` session (#159191).
+   */
+  plugin: PaymentPlugin;
   operation?: string;
   type?: string;
   tags?: string[];
@@ -160,7 +176,7 @@ export async function callPaymentMethods(options: {
   payment_services?: string[];
 }): Promise<any> {
   const body: Record<string, unknown> = {
-    plugin: options.plugin ?? "payment_request",
+    plugin: options.plugin,
     operation: options.operation ?? "purchase",
     currencies: options.currencies,
   };
