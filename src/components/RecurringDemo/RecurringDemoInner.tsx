@@ -7,12 +7,17 @@ import {
   callPaymentMethods,
   extractPgCodes,
   getWebhookBaseUrl,
+  type PaymentPlugin,
 } from "@site/src/utils/sandbox";
 import ApiPanel from "@site/src/components/ApiPanel";
 import CheckoutSDKEmbed from "@site/src/components/CheckoutSDKEmbed";
 import { TEST_CARD } from "@site/src/components/TestCardCallout";
 import WebhookViewer, { extractTokenFromWebhook } from "./WebhookViewer";
 import styles from "./styles.module.css";
+
+// Single-sourced: gateway discovery and session creation must name the same
+// plugin, or the session gets pg_codes that are not enabled for it (#159191).
+const PLUGIN: PaymentPlugin = "e_commerce";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -265,7 +270,7 @@ export default function RecurringDemoInner() {
     webhookEventsRef.current = [];
 
     const pmRequest = {
-      plugin: "e_commerce",
+      plugin: PLUGIN,
       currencies: ["KWD"],
       auto_debit: true,
       type: "sandbox",
@@ -296,7 +301,7 @@ export default function RecurringDemoInner() {
       const webhookUrl = `${getWebhookBaseUrl()}/webhook/${state.orderId}`;
       const agreement = buildAgreement(state.orderId);
       const citRequest = {
-        type: "e_commerce",
+        type: PLUGIN,
         pg_codes: state.pgCodes,
         amount: "20",
         currency_code: "KWD",
@@ -310,6 +315,7 @@ export default function RecurringDemoInner() {
 
       const session = await createSandboxSession({
         pg_codes: state.pgCodes,
+        type: PLUGIN,
         customer_id: state.customerId,
         extra: {
           payment_type: "auto_debit",
@@ -370,7 +376,7 @@ export default function RecurringDemoInner() {
   const startMITOneStep = useCallback(async () => {
     const webhookUrl = `${getWebhookBaseUrl()}/webhook/${state.orderId}`;
     const mitRequest = {
-      type: "e_commerce",
+      type: PLUGIN,
       pg_codes: [state.citPgCode],
       amount: "15",
       currency_code: "KWD",
@@ -387,6 +393,7 @@ export default function RecurringDemoInner() {
     try {
       const result = await createSandboxSession({
         pg_codes: [state.citPgCode || state.pgCodes[0]],
+        type: PLUGIN,
         amount: "15",
         customer_id: state.customerId,
         extra: {
@@ -411,7 +418,7 @@ export default function RecurringDemoInner() {
   const startMITTwoStep = useCallback(async () => {
     const webhookUrl = `${getWebhookBaseUrl()}/webhook/${state.orderId}`;
     const mitRequest = {
-      type: "e_commerce",
+      type: PLUGIN,
       pg_codes: [state.citPgCode],
       amount: "15",
       currency_code: "KWD",
@@ -427,6 +434,7 @@ export default function RecurringDemoInner() {
     try {
       const session = await createSandboxSession({
         pg_codes: [state.citPgCode || state.pgCodes[0]],
+        type: PLUGIN,
         amount: "15",
         customer_id: state.customerId,
         extra: {
