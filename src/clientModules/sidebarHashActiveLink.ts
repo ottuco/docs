@@ -386,13 +386,21 @@ const FRAME_FALLBACK_MS = 50;
 
 function nextFrame(callback: () => void): void {
   let ran = false;
+  let rafId = 0;
+  let timerId = 0;
   const run = () => {
     if (ran) return;
     ran = true;
+    // Cancel whichever scheduler lost the race. This matters most in the
+    // hidden case: the timer wins, but the rAF stays *registered and
+    // suspended*, so the tick loops below would pile up hundreds of stale
+    // callbacks that all fire in one burst when the document is shown.
+    cancelAnimationFrame(rafId);
+    window.clearTimeout(timerId);
     callback();
   };
-  requestAnimationFrame(run);
-  window.setTimeout(run, FRAME_FALLBACK_MS);
+  rafId = requestAnimationFrame(run);
+  timerId = window.setTimeout(run, FRAME_FALLBACK_MS);
 }
 
 let initialLoadHandled = false;
