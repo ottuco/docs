@@ -224,6 +224,11 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
+                  label: "Live Demo",
+                  href: "/developers/payments/wallet#live-demo",
+                },
+                {
+                  type: "link",
                   label: "API Reference",
                   href: "/developers/payments/wallet#api-reference",
                 },
@@ -322,9 +327,19 @@ const sidebars: SidebarsConfig = {
               },
               items: [
                 {
-                  type: "doc",
-                  id: "developers/payments/checkout-sdk/web",
+                  type: "category",
                   label: "Web",
+                  link: {
+                    type: "doc",
+                    id: "developers/payments/checkout-sdk/web",
+                  },
+                  items: [
+                    {
+                      type: "link",
+                      label: "Live Demo",
+                      href: "/developers/payments/checkout-sdk/web#live-demo",
+                    },
+                  ],
                 },
                 {
                   type: "doc",
@@ -492,6 +507,11 @@ const sidebars: SidebarsConfig = {
                   type: "link",
                   label: "Guide",
                   href: "/developers/cards-and-tokens/recurring-payments#guide",
+                },
+                {
+                  type: "link",
+                  label: "Live Demo",
+                  href: "/developers/cards-and-tokens/recurring-payments#live-demo",
                 },
                 {
                   type: "link",
