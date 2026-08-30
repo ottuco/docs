@@ -2,6 +2,14 @@ import type { ChangelogEntry } from "@site/src/components/Changelog";
 
 export const changelogEntries: ChangelogEntry[] = [
   {
+    date: "2026-07-13",
+    category: "payments",
+    title: "OmanNet now supports Refund operations",
+    link: "/business/payments/gateways",
+    description:
+      "Merchants using the OmanNet gateway can now issue full or partial refunds on paid transactions — from the dashboard or via the Operations API.",
+  },
+  {
     date: "2026-03-16",
     category: "dashboard",
     title: "Connect Frontend redesign with updated navigation",
