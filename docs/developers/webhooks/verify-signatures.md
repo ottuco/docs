@@ -121,7 +121,7 @@ It is fetched live from the AutoPay service while the response is being assemble
 
 - **Never** make a security or money-moving decision based on it. Use the signed [`extra.autopay.subscription_id`](#2-fields-for-signature) to identify the subscription, then read authoritative state from the [subscription endpoints](/developers/payments/autopay/#step-by-step).
 - Its absence means the lookup did not complete. It does **not** mean the payment is not an AutoPay payment.
-- `event_type` can be `null`. Null means the setup outcome is still undecided — it does **not** mean the setup succeeded.
+- `event_type` is one of `cit_success`, `mit_success`, `mit_failure`, `card_updated`, `recovery_success` — never `null` when the block is present. It's AutoPay's own best-guess classification, computed independently of the payment result; it is **not** authoritative. Read `result` and `state` on the payment for the actual outcome.
 :::
 
 ## Example
