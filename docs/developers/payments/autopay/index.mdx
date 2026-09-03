@@ -429,7 +429,7 @@ The billing date is anchor-day clamped: a subscription anchored on the 31st that
 
 #### Retries & Dunning {#retries-and-dunning}
 
-If a charge fails, AutoPay retries. The default is 3 retries — 4 total attempts (1 initial + 3 retries) — configurable per subscription via `retry_count` (1–10) on the `autopay` block. Retries are spaced **one hour apart, flat** — there's no exponential backoff.
+If a charge fails, AutoPay retries. The default is 3 retries — 4 total attempts (1 initial + 3 retries) — configurable per subscription via `retry_count` (1–10) on the `autopay` block. Retries are spaced **evenly across `retry_window_days`**: the interval between attempts is `retry_window_days / retry_count` days. With the defaults (3 retries over a 3-day window) that's one retry per day. There's no exponential backoff — the spacing is flat, just not fixed at a specific duration, since both `retry_count` and `retry_window_days` (1–30) are configurable per subscription.
 
 When every attempt on a cycle is exhausted: the cycle moves to `failed`, the subscription moves to `past_due`, and the customer gets a final-failure email with a recovery link.
 
@@ -588,7 +588,7 @@ Recovery is to run a fresh CIT for that customer so a new token is saved with th
     The old link stops working instantly, and AutoPay does not notify the customer. You're responsible for delivering the new `page_url` to them.
   </FAQItem>
   <FAQItem question="Do failed-charge retries use exponential backoff?">
-    No. Retries are spaced a flat one hour apart. The default is 3 retries (4 total attempts), configurable per subscription from 1–10 via `retry_count`.
+    No, the spacing is flat: `retry_window_days / retry_count` days between attempts. The defaults are 3 retries over a 3-day window — one retry per day — and both are configurable per subscription, `retry_count` from 1–10 and `retry_window_days` from 1–30.
   </FAQItem>
   <FAQItem question="Do I need to set up a plan catalog before creating subscriptions?">
     No — AutoPay has no plan catalog. Pricing (`recurring_amount`), schedule (`frequency`, `start_date`), and a free-text `description` are just fields on the checkout call itself.

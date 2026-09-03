@@ -32,10 +32,14 @@ properties:
       Optional free-text label for the subscription, up to 255 characters. Shown to the customer on the self-service subscription page, so write it for a customer audience (for example `Pro Plan — Monthly`) rather than as an internal code.
   retry_window_days:
     description: |
-      Optional. The number of days AutoPay may keep retrying a failed billing cycle before giving up. Integer between 1 and 30. Omit it to let AutoPay apply its own default.
+      Optional. The number of days AutoPay may keep retrying a failed billing cycle before giving up. Integer between 1 and 30. Omit it to let AutoPay apply its own default of 3 days.
+
+      Retries are spaced evenly across this window: the gap between attempts is `retry_window_days / retry_count` days, not a fixed interval and not exponential backoff.
   retry_count:
     description: |
       Optional. The maximum number of retry attempts AutoPay makes for a single failed billing cycle. Integer between 1 and 10. Omit it to let AutoPay apply its own default of 3 retries, which is 4 attempts in total including the original charge.
+
+      Together with `retry_window_days` (default 3), this sets the retry cadence: the defaults produce one retry per day.
   notification_preferences:
     description: |
       Optional free-form object controlling the customer notifications AutoPay sends for this subscription. Connect does not validate its contents; it is passed through to AutoPay untouched, so its accepted keys are defined by AutoPay rather than by the Checkout API. Nullable.
