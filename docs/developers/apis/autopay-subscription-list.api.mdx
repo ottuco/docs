@@ -1,0 +1,71 @@
+---
+id: autopay-subscription-list
+title: "List AutoPay subscriptions"
+description: "Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant."
+sidebar_label: "List AutoPay subscriptions"
+hide_title: true
+hide_table_of_contents: true
+api: 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
+sidebar_class_name: "post api-method"
+info_path: developers/apis/ottu-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+import Translate from "@docusaurus/Translate";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"List AutoPay subscriptions"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/b/pbl/v2/subscriptions/"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant.
+
+Lists subscriptions using AutoPay's filter-body API. Pagination uses `limit` and `offset`, accepted in the request body or as query parameters (query wins). The returned `next` and `previous` URLs point at this endpoint and can be followed directly.
+
+<pre style={{display:"none"}}>{"curl --location 'https://sandbox.ottu.net/b/pbl/v2/subscriptions/' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Api-Key YOUR_API_KEY' \\\n--data '{\n  \"status\": \"string\",\n  \"customer_id\": \"string\",\n  \"created_after\": \"2024-07-29\",\n  \"created_before\": \"2024-07-29\",\n  \"limit\": 0,\n  \"offset\": 0\n}'"}</pre>
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+>
+  <Translate id="theme.openapi.request.title">Request</Translate>
+</Heading>
+
+<ParamsDetails>
+  
+</ParamsDetails>
+
+<RequestSchema
+  {...require("./autopay-subscription-list.RequestSchema.json")}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  {...require("./autopay-subscription-list.StatusCodes.json")}
+>
+  
+</StatusCodes>
+
+
+      

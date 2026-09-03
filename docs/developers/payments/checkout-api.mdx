@@ -474,9 +474,24 @@ When a valid [payment_instrument](/developers/payments/checkout-api/) is provide
 </FAQItem>
 
 <FAQItem question="Can I set up recurring payments using the Checkout API?">
-  Yes! Use [Auto-Debit](/developers/cards-and-tokens/recurring-payments/) with
+  Yes, in two different ways, and the choice decides who owns the billing schedule.
+
+  Use [Auto-Debit](/developers/cards-and-tokens/recurring-payments/) with
   `payment_type` set to `auto_debit` to create agreements for recurring
-  transactions.
+  transactions. **You** then decide when each charge happens and handle retries
+  and customer emails yourself.
+
+  Use [AutoPay](/developers/payments/autopay/) with `payment_type` set to
+  `auto_pay` to hand the whole subscription lifecycle to Ottu: billing cycles,
+  retries, dunning, and a customer self-service page. `auto_pay` requires
+  `customer_id`, `customer_email`, an `agreement` object **including
+  `agreement.id`**, and an `autopay` block with the schedule. It is also the one
+  non-`one_off` type where `amount` may be `0`, which starts a subscription with
+  no first charge. The 201 response returns `extra.autopay.subscription_id`,
+  which is your handle on the subscription.
+
+  Note that subscription creation is synchronous: if AutoPay rejects the request,
+  the transaction is marked failed and you get a 4xx with no usable `session_id`.
 </FAQItem>
 
   <FAQItem question="How do I integrate the Checkout API with the SDK?">

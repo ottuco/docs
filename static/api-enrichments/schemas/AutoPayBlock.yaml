@@ -1,0 +1,45 @@
+# Overrides for: components/schemas/AutoPayBlock
+# Used by CheckoutPOSTRequest.autopay — the subscription schedule sent when
+# `payment_type` is `auto_pay`.
+#
+# The serializer carries no help_text, so every description here is written by
+# hand. Constraints below mirror bridges/autopay/serializers.py.
+
+_description: |
+  The subscription schedule, required when `payment_type` is `auto_pay`. It describes what AutoPay should charge after the first (customer-initiated) payment completes, and how hard it should try when a charge fails.
+
+  This block is write-only: it is validated and forwarded to AutoPay, but it is not echoed back in the response. The created subscription is identified by `extra.autopay.subscription_id` on the 201 response instead.
+
+  Optional fields that you leave out are dropped rather than sent as `null`, so AutoPay applies its own server-side defaults. Sending an explicit `null` is not the same as omitting the field.
+
+properties:
+  frequency:
+    description: |
+      How often AutoPay charges the customer. Enum: `monthly`, `yearly`. These are the only two values accepted; AutoPay has no weekly or custom-interval billing. Required.
+  recurring_amount:
+    description: |
+      The amount charged on every billing cycle after the first payment, as a decimal string. Maximum 14 digits with up to 3 decimal places, and it may not be negative. Required.
+
+      This is independent of the transaction `amount`, which covers only the first (customer-initiated) payment. A free trial is expressed as `amount: "0"` with a non-zero `recurring_amount`.
+  start_date:
+    description: |
+      The date from which billing may start, in `YYYY-MM-DD` format. Required.
+  end_date:
+    description: |
+      Optional date after which AutoPay stops billing, in `YYYY-MM-DD` format. Nullable. When provided it must be strictly after `start_date`; an `end_date` equal to `start_date` is rejected with a 400. Omit it for an open-ended subscription.
+  description:
+    description: |
+      Optional free-text label for the subscription, up to 255 characters. Shown to the customer on the self-service subscription page, so write it for a customer audience (for example `Pro Plan — Monthly`) rather than as an internal code.
+  retry_window_days:
+    description: |
+      Optional. The number of days AutoPay may keep retrying a failed billing cycle before giving up. Integer between 1 and 30. Omit it to let AutoPay apply its own default of 3 days.
+
+      Retries are spaced evenly across this window: the gap between attempts is `retry_window_days / retry_count` days, not a fixed interval and not exponential backoff.
+  retry_count:
+    description: |
+      Optional. The maximum number of retry attempts AutoPay makes for a single failed billing cycle. Integer between 1 and 10. Omit it to let AutoPay apply its own default of 3 retries, which is 4 attempts in total including the original charge.
+
+      Together with `retry_window_days` (default 3), this sets the retry cadence: the defaults produce one retry per day.
+  notification_preferences:
+    description: |
+      Optional free-form object controlling the customer notifications AutoPay sends for this subscription. Connect does not validate its contents; it is passed through to AutoPay untouched, so its accepted keys are defined by AutoPay rather than by the Checkout API. Nullable.

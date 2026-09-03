@@ -1,0 +1,1 @@
+{"parameters":[{"in":"path","name":"subscription_id","schema":{"type":"string"},"description":"AutoPay subscription identifier returned by subscription creation.","required":true}]}

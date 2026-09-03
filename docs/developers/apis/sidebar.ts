@@ -240,6 +240,42 @@ const sidebar: SidebarsConfig = {
         },
       ],
     },
+    {
+      type: "category",
+      label: "AutoPay Subscriptions",
+      items: [
+        {
+          type: "doc",
+          id: "developers/apis/autopay-subscription-list",
+          label: "List AutoPay subscriptions",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/apis/autopay-subscription-detail",
+          label: "Retrieve an AutoPay subscription",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/apis/autopay-subscription-cancel",
+          label: "Cancel an AutoPay subscription",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "developers/apis/autopay-subscription-cycles",
+          label: "List AutoPay billing cycles",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "developers/apis/autopay-subscription-regenerate-page-token",
+          label: "Regenerate an AutoPay hosted-page token",
+          className: "api-method post",
+        },
+      ],
+    },
   ],
 };
 
