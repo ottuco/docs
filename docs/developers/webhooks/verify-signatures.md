@@ -101,10 +101,11 @@ This is not a webhooks-only change. The same `signature` field, computed the sam
 | `POST /b/pbl/v2/payment/auto-debit` | Charging a saved token (MIT) |
 | `POST /b/pbl/v2/payment/apple-pay` | [Native payments](/developers/payments/native-payments/) |
 | `POST /b/pbl/v2/payment/google-pay` | [Native payments](/developers/payments/native-payments/) |
+| `POST /b/pbl/v2/payment/wallet` | [Wallet](/developers/payments/wallet/) balance payment |
 | `POST /b/pbl/v2/payment/cash` | Cash / COD acknowledgement |
 | `POST /b/pbl/v2/sign` | Signs a payload you supply, using your HMAC Key |
 
-Those four payment responses share the payment-webhook body shape, so they also carry `extra.merchant_id` (see below). If you verify the signature on a synchronous response as well as on the webhook, both code paths need the update.
+Those five payment responses share the payment-webhook body shape, so they also carry `extra.merchant_id` (see below). If you verify the signature on a synchronous response as well as on the webhook, both code paths need the update.
 
 `POST /b/pbl/v2/sign` is useful while migrating: post a payload to it and compare the signature it returns against what your own implementation produces for the same payload.
 
