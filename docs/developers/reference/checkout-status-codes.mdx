@@ -26,6 +26,25 @@ Every call on this page targets <code>{OTTU_CONNECT_BASE_URL}</code>. Swap in yo
 domain when you integrate.
 :::
 
+## Authentication
+
+**This endpoint takes no API key.** It is the JSON behind the hosted checkout page, which a customer
+opens from a link, so it is reachable without credentials — the `session_id` in the path is what
+identifies the payment, and possessing it is what grants access.
+
+That has one consequence worth designing around:
+
+:::warning Treat `session_id` as a secret
+Anyone holding a `session_id` can read that payment's status. Do not put it in analytics events,
+client-side logs, referrer-exposed query strings, or anywhere it outlives the customer's session.
+It is a bearer value, not an opaque identifier.
+:::
+
+If you need payment data that is *not* safe to expose this way — the gateway used, the operator
+diagnostic, anything about your configuration — read it from the authenticated
+[Operations API](/developers/operations) instead, using your
+[API key](/developers/getting-started/authentication).
+
 ## When You Need This
 
 - You host your own checkout screen and need to tell the customer why they cannot pay.
