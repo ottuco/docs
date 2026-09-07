@@ -691,6 +691,11 @@ const sidebars: SidebarsConfig = {
               id: "developers/reference/payment-states",
               label: "Payment States",
             },
+            {
+              type: "doc",
+              id: "developers/reference/checkout-status-codes",
+              label: "Checkout Status Codes",
+            },
           ],
         },
       ],
