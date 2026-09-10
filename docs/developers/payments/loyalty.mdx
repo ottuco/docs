@@ -302,7 +302,9 @@ A single transaction can do both: redeem points toward the balance, then earn on
 When a customer **redeemed** Qitaf points at checkout, the payment is recorded as a parent transaction with a child transaction per funding source: one child for the points (the *points leg*) and, on a split payment, the gateway payment itself. Refunding such an order has two halves, and they run in a fixed order:
 
 1. **The money first.** The gateway portion is refunded exactly like any other refund — from the dashboard or through the [Operations API](../operations.md) with the parent's `session_id`. The refundable amount is capped at what the gateway actually settled; the points are never part of it.
-2. **Then the points.** Once the gateway portion is fully refunded (or immediately, when the order was paid with points only), the dashboard offers **Return Qitaf points** on the points leg. It returns the **whole** redeemed amount to the customer's Qitaf account in one step. There is no partial return and no amount to enter.
+2. **Then the points — automatically.** The gateway refund that leaves nothing owed through the gateway also queues the return of the redeemed points: within seconds Ottu reverses the redemption at Qitaf and books it, with no further click. The **whole** redeemed amount comes back in one step; there is no partial return.
+
+For an order paid with **points only** there is no gateway half: the parent's ordinary **Refund** returns the points (the amount is shown locked to the full redeemed amount), and so does **Return Qitaf points** on the points leg. Both doors lead to the same single, idempotent return.
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
@@ -317,25 +319,25 @@ sequenceDiagram
     PG-->>O: Refunded
     O->>Q: Reduce the earned reward (money basis)
     O-->>M: Operation webhook: refund 70 SAR
-    Note over O: "Return Qitaf points" now offered on the points leg
-    M->>O: Return Qitaf points (dashboard, points leg)
+    Note over O: nothing owed through the gateway any more — points return queued
     O->>Q: Reverse the redemption (30 SAR of points)
     Q-->>O: Reversed
     O-->>M: Operation webhook: refund 30 SAR, pg_response.code 0
 ```
 
-:::note Points are returned from the dashboard, not the API
-The **Return Qitaf points** action is a dashboard operation, governed by the same refund permission and the same [maker-checker approval](/business/operations/two-step-authorization) as a gateway refund. The public [Operations API](../operations.md) does not return loyalty points: a `refund` with `destination: "wallet"` is rejected on a points-funded order, exactly as before. What your integration *does* see is the outcome, through the webhooks below.
+:::note The points come back on their own — the API does not return them directly
+The automatic return is triggered by the gateway refund itself, whichever way you made it (dashboard or Operations API), and follows the same refund permission and the same [maker-checker approval](/business/operations/two-step-authorization) as that refund. The dashboard additionally offers the return by hand — **Return Qitaf points** on the points leg, and the parent's own **Refund** once the points are all that is left — for points-only orders and for the rare case where Qitaf could not be reached at the time. The public [Operations API](../operations.md) has no call that returns loyalty points: a `refund` with `destination: "wallet"` is rejected on a points-funded order, exactly as before. What your integration *does* see is the outcome, through the webhooks below.
 :::
 
 ### What the rules are
 
 | Rule | Behaviour |
 | --- | --- |
-| **Order** | Gateway money first, points second. Until the gateway portion is fully refunded, the points action is not offered and a request for it is refused with the remaining gateway amount. A refund that is still pending approval counts as outstanding. |
+| **Order** | Gateway money first, points second. Until the gateway portion is fully refunded nothing returns the points: the automatic return is not queued, the manual actions are not offered, and a direct request is refused with the remaining gateway amount. A refund that is still pending approval counts as outstanding. |
+| **Trigger** | The gateway refund that leaves nothing owed through the gateway queues the return automatically. A points-only order is returned through the parent's Refund (or the leg's own action). |
 | **Amount** | Always the full redeemed amount. Nothing to enter, nothing partial. |
-| **Once** | A second return is refused; two simultaneous requests book exactly one. Retrying after a timeout is safe. |
-| **Recoverable** | If Qitaf times out or answers with a retryable error, nothing is booked and the action stays available. If Qitaf answers that the redemption can no longer be reversed (for example the reversal window has passed, or the redemption is unknown to it), the action is withdrawn and the operator is told to refund the customer another way. |
+| **Once** | A second return — by hand, by a retry, or by the automatic run landing after a manual one — is refused; two simultaneous requests book exactly one. |
+| **Recoverable** | If Qitaf times out or answers with a retryable error, nothing is booked; Ottu retries on its own every few minutes (for a bounded number of attempts, then escalates to Ottu operations), and the dashboard actions stay available to return the points by hand meanwhile. If Qitaf answers that the redemption can no longer be reversed (for example the reversal window has passed, or the redemption is unknown to it), the actions are withdrawn and the operator is told to refund the customer another way. |
 | **Reward** | Returning the points does **not** reduce the earned reward — the money refund already did that. |
 | **Records** | A successful return books a `refunded` child transaction for the points amount under the parent, so the parent's `refunded_amount` reaches the order total. |
 

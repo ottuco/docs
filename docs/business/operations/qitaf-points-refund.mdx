@@ -6,12 +6,12 @@ description: "How to refund an order a customer paid fully or partly with redeem
 
 # Refunding Orders Paid with Qitaf Points
 
-When a customer pays with **STC Qitaf points** at checkout — on their own, or together with a card — a refund has to give back two different things: the money that went through the payment gateway, and the points that were deducted from the customer's Qitaf account. Ottu handles both from the dashboard, in a fixed order, so the customer is made whole and no points are returned twice.
+When a customer pays with **STC Qitaf points** at checkout — on their own, or together with a card — a refund has to give back two different things: the money that went through the payment gateway, and the points that were deducted from the customer's Qitaf account. Ottu handles both in a fixed order, so the customer is made whole and no points are returned twice: you refund the card portion as usual, and **the points come back on their own** the moment nothing is left to refund through the gateway.
 
 This page is for dashboard users who process refunds. If you are building against the API, the technical side (webhooks, records, rules) is in [Loyalty → Refunding a points-funded order](/developers/payments/loyalty#refund-points).
 
-:::note Availability
-Returning points needs the **Return Qitaf points** action on the transaction's points row. It appears in dashboard releases that include it; until then the points row shows no action and your Ottu account manager can return the points for you.
+:::tip One refund, both halves
+On a split order you only ever click **Refund** on the parent. When the last card refund goes through, Ottu returns the redeemed points automatically within seconds — no second action. The manual **Return Qitaf points** button on the points row exists for points-only orders and for the rare case where Qitaf could not be reached at the time.
 :::
 
 ## How a Qitaf-paid order looks in the dashboard
@@ -32,7 +32,7 @@ On a split order the parent's **paid** figure is the card money only (70.00 in t
 
 ## The rule: card first, points second
 
-For a split payment, the card portion must be **fully refunded before** the points can be returned. Until then the points row offers no return action, and a request for it is answered with the amount still to refund through the gateway.
+For a split payment, the card portion must be **fully refunded before** the points come back. Until then nothing returns the points: the points row offers no return action, and a request for it is answered with the amount still to refund through the gateway.
 
 Why this order? The points are returned in one piece, always in full. Refunding the card first keeps a simple invariant: a customer either keeps their points and has the money refunded, or gets everything back — never a partial, ambiguous middle state.
 
@@ -43,23 +43,19 @@ An order paid with **points only** has no card portion, so the points can be ret
 ### Split payment (points + card)
 
 1. Open **Payment Management** and find the order. Expand the parent to show its child rows.
-2. On the **parent** row, use **Refund** and refund the card portion. The maximum is the amount the gateway settled — the points are never included in it. A partial card refund is allowed, but the points cannot be returned until the card portion is refunded in full.
-3. Once the card refund is done, the **points row** offers **Return Qitaf points**. The amount is shown and cannot be changed: it is always the full redeemed amount.
-4. Confirm. Ottu asks Qitaf to reverse the redemption and shows the confirmation message:
-
-   > 30.000 SAR in Qitaf points returned to the customer.
-
-5. A new child row (30.00, *Refunded*) appears under the parent, and the parent's refunded amount now covers the whole order.
+2. On the **parent** row, use **Refund** and refund the card portion. The maximum is the amount the gateway settled — the points are never included in it. A partial card refund is allowed; the points stay with the customer until the card portion is refunded in full.
+3. The moment the card portion is fully refunded, Ottu returns the redeemed points **automatically**: within a few seconds a new child row (30.00, *Refunded*) appears under the parent, and the parent's refunded amount now covers the whole order. Nothing to click.
+4. If the points row still shows *Paid* after a minute, Qitaf could not be reached at the time. Ottu keeps retrying on its own every few minutes; you can also return the points by hand — **Return Qitaf points** on the points row, or **Refund** on the parent (the amount is locked to the points value). Whichever runs first wins; the other answers *already returned*.
 
 ### Points-only payment
 
 1. Open the order and expand the parent.
-2. The points row already offers **Return Qitaf points** — there is no card portion to refund first.
-3. Confirm. The full redeemed amount goes back to the customer's Qitaf account and a *Refunded* child row is added.
+2. Use **Refund** on the parent — the amount is shown locked to the full points value — or **Return Qitaf points** on the points row. There is no card portion to refund first.
+3. Confirm. The full redeemed amount goes back to the customer's Qitaf account, the confirmation reads *30.000 SAR in Qitaf points returned to the customer.*, and a *Refunded* child row is added.
 
 ### With two-step authorization
 
-If [Two-Step Refund & Void Authorization](./two-step-authorization.mdx) is enabled for your account, the points return follows the same maker-checker path as any refund: the maker's click opens an approval request (the message reads *Approval request initiated.*), and the points are returned when the checker approves. The same user permission that allows refunds ([Refund & Void Access Control](./refund-void-access-control.mdx)) is required to see and use the action.
+If [Two-Step Refund & Void Authorization](./two-step-authorization.mdx) is enabled for your account, the return follows the same maker-checker path as any refund. On a split order the points come back automatically once the checker approves the last card refund; a manual return (points-only order, or by hand after a Qitaf outage) opens its own approval request (*Approval request initiated.*) and runs when the checker approves. The same user permission that allows refunds ([Refund & Void Access Control](./refund-void-access-control.mdx)) is required.
 
 ## Messages you may see
 
@@ -68,8 +64,8 @@ If [Two-Step Refund & Void Authorization](./two-step-authorization.mdx) is enabl
 | *Refund the remaining 70.000 SAR paid through the payment gateway before returning the Qitaf points.* | The card portion is not fully refunded yet. A card refund waiting for approval still counts as outstanding. | Finish the card refund, then return the points. |
 | *Qitaf points are always returned in full (30.000 SAR); a partial amount cannot be entered.* | The amount was changed. | Leave the amount as shown. |
 | *The Qitaf points for this transaction have already been returned to the customer.* | Someone already returned them — possibly a colleague, or an earlier attempt that completed after a slow response. | Nothing; the customer has the points. Check the child rows. |
-| *Qitaf did not confirm the reversal ([2311] Technical error has occurred while processing this transaction, please try again). No points were returned; you can retry.* | Qitaf answered with a temporary error. The bracketed part is Qitaf's own code and text. | Try again in a moment. Nothing was booked. |
-| *Qitaf could not be reached to confirm the reversal. No points were returned; you can retry.* | Qitaf did not answer in time. | Try again. If the points were in fact reversed on Qitaf's side, the retry recognises that and books the return once. |
+| *Qitaf did not confirm the reversal ([2311] Technical error has occurred while processing this transaction, please try again). No points were returned; you can retry.* | Qitaf answered with a temporary error. The bracketed part is Qitaf's own code and text. | Nothing was booked. Ottu retries automatically every few minutes; you can also try again by hand. |
+| *Qitaf could not be reached to confirm the reversal. No points were returned; you can retry.* | Qitaf did not answer in time. | Ottu retries automatically; a manual retry is safe too. If the points were in fact reversed on Qitaf's side, the retry recognises that and books the return once. |
 | *Qitaf can no longer return these points ([1041] Refund period has expired). Refund the customer by another means.* | Qitaf refuses this reversal for good — typically the reversal window has closed, or Qitaf no longer knows the redemption. | The action is withdrawn. Refund the customer's points value by another route (card refund, wallet credit, or a manual arrangement) and quote the bracketed code to STC if you need to escalate. |
 
 All messages are also shown in Arabic when the dashboard is in Arabic. The action itself is labelled **Return Qitaf points** / **إعادة نقاط Qitaf**.
