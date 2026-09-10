@@ -303,6 +303,11 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
+                  label: "Refunding a Points-Funded Order",
+                  href: "/developers/payments/loyalty#refund-points",
+                },
+                {
+                  type: "link",
                   label: "API Reference",
                   href: "/developers/payments/loyalty#api-reference",
                 },
@@ -888,6 +893,7 @@ const sidebars: SidebarsConfig = {
           items: [
             "business/operations/refund-void-access-control",
             "business/operations/two-step-authorization",
+            "business/operations/qitaf-points-refund",
           ],
         },
         "business/integrations",

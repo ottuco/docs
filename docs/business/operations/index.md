@@ -13,6 +13,7 @@ Operations & Controls covers the security and authorization features that govern
 | -------------------------------------------------------------------- | ------------------------------------------------------------------- |
 | [Refund & Void Access Control](./refund-void-access-control.mdx)     | Assign refund and void permissions to specific users                |
 | [Two-Step Refund & Void Authorization](./two-step-authorization.mdx) | Require maker-checker approval before refunds or voids are executed |
+| [Refunding Orders Paid with Qitaf Points](./qitaf-points-refund.mdx) | Refund the card portion, then return the redeemed points to the customer's Qitaf account |
 
 ## Why This Matters
 
@@ -31,5 +32,6 @@ Start with [Refund & Void Access Control](./refund-void-access-control.mdx) to u
 
 - [Refund & Void Access Control](./refund-void-access-control.mdx) — Set up user permissions for refunds and voids
 - [Two-Step Refund & Void Authorization](./two-step-authorization.mdx) — Configure the maker-checker approval workflow
+- [Refunding Orders Paid with Qitaf Points](./qitaf-points-refund.mdx) — Return redeemed loyalty points after refunding the card portion
 - [Payment Management](../payment-management/index.md) — View and manage all transactions
 - [Settings](../settings/index.md) — Configure global dashboard settings
