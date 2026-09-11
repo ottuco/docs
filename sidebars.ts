@@ -325,6 +325,43 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "category",
+              label: "Partner Onboarding",
+              link: { type: "doc", id: "developers/payments/onboarding" },
+              items: [
+                {
+                  type: "link",
+                  label: "When to Use",
+                  href: "/developers/payments/onboarding#when-to-use",
+                },
+                {
+                  type: "link",
+                  label: "Setup",
+                  href: "/developers/payments/onboarding#setup",
+                },
+                {
+                  type: "link",
+                  label: "Guide",
+                  href: "/developers/payments/onboarding#guide",
+                },
+                {
+                  type: "link",
+                  label: "API Reference",
+                  href: "/developers/payments/onboarding#api-reference",
+                },
+                {
+                  type: "link",
+                  label: "Best Practices",
+                  href: "/developers/payments/onboarding#best-practices",
+                },
+                {
+                  type: "link",
+                  label: "FAQ",
+                  href: "/developers/payments/onboarding#faq",
+                },
+              ],
+            },
+            {
+              type: "category",
               label: "Checkout SDK",
               link: {
                 type: "doc",
