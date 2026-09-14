@@ -302,9 +302,9 @@ A single transaction can do both: redeem points toward the balance, then earn on
 When a customer **redeemed** Qitaf points at checkout, the payment is recorded as a parent transaction with a child transaction per funding source: one child for the points (the *points leg*) and, on a split payment, the gateway payment itself. Refunding such an order has two halves, and they run in a fixed order:
 
 1. **The money first.** The gateway portion is refunded exactly like any other refund — from the dashboard or through the [Operations API](../operations.md) with the parent's `session_id`. The refundable amount is capped at what the gateway actually settled; the points are never part of it.
-2. **Then the points — automatically.** The gateway refund that leaves nothing owed through the gateway also queues the return of the redeemed points: within seconds Ottu reverses the redemption at Qitaf and books it, with no further click. The **whole** redeemed amount comes back in one step; there is no partial return.
+2. **Then the points — automatically, in the same request.** The gateway refund that leaves nothing owed through the gateway also returns the redeemed points: after the refund is recorded, and before the refund call answers, Ottu reverses the redemption at Qitaf and books it. By the time your refund call (dashboard or [Operations API](../operations.md)) gets its response, the points-return record already exists. The **whole** redeemed amount comes back in one step; there is no partial return.
 
-For an order paid with **points only** there is no gateway half: the parent's ordinary **Refund** returns the points (the amount is shown locked to the full redeemed amount), and so does **Return Qitaf points** on the points leg. Both doors lead to the same single, idempotent return.
+For an order paid with **points only** there is no gateway half: the parent's ordinary **Refund** returns the points, for exactly the redeemed amount. The points leg itself offers no action, and a refund aimed at the points leg is refused — points always come back through the parent.
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
@@ -317,33 +317,40 @@ sequenceDiagram
     M->>O: Refund the gateway portion (parent session_id)
     O->>PG: Refund 70 SAR
     PG-->>O: Refunded
-    O->>Q: Reduce the earned reward (money basis)
-    O-->>M: Operation webhook: refund 70 SAR
-    Note over O: nothing owed through the gateway any more — points return queued
+    Note over O: refund recorded — nothing owed through the gateway any more
     O->>Q: Reverse the redemption (30 SAR of points)
     Q-->>O: Reversed
-    O-->>M: Operation webhook: refund 30 SAR, pg_response.code 0
+    Note over O: points-return record booked
+    O-->>M: Refund response (both records already exist)
+    O-->>M: Operation webhook: refund 30 SAR (points), pg_response.code 0
+    O-->>M: Operation webhook: refund 70 SAR (gateway)
+    O->>Q: Reduce the earned reward (money basis)
 ```
 
 :::note The points come back on their own — the API does not return them directly
-The automatic return is triggered by the gateway refund itself, whichever way you made it (dashboard or Operations API), and follows the same refund permission and the same [maker-checker approval](/business/operations/two-step-authorization) as that refund. The dashboard additionally offers the return by hand — **Return Qitaf points** on the points leg, and the parent's own **Refund** once the points are all that is left — for points-only orders and for the rare case where Qitaf could not be reached at the time. The public [Operations API](../operations.md) has no call that returns loyalty points: a `refund` with `destination: "wallet"` is rejected on a points-funded order, exactly as before. What your integration *does* see is the outcome, through the webhooks below.
+The automatic return is triggered by the gateway refund itself, whichever way you made it (dashboard or Operations API), and follows the same refund permission and the same [maker-checker approval](/business/operations/two-step-authorization) as that refund. If Qitaf cannot confirm the return at that moment, the gateway refund still succeeds; Ottu retries the points in the background, and the dashboard's **Refund** on the parent offers the points value so an operator can return them by hand. The public [Operations API](../operations.md) has no call that returns loyalty points: a `refund` with `destination: "wallet"` is rejected on a points-funded order, exactly as before. What your integration *does* see is the outcome, through the webhooks below.
 :::
 
 ### What the rules are
 
 | Rule | Behaviour |
 | --- | --- |
-| **Order** | Gateway money first, points second. Until the gateway portion is fully refunded nothing returns the points: the automatic return is not queued, the manual actions are not offered, and a direct request is refused with the remaining gateway amount. A refund that is still pending approval counts as outstanding. |
-| **Trigger** | The gateway refund that leaves nothing owed through the gateway queues the return automatically. A points-only order is returned through the parent's Refund (or the leg's own action). |
+| **Order** | Gateway money first, points second. Until the gateway portion is fully refunded nothing returns the points: the parent's Refund only offers the gateway money still owed. A refund that is still pending approval counts as outstanding. |
+| **Trigger** | The gateway refund that leaves nothing owed through the gateway returns the points in the same request. A points-only order is returned through the parent's Refund. |
+| **One door** | Points only come back through the parent. The points leg has no actions, and a refund sent to the points leg itself is refused with *Qitaf points are returned through Refund on the transaction, not from the points row.* |
 | **Amount** | Always the full redeemed amount. Nothing to enter, nothing partial. |
 | **Once** | A second return — by hand, by a retry, or by the automatic run landing after a manual one — is refused; two simultaneous requests book exactly one. |
-| **Recoverable** | If Qitaf times out or answers with a retryable error, nothing is booked; Ottu retries on its own every few minutes (for a bounded number of attempts, then escalates to Ottu operations), and the dashboard actions stay available to return the points by hand meanwhile. If Qitaf answers that the redemption can no longer be reversed (for example the reversal window has passed, or the redemption is unknown to it), the actions are withdrawn and the operator is told to refund the customer another way. |
+| **Recoverable** | If Qitaf times out or answers with a retryable error, nothing is booked and the gateway refund is not affected; Ottu retries on its own every few minutes (for a bounded number of attempts, then escalates to Ottu operations), and the parent's Refund offers the points value so they can be returned by hand meanwhile. If Qitaf answers that the redemption can no longer be reversed (for example the reversal window has passed, or the redemption is unknown to it), Refund no longer offers the points and the operator is told to refund the customer another way. |
 | **Reward** | Returning the points does **not** reduce the earned reward — the money refund already did that. |
 | **Records** | A successful return books a `refunded` child transaction for the points amount under the parent, so the parent's `refunded_amount` reaches the order total. |
 
 ### What your webhooks receive
 
 The points return emits the **same two notifications** as a gateway refund, so nothing new has to be parsed.
+
+:::warning Do not rely on the arrival order
+On a split order the gateway refund and the points return happen in the same request, and the points-return operation webhook is sent **before** the webhook of the gateway refund that triggered it. Match each webhook on its own fields — `operation`, `amount`, and `pg_response` (the points return carries Qitaf's `code` and its reversal `operation_id`) — rather than assuming the gateway refund arrives first.
+:::
 
 **1. The operation webhook** (your `operations_webhook_url`, see [Operation events](../webhooks/operation-events.md)). `amount` is the points value, `result` is `success`, and `pg_response` carries Qitaf's own answer — `code: 0` and the reversal reference in `operation_id`:
 
@@ -406,15 +413,20 @@ Every outcome comes back as one merchant-facing message, in the dashboard user's
 
 | Outcome | Message (English) | Message (Arabic) |
 | --- | --- | --- |
-| Returned | `30.000 SAR in Qitaf points returned to the customer.` | `تمت إعادة 30.000 SAR من نقاط Qitaf إلى العميل.` |
-| Gateway money still refundable | `Refund the remaining 70.000 SAR paid through the payment gateway before returning the Qitaf points.` | `قم باسترداد المبلغ المتبقي 70.000 SAR المدفوع عبر بوابة الدفع قبل إعادة نقاط Qitaf.` |
-| Amount edited | `Qitaf points are always returned in full (30.000 SAR); a partial amount cannot be entered.` | `تتم إعادة نقاط Qitaf بالكامل دائمًا (30.000 SAR)؛ لا يمكن إدخال مبلغ جزئي.` |
+| Returned | `30.00 SAR in Qitaf points returned to the customer.` | `تمت إعادة 30.00 SAR من نقاط Qitaf إلى العميل.` |
+| Gateway money still refundable | `Refund the remaining 70.00 SAR paid through the payment gateway before returning the Qitaf points.` | `قم باسترداد المبلغ المتبقي 70.00 SAR المدفوع عبر بوابة الدفع قبل إعادة نقاط Qitaf.` |
+| Amount edited | `Qitaf points are always returned in full (30.00 SAR); a partial amount cannot be entered.` | `تتم إعادة نقاط Qitaf بالكامل دائمًا (30.00 SAR)؛ لا يمكن إدخال مبلغ جزئي.` |
+| Refund sent to the points leg | `Qitaf points are returned through Refund on the transaction, not from the points row.` | `تتم إعادة نقاط Qitaf من خلال الاسترداد على المعاملة، وليس من صف النقاط.` |
 | Already returned | `The Qitaf points for this transaction have already been returned to the customer.` | `تمت إعادة نقاط Qitaf لهذه المعاملة إلى العميل بالفعل.` |
 | Qitaf refused, retry possible | `Qitaf did not confirm the reversal ([2311] Technical error has occurred while processing this transaction, please try again). No points were returned; you can retry.` | `لم يؤكد Qitaf عملية الإلغاء (...). لم تتم إعادة أي نقاط؛ يمكنك المحاولة مرة أخرى.` |
 | Qitaf unreachable | `Qitaf could not be reached to confirm the reversal. No points were returned; you can retry.` | `تعذر الوصول إلى Qitaf لتأكيد عملية الإلغاء. لم تتم إعادة أي نقاط؛ يمكنك المحاولة مرة أخرى.` |
 | Qitaf can no longer reverse it | `Qitaf can no longer return these points ([1041] Refund period has expired). Refund the customer by another means.` | `لم يعد بإمكان Qitaf إعادة هذه النقاط (...). يرجى استرداد المبلغ للعميل بوسيلة أخرى.` |
 
-The bracketed code and text inside the Qitaf messages are STC's own error code and description, passed through unchanged so they can be quoted to STC support. The dashboard side of this workflow, with the exact steps, is in [Refunding Orders Paid with Qitaf Points](/business/operations/qitaf-points-refund).
+The bracketed code and text inside the Qitaf messages are STC's own error code and description, passed through unchanged so they can be quoted to STC support. The wallet name in every message is the name configured for your Qitaf service.
+
+### How a points-only order is listed
+
+A wallet is a payment service, not a payment gateway, so an order paid **entirely** with redeemed points has no gateway of its own. In the dashboard transaction listing and details its **Gateway Name** shows the wallet's name (for example `Qitaf`), in the dashboard user's language, instead of an internal placeholder. It keeps that name after the points are returned. A split order lists its card gateway. Webhook payloads are unchanged. The dashboard side of this workflow, with the exact steps, is in [Refunding Orders Paid with Qitaf Points](/business/operations/qitaf-points-refund).
 
 ## API Reference
 
@@ -458,13 +470,16 @@ The bracketed code and text inside the Qitaf messages are STC's own error code a
     No. Earning is entirely server-side. The customer sees a normal checkout and their points appear in their Qitaf account afterwards.
   </FAQItem>
   <FAQItem question="What happens to points when I refund?">
-    Two different things, depending on which points you mean. Points the customer **earned** on the order are reversed automatically, amount-matched to the money you refund — see [Reversal on refund](#4-reversal-on-refund). Points the customer **redeemed** to pay are returned to their Qitaf account when an operator uses **Return Qitaf points** on the points leg, after the gateway portion is refunded — see [Refunding a points-funded order](#refund-points).
+    Two different things, depending on which points you mean. Points the customer **earned** on the order are reversed automatically, amount-matched to the money you refund — see [Reversal on refund](#4-reversal-on-refund). Points the customer **redeemed** to pay are returned to their Qitaf account automatically, in the same request as the refund that clears the gateway portion — or through the parent's Refund on a points-only order. See [Refunding a points-funded order](#refund-points).
   </FAQItem>
   <FAQItem question="Can I return redeemed points through the API?">
-    Not today. The return is a dashboard operation on the points leg, under the same refund permission and maker-checker approval as a gateway refund. Your integration is told about it through the same operation and payment webhooks a gateway refund emits. Sending `destination: "wallet"` to the Operations API on a points-funded order is rejected.
+    Not with a dedicated call. Refunding the gateway portion through the [Operations API](../operations.md) returns the points automatically once nothing is owed through the gateway. A points-only order is returned from the dashboard with Refund on the parent, under the same refund permission and maker-checker approval as a gateway refund. Your integration is told about every return through the same operation and payment webhooks a gateway refund emits. Sending `destination: "wallet"` to the Operations API on a points-funded order is rejected.
   </FAQItem>
-  <FAQItem question="Why is the points action missing on a refunded order?">
+  <FAQItem question="Why does Refund not offer the points on a refunded order?">
     Either the gateway portion is not fully refunded yet (a refund waiting for approval still counts), the points were already returned, or Qitaf answered that the redemption can no longer be reversed — in which case the customer has to be refunded another way. The operator sees the exact reason as a message when they try.
+  </FAQItem>
+  <FAQItem question="Where did the Return Qitaf points action go?">
+    It was removed. Points are returned only through the parent transaction: automatically with the last gateway refund, or through the parent's Refund. A refund sent to the points leg itself is refused.
   </FAQItem>
 </FAQ>
 

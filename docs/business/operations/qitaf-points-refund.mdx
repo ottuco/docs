@@ -1,17 +1,17 @@
 ---
 title: Refunding Orders Paid with Qitaf Points
 sidebar_label: Refunding Qitaf Points
-description: "How to refund an order a customer paid fully or partly with redeemed STC Qitaf points: card portion first, then return the points from the dashboard."
+description: "How to refund an order a customer paid fully or partly with redeemed STC Qitaf points: refund the card portion first, and the points come back with the last card refund."
 ---
 
 # Refunding Orders Paid with Qitaf Points
 
-When a customer pays with **STC Qitaf points** at checkout — on their own, or together with a card — a refund has to give back two different things: the money that went through the payment gateway, and the points that were deducted from the customer's Qitaf account. Ottu handles both in a fixed order, so the customer is made whole and no points are returned twice: you refund the card portion as usual, and **the points come back on their own** the moment nothing is left to refund through the gateway.
+When a customer pays with **STC Qitaf points** at checkout — on their own, or together with a card — a refund has to give back two different things: the money that went through the payment gateway, and the points that were deducted from the customer's Qitaf account. Ottu handles both in a fixed order, so the customer is made whole and no points are returned twice: you refund the card portion as usual, and **the points come back in the same refund** the moment nothing is left to refund through the gateway.
 
 This page is for dashboard users who process refunds. If you are building against the API, the technical side (webhooks, records, rules) is in [Loyalty → Refunding a points-funded order](/developers/payments/loyalty#refund-points).
 
-:::tip One refund, both halves
-On a split order you only ever click **Refund** on the parent. When the last card refund goes through, Ottu returns the redeemed points automatically within seconds — no second action. The manual **Return Qitaf points** button on the points row exists for points-only orders and for the rare case where Qitaf could not be reached at the time.
+:::tip One action for everything: Refund on the parent
+Points are only ever returned through **Refund** on the parent transaction. On a split order, the refund that clears the card portion returns the redeemed points before it confirms — there is no second action, and the points row shows up in the list as soon as the page refreshes. On a points-only order, **Refund** on the parent returns the points directly. The points row itself has no actions.
 :::
 
 ## How a Qitaf-paid order looks in the dashboard
@@ -26,13 +26,19 @@ A payment funded with points is one **parent** transaction with a child row per 
 
 After a full refund the parent gains two more child rows: the card refund (70.00, *Refunded*) and the points return (30.00, *Refunded*). The parent's refunded amount then reads 100.00 — the whole order.
 
+The child rows are for reading only: they have no actions menu. Every refund, including returning the points, starts from **Refund** on the parent row.
+
+### The Gateway Name column
+
+A wallet such as Qitaf is a payment service, not a payment gateway, so an order paid **entirely with points** has no gateway of its own. For those orders the **Gateway Name** column shows the wallet's name instead — for example **Qitaf** — in the dashboard's language (the Arabic dashboard shows the wallet's Arabic name). The name stays the same after the points are returned. A split order shows the card gateway, as any card payment does.
+
 :::tip Reading the amounts
 On a split order the parent's **paid** figure is the card money only (70.00 in the example); the points sit on their own child row. Its **refunded** figure counts both — so a fully refunded 100.00 order shows paid 70.00 and refunded 100.00. That is expected, not a discrepancy.
 :::
 
 ## The rule: card first, points second
 
-For a split payment, the card portion must be **fully refunded before** the points come back. Until then nothing returns the points: the points row offers no return action, and a request for it is answered with the amount still to refund through the gateway.
+For a split payment, the card portion must be **fully refunded before** the points come back. Until then nothing returns the points: **Refund** on the parent only offers the card amount still left to refund.
 
 Why this order? The points are returned in one piece, always in full. Refunding the card first keeps a simple invariant: a customer either keeps their points and has the money refunded, or gets everything back — never a partial, ambiguous middle state.
 
@@ -44,38 +50,43 @@ An order paid with **points only** has no card portion, so the points can be ret
 
 1. Open **Payment Management** and find the order. Expand the parent to show its child rows.
 2. On the **parent** row, use **Refund** and refund the card portion. The maximum is the amount the gateway settled — the points are never included in it. A partial card refund is allowed; the points stay with the customer until the card portion is refunded in full.
-3. The moment the card portion is fully refunded, Ottu returns the redeemed points **automatically**: within a few seconds a new child row (30.00, *Refunded*) appears under the parent, and the parent's refunded amount now covers the whole order. Nothing to click.
-4. If the points row still shows *Paid* after a minute, Qitaf could not be reached at the time. Ottu keeps retrying on its own every few minutes; you can also return the points by hand — **Return Qitaf points** on the points row, or **Refund** on the parent (the amount is locked to the points value). Whichever runs first wins; the other answers *already returned*.
+3. The refund that clears the card portion also returns the redeemed points **automatically, before it confirms**. When the list refreshes after the confirmation, the parent already has both new child rows — the card refund and the points return (30.00, *Refunded*) — and its refunded amount covers the whole order. Nothing else to click.
+4. If no points row appeared, Qitaf could not confirm the return at that moment; the card refund is not affected. Ottu retries the points on its own every few minutes. You can also return them by hand: **Refund** on the parent now offers exactly the points value. Whichever runs first wins; the other answers *already returned*.
 
 ### Points-only payment
 
 1. Open the order and expand the parent.
-2. Use **Refund** on the parent — the amount is shown locked to the full points value — or **Return Qitaf points** on the points row. There is no card portion to refund first.
-3. Confirm. The full redeemed amount goes back to the customer's Qitaf account, the confirmation reads *30.000 SAR in Qitaf points returned to the customer.*, and a *Refunded* child row is added.
+2. Use **Refund** on the parent. It offers the full points value; there is no card portion to refund first.
+3. Confirm. The full redeemed amount goes back to the customer's Qitaf account, the confirmation reads *30.00 SAR in Qitaf points returned to the customer.*, and a *Refunded* child row is added. Afterwards the parent no longer offers **Refund**.
+
+:::warning Leave the amount as offered
+On a points refund the amount field shows the full points value. Change it and the refund is refused (*Qitaf points are always returned in full…*): the points can only come back in one piece.
+:::
 
 ### With two-step authorization
 
-If [Two-Step Refund & Void Authorization](./two-step-authorization.mdx) is enabled for your account, the return follows the same maker-checker path as any refund. On a split order the points come back automatically once the checker approves the last card refund; a manual return (points-only order, or by hand after a Qitaf outage) opens its own approval request (*Approval request initiated.*) and runs when the checker approves. The same user permission that allows refunds ([Refund & Void Access Control](./refund-void-access-control.mdx)) is required.
+If [Two-Step Refund & Void Authorization](./two-step-authorization.mdx) is enabled for your account, the return follows the same maker-checker path as any refund. On a split order the points come back automatically when the checker's approval of the last card refund runs; a **Refund** of the points on the parent (points-only order, or by hand after a Qitaf outage) opens its own approval request (*Approval request initiated.*) and runs when the checker approves. The same user permission that allows refunds ([Refund & Void Access Control](./refund-void-access-control.mdx)) is required.
 
 ## Messages you may see
 
 | You see | It means | What to do |
 | --- | --- | --- |
-| *Refund the remaining 70.000 SAR paid through the payment gateway before returning the Qitaf points.* | The card portion is not fully refunded yet. A card refund waiting for approval still counts as outstanding. | Finish the card refund, then return the points. |
-| *Qitaf points are always returned in full (30.000 SAR); a partial amount cannot be entered.* | The amount was changed. | Leave the amount as shown. |
+| *Refund the remaining 70.00 SAR paid through the payment gateway before returning the Qitaf points.* | The card portion is not fully refunded yet. A card refund waiting for approval still counts as outstanding. | Finish the card refund; the points then come back with it. |
+| *Qitaf points are always returned in full (30.00 SAR); a partial amount cannot be entered.* | The amount was changed. | Leave the amount as offered. |
+| *Qitaf points are returned through Refund on the transaction, not from the points row.* | Someone tried to return the points from the points row (for example an old bookmark or an integration calling the points row directly). | Use **Refund** on the parent transaction. |
 | *The Qitaf points for this transaction have already been returned to the customer.* | Someone already returned them — possibly a colleague, or an earlier attempt that completed after a slow response. | Nothing; the customer has the points. Check the child rows. |
 | *Qitaf did not confirm the reversal ([2311] Technical error has occurred while processing this transaction, please try again). No points were returned; you can retry.* | Qitaf answered with a temporary error. The bracketed part is Qitaf's own code and text. | Nothing was booked. Ottu retries automatically every few minutes; you can also try again by hand. |
 | *Qitaf could not be reached to confirm the reversal. No points were returned; you can retry.* | Qitaf did not answer in time. | Ottu retries automatically; a manual retry is safe too. If the points were in fact reversed on Qitaf's side, the retry recognises that and books the return once. |
-| *Qitaf can no longer return these points ([1041] Refund period has expired). Refund the customer by another means.* | Qitaf refuses this reversal for good — typically the reversal window has closed, or Qitaf no longer knows the redemption. | The action is withdrawn. Refund the customer's points value by another route (card refund, wallet credit, or a manual arrangement) and quote the bracketed code to STC if you need to escalate. |
+| *Qitaf can no longer return these points ([1041] Refund period has expired). Refund the customer by another means.* | Qitaf refuses this reversal for good — typically the reversal window has closed, or Qitaf no longer knows the redemption. | **Refund** no longer offers the points. Refund the customer's points value by another route (card refund, wallet credit, or a manual arrangement) and quote the bracketed code to STC if you need to escalate. |
 
-All messages are also shown in Arabic when the dashboard is in Arabic. The action itself is labelled **Return Qitaf points** / **إعادة نقاط Qitaf**.
+All messages are also shown in Arabic when the dashboard is in Arabic. The wallet's name in them is the name configured for your Qitaf service. There is no separate points action to look for: the points are always returned through **Refund** on the parent.
 
 ## Things to know
 
 - **Returned points do not touch earned points.** If the order also *earned* Qitaf points, those are reduced when you refund the card money, in proportion to the amount refunded. Returning the redeemed points changes nothing on the earned side.
 - **No double returns.** A second click, a retry after a timeout, or two users acting at once can only ever produce one return. The record and the customer's points move together, or not at all.
 - **The customer's Qitaf account is updated by STC**, usually within seconds of the confirmation message. Ottu shows the return as a *Refunded* child row and reports it through your operations webhook, exactly as a card refund.
-- **Webhook and reports.** The points return appears in the parent's refunded transactions and in your operations webhook with Qitaf's own reference. Developers can read the details in [Loyalty → What your webhooks receive](/developers/payments/loyalty#what-your-webhooks-receive).
+- **Webhook and reports.** The points return appears in the parent's refunded transactions and in your operations webhook with Qitaf's own reference. On a split order the points-return webhook is sent before the webhook of the card refund that triggered it. Developers can read the details in [Loyalty → What your webhooks receive](/developers/payments/loyalty#what-your-webhooks-receive).
 
 ## FAQ
 
@@ -86,10 +97,13 @@ No. The card portion must be fully refunded first. This keeps the customer's pos
 No. The redeemed points are always returned in full. If the customer should only get part of the order's value back, refund that part from the card portion and leave the points alone.
 
 **The customer says the points have not arrived.**
-Open the order: if the points row shows a *Refunded* child of the points amount, Ottu received Qitaf's confirmation — share Qitaf's reference from the operations webhook with STC support. If there is no such row and the action is still offered, the return did not happen yet; try again.
+Open the order: if the parent shows a *Refunded* child of the points amount, Ottu received Qitaf's confirmation — share Qitaf's reference from the operations webhook with STC support. If there is no such row and **Refund** on the parent still offers the points value, the return did not happen yet; use it to try again.
+
+**Where did the Return Qitaf points button go?**
+It was removed. The points are returned only through **Refund** on the parent: automatically together with the last card refund, or directly for a points-only order.
 
 **What if Qitaf says the points can no longer be returned?**
-The action is withdrawn and cannot be forced. Refund the customer's points value by another means and keep the bracketed Qitaf code from the message for your records.
+**Refund** no longer offers the points and the return cannot be forced. Refund the customer's points value by another means and keep the bracketed Qitaf code from the message for your records.
 
 ## What's Next?
 
