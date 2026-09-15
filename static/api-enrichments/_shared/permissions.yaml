@@ -36,7 +36,7 @@ basic_auth_view_checkout:
 
 basic_auth_payment_methods:
   auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
-  permissions: "User-specific access based on assigned permissions"
+  permissions: "`Can view Settings` (`gateway.view_pgmid`). The public key is refused with `401`."
   extra: "`Can use pg_code` — grants access to the specific [payment gateway]({{apiBaseUrl}}/payments/payment-methods/) (e.g., \"Can use Credit Card\")"
 
 # ── Operations API ────────────────────────────────────────────
@@ -53,11 +53,25 @@ basic_auth_inquiry:
 
 basic_auth_auto_debit:
   auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
-  permissions: "`Can add payment requests` or `Can add e-commerce payments`"
+  permissions: "`Can perform auto-debits` (`user.do_autodebit`). The public key is refused with `401`."
 
 basic_auth_native_payment:
   auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
   permissions: "`Can add payment requests` or `Can add e-commerce payments`"
+
+# ── User Cards API ────────────────────────────────────────────
+
+basic_auth_user_cards_view:
+  auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
+  permissions: "`Can view Card` (`card.view_card`). The public key is refused with `401`."
+
+basic_auth_user_cards_delete:
+  auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
+  permissions: "`Can delete Card` (`card.delete_card`). The public key is refused with `401`."
+
+public_key_session_card_delete:
+  auth_method: "[Public Key]({{apiBaseUrl}}/getting-started/authentication/#public-key)"
+  permissions: "Accepted — this is the route the Checkout SDK calls. The customer is read from the session, never from the request. A private key or Basic Auth user needs `Can delete Card` (`card.delete_card`)."
 
 # ── Invoice API ───────────────────────────────────────────────
 
