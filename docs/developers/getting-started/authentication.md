@@ -38,6 +38,16 @@ The private key should NEVER be embedded in SDKs or made public. Ensure it’s u
 
 The Public Key is used to initialize the [Checkout SDK](../payments/checkout-sdk/index.md) and can safely be shared with clients. This key doesn’t provide access to public API endpoints, making it secure for client-side use.
 
+Anyone who loads your checkout can read the public key, so it proves nothing about who is calling. Ottu therefore accepts it only where the checkout session itself decides what the call may touch — for example, the Checkout SDK deleting a saved card through the session-scoped [User Cards](../cards-and-tokens/user-cards.mdx#delete-a-card-from-a-checkout-session-checkout-sdk) route, where the customer is read from the session.
+
+Server APIs that name a customer or charge a card **refuse the public key** with `401 {"detail": "Authentication credentials were not provided."}`. Call them from your server with your [private key](#api-key-auth) instead:
+
+| API | Route |
+|---|---|
+| [User Cards](../cards-and-tokens/user-cards.mdx) — list and delete | `POST /b/pbl/v2/card/`, `DELETE /b/pbl/v2/card/{token}/` |
+| [Payment Methods](../payments/payment-methods.md) | `POST /b/pbl/v2/payment-methods/` |
+| [Auto-debit](../cards-and-tokens/recurring-payments.mdx#subsequent-payments-mit) | `POST /b/pbl/v2/payment/auto-debit/`, `POST /b/pbl/v2/auto-debit/` |
+
 :::info
 
 For detailed instructions on generating API keys for both [Public ](authentication.md#public-key)& [Private ](authentication.md#api-key-auth)Keys, kindly refer to the [Private Key (API-Key)](authentication.md#api-key-auth) section.
@@ -99,6 +109,10 @@ For [post-payment operations](../operations.md) (refund, capture, void, etc.), e
 |---|---|
 | `Can add Invoice` | [Invoice API](../invoices.mdx) |
 | `report.can_view_report` | [Reports API](../reports.mdx) |
+| `Can view Card` (`card.view_card`) | [User Cards API](../cards-and-tokens/user-cards.mdx) — list saved cards |
+| `Can delete Card` (`card.delete_card`) | [User Cards API](../cards-and-tokens/user-cards.mdx) — delete a saved card, including the session-scoped route |
+| `Can view Settings` (`gateway.view_pgmid`) | [Payment Methods API](../payments/payment-methods.md) |
+| `Can perform auto-debits` (`user.do_autodebit`) | [Auto-debit](../cards-and-tokens/recurring-payments.mdx#subsequent-payments-mit) — charge a saved card |
 
 ### Best Practices
 
