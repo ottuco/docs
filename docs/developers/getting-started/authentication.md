@@ -98,7 +98,7 @@ For [post-payment operations](../operations.md) (refund, capture, void, etc.), e
 | Permission | Used By |
 |---|---|
 | `Can add Invoice` | [Invoice API](../invoices.mdx) |
-| `report.can_view_report` | [Reports API](../reports.mdx) |
+| `report.view_report` | [Reports API](../reports.mdx) |
 
 ### Best Practices
 

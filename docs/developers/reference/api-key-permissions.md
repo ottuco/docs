@@ -71,7 +71,7 @@ Permissions use the same vocabulary as dashboard users (Basic Authentication) â€
 | Compute a webhook payload signature | `Can view webhook config` |
 
 :::info
-Dashboard-internal endpoints (transaction search, refund listings, access logs, and similar) follow the same permission model with their own permissions; they are listed in the dashboard's role configuration rather than here.
+Dashboard-internal endpoints (transaction search, refund listings, access logs, payout configuration, and similar) follow the same permission model with their own permissions; they are listed in the dashboard's role configuration rather than here.
 :::
 
 ## Behavior summary
