@@ -325,38 +325,38 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "category",
-              label: "Partner Onboarding",
-              link: { type: "doc", id: "developers/payments/onboarding" },
+              label: "Loyalty Enrollment",
+              link: { type: "doc", id: "developers/payments/loyalty-enrollment" },
               items: [
                 {
                   type: "link",
                   label: "When to Use",
-                  href: "/developers/payments/onboarding#when-to-use",
+                  href: "/developers/payments/loyalty-enrollment#when-to-use",
                 },
                 {
                   type: "link",
                   label: "Setup",
-                  href: "/developers/payments/onboarding#setup",
+                  href: "/developers/payments/loyalty-enrollment#setup",
                 },
                 {
                   type: "link",
                   label: "Guide",
-                  href: "/developers/payments/onboarding#guide",
+                  href: "/developers/payments/loyalty-enrollment#guide",
                 },
                 {
                   type: "link",
                   label: "API Reference",
-                  href: "/developers/payments/onboarding#api-reference",
+                  href: "/developers/payments/loyalty-enrollment#api-reference",
                 },
                 {
                   type: "link",
                   label: "Best Practices",
-                  href: "/developers/payments/onboarding#best-practices",
+                  href: "/developers/payments/loyalty-enrollment#best-practices",
                 },
                 {
                   type: "link",
                   label: "FAQ",
-                  href: "/developers/payments/onboarding#faq",
+                  href: "/developers/payments/loyalty-enrollment#faq",
                 },
               ],
             },

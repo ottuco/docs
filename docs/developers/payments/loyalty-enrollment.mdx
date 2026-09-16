@@ -1,6 +1,6 @@
 ---
-title: Partner Onboarding
-description: A server-to-server endpoint for a partner bank to register a customer onboarding event with Ottu — received and acknowledged, never charged.
+title: Loyalty Enrollment
+description: A server-to-server endpoint for a partner bank to push a loyalty-program cardholder enrollment event to Ottu — received and acknowledged, never charged.
 toc_min_heading_level: 2
 toc_max_heading_level: 3
 ---
@@ -10,9 +10,11 @@ import TabItem from "@theme/TabItem";
 import CodeBlock from "@theme/CodeBlock";
 import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
-# Partner Onboarding
+# Loyalty Enrollment
 
-The **Partner Onboarding API** lets an issuing bank push a customer onboarding event to Ottu — for example, when a cardholder is enrolled in a co-branded card programme and granted a welcome reward. Ottu **records the event and returns a reference**. Nothing is charged, no wallet is credited, and no message is sent to the cardholder: the endpoint is a receipt, and what happens next (reward issuance, redemption) is handled by the programme it feeds — see [Loyalty](/developers/payments/loyalty).
+The **Loyalty Enrollment API** lets an issuing bank push a cardholder enrollment event to Ottu — for example, when a customer is enrolled in a co-branded card programme and granted a welcome reward. Ottu **records the event and returns a reference**. Nothing is charged, no wallet is credited, and no message is sent to the cardholder: the endpoint is a receipt, and what happens next (reward issuance, redemption) is handled by the programme it feeds — see [Loyalty](/developers/payments/loyalty).
+
+The endpoint is program-specific: today's is `pwp` — Mastercard Pay-with-Points, bank-agnostic across every issuer that uses it. A future program (for example Visa) gets its own path alongside it, `/b/partners/loyalty/<program>/enrollments/`, documented separately when it ships.
 
 It is a **server-to-server** call, authenticated with a [private API key](/developers/getting-started/authentication#api-key-auth). The customer never calls it, and it must never be called from a browser.
 
@@ -20,9 +22,9 @@ It is a **server-to-server** call, authenticated with a [private API key](/devel
 sequenceDiagram
     participant Bank as Partner bank
     participant Ottu as Ottu Connect
-    participant DB as Onboarding record
+    participant DB as Enrollment record
 
-    Bank->>Ottu: POST /b/onboarding/v1/user/<br/>Authorization: Api-Key · Idempotency-Key
+    Bank->>Ottu: POST /b/partners/loyalty/pwp/enrollments/<br/>Authorization: Api-Key · Idempotency-Key
     Ottu->>Ottu: validate · mask check · rate limit
     Ottu->>DB: record the event
     Ottu-->>Bank: 201 {reference, status: "received"}
@@ -45,7 +47,7 @@ Do **not** use it to:
 ## Setup
 
 1. **Get a private API key** for the Ottu installation the partner will call. Keys are created in the Ottu admin (**API keys → Add**) and shown once. Share the key with the partner over a secure channel — never in a ticket, an email, or a chat.
-2. **Give the partner the endpoint** — `POST /b/onboarding/v1/user/` on your installation host, over HTTPS only.
+2. **Give the partner the endpoint** — `POST /b/partners/loyalty/pwp/enrollments/` on your installation host, over HTTPS only.
 3. **Agree the `reward_type` codes.** The endpoint accepts any well-formed code the partner sends (lowercase letters, digits, `.`, `_`, `-`); the codes Ottu already recognises get a display name in the dashboard. Today that is `welcome_voucher` → **Welcome Voucher** / **قسيمة ترحيبية**.
 
 :::danger The private key is the only credential that opens this endpoint
@@ -54,14 +56,14 @@ The **public** (SDK) key, HTTP Basic credentials and dashboard sessions are all 
 
 ## Guide
 
-### Record an onboarding event
+### Record an enrollment event
 
 The minimal call. Replace `<PRIVATE_API_KEY>` and the body with the partner's data.
 
 <Tabs groupId="language">
 <TabItem value="curl" label="cURL">
 
-<CodeBlock language="bash" title="Record a customer onboarding">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/onboarding/v1/user/' \\
+<CodeBlock language="bash" title="Record a loyalty enrollment">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/partners/loyalty/pwp/enrollments/' \\
   --header 'Authorization: Api-Key <PRIVATE_API_KEY>' \\
   --header 'Content-Type: application/json' \\
   --header 'Idempotency-Key: 3f2a9c1e-4b7d-8e6f-0a1b-2c3d4e5f6071' \\
@@ -76,11 +78,11 @@ The minimal call. Replace `<PRIVATE_API_KEY>` and the body with the partner's da
 </TabItem>
 <TabItem value="python" label="Python">
 
-<CodeBlock language="python" title="Record a customer onboarding">{`import uuid
+<CodeBlock language="python" title="Record a loyalty enrollment">{`import uuid
 import requests
 
 response = requests.post(
-    "${OTTU_CONNECT_BASE_URL}/b/onboarding/v1/user/",
+    "${OTTU_CONNECT_BASE_URL}/b/partners/loyalty/pwp/enrollments/",
     headers={
         "Authorization": "Api-Key <PRIVATE_API_KEY>",
         "Content-Type": "application/json",
@@ -102,9 +104,9 @@ print(response.status_code, response.json())
 </TabItem>
 <TabItem value="nodejs" label="Node.js">
 
-<CodeBlock language="javascript" title="Record a customer onboarding">{`import { randomUUID } from "node:crypto";
+<CodeBlock language="javascript" title="Record a loyalty enrollment">{`import { randomUUID } from "node:crypto";
 
-const response = await fetch("${OTTU_CONNECT_BASE_URL}/b/onboarding/v1/user/", {
+const response = await fetch("${OTTU_CONNECT_BASE_URL}/b/partners/loyalty/pwp/enrollments/", {
   method: "POST",
   headers: {
     Authorization: "Api-Key <PRIVATE_API_KEY>",
@@ -126,7 +128,7 @@ console.log(response.status, await response.json());
 </TabItem>
 <TabItem value="php" label="PHP">
 
-<CodeBlock language="php" title="Record a customer onboarding">{`<?php
+<CodeBlock language="php" title="Record a loyalty enrollment">{`<?php
 $payload = [
     "customer_first_name"   => "Saifuddin",
     "customer_last_name"    => "Tahir",
@@ -135,7 +137,7 @@ $payload = [
     "reward_type"           => "welcome_voucher",
 ];
 
-$ch = curl_init("${OTTU_CONNECT_BASE_URL}/b/onboarding/v1/user/");
+$ch = curl_init("${OTTU_CONNECT_BASE_URL}/b/partners/loyalty/pwp/enrollments/");
 curl_setopt_array($ch, [
     CURLOPT_POST           => true,
     CURLOPT_RETURNTRANSFER => true,
@@ -184,14 +186,14 @@ Networks drop responses. If the partner resends a request after a timeout withou
 Without the header, every call records a new event.
 
 <CodeBlock language="bash" title="A retry with the same key returns the original reference">{`# first attempt (response lost in transit)
-curl -s -X POST '${OTTU_CONNECT_BASE_URL}/b/onboarding/v1/user/' \\
+curl -s -X POST '${OTTU_CONNECT_BASE_URL}/b/partners/loyalty/pwp/enrollments/' \\
   -H 'Authorization: Api-Key <PRIVATE_API_KEY>' -H 'Content-Type: application/json' \\
   -H 'Idempotency-Key: 3f2a9c1e-4b7d-8e6f-0a1b-2c3d4e5f6071' \\
   -d '{"customer_first_name":"Saifuddin","customer_last_name":"Tahir","customer_phone":"+96597117060","reward_type":"welcome_voucher"}'
 # -> 201 {"reference": "9b1c...2c3d", "status": "received"}
 
 # the retry
-curl -s -X POST '${OTTU_CONNECT_BASE_URL}/b/onboarding/v1/user/' \\
+curl -s -X POST '${OTTU_CONNECT_BASE_URL}/b/partners/loyalty/pwp/enrollments/' \\
   -H 'Authorization: Api-Key <PRIVATE_API_KEY>' -H 'Content-Type: application/json' \\
   -H 'Idempotency-Key: 3f2a9c1e-4b7d-8e6f-0a1b-2c3d4e5f6071' \\
   -d '{"customer_first_name":"Saifuddin","customer_last_name":"Tahir","customer_phone":"+96597117060","reward_type":"welcome_voucher"}'
@@ -224,7 +226,7 @@ Ottu does not store full card numbers on this endpoint. Any value with a run of 
 | | |
 | --- | --- |
 | Method | `POST` |
-| Path | `/b/onboarding/v1/user/` |
+| Path | `/b/partners/loyalty/pwp/enrollments/` — one path per loyalty program; see [When to Use](#when-to-use) |
 | Auth | `Authorization: Api-Key <PRIVATE_API_KEY>` — [private key only](/developers/getting-started/authentication#api-key-auth) |
 | Content type | `application/json` (request and response) |
 | Rate limit | 60 requests per minute **per API key**; `429` when exceeded |
@@ -289,12 +291,12 @@ Validation errors are keyed by the field (or header) that failed, in the standar
 | `reward_type` | `Only letters, digits and the characters . _ - are allowed.` | A display name (`Welcome Voucher`) or other non-code value; send the lowercase code. |
 | `Idempotency-Key` | `Only letters, digits and the characters . _ : - are allowed.` | Spaces or other characters in the key. |
 | `Idempotency-Key` | `Must not contain a card number. Use an opaque id such as a UUID.` | The key contains a 13–19 digit card number. |
-| `detail` | `This Idempotency-Key was already used for a different onboarding. Send a new key, or resend the original data unchanged.` | `409` — key reuse with different data. |
+| `detail` | `This Idempotency-Key was already used for a different enrollment. Send a new key, or resend the original data unchanged.` | `409` — key reuse with different data. |
 | `detail` | `Null characters are not allowed.` | `400` — a NUL byte anywhere in the request. |
 
 ## Best Practices
 
-- **Always send an `Idempotency-Key`**, generated per onboarding event (a UUID is ideal). It is the only thing that makes a retry after a timeout safe.
+- **Always send an `Idempotency-Key`**, generated per enrollment event (a UUID is ideal). It is the only thing that makes a retry after a timeout safe.
 - **Mask the card number before it leaves the partner's system.** The endpoint refuses a full PAN, but the right place to mask is at the source — the value should never travel unmasked.
 - **Treat `200` as success.** It means the event was already recorded from an earlier attempt; the `reference` is the same one.
 - **On `409`, stop and look.** It means a key was reused for a different customer — usually a bug in key generation on the partner side, not something to retry.
@@ -304,7 +306,7 @@ Validation errors are keyed by the field (or header) that failed, in the standar
 ## FAQ
 
 **Does this endpoint issue the reward, credit points, or notify the customer?**
-No. It records that the onboarding happened and returns a reference. Reward redemption is part of the [Loyalty](/developers/payments/loyalty) programme it feeds.
+No. It records that the enrollment happened and returns a reference. Reward redemption is part of the [Loyalty](/developers/payments/loyalty) programme it feeds.
 
 **Can the customer call this from the checkout page or an app?**
 No. It is server-to-server only and requires the private API key, which must never be shipped to a browser or a mobile app.
@@ -324,7 +326,7 @@ It is published in the public OpenAPI schema of your installation; the interacti
 ## What's Next?
 
 - [Authentication](/developers/getting-started/authentication#api-key-auth) — how private API keys work and how to keep them safe
-- [Loyalty](/developers/payments/loyalty) — the reward programme an onboarding event feeds
+- [Loyalty](/developers/payments/loyalty) — the reward programme an enrollment event feeds
 - [Error codes](/developers/reference/error-codes) — the platform-wide error reference
 - [Checkout API](/developers/payments/checkout-api) — when the customer actually pays
 - [Webhooks](/developers/webhooks/) — how Ottu tells your server about payment outcomes
