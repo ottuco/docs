@@ -13,6 +13,8 @@ Give each integration its own scoped key holding only what it needs. A back-offi
 
 :::note Checkout SDK flows are unaffected
 Your customers' browser and mobile checkout flows authenticate with the [public key](../getting-started/authentication.md#public-key) and are never blocked by key scoping.
+
+The public key is not a way around scoping either: routes that name a customer or charge a card â€” [User Cards](../cards-and-tokens/user-cards.mdx) list and delete, the [Payment Methods API](../payments/payment-methods.md) and [auto-debit](../cards-and-tokens/recurring-payments.mdx#subsequent-payments-mit) â€” refuse it with `401`.
 :::
 
 ## Permission catalog
@@ -28,7 +30,7 @@ Permissions use the same vocabulary as dashboard users (Basic Authentication) â€
 | Upload an attachment | `Can add payment requests` (per plugin) |
 | Create an invoice ([Invoice API](../invoices.mdx)) | `Can add payment requests` and `Can add Invoice` |
 | Payment status inquiry ([Operations](../operations.md)) | `Can do inquiry` |
-| List available payment methods | `Can view PG MID` |
+| List available payment methods ([Payment Methods API](../payments/payment-methods.md)) | `Can view Settings` (`gateway.view_pgmid`) |
 
 ### Post-payment operations
 
@@ -46,8 +48,8 @@ Permissions use the same vocabulary as dashboard users (Basic Authentication) â€
 
 | Operation | Required permission |
 |---|---|
-| Auto-debit a saved card | `Can do autodebit` |
-| Charge a stored card token | `Can do autodebit` |
+| Auto-debit a saved card ([Recurring Payments](../cards-and-tokens/recurring-payments.mdx#subsequent-payments-mit)) | `Can perform auto-debits` (`user.do_autodebit`) |
+| Charge a stored card token | `Can perform auto-debits` (`user.do_autodebit`) |
 | Native Apple Pay / Google Pay / wallet payment (server-to-server) | `Can execute native payment` |
 
 ### Driving a checkout session server-side
@@ -62,8 +64,9 @@ Permissions use the same vocabulary as dashboard users (Basic Authentication) â€
 
 | Operation | Required permission |
 |---|---|
-| List a customer's saved cards | `Can view card` |
-| Delete a saved card token | `Can delete card` |
+| List a customer's saved cards ([User Cards](../cards-and-tokens/user-cards.mdx)) | `Can view Card` (`card.view_card`) |
+| Delete a saved card token | `Can delete Card` (`card.delete_card`) |
+| Delete a saved card from a checkout session (the Checkout SDK's `delete_url`) | `Can delete Card` (`card.delete_card`) â€” not needed when the Checkout SDK calls it with the public key |
 | Send a customer notification (email / SMS / WhatsApp) | `Can send payment notification` |
 | Read notification unit configuration; shorten a payment link | `Can send payment notification` |
 | List and download reports ([Reports API](../reports.mdx)) | `Can view report` |
