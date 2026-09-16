@@ -108,7 +108,7 @@ For [post-payment operations](../operations.md) (refund, capture, void, etc.), e
 | Permission | Used By |
 |---|---|
 | `Can add Invoice` | [Invoice API](../invoices.mdx) |
-| `report.can_view_report` | [Reports API](../reports.mdx) |
+| `Can view Report` (`report.view_report`) | [Reports API](../reports.mdx) |
 | `Can view Card` (`card.view_card`) | [User Cards API](../cards-and-tokens/user-cards.mdx) — list saved cards |
 | `Can delete Card` (`card.delete_card`) | [User Cards API](../cards-and-tokens/user-cards.mdx) — delete a saved card, including the session-scoped route |
 | `Can view Settings` (`gateway.view_pgmid`) | [Payment Methods API](../payments/payment-methods.md) |
