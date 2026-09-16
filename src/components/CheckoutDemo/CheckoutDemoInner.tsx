@@ -5,10 +5,15 @@ import {
   createSandboxSession,
   callPaymentMethods,
   extractPgCodes,
+  type PaymentPlugin,
 } from "@site/src/utils/sandbox";
 import { createDemoCallbacks } from "@site/src/utils/checkoutSdk";
 import CheckoutSDKEmbed from "@site/src/components/CheckoutSDKEmbed";
 import styles from "./styles.module.css";
+
+// Single-sourced: gateway discovery and session creation must name the same
+// plugin, or the session gets pg_codes that are not enabled for it (#159191).
+const PLUGIN: PaymentPlugin = "e_commerce";
 
 type State =
   | { status: "idle" }
@@ -86,6 +91,7 @@ export default function CheckoutDemoInner() {
     try {
       const methodsResponse = await callPaymentMethods({
         currencies: ["KWD"],
+        plugin: PLUGIN,
         type: "sandbox",
         tags: ["demo"],
       });
@@ -94,7 +100,7 @@ export default function CheckoutDemoInner() {
 
       const { session_id } = await createSandboxSession({
         pg_codes: pgCodes.length > 0 ? pgCodes : ["ottu_sdk"],
-        type: "e_commerce",
+        type: PLUGIN,
       });
       dispatch({ type: "SESSION_CREATED", sessionId: session_id });
     } catch (err: any) {

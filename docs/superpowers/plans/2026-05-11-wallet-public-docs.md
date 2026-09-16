@@ -2526,8 +2526,8 @@ gh pr create --base dev --title "docs(wallet): add public wallet documentation f
 - Three glossary entries: Wallet, Wallet Credit, Wallet Reservation.
 
 Spec: [`docs/superpowers/specs/2026-05-11-wallet-public-docs-design.md`](../blob/task/150388-wallet-docs/docs/superpowers/specs/2026-05-11-wallet-public-docs-design.md)
-Ticket: [Redmine #150388](https://pm.kuwaitnet.com/issues/150388)
-Docs subticket: [Redmine #150394](https://pm.kuwaitnet.com/issues/150394)
+Ticket: [Redmine #150388](https://orbit.ottu.com/issues/150388)
+Docs subticket: [Redmine #150394](https://orbit.ottu.com/issues/150394)
 
 ## Sequencing notes
 

@@ -6,6 +6,7 @@ import {
   callPaymentMethods,
   callPaymentStatusQuery,
   getWebhookBaseUrl,
+  type PaymentPlugin,
 } from "@site/src/utils/sandbox";
 import { createDemoCallbacks } from "@site/src/utils/checkoutSdk";
 import ApiPanel from "@site/src/components/ApiPanel";
@@ -14,6 +15,10 @@ import WebhookViewer from "@site/src/components/RecurringDemo/WebhookViewer";
 import { TEST_CARD } from "@site/src/components/TestCardCallout";
 import { COUNTRIES, DEFAULT_COUNTRY_INDEX } from "./countries";
 import styles from "./styles.module.css";
+
+// Single-sourced: gateway discovery and session creation must name the same
+// plugin, or the session gets pg_codes that are not enabled for it (#159191).
+const PLUGIN: PaymentPlugin = "payment_request";
 
 // ── Types ──────────────────────────────────────────────
 
@@ -325,7 +330,7 @@ export default function PaymentJourneyInner() {
   const runStep1 = useCallback(async () => {
     dispatch({ type: "COUNTRY_CONFIRMED" });
     try {
-      const response = await callPaymentMethods({ currencies: [state.selectedCurrency], plugin: "payment_request", operation: "purchase", type: "sandbox", tags: ["demo"] });
+      const response = await callPaymentMethods({ currencies: [state.selectedCurrency], plugin: PLUGIN, operation: "purchase", type: "sandbox", tags: ["demo"] });
       const pgCodes = response?.payment_methods?.map((m: any) => m.code) ?? response?.pg_codes ?? [];
       dispatch({ type: "STEP1_DONE", pgCodes, response });
     } catch (err: any) {
@@ -341,6 +346,7 @@ export default function PaymentJourneyInner() {
       const webhookUrl = `${getWebhookBaseUrl()}/webhook/${state.orderId}`;
       const response = await createSandboxSession({
         pg_codes: state.pgCodes.length > 0 ? state.pgCodes : ["direct-payment"],
+        type: PLUGIN,
         currency_code: state.selectedCurrency,
         customer_id: "sandbox",
         extra: {
@@ -514,7 +520,7 @@ export default function PaymentJourneyInner() {
           {(state.status === "step1_done" || isStepExpanded(2)) && (
             <>
               <ApiPanel label="POST /b/pbl/v2/payment-methods/" data={{
-                plugin: "payment_request",
+                plugin: PLUGIN,
                 operation: "purchase",
                 currencies: [state.selectedCurrency],
                 type: "sandbox",
@@ -545,7 +551,7 @@ export default function PaymentJourneyInner() {
           ) : (state.status === "step2_done" || isStepExpanded(3)) && state.sessionId ? (
             <>
               <ApiPanel label="POST /b/checkout/v1/pymt-txn/" data={{
-                type: "payment_request",
+                type: PLUGIN,
                 pg_codes: state.pgCodes,
                 amount: "20",
                 currency_code: state.selectedCurrency,

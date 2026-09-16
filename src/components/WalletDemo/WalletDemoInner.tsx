@@ -99,7 +99,7 @@ export default function WalletDemoInner() {
 
     try {
       // Step 1 — Fetch wallet-capable gateways
-      const filter = WALLET_DEMO.pgFilter || ({} as any);
+      const filter = WALLET_DEMO.pgFilter;
       const methodsResponse = await callPaymentMethods({
         currencies: [WALLET_DEMO.currency],
         plugin: filter.plugin,
@@ -131,7 +131,7 @@ export default function WalletDemoInner() {
       // Step 3 — Create Checkout session
       const { session_id } = await createSandboxSession({
         pg_codes: [pgCode],
-        type: "e_commerce",
+        type: filter.plugin,
         amount: WALLET_DEMO.sessionAmount,
         currency_code: WALLET_DEMO.currency,
         customer_id: customerId,
