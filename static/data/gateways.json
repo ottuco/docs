@@ -1221,6 +1221,14 @@
         "statusLabel": "Success"
       },
       {
+        "cardNumber": "4508 7500 1574 1019",
+        "expiry": "01/28",
+        "cvv": "900",
+        "brand": "Visa",
+        "status": "declined",
+        "statusLabel": "Declined"
+      },
+      {
         "cardNumber": "5120 3501 0006 4537",
         "expiry": "Any future",
         "cvv": "Any 3 digits",
