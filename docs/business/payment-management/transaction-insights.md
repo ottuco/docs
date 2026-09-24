@@ -95,6 +95,16 @@ The full transaction amount credited back to the customer's bank account when a 
 - **Void** nullifies the entire amount, including any associated fee.
 :::
 
+### Track ID
+
+The **Track ID** column identifies a transaction at the payment gateway. You can add it to the transaction table via [proxy fields](#proxy-fields), and it is also available on the **Refund** and **Auto-Debit** transaction tables.
+
+Ottu shows the gateway's own reference for the transaction whenever the gateway returns one. If the gateway does not return its own reference, Ottu falls back to its internal transaction reference, so the column always has a value once a payment attempt exists.
+
+:::note
+Which value you see depends on the payment gateway. Gateways that return their own reference in their response show it directly; others show Ottu's internal reference instead.
+:::
+
 ## Dashboard Charts
 
 The Ottu Dashboard provides visual charts so you can track transactions and sales performance at a glance. These charts update in real time and are available from the main dashboard.
