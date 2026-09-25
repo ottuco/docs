@@ -1,0 +1,73 @@
+---
+id: autopay-subscription-cancel
+title: "Cancel an AutoPay subscription"
+description: "Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant."
+sidebar_label: "Cancel an AutoPay subscription"
+hide_title: true
+hide_table_of_contents: true
+api: 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
+sidebar_class_name: "post api-method"
+info_path: developers/apis/ottu-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+import Translate from "@docusaurus/Translate";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Cancel an AutoPay subscription"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/b/pbl/v2/subscriptions/{subscription_id}/cancel/"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant.
+
+Cancels a subscription through AutoPay and records the merchant as the initiator upstream.
+
+<pre style={{display:"none"}}>{"curl --location --globoff 'https://sandbox.ottu.net/b/pbl/v2/subscriptions/{subscription_id}/cancel/' \\\n--header 'Idempotency-Key: <uuid>' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Api-Key YOUR_API_KEY' \\\n--data '{\n  \"mode\": \"immediate\"\n}'"}</pre>
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+>
+  <Translate id="theme.openapi.request.title">Request</Translate>
+</Heading>
+
+<ParamsDetails
+  {...require("./autopay-subscription-cancel.ParamsDetails.json")}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  {...require("./autopay-subscription-cancel.RequestSchema.json")}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  {...require("./autopay-subscription-cancel.StatusCodes.json")}
+>
+  
+</StatusCodes>
+
+
+      

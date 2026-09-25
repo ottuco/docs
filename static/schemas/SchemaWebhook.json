@@ -139,6 +139,34 @@
       "readOnly": true,
       "description": "A comprehensive set of amount details includes: Currency Code, Amount, Total, Fee."
     },
+    "autopay": {
+      "type": "object",
+      "description": "AutoPay subscription context, added to the webhook after signing (informational, not covered by the HMAC).",
+      "properties": {
+        "cycle_number": {
+          "type": "integer",
+          "nullable": true
+        },
+        "cycle_status": {
+          "type": "string",
+          "nullable": true
+        },
+        "event_type": {
+          "type": "string"
+        },
+        "next_billing_date": {
+          "type": "string",
+          "format": "date",
+          "nullable": true
+        },
+        "subscription_id": {
+          "type": "string"
+        },
+        "subscription_status": {
+          "type": "string"
+        }
+      }
+    },
     "capture_delivery_address": {
       "type": "boolean",
       "description": "By enabling this, you will ask for user's address. If enabled, capture delivery coordinates should also be active."
@@ -154,7 +182,7 @@
           "type": "integer",
           "maximum": 365,
           "minimum": 1,
-          "description": "Specifies the minimum required validity period, in days, for a card to be eligible for payment. If set to 30 days, for example, cards set to expire within the next month would be declined. Additionally, it defaults to 30 days when the `payment_type` is `auto_debit`. If any other payment type is selected, no default value is set.\n"
+          "description": "Specifies the minimum required validity period, in days, for a card to be eligible for payment. If set to 30 days, for example, cards set to expire within the next month would be declined. Additionally, it defaults to 30 days when the `payment_type` is `auto_debit`. If any other payment type is selected, no default value is set. This default is specific to `auto_debit` and is **not** applied to `auto_pay`, even though `auto_pay` otherwise inherits the `auto_debit` requirements — set `min_expiry_time` explicitly if you want a card-expiry floor on an AutoPay subscription.\n"
         }
       },
       "type": "object",
@@ -406,11 +434,12 @@
       "enum": [
         "one_off",
         "auto_debit",
-        "save_card"
+        "save_card",
+        "auto_pay"
       ],
       "type": "string",
-      "x-spec-enum-id": "b2ae60f7918918e7",
-      "description": "Type of payment. Choose `one_off` for payments that occur only once without future commitments. Choose `auto_debit` for payments that are automatically deducted, such as recurring subscriptions, installments, or unscheduled auto-debits. \n\nChoose `save_card` if you want to perform a card tokenization operation.\n\nNOTE: If `auto_debit` is selected: \n1. `agreement` and `customer_id` parameters will also be mandatory. \n2. Only PG codes supporting tokenization can be selected. \nAs a side effect, the card used for the payment will be associated with the supplied `agreement.id`. This card will be locked, preventing the customer from deleting it from the system until an alternate card is chosen for auto-debit payments.\n\nNOTE: If `save_card` is selected: \n1. The amount must be zero for the save card operation. \n2. The selected MID(pg_code) must support tokenization to enable the save card operation. \n3. Please note that the save card operation is considered successful without any funds being charged.\n4. Once a card is created, Ottu will send a webhook containing the card details to the merchant's webhook URL.\n5. When the transaction type is `save_card`, all previously saved cards returned in the sdk_preload_payload should be hidden since the user is saving a new card and does not need to select from existing ones.\n\n* `one_off` - One Off\n* `auto_debit` - Auto Debit\n* `save_card` - Save Card"
+      "x-spec-enum-id": "a60fd8e05a86f0b5",
+      "description": "Type of payment. Choose `one_off` for payments that occur only once without future commitments. Choose `auto_debit` for payments that are automatically deducted, such as recurring subscriptions, installments, or unscheduled auto-debits. \n\nChoose `save_card` if you want to perform a card tokenization operation.\n\nNOTE: If `auto_debit` is selected: \n1. `agreement` and `customer_id` parameters will also be mandatory. \n2. Only PG codes supporting tokenization can be selected. \nAs a side effect, the card used for the payment will be associated with the supplied `agreement.id`. This card will be locked, preventing the customer from deleting it from the system until an alternate card is chosen for auto-debit payments.\n\nNOTE: If `save_card` is selected: \n1. The amount must be zero for the save card operation. \n2. The selected MID(pg_code) must support tokenization to enable the save card operation. \n3. Please note that the save card operation is considered successful without any funds being charged.\n4. Once a card is created, Ottu will send a webhook containing the card details to the merchant's webhook URL.\n5. When the transaction type is `save_card`, all previously saved cards returned in the sdk_preload_payload should be hidden since the user is saving a new card and does not need to select from existing ones.\n\n* `one_off` - One Off\n* `auto_debit` - Auto Debit\n* `save_card` - Save Card\n* `auto_pay` - Auto Pay"
     },
     "pg_params": {
       "properties": {

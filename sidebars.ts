@@ -271,6 +271,11 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
+                  label: "Compatibility Notes",
+                  href: "/developers/payments/autopay#compatibility-notes",
+                },
+                {
+                  type: "link",
                   label: "FAQ",
                   href: "/developers/payments/autopay#faq",
                 },

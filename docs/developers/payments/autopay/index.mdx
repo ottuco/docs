@@ -12,12 +12,13 @@ import CodeBlock from "@theme/CodeBlock";
 import AutoPayFlowDiagram from "@site/src/diagrams/AutoPayFlowDiagram";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
+import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 
 # AutoPay
 
 AutoPay is Ottu's fully managed subscription engine. With [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments), **you** own the billing schedule — your system decides when to charge the saved card, retries failures, and emails the customer. With AutoPay (`payment_type: "auto_pay"`), **Ottu** owns all of that instead: you make one [Checkout API](../checkout-api) call to set up the subscription, and from there AutoPay generates each [billing cycle](/glossary/#term-billing-cycle), retries failed charges, notifies the customer, and gives them a self-service page — no scheduler, retry loop, or [dunning](/glossary/#term-dunning) emails to build yourself.
 
-Merchant-facing management (list, retrieve, cancel, and the rest) is REST-API-only in this phase — there is no AutoPay dashboard screen yet. Every call on this page, including the six subscription-management endpoints, uses the standard [Ottu API key](/developers/getting-started/authentication) flow — there is no separate credential to obtain.
+Merchant-facing management (list, retrieve, cancel, and the rest) is REST-API-only in this phase — there is no AutoPay dashboard screen yet. Every call on this page, including the five subscription-management endpoints, uses the standard [Ottu API key](/developers/getting-started/authentication) flow — there is no separate credential to obtain.
 
 :::note Base URL
 Every API call in this guide targets <code>{OTTU_CONNECT_BASE_URL}</code>. Swap in your own merchant domain when you integrate.
@@ -248,6 +249,29 @@ This error reads like something is wrong with your `agreement` object — it isn
 
 All filter fields are optional: `status`, `customer_id`, `created_after`, `created_before`, `limit` (default 20, max 100), `offset`. The response is the standard paginated envelope — `count`, `next`, `previous`, `results`. Each item in `results` is a slim summary — `id`, `customer_id`, `customer_email`, `frequency`, `recurring_amount`, `currency`, `status`, `next_billing_date`, `created_at` — not the full subscription object. For the active card and latest-cycle detail, call [Retrieve a subscription](#retrieve-a-subscription) with the item's `id`.
 
+##### Paging through the list {#paging-through-the-list}
+
+`next` and `previous` are absolute URLs on your own Connect domain, and they carry `limit` and `offset` in the **query string**, even though you sent them in the body:
+
+```json title="Example response — 200 OK (truncated)"
+{
+  "count": 503,
+  "next": "https://<your-ottu-domain>/b/pbl/v2/subscriptions/?limit=1&offset=1",
+  "previous": null,
+  "results": [{"id": "sub_jzxTLIBY3LT090lkbe4y9XBX", "status": "pending_setup"}]
+}
+```
+
+Three rules follow from that, and the first one catches almost everyone:
+
+1. **Follow the link with `POST`, not `GET`.** The endpoint is POST-only. A `GET` on the `next` URL returns `405 {"detail": "Method \"GET\" not allowed."}`. Reuse the same verb, headers and API key you used for the first page.
+2. **The body is optional when you follow a link.** Because `limit` and `offset` are already in the query string, `POST`ing the `next` URL with an empty body `{}` returns the correct page. If you want your original filters applied to that page too, resend them in the body.
+3. **Query parameters win over body parameters.** When both carry `limit` or `offset`, the query string overrides the body. Posting `{"offset": 1}` to a URL ending `?offset=5` returns the page at offset 5, not 1. Other filters (`status`, `customer_id`, `created_after`, `created_before`) are read from the body only.
+
+:::note Why the links point at your domain
+AutoPay builds `next` and `previous` against its own internal host, which merchants cannot reach. Connect rewrites both onto the URL you called before returning the response, so the links are always followable with the credentials you already hold. The same rewrite applies to [billing cycle history](#billing-cycle-history).
+:::
+
 #### 3. Retrieve a subscription {#retrieve-a-subscription}
 
 <CodeBlock language="bash" title="Get subscription detail">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/sub_abc123/' \\
@@ -320,10 +344,11 @@ The customer self-service page (below) can only schedule a cancellation for the 
 
 #### 5. Manage the customer self-service link {#manage-the-customer-self-service-link}
 
-The merchant delivers a per-subscription link to the customer; the signed token in the URL is the credential — see [Customer Self-Service Page](#customer-self-service-page) for what the customer can do with it. Two endpoints manage that link:
+The merchant delivers a per-subscription link to the customer; the signed token in the URL is the credential — see [Customer Self-Service Page](#customer-self-service-page) for what the customer can do with it. One endpoint manages that link, and it requires an `Idempotency-Key` header (UUID v4). Connect rejects the call with `400` before it reaches AutoPay if the header is missing:
 
 <CodeBlock language="bash" title="Regenerate the page token (revokes the old link instantly)">{`curl --location --request POST '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/sub_abc123/regenerate-page-token/' \\
-  --header 'Authorization: Api-Key <YOUR_API_KEY>'`}</CodeBlock>
+  --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
+  --header 'Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000'`}</CodeBlock>
 
 ```json title="Example response — 200 OK"
 {
@@ -332,16 +357,15 @@ The merchant delivers a per-subscription link to the customer; the signed token 
 }
 ```
 
-<CodeBlock language="bash" title="Read the current link without rotating it">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/sub_abc123/page-link/' \\
-  --header 'Authorization: Api-Key <YOUR_API_KEY>'`}</CodeBlock>
-
 :::warning Regenerating revokes the old link instantly — and silently
-The old `page_token` stops working the moment you call regenerate — before you've delivered the new one. AutoPay does **not** notify the customer. You must send them the new `page_url` yourself, or they'll hit a dead link. Use `page-link` (not `regenerate-page-token`) when you just need to re-send a link that should keep working — regenerating is only for revoking a compromised or lost one.
+The old `page_token` stops working the moment you call regenerate, before you've delivered the new one. AutoPay does **not** notify the customer. You must send them the new `page_url` yourself, or they'll hit a dead link. Treat this endpoint as the recovery path for a compromised or lost link, not as a way to re-send a working one.
 
-Note also that `regenerate-page-token` is deliberately **not** idempotent — each call mints a new token and kills the old one, so it does not take (or need) an `Idempotency-Key` header. Retrying it on a timeout will revoke a link a second time.
+**Store the `page_url` when you create the subscription.** Connect does not expose a read-only "fetch the current link" endpoint, so regenerating is the only way to obtain a link you did not keep, and it destroys the one the customer is already using.
+
+**The required `Idempotency-Key` does not make this call idempotent.** Connect rejects the request without the header, but replaying the *same* key still mints a fresh token and revokes the previous one. There is no replay protection here, so a blind retry after a timeout will invalidate a link you may have just delivered. Confirm the outcome before retrying.
 :::
 
-#### 6. Billing cycle history
+#### 6. Billing cycle history {#billing-cycle-history}
 
 <CodeBlock language="bash" title="List billing cycles">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/sub_abc123/cycles/?limit=10&offset=0' \\
   --header 'Authorization: Api-Key <YOUR_API_KEY>'`}</CodeBlock>
@@ -369,6 +393,16 @@ Note also that `regenerate-page-token` is deliberately **not** idempotent — ea
 
 Cycle `status` values: `scheduled` (charge pending), `processing` (charge in flight), `retry_scheduled` (an attempt failed and the next automatic retry is queued), `paid`, `failed` (all retries exhausted — the subscription is now `past_due`), and `canceled` (the cycle was canceled along with the subscription). See [Billing Cycles](#billing-cycles) for how cycles are generated and [Retries & Dunning](#retries-and-dunning) for the retry schedule that gets a cycle from `scheduled` to `failed`.
 
+Pagination works the same way as [the subscription list](#paging-through-the-list), with one difference that makes it simpler: this endpoint is a `GET`, so `limit` and `offset` belong in the query string and `next` / `previous` can be followed directly with `GET`. Connect rewrites both links onto your Connect domain, as it does for the list:
+
+```json title="next / previous on a paginated cycles response"
+{
+  "count": 2,
+  "next": "https://<your-ottu-domain>/b/pbl/v2/subscriptions/sub_abc123/cycles/?limit=1&offset=1",
+  "previous": null
+}
+```
+
 ### Use Cases
 
 #### Subscription States {#subscription-states}
@@ -395,7 +429,7 @@ The billing date is anchor-day clamped: a subscription anchored on the 31st that
 
 #### Retries & Dunning {#retries-and-dunning}
 
-If a charge fails, AutoPay retries. The default is 3 retries — 4 total attempts (1 initial + 3 retries) — configurable per subscription via `retry_count` (1–10) on the `autopay` block. Retries are spaced **one hour apart, flat** — there's no exponential backoff.
+If a charge fails, AutoPay retries. The default is 3 retries — 4 total attempts (1 initial + 3 retries) — configurable per subscription via `retry_count` (1–10) on the `autopay` block. Retries are spaced **evenly across `retry_window_days`**: the interval between attempts is `retry_window_days / retry_count` days. With the defaults (3 retries over a 3-day window) that's one retry per day. There's no exponential backoff — the spacing is flat, just not fixed at a specific duration, since both `retry_count` and `retry_window_days` (1–30) are configurable per subscription.
 
 When every attempt on a cycle is exhausted: the cycle moves to `failed`, the subscription moves to `past_due`, and the customer gets a final-failure email with a recovery link.
 
@@ -437,18 +471,100 @@ Unlike the merchant [Cancel](#cancel-a-subscription) endpoint, a cancellation in
 
 ## API Reference
 
-:::note Interactive reference coming soon
-AutoPay's endpoints aren't in the public OpenAPI schema yet, so there's no interactive explorer here for the moment. See [Step-by-Step](#step-by-step) for the full set of six endpoints with cURL examples. The request bodies, responses, and behaviour documented there are accurate; the path the six management endpoints sit behind is not yet final, and is flagged in that section.
+All five subscription-management endpoints are published in the interactive reference below. Expand any field for its type, enum values, constraints and defaults, and use the sample request as a starting point.
+
+Every one of them is a proxy: Connect authenticates you, resolves your merchant tenant, forwards the call to AutoPay, and returns AutoPay's response body and status unchanged. You never send a `Merchant-Id` header yourself.
+
+<ApiDocEmbed path="autopay-subscription-list.api.mdx" />
+
+<ApiDocEmbed path="autopay-subscription-detail.api.mdx" />
+
+<ApiDocEmbed path="autopay-subscription-cancel.api.mdx" />
+
+<ApiDocEmbed path="autopay-subscription-cycles.api.mdx" />
+
+<ApiDocEmbed path="autopay-subscription-regenerate-page-token.api.mdx" />
+
+### Error contract {#error-contract}
+
+The proxy maps upstream and transport failures onto a fixed set of statuses, so you can handle them without parsing message text:
+
+| Status | Meaning | What to do |
+|---|---|---|
+| `400` | Request validation failed, either by Connect or by AutoPay. A missing `Idempotency-Key` on cancel or regenerate is rejected here, before the upstream call. | Fix the request. Retrying unchanged will fail again. |
+| `401` | Not authenticated. | Check your [API key](/developers/getting-started/authentication) or bearer token. |
+| `404` | No such subscription for your merchant. | Do not retry. |
+| `423` | The installation is paused. | Retry later; this is a temporary administrative state. |
+| `503` | AutoPay is unavailable or not configured on this deployment. | Retry with backoff. |
+| `504` | The call to AutoPay timed out. | Retry with backoff. For `cancel`, reuse the same `Idempotency-Key` so a retry cannot double-apply. |
+
+:::warning A 504 does not mean nothing happened
+A timeout means Connect stopped waiting, not that AutoPay stopped working. The operation may still have been applied upstream. For `cancel`, retry with the *same* `Idempotency-Key`. For `regenerate-page-token`, re-read the subscription before retrying, because that endpoint has no replay protection.
 :::
+
+### Configuration discovery {#configuration-discovery}
+
+`GET /b/api/v1/config/` reports whether AutoPay is enabled for a merchant, via an `autopay_api_url` field:
+
+<CodeBlock language="bash" title="Check whether AutoPay is enabled">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/api/v1/config/'`}</CodeBlock>
+
+```json title="Example response — 200 OK"
+{
+  "title": "your-merchant",
+  "websocket_url": "wss://ws.ottu.dev",
+  "autopay_api_url": "https://autopay.ottu.dev"
+}
+```
+
+Two things to know about it:
+
+- **Falsy values are stripped from this response**, so the key is simply absent when AutoPay is not enabled. Test for the key's presence, not for an empty value.
+- It **replaces the old build-time `VUE_APP_AUTOPAY_BACKEND_URL` environment variable**. Read the host at runtime from this endpoint rather than baking it into a build.
+
+`autopay_api_url` points at the AutoPay service itself, which is not where your integration sends requests. Merchant calls go to `/b/pbl/v2/subscriptions/` on your own Connect domain, as documented above. Treat this field as a capability flag.
 
 ## Best Practices
 
-- **Send `Idempotency-Key` (UUID v4) on Cancel** — but not on Regenerate Page Token, which is deliberately non-idempotent. Sending one there does nothing; retrying the call on a timeout revokes a link a second time.
+- **Send `Idempotency-Key` (UUID v4) on both Cancel and Regenerate Page Token.** Connect rejects either call with `400` if the header is missing. On Cancel it also gives you real replay protection, so retrying a timed-out call with the same key is safe. On Regenerate it does **not**: the header is required but reusing the same key still mints a new token and revokes the old one, so never retry that call blindly.
 - **Deliver `page_url` yourself, every time.** AutoPay never notifies the customer when you regenerate — a stale link left undelivered is a customer who can't self-serve.
 - **Treat `past_due` as sticky.** AutoPay never auto-cancels it — build your own monitoring or reminder cadence around subscriptions stuck in that state if your business needs one.
 - **Match `notification_preferences` keys exactly.** Connect passes the object through without validating it, so a misspelled key silently does nothing instead of erroring. The three valid keys are listed under [Notifications](#notifications).
 - **Don't assume `card_acceptance_criteria.min_expiry_time` defaults for you.** Auto-debit defaults it to 30 days; AutoPay does not apply that default — set it explicitly if your integration relies on it.
 - **Keep filters in the body on List.** It's a POST for a reason — never move `customer_id` into a query string yourself.
+
+## Compatibility Notes {#compatibility-notes}
+
+Two behaviours will look like bugs if you have not seen them documented.
+
+### `auto_pay` appears as `auto_debit` in SDK and gateway payloads {#auto-pay-appears-as-auto-debit}
+
+`auto_pay` is meaningful only to Connect, which orchestrates the subscription. Everything downstream treats the payment as an ordinary auto-debit charge, so `payment_type` is deliberately rewritten to `auto_debit` in:
+
+- the **[Checkout SDK](../checkout-sdk/web) preload payload** served for the session, and
+- payloads handed to **ottu_pg**.
+
+Create a session with `payment_type: "auto_pay"`, then read the SDK payload for that `session_id`, and you will see `payment_type: "auto_debit"` with no `autopay` key. That is expected, not a defect. Your own record of the payment type stays `auto_pay`: the Checkout API response, the [webhook](/developers/webhooks/payment-events/) and the signed field set all report `auto_pay`.
+
+### Cards saved before the CIT agreement fix are not backfilled {#cards-saved-before-the-agreement-fix}
+
+An earlier defect meant a CIT paid with `payment_type: "auto_pay"` saved its token with an **empty `agreements` list**, because the code that binds the agreement to the saved card keyed off an exact `auto_debit` check and skipped `auto_pay` entirely.
+
+Because a merchant-initiated charge is authorised by matching the agreement recorded on the card, every later MIT against such a token is rejected:
+
+```json title="Symptom — MIT against a card saved by a pre-fix auto_pay CIT"
+{
+  "detail": "No Cardholder Initiated Transaction (CIT) found. Before initiating an auto-debit request, ensure a successful CIT payment has been made by the customer.",
+  "result": "failed"
+}
+```
+
+The message points at a missing CIT, but the CIT did happen and did succeed. What is missing is the agreement binding on the saved card, which is what the lookup actually matches on.
+
+:::warning Affected cards are not repaired automatically
+The fix binds the agreement for every mandate-carrying payment type going forward, but **existing tokens are not backfilled**. A card saved by an `auto_pay` CIT before the fix keeps its empty `agreements` list and will keep failing on MIT.
+
+Recovery is to run a fresh CIT for that customer so a new token is saved with the agreement bound. Subscriptions created after the fix are unaffected.
+:::
 
 ## FAQ
 
@@ -472,7 +588,7 @@ AutoPay's endpoints aren't in the public OpenAPI schema yet, so there's no inter
     The old link stops working instantly, and AutoPay does not notify the customer. You're responsible for delivering the new `page_url` to them.
   </FAQItem>
   <FAQItem question="Do failed-charge retries use exponential backoff?">
-    No. Retries are spaced a flat one hour apart. The default is 3 retries (4 total attempts), configurable per subscription from 1–10 via `retry_count`.
+    No, the spacing is flat: `retry_window_days / retry_count` days between attempts. The defaults are 3 retries over a 3-day window — one retry per day — and both are configurable per subscription, `retry_count` from 1–10 and `retry_window_days` from 1–30.
   </FAQItem>
   <FAQItem question="Do I need to set up a plan catalog before creating subscriptions?">
     No — AutoPay has no plan catalog. Pricing (`recurring_amount`), schedule (`frequency`, `start_date`), and a free-text `description` are just fields on the checkout call itself.
