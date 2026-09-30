@@ -18,10 +18,10 @@ This guide covers everything from generating your first export to re-downloading
 
 When you export data from any screen in Ottu — the Transactions page, wallet activity, or other sections — Ottu queues a file to be generated in the background. This usually takes a few seconds to a few minutes depending on how many records are included.
 
-Once the file is ready, it appears in the **Generated Reports** page, where you can download it at any time. You do not need to wait on the screen where you clicked Export — you can close the browser, come back later, and the file will still be there.
+Once the file is ready, it appears in the **Generated Reports** page, where you can download it for 30 days. You do not need to wait on the screen where you clicked Export — you can close the browser, come back later, and the file will still be there.
 
 :::note
-Generated reports are private to your account. Other staff members on your merchant account can see their own reports but not yours unless they have admin access.
+Which reports you see in Generated Reports depends on your dashboard permissions. The **Exported By** column shows who created each export. Rows with no name in that column are scheduled reports that Ottu generates automatically — see [Transaction Report Configuration](/business/settings/transaction-reports).
 :::
 
 ### What gets exported
@@ -84,7 +84,7 @@ Set the **Timezone** in the export panel to match the timezone your finance team
 
 ## Export Sources
 
-Ottu offers export from multiple screens in the dashboard. Each export source produces a CSV in the same **Generated Reports** download center.
+Ottu offers export from multiple screens in the dashboard. Every export source produces a **CSV** or **XLSX** file, and all of them land in the same **Generated Reports** download center.
 
 ### Transactions
 
@@ -124,7 +124,7 @@ All files you have exported — from any screen — are collected in one place: 
 <StepGuide steps={[
   {
     title: "Open Generated Reports",
-    description: <>From the Ottu Dashboard, click <strong>Generated Reports</strong> in the left sidebar. You will see a list of all reports you have queued, sorted with the most recent at the top.</>,
+    description: <>From the Ottu Dashboard, click <strong>Generated Reports</strong> in the left sidebar. Reports are split into two tabs: <strong>Transaction Exports</strong> (the default) and <strong>Wallet Exports</strong>. Each tab lists its reports with the most recent at the top.</>,
     image: "/img/business/reports/generated-reports-01-open.png",
     imageAlt: "Generated Reports page showing a table of exported report files",
   },
@@ -136,13 +136,13 @@ All files you have exported — from any screen — are collected in one place: 
   },
   {
     title: "Click the download icon",
-    description: <>Click the green <strong>download icon</strong> (↓) in the rightmost column next to your report. The CSV file saves to your browser's default Downloads folder.</>,
+    description: <>Click the green <strong>download icon</strong> (↓) in the rightmost column next to your report. The file (CSV or XLSX, whichever you chose when exporting) saves to your browser's default Downloads folder.</>,
     image: "/img/business/reports/generated-reports-03-download.png",
     imageAlt: "Download icon highlighted in the rightmost column next to a report row",
   },
   {
     title: "Re-download before the expiry date",
-    description: <>Each report shows an <strong>Available Until</strong> date — typically 30 days from when you exported it. You can click the download icon again at any time before that date to get another copy. Nothing changes between downloads — the file reflects the data at the moment you clicked Export.</>,
+    description: <>Each report shows an <strong>Available Until</strong> date — 30 days from when you exported it. You can click the download icon again at any time before that date to get another copy. Nothing changes between downloads — the file reflects the data at the moment you clicked Export.</>,
     image: "/img/business/reports/generated-reports-04-redownload.png",
     imageAlt: "Generated Reports list showing the Available Until date column next to older reports still available to download",
   },
