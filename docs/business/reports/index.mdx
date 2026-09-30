@@ -18,7 +18,7 @@ This guide covers everything from generating your first export to re-downloading
 
 When you export data from any screen in Ottu — the Transactions page, wallet activity, or other sections — Ottu queues a file to be generated in the background. This usually takes a few seconds to a few minutes depending on how many records are included.
 
-Once the file is ready, it appears in the **Generated Reports** page, where you can download it for 30 days. You do not need to wait on the screen where you clicked Export — you can close the browser, come back later, and the file will still be there.
+Once the file is ready, it appears in the **Generated Reports** page, where you can download it for 30 days (event booking exports are the one exception — see [Event Bookings](#event-bookings)). You do not need to wait on the screen where you clicked Export — you can close the browser, come back later, and the file will still be there.
 
 :::note
 Which reports you see in Generated Reports depends on your dashboard permissions. The **Exported By** column shows who created each export. Rows with no name in that column are scheduled reports that Ottu generates automatically — see [Transaction Report Configuration](/business/settings/transaction-reports).
@@ -31,7 +31,8 @@ Every export produces a spreadsheet file you can open in Excel, Google Sheets, o
 | What you export | Where you start | What the file contains |
 |---|---|---|
 | Payment transactions | Transactions page | Payment links, amounts, statuses, gateway info |
-| Wallet activity | Wallet reports screen | Wallet credits, debits, and balances |
+| Wallet activity | Wallet → Accounts → an account | Wallet credits, debits, and balances |
+| Event bookings | Events → Bookings | One row per booking, with customer and event details |
 
 :::tip
 If you need reports delivered automatically on a schedule — for example, a daily CSV emailed to your finance team — see [Transaction Report Configuration](/business/settings/transaction-reports) under Settings.
@@ -84,7 +85,7 @@ Set the **Timezone** in the export panel to match the timezone your finance team
 
 ## Export Sources
 
-Ottu offers export from multiple screens in the dashboard. Every export source produces a **CSV** or **XLSX** file, and transaction and wallet exports all land in the same **Generated Reports** download center.
+Ottu offers export from multiple screens in the dashboard. Every export source produces a **CSV** or **XLSX** file, and transaction and wallet exports all land in the same **Generated Reports** download center. The one exception is [Event Bookings](#event-bookings), which has its own download list.
 
 ### Transactions
 
@@ -103,6 +104,23 @@ If your account uses the [M-Wallet](/business/wallet/) feature, you can export w
 **What you get:** One row per wallet ledger entry, including event type (credit/debit/reservation), amount, currency, customer ID, status, and linked payment session.
 
 <StepGuide steps={walletExportSteps} />
+
+### Event Bookings
+
+If your account uses the Events plugin, you can export the list of bookings for your events. Event booking exports work differently from every other source: the file does **not** appear in Generated Reports. It has its own list under **Events → Event Reports**.
+
+**Where:** Dashboard → Events → Bookings → **Export Bookings**
+
+**What you get:** One row per booking, including the event, quantity, customer name, purchase type (free or paid), email, event date, booking date, and customer phone.
+
+1. Go to **Events → Bookings** and click **Export Bookings**.
+2. In the menu that opens, under **Select file type**, choose **CSV** or **XLSX**.
+3. Click **Export Bookings** in the menu. A green *"Your export request was successful"* message confirms the request.
+4. Go to **Events → Event Reports**. Your export is listed with its file format and number of records. Click the link in the **Download URL** column to download the file.
+
+:::warning
+Don't look for event booking exports in **Generated Reports** — they only appear under **Events → Event Reports**.
+:::
 
 ### Other Export Sources
 
@@ -127,7 +145,7 @@ The exact sections available in your dashboard depend on which [plugins](/busine
 
 ## Download Your Reports
 
-All files you have exported — from any screen — are collected in one place: the **Generated Reports** page. You can download them immediately after they are ready, or come back days later to re-download the same file.
+Every transaction and wallet export is collected in one place: the **Generated Reports** page. You can download them immediately after they are ready, or come back days later to re-download the same file.
 
 <StepGuide steps={[
   {
