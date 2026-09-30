@@ -84,13 +84,13 @@ Set the **Timezone** in the export panel to match the timezone your finance team
 
 ## Export Sources
 
-Ottu offers export from multiple screens in the dashboard. Every export source produces a **CSV** or **XLSX** file, and all of them land in the same **Generated Reports** download center.
+Ottu offers export from multiple screens in the dashboard. Every export source produces a **CSV** or **XLSX** file, and transaction and wallet exports all land in the same **Generated Reports** download center.
 
 ### Transactions
 
-The main export source. Covers all payment transactions created through any [plugin](/business/plugins) — Payment Request, E-Commerce, Bulk Payment Request, and others.
+The main export source. Each [plugin](/business/plugins) has its own **Transactions** page with an **Export Transactions** button, and every export covers only that plugin's transactions. The steps are the same everywhere, so the [Generate a Report](#generate-a-report) walkthrough above applies to all of them.
 
-**Where:** Dashboard → Payment Request → Transactions → **Export Transactions**
+**Where:** Dashboard → Payment Request → Transactions → **Export Transactions** (or the Transactions page of any other plugin, listed in [Other Export Sources](#other-export-sources) below)
 
 **What you get:** One row per transaction, including amount, currency, payment status, gateway, creation date, customer details, and any custom columns you have configured.
 
@@ -106,12 +106,20 @@ If your account uses the [M-Wallet](/business/wallet/) feature, you can export w
 
 ### Other Export Sources
 
-The following additional screens in Ottu also offer an Export button. Each works the same way — click Export, wait for the file to appear in Generated Reports.
+The following screens also have an **Export Transactions** button. Each works exactly like the [Transactions export](#generate-a-report): open the export panel, choose columns, timezone and file type, click **EXPORT**, and collect the file from Generated Reports.
 
 | Section | How to reach it |
 |---|---|
-| **Bulk Payment Requests** | Dashboard → Bulk Payment Request → Transactions → Export |
-| **E-Commerce Orders** | Dashboard → E-Commerce → Orders → Export |
+| **Payment Request — deleted transactions** | Dashboard → Payment Request → Deleted Paid Transactions → **Export Transactions** |
+| **Bulk** | Dashboard → Bulk → Transactions (or Deleted Paid Transactions) → **Export Transactions** |
+| **Customer Payment** | Dashboard → Customer payment → Transactions (or Deleted Paid Transactions) → **Export Transactions** |
+| **Catalogue** | Dashboard → Catalogue → Transactions (or Deleted Paid Transactions) → **Export Transactions** |
+| **E-Commerce** | Dashboard → E-commerce → Transactions (or Deleted Paid Transactions) → **Export Transactions** |
+| **Refund Transactions** | Dashboard → Refund Transactions → **Export Transactions** |
+
+:::note
+**Invoices**, **Bulk Uploads**, **Access Logs**, and the **Tickets** approval queue do not have an export option.
+:::
 
 :::note
 The exact sections available in your dashboard depend on which [plugins](/business/plugins) are enabled for your merchant account. If a section listed above is not visible, it may not be activated. Contact your Ottu account manager to enable it.
