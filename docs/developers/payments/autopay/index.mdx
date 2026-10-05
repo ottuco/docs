@@ -1,6 +1,6 @@
 ---
 title: AutoPay
-description: Recurring subscriptions — AutoPay owns the billing schedule, retries, dunning, and customer self-service.
+description: Recurring subscriptions. AutoPay owns the billing schedule, retries, dunning, and customer self-service.
 toc_min_heading_level: 2
 toc_max_heading_level: 3
 hide_table_of_contents: true
@@ -15,9 +15,13 @@ import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
 # AutoPay
 
-AutoPay is Ottu's fully managed subscription engine. With [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments), **you** own the billing schedule — your system decides when to charge the saved card, retries failures, and emails the customer. With AutoPay (`payment_type: "auto_pay"`), **Ottu** owns all of that instead: you make one [Checkout API](../checkout-api) call to set up the subscription, and from there AutoPay generates each [billing cycle](/glossary/#term-billing-cycle), retries failed charges, notifies the customer, and gives them a self-service page — no scheduler, retry loop, or [dunning](/glossary/#term-dunning) emails to build yourself.
+AutoPay is Ottu's managed subscription engine. You make one [Checkout API](../checkout-api) call with `payment_type: "auto_pay"`, and Ottu then generates each [billing cycle](/glossary/#term-billing-cycle), retries failed charges, sends the [dunning](/glossary/#term-dunning) emails and hosts a self-service page for your customer. With [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments) you own that schedule yourself.
 
-Merchant-facing management (list, retrieve, cancel, and the rest) is REST-API-only in this phase — there is no AutoPay dashboard screen yet. Every call on this page, including the six subscription-management endpoints, uses the standard [Ottu API key](/developers/getting-started/authentication) flow — there is no separate credential to obtain.
+Every call on this page uses the standard [Ottu API key](/developers/getting-started/authentication), with no separate credential. There is no AutoPay screen in the dashboard, so your developers manage subscriptions through the API.
+
+:::tip See what your customers see
+Your customer gets reminder emails and a private page to manage the subscription. [What your customer sees](/business/autopay/#what-your-customer-sees) shows both.
+:::
 
 :::note Base URL
 Every API call in this guide targets <code>{OTTU_CONNECT_BASE_URL}</code>. Swap in your own merchant domain when you integrate.
@@ -29,13 +33,13 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 ## When to Use
 
-- **Subscriptions and SaaS billing** — monthly or yearly plans where you don't want to build and operate a billing scheduler.
-- **You want Ottu to handle dunning** — failed-charge retries, the past-due state, and recovery emails happen automatically.
-- **You want a customer self-service surface** without building one — a hosted page for viewing status, paying an outstanding balance, updating the card, or canceling.
-- **You have no plan catalog to manage** — there's no "create a plan" step; pricing and scheduling are just fields on your checkout call.
+- **Subscriptions and SaaS billing**: monthly or yearly plans where you don't want to build and operate a billing scheduler.
+- **You want Ottu to handle dunning**: failed-charge retries, the past-due state, and recovery emails happen automatically.
+- **You want a customer self-service surface** without building one: a hosted page for viewing status, paying an outstanding balance, updating the card, or canceling.
+- **You have no plan catalog to manage**: there's no "create a plan" step; pricing and scheduling are just fields on your checkout call.
 
 :::tip Choosing between AutoPay and Auto-Debit
-Use AutoPay when you want Ottu to own the whole subscription lifecycle after one checkout call. If you'd rather run the billing schedule and retry logic yourself and just charge a saved card on demand, use [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments) instead — it's the closer fit for installments, on-demand billing, and cases where your own system needs to decide exactly when a charge happens.
+Use AutoPay when you want Ottu to own the whole subscription lifecycle after one checkout call. If you'd rather run the billing schedule and retry logic yourself and just charge a saved card on demand, use [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments) instead. It is the closer fit for installments, on-demand billing, and cases where your own system needs to decide exactly when a charge happens.
 :::
 
 ## Guide
@@ -44,11 +48,11 @@ Use AutoPay when you want Ottu to own the whole subscription lifecycle after one
 
 <AutoPayFlowDiagram />
 
-1. **Merchant creates a subscription** — one [Checkout API](../checkout-api) call with `payment_type: "auto_pay"`, an `agreement` object, and an `autopay` block describing the schedule.
-2. **The subscription is created synchronously** — you get the result in the same response, not later by webhook. If the subscription can't be created, the transaction is marked failed and you get a 4xx with no usable `session_id`.
-3. **Subscription created** — the 201 response carries `extra.autopay.subscription_id`, your handle on the [subscription](/glossary/#term-subscription) going forward.
-4. **Customer pays the CIT** — you redirect the customer to the checkout page (Checkout SDK or hosted page) from the `session_id`, same as any other Checkout API session. They enter their card and complete the first charge.
-5. **AutoPay owns everything after** — billing cycles, retries, dunning emails, and the customer self-service page. You don't call anything to keep the subscription running.
+1. **You create the subscription** with one [Checkout API](../checkout-api) call.
+2. **Your customer pays the first charge** on the checkout page.
+3. **You get the result.** When your customer completes checkout, Ottu sends the result to your webhook URL, if you set one, as for any checkout. You can look up the subscription's status at any time.
+4. **AutoPay bills each cycle**, retries failed charges and emails your customer.
+5. **Your customer manages the subscription** from their own page.
 
 ### Step-by-Step {#step-by-step}
 
@@ -60,13 +64,13 @@ Authorization: Api-Key <YOUR_API_KEY>
 
 There is no second credential to obtain and no separate endpoint to configure.
 
-:::note Two different surfaces, one host
-Both the merchant API and the customer self-service page live on your Connect domain, at different paths. The merchant endpoints below sit under `/b/pbl/v2/subscriptions/`. The customer page is served at `/<lang>/subscription/<page_token>` — see [Customer Self-Service Page](#customer-self-service-page). Your integration only ever calls the first; the second is what you hand to the customer.
+:::note Two different surfaces
+The merchant endpoints below sit under `/b/pbl/v2/subscriptions/`. The customer page is a separate URL, served at `/<lang>/subscription/<page_token>`; see [Customer Self-Service Page](#customer-self-service-page). Your integration only calls the first and hands the second to the customer.
 :::
 
 #### 1. Create a subscription
 
-Call the [Checkout API](../checkout-api) with `payment_type: "auto_pay"`. Three things are easy to miss: `agreement` is required and — unlike `auto_debit` — `agreement.id` is required inside it too; `customer_id` is required; and `customer_email` is required (see [Error Handling](#error-handling-missing-customer-email) below for what happens if you skip it).
+Call the [Checkout API](../checkout-api) with `payment_type: "auto_pay"`. Three things are easy to miss: `agreement` is required, and unlike `auto_debit`, `agreement.id` is required inside it too; `customer_id` is required; and `customer_email` is required (see [Error Handling](#error-handling-missing-customer-email) below for what happens if you skip it).
 
 <Tabs groupId="language">
 <TabItem value="curl" label="cURL">
@@ -201,41 +205,33 @@ $session = json_decode($response, true);`}</CodeBlock>
   }
 }`}</CodeBlock>
 
-`extra.autopay.subscription_id` is your handle on the subscription — save it. The `autopay` block you sent is **write-only**; it is not echoed back anywhere in the response, so don't build logic that expects to read `frequency` or `recurring_amount` off the checkout response. Use [Retrieve a subscription](#retrieve-a-subscription) for that.
+`extra.autopay.subscription_id` is your handle on the subscription, so save it. The `autopay` block you sent is **write-only**; it is not echoed back anywhere in the response, so don't build logic that expects to read `frequency` or `recurring_amount` off the checkout response. Use [Retrieve a subscription](#retrieve-a-subscription) for that.
 
 **The `autopay` request block:**
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `frequency` | string | Yes | `monthly` or `yearly` only. |
-| `recurring_amount` | decimal | Yes | Max 14 digits, 3 decimal places, min 0. |
+| `recurring_amount` | decimal | Yes | 3 decimal places, min 0. |
 | `start_date` | date | Yes | `YYYY-MM-DD`. |
 | `end_date` | date | No | Nullable; must be strictly after `start_date`. |
 | `description` | string | No | Max 255 characters. |
-| `retry_count` | integer | No | 1–10. Overrides the default of 3 retries (4 total attempts) — see [Retries & Dunning](#retries-and-dunning). |
-| `notification_preferences` | object | No | Per-subscription email toggles — `pre_charge_enabled`, `failure_enabled`, `final_failure_enabled`, booleans defaulting to `true`. Connect does not validate it. See [Notifications](#notifications). |
+| `retry_count` | integer | No | 1–10. Overrides the default of 3 retries (4 total attempts). See [Retries & Dunning](#retries-and-dunning). |
+| `notification_preferences` | object | No | Per-subscription email toggles: `pre_charge_enabled`, `failure_enabled`, `final_failure_enabled`, booleans defaulting to `true`. Unknown keys are ignored. See [Notifications](#notifications). |
 
 Fields you don't send are dropped rather than sent as `null`, so AutoPay applies its own defaults instead of a default you didn't intend.
 
 :::tip Zero-amount subscriptions start a trial
-`amount` may be `"0.000"` on the checkout call as long as `type` isn't `one_off` — this creates the subscription with no first charge, and it starts in `trialing` instead of `active`. See [Subscription States](#subscription-states).
+`amount` may be `"0.000"` on the checkout call as long as `type` isn't `one_off`. This creates the subscription with no first charge, and it starts in `trialing` instead of `active`. See [Subscription States](#subscription-states).
 :::
 
 #### Error Handling: Missing customer_email {#error-handling-missing-customer-email}
 
-`customer_email` looks optional on a normal Checkout API call, but AutoPay requires it. Omit it and AutoPay's internal validation rejects the request at bind time; Connect surfaces that as:
-
-```json title="Response — 400 Bad Request"
-{
-  "autopay": ["AutoPayClient rejected request (422)"]
-}
-```
-
-This error reads like something is wrong with your `agreement` object — it isn't. Check `customer_email` first; it's the most common trigger for this exact message.
+`customer_email` looks optional on a normal Checkout API call, but AutoPay requires it. Omit it and the request is rejected with a 400. If a create call fails and your `agreement` object looks right, check `customer_email` first.
 
 #### 2. List subscriptions
 
-`POST /b/pbl/v2/subscriptions/` — yes, a POST that only reads. Filter parameters live in the request body on purpose, so `customer_id` never lands in server access logs.
+`POST /b/pbl/v2/subscriptions/` is a POST that only reads. Filter parameters live in the request body on purpose, so `customer_id` never lands in server access logs.
 
 <CodeBlock language="bash" title="List active subscriptions for a customer">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/' \\
   --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
@@ -246,7 +242,7 @@ This error reads like something is wrong with your `agreement` object — it isn
     "limit": 50
   }'`}</CodeBlock>
 
-All filter fields are optional: `status`, `customer_id`, `created_after`, `created_before`, `limit` (default 20, max 100), `offset`. The response is the standard paginated envelope — `count`, `next`, `previous`, `results`. Each item in `results` is a slim summary — `id`, `customer_id`, `customer_email`, `frequency`, `recurring_amount`, `currency`, `status`, `next_billing_date`, `created_at` — not the full subscription object. For the active card and latest-cycle detail, call [Retrieve a subscription](#retrieve-a-subscription) with the item's `id`.
+All filter fields are optional: `status`, `customer_id`, `created_after`, `created_before`, `limit` (default 20, max 100), `offset`. The response is the standard paginated envelope: `count`, `next`, `previous`, `results`. Each item in `results` is a slim summary (`id`, `customer_id`, `customer_email`, `frequency`, `recurring_amount`, `currency`, `status`, `next_billing_date`, `created_at`), not the full subscription object. For the active card and latest-cycle detail, call [Retrieve a subscription](#retrieve-a-subscription) with the item's `id`.
 
 #### 3. Retrieve a subscription {#retrieve-a-subscription}
 
@@ -300,11 +296,11 @@ All filter fields are optional: `status`, `customer_id`, `created_after`, `creat
 }
 ```
 
-`status`, `card`, and `current_cycle` are the three fields worth polling — together they tell you whether the CIT completed, which card is active, and how the latest charge went.
+`status`, `card`, and `current_cycle` are the three fields worth polling. Together they tell you whether the CIT completed, which card is active, and how the latest charge went.
 
 #### 4. Cancel a subscription {#cancel-a-subscription}
 
-`POST /b/pbl/v2/subscriptions/{subscription_id}/cancel/` requires an `Idempotency-Key` header (UUID v4) — this is a mutation, and a retried network call must not double-cancel.
+`POST /b/pbl/v2/subscriptions/{subscription_id}/cancel/` requires an `Idempotency-Key` header (UUID v4), so a retried network call can't double-cancel.
 
 <CodeBlock language="bash" title="Cancel immediately">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/sub_abc123/cancel/' \\
   --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
@@ -312,18 +308,19 @@ All filter fields are optional: `status`, `customer_id`, `created_after`, `creat
   --header 'Content-Type: application/json' \\
   --data '{"mode": "immediate"}'`}</CodeBlock>
 
-`mode: "immediate"` stops the subscription right away — `status` becomes `canceled` and no more cycles are scheduled. `mode: "at_period_end"` instead sets `cancel_at_period_end: true` and leaves `status` as-is; the subscription keeps billing through the current period and only flips to `canceled` when the next cycle would have been generated.
+`mode: "immediate"` stops the subscription right away: `status` becomes `canceled` and no more cycles are scheduled. `mode: "at_period_end"` instead sets `cancel_at_period_end: true` and leaves `status` as-is; the subscription keeps billing through the current period and only flips to `canceled` when the next cycle would have been generated.
 
 :::note Only the merchant can cancel immediately
-The customer self-service page (below) can only schedule a cancellation for the end of the period, never immediately — see [Customer Self-Service Page](#customer-self-service-page).
+The customer self-service page (below) can only schedule a cancellation for the end of the period, never immediately. See [Customer Self-Service Page](#customer-self-service-page).
 :::
 
 #### 5. Manage the customer self-service link {#manage-the-customer-self-service-link}
 
-The merchant delivers a per-subscription link to the customer; the signed token in the URL is the credential — see [Customer Self-Service Page](#customer-self-service-page) for what the customer can do with it. Two endpoints manage that link:
+The merchant delivers a per-subscription link to the customer; the signed token in the URL is the credential; see [Customer Self-Service Page](#customer-self-service-page) for what the customer can do with it. Two endpoints manage that link:
 
 <CodeBlock language="bash" title="Regenerate the page token (revokes the old link instantly)">{`curl --location --request POST '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/sub_abc123/regenerate-page-token/' \\
-  --header 'Authorization: Api-Key <YOUR_API_KEY>'`}</CodeBlock>
+  --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
+  --header 'Idempotency-Key: 7c9e6679-7425-40de-944b-e07fc1f90ae7'`}</CodeBlock>
 
 ```json title="Example response — 200 OK"
 {
@@ -335,10 +332,10 @@ The merchant delivers a per-subscription link to the customer; the signed token 
 <CodeBlock language="bash" title="Read the current link without rotating it">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/sub_abc123/page-link/' \\
   --header 'Authorization: Api-Key <YOUR_API_KEY>'`}</CodeBlock>
 
-:::warning Regenerating revokes the old link instantly — and silently
-The old `page_token` stops working the moment you call regenerate — before you've delivered the new one. AutoPay does **not** notify the customer. You must send them the new `page_url` yourself, or they'll hit a dead link. Use `page-link` (not `regenerate-page-token`) when you just need to re-send a link that should keep working — regenerating is only for revoking a compromised or lost one.
+:::warning Regenerating revokes the old link instantly
+The old `page_token` stops working the moment you call regenerate, before you've delivered the new one. AutoPay does **not** notify the customer, so you must send them the new `page_url` yourself. To re-send a link that should keep working, use `page-link` instead.
 
-Note also that `regenerate-page-token` is deliberately **not** idempotent — each call mints a new token and kills the old one, so it does not take (or need) an `Idempotency-Key` header. Retrying it on a timeout will revoke a link a second time.
+Regenerate requires an `Idempotency-Key` header (UUID v4), like cancel. It gives no replay protection here: each call can mint a new token and revoke the last. If a call times out, call `page-link` and compare its `page_url` with the one you hold before retrying.
 :::
 
 #### 6. Billing cycle history
@@ -367,7 +364,7 @@ Note also that `regenerate-page-token` is deliberately **not** idempotent — ea
 }
 ```
 
-Cycle `status` values: `scheduled` (charge pending), `processing` (charge in flight), `retry_scheduled` (an attempt failed and the next automatic retry is queued), `paid`, `failed` (all retries exhausted — the subscription is now `past_due`), and `canceled` (the cycle was canceled along with the subscription). See [Billing Cycles](#billing-cycles) for how cycles are generated and [Retries & Dunning](#retries-and-dunning) for the retry schedule that gets a cycle from `scheduled` to `failed`.
+Cycle `status` values: `scheduled` (charge pending), `processing` (charge in flight), `retry_scheduled` (an attempt failed and the next automatic retry is queued), `paid`, `failed` (all retries exhausted, so the subscription is now `past_due`), and `canceled` (the cycle was canceled along with the subscription). See [Billing Cycles](#billing-cycles) for how cycles are generated and [Retries & Dunning](#retries-and-dunning) for the retry schedule that gets a cycle from `scheduled` to `failed`.
 
 ### Use Cases
 
@@ -377,108 +374,69 @@ A subscription is always in exactly one of seven states:
 
 | State | Meaning |
 |---|---|
-| `pending_setup` | Created by the checkout call; waiting on the customer to complete the CIT. |
-| `trialing` | The CIT settled with a `0.000` first charge — no money moved yet, but the schedule is live. |
-| `active` | Billing normally. MIT charges run on schedule. |
-| `past_due` | A billing cycle exhausted every retry. See [Retries & Dunning](#retries-and-dunning). |
-| `canceled` | Terminal. No more charges, ever. |
-| `expired` | Terminal. The subscription's `end_date` was reached naturally. |
-| `setup_failed` | The CIT never completed. **Not terminal** — retrying setup moves it back to `pending_setup`. |
+| `pending_setup` | Created by the checkout call; waiting for the customer to complete the first payment. |
+| `trialing` | The first payment settled with a `0.000` amount. No money moved, but the schedule is live. |
+| `active` | Billing normally. |
+| `past_due` | A billing cycle used up every retry. See [Retries & Dunning](#retries-and-dunning). |
+| `canceled` | Terminal. No more charges. |
+| `expired` | Terminal. The subscription's `end_date` was reached. |
+| `setup_failed` | The customer never completed the first payment. AutoPay does not retry it; create a new subscription. |
 
-Two behaviors worth calling out explicitly: a subscription only reaches `active` via a nonzero first charge — a `0.000` first charge starts it in `trialing` instead. And a subscription only becomes `past_due` after **every** retry on the current cycle has been exhausted, never on the first failure. Once `past_due`, the customer paying the outstanding balance (via the [self-service page](#customer-self-service-page)) moves it straight back to `active`.
+A nonzero first charge makes a subscription `active`; a `0.000` one starts it in `trialing`. See [Lifecycle and billing cycles](/business/autopay/#lifecycle-and-billing-cycles) for the business view.
 
 #### Billing Cycles {#billing-cycles}
 
-Cycles are generated **one at a time** — the next cycle isn't created until the previous one is paid. Each cycle snapshots its own `amount_due` when it's created, so a cycle always charges the amount it was scheduled for, not whatever the subscription's current `recurring_amount` happens to be by the time it runs.
-
-The billing date is anchor-day clamped: a subscription anchored on the 31st that bills into February charges on the 28th (or 29th in a leap year) — then returns to the 31st the next time a 31-day month comes around. The anchor day itself never moves; only the day-of-month is clamped when the month is shorter.
+Cycles are generated one at a time, so the next one isn't created until the previous one is paid. Each cycle locks its own `amount_due` when it's created. Billing is anchor-day clamped: a subscription anchored on the 31st charges on the 28th (or 29th) in February, then returns to the 31st. See [Lifecycle and billing cycles](/business/autopay/#lifecycle-and-billing-cycles).
 
 #### Retries & Dunning {#retries-and-dunning}
 
-If a charge fails, AutoPay retries. The default is 3 retries — 4 total attempts (1 initial + 3 retries) — configurable per subscription via `retry_count` (1–10) on the `autopay` block. Retries are spaced **one hour apart, flat** — there's no exponential backoff.
-
-When every attempt on a cycle is exhausted: the cycle moves to `failed`, the subscription moves to `past_due`, and the customer gets a final-failure email with a recovery link.
+A failed charge is retried one hour apart. The default is 3 retries, 4 attempts in total, and you can set it from 1 to 10 with `retry_count` on the `autopay` block. When the last attempt fails, the cycle becomes `failed`, the subscription becomes `past_due`, and the customer gets a final email with a link to pay the balance. See [When a payment fails](/business/autopay/#when-a-payment-fails).
 
 :::warning AutoPay never auto-cancels a past-due subscription
-This is the most surprising behavior in the product, so it's worth stating plainly: a `past_due` subscription stays `past_due` **indefinitely**. AutoPay does not cancel it for you. It only leaves that state when the customer pays the outstanding balance, or you cancel it yourself via [Cancel a subscription](#cancel-a-subscription). If your business logic assumes past-due subscriptions eventually self-clean, build that check yourself.
+A `past_due` subscription stays that way until the customer pays or you [cancel it](#cancel-a-subscription).
 :::
 
 #### Notifications {#notifications}
 
-AutoPay sends three email types, each available in English and Arabic:
-
-- **Upcoming-charge reminder** — sent before a scheduled charge.
-- **Payment failed** — sent after a retry attempt fails (but before all retries are exhausted).
-- **Final failure** — sent when a cycle's retries are exhausted, with a recovery link to the self-service page.
-
-Reminder timing depends on `frequency`: monthly subscriptions get **one** reminder, 2 days before the charge; yearly subscriptions get **three**, at 30, 10, and 3 days before. Each of the three email types can be turned off independently per subscription via `notification_preferences` on the `autopay` block. The object takes three boolean keys, each defaulting to `true`:
-
-| Key | Controls |
-|---|---|
-| `pre_charge_enabled` | The upcoming-charge reminder. |
-| `failure_enabled` | The payment-failed email sent while retries remain. |
-| `final_failure_enabled` | The final-failure email sent when retries are exhausted. |
-
-Because Connect doesn't validate the object, a typo'd key fails silently rather than erroring — an unrecognized key is simply ignored and the default stays on.
+AutoPay emails your customer an upcoming-charge reminder, a payment-failed notice after each failed attempt while retries remain, and a final-failure email when they run out. Monthly subscriptions get one reminder, 2 days before the charge. Yearly ones get three, at 30, 10 and 3 days. Each email can be switched off per subscription with `notification_preferences` on the `autopay` block. See [The emails](/business/autopay/#the-emails).
 
 #### Customer Self-Service Page {#customer-self-service-page}
 
-The `page_url` from [step 5](#manage-the-customer-self-service-link) is a credential — anyone holding it can act on the subscription. From it, a customer can:
+The `page_url` from [step 5](#manage-the-customer-self-service-link) is a credential: anyone holding it can act on the subscription. Your customer can view status and billing history, add or switch a card, pay an outstanding balance, and cancel or undo a pending cancellation. See [The self-service page](/business/autopay/#the-self-service-page).
 
-- View status, plan, and next charge date.
-- View billing history.
-- Add a card or switch the active card.
-- Pay an outstanding balance (moves `past_due` back to `active`).
-- Cancel, or undo a pending cancellation.
-
-:::warning Customer cancellation is always end-of-period
-Unlike the merchant [Cancel](#cancel-a-subscription) endpoint, a cancellation initiated from the self-service page always takes effect at the end of the current billing period — never immediately. Only the merchant-side `mode: "immediate"` call stops a subscription right away.
+:::note Customer cancellation is end-of-period
+A cancellation from the self-service page takes effect at the end of the current billing period. Only the merchant [Cancel](#cancel-a-subscription) call with `mode: "immediate"` stops a subscription right away. The customer can undo a pending cancellation while the subscription is `active`.
 :::
 
 ## API Reference
 
-:::note Interactive reference coming soon
-AutoPay's endpoints aren't in the public OpenAPI schema yet, so there's no interactive explorer here for the moment. See [Step-by-Step](#step-by-step) for the full set of six endpoints with cURL examples. The request bodies, responses, and behaviour documented there are accurate; the path the six management endpoints sit behind is not yet final, and is flagged in that section.
-:::
+The request and response for each endpoint, including the checkout call that creates a subscription, are in [Step-by-Step](#step-by-step).
 
 ## Best Practices
 
-- **Send `Idempotency-Key` (UUID v4) on Cancel** — but not on Regenerate Page Token, which is deliberately non-idempotent. Sending one there does nothing; retrying the call on a timeout revokes a link a second time.
-- **Deliver `page_url` yourself, every time.** AutoPay never notifies the customer when you regenerate — a stale link left undelivered is a customer who can't self-serve.
-- **Treat `past_due` as sticky.** AutoPay never auto-cancels it — build your own monitoring or reminder cadence around subscriptions stuck in that state if your business needs one.
-- **Match `notification_preferences` keys exactly.** Connect passes the object through without validating it, so a misspelled key silently does nothing instead of erroring. The three valid keys are listed under [Notifications](#notifications).
-- **Don't assume `card_acceptance_criteria.min_expiry_time` defaults for you.** Auto-debit defaults it to 30 days; AutoPay does not apply that default — set it explicitly if your integration relies on it.
-- **Keep filters in the body on List.** It's a POST for a reason — never move `customer_id` into a query string yourself.
+- **Send a UUID `Idempotency-Key` on cancel and regenerate.** Only cancel replays safely. Before retrying a timed-out regenerate, call `page-link` and compare `page_url`.
+- **Deliver `page_url` yourself, every time.** AutoPay never notifies the customer when you regenerate, so an undelivered link is a customer who can't self-serve.
+- **Treat `past_due` as sticky.** Build your own monitoring if you need a cadence for subscriptions stuck in that state.
+- **Set `card_acceptance_criteria.min_expiry_time` yourself.** Auto-debit defaults it to 30 days; AutoPay does not apply that default.
+- **Always send `customer_email`.** AutoPay requires it, and a missing one is rejected with a 400.
 
 ## FAQ
 
 <FAQ>
   <FAQItem question="What's the real difference between AutoPay and auto-debit?">
-    Who owns the schedule. With auto-debit, your system decides when to charge the saved token — you own retries and dunning. With AutoPay, you make one checkout call and Ottu owns the schedule, retries, dunning, and the customer self-service page from then on. See [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments) for the auto-debit side.
+    Who owns the schedule. With auto-debit, your system decides when to charge the saved token, and you own retries and dunning. With AutoPay, you make one checkout call and Ottu owns the schedule, retries, dunning and the customer page. See [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments) for the auto-debit side.
   </FAQItem>
   <FAQItem question="Why is List Subscriptions a POST instead of a GET?">
-    So `customer_id` — which is PII — never ends up in a query string and therefore never lands in server access logs. Filters live in the request body instead.
+    So `customer_id`, which is PII, never ends up in a query string or a server access log. Filters live in the request body instead.
   </FAQItem>
-  <FAQItem question="What happens if I omit customer_email on the checkout call?">
-    AutoPay rejects the request, and Connect surfaces it as `400 {"autopay": ["AutoPayClient rejected request (422)"]}`. It reads like an agreement problem — it's almost always a missing `customer_email`. See [Error Handling](#error-handling-missing-customer-email).
+  <FAQItem question="How do I know when the customer finishes the first payment?">
+    If you set `webhook_url` on the checkout call, Ottu sends the result there, as for any checkout (see [payment events](/developers/webhooks/payment-events)). As a fallback, call [Retrieve a subscription](#retrieve-a-subscription) and check `status`: it moves off `pending_setup` once the first payment resolves.
   </FAQItem>
-  <FAQItem question="Does AutoPay ever cancel a past-due subscription automatically?">
-    No, never. A `past_due` subscription stays that way indefinitely until the customer pays or you cancel it. See [Retries & Dunning](#retries-and-dunning).
+  <FAQItem question="What happens when the customer's card expires?">
+    AutoPay doesn't warn about the expiry in advance. The next renewal fails and follows the normal path: retries, then `past_due` and the final email. The customer adds a new card and pays the balance on the [self-service page](#customer-self-service-page).
   </FAQItem>
-  <FAQItem question="Can a customer cancel their own subscription immediately?">
-    No. Cancellation from the customer self-service page always takes effect at the end of the current billing period. Only the merchant-side Cancel endpoint with `mode: "immediate"` stops a subscription right away.
-  </FAQItem>
-  <FAQItem question="What happens when I regenerate a customer's page link?">
-    The old link stops working instantly, and AutoPay does not notify the customer. You're responsible for delivering the new `page_url` to them.
-  </FAQItem>
-  <FAQItem question="Do failed-charge retries use exponential backoff?">
-    No. Retries are spaced a flat one hour apart. The default is 3 retries (4 total attempts), configurable per subscription from 1–10 via `retry_count`.
-  </FAQItem>
-  <FAQItem question="Do I need to set up a plan catalog before creating subscriptions?">
-    No — AutoPay has no plan catalog. Pricing (`recurring_amount`), schedule (`frequency`, `start_date`), and a free-text `description` are just fields on the checkout call itself.
-  </FAQItem>
-  <FAQItem question="How do I know when the customer finishes the first payment (CIT)?">
-    Poll [Retrieve a subscription](#retrieve-a-subscription) and check `status` — it moves off `pending_setup` once the CIT resolves. If you set `webhook_url` on the checkout call, your existing Ottu [payment webhook](/developers/webhooks/payment-events) for that session fires as usual too.
+  <FAQItem question="Can I change the amount of a running subscription?">
+    No. There is no update endpoint. [Cancel](#cancel-a-subscription) the subscription and create a new one with the new `recurring_amount`.
   </FAQItem>
 </FAQ>
 
