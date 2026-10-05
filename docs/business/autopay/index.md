@@ -1,6 +1,7 @@
 ---
 title: AutoPay
 sidebar_label: AutoPay
+description: "AutoPay runs subscriptions for you: it charges the saved card on schedule, retries failed payments, emails your customer, and gives them a page to manage it."
 toc_min_heading_level: 2
 toc_max_heading_level: 3
 ---
@@ -8,10 +9,6 @@ toc_max_heading_level: 3
 import StepGuide from "@site/src/components/StepGuide";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import VideoEmbed from "@site/src/components/VideoEmbed";
-
-{/* The AutoPay <VideoEmbed> clips below are built from the real betabulk screenshots
-    (sequenced via the Reel component). To refresh: update a screenshot or composition in
-    remotion/, run `npm run render`, and the files in static/video/autopay/ update in place. */}
 
 # AutoPay
 
