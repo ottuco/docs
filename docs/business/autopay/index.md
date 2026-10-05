@@ -274,5 +274,5 @@ AutoPay has no plan catalog. The plan name is a free-text label, and the price i
 
 - [AutoPay for developers](/developers/payments/autopay/): API integration and the full request/response contract.
 - [Notifications](/business/notifications/): configuring email, SMS, and WhatsApp templates generally.
-- [Payment Management](/business/payment-management/): viewing individual AutoPay charges alongside all other transactions.
+- [Payment Management](/business/payment-management/): find and manage your transactions.
 - [Settings → API Keys](/business/settings/api-keys): the credentials your developers need to call the AutoPay API.
