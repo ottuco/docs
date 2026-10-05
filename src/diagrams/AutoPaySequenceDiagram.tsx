@@ -27,7 +27,6 @@ const SVG = String.raw`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 
       .ottu-dgm--autopay-sequence .label { fill: #302F37; font: 600 13px 'Poppins', system-ui, -apple-system, sans-serif; }
       .ottu-dgm--autopay-sequence .label-white { fill: #FFFFFF; font: 600 13px 'Poppins', system-ui, -apple-system, sans-serif; }
       .ottu-dgm--autopay-sequence .sub { fill: #6B6B72; font: 400 11px 'Poppins', system-ui, -apple-system, sans-serif; }
-      .ottu-dgm--autopay-sequence .divider { stroke: #E0E0E3; stroke-width: 1; }
       .ottu-dgm--autopay-sequence .arrow { fill: none; stroke: #8B8A90; stroke-width: 1.4; }
       .ottu-dgm--autopay-sequence .arrow-head { fill: #8B8A90; }
       .ottu-dgm--autopay-sequence .arrow-label { fill: #6B6B72; font: 500 10px 'Poppins', system-ui, -apple-system, sans-serif; letter-spacing: 0.3px; }
@@ -38,7 +37,6 @@ const SVG = String.raw`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 
       [data-theme='dark'] .ottu-dgm--autopay-sequence .node { fill: #171A21; stroke: #1E2939; }
       [data-theme='dark'] .ottu-dgm--autopay-sequence .label { fill: #E5E7EB; }
       [data-theme='dark'] .ottu-dgm--autopay-sequence .sub { fill: #A0A0A8; }
-      [data-theme='dark'] .ottu-dgm--autopay-sequence .divider { stroke: #1E2939; }
       [data-theme='dark'] .ottu-dgm--autopay-sequence .arrow { stroke: #8A8A92; }
       [data-theme='dark'] .ottu-dgm--autopay-sequence .arrow-head { fill: #8A8A92; }
       [data-theme='dark'] .ottu-dgm--autopay-sequence .arrow-label { fill: #A0A0A8; }
