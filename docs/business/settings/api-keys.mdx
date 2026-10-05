@@ -8,7 +8,7 @@ import Admonition from "@theme/Admonition";
 
 # How to Get API Keys
 
-API keys allow your developers to authenticate with the Ottu API and integrate payment functionality into your application. Each key pair consists of a **private key** (for server-side API calls) and a **public key** (for client-side SDK initialization).
+API keys allow your developers to authenticate with the Ottu API and integrate payment functionality into your application. Each key pair consists of a **private key** (for server-side API calls) and a **public key** (for client-side SDK initialization). A private key can be **full access** or **scoped** to an explicit set of permissions — see the [API Key Permissions](/developers/reference/api-key-permissions) catalog.
 
 For technical details on how API keys are used in authentication, see the [developer authentication guide](/developers/getting-started/authentication).
 
@@ -92,13 +92,40 @@ For technical details on how API keys are used in authentication, see the [devel
                   longer be used
                 </td>
               </tr>
+              <tr>
+                <td>
+                  <strong>Full access</strong>
+                </td>
+                <td>No</td>
+                <td>
+                  When checked (the default), the key can call every endpoint
+                  that accepts private-key authentication. Uncheck it to create
+                  a <em>scoped</em> key limited to the permissions you select
+                  below
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <strong>Permissions</strong>
+                </td>
+                <td>No</td>
+                <td>
+                  For scoped keys: the exact operations this key may perform —
+                  see the{" "}
+                  <a href="/developers/reference/api-key-permissions">
+                    API Key Permissions
+                  </a>{" "}
+                  catalog. Ignored while Full access is checked
+                </td>
+              </tr>
             </tbody>
           </table>
           <Admonition type="tip">
             <p>
               Use descriptive names for your API keys so you can easily identify
               which key is used by which application or environment. Create
-              separate keys for production and staging.
+              separate keys for production and staging, and prefer scoped keys —
+              give each integration only the permissions it needs.
             </p>
           </Admonition>
         </>
@@ -107,35 +134,40 @@ For technical details on how API keys are used in authentication, see the [devel
       imageAlt: "API Key creation form with Name, Revoke, and Expires fields",
     },
     {
-      title: "Click on the created API key",
+      title: "Copy the Private Key — It Is Shown Only Once",
       description: (
         <>
-          After saving, click on the newly created API key entry (e.g.,
-          "Production Backend") to view the generated keys.
+          <p>
+            As soon as you click <strong>Save</strong>, the{" "}
+            <strong>private key (API key)</strong> is displayed once at the top
+            of the page. Copy it to your server's secret storage now.
+          </p>
+          <Admonition type="danger">
+            <p>
+              For security, Ottu does not store the private key in a readable
+              form. Once you leave this page it{" "}
+              <strong>cannot be viewed again</strong> — not even by an
+              administrator. If it is lost or compromised, revoke the key and
+              create a new one.
+            </p>
+          </Admonition>
         </>
       ),
       image: "/img/business/settings/api-keys-04-click-created.png",
-      imageAlt: "Newly created API key entry in the API Keys list",
+      imageAlt:
+        "One-time private key message shown immediately after saving the API key",
     },
     {
-      title: "Retrieve Your Keys",
+      title: "Retrieve the Public Key",
       description: (
         <>
-          <p>You will see two keys:</p>
-          <ul>
-            <li>
-              <strong>Private key (API key)</strong> — used on your server for{" "}
-              <a href="/developers/getting-started/authentication">
-                API authentication
-              </a>
-              . Keep this secret and never expose it in client-side code.
-            </li>
-            <li>
-              <strong>Public key</strong> — used for client-side SDK
-              initialization (e.g.,{" "}
-              <a href="/developers/payments/checkout-sdk/">Checkout SDK</a>).
-            </li>
-          </ul>
+          <p>
+            The API key entry (e.g., "Production Backend") keeps showing the{" "}
+            <strong>public key</strong>, which you can re-open any time. It is
+            used for client-side SDK initialization (e.g.,{" "}
+            <a href="/developers/payments/checkout-sdk/">Checkout SDK</a>) and
+            is safe to share with browsers and mobile apps.
+          </p>
           <Admonition type="danger">
             <p>
               Never share your private API key publicly or include it in
@@ -146,7 +178,7 @@ For technical details on how API keys are used in authentication, see the [devel
         </>
       ),
       image: "/img/business/settings/api-keys-05-view-keys.png",
-      imageAlt: "API key details showing private and public keys",
+      imageAlt: "API key details showing the public key",
     },
   ]}
 />
