@@ -39,7 +39,7 @@ This is the whole journey, from signup to recovery. Each step below links to the
 
 1. **You create the subscription** with one checkout call. [Setup](#setting-up-autopay)
 2. **Your customer pays the first charge.** [Billing cycles](#lifecycle-and-billing-cycles)
-3. **Your customer gets the self-service link** from you. [Self-service page](#the-self-service-page)
+3. **Your customer gets the self-service link** in every AutoPay email. You can send it too. [Self-service page](#the-self-service-page)
 4. **A reminder email arrives** before each charge. [Emails](#the-emails)
 5. **AutoPay charges the saved card** on each billing date. [Billing cycles](#lifecycle-and-billing-cycles)
 6. **If a charge fails,** AutoPay retries it and emails the customer. [Failed payments](#when-a-payment-fails)

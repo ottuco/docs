@@ -16,7 +16,7 @@ import Diagram from "@site/src/components/Diagram";
 const SVG = String.raw`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520"
      role="img" aria-labelledby="diagram-title-autopay-sequence diagram-desc-autopay-sequence" preserveAspectRatio="xMidYMid meet" class="ottu-dgm--autopay-sequence">
   <title id="diagram-title-autopay-sequence">AutoPay journey from first subscription to recovery</title>
-  <desc id="diagram-desc-autopay-sequence">Three lanes: your business, AutoPay, and your customer. You create the subscription and the customer pays the first charge. The customer gets the self-service link and a reminder email before each charge. AutoPay charges the saved card. If a charge fails, AutoPay retries and emails the customer. The final-failure email links the customer straight to paying the balance, and paying it makes the subscription active again.</desc>
+  <desc id="diagram-desc-autopay-sequence">Three lanes: your business, AutoPay, and your customer. You create the subscription and the customer pays the first charge. AutoPay emails the customer the self-service link, and you can send it too. A reminder email arrives before each charge. AutoPay charges the saved card. If a charge fails, AutoPay retries and emails the customer. The final-failure email links the customer straight to paying the balance, and paying it makes the subscription active again.</desc>
   <defs>
     <marker id="arrow-autopay-sequence" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
       <path class="arrow-head" d="M0,1 L9,5 L0,9 z" />
@@ -68,8 +68,8 @@ const SVG = String.raw`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 
   <circle class="node" cx="784" cy="162" r="11" />
   <text class="label" x="784" y="166.5" text-anchor="middle">2</text>
   <path class="arrow" d="M 480 214 L 810 214" marker-end="url(#arrow-autopay-sequence)" />
-  <rect class="arrow-label-bg" x="584" y="206" width="123" height="16" rx="3" />
-  <text class="arrow-label" x="645" y="217.5" text-anchor="middle">Self-service link</text>
+  <rect class="arrow-label-bg" x="577" y="206" width="136" height="16" rx="3" />
+  <text class="arrow-label" x="645" y="217.5" text-anchor="middle">Link in every email</text>
   <circle class="node" cx="506" cy="214" r="11" />
   <text class="label" x="506" y="218.5" text-anchor="middle">3</text>
   <path class="arrow" d="M 480 266 L 810 266" marker-end="url(#arrow-autopay-sequence)" />
@@ -103,7 +103,7 @@ export default function AutoPaySequenceDiagram(): React.JSX.Element {
   return (
     <Diagram
       svg={SVG}
-      alt="A three-lane sequence of the AutoPay journey: you create the subscription, the customer pays the first charge and gets the self-service link, a reminder email arrives before each charge, AutoPay charges the saved card, retries and emails when a charge fails, and the final email links the customer to paying the balance, which makes the subscription active again."
+      alt="A three-lane sequence of the AutoPay journey: you create the subscription, the customer pays the first charge, every AutoPay email carries the self-service link, a reminder email arrives before each charge, AutoPay charges the saved card, retries and emails when a charge fails, and the final email links the customer to paying the balance, which makes the subscription active again."
     />
   );
 }
