@@ -43,7 +43,7 @@ basic_auth_payment_methods:
 
 basic_auth_operations:
   auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
-  permissions: "Requires the specific operation permission: `payment.capture`, `payment.refund`, `payment.void`, `payment.cancel`, `payment.expire`, or `payment.delete`"
+  permissions: "Requires the specific operation permission: `payment.capture`, `payment.refund`, `payment.void`, `payment.cancel`, `payment.do_expire`, or `payment.delete`"
 
 basic_auth_inquiry:
   auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
@@ -57,7 +57,17 @@ basic_auth_auto_debit:
 
 basic_auth_native_payment:
   auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
-  permissions: "`Can add payment requests` or `Can add e-commerce payments`"
+  permissions: "`Can execute native payment` (`payment.native_payment`)"
+
+basic_auth_acknowledge_payment:
+  auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
+  permissions: "`Can acknowledge payment` (`payment.acknowledge_payment`)"
+
+# ── Notifications API ─────────────────────────────────────────
+
+basic_auth_send_notification:
+  auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
+  permissions: "`Can send payment notification` (`payment.send_notification`)"
 
 # ── User Cards API ────────────────────────────────────────────
 
@@ -84,11 +94,11 @@ basic_auth_create_invoice:
 
 basic_auth_view_reports:
   auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
-  permissions: "`report.can_view_report`"
+  permissions: "`Can view Report` (`report.view_report`)"
 
 # ── Wallet API ────────────────────────────────────────────────
 
 basic_auth_wallet_read:
   auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
-  permissions: "`wallet.view`"
+  permissions: "`Can view Wallet section` (`wallet.can_view_wallet_section`)"
   extra: "Read-only access to wallet accounts, ledger entries, and operations. Refund-to-wallet (which credits a wallet) uses `payment.refund` — see `basic_auth_operations`."

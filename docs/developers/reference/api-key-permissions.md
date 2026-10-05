@@ -69,9 +69,9 @@ Permissions use the same vocabulary as dashboard users (Basic Authentication) â€
 | Delete a saved card from a checkout session (the Checkout SDK's `delete_url`) | `Can delete Card` (`card.delete_card`) â€” not needed when the Checkout SDK calls it with the public key |
 | Send a customer notification (email / SMS / WhatsApp) | `Can send payment notification` |
 | Read notification unit configuration; shorten a payment link | `Can send payment notification` |
-| List and download reports ([Reports API](../reports.mdx)) | `Can view report` |
-| Wallet accounts, entries and operations | `Can view wallet section` |
-| Compute a webhook payload signature | `Can view webhook config` |
+| List and download reports ([Reports API](../reports.mdx)) | `Can view Report` (`report.view_report`) |
+| Wallet accounts, entries and operations | `Can view Wallet section` (`wallet.can_view_wallet_section`) |
+| Compute a webhook payload signature | `Can view Webhook Config` (`webhook.view_webhookconfig`) |
 
 :::info
 Dashboard-internal endpoints (transaction search, refund listings, access logs, payout configuration, and similar) follow the same permission model with their own permissions; they are listed in the dashboard's role configuration rather than here.
