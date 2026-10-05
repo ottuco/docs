@@ -1,7 +1,7 @@
 ---
 title: AutoPay
 sidebar_label: AutoPay
-description: "AutoPay runs subscriptions for you: it charges the saved card on schedule, retries failed payments, emails your customer, and gives them a page to manage it."
+description: "With AutoPay, Ottu runs subscriptions for you: it charges the saved card on schedule, retries failed payments, emails your customer, and gives them a page to manage it."
 toc_min_heading_level: 2
 toc_max_heading_level: 3
 ---
@@ -12,23 +12,23 @@ import AutoPaySequenceDiagram from "@site/src/diagrams/AutoPaySequenceDiagram";
 
 # AutoPay
 
-AutoPay turns a [subscription](/glossary/#term-subscription) into a single checkout call. After that, it generates every [billing cycle](/glossary/#term-billing-cycle), charges the saved card, retries failed charges, emails the customer, and hosts a page where they manage their own subscription.
+With AutoPay, a [subscription](/glossary/#term-subscription) is a single checkout call. After that, Ottu generates every [billing cycle](/glossary/#term-billing-cycle), charges the saved card, retries failed charges, emails the customer, and hosts a page where they manage their own subscription.
 
 Building the integration? See [AutoPay for developers](/developers/payments/autopay/).
 
 ## Why use AutoPay {#why-use-autopay}
 
-- **Run subscriptions without building a billing engine.** AutoPay owns the schedule, the retries, the [dunning](/glossary/#term-dunning) emails, and the customer page. Your integration is one checkout call per subscription.
-- **Recover failed payments automatically.** AutoPay retries every declined card and emails the customer at each stage, so a renewal doesn't lapse unnoticed.
+- **Run subscriptions without building a billing engine.** Ottu owns the schedule, the retries, the [dunning](/glossary/#term-dunning) emails, and the customer page. Your integration is one checkout call per subscription.
+- **Recover failed payments automatically.** Ottu retries every declined card and emails the customer at each stage, so a renewal doesn't lapse unnoticed.
 - **Give customers somewhere to self-serve.** Status, billing history, saved cards, and cancellation live on one page you send them.
 
 The difference is who owns the billing schedule after the first charge:
 
 | | Self-managed recurring billing | AutoPay subscriptions |
 |---|---|---|
-| Billing schedule | Your system decides when to charge | AutoPay decides when to charge |
-| Failed payments | Your team retries and follows up | AutoPay retries automatically and emails the customer |
-| Cancel, swap card, pay a balance | You build and host that experience | AutoPay hosts a ready-made self-service page |
+| Billing schedule | Your system decides when to charge | Ottu decides when to charge |
+| Failed payments | Your team retries and follows up | Ottu retries automatically and emails the customer |
+| Cancel, swap card, pay a balance | You build and host that experience | Ottu hosts a ready-made self-service page |
 | What your integration does | Calls the charge API on every cycle | Makes one checkout call, once, at signup |
 
 ## How it works {#how-it-works}
@@ -39,20 +39,20 @@ This is the whole journey, from signup to recovery. Each step below links to the
 
 1. **You create the subscription** with one checkout call. [Setup](#setting-up-autopay)
 2. **Your customer pays the first charge.** [Billing cycles](#lifecycle-and-billing-cycles)
-3. **Your customer gets the self-service link** in every AutoPay email. You can send it too. [Self-service page](#the-self-service-page)
+3. **Your customer gets the self-service link** in every email Ottu sends. You can send it too. [Self-service page](#the-self-service-page)
 4. **A reminder email arrives** before each charge. [Emails](#the-emails)
-5. **AutoPay charges the saved card** on each billing date. [Billing cycles](#lifecycle-and-billing-cycles)
-6. **If a charge fails,** AutoPay retries it and emails the customer. [Failed payments](#when-a-payment-fails)
+5. **Ottu charges the saved card** on each billing date. [Billing cycles](#lifecycle-and-billing-cycles)
+6. **If a charge fails,** Ottu retries it and emails the customer. [Failed payments](#when-a-payment-fails)
 7. **The final email** links the customer straight to paying the balance. [Emails](#the-emails)
 8. **Your customer pays,** and the subscription is active again. [Failed payments](#when-a-payment-fails)
 
 ## What your customer sees {#what-your-customer-sees}
 
-Your customer gets two things: emails and one private page. AutoPay hosts both.
+Your customer gets two things: emails and one private page. Ottu hosts both.
 
 ### The emails {#the-emails}
 
-AutoPay sends an upcoming-charge reminder, a payment-failed notice, and a final-failure notice. You can switch each one off per subscription, and all of them are also available in Arabic. Reminders go out ahead of each charge:
+Ottu sends an upcoming-charge reminder, a payment-failed notice, and a final-failure notice. You can switch each one off per subscription, and all of them are also available in Arabic. Reminders go out ahead of each charge:
 
 | Billing frequency | Reminders | When |
 |---|---|---|
@@ -86,11 +86,11 @@ AutoPay sends an upcoming-charge reminder, a payment-failed notice, and a final-
   },
 ]} />
 
-The final email may talk about suspended access. That describes your product. AutoPay itself never suspends or cancels a subscription because a payment failed.
+The final email may talk about suspended access. That describes your product. Ottu itself never suspends or cancels a subscription because a payment failed.
 
 ### The self-service page {#the-self-service-page}
 
-Every subscription gets its own private page, reached through a private link. Treat it like a password: anyone holding the link can open the page. The link is in every AutoPay email, and you can also send it yourself, for example at signup. AutoPay hosts the page, keeps it in sync with the subscription, and shows it in English and Arabic.
+Every subscription gets its own private page, reached through a private link. Treat it like a password: anyone holding the link can open the page. The link is in every email Ottu sends, and you can also send it yourself, for example at signup. Ottu hosts the page, keeps it in sync with the subscription, and shows it in English and Arabic.
 
 From this page, a customer can:
 
@@ -180,10 +180,10 @@ And these are the actions a customer can take:
 It never takes effect immediately. Only your team can cancel immediately, through the API. Undo is available while an active subscription's cancellation is pending.
 :::
 
-Customers can hold several cards and switch the active one in a click. AutoPay never deletes saved cards, so an old card still explains what paid an earlier cycle.
+Customers can hold several cards and switch the active one in a click. Ottu never deletes saved cards, so an old card still explains what paid an earlier cycle.
 
 :::warning Regenerating a link revokes the old one
-The previous link stops working instantly, and AutoPay doesn't notify the customer. Deliver the new link the same way you delivered the first, or the customer is locked out.
+The previous link stops working instantly, and Ottu doesn't notify the customer. Deliver the new link the same way you delivered the first, or the customer is locked out.
 :::
 
 A regenerated link shows "link expired". A mistyped link shows "link not recognized". Links never expire on their own.
@@ -195,7 +195,7 @@ A regenerated link shows "link expired". A mistyped link shows "link not recogni
 - **After the last attempt,** the subscription moves to Past Due. The customer gets the final email with a link to pay.
 - **Paying the balance** returns the subscription to Active.
 
-:::warning AutoPay never cancels a past-due subscription
+:::warning Ottu never cancels a past-due subscription on its own
 It stays Past Due until the customer pays or your team cancels it. Build your own process for subscriptions that stay past due longer than you are comfortable with.
 :::
 
@@ -211,9 +211,9 @@ A subscription moves through seven states. Canceled and Expired are final.
 | Past Due | Every retry on a cycle failed. The subscription is not canceled. It waits for the balance to be paid. |
 | Canceled | Billing has stopped and access has ended. A customer's cancellation lands here at the end of the paid period. Your team's immediate cancel lands here at once. |
 | Expired | Billing stopped because the subscription reached its end date. |
-| Setup Failed | The customer never completed the first payment. AutoPay doesn't retry it. Create a new subscription. |
+| Setup Failed | The customer never completed the first payment. Ottu doesn't retry it. Create a new subscription. |
 
-AutoPay creates [billing cycles](/glossary/#term-billing-cycle) one at a time. The next cycle exists only once the current one is paid. Each cycle locks its amount when it is generated, so past cycles stay a reliable record of what was charged.
+Ottu creates [billing cycles](/glossary/#term-billing-cycle) one at a time. The next cycle exists only once the current one is paid. Each cycle locks its amount when it is generated, so past cycles stay a reliable record of what was charged.
 
 ### Anchor days
 
@@ -232,12 +232,12 @@ AutoPay is an API-only integration. Your developers call the API to create, look
 Before your first subscription, make sure you have:
 
 1. **AutoPay enabled for your account.** Ask Ottu support to turn it on.
-2. **A support email.** It appears on the customer's page and in the footer of every AutoPay email.
-3. **A privacy policy URL.** It is linked from the footer of every AutoPay email.
-4. **A tokenizable payment gateway that supports auto-debit,** in the currency you bill in. AutoPay needs somewhere to save and charge the card.
+2. **A support email.** It appears on the customer's page and in the footer of every email Ottu sends.
+3. **A privacy policy URL.** It is linked from the footer of every email Ottu sends.
+4. **A tokenizable payment gateway that supports auto-debit,** in the currency you bill in. Ottu needs somewhere to save and charge the card.
 5. **The three notification templates registered,** in English and Arabic. Ottu support sets these up, the same way [notification templates](/business/notifications/) work for one-off payments.
 
-AutoPay has no plan catalog. The plan name is a free-text label, and the price is the amount your team passes in the checkout call that creates the subscription. The [developer docs](/developers/payments/autopay/#api-reference) show the request shape.
+AutoPay subscriptions have no plan catalog. The plan name is a free-text label, and the price is the amount your team passes in the checkout call that creates the subscription. The [developer docs](/developers/payments/autopay/#api-reference) show the request shape.
 
 ## Things to know {#things-to-know}
 
@@ -254,19 +254,19 @@ AutoPay has no plan catalog. The plan name is a free-text label, and the price i
     Yes, but only your team can, through the API. A cancellation the customer starts always waits for the end of their paid period.
   </FAQItem>
   <FAQItem question="Can I change the price of a subscription that's already running?">
-    No. AutoPay has no way to edit a running subscription's amount. Cancel it and create a new one at the new price.
+    No. A running subscription's amount can't be edited. Cancel it and create a new one at the new price.
   </FAQItem>
   <FAQItem question="What happens when my customer's card expires?">
-    The charge fails like any other declined card. AutoPay retries and emails the customer. If every attempt fails, the subscription moves to Past Due. The customer can add a new card and pay from their self-service page.
+    The charge fails like any other declined card. Ottu retries and emails the customer. If every attempt fails, the subscription moves to Past Due. The customer can add a new card and pay from their self-service page.
   </FAQItem>
   <FAQItem question="Can a customer have more than one card on file?">
     Yes. They can switch the active card from their self-service page at any time.
   </FAQItem>
   <FAQItem question="Does AutoPay support Arabic?">
-    Yes. Every AutoPay email and the self-service page itself offer Arabic.
+    Yes. Every email Ottu sends and the self-service page itself offer Arabic.
   </FAQItem>
   <FAQItem question="What if a customer opens a link that was replaced?">
-    They see a "link expired" page instead of their subscription. Send them the new link yourself. AutoPay doesn't offer to email one.
+    They see a "link expired" page instead of their subscription. Send them the new link yourself. Ottu doesn't offer to email one.
   </FAQItem>
 </FAQ>
 
@@ -275,4 +275,4 @@ AutoPay has no plan catalog. The plan name is a free-text label, and the price i
 - [AutoPay for developers](/developers/payments/autopay/): API integration and the full request/response contract.
 - [Notifications](/business/notifications/): configuring email, SMS, and WhatsApp templates generally.
 - [Payment Management](/business/payment-management/): find and manage your transactions.
-- [Settings → API Keys](/business/settings/api-keys): the credentials your developers need to call the AutoPay API.
+- [Settings → API Keys](/business/settings/api-keys): the credentials your developers need to call Ottu's API.

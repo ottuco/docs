@@ -3,7 +3,7 @@ import Diagram from "@site/src/components/Diagram";
 
 /**
  * AutoPay end-to-end journey for the business page: three lanes (your business,
- * AutoPay, your customer) and eight numbered steps, from creating the
+ * Ottu, your customer) and eight numbered steps, from creating the
  * subscription to recovering a past-due one.
  *
  * Single inline, theme-aware SVG made with the `svg-diagram` skill
@@ -11,12 +11,13 @@ import Diagram from "@site/src/components/Diagram";
  * source SVG and re-run inline-svg.py.
  *
  * PUBLIC SURFACE: the SVG, its <title>/<desc> and the alt text ship to merchants.
- * AutoPay is shown as one platform; no internal service topology appears here.
+ * Ottu is the only actor merchants and customers deal with; AutoPay is the feature name.
+ * No internal service topology appears here.
  */
 const SVG = String.raw`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520"
      role="img" aria-labelledby="diagram-title-autopay-sequence diagram-desc-autopay-sequence" preserveAspectRatio="xMidYMid meet" class="ottu-dgm--autopay-sequence">
   <title id="diagram-title-autopay-sequence">AutoPay journey from first subscription to recovery</title>
-  <desc id="diagram-desc-autopay-sequence">Three lanes: your business, AutoPay, and your customer. You create the subscription and the customer pays the first charge. AutoPay emails the customer the self-service link, and you can send it too. A reminder email arrives before each charge. AutoPay charges the saved card. If a charge fails, AutoPay retries and emails the customer. The final-failure email links the customer straight to paying the balance, and paying it makes the subscription active again.</desc>
+  <desc id="diagram-desc-autopay-sequence">Three lanes: your business, Ottu, and your customer. You create the subscription and the customer pays the first charge. Ottu emails the customer the self-service link, and you can send it too. A reminder email arrives before each charge. Ottu charges the saved card. If a charge fails, Ottu retries and emails the customer. The final-failure email links the customer straight to paying the balance, and paying it makes the subscription active again.</desc>
   <defs>
     <marker id="arrow-autopay-sequence" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
       <path class="arrow-head" d="M0,1 L9,5 L0,9 z" />
@@ -50,7 +51,7 @@ const SVG = String.raw`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 
   <rect class="node" x="60" y="20" width="180" height="48" rx="24" />
   <text class="label" x="150" y="49" text-anchor="middle">Your business</text>
   <rect class="accent" x="390" y="20" width="180" height="48" rx="24" />
-  <text class="label-white" x="480" y="49" text-anchor="middle">AutoPay</text>
+  <text class="label-white" x="480" y="49" text-anchor="middle">Ottu</text>
   <rect class="node" x="720" y="20" width="180" height="48" rx="24" />
   <circle class="arrow" cx="754" cy="38" r="5" />
   <path class="arrow" d="M 744 56 Q 744 46 754 46 Q 764 46 764 56" />
@@ -101,7 +102,7 @@ export default function AutoPaySequenceDiagram(): React.JSX.Element {
   return (
     <Diagram
       svg={SVG}
-      alt="A three-lane sequence of the AutoPay journey: you create the subscription, the customer pays the first charge, every AutoPay email carries the self-service link, a reminder email arrives before each charge, AutoPay charges the saved card, retries and emails when a charge fails, and the final email links the customer to paying the balance, which makes the subscription active again."
+      alt="A three-lane sequence of the AutoPay journey: you create the subscription, the customer pays the first charge, every email Ottu sends carries the self-service link, a reminder email arrives before each charge, Ottu charges the saved card, retries and emails when a charge fails, and the final email links the customer to paying the balance, which makes the subscription active again."
     />
   );
 }
