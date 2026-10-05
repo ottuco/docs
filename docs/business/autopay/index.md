@@ -243,9 +243,9 @@ AutoPay has no plan catalog. The plan name is a free-text label, and the price i
 
 - **A Past Due subscription never cancels itself.** See [When a payment fails](#when-a-payment-fails).
 - **A customer's cancellation waits for the end of the paid period.** See [The self-service page](#the-self-service-page).
-- **Regenerating a link silently revokes the old one.** Deliver the new link yourself.
+- **Regenerating a link silently revokes the old one.** Deliver the new link yourself. See [The self-service page](#the-self-service-page).
 - **A zero first charge starts a trial,** not an active subscription. See [Lifecycle](#lifecycle-and-billing-cycles).
-- **A cycle's amount is locked when it is generated,** not read fresh at charge time.
+- **A cycle's amount is locked when it is generated,** not read fresh at charge time. See [Lifecycle and billing cycles](#lifecycle-and-billing-cycles).
 
 ## FAQ {#faq}
 
