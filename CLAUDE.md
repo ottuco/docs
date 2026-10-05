@@ -330,6 +330,7 @@ Use the `/mermaid` skill (`~/.claude/commands/mermaid.md`, global) for the full 
 - **Customer** — the end user making a payment. Interacts only with the checkout UI (Checkout SDK, redirect to hosted page, or payment gateway page). **Never calls Ottu's API directly.** The customer enters card details, authenticates (3DS), and sees payment results.
 - **Ottu** — the payment platform. Provides APIs, SDKs, hosted checkout pages, and webhook notifications. Sits between the merchant and the payment gateway.
 - **Payment Gateway (PG)** — the bank or processor behind the scenes (e.g., KNET, MPGS, Cybersource). Configured by Ottu staff; the merchant receives `pg_codes` to reference gateways in API calls.
+- **Microservices (AutoPay, Wallet, …) are never actors.** Merchants and customers only see Ottu. Name a microservice only as the feature ("AutoPay subscriptions"); the system that charges, emails, or hosts is always Ottu. Diagrams never draw a microservice as its own lane or box.
 
 ### Key Flow Pattern
 
