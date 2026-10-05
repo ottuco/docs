@@ -90,7 +90,7 @@ The final email may talk about suspended access. That describes your product. Au
 
 ### The self-service page {#the-self-service-page}
 
-Every subscription gets its own private page, reached through a link with a signed token that only that customer can use. Your team delivers the link. AutoPay hosts the page, keeps it in sync with the subscription, and shows it in English and Arabic.
+Every subscription gets its own private page, reached through a private link. Treat it like a password: anyone holding the link can open the page. Your team delivers the link. AutoPay hosts the page, keeps it in sync with the subscription, and shows it in English and Arabic.
 
 From this page, a customer can:
 
