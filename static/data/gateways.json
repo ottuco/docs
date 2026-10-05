@@ -1896,7 +1896,7 @@
       "Apple Pay"
     ],
     "testCards": [],
-    "testCardNotes": "BNPL, no card entry: Tabby's own checkout page. The transaction must carry customer_email, customer_phone (international format) and the customer's first and last name, or Tabby rejects it before showing the method. Test buyer: email otp.success@tabby.ai, phone +971500000001 (UAE store), +966500000001 (KSA store) or +96590000001 (Kuwait store), OTP 8888; the phone and the currency must match the region of the test store. Rejected at pre-scoring: same email with the ...0002 phone. Rejected on Tabby's page: otp.rejected@tabby.ai."
+    "testCardNotes": "BNPL, no card entry: Tabby's own checkout page. Create the payment with customer_email, customer_phone (international format), customer_first_name and customer_last_name; Ottu rejects the payment without them. Test buyer: email otp.success@tabby.ai, phone +971500000001 (UAE) or +966500000001 (KSA), OTP 8888. Rejected at pre-scoring (Tabby is not offered): otp.success@tabby.ai with +971500000002 or +966500000002. Rejected on Tabby's page: otp.rejected@tabby.ai with +971500000001 or +966500000001. These test buyers work only with Tabby test keys."
   },
   {
     "slug": "taly",
