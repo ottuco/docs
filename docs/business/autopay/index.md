@@ -209,7 +209,7 @@ A subscription moves through seven states. Canceled and Expired are final.
 | Trialing | The first charge was zero, so no money has moved. The customer has access now, and the first real charge comes at the next billing cycle. |
 | Active | Billing normally. The latest cycle was paid. |
 | Past Due | Every retry on a cycle failed. The subscription is not canceled. It waits for the balance to be paid. |
-| Canceled | Billing has stopped. Either the customer canceled, and access continues to the end of the paid period, or your team canceled it, effective immediately. |
+| Canceled | Billing has stopped and access has ended. A customer's cancellation lands here at the end of the paid period. Your team's immediate cancel lands here at once. |
 | Expired | Billing stopped because the subscription reached its end date. |
 | Setup Failed | The customer never completed the first payment. AutoPay doesn't retry it. Create a new subscription. |
 
