@@ -38,6 +38,8 @@ Link liberally throughout body text — not just in a "Related" section at the b
 ### Code-First for Developers
 Working code before explanation. Show a complete, runnable example first, then explain what it does and why.
 
+Developer pages follow `docs/developers/CLAUDE.md` (Live Demo, "What your customer sees" and Step-by-Step rules) where it differs from this.
+
 ### Feature-Benefit for Business Users
 Lead with what the feature does for their business. No code. Dashboard-focused with screenshots and step-by-step instructions.
 
