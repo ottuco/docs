@@ -316,7 +316,7 @@ The customer self-service page (below) can only schedule a cancellation for the 
 
 #### 5. Manage the customer self-service link {#manage-the-customer-self-service-link}
 
-The merchant delivers a per-subscription link to the customer; the signed token in the URL is the credential; see [Customer Self-Service Page](#customer-self-service-page) for what the customer can do with it. Two endpoints manage that link:
+The merchant delivers a per-subscription link to the customer; the signed token in the URL is the credential; see [Customer Self-Service Page](#customer-self-service-page) for what the customer can do with it. The create response has no `page_url`, so after the first payment call `page-link` to get the link to send. Use `regenerate-page-token` only to revoke a link. Two endpoints manage that link:
 
 <CodeBlock language="bash" title="Regenerate the page token (revokes the old link instantly)">{`curl --location --request POST '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/sub_abc123/regenerate-page-token/' \\
   --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
@@ -415,6 +415,7 @@ The request and response for each endpoint, including the checkout call that cre
 ## Best Practices
 
 - **Send a UUID `Idempotency-Key` on cancel and regenerate.** Only cancel replays safely. Before retrying a timed-out regenerate, call `page-link` and compare `page_url`.
+- **Get `page_url` from `page-link`, not regenerate.** The create response doesn't include it; fetch it after the first payment and use regenerate only to revoke a link.
 - **Deliver `page_url` yourself, every time.** AutoPay never notifies the customer when you regenerate, so an undelivered link is a customer who can't self-serve.
 - **Treat `past_due` as sticky.** Build your own monitoring if you need a cadence for subscriptions stuck in that state.
 - **Set `card_acceptance_criteria.min_expiry_time` yourself.** Auto-debit defaults it to 30 days; AutoPay does not apply that default.
