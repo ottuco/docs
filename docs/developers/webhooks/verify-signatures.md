@@ -42,14 +42,12 @@ The signature is not derived from every field in the webhook payload. See payloa
 1. Fields not present in the webhook payload or those with an empty string value are not considered when constructing the signature.
 2. Only fields present in the above list and in the payload with valid non-empty values are considered for signature generation.
 
-This update ensures that developers understand the significance of field presence and their values in the payload when constructing the HMAC signature.
-
 #### 3. Signature Creation
 
 - Fields from the payload are extracted based on the aforementioned list, sorted alphabetically by key name, and then concatenated to form a unique message string.
 
 :::warning Sort the fields before you concatenate them
-The fields must be joined in **alphabetical order of their names**, whatever order they have in the payload or in your own code. For example, `customer_email` comes before `customer_first_name`, and `gateway_account` comes before `gateway_name`. Joining them in any other order gives a different signature.
+The fields must be joined in **alphabetical order of their names** (plain byte order, case-sensitive), whatever order they have in the payload or in your own code. Many JSON libraries change the key order, so always sort. For example, `customer_email` comes before `customer_first_name`, and `gateway_account` comes before `gateway_name`. Joining them in any other order gives a different signature.
 :::
 
 - This string, combined with the HMAC Key, is used to create the **HMAC-SHA256** signature. This resultant signature is then dispatched with the [webhook notification](/developers/webhooks/payment-events).
@@ -58,7 +56,13 @@ The fields must be joined in **alphabetical order of their names**, whatever ord
 
 - On receipt of the webhook, merchants should rebuild the message string, using the listed fields.
 - Generate an HMAC signature using their stored [HMAC Key](/developers/webhooks).
+- Compare your result with the `signature` field of the payload. The `signature` field itself is not part of the signed fields.
 - If the computed signature corresponds to the provided one, the payload's authenticity is confirmed. Any discrepancies suggest potential tampering.
+
+:::tip
+- Sign the values exactly as they arrive. All signed fields are strings (for example `"amount": "86.000"`), so don't convert them to numbers first.
+- Compare the two signatures with a constant-time function instead of `==`: `hmac.compare_digest` (Python), `hash_equals` (PHP), `MessageDigest.isEqual` (Java), `CryptographicOperations.FixedTimeEquals` (C#), `crypto.timingSafeEqual` (Node.js), `OpenSSL.secure_compare` (Ruby), `hmac.Equal` (Go).
+:::
 
 ## Example
 
@@ -362,7 +366,7 @@ public class SignatureGenerator {
 
         using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(hmacKey))) {
             byte[] hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(message.ToString()));
-            return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+            return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
         }
     }
 
@@ -474,6 +478,8 @@ SIGNED_FIELDS = %w[
   state
 ].freeze
 
+# payload must use string keys, as JSON.parse(body) returns them.
+# With symbolize_names: true every field is skipped.
 def generate_hmac_signature(payload, hmac_key)
   # Keep the signed fields that have a value, sorted alphabetically by name
   fields = SIGNED_FIELDS.select { |key| payload[key] && payload[key] != '' }.sort
