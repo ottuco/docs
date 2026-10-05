@@ -86,7 +86,7 @@ AutoPay sends an upcoming-charge reminder, a payment-failed notice, and a final-
   },
 ]} />
 
-The final email may talk about suspended access. That describes your product. AutoPay itself never suspends or cancels a subscription.
+The final email may talk about suspended access. That describes your product. AutoPay itself never suspends or cancels a subscription because a payment failed.
 
 ### The self-service page {#the-self-service-page}
 
