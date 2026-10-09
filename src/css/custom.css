@@ -970,3 +970,8 @@ article .markdown header h1 {
     padding-bottom: 0.75rem;
   }
 }
+
+/* AutoPay business page: centered comparison heading. */
+#why-use-autopay {
+  text-align: center;
+}

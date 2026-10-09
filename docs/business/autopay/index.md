@@ -8,7 +8,8 @@ toc_max_heading_level: 3
 
 import StepGuide from "@site/src/components/StepGuide";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
-import AutoPaySequenceDiagram from "@site/src/diagrams/AutoPaySequenceDiagram";
+import JourneyCards from "@site/src/components/JourneyCards";
+import Comparison, {ComparisonEyebrow, ComparisonSubtitle} from "@site/src/components/Comparison";
 
 # AutoPay
 
@@ -16,35 +17,61 @@ With AutoPay, a [subscription](/glossary/#term-subscription) is a single checkou
 
 Building the integration? See [AutoPay for developers](/developers/payments/autopay/).
 
-## Why use AutoPay {#why-use-autopay}
+<ComparisonEyebrow>Compare</ComparisonEyebrow>
 
-- **Run subscriptions without building a billing engine.** Ottu owns the schedule, the retries, the [dunning](/glossary/#term-dunning) emails, and the customer page. Your integration is one checkout call per subscription.
-- **Recover failed payments automatically.** Ottu retries every declined card and emails the customer at each stage, so a renewal doesn't lapse unnoticed.
-- **Give customers somewhere to self-serve.** Status, billing history, saved cards, and cancellation live on one page you send them.
+## Why choose AutoPay over <span style={{color: "var(--ifm-color-emphasis-600)"}}>building it yourself</span>? {#why-use-autopay}
 
-The difference is who owns the billing schedule after the first charge:
+<ComparisonSubtitle>Ottu runs the schedule, retries, emails, and customer page. You make one checkout call.</ComparisonSubtitle>
 
-| | Self-managed recurring billing | AutoPay subscriptions |
-|---|---|---|
-| Billing schedule | Your system decides when to charge | Ottu decides when to charge |
-| Failed payments | Your team retries and follows up | Ottu retries automatically and emails the customer |
-| Cancel, swap card, pay a balance | You build and host that experience | Ottu hosts a ready-made self-service page |
-| What your integration does | Calls the charge API on every cycle | Makes one checkout call, once, at signup |
+<Comparison
+  rows={[
+    {label: "Charges on a schedule", withOk: true, withoutOk: false},
+    {label: "Automatic retries", withOk: true, withoutOk: false},
+    {label: "Reminder and failure emails", withOk: true, withoutOk: false},
+    {label: "Emails in Arabic", withOk: true, withoutOk: false},
+    {label: "Switch emails off per subscription", withOk: true, withoutOk: false},
+    {label: "Hosted customer page", withOk: true, withoutOk: false},
+    {label: "Customer changes their card", withOk: true, withoutOk: false},
+    {label: "Customer cancels on their own", withOk: true, withoutOk: false},
+    {label: "Customer pays an overdue balance", withOk: true, withoutOk: false},
+    {label: "Free first period (trial)", withOk: true, withoutOk: false},
+    {label: "Month-end billing dates handled", withOk: true, withoutOk: false},
+    {label: "Customer sees billing history", withOk: true, withoutOk: false},
+  ]}
+/>
 
 ## How it works {#how-it-works}
 
-This is the whole journey, from signup to recovery. Each step below links to the section that explains it.
+What happens at each stage, and what you need to do.
 
-<AutoPaySequenceDiagram />
-
-1. **You create the subscription** with one checkout call. [Setup](#setting-up-autopay)
-2. **Your customer pays the first charge.** [Billing cycles](#lifecycle-and-billing-cycles)
-3. **Your customer gets the self-service link** in every email Ottu sends. You can send it too. [Self-service page](#the-self-service-page)
-4. **A reminder email arrives** before each charge. [Emails](#the-emails)
-5. **Ottu charges the saved card** on each billing date. [Billing cycles](#lifecycle-and-billing-cycles)
-6. **If a charge fails,** Ottu retries it and emails the customer. [Failed payments](#when-a-payment-fails)
-7. **The final email** links the customer straight to paying the balance. [Emails](#the-emails)
-8. **Your customer pays,** and the subscription is active again. [Failed payments](#when-a-payment-fails)
+<JourneyCards
+  steps={[
+    {
+      title: "Your customer signs up",
+      body: "Your customer pays the first charge at checkout, and Ottu saves their card.",
+      yourPart: "Send them to checkout.",
+      href: "#setting-up-autopay",
+    },
+    {
+      title: "Every billing date",
+      body: "Ottu emails a reminder before the charge, then charges the saved card.",
+      yourPart: "Nothing",
+      href: "#lifecycle-and-billing-cycles",
+    },
+    {
+      title: "If a payment fails",
+      body: "Ottu retries and asks your customer to pay. Ottu never cancels the subscription on its own.",
+      yourPart: "Nothing",
+      href: "#when-a-payment-fails",
+    },
+  ]}
+  band={{
+    title: "Your customer's own page",
+    body: "Your customer can change their card, pay a balance, or cancel.",
+    yourPart: "Optional. Send the page link at signup. Every Ottu email also includes it.",
+    href: "#the-self-service-page",
+  }}
+/>
 
 ## What your customer sees {#what-your-customer-sees}
 
