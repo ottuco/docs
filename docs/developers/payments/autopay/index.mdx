@@ -507,9 +507,11 @@ The proxy maps upstream and transport failures onto a fixed set of statuses, so 
 
 | Status | Meaning | What to do |
 |---|---|---|
-| `400` | Request validation failed, either by Connect or by AutoPay. A missing `Idempotency-Key` on cancel or regenerate is rejected here, before the upstream call. | Fix the request. Retrying unchanged will fail again. |
+| `400` | Connect rejected the request before forwarding it, for example a `limit` above 100, or a missing `Idempotency-Key` on cancel or regenerate. | Fix the request. Retrying unchanged will fail again. |
 | `401` | Not authenticated. | Check your [API key](/developers/getting-started/authentication) or bearer token. |
+| `403` | Authenticated, but the credential lacks permission to manage subscriptions. | Use a credential with the required permission. |
 | `404` | No such subscription for your merchant. | Do not retry. |
+| `422` | AutoPay rejected the request after Connect forwarded it, for example an unknown `status` filter value. The body's `detail` lists each invalid field. | Fix the request. Retrying unchanged will fail again. |
 | `423` | The installation is paused. | Retry later; this is a temporary administrative state. |
 | `503` | AutoPay is unavailable or not configured on this deployment. | Retry with backoff. |
 | `504` | The call to AutoPay timed out. | Retry with backoff. For `cancel`, reuse the same `Idempotency-Key` so a retry cannot double-apply. |

@@ -48,7 +48,7 @@ properties:
       UTC timestamp of when the subscription became `canceled`. `null` while it is not canceled, including while a cancellation is only scheduled through `cancel_at_period_end`.
   cancellation_initiator:
     description: |
-      Who canceled the subscription: `merchant` when you called Cancel a subscription, `customer` when the customer used the self-service page. `null` if it has not been canceled.
+      Who most recently requested a cancellation: `merchant` when you called Cancel a subscription, `customer` when the customer used the self-service page. `null` if none was ever requested. It is set as soon as a cancellation is scheduled, and it is not cleared if the customer later reactivates the subscription, so read `status` and `cancel_at_period_end` to know whether the subscription is actually ending.
   agreement_id:
     description: |
       The `agreement.id` you supplied on the checkout call. It ties every charge in the subscription to the same card-on-file agreement with the customer.
