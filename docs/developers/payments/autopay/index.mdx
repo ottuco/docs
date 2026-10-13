@@ -344,7 +344,21 @@ The customer self-service page (below) can only schedule a cancellation for the 
 
 #### 5. Manage the customer self-service link {#manage-the-customer-self-service-link}
 
-The merchant delivers a per-subscription link to the customer; the signed token in the URL is the credential — see [Customer Self-Service Page](#customer-self-service-page) for what the customer can do with it. One endpoint manages that link, and it requires an `Idempotency-Key` header (UUID v4). Connect rejects the call with `400` before it reaches AutoPay if the header is missing:
+The merchant delivers a per-subscription link to the customer; the signed token in the URL is the credential — see [Customer Self-Service Page](#customer-self-service-page) for what the customer can do with it. Two endpoints manage that link: one reads the current link without changing it, the other replaces it.
+
+**Read the current link.** This call never rotates the token, so a link the customer already has keeps working. Use it whenever you need to re-send the link or did not store it:
+
+<CodeBlock language="bash" title="Retrieve the current page link (does not rotate it)">{`curl --location --request GET '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/sub_abc123/page-link/' \\
+  --header 'Authorization: Api-Key <YOUR_API_KEY>'`}</CodeBlock>
+
+```json title="Example response — 200 OK"
+{
+  "page_token": "current_signed_token_here",
+  "page_url": "https://merchant.example.com/en/subscription/current_signed_token_here"
+}
+```
+
+**Replace the link.** Regenerating requires an `Idempotency-Key` header (UUID v4). Connect rejects the call with `400` before it reaches AutoPay if the header is missing:
 
 <CodeBlock language="bash" title="Regenerate the page token (revokes the old link instantly)">{`curl --location --request POST '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/subscriptions/sub_abc123/regenerate-page-token/' \\
   --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
@@ -360,7 +374,7 @@ The merchant delivers a per-subscription link to the customer; the signed token 
 :::warning Regenerating revokes the old link instantly — and silently
 The old `page_token` stops working the moment you call regenerate, before you've delivered the new one. AutoPay does **not** notify the customer. You must send them the new `page_url` yourself, or they'll hit a dead link. Treat this endpoint as the recovery path for a compromised or lost link, not as a way to re-send a working one.
 
-**Store the `page_url` when you create the subscription.** Connect does not expose a read-only "fetch the current link" endpoint, so regenerating is the only way to obtain a link you did not keep, and it destroys the one the customer is already using.
+**To re-send a working link, read it — don't regenerate.** `GET /b/pbl/v2/subscriptions/{subscription_id}/page-link/` returns the current `page_url` unchanged. Regenerating destroys the link the customer is already using.
 
 **The required `Idempotency-Key` does not make this call idempotent.** Connect rejects the request without the header, but replaying the *same* key still mints a fresh token and revokes the previous one. There is no replay protection here, so a blind retry after a timeout will invalidate a link you may have just delivered. Confirm the outcome before retrying.
 :::
@@ -429,7 +443,7 @@ The billing date is anchor-day clamped: a subscription anchored on the 31st that
 
 #### Retries & Dunning {#retries-and-dunning}
 
-If a charge fails, AutoPay retries. The default is 3 retries — 4 total attempts (1 initial + 3 retries) — configurable per subscription via `retry_count` (1–10) on the `autopay` block. Retries are spaced **evenly across `retry_window_days`**: the interval between attempts is `retry_window_days / retry_count` days. With the defaults (3 retries over a 3-day window) that's one retry per day. There's no exponential backoff — the spacing is flat, just not fixed at a specific duration, since both `retry_count` and `retry_window_days` (1–30) are configurable per subscription.
+If a charge fails, AutoPay retries. The default is 3 retries — 4 total attempts (1 initial + 3 retries) — configurable per subscription via `retry_count` (1–10) on the `autopay` block. Retries run **one hour apart**, each one timed from the previous failed attempt: a charge that fails at 12:00 is retried at 13:00, 14:00, and 15:00. There's no exponential backoff — the spacing is flat, and it is the same for every subscription. `retry_count` changes how many retries happen, not how far apart they are.
 
 When every attempt on a cycle is exhausted: the cycle moves to `failed`, the subscription moves to `past_due`, and the customer gets a final-failure email with a recovery link.
 
@@ -471,7 +485,7 @@ Unlike the merchant [Cancel](#cancel-a-subscription) endpoint, a cancellation in
 
 ## API Reference
 
-All five subscription-management endpoints are published in the interactive reference below. Expand any field for its type, enum values, constraints and defaults, and use the sample request as a starting point.
+All six subscription-management endpoints are published in the interactive reference below. Expand any field for its type, enum values, constraints and defaults, and use the sample request as a starting point.
 
 Every one of them is a proxy: Connect authenticates you, resolves your merchant tenant, forwards the call to AutoPay, and returns AutoPay's response body and status unchanged. You never send a `Merchant-Id` header yourself.
 
@@ -482,6 +496,8 @@ Every one of them is a proxy: Connect authenticates you, resolves your merchant 
 <ApiDocEmbed path="autopay-subscription-cancel.api.mdx" />
 
 <ApiDocEmbed path="autopay-subscription-cycles.api.mdx" />
+
+<ApiDocEmbed path="autopay-subscription-page-link.api.mdx" />
 
 <ApiDocEmbed path="autopay-subscription-regenerate-page-token.api.mdx" />
 
@@ -588,7 +604,7 @@ Recovery is to run a fresh CIT for that customer so a new token is saved with th
     The old link stops working instantly, and AutoPay does not notify the customer. You're responsible for delivering the new `page_url` to them.
   </FAQItem>
   <FAQItem question="Do failed-charge retries use exponential backoff?">
-    No, the spacing is flat: `retry_window_days / retry_count` days between attempts. The defaults are 3 retries over a 3-day window — one retry per day — and both are configurable per subscription, `retry_count` from 1–10 and `retry_window_days` from 1–30.
+    No, the spacing is flat: retries run one hour apart, each timed from the previous failed attempt. The default is 3 retries, configurable per subscription with `retry_count` from 1–10; the one-hour interval itself is not configurable per subscription.
   </FAQItem>
   <FAQItem question="Do I need to set up a plan catalog before creating subscriptions?">
     No — AutoPay has no plan catalog. Pricing (`recurring_amount`), schedule (`frequency`, `start_date`), and a free-text `description` are just fields on the checkout call itself.

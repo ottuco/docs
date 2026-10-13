@@ -270,6 +270,12 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
+          id: "developers/apis/autopay-subscription-page-link",
+          label: "Retrieve an AutoPay hosted-page link",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
           id: "developers/apis/autopay-subscription-regenerate-page-token",
           label: "Regenerate an AutoPay hosted-page token",
           className: "api-method post",

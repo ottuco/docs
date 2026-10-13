@@ -1,0 +1,73 @@
+---
+id: autopay-subscription-page-link
+title: "Retrieve an AutoPay hosted-page link"
+description: "Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant."
+sidebar_label: "Retrieve an AutoPay hosted-page link"
+hide_title: true
+hide_table_of_contents: true
+api: eJztV81u20YQfpXBXtwCK8lJk4tubhAEqWPUcGz0YAvGkByJG5G7zO5QNisQyEP0CfskxSwphpEUFwV6MZCLRHFn5+ebb360Va4ij2ycfZ+pucKaXYXNfaiTkHpTycF9hSu6L4xdK60yGt6rubowqXeB/MakFCbOFg2c1ewusYGxhkmJFldUkmWovHtspvDGWUspA5MvjUWmACX5NEfLgDXnZNmk0S+og7ErqLzZIBOcXb6HNTUafsVg0iirwXk4pyYtHK7htz+uNXgKrthQAM7pq2Imi5Y1LJ1/QJ91p54+1xQY2A2+PxjO4aK/NXmfaUCbgSeuvQ07qZMgVipnA0HisibKBEaug+gaG57e2Tt71V+XgzE4JwHS2nvBJq0Du5L8ZImpxJy7wJRNBH8Q/KNjrmbwjpFFwrCG4AC7Yyw8YdaAsdHKTt1JgBxtFmBNVAV4cH5t7GoKN0GiX5EVBlA0M2G3JgvGBibM4CGnTpUrss5EWQeGRO5t3JqyqdKqQo8lMfmg5rdbZYQYFXKutLJYkpqrb9hkMqVVSHMqUc23ipsqirA3dqXafYYdoxOYTOixNOT7pFAGyZ5M6inSRzyUFBtPmZqzr6ldaMW4Em8H9R9HV4NaaBUorb3hJoYknDunyO1czW8Xrd6qjn7Dm4VY6dgQJKyXp6fylTrLZFkesaqKntKzT0GC2x7C4JJPlLKA6qUw2XTaYgXG1BxCto/Y9ff5NeZT1KahtpFLkslWd3ZqX/y7lTdPUPXm6gMktSlYkrJDeOldGanUFeFJkIou0TeQuRKNjeVzpDYKtKsaVzSFa8koGAYMgJLfyAIs4O8vf0FGhdmQl+PYhvoK3FPmHuxQFVPVtmNq3I5RHkEhbDFc0FcyXuKKPhi7vuoTrtr2gLeC5qvTF/8jBzJiNEcysx9FLzdy+51UuEnfeu/8BYWAqydc/uX5ufzqubn8+vmh/Pq5odxqVRLnTraaFUUXZCbN1SyZVUkx27ycjZtDmG33plQ7iwNRpt5MJhb5zW7ExQ6pcuYqzGezgDZL3OPUMddTS6za0fz4KIh0QX87RYbQsTLn1CjdDc6cMCP/dXSKsPPmz4jzQRful6H9jSnuLzscofK0NI9wp84qMzmn5i4mdDy/Bl8kpN10lt+JCEUsjV26KNjn4XfmWnYxpZXA0rnzYno6PT1wchCVAeMClxi50gd4RewNbQjQDrNif+/ZVzni4Y8V9McKqnf0ZXrkWVWgscK1fo/pyv5WJdICkkII+1I4/s3Gp9X8cEkd6l9pJT1IsBBN222CgW580bby+nNNXvbEhVYb9AYTKZDbrcpMkOdMzZdYBHqCwz9d9bX681Hu/ud99ygcu3ZjpddssKjll9JqTc2RFb1dtHrXjCSYTuosTani0f2DISC9b+i7795eKy3/Kff63Tr2u/5BtB/1bb/1dS7Ip+zfR69st103bdtBvjv67o2h33bSAtWibdt/ABgiVqE=
+sidebar_class_name: "get api-method"
+info_path: developers/apis/ottu-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+import Translate from "@docusaurus/Translate";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Retrieve an AutoPay hosted-page link"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/b/pbl/v2/subscriptions/{subscription_id}/page-link/"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant.
+
+Returns the subscription's current customer-facing hosted-page link without rotating it, so a link already in the customer's hands keeps working. Use regenerate-page-token instead when the old link must be revoked.
+
+<pre style={{display:"none"}}>{"curl --location --globoff 'https://sandbox.ottu.net/b/pbl/v2/subscriptions/{subscription_id}/page-link/' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Api-Key YOUR_API_KEY'"}</pre>
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+>
+  <Translate id="theme.openapi.request.title">Request</Translate>
+</Heading>
+
+<ParamsDetails
+  {...require("./autopay-subscription-page-link.ParamsDetails.json")}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  {...require("./autopay-subscription-page-link.RequestSchema.json")}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  {...require("./autopay-subscription-page-link.StatusCodes.json")}
+>
+  
+</StatusCodes>
+
+
+      
