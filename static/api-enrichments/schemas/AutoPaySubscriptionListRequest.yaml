@@ -1,0 +1,25 @@
+# Overrides for: components/schemas/AutoPaySubscriptionListRequest
+# Body of POST /b/pbl/v2/subscriptions/. Mirrors SubscriptionListIn in AutoPay.
+
+_description: |
+  Filters and paging for the subscription list. They are sent in the request body, not the query string, so that customer identifiers stay out of URL logs. Every field is optional; an empty JSON object returns the 20 newest subscriptions.
+
+properties:
+  status:
+    description: |
+      Return only subscriptions in this state. Enum: `pending_setup`, `trialing`, `active`, `past_due`, `canceled`, `expired`, `setup_failed`. Omit it to return every state.
+  customer_id:
+    description: |
+      Return only the subscriptions of one customer. Exact match on the `customer_id` you sent at checkout.
+  created_after:
+    description: |
+      Return subscriptions created on or after this date, in `YYYY-MM-DD` format.
+  created_before:
+    description: |
+      Return subscriptions created on or before this date, in `YYYY-MM-DD` format. Combine it with `created_after` for a date range.
+  limit:
+    description: |
+      How many subscriptions to return, from 1 to 100. Defaults to 20.
+  offset:
+    description: |
+      How many subscriptions to skip before the first one returned. Defaults to 0. See [Paging through the list]({{apiBaseUrl}}/payments/autopay/#paging-through-the-list).
