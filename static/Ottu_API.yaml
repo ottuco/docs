@@ -11131,7 +11131,8 @@ components:
               description: "The date of the next scheduled charge, in `YYYY-MM-DD` format."
             event_type:
               type: string
-              description: "What AutoPay classified this payment as. One of `cit_success`, `mit_success`, `mit_failure`, `card_updated`, `recovery_success`. A hint only; read `result` and `state` for the payment outcome."
+              nullable: true
+              description: "What AutoPay classified this payment as. One of `cit_success`, `cit_failure`, `mit_success`, `mit_failure`, `card_updated`, `recovery_success`, or `null` when the setup outcome is still undecided. A hint only; read `result` and `state` for the payment outcome."
         capture_delivery_address:
           type: boolean
           description: By enabling this, you will ask for user's address. If enabled, capture delivery coordinates should also be active.

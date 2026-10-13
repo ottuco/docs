@@ -171,7 +171,7 @@ Payments belonging to an [AutoPay](/developers/payments/autopay/) subscription m
 | `cycle_number` | Sequential number of the billing cycle being charged. Nullable. |
 | `cycle_status` | Status of that billing cycle, for example `paid`, `retry_scheduled`, `failed`. Nullable. |
 | `next_billing_date` | Next scheduled billing date, or `null` when nothing further is scheduled. |
-| `event_type` | One of `cit_success`, `mit_success`, `mit_failure`, `card_updated`, `recovery_success`. Always present when the `autopay` block is present — never `null`. |
+| `event_type` | One of `cit_success`, `cit_failure`, `mit_success`, `mit_failure`, `card_updated`, `recovery_success`, or `null`. `null` means AutoPay could not yet tell whether the subscription's setup payment succeeded — it does **not** mean success. |
 
 :::danger The top-level `autopay` block is not signed — never trust it
 Two blocks carry a `subscription_id`, and only one of them is trustworthy.
