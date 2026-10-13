@@ -224,6 +224,11 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
+                  label: "Live Demo",
+                  href: "/developers/payments/wallet#live-demo",
+                },
+                {
+                  type: "link",
                   label: "API Reference",
                   href: "/developers/payments/wallet#api-reference",
                 },
@@ -283,8 +288,8 @@ const sidebars: SidebarsConfig = {
               items: [
                 {
                   type: "link",
-                  label: "Supported Providers",
-                  href: "/developers/payments/loyalty#supported-providers",
+                  label: "How it works",
+                  href: "/developers/payments/loyalty#overview",
                 },
                 {
                   type: "link",
@@ -300,6 +305,11 @@ const sidebars: SidebarsConfig = {
                   type: "link",
                   label: "Guide",
                   href: "/developers/payments/loyalty#guide",
+                },
+                {
+                  type: "link",
+                  label: "Refund and Points Return",
+                  href: "/developers/payments/loyalty#refund-points",
                 },
                 {
                   type: "link",
@@ -320,6 +330,43 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "category",
+              label: "Partner Onboarding",
+              link: { type: "doc", id: "developers/payments/onboarding" },
+              items: [
+                {
+                  type: "link",
+                  label: "When to Use",
+                  href: "/developers/payments/onboarding#when-to-use",
+                },
+                {
+                  type: "link",
+                  label: "Setup",
+                  href: "/developers/payments/onboarding#setup",
+                },
+                {
+                  type: "link",
+                  label: "Guide",
+                  href: "/developers/payments/onboarding#guide",
+                },
+                {
+                  type: "link",
+                  label: "API Reference",
+                  href: "/developers/payments/onboarding#api-reference",
+                },
+                {
+                  type: "link",
+                  label: "Best Practices",
+                  href: "/developers/payments/onboarding#best-practices",
+                },
+                {
+                  type: "link",
+                  label: "FAQ",
+                  href: "/developers/payments/onboarding#faq",
+                },
+              ],
+            },
+            {
+              type: "category",
               label: "Checkout SDK",
               link: {
                 type: "doc",
@@ -327,9 +374,19 @@ const sidebars: SidebarsConfig = {
               },
               items: [
                 {
-                  type: "doc",
-                  id: "developers/payments/checkout-sdk/web",
+                  type: "category",
                   label: "Web",
+                  link: {
+                    type: "doc",
+                    id: "developers/payments/checkout-sdk/web",
+                  },
+                  items: [
+                    {
+                      type: "link",
+                      label: "Live Demo",
+                      href: "/developers/payments/checkout-sdk/web#live-demo",
+                    },
+                  ],
                 },
                 {
                   type: "doc",
@@ -497,6 +554,11 @@ const sidebars: SidebarsConfig = {
                   type: "link",
                   label: "Guide",
                   href: "/developers/cards-and-tokens/recurring-payments#guide",
+                },
+                {
+                  type: "link",
+                  label: "Live Demo",
+                  href: "/developers/cards-and-tokens/recurring-payments#live-demo",
                 },
                 {
                   type: "link",
@@ -676,6 +738,11 @@ const sidebars: SidebarsConfig = {
               id: "developers/reference/payment-states",
               label: "Payment States",
             },
+            {
+              type: "doc",
+              id: "developers/reference/checkout-status-codes",
+              label: "Checkout Status Codes",
+            },
           ],
         },
       ],
@@ -853,6 +920,63 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: "category",
+          label: "Loyalty",
+          link: { type: "doc", id: "business/loyalty/index" },
+          items: [
+            {
+              type: "link",
+              label: "Why use Loyalty",
+              href: "/business/loyalty#why-use-loyalty",
+            },
+            {
+              type: "link",
+              label: "How it works",
+              href: "/business/loyalty#how-it-works",
+            },
+            {
+              type: "link",
+              label: "Supported providers",
+              href: "/business/loyalty#supported-providers",
+            },
+            {
+              type: "link",
+              label: "What the reward is calculated on",
+              href: "/business/loyalty#what-the-reward-is-calculated-on",
+            },
+            {
+              type: "link",
+              label: "Earning vs. redeeming",
+              href: "/business/loyalty#earning-vs-redeeming",
+            },
+            {
+              type: "link",
+              label: "When a payment earns no reward",
+              href: "/business/loyalty#when-no-reward",
+            },
+            {
+              type: "link",
+              label: "Refunding an order paid with points",
+              href: "/business/loyalty#refund-rules",
+            },
+            {
+              type: "link",
+              label: "Setting up Loyalty",
+              href: "/business/loyalty#setting-up-loyalty",
+            },
+            {
+              type: "link",
+              label: "Things to know",
+              href: "/business/loyalty#things-to-know",
+            },
+            {
+              type: "link",
+              label: "FAQ",
+              href: "/business/loyalty#faq",
+            },
+          ],
+        },
+        {
+          type: "category",
           label: "Plugins",
           link: { type: "doc", id: "business/plugins/index" },
           items: [
@@ -868,6 +992,7 @@ const sidebars: SidebarsConfig = {
           items: [
             "business/operations/refund-void-access-control",
             "business/operations/two-step-authorization",
+            "business/operations/qitaf-points-refund",
           ],
         },
         "business/integrations",

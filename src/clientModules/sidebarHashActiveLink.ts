@@ -372,6 +372,37 @@ function onScroll(): void {
 const STABILITY_FRAMES = 6; // ~100ms @ 60fps
 const STABILITY_TIMEOUT_MS = 6000;
 
+// `requestAnimationFrame` is not merely throttled but fully SUSPENDED while
+// the document is hidden — background tabs, headless capture, link-preview
+// crawlers, print-to-PDF pipelines. Every stage of the hash gate below is
+// chained through rAF, so a suspended rAF strands the sequence at stage one:
+// `hideLoader()` never runs and the opaque full-screen loader set by the head
+// script covers the page indefinitely. The page renders as a blank sheet.
+//
+// Racing each frame against a timer keeps the sequence advancing. When the
+// document is visible rAF wins (~16ms vs 50ms) and behaviour is unchanged;
+// when it is hidden the timer drives the sequence to completion instead.
+const FRAME_FALLBACK_MS = 50;
+
+function nextFrame(callback: () => void): void {
+  let ran = false;
+  let rafId = 0;
+  let timerId = 0;
+  const run = () => {
+    if (ran) return;
+    ran = true;
+    // Cancel whichever scheduler lost the race. This matters most in the
+    // hidden case: the timer wins, but the rAF stays *registered and
+    // suspended*, so the tick loops below would pile up hundreds of stale
+    // callbacks that all fire in one burst when the document is shown.
+    cancelAnimationFrame(rafId);
+    window.clearTimeout(timerId);
+    callback();
+  };
+  rafId = requestAnimationFrame(run);
+  timerId = window.setTimeout(run, FRAME_FALLBACK_MS);
+}
+
 let initialLoadHandled = false;
 
 function getHashTargetId(): string | null {
@@ -437,7 +468,12 @@ function smoothScrollToHash(hashId: string): void {
   const topOffset = getNavbarHeight() + 16;
   const rect = target.getBoundingClientRect();
   const y = rect.top + window.scrollY - topOffset;
-  window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+  // Smooth scrolling is animation-driven, so it cannot progress while the
+  // document is hidden — the position would simply never be applied. Jump
+  // instantly in that case; there is no user watching an animation anyway.
+  const behavior: ScrollBehavior =
+    document.visibilityState === "visible" ? "smooth" : "auto";
+  window.scrollTo({ top: Math.max(0, y), behavior });
 }
 
 // After the gate's smooth scroll lands, content can still shift
@@ -544,9 +580,9 @@ function waitForScrollIdle(timeoutMs: number, onIdle: () => void): void {
       stableCount = 0;
       lastY = window.scrollY;
     }
-    requestAnimationFrame(tick);
+    nextFrame(tick);
   };
-  requestAnimationFrame(tick);
+  nextFrame(tick);
 }
 
 /**
@@ -584,10 +620,10 @@ function waitForLayoutStability(
       lastHeight = height;
     }
 
-    requestAnimationFrame(tick);
+    nextFrame(tick);
   };
 
-  requestAnimationFrame(tick);
+  nextFrame(tick);
 }
 
 /**
@@ -623,7 +659,7 @@ function runInitialHashGate(): void {
     // stable for several frames), otherwise the compensator would see
     // the in-progress scroll as drift and break the animation.
     snapToTop();
-    requestAnimationFrame(() => {
+    nextFrame(() => {
       hideLoader();
       smoothScrollToHash(hashId);
       waitForScrollIdle(4000, () => maintainTargetPosition(hashId));

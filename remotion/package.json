@@ -1,0 +1,21 @@
+{
+  "name": "autopay-remotion",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Isolated Remotion workspace for AutoPay business video clips. NOT part of the Docusaurus build — see README.md.",
+  "scripts": {
+    "start": "remotion studio",
+    "render": "node scripts/render-all.mjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "typescript": "^5.9.0"
+  }
+}

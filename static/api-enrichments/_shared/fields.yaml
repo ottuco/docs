@@ -38,7 +38,13 @@ customer_phone:
   description: |
     Customer phone number associated with the payment. This might be sent to the payment gateway and depending on the gateway, it may trigger a click to pay process on the payment page. The phone number will also be included in the invoice, receipt, email, and displayed on the payment page. It becomes a **required** parameter if the merchant wants to enable KFAST on KNET (KFAST is a tokenization feature on KPay page, which works with UDF3 mapped with `customer_phone`), or if SMS [notifications]({{apiBaseUrl}}/notifications/) are enabled, or if the transaction opts into [loyalty rewards]({{apiBaseUrl}}/payments/loyalty/) with `loyalty.enabled=true`. Otherwise, it remains **optional**.
 
-    For [loyalty]({{apiBaseUrl}}/payments/loyalty/), this is the field the reward is issued against — STC Qitaf identifies a loyalty account by mobile number, never by `customer_id`. Send a Saudi mobile number in any of `05XXXXXXXX`, `5XXXXXXXX`, `+9665XXXXXXXX`, `009665XXXXXXXX`, or `9665XXXXXXXX`; Ottu normalizes the country code and any spaces, hyphens, or parentheses. A missing, masked, or non-Saudi number silently skips the reward — no error is returned.
+    For [loyalty]({{apiBaseUrl}}/payments/loyalty/), this is the field the reward is issued against — STC Qitaf identifies a loyalty account by mobile number, never by `customer_id` (your own identifier, routinely non-numeric). The field accepts up to 16 characters.
+
+    **Accepted Saudi mobile forms** — all resolve to the same account: `0566089459` (local), `566089459` (no leading zero), `+966566089459`, `00966566089459`, `966566089459`, and `+966 56 608-9459` (spaces, hyphens, and parentheses are stripped). A valid Saudi mobile is `05XXXXXXXX` or `5XXXXXXXX` — 9 digits after any prefix, starting with `5`. Saudi landlines (`01XXXXXXX` / `1XXXXXXX`) also pass validation, though loyalty accounts are mobile-based in practice.
+
+    **Rejected forms** — `0766089459` (`07` is not a Saudi mobile prefix), `+40721234567` (not a Saudi number), `056.608.9459` (dots are **not** stripped), and `CUST-123` (not a phone number).
+
+    A missing, masked, or invalid number silently skips the reward — no error is returned, and the transaction still reaches `paid`. Normalize numbers to one canonical form on your side (`+9665XXXXXXXX` works well) before you call the API.
 
 customer_id:
   description: |

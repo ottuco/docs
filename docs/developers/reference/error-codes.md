@@ -129,6 +129,23 @@ Returned when the request rate exceeds the allowed limit.
 
 Some endpoints return specific error codes beyond the standard HTTP errors:
 
+### Checkout Page
+
+The hosted checkout status endpoint returns a stable `code` alongside its display text, both when a
+payment link cannot be paid (HTTP 200) and when its gateway is misconfigured (HTTP 400).
+
+| Code | HTTP | Cause | Remedy |
+|------|:----:|-------|--------|
+| `canceled` | 200 | The merchant canceled the payment | Nothing to retry — return the customer to the merchant |
+| `expired` | 200 | Not paid before expiry | Request a new payment link |
+| `unavailable` | 200 | Configuration change made the transaction unprocessable | Contact the merchant; a retry will not help |
+| `pg_unavailable` | 200 / 400 | The gateway cannot settle the transaction currency | Contact the merchant; a retry will not help |
+| `awaiting_payment` | 200 | A gateway result is still expected | Wait and poll |
+| `unknown` | 200 | Terminal state with no specific code | Contact the merchant |
+
+Branch on `code`, never on the message text — see [Checkout Status Codes](/developers/reference/checkout-status-codes)
+for the full contract, the bilingual copy, and the SDK error shapes.
+
 ### Operations API
 
 | HTTP | Code | When |

@@ -1,0 +1,66 @@
+/* ═══════════════════════════════════════════════════════
+   VideoEmbed — poster-first, click-to-play video figure
+   Reduced-motion safe: nothing moves until the user clicks.
+   ═══════════════════════════════════════════════════════ */
+
+.figure {
+  margin: 28px auto;
+}
+
+.frame {
+  position: relative;
+  width: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-background-surface-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.posterBtn {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  cursor: pointer;
+  background-size: cover;
+  background-position: center;
+  display: grid;
+  place-items: center;
+}
+
+.playIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 24px;
+  padding-left: 4px;
+  transition: background 0.15s ease;
+}
+
+.posterBtn:hover .playIcon {
+  background: var(--ifm-color-primary);
+}
+
+.caption {
+  font-size: 14px;
+  color: var(--ifm-color-emphasis-600);
+  text-align: center;
+  margin-top: 10px;
+}
+
+[data-theme="dark"] .frame {
+  border-color: var(--ifm-color-emphasis-300);
+}

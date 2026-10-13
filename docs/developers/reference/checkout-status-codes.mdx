@@ -1,0 +1,288 @@
+---
+title: Checkout Status Codes
+description: Branch on a stable code when a payment link cannot be paid, instead of parsing display text.
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import CodeBlock from "@theme/CodeBlock";
+import FAQ, { FAQItem } from "@site/src/components/FAQ";
+import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
+
+# Checkout Status Codes
+
+When a customer opens a payment link that can no longer be paid — it expired, the merchant canceled
+it, or a configuration change made it unprocessable — the checkout page endpoint answers with a
+`details` object describing the situation.
+
+That object carries a **`code`**: a short, stable, lowercase value you branch on. The accompanying
+`state` and `message` are display copy, translated into the customer's language and reworded
+whenever the wording is improved. `code` is the contract; the text is not.
+
+:::note Base URL
+Every call on this page targets <code>{OTTU_CONNECT_BASE_URL}</code>. Swap in your own merchant
+domain when you integrate.
+:::
+
+## Authentication
+
+**This endpoint takes no API key.** It is the JSON behind the hosted checkout page, which a customer
+opens from a link, so it is reachable without credentials — the `session_id` in the path is what
+identifies the payment, and possessing it is what grants access.
+
+That has one consequence worth designing around:
+
+:::warning Treat `session_id` as a secret
+Anyone holding a `session_id` can read that payment's status. Do not put it in analytics events,
+client-side logs, referrer-exposed query strings, or anywhere it outlives the customer's session.
+It is a bearer value, not an opaque identifier.
+:::
+
+If you need payment data that is *not* safe to expose this way — the gateway used, the operator
+diagnostic, anything about your configuration — read it from the authenticated
+[Operations API](/developers/operations) instead, using your
+[API key](/developers/getting-started/authentication).
+
+## When You Need This
+
+- You host your own checkout screen and need to tell the customer why they cannot pay.
+- You want to route customers differently per situation — offer a retry on one code, send them back
+  to the merchant on another.
+- You are localizing the checkout experience and want your own copy rather than Ottu's.
+
+## Quick Implementation
+
+Fetch the checkout page for a session and branch on `details.code`:
+
+<Tabs groupId="language">
+<TabItem value="curl" label="cURL">
+
+<CodeBlock language="bash">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/checkout/api/intl/v1/checkout-page/<session_id>' \\
+--header 'Accept-Language: en'`}</CodeBlock>
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+<CodeBlock language="python">{`import requests
+
+response = requests.get(
+    f"${OTTU_CONNECT_BASE_URL}/b/checkout/api/intl/v1/checkout-page/{session_id}",
+    headers={"Accept-Language": "en"},
+)
+payload = response.json()
+
+details = payload.get("details")
+if details is None:
+    render_payment_form(payload)          # still payable
+else:
+    show_notice(details["code"])          # branch on the code, never the text`}</CodeBlock>
+
+</TabItem>
+<TabItem value="node" label="Node.js">
+
+<CodeBlock language="javascript">{`const response = await fetch(
+  \`${OTTU_CONNECT_BASE_URL}/b/checkout/api/intl/v1/checkout-page/\${sessionId}\`,
+  { headers: { "Accept-Language": "en" } }
+);
+const payload = await response.json();
+
+if (!payload.details) {
+  renderPaymentForm(payload);             // still payable
+} else {
+  showNotice(payload.details.code);       // branch on the code, never the text
+}`}</CodeBlock>
+
+</TabItem>
+<TabItem value="php" label="PHP">
+
+<CodeBlock language="php">{`<?php
+$ch = curl_init("${OTTU_CONNECT_BASE_URL}/b/checkout/api/intl/v1/checkout-page/" . $sessionId);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, ["Accept-Language: en"]);
+$payload = json_decode(curl_exec($ch), true);
+curl_close($ch);
+
+if (!isset($payload["details"])) {
+    renderPaymentForm($payload);          // still payable
+} else {
+    showNotice($payload["details"]["code"]); // branch on the code, never the text
+}`}</CodeBlock>
+
+</TabItem>
+</Tabs>
+
+:::warning Do not branch on `message`
+`message` and `state` are display copy. They change with the customer's language and are reworded
+without notice. Any logic that reads them will break — `code` is the only value safe to compare
+against.
+:::
+
+## Response Shape
+
+A payment link that **cannot** be paid returns `HTTP 200` with a `details` object:
+
+```json title="Terminal state — HTTP 200"
+{
+  "valid_for_payment": false,
+  "is_paid": false,
+  "details": {
+    "state": "Unavailable",
+    "code": "unavailable",
+    "message": "This payment link is not available right now. Please contact the merchant."
+  },
+  "unit_details": { }
+}
+```
+
+| Key | Type | Meaning |
+| --- | --- | --- |
+| `details.code` | string | Stable machine-readable reason. Branch on this. Never translated. |
+| `details.state` | string | Localized state heading, for display only. |
+| `details.message` | string | Localized explanation, for display only. |
+| `valid_for_payment` | boolean | `false` whenever `details` is present. |
+| `is_paid` | boolean | Whether the payment already succeeded. |
+
+A link that **can** still be paid returns the normal checkout payload with payment methods and **no
+`details` object** — which is the cleanest way to tell the two apart.
+
+## The Codes
+
+| `code` | Meaning | What to offer the customer |
+| --- | --- | --- |
+| `canceled` | The merchant canceled the payment. | Nothing to retry. Send them back to the merchant. |
+| `expired` | The link was not paid before its expiry. | Ask the merchant for a fresh link. |
+| `unavailable` | A configuration change made the payment unprocessable after it was created. | Contact the merchant. A retry will not help. |
+| `pg_unavailable` | The selected payment gateway cannot settle this transaction's currency. | Contact the merchant. A retry will not help. |
+| `awaiting_payment` | A result is still expected from the payment gateway. | Ask them to wait, then poll. This is the one code where retrying makes sense. |
+| `unknown` | The payment cannot be initiated, and the reason is not one of the above. | Contact the merchant. |
+
+:::tip Group them by what the customer can do
+Only `awaiting_payment` is worth polling. `canceled` and `expired` mean "get a new link".
+`unavailable`, `pg_unavailable` and `unknown` all mean "the merchant has something to fix" — you can
+safely render one screen for those three.
+:::
+
+## Display Copy
+
+Ottu returns copy in the language of the `Accept-Language` header. Both languages ship for every
+code, so you can render Ottu's text directly if you do not want to write your own.
+
+| `code` | English | Arabic |
+| --- | --- | --- |
+| `canceled` | Oops, transaction was canceled by the merchant. | عفوًا، تم إلغاء المعاملة بواسطة التاجر. |
+| `expired` | Oops, transaction is expired. | عفوًا، انتهت صلاحية العملية. |
+| `unavailable` | This payment link is not available right now. Please contact the merchant. | رابط الدفع هذا غير متاح حاليًا. يرجى التواصل مع التاجر. |
+| `pg_unavailable` | This payment link is not available right now. Please contact the merchant. | رابط الدفع هذا غير متاح حاليًا. يرجى التواصل مع التاجر. |
+| `awaiting_payment` | We are waiting for payment status from the payment gateway. | نحن في انتظار حالة الدفع من بوابة الدفع. |
+| `unknown` | Unable to initiate the payment. | غير قادر على بدء الدفع. |
+
+The `state` heading is localized the same way — for example `Unavailable` / `غير متوفر`,
+`Expired` / `منتهية`, `Canceled` / `ألغيت`.
+
+```json title="Same session, Accept-Language: ar"
+{
+  "details": {
+    "state": "غير متوفر",
+    "code": "unavailable",
+    "message": "رابط الدفع هذا غير متاح حاليًا. يرجى التواصل مع التاجر."
+  }
+}
+```
+
+Note that `code` is identical in both responses. That is the point of it.
+
+## Errors
+
+Two non-2xx responses are worth handling explicitly.
+
+| HTTP | Body | Cause | What to do |
+| :--: | --- | --- | --- |
+| 400 | `{"detail": "...", "code": "pg_unavailable"}` | The gateway on this transaction cannot settle its currency. | Render the same screen as the `pg_unavailable` code above. |
+| 404 | `{"detail": "Not found."}` | No transaction matches this `session_id`. | Show a "link not found" screen. Do not retry. |
+
+```json title="Misconfigured gateway — HTTP 400"
+{
+  "detail": "This payment link is not available right now. Please contact the merchant.",
+  "code": "pg_unavailable"
+}
+```
+
+The `400` carries `code` beside the standard `detail` key, so the same branching logic works for
+both the `200` and the `400`.
+
+:::danger Handle every non-2xx
+A `400` here is a configuration problem on a link the merchant has already handed out. If your
+checkout screen renders nothing for non-2xx responses, the customer sees a blank page rather than an
+explanation. Give every non-2xx a visible screen.
+:::
+
+## Checkout SDK Error Payloads
+
+The Checkout SDK payment endpoints answer with the same payer-safe copy when a transaction cannot be
+paid. Two of them also carry the code:
+
+| Surface | Shape |
+| --- | --- |
+| Token pay | `{"form_of_payment": "token_pay", "status": "error", "code": "...", "message": "..."}` |
+| SMS payment | `{"code": "...", "message": "..."}` |
+| Click to Pay | `{"session_id": ["..."]}` — copy only |
+| ABA PayWay | `{"session_id": ["..."]}` — copy only |
+
+:::note
+Click to Pay and ABA PayWay report the failure as a field error, so they return the explanation
+without a `code`. If you integrate against those two, branch on the HTTP status and render a generic
+"cannot be paid" screen.
+:::
+
+## Best Practices
+
+- **Branch on `code`, render your own copy.** Ottu's text is good defaults, not a contract.
+- **Treat an unknown `code` as `unknown`.** New codes can be added; fall back rather than crash.
+- **Only poll on `awaiting_payment`.** Every other code is terminal for the customer.
+- **Do not show the customer a technical reason.** Ottu deliberately never tells the payer which
+  gateway is misconfigured. If you need that detail for support, take it from your own logs or from
+  the [Operations API](/developers/operations), not from the checkout response.
+
+## FAQ
+
+<FAQ>
+  <FAQItem question="Why did the `Invalided` label change to `Unavailable`?">
+    "Invalided" was not a word. The English display label for the `invalided` payment state now
+    reads **Unavailable**. The **stored value is unchanged** — it is still `invalided` in webhooks,
+    the Operations API, exports and filters, so nothing you have integrated against the value needs
+    to change. Only the human-readable label moved. See [Payment States](/developers/reference/payment-states).
+  </FAQItem>
+
+  <FAQItem question="Is `code` ever translated?">
+    No. `code` is always the lowercase English slug regardless of `Accept-Language`. Only `state`
+    and `message` are localized.
+  </FAQItem>
+
+  <FAQItem question="What is the difference between `unavailable` and `pg_unavailable`?">
+    `unavailable` means the transaction as a whole can no longer be processed. `pg_unavailable`
+    means a specific payment gateway cannot settle the transaction's currency. For the customer they
+    are the same situation — the merchant has something to fix — so you can render one screen for
+    both. They are separate codes so your support tooling can tell them apart.
+  </FAQItem>
+
+  <FAQItem question="Do I have to handle `unknown`?">
+    Yes, as a catch-all. It covers terminal states that are not one of the named codes, and it is
+    also the safe fallback if Ottu adds a code your integration does not recognize yet.
+  </FAQItem>
+
+  <FAQItem question="Why does a payable link have no `details` object?">
+    `details` only describes why a payment cannot proceed. When the link is payable the response
+    carries the payment methods instead. Checking for the presence of `details` is the simplest way
+    to branch.
+  </FAQItem>
+</FAQ>
+
+## What's Next?
+
+- [Payment States](/developers/reference/payment-states) — the full state model behind these codes
+- [Error Codes](/developers/reference/error-codes) — platform-wide error format and HTTP statuses
+- [Checkout API](/developers/payments/checkout-api) — creating the payment links these codes describe
+- [Checkout SDK](/developers/payments/checkout-sdk/web) — the hosted and embedded checkout experience
+- [Operations API](/developers/operations) — cancel, expire, refund and their effect on state

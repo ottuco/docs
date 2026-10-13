@@ -7,6 +7,11 @@ toc_max_heading_level: 3
 
 import StepGuide from "@site/src/components/StepGuide";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
+import VideoEmbed from "@site/src/components/VideoEmbed";
+
+{/* The AutoPay <VideoEmbed> clips below are built from the real betabulk screenshots
+    (sequenced via the Reel component). To refresh: update a screenshot or composition in
+    remotion/, run `npm run render`, and the files in static/video/autopay/ update in place. */}
 
 # AutoPay
 
@@ -38,6 +43,12 @@ This page covers what AutoPay does for your business. The exact request and resp
 3. **From then on, AutoPay generates each new cycle on schedule** and charges the saved card automatically — the next cycle is only created once the current one is paid.
 4. **If a charge fails, AutoPay retries it automatically** and keeps the customer posted by email — your team doesn't have to notice or act.
 5. **The customer manages everything else themselves** — checking their next charge date, updating a card, or canceling — from a private self-service page you send them.
+
+<VideoEmbed
+  src="/video/autopay/setup-subscription.mp4"
+  poster="/video/autopay/setup-subscription-poster.png"
+  caption="One checkout call creates the subscription; AutoPay then owns the schedule, retries, dunning, and the customer self-service page."
+/>
 
 ## Subscription lifecycle {#subscription-lifecycle}
 
@@ -95,6 +106,12 @@ Not every card charge succeeds on the first try. AutoPay handles the follow-up a
 A Past Due subscription stays Past Due indefinitely. AutoPay does not cancel it automatically, no matter how long the balance goes unpaid — it keeps waiting for the customer to pay, or for your team to cancel it directly. If you were assuming subscriptions eventually cancel themselves after enough failed attempts, they don't — build your own process (a scheduled report, a support workflow) around subscriptions that have been past due longer than you're comfortable with.
 :::
 
+<VideoEmbed
+  src="/video/autopay/retry-to-recovery.mp4"
+  poster="/video/autopay/retry-to-recovery-poster.png"
+  caption="The retry → past due → recovery journey: automatic retries, a final-failure email, and the customer clearing the balance to return to Active."
+/>
+
 ## The customer self-service page {#customer-self-service-page}
 
 Every subscription gets its own private page (the product calls it "Manage Subscription") — a link with a signed token that only that customer can use. Your team delivers the link; AutoPay hosts the page and keeps it in sync with the subscription's real state automatically, in English and Arabic.
@@ -108,6 +125,12 @@ From this page, a customer can:
 - Pay an outstanding balance directly
 - Cancel their subscription
 - Undo a cancellation that hasn't taken effect yet
+
+<VideoEmbed
+  src="/video/autopay/self-service-tour.mp4"
+  poster="/video/autopay/self-service-tour-poster.png"
+  caption="The customer self-service page: view status, update a card, and pay an outstanding balance — all from one link."
+/>
 
 ### What a subscription looks like to your customer
 
@@ -135,6 +158,8 @@ The page is a single scrolling view — customer details, subscription summary, 
   {
     title: "Expired",
     description: <>Billing stopped at the subscription's end date. History stays readable, every action is gone. Continuing means a new subscription.</>,
+    image: "/img/business/autopay/portal-04-expired.png",
+    imageAlt: "Expired subscription: billing stopped at the end date, actions removed, history still readable",
   },
   {
     title: "No cards saved",
@@ -194,6 +219,14 @@ Customers can hold several cards on file and switch which one is active with a s
 
 Saved cards are never deleted. AutoPay keeps every card a customer has used as part of the subscription's record, so a card that is no longer active still explains what paid for an earlier cycle. Switching the active card is the only card management a customer needs — there is no removal step to walk them through.
 
+![Adding a card: a secure checkout where the customer enters and saves a new card to the subscription](/img/business/autopay/cards-02-add-card.png)
+
+<VideoEmbed
+  src="/video/autopay/add-card-flow.mp4"
+  poster="/video/autopay/add-card-flow-poster.png"
+  caption="Adding a card: the customer taps Add Another Card, enters details in a secure checkout, and the new card is saved to the subscription."
+/>
+
 :::warning Regenerating a customer's link revokes the old one instantly
 If you regenerate a subscription's self-service link, the previous link stops working immediately — and AutoPay does not tell the customer. Whatever channel delivered the first link (email, your own account area, a support reply), you need to deliver the new one the same way, or the customer is simply locked out with no explanation.
 :::
@@ -237,6 +270,12 @@ AutoPay sends three emails over a subscription's life, each available in English
 |---|---|---|
 | Monthly | 1 | 2 days before |
 | Yearly | 3 | 30, 10, and 3 days before |
+
+<VideoEmbed
+  src="/video/autopay/notification-emails.mp4"
+  poster="/video/autopay/notification-emails-poster.png"
+  caption="The three AutoPay emails over a subscription's life: upcoming charge, payment failed, and final failure."
+/>
 
 ### Upcoming charge
 
