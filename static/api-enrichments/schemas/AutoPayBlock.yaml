@@ -18,7 +18,7 @@ properties:
       How often AutoPay charges the customer. Enum: `monthly`, `yearly`. These are the only two values accepted; AutoPay has no weekly or custom-interval billing. Required.
   recurring_amount:
     description: |
-      The amount charged on every billing cycle after the first payment, as a decimal string. Maximum 14 digits with up to 3 decimal places, and it may not be negative. Required.
+      The amount charged on every billing cycle after the first payment, as a decimal string. Maximum 14 digits with up to 3 decimal places, and it may not be negative: a value below `0` is rejected with a 400 even though the schema pattern admits a leading minus sign. Required.
 
       This is independent of the transaction `amount`, which covers only the first (customer-initiated) payment. A free trial is expressed as `amount: "0"` with a non-zero `recurring_amount`.
   start_date:

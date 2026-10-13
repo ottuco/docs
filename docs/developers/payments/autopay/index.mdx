@@ -219,7 +219,7 @@ $session = json_decode($response, true);`}</CodeBlock>
 Fields you don't send are dropped rather than sent as `null`, so AutoPay applies its own defaults instead of a default you didn't intend.
 
 :::tip Zero-amount subscriptions start a trial
-`amount` may be `"0.000"` on the checkout call as long as `type` isn't `one_off` — this creates the subscription with no first charge, and it starts in `trialing` instead of `active`. See [Subscription States](#subscription-states).
+`amount` may be `"0.000"` on the checkout call as long as `payment_type` isn't `one_off` — this creates the subscription with no first charge, and it starts in `trialing` instead of `active`. See [Subscription States](#subscription-states).
 :::
 
 #### Error Handling: Missing customer_email {#error-handling-missing-customer-email}

@@ -145,25 +145,31 @@
       "properties": {
         "cycle_number": {
           "type": "integer",
-          "nullable": true
+          "nullable": true,
+          "description": "The sequential number of the billing cycle this payment belongs to, starting at 1."
         },
         "cycle_status": {
           "type": "string",
-          "nullable": true
+          "nullable": true,
+          "description": "The status of that billing cycle, for example `paid` or `retry_scheduled`."
         },
         "event_type": {
-          "type": "string"
+          "type": "string",
+          "description": "What AutoPay classified this payment as. One of `cit_success`, `mit_success`, `mit_failure`, `card_updated`, `recovery_success`. A hint only; read `result` and `state` for the payment outcome."
         },
         "next_billing_date": {
           "type": "string",
           "format": "date",
-          "nullable": true
+          "nullable": true,
+          "description": "The date of the next scheduled charge, in `YYYY-MM-DD` format."
         },
         "subscription_id": {
-          "type": "string"
+          "type": "string",
+          "description": "The AutoPay subscription this payment belongs to. Not signed; for a value you can trust, read `extra.autopay.subscription_id`."
         },
         "subscription_status": {
-          "type": "string"
+          "type": "string",
+          "description": "The subscription's status at the moment the webhook was assembled, for example `active` or `past_due`."
         }
       }
     },
@@ -336,7 +342,25 @@
       "description": "List of wallet legs that contributed to this payment — one entry per wallet provider (Ottu, Qitaf, …). Multi-wallet stacking emits multiple entries; full or single-wallet payments emit a one-element list. Omitted entirely (key absent) when no wallet was involved."
     },
     "extra": {
-      "description": "The extra information for the payment details, which the merchant has sent it in key value form."
+      "type": "object",
+      "additionalProperties": true,
+      "description": "The extra information for the payment details, which the merchant has sent it in key value form. Ottu always adds `merchant_id`, and adds `autopay.subscription_id` on payments that belong to an AutoPay subscription. Both are covered by the signature.",
+      "properties": {
+        "autopay": {
+          "type": "object",
+          "description": "Present only on payments that belong to an AutoPay subscription.",
+          "properties": {
+            "subscription_id": {
+              "type": "string",
+              "description": "The AutoPay subscription this payment belongs to. It is part of the signed field set. Use this value, not the top-level `autopay.subscription_id`, to identify the subscription."
+            }
+          }
+        },
+        "merchant_id": {
+          "type": "string",
+          "description": "Your merchant domain, for example `your-merchant.ottu.net`. Always present, even when you sent no `extra` object. It is part of the signed field set, so it can be trusted once the signature is verified."
+        }
+      }
     },
     "fee": {
       "type": "string",
