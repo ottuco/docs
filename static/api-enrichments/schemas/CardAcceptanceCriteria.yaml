@@ -4,4 +4,4 @@
 properties:
   min_expiry_time:
     description: |
-      Specifies the minimum required validity period, in days, for a card to be eligible for payment. If set to 30 days, for example, cards set to expire within the next month would be declined. Additionally, it defaults to 30 days when the `payment_type` is `auto_debit`. If any other payment type is selected, no default value is set.
+      Specifies the minimum required validity period, in days, for a card to be eligible for payment. If set to 30 days, for example, cards set to expire within the next month would be declined. Additionally, it defaults to 30 days when the `payment_type` is `auto_debit`. If any other payment type is selected, no default value is set. This default is specific to `auto_debit` and is **not** applied to `auto_pay`, even though `auto_pay` otherwise inherits the `auto_debit` requirements — set `min_expiry_time` explicitly if you want a card-expiry floor on an AutoPay subscription.

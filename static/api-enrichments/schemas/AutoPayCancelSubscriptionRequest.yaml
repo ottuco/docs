@@ -1,0 +1,9 @@
+# Overrides for: components/schemas/AutoPayCancelSubscriptionRequest
+# Body of POST /b/pbl/v2/subscriptions/{subscription_id}/cancel/.
+
+properties:
+  mode:
+    description: |
+      When the cancellation takes effect. Required.
+
+      `immediate` stops the subscription now: `status` becomes `canceled` and no further cycles are scheduled. `at_period_end` sets `cancel_at_period_end` to `true` and leaves `status` unchanged; the subscription becomes `canceled` when the next cycle would have been generated.

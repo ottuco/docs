@@ -128,9 +128,9 @@ Three further cards **enroll and tokenize successfully** on the first (CIT) paym
 
 <TestCardsTable
   cards={[
-    { cardNumber: "411111111111114", expiry: "Any", cvv: "Any", brand: "Visa (test)", status: "declined", statusLabel: "MIT decline", note: "Saves at CIT; declined when charged — issuing bank" },
-    { cardNumber: "411111111111115", expiry: "Any", cvv: "Any", brand: "Visa (test)", status: "declined", statusLabel: "MIT decline", note: "Saves at CIT; declined when charged — card expired" },
-    { cardNumber: "411111111111116", expiry: "Any", cvv: "Any", brand: "Visa (test)", status: "declined", statusLabel: "MIT decline", note: "Saves at CIT; declined when charged — insufficient funds" },
+    { cardNumber: "411111111111114", expiry: "Any", cvv: "Any", brand: "Visa (test)", status: "declined", statusLabel: "Issuer Declined", note: "Saves on the first payment; declined by the issuing bank on every merchant-initiated charge" },
+    { cardNumber: "411111111111115", expiry: "Any", cvv: "Any", brand: "Visa (test)", status: "declined", statusLabel: "Expired Card", note: "Saves on the first payment; card expired on every merchant-initiated charge" },
+    { cardNumber: "411111111111116", expiry: "Any", cvv: "Any", brand: "Visa (test)", status: "declined", statusLabel: "Insufficient Funds", note: "Saves on the first payment; insufficient funds on every merchant-initiated charge" },
   ]}
 />
 

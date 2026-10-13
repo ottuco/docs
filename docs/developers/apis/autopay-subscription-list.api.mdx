@@ -1,0 +1,71 @@
+---
+id: autopay-subscription-list
+title: "List AutoPay subscriptions"
+description: "Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant."
+sidebar_label: "List AutoPay subscriptions"
+hide_title: true
+hide_table_of_contents: true
+api: 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
+sidebar_class_name: "post api-method"
+info_path: developers/apis/ottu-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+import Translate from "@docusaurus/Translate";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"List AutoPay subscriptions"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/b/pbl/v2/subscriptions/"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant.
+
+Lists subscriptions using AutoPay's filter-body API. Pagination uses `limit` and `offset`, accepted in the request body or as query parameters (query wins). The returned `next` and `previous` URLs point at this endpoint and can be followed directly.
+
+<pre style={{display:"none"}}>{"curl --location 'https://sandbox.ottu.net/b/pbl/v2/subscriptions/' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Api-Key YOUR_API_KEY' \\\n--data '{\n  \"status\": \"string\",\n  \"customer_id\": \"string\",\n  \"created_after\": \"2024-07-29\",\n  \"created_before\": \"2024-07-29\",\n  \"limit\": 0,\n  \"offset\": 0\n}'"}</pre>
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+>
+  <Translate id="theme.openapi.request.title">Request</Translate>
+</Heading>
+
+<ParamsDetails>
+  
+</ParamsDetails>
+
+<RequestSchema
+  {...require("./autopay-subscription-list.RequestSchema.json")}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  {...require("./autopay-subscription-list.StatusCodes.json")}
+>
+  
+</StatusCodes>
+
+
+      

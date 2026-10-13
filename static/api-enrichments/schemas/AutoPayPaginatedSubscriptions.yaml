@@ -1,0 +1,19 @@
+# Overrides for: components/schemas/AutoPayPaginatedSubscriptions
+# Response of POST /b/pbl/v2/subscriptions/.
+
+_description: |
+  One page of subscriptions. See [Paging through the list]({{apiBaseUrl}}/payments/autopay/#paging-through-the-list) for how to walk the pages of this `POST` list.
+
+properties:
+  count:
+    description: |
+      The total number of subscriptions that match, across all pages, not only the ones in `results`.
+  next:
+    description: |
+      URL of the next page, on your Connect domain. Follow it with `POST`, the same verb as the first page; a `GET` returns `405`. `null` on the last page.
+  previous:
+    description: |
+      URL of the previous page, on your Connect domain. Follow it with `POST`, the same verb as the first page; a `GET` returns `405`. `null` on the first page.
+  results:
+    description: |
+      The subscriptions on this page, newest first. An empty array when nothing matches.
