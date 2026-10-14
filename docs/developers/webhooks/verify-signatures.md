@@ -142,7 +142,7 @@ Consider this payload and a hypothetical HMAC key.
   "gateway_name": "mpgs",
   "order_no": "ORD-1001",
   "payment_type": "auto_pay",
-  "reference_number": "betabulkAQ5DJ",
+  "reference_number": "sandboxAQ5DJ",
   "result": "success",
   "session_id": "a12f71075a834a34d692736ac43a212fcebfb6ec",
   "state": "paid",
@@ -177,7 +177,7 @@ gateway_account=credit-card
 gateway_name=mpgs
 order_no=ORD-1001
 payment_type=auto_pay
-reference_number=betabulkAQ5DJ
+reference_number=sandboxAQ5DJ
 result=success
 session_id=a12f71075a834a34d692736ac43a212fcebfb6ec
 state=paid
@@ -194,7 +194,7 @@ Note what is missing from it, and why:
 
 Applying HMAC-SHA256 with the key above gives:
 
-`4ea44c61554e6b64feeb82e6bfc724dc1c46bf183596f5375f5cb12cca14b7ef`
+`e40d3a6f46b8d48b5d8cd5e9265fc41f2c2f54e2848fbe6389ed4fab22cf1beb`
 
 Compare that against the `signature` field on the payload you received.
 
@@ -203,7 +203,7 @@ Compare that against the `signature` field on the payload you received.
 Ensuring the integrity and authenticity of payloads is paramount for the security of both the service provider and the merchants. To achieve this, an HMAC signature is generated and sent along with the payload, and this signature needs to be validated at the merchant's end. Each implementation below follows the [signature creation](#3-signature-creation) steps exactly; use the payload, key and digest in the [example](#example) as a test vector to confirm your build of it. Snippets are provided for [Python](#python), [PHP](#php), [Java](#java), [.NET (C#)](#net-c), [Node.js](#nodejs), [Ruby](#ruby), and [Go](#go).
 
 :::tip Test your implementation before you need it
-Run your updated verifier against the payload and key in the [example](#example) above. If it produces `4ea44c61…`, it implements the current scheme correctly.
+Run your updated verifier against the payload and key in the [example](#example) above. If it produces `e40d3a6f…`, it implements the current scheme correctly.
 :::
 
 ## Specific Examples
@@ -276,7 +276,7 @@ def verify(payload, hmac_key):
     return hmac.compare_digest(expected, payload.get("signature", ""))
 ```
 
-Running `generate_hmac_signature` against the payload and key from the [example](#example) prints `4ea44c61554e6b64feeb82e6bfc724dc1c46bf183596f5375f5cb12cca14b7ef`.
+Running `generate_hmac_signature` against the payload and key from the [example](#example) prints `e40d3a6f46b8d48b5d8cd5e9265fc41f2c2f54e2848fbe6389ed4fab22cf1beb`.
 
 ### PHP
 
