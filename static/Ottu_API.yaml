@@ -2230,36 +2230,97 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/AutoPayPaginatedSubscriptions'
+              examples:
+                FirstPage:
+                  value:
+                  - count: 42
+                    next: https://sandbox.ottu.net/b/pbl/v2/subscriptions/?limit=20&offset=20
+                    previous: null
+                    results:
+                    - id: sub_9kq2w7xp4m
+                      customer_id: cust_10042
+                      customer_email: customer@example.com
+                      frequency: monthly
+                      recurring_amount: '9.990'
+                      currency: KWD
+                      status: active
+                      next_billing_date: '2026-12-01'
+                      created_at: '2026-11-01T08:15:42Z'
+                  summary: First page
           description: ''
         '400':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                LimitAbove100:
+                  value:
+                    limit:
+                    - Ensure this value is less than or equal to 100.
+                  summary: Limit above 100
           description: ''
         '401':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                NotAuthenticated:
+                  value:
+                    detail: Authentication credentials were not provided.
+                  summary: Not authenticated
           description: ''
-        '403':
+        '422':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                UnknownStatusFilter:
+                  value:
+                    detail:
+                    - type: enum
+                      loc:
+                      - body
+                      - payload
+                      - status
+                      msg: Input should be 'pending_setup', 'trialing', 'active', 'past_due', 'canceled', 'expired' or 'setup_failed'
+                  summary: Unknown status filter
+          description: ''
+        '423':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                InstallationPaused:
+                  value:
+                    detail: Service is paused.
+                    code: service_paused
+                  summary: Installation paused
           description: ''
         '503':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayUnavailable:
+                  value:
+                    detail: AutoPay bridge is unavailable.
+                  summary: AutoPay unavailable
           description: ''
         '504':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayTimedOut:
+                  value:
+                    detail: AutoPay bridge request timed out.
+                  summary: AutoPay timed out
           description: ''
   /b/pbl/v2/subscriptions/{subscription_id}/:
     get:
@@ -2295,36 +2356,86 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AutoPaySubscription'
+              examples:
+                ActiveSubscription:
+                  value:
+                    id: sub_9kq2w7xp4m
+                    customer_id: cust_10042
+                    customer_email: customer@example.com
+                    frequency: monthly
+                    currency: KWD
+                    recurring_amount: '9.990'
+                    first_payment_amount: '9.990'
+                    start_date: '2026-11-01'
+                    end_date: null
+                    status: active
+                    cancel_at_period_end: false
+                    canceled_at: null
+                    cancellation_initiator: null
+                    agreement_id: AGR-10042
+                    next_billing_date: '2026-12-01'
+                    description: Premium plan
+                    merchant_reference: PLAN-PREMIUM-10042
+                    retry_count: 3
+                    created_at: '2026-11-01T08:15:42Z'
+                  summary: Active subscription
           description: ''
         '401':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                NotAuthenticated:
+                  value:
+                    detail: Authentication credentials were not provided.
+                  summary: Not authenticated
           description: ''
         '404':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                UnknownSubscription:
+                  value:
+                    detail: Not found
+                    code: subscription_not_found
+                  summary: Unknown subscription
+          description: ''
+        '423':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                InstallationPaused:
+                  value:
+                    detail: Service is paused.
+                    code: service_paused
+                  summary: Installation paused
           description: ''
         '503':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayUnavailable:
+                  value:
+                    detail: AutoPay bridge is unavailable.
+                  summary: AutoPay unavailable
           description: ''
         '504':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayTimedOut:
+                  value:
+                    detail: AutoPay bridge request timed out.
+                  summary: AutoPay timed out
           description: ''
   /b/pbl/v2/subscriptions/{subscription_id}/cancel/:
     post:
@@ -2347,8 +2458,7 @@ paths:
         schema:
           type: string
           format: uuid
-        description: Unique UUID for idempotent AutoPay mutation requests. Required
-          by AutoPay for cancel and regenerate-page-token.
+        description: Unique UUID for idempotent AutoPay mutation requests. Required by AutoPay for cancel and regenerate-page-token.
         required: true
       - in: path
         name: subscription_id
@@ -2389,54 +2499,132 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AutoPaySubscription'
+              examples:
+                ScheduledToEnd:
+                  value:
+                    id: sub_9kq2w7xp4m
+                    customer_id: cust_10042
+                    customer_email: customer@example.com
+                    frequency: monthly
+                    currency: KWD
+                    recurring_amount: '9.990'
+                    first_payment_amount: '9.990'
+                    start_date: '2026-11-01'
+                    end_date: null
+                    status: active
+                    cancel_at_period_end: true
+                    canceled_at: null
+                    cancellation_initiator: merchant
+                    agreement_id: AGR-10042
+                    next_billing_date: '2026-12-01'
+                    description: Premium plan
+                    merchant_reference: PLAN-PREMIUM-10042
+                    retry_count: 3
+                    created_at: '2026-11-01T08:15:42Z'
+                  summary: Scheduled to end
           description: ''
         '400':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                MissingIdempotency-Key:
+                  value:
+                    Idempotency-Key:
+                    - This header is required.
+                  summary: Missing Idempotency-Key
           description: ''
         '401':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                NotAuthenticated:
+                  value:
+                    detail: Authentication credentials were not provided.
+                  summary: Not authenticated
           description: ''
         '404':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                UnknownSubscription:
+                  value:
+                    detail: Not found
+                    code: subscription_not_found
+                  summary: Unknown subscription
           description: ''
         '409':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                Idempotency-KeyReused:
+                  value:
+                    detail: Idempotency key 3f6c2a9e-8b1d-4c7a-9e2f-5d4b6a1c0e93 was already used with a different request payload.
+                    code: idempotency_conflict
+                  summary: Idempotency-Key reused
           description: ''
         '422':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                UnknownMode:
+                  value:
+                    detail:
+                    - type: enum
+                      loc:
+                      - body
+                      - payload
+                      - mode
+                      msg: Input should be 'immediate' or 'at_period_end'
+                  summary: Unknown mode
+                AlreadyCanceled:
+                  value:
+                    detail: 'Cancel is only allowed from pending_setup, setup_failed, trialing, active, past_due. Current status: canceled'
+                    code: invalid_transition
+                  summary: Already canceled
+          description: ''
+        '423':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                InstallationPaused:
+                  value:
+                    detail: Service is paused.
+                    code: service_paused
+                  summary: Installation paused
           description: ''
         '503':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayUnavailable:
+                  value:
+                    detail: AutoPay bridge is unavailable.
+                  summary: AutoPay unavailable
           description: ''
         '504':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayTimedOut:
+                  value:
+                    detail: AutoPay bridge request timed out.
+                  summary: AutoPay timed out
           description: ''
   /b/pbl/v2/subscriptions/{subscription_id}/cycles/:
     get:
@@ -2458,14 +2646,12 @@ paths:
         name: limit
         schema:
           type: integer
-        description: Number of billing cycles to return. Defaults to 20; maximum is
-          100.
+        description: Number of billing cycles to return. Defaults to 20; maximum is 100.
       - in: query
         name: offset
         schema:
           type: integer
-        description: Zero-based index of the first billing cycle to return. Defaults
-          to 0.
+        description: Zero-based index of the first billing cycle to return. Defaults to 0.
       - in: path
         name: subscription_id
         schema:
@@ -2484,36 +2670,97 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AutoPayPaginatedBillingCycles'
+              examples:
+                ARetryAfterADecline:
+                  value:
+                    count: 2
+                    next: null
+                    previous: null
+                    results:
+                    - cycle_number: 2
+                      scheduled_date: '2026-12-01'
+                      amount_due: '9.990'
+                      status: retry_scheduled
+                      paid_at: null
+                      failure_reason: Insufficient funds
+                      session_id: c8e1f2a94b7d3e6f0a1b2c3d4e5f6a7b8c9d0e1f
+                      charge_type: mit
+                      payment_attempts:
+                      - attempt_number: 1
+                        session_id: c8e1f2a94b7d3e6f0a1b2c3d4e5f6a7b8c9d0e1f
+                        result: failed
+                        created_at: '2026-12-01T06:00:04Z'
+                    - cycle_number: 1
+                      scheduled_date: '2026-11-01'
+                      amount_due: '9.990'
+                      status: paid
+                      paid_at: '2026-11-01T08:15:40Z'
+                      failure_reason: null
+                      session_id: a12f71075a834a34d692736ac43a212fcebfb6ec
+                      charge_type: cit
+                      payment_attempts:
+                      - attempt_number: 1
+                        session_id: a12f71075a834a34d692736ac43a212fcebfb6ec
+                        result: success
+                        created_at: '2026-11-01T08:15:12Z'
+                  summary: A retry after a decline
           description: ''
         '401':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                NotAuthenticated:
+                  value:
+                    detail: Authentication credentials were not provided.
+                  summary: Not authenticated
           description: ''
         '404':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                UnknownSubscription:
+                  value:
+                    detail: Not found
+                    code: subscription_not_found
+                  summary: Unknown subscription
+          description: ''
+        '423':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                InstallationPaused:
+                  value:
+                    detail: Service is paused.
+                    code: service_paused
+                  summary: Installation paused
           description: ''
         '503':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayUnavailable:
+                  value:
+                    detail: AutoPay bridge is unavailable.
+                  summary: AutoPay unavailable
           description: ''
         '504':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayTimedOut:
+                  value:
+                    detail: AutoPay bridge request timed out.
+                  summary: AutoPay timed out
           description: ''
   /b/pbl/v2/subscriptions/{subscription_id}/page-link/:
     get:
@@ -2549,36 +2796,69 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AutoPayPageLinkResponse'
+              examples:
+                CurrentLink:
+                  value:
+                    page_token: tok_5c1e8b2f0a9d4e7b
+                    page_url: https://sandbox.ottu.net/en/subscription/tok_5c1e8b2f0a9d4e7b
+                  summary: Current link
           description: ''
         '401':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                NotAuthenticated:
+                  value:
+                    detail: Authentication credentials were not provided.
+                  summary: Not authenticated
           description: ''
         '404':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                UnknownSubscription:
+                  value:
+                    detail: Not found
+                    code: subscription_not_found
+                  summary: Unknown subscription
+          description: ''
+        '423':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                InstallationPaused:
+                  value:
+                    detail: Service is paused.
+                    code: service_paused
+                  summary: Installation paused
           description: ''
         '503':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayUnavailable:
+                  value:
+                    detail: AutoPay bridge is unavailable.
+                  summary: AutoPay unavailable
           description: ''
         '504':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayTimedOut:
+                  value:
+                    detail: AutoPay bridge request timed out.
+                  summary: AutoPay timed out
           description: ''
   /b/pbl/v2/subscriptions/{subscription_id}/regenerate-page-token/:
     post:
@@ -2601,8 +2881,7 @@ paths:
         schema:
           type: string
           format: uuid
-        description: Unique UUID for idempotent AutoPay mutation requests. Required
-          by AutoPay for cancel and regenerate-page-token.
+        description: Unique UUID for idempotent AutoPay mutation requests. Required by AutoPay for cancel and regenerate-page-token.
         required: true
       - in: path
         name: subscription_id
@@ -2622,54 +2901,81 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AutoPayRegeneratePageTokenResponse'
+              examples:
+                NewLink:
+                  value:
+                    page_token: tok_e7a90c3d5b2f4186
+                    page_url: https://sandbox.ottu.net/en/subscription/tok_e7a90c3d5b2f4186
+                  summary: New link
           description: ''
         '400':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                MissingIdempotency-Key:
+                  value:
+                    Idempotency-Key:
+                    - This header is required.
+                  summary: Missing Idempotency-Key
           description: ''
         '401':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                NotAuthenticated:
+                  value:
+                    detail: Authentication credentials were not provided.
+                  summary: Not authenticated
           description: ''
         '404':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                UnknownSubscription:
+                  value:
+                    detail: Not found
+                    code: subscription_not_found
+                  summary: Unknown subscription
           description: ''
-        '409':
+        '423':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
-          description: ''
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                InstallationPaused:
+                  value:
+                    detail: Service is paused.
+                    code: service_paused
+                  summary: Installation paused
           description: ''
         '503':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayUnavailable:
+                  value:
+                    detail: AutoPay bridge is unavailable.
+                  summary: AutoPay unavailable
           description: ''
         '504':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayTimedOut:
+                  value:
+                    detail: AutoPay bridge request timed out.
+                  summary: AutoPay timed out
           description: ''
 components:
   schemas:
