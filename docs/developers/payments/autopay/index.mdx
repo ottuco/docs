@@ -18,7 +18,7 @@ import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 
 AutoPay is Ottu's fully managed subscription engine. With [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments), **you** own the billing schedule — your system decides when to charge the saved card, retries failures, and emails the customer. With AutoPay (`payment_type: "auto_pay"`), **Ottu** owns all of that instead: you make one [Checkout API](../checkout-api) call to set up the subscription, and from there AutoPay generates each [billing cycle](/glossary/#term-billing-cycle), retries failed charges, notifies the customer, and gives them a self-service page — no scheduler, retry loop, or [dunning](/glossary/#term-dunning) emails to build yourself.
 
-Merchant-facing management (list, retrieve, cancel, and the rest) is REST-API-only in this phase — there is no AutoPay dashboard screen yet. Every call on this page, including the five subscription-management endpoints, uses the standard [Ottu API key](/developers/getting-started/authentication) flow — there is no separate credential to obtain.
+Merchant-facing management (list, retrieve, cancel, and the rest) is REST-API-only in this phase — there is no AutoPay dashboard screen yet. Every call on this page, including the six subscription-management endpoints, uses the standard [Ottu API key](/developers/getting-started/authentication) flow — there is no separate credential to obtain.
 
 :::note Base URL
 Every API call in this guide targets <code>{OTTU_CONNECT_BASE_URL}</code>. Swap in your own merchant domain when you integrate.
@@ -509,7 +509,6 @@ The proxy maps upstream and transport failures onto a fixed set of statuses, so 
 |---|---|---|
 | `400` | Connect rejected the request before forwarding it, for example a `limit` above 100, or a missing `Idempotency-Key` on cancel or regenerate. | Fix the request. Retrying unchanged will fail again. |
 | `401` | Not authenticated. | Check your [API key](/developers/getting-started/authentication) or bearer token. |
-| `403` | Authenticated, but the credential lacks permission to manage subscriptions. | Use a credential with the required permission. |
 | `404` | No such subscription for your merchant. | Do not retry. |
 | `422` | AutoPay rejected the request after Connect forwarded it, for example an unknown `status` filter value. The body's `detail` lists each invalid field. | Fix the request. Retrying unchanged will fail again. |
 | `423` | The installation is paused. | Retry later; this is a temporary administrative state. |
