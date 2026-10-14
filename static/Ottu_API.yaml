@@ -2534,6 +2534,11 @@ paths:
                     Idempotency-Key:
                     - This header is required.
                   summary: Missing Idempotency-Key
+                UnknownMode:
+                  value:
+                    mode:
+                    - '"now" is not a valid choice.'
+                  summary: Unknown mode
           description: ''
         '401':
           content:
@@ -2576,16 +2581,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
               examples:
-                UnknownMode:
-                  value:
-                    detail:
-                    - type: enum
-                      loc:
-                      - body
-                      - payload
-                      - mode
-                      msg: Input should be 'immediate' or 'at_period_end'
-                  summary: Unknown mode
                 AlreadyCanceled:
                   value:
                     detail: 'Cancel is only allowed from pending_setup, setup_failed, trialing, active, past_due. Current status: canceled'

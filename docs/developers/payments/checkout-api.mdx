@@ -484,8 +484,10 @@ When a valid [payment_instrument](/developers/payments/checkout-api/) is provide
   Use [AutoPay](/developers/payments/autopay/) with `payment_type` set to
   `auto_pay` to hand the whole subscription lifecycle to Ottu: billing cycles,
   retries, dunning, and a customer self-service page. `auto_pay` requires
-  `customer_id`, `customer_email`, an `agreement` object **including
-  `agreement.id`**, and an `autopay` block with the schedule. It is also the one
+  `customer_id`, `customer_email`, a full recurring `agreement` object
+  (`id`, `frequency`, `amount_variability`, `cycle_interval_days`,
+  `total_cycles` and `expiry_date`, not just the id), and an `autopay` block
+  with the schedule. It is also the one
   non-`one_off` type where `amount` may be `0`, which starts a subscription with
   no first charge. The 201 response returns `extra.autopay.subscription_id`,
   which is your handle on the subscription.

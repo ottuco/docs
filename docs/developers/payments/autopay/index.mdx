@@ -67,7 +67,11 @@ Both the merchant API and the customer self-service page live on your Connect do
 
 #### 1. Create a subscription
 
-Call the [Checkout API](../checkout-api) with `payment_type: "auto_pay"`. Three things are easy to miss: `agreement` is required and — unlike `auto_debit` — `agreement.id` is required inside it too; `customer_id` is required; and `customer_email` is required (see [Error Handling](#error-handling-missing-customer-email) below for what happens if you skip it).
+Call the [Checkout API](../checkout-api) with `payment_type: "auto_pay"`. Three things are easy to miss:
+
+- **`agreement` is a full [recurring agreement](/developers/cards-and-tokens/recurring-payments#agreement-types), not just an id.** `agreement.id` is required, and because the agreement `type` defaults to `recurring`, so are `frequency`, `amount_variability`, `cycle_interval_days`, `total_cycles` and `expiry_date`. Sending only `{"id": ...}` is rejected with `400` and a `This field is required.` error for each missing field. Describe the same schedule as the `autopay` block: the agreement is what the gateway sees, and the `autopay` block is what AutoPay bills on.
+- **`customer_id` is required.**
+- **`customer_email` is required.** See [Error Handling](#error-handling-missing-customer-email) below for what happens if you skip it.
 
 <Tabs groupId="language">
 <TabItem value="curl" label="cURL">
@@ -85,7 +89,13 @@ Call the [Checkout API](../checkout-api) with `payment_type: "auto_pay"`. Three 
     "customer_email": "customer@example.com",
     "webhook_url": "https://yourwebsite.com/webhook",
     "agreement": {
-      "id": "AGR-sub-001"
+      "id": "AGR-sub-001",
+      "type": "recurring",
+      "frequency": "monthly",
+      "amount_variability": "fixed",
+      "cycle_interval_days": 30,
+      "total_cycles": 12,
+      "expiry_date": "2027-09-01"
     },
     "autopay": {
       "frequency": "monthly",
@@ -115,7 +125,15 @@ response = requests.post(
         "customer_id": "cust_123",
         "customer_email": "customer@example.com",
         "webhook_url": "https://yourwebsite.com/webhook",
-        "agreement": {"id": "AGR-sub-001"},
+        "agreement": {
+            "id": "AGR-sub-001",
+            "type": "recurring",
+            "frequency": "monthly",
+            "amount_variability": "fixed",
+            "cycle_interval_days": 30,
+            "total_cycles": 12,
+            "expiry_date": "2027-09-01",
+        },
         "autopay": {
             "frequency": "monthly",
             "recurring_amount": "9.900",
@@ -144,7 +162,15 @@ session = response.json()`}</CodeBlock>
     customer_id: "cust_123",
     customer_email: "customer@example.com",
     webhook_url: "https://yourwebsite.com/webhook",
-    agreement: { id: "AGR-sub-001" },
+    agreement: {
+      id: "AGR-sub-001",
+      type: "recurring",
+      frequency: "monthly",
+      amount_variability: "fixed",
+      cycle_interval_days: 30,
+      total_cycles: 12,
+      expiry_date: "2027-09-01",
+    },
     autopay: {
       frequency: "monthly",
       recurring_amount: "9.900",
@@ -174,7 +200,15 @@ const session = await response.json();`}</CodeBlock>
                 'customer_id' => 'cust_123',
                 'customer_email' => 'customer@example.com',
                 'webhook_url' => 'https://yourwebsite.com/webhook',
-                'agreement' => ['id' => 'AGR-sub-001'],
+                'agreement' => [
+                    'id' => 'AGR-sub-001',
+                    'type' => 'recurring',
+                    'frequency' => 'monthly',
+                    'amount_variability' => 'fixed',
+                    'cycle_interval_days' => 30,
+                    'total_cycles' => 12,
+                    'expiry_date' => '2027-09-01',
+                ],
                 'autopay' => [
                     'frequency' => 'monthly',
                     'recurring_amount' => '9.900',
@@ -507,11 +541,11 @@ The proxy maps upstream and transport failures onto a fixed set of statuses, so 
 
 | Status | Meaning | What to do |
 |---|---|---|
-| `400` | Connect rejected the request before forwarding it, for example a `limit` above 100, or a missing `Idempotency-Key` on cancel or regenerate. | Fix the request. Retrying unchanged will fail again. |
+| `400` | Connect rejected the request before forwarding it, for example a `limit` above 100, an unknown cancel `mode`, or a missing `Idempotency-Key` on cancel or regenerate. | Fix the request. Retrying unchanged will fail again. |
 | `401` | Not authenticated. | Check your [API key](/developers/getting-started/authentication) or bearer token. |
 | `404` | No such subscription for your merchant. | Do not retry. |
 | `409` | `Idempotency-Key` was already used on `cancel` with a different request body (`code: idempotency_conflict`). | Send a new key for a new request. Reuse a key only to retry the exact same request. |
-| `422` | AutoPay rejected the request after Connect forwarded it. Either a value is invalid (for example an unknown `status` filter or `mode`, where `detail` lists each invalid field), or the subscription is in a state that does not allow it, such as canceling one that has already ended (`code: invalid_transition`). | Fix the request, or re-read the subscription's `status`. Retrying unchanged will fail again. |
+| `422` | AutoPay rejected the request after Connect forwarded it. Either a value is invalid (for example an unknown `status` filter on list, where `detail` lists each invalid field), or the subscription is in a state that does not allow it, such as canceling one that has already ended (`code: invalid_transition`). | Fix the request, or re-read the subscription's `status`. Retrying unchanged will fail again. |
 | `423` | The installation is paused. | Retry later; this is a temporary administrative state. |
 | `503` | AutoPay is unavailable or not configured on this deployment. | Retry with backoff. |
 | `504` | The call to AutoPay timed out. | Retry with backoff. For `cancel`, reuse the same `Idempotency-Key` so a retry cannot double-apply. |
