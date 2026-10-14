@@ -8525,6 +8525,9 @@ components:
           type: string
           default: failed
           description: Indicates the outcome of the operation. Typically set to 'failed' for error responses.
+        error_code:
+          type: string
+          description: "A stable machine-readable failure code, present on auto-debit failures. Branch on it rather than on `detail`, which is English text and may change. Values: `multiple_pg_codes` (the transaction has more than one `pg_codes` entry), `auto_debit_unsupported` (the gateway does not support auto-debit), `cit_not_found` (no successful customer-initiated payment has bound this `agreement.id` to a saved card), `invalid_token` (the card token does not exist for this customer), `txn_state_invalid` (the transaction cannot be paid in its current state), `charge_failed` (the charge could not be sent to the gateway), `gateway_declined` (the gateway declined the charge). Absent when no specific code applies."
         failed_provider:
           type: string
           description: Wallet cohort errors only. The `provider_code` of the wallet leg whose commit/release failed and triggered the saga rollback.
