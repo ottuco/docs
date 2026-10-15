@@ -29,7 +29,7 @@ Building the integration? See [AutoPay for developers](/developers/payments/auto
     {label: "Automatic retries", withOk: true, withoutOk: false},
     {label: "Reminder and failure emails", withOk: true, withoutOk: false},
     {label: "Emails in Arabic", withOk: true, withoutOk: false},
-    {label: "Switch emails off per subscription", withOk: true, withoutOk: false},
+    {label: "Switch emails off at creation", withOk: true, withoutOk: false},
     {label: "Hosted customer page", withOk: true, withoutOk: false},
     {label: "Customer changes their card", withOk: true, withoutOk: false},
     {label: "Customer cancels on their own", withOk: true, withoutOk: false},
@@ -84,7 +84,7 @@ Your customer gets two things: emails and one private page. Ottu hosts both.
 
 ### The emails {#the-emails}
 
-Ottu sends an upcoming-charge reminder, a payment-failed notice, and a final-failure notice. You can switch each one off per subscription, and all of them are also available in Arabic. Reminders go out ahead of each charge:
+Ottu sends an upcoming-charge reminder, a payment-failed notice, and a final-failure notice. You can switch each one off, but only when you create the subscription, not afterwards. Emails go out in English or Arabic, chosen when the subscription is created. Reminders go out ahead of each charge:
 
 | Billing frequency | Reminders | When |
 |---|---|---|
@@ -112,7 +112,7 @@ Ottu sends an upcoming-charge reminder, a payment-failed notice, and a final-fai
   },
   {
     title: "Final failure in Arabic",
-    description: <>The same notice, fully localized.</>,
+    description: <>The same notice in Arabic. The email subject stays in English.</>,
     image: "/img/business/autopay/notifications-06-final-failure-ar.png",
     imageAlt: "Final failure email in Arabic with outstanding balance and next steps",
   },
@@ -310,7 +310,7 @@ AutoPay subscriptions have no plan catalog. The plan name is a free-text label, 
     Yes. They can switch the active card from their self-service page at any time.
   </FAQItem>
   <FAQItem question="Does AutoPay support Arabic?">
-    Yes. Every email Ottu sends and the self-service page itself offer Arabic.
+    Yes. Each subscription's emails go out in English or Arabic, chosen when it is created, and the self-service page offers both languages. The email subject stays in English.
   </FAQItem>
   <FAQItem question="What if a customer opens a link that was replaced?">
     They see a "link expired" page instead of their subscription. Send them the new link yourself. Ottu doesn't offer to email one.
