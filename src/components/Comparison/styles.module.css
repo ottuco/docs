@@ -10,6 +10,11 @@
   color: #0b82be;
 }
 
+/* The heading right after the eyebrow is centered with it. */
+.eyebrow + h2 {
+  text-align: center;
+}
+
 .subtitle {
   max-width: 34rem;
   margin: 0 auto 1.5rem;

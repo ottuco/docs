@@ -37,6 +37,7 @@ Building the integration? See [AutoPay for developers](/developers/payments/auto
     {label: "Free first period (trial)", withOk: true, withoutOk: false},
     {label: "Month-end billing dates handled", withOk: true, withoutOk: false},
     {label: "Customer sees billing history", withOk: true, withoutOk: false},
+    {label: "You pick the exact charge time", withOk: false, withoutOk: true},
   ]}
 />
 
@@ -48,7 +49,7 @@ What happens at each stage, and what you need to do.
   steps={[
     {
       title: "Your customer signs up",
-      body: "Your customer pays the first charge at checkout, and Ottu saves their card.",
+      body: "Your customer pays the first charge, or saves a card for a free trial, and Ottu keeps the card.",
       yourPart: "Send them to checkout.",
       href: "#setting-up-autopay",
     },
@@ -83,8 +84,8 @@ Ottu sends an upcoming-charge reminder, a payment-failed notice, and a final-fai
 
 | Billing frequency | Reminders | When |
 |---|---|---|
-| Monthly | 1 | 2 days before |
-| Yearly | 3 | 30, 10, and 3 days before |
+| Monthly | 1 | About 3 days before |
+| Yearly | 3 | About 31, 11, and 4 days before |
 
 <StepGuide steps={[
   {
