@@ -118,7 +118,7 @@ Ottu sends an upcoming-charge reminder, a payment-failed notice, and a final-fai
   },
 ]} />
 
-Ottu itself never suspends or cancels a subscription because a payment failed. Any decision about your customer's access to your product is yours.
+The final email may talk about suspended access. That describes your product. Ottu itself never suspends or cancels a subscription because a payment failed. Any decision about your customer's access to your product is yours.
 
 ### The self-service page {#the-self-service-page}
 
