@@ -101,7 +101,7 @@ Call the [Checkout API](../checkout-api) with `payment_type: "auto_pay"`. Three 
       "frequency": "monthly",
       "recurring_amount": "9.900",
       "start_date": "2026-09-01",
-      "description": "Pro Plan — Monthly"
+      "description": "Pro Plan - Monthly"
     }
   }'`}</CodeBlock>
 
@@ -138,7 +138,7 @@ response = requests.post(
             "frequency": "monthly",
             "recurring_amount": "9.900",
             "start_date": "2026-09-01",
-            "description": "Pro Plan — Monthly",
+            "description": "Pro Plan - Monthly",
         },
     },
 )
@@ -175,7 +175,7 @@ session = response.json()`}</CodeBlock>
       frequency: "monthly",
       recurring_amount: "9.900",
       start_date: "2026-09-01",
-      description: "Pro Plan — Monthly",
+      description: "Pro Plan - Monthly",
     },
   }),
 });
@@ -213,7 +213,7 @@ const session = await response.json();`}</CodeBlock>
                     'frequency' => 'monthly',
                     'recurring_amount' => '9.900',
                     'start_date' => '2026-09-01',
-                    'description' => 'Pro Plan — Monthly',
+                    'description' => 'Pro Plan - Monthly',
                 ],
             ]),
         ],
@@ -224,17 +224,33 @@ $session = json_decode($response, true);`}</CodeBlock>
 </TabItem>
 </Tabs>
 
-<CodeBlock language="json" title="Example response — 201 Created">{`{
-  "session_id": "sess_9f8e7d6c5b4a",
-  "checkout_url": "${OTTU_CONNECT_BASE_URL}/checkout/sess_9f8e7d6c5b4a",
-  "checkout_short_url": "${OTTU_CONNECT_BASE_URL}/c/sess_9f8e7d6c5b4a",
+<CodeBlock language="json" title="Example response — 201 Created (trimmed)">{`{
+  "session_id": "a53655b8354f73809e58f8a730a1050c731ed038",
+  "state": "created",
+  "payment_type": "auto_pay",
+  "amount": "9.900",
+  "currency_code": "KWD",
+  "customer_id": "cust_123",
+  "checkout_url": "${OTTU_CONNECT_BASE_URL}/b/checkout/redirect/start/?session_id=a53655b8354f73809e58f8a730a1050c731ed038",
+  "checkout_page_url": "${OTTU_CONNECT_BASE_URL}/en/checkout/a53655b8354f73809e58f8a730a1050c731ed038",
   "expiration_time": "00:30:00",
+  "agreement": {
+    "id": "AGR-sub-001",
+    "type": "recurring",
+    "frequency": "monthly",
+    "amount_variability": "fixed",
+    "cycle_interval_days": 30,
+    "total_cycles": 12,
+    "expiry_date": "01/09/2027"
+  },
   "extra": {
     "autopay": {
       "subscription_id": "sub_hA1YYmZz1xk8speCiPbOquIP"
     }
   }
 }`}</CodeBlock>
+
+The response is the standard [Checkout API](../checkout-api) response; `payment_methods`, `billing` and the other usual fields are left out above.
 
 `extra.autopay.subscription_id` is your handle on the subscription — save it. The `autopay` block you sent is **write-only**; it is not echoed back anywhere in the response, so don't build logic that expects to read `frequency` or `recurring_amount` off the checkout response. Use [Retrieve a subscription](#retrieve-a-subscription) for that.
 
@@ -325,7 +341,7 @@ AutoPay builds `next` and `previous` against its own internal host, which mercha
   "start_date": "2026-04-24",
   "end_date": "2027-04-24",
   "billing_anchor_day": 24,
-  "setup_session_id": "sess_9f8e7d6c5b4a",
+  "setup_session_id": "a53655b8354f73809e58f8a730a1050c731ed038",
   "agreement_id": "AGR-abc123",
   "amount_variability": "fixed",
   "cycle_interval_days": 30,
@@ -338,27 +354,30 @@ AutoPay builds `next` and `previous` against its own internal host, which mercha
   "cancellation_reason": null,
   "cancellation_note": null,
   "next_billing_date": "2026-05-24",
-  "description": "Pro Plan — Monthly",
+  "description": "Pro Plan - Monthly",
   "merchant_reference": "ref-001",
   "plan_name": "Pro Plan",
   "language": "en",
   "retry_count": 3,
   "created_at": "2026-04-24T10:30:00Z",
   "updated_at": "2026-04-24T10:30:00Z",
-  "card": {"masked_card": "**** 1111", "card_brand": "visa"},
+  "card": {"masked_card": "**** 1111", "card_brand": "VISA"},
   "current_cycle": {
     "cycle_number": 1,
     "scheduled_date": "2026-04-24",
     "amount_due": "49.990",
     "status": "paid",
     "paid_at": "2026-04-24T10:31:00Z",
-    "session_id": "sess_prev001",
+    "failure_reason": null,
+    "session_id": "a53655b8354f73809e58f8a730a1050c731ed038",
     "charge_type": "cit"
   }
 }
 ```
 
 `status`, `card`, and `current_cycle` are the three fields worth polling — together they tell you whether the CIT completed, which card is active, and how the latest charge went.
+
+While the subscription is still `pending_setup`, `card`, `current_cycle`, `next_billing_date`, `amount_variability`, `cycle_interval_days` and `total_cycles` are `null`. AutoPay fills them from the CIT and its agreement once the first payment is confirmed. If you did not send `end_date` in the `autopay` block, it is set to the agreement's `expiry_date` at that point, so the subscription ends when the agreement does.
 
 #### 4. Cancel a subscription {#cancel-a-subscription}
 
@@ -371,6 +390,8 @@ AutoPay builds `next` and `previous` against its own internal host, which mercha
   --data '{"mode": "immediate"}'`}</CodeBlock>
 
 `mode: "immediate"` stops the subscription right away — `status` becomes `canceled` and no more cycles are scheduled. `mode: "at_period_end"` instead sets `cancel_at_period_end: true` and leaves `status` as-is; the subscription keeps billing through the current period and only flips to `canceled` when the next cycle would have been generated.
+
+`cancellation_initiator` (`merchant` or `customer`) records who last scheduled a cancellation. It is not cleared when the customer undoes a pending cancellation from the self-service page, so read `cancel_at_period_end` and `status` to know whether a cancellation is actually pending.
 
 :::note Only the merchant can cancel immediately
 The customer self-service page (below) can only schedule a cancellation for the end of the period, never immediately — see [Customer Self-Service Page](#customer-self-service-page).
@@ -431,7 +452,7 @@ The old `page_token` stops working the moment you call regenerate, before you've
       "status": "paid",
       "paid_at": "2026-05-24T15:30:00Z",
       "failure_reason": null,
-      "session_id": "sess_abc123",
+      "session_id": "c8e1f2a94b7d3e6f0a1b2c3d4e5f6a7b8c9d0e1f",
       "charge_type": "mit",
       "payment_attempts": []
     }
@@ -646,7 +667,7 @@ Recovery is to run a fresh CIT for that customer so a new token is saved with th
     No — AutoPay has no plan catalog. Pricing (`recurring_amount`), schedule (`frequency`, `start_date`), and a free-text `description` are just fields on the checkout call itself.
   </FAQItem>
   <FAQItem question="How do I know when the customer finishes the first payment (CIT)?">
-    Poll [Retrieve a subscription](#retrieve-a-subscription) and check `status` — it moves off `pending_setup` once the CIT resolves. If you set `webhook_url` on the checkout call, your existing Ottu [payment webhook](/developers/webhooks/payment-events) for that session fires as usual too.
+    Poll [Retrieve a subscription](#retrieve-a-subscription) and check `status` — it moves off `pending_setup` once AutoPay confirms the CIT. That is not instant: AutoPay checks the payment itself, so allow a few minutes after the customer pays before treating a subscription still in `pending_setup` as stuck. If you set `webhook_url` on the checkout call, your existing Ottu [payment webhook](/developers/webhooks/payment-events) for that session fires as usual too.
   </FAQItem>
 </FAQ>
 
