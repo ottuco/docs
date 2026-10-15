@@ -16,4 +16,4 @@ properties:
       The outcome of the attempt. `success` means the charge was collected. `failed` means it was declined or the gateway returned an error. `pending` means the charge was started and its outcome is not confirmed yet, which normally resolves within minutes. `null` before any outcome is recorded.
   created_at:
     description: |
-      UTC timestamp of when AutoPay started this attempt, in ISO 8601 format.
+      UTC timestamp of when Ottu started this attempt, in ISO 8601 format.

@@ -86,7 +86,7 @@ Run the whole journey against the sandbox: create a subscription, pay its first 
 
 ### What your customer sees {#what-your-customer-sees}
 
-{/* TODO #158913: real sandbox screenshots from Junaid */}
+{/* TODO #158913: real sandbox screenshots from Junaid, planned at /img/developers/autopay/first-charge-checkout.png, self-service-page.png and reminder-email.png. Add them to src/data/autopay-customer-view.tsx. */}
 
 Your customer meets AutoPay in three places. See [What your customer sees](/business/autopay/#what-your-customer-sees) on the business page for the full tour.
 
@@ -164,7 +164,7 @@ A customer cancellation on a `past_due` subscription only schedules the cancella
 
 All six subscription-management endpoints, plus the Checkout API call that creates a subscription, are in the interactive reference below. Expand any field for its type, enum values, constraints and defaults.
 
-Every management endpoint is a proxy: Connect authenticates you, resolves your merchant tenant, forwards the call to AutoPay, and returns AutoPay's response body and status unchanged. You never send a `Merchant-Id` header yourself.
+Every management endpoint authenticates with your [API key](/developers/getting-started/authentication) and applies to your own merchant account. You never send a `Merchant-Id` header yourself.
 
 <Tabs groupId="autopay-api" queryString>
 <TabItem value="create" label="Create">
@@ -208,15 +208,15 @@ Create a subscription with the Checkout API: set `payment_type` to `auto_pay` an
 
 ### Error contract {#error-contract}
 
-The proxy maps upstream and transport failures onto a fixed set of statuses, so you can handle them without parsing message text:
+These are the statuses you will meet most often, so you can handle them without parsing message text. The full list of status codes for each endpoint, with examples, is in the [API Reference](#api-reference) tabs above.
 
 | Status | Meaning | What to do |
 |---|---|---|
-| `400` | Connect rejected the request before forwarding it, for example a `limit` above 100, an unknown cancel `mode`, or a missing `Idempotency-Key` on cancel or regenerate. | Fix the request. Retrying unchanged will fail again. |
+| `400` | Ottu rejected the request as malformed, for example a `limit` above 100 on list, an unknown cancel `mode`, or a missing `Idempotency-Key` on cancel or regenerate. | Fix the request. Retrying unchanged will fail again. |
 | `401` | Not authenticated. | Check your [API key](/developers/getting-started/authentication) or bearer token. |
 | `404` | No such subscription for your merchant. | Do not retry. |
 | `409` | `Idempotency-Key` was already used on `cancel` with a different request body (`code: idempotency_conflict`). | Send a new key for a new request. Reuse a key only to retry the exact same request. |
-| `422` | AutoPay rejected the request after Connect forwarded it. Either a value is invalid (for example an unknown `status` filter on list, where `detail` lists each invalid field), or the subscription is in a state that does not allow it, such as canceling one that has already ended (`code: invalid_transition`). | Fix the request, or re-read the subscription's `status`. Retrying unchanged will fail again. |
+| `422` | Ottu rejected the request. Either a value is invalid (for example an unknown `status` filter on list, where `detail` lists each invalid field), or the subscription is in a state that does not allow it, such as canceling one that has already ended (`code: invalid_transition`). | Fix the request, or re-read the subscription's `status`. Retrying unchanged will fail again. |
 
 ## Best Practices
 
@@ -224,14 +224,8 @@ The proxy maps upstream and transport failures onto a fixed set of statuses, so 
 - **Get `page_url` from `page-link`, not regenerate.** The create response doesn't include it; `page-link` works any time after create, and regenerate is only for revoking a link.
 - **Deliver `page_url` yourself, every time.** Ottu never notifies the customer when you regenerate, so an undelivered link is a customer who can't self-serve.
 - **Treat `past_due` as sticky.** Build your own monitoring if you need a cadence for subscriptions stuck in that state.
-- **Set `card_acceptance_criteria.min_expiry_time` yourself.** Auto-debit defaults it to 30 days; Ottu does not apply that default here.
 - **Always send `customer_email`.** It is required, and a missing one is rejected with a 400.
-
-## Compatibility Notes {#compatibility-notes}
-
-### `auto_pay` appears as `auto_debit` in the SDK payload {#auto-pay-appears-as-auto-debit}
-
-Create a session with `payment_type: "auto_pay"`, then read the [Checkout SDK](../checkout-sdk/web) preload payload for that session, and you will see `payment_type: "auto_debit"` with no `autopay` key. That is expected, not a defect: Ottu charges every renewal as an ordinary auto-debit payment, so the SDK payload carries that type. Your own record stays `auto_pay`: the Checkout API response reports `auto_pay`.
+- **Expect `auto_debit` in the SDK payload.** The [Checkout SDK](../checkout-sdk/web) preload payload for an `auto_pay` session carries `payment_type: "auto_debit"` and no `autopay` key, because Ottu charges every renewal as an ordinary auto-debit payment. That is not a defect. The Checkout API response still reports `auto_pay`.
 
 ## FAQ
 

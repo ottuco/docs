@@ -3,11 +3,11 @@
 # autopay/subscriptions/schemas.py.
 
 _description: |
-  A subscription as AutoPay holds it right now. Returned by Retrieve a subscription and by Cancel a subscription.
+  A subscription as Ottu holds it right now. Returned by Retrieve a subscription and by Cancel a subscription.
 
-  Connect forwards AutoPay's body unchanged, so read this object for the current state rather than caching what you sent at checkout. The customer's self-service link is deliberately not part of it; fetch that from the page-link endpoint.
+  Read this object for the current state rather than caching what you sent at checkout. The customer's self-service link is deliberately not part of it; fetch that from the page-link endpoint.
 
-  Beyond the fields described below, the object carries `language` (from the checkout `language` field at creation, default `en`; it drives the customer page and every customer email), `setup_session_id` (the checkout `session_id` of the first payment, which is how you match a webhook to a subscription), `card` (the active card's `masked_card` and `card_brand`), `current_cycle` (the latest billing cycle), and `amount_variability`, `cycle_interval_days` and `total_cycles` (taken from the agreement). While the status is `pending_setup`, `card`, `current_cycle`, `next_billing_date`, `amount_variability`, `cycle_interval_days` and `total_cycles` are `null`, and they are filled in once the first payment is confirmed.
+  Beyond the fields described below, the object carries `language` (from the checkout `language` field at creation, default `en`; it drives the customer page and every customer email), `setup_session_id` (the checkout `session_id` of the first payment, which is how you match a webhook to a subscription), `card` (the active card's `masked_card` and `card_brand`), `current_cycle` (the latest attempted billing cycle; `null` for a `past_due` subscription after its period has ended), and `amount_variability`, `cycle_interval_days` and `total_cycles` (taken from the agreement). While the status is `pending_setup`, `card`, `current_cycle`, `next_billing_date`, `amount_variability`, `cycle_interval_days` and `total_cycles` are `null`, and they are filled in once the first payment is confirmed.
 
 properties:
   id:
@@ -18,7 +18,7 @@ properties:
       Your own identifier for the customer, exactly as you sent it in `customer_id` on the checkout call that created the subscription. Use it to filter the subscription list.
   customer_email:
     description: |
-      The customer's email address, captured when the subscription was created. AutoPay sends the pre-charge, payment-failed and final-failure emails to this address.
+      The customer's email address, captured when the subscription was created. Ottu sends the pre-charge, payment-failed and final-failure emails to this address.
   frequency:
     description: |
       How often the customer is charged. Enum: `monthly`, `yearly`.
@@ -36,7 +36,7 @@ properties:
       The date billing starts from, in `YYYY-MM-DD` format. Its day of the month becomes the billing anchor: a subscription anchored on the 31st bills on the last day of shorter months.
   end_date:
     description: |
-      The date after which AutoPay stops billing, in `YYYY-MM-DD` format. `null` for an open-ended subscription. When it passes, the subscription moves to `expired`.
+      The date after which Ottu stops billing, in `YYYY-MM-DD` format. `null` for an open-ended subscription. When it passes, the subscription moves to `expired`.
   status:
     description: |
       The subscription's lifecycle state. One of `pending_setup` (created, first payment not completed yet), `trialing` (set up with a `0` first charge, waiting for its first billing date), `active` (billing normally), `past_due` (a billing cycle used up every retry), `canceled`, `expired` (the `end_date` passed), or `setup_failed` (the first payment never completed).
@@ -44,7 +44,7 @@ properties:
       A `past_due` subscription is never canceled automatically. See [Subscription States]({{apiBaseUrl}}/payments/autopay/#subscription-states).
   cancel_at_period_end:
     description: |
-      `true` when a cancellation is scheduled for the end of the current paid period. The subscription keeps its current `status` and keeps billing until then, and only becomes `canceled` when the next cycle would have been generated. `false` otherwise, including after an immediate cancellation.
+      `true` when a cancellation is scheduled for the end of the current paid period. The subscription keeps its current `status` until then. When the next billing date arrives, Ottu cancels the subscription and does not charge. `false` otherwise, including after an immediate cancellation.
   canceled_at:
     description: |
       UTC timestamp of when the subscription became `canceled`. `null` while it is not canceled, including while a cancellation is only scheduled through `cancel_at_period_end`.
@@ -62,10 +62,10 @@ properties:
       The free-text label you sent in `autopay.description`, shown to the customer on the self-service page. `null` if you did not send one.
   merchant_reference:
     description: |
-      Your own reference attached to the subscription. `null` if none was provided.
+      Your checkout `order_no`, copied onto the subscription. `null` if the checkout call had none.
   retry_count:
     description: |
-      How many times AutoPay retries a failed billing cycle before giving up, between 1 and 10. Retries run one hour apart. See [Retries & Dunning]({{apiBaseUrl}}/payments/autopay/#retries-and-dunning).
+      How many times Ottu retries a failed billing cycle before giving up, between 1 and 10. Retries run one hour apart. See [Retries & Dunning]({{apiBaseUrl}}/payments/autopay/#retries-and-dunning).
   created_at:
     description: |
       UTC timestamp of when the subscription was created, in ISO 8601 format.

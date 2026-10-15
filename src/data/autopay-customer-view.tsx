@@ -1,7 +1,9 @@
 import React from "react";
 import type { Step } from "@site/src/components/StepGuide";
 
-// TODO #158913: replace the placeholder image paths with real sandbox screenshots from Junaid.
+// TODO #158913: add real sandbox screenshots from Junaid, one `image` + `imageAlt` per step, at
+// /img/developers/autopay/first-charge-checkout.png, self-service-page.png and reminder-email.png.
+// No image props until the files exist: StepGuide renders text-only steps without them.
 export const autopayCustomerViewSteps: Step[] = [
   {
     title: "The first-charge checkout",
@@ -11,8 +13,6 @@ export const autopayCustomerViewSteps: Step[] = [
         later charges need no action from them.
       </>
     ),
-    image: "/img/developers/autopay/first-charge-checkout.png",
-    imageAlt: "Ottu checkout page where the customer pays the first AutoPay charge",
   },
   {
     title: "The self-service page",
@@ -23,8 +23,6 @@ export const autopayCustomerViewSteps: Step[] = [
         cancellation.
       </>
     ),
-    image: "/img/developers/autopay/self-service-page.png",
-    imageAlt: "AutoPay self-service page showing subscription status and billing history",
   },
   {
     title: "One email: the charge reminder",
@@ -34,7 +32,5 @@ export const autopayCustomerViewSteps: Step[] = [
         support email and a link to the self-service page.
       </>
     ),
-    image: "/img/developers/autopay/reminder-email.png",
-    imageAlt: "Email reminding the customer about an upcoming AutoPay charge",
   },
 ];

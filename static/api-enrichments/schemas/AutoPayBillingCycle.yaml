@@ -16,7 +16,7 @@ properties:
       The amount charged or to be charged for this period, as a decimal string in the subscription's currency.
   status:
     description: |
-      Where this cycle stands. One of `scheduled` (not attempted yet), `processing` (a charge is in flight), `paid`, `retry_scheduled` (an attempt failed and the next automatic retry is queued), `failed` (every retry was used up, and the subscription is now `past_due`), or `canceled` (canceled together with the subscription).
+      Where this cycle stands. One of `scheduled` (not attempted yet), `processing` (a charge is in flight), `paid`, `retry_scheduled` (an attempt failed and the next automatic retry is queued), `failed` (every retry was used up, and the subscription is now `past_due`), `canceled` (canceled together with the subscription), or `needs_triage` (contact Ottu support).
   paid_at:
     description: |
       UTC timestamp of when the cycle was collected. `null` until it is `paid`.
@@ -28,7 +28,7 @@ properties:
       The Ottu `session_id` of the latest charge attempt for this cycle. `null` while the cycle is `scheduled` and has not been attempted.
   charge_type:
     description: |
-      How the cycle was charged. `cit` is a customer-initiated payment: the first payment at checkout, or a recovery payment. `mit` is an automatic charge AutoPay made against the saved card. `null` while the cycle has not been attempted.
+      How the cycle was charged. `cit` is a customer-initiated payment: the first payment at checkout, or a recovery payment. `mit` is an automatic charge Ottu makes against the saved card, and it is already set on a scheduled cycle that has not been attempted. To tell whether a cycle was attempted, check `status` and `payment_attempts`, not `charge_type`.
   payment_attempts:
     description: |
       Every charge attempt made for this cycle, oldest first. More than one entry means the cycle was retried after a failure. See [Retries & Dunning]({{apiBaseUrl}}/payments/autopay/#retries-and-dunning).

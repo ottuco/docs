@@ -10,10 +10,10 @@ properties:
       The total number of subscriptions that match, across all pages, not only the ones in `results`.
   next:
     description: |
-      URL of the next page, on your Connect domain. Follow it with `POST`, the same verb as the first page; a `GET` returns `405`. `null` on the last page.
+      URL of the next page, on your Ottu domain. Follow it with `POST`, the same verb as the first page; a `GET` returns `405`. `null` on the last page.
   previous:
     description: |
-      URL of the previous page, on your Connect domain. Follow it with `POST`, the same verb as the first page; a `GET` returns `405`. `null` on the first page.
+      URL of the previous page, on your Ottu domain. Follow it with `POST`, the same verb as the first page; a `GET` returns `405`. `null` on the first page.
   results:
     description: |
       The subscriptions on this page, newest first. An empty array when nothing matches.

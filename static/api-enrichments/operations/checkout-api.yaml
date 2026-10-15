@@ -14,7 +14,7 @@ operations:
 
       **Creating an AutoPay subscription.** Set `payment_type` to `auto_pay` and send the `autopay` block. Six things are easy to miss:
 
-      - `agreement` is a full [recurring agreement]({{apiBaseUrl}}/cards-and-tokens/recurring-payments/#agreement-types), not only an id. Because the agreement `type` defaults to `recurring`, `agreement.id`, `frequency`, `amount_variability`, `cycle_interval_days`, `total_cycles` and `expiry_date` are all required. A missing field is rejected with a `400` that names it. Repeat the same schedule in the `autopay` block: the agreement is what the gateway sees, and the `autopay` block is what AutoPay bills on.
+      - `agreement` is a full [recurring agreement]({{apiBaseUrl}}/cards-and-tokens/recurring-payments/#agreement-types), not only an id. Because the agreement `type` defaults to `recurring`, `agreement.id`, `frequency`, `amount_variability`, `cycle_interval_days`, `total_cycles` and `expiry_date` are all required. A missing field is rejected with a `400` that names it. Repeat the same schedule in the `autopay` block: the agreement is what the gateway sees, and the `autopay` block is what Ottu bills on.
       - `customer_id` is required.
       - `language` is optional and defaults to `en`. It sets the language of the customer's self-service page and of every customer email, and cannot be changed afterwards.
       - `customer_email` is required, because every customer email goes there. If you omit it, the `400` reads `{"autopay": ["AutoPayClient rejected request (422)"]}`, which looks like a problem with your `autopay` block. Check `customer_email` first.

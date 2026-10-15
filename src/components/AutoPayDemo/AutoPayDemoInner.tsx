@@ -115,6 +115,8 @@ function buildAutoPayRequest(orderId: string, customerId: string, pgCodes: strin
     amount: "9.900",
     currency_code: "KWD",
     customer_id: customerId,
+    customer_first_name: "Demo",
+    customer_phone: "50000000",
     customer_email: `demo.${orderId}@example.com`,
     payment_type: "auto_pay",
     include_sdk_setup_preload: true,
@@ -381,8 +383,9 @@ export default function AutoPayDemoInner() {
         return (
           <>
             <p className={styles.cardDescription}>
-              <code>at_period_end</code> keeps billing until the current period ends. The status does not
-              change; <code>cancel_at_period_end</code> becomes <code>true</code>.
+              <code>at_period_end</code> schedules the cancellation. The status does not change and
+              <code>cancel_at_period_end</code> becomes <code>true</code>. When the next billing date
+              arrives, Ottu cancels the subscription and does not charge.
             </p>
             {state.cancelReq && (
               <ApiPanel label={`POST ${SUBSCRIPTIONS}/${state.subscriptionId}/cancel/`} data={state.cancelReq} />
