@@ -112,7 +112,7 @@ Ottu sends an upcoming-charge reminder, a payment-failed notice, and a final-fai
   },
   {
     title: "The same email in Arabic",
-    description: <>Each email comes in the language chosen when the first payment was created, English or Arabic. This is the Arabic version of the final-failure email. The email subject stays in English.</>,
+    description: <>Each email comes in the language chosen when the first payment was created, English or Arabic. This is the Arabic version of the final-failure email.</>,
     image: "/img/business/autopay/notifications-06-final-failure-ar.png",
     imageAlt: "Final failure email in Arabic with outstanding balance and next steps",
   },
@@ -289,7 +289,7 @@ AutoPay subscriptions have no plan catalog. The plan name is a free-text label, 
     No. Cancel at the end of the paid period, so the customer keeps access until it runs out, then create a new subscription when they come back.
   </FAQItem>
   <FAQItem question="Which payment gateways and currencies does AutoPay support?">
-    Ottu charges the saved card through a gateway that supports both tokenization and auto-debit, in the currency of the subscription. In the [gateway catalog](/business/payments/gateways), Cybersource, MPGS, and Tap list both, and the catalog shows each gateway's currencies. Benefit also works for Bahraini dinar when it is set up on your account. KNET doesn't support auto-debit, so it can't pay renewals.
+    Ottu charges the saved card through a gateway that supports both tokenization and auto-debit, in the currency of the subscription. In the [gateway catalog](/business/payments/gateways), Cybersource, MPGS, and Tap list both, and the catalog shows each gateway's currencies. KNET doesn't support auto-debit, so it can't pay renewals.
   </FAQItem>
   <FAQItem question="Where do I see AutoPay payments?">
     Each billing cycle is one Ottu transaction in [Payment Management](/business/payment-management/), and all retries of that cycle are on it. The first payment is the transaction from your own checkout.
@@ -304,7 +304,7 @@ AutoPay subscriptions have no plan catalog. The plan name is a free-text label, 
     Yes. They can switch the active card from their self-service page at any time.
   </FAQItem>
   <FAQItem question="Does AutoPay support Arabic?">
-    Yes. Each subscription's emails go out in English or Arabic, chosen when it is created, and the self-service page offers both languages. The email subject stays in English.
+    Yes. Each subscription's emails go out in English or Arabic, chosen when it is created, and the self-service page offers both languages.
   </FAQItem>
   <FAQItem question="What if a customer opens a link that was replaced?">
     The old link doesn't open their subscription. Send them the new link yourself.

@@ -51,6 +51,11 @@
   line-height: 24px; /* 150% */
 }
 
+/* The reset above also removes the gap between paragraphs. */
+.theme-admonition div:nth-child(2) p + p {
+  margin-top: 12px;
+}
+
 [data-theme="dark"] .theme-admonition div:first-child {
   color: var(--title-font-dark-color);
 }
