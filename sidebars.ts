@@ -261,6 +261,11 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
+                  label: "Live Demo",
+                  href: "/developers/payments/autopay#live-demo",
+                },
+                {
+                  type: "link",
                   label: "API Reference",
                   href: "/developers/payments/autopay#api-reference",
                 },

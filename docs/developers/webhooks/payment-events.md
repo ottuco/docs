@@ -184,7 +184,7 @@ The top-level block is also fetched live from the AutoPay service while the webh
 Two consequences worth designing for:
 
 - **Its absence proves nothing.** A payment with no `autopay` block may still be an AutoPay payment whose lookup did not complete in time. Do not infer "this is not a subscription payment" from a missing block.
-- **`event_type` is a best-guess hint, not an authoritative outcome.** AutoPay classifies it independently from the payment result you're reading it alongside. For what actually happened to this payment, read `result` and `state`; for authoritative subscription state, use the [subscription endpoints](/developers/payments/autopay/#step-by-step).
+- **`event_type` is a best-guess hint, not an authoritative outcome.** AutoPay classifies it independently from the payment result you're reading it alongside. For what actually happened to this payment, read `result` and `state`; for authoritative subscription state, use the [subscription endpoints](/developers/payments/autopay/#api-reference).
 
 Never make a security or money-moving decision from the top-level `autopay` block.
 :::
