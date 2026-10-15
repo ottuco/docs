@@ -150,6 +150,7 @@ Use the `extra` field to attach arbitrary key-value data to a payment transactio
   "currency_code": "KWD",
   "pg_codes": ["kpay"],
   "extra": {
+    "app_name": "my-pos",
     "order_id": "ORD-12345",
     "department": "sales",
     "customer_tier": "premium"
@@ -158,6 +159,35 @@ Use the `extra` field to attach arbitrary key-value data to a payment transactio
 ```
 
 The `extra` object is stored with the transaction and included in [webhook payloads](/developers/webhooks/payment-events) — use it to pass context your backend needs when processing the payment result.
+
+### Application Name (`app_name`) {#app-name}
+
+`extra.app_name` names the application that created the payment. It is optional. Ottu's own integrations set it to `shopify`, `estate` (real estate) or `event` (events). If you build an application that creates payments, for example a POS app or a platform plugin, send your own short, fixed identifier, such as `my-pos` above.
+
+| Rule | What Ottu does |
+|------|----------------|
+| Type | Must be a string. A number, boolean, object or list is rejected, not converted. |
+| Length | Up to 64 characters, counted after trimming. |
+| Stored as | Trimmed and lower-cased: `" Shopify "` is stored as `shopify`. |
+| `null` | Accepted, and not stored. |
+
+An invalid value returns `400` with the error under `extra.app_name`:
+
+```json
+{
+  "extra": {
+    "app_name": ["Not a valid string."]
+  }
+}
+```
+
+A value longer than 64 characters returns `["Ensure this field has no more than 64 characters."]` in the same place.
+
+**Where it shows:** the merchant's dashboard shows the value as **Application**: a column in the transaction tables, a [filter and a search field](/business/payment-management/search-and-filter#filter-by-application), a header in [exports and reports](/business/settings/transaction-reports#application-header), and a row on the payment's detail page. In [webhook payloads](/developers/webhooks/payment-events) it stays inside `extra`, like any other key.
+
+:::note
+`app_name` is a reserved name: a [custom field](/business/plugins/payment-request#custom-field-settings) cannot be named `app_name`.
+:::
 
 ## Pagination
 
