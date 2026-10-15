@@ -327,7 +327,7 @@ export default function AutoPayDemoInner() {
               {pending ? (
                 <>
                   <strong><code>pending_setup</code> is expected right after payment.</strong> Ottu confirms
-                  the first payment on a recurring check, so the status
+                  the first payment on a recurring check (usually a minute or two on the sandbox, up to about 15 minutes in production), so the status
                   lags the payment. {state.polls >= MAX_POLLS ? "Polling stopped; check again below." : "Checking every 5 seconds..."}
                 </>
               ) : (
