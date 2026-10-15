@@ -294,11 +294,11 @@ AutoPay subscriptions have no plan catalog. The plan name is a free-text label, 
   <FAQItem question="Which payment gateways and currencies does AutoPay support?">
     Ottu charges the saved card through a gateway that supports both tokenization and auto-debit, in the currency of the subscription. In the [gateway catalog](/business/payments/gateways), Cybersource, MPGS, and Tap list both, and the catalog shows each gateway's currencies. KNET doesn't support auto-debit, so it can't pay renewals.
   </FAQItem>
-  <FAQItem question="Where do I see the money AutoPay collects?">
-    Every billing cycle is a normal Ottu transaction, so it appears in [Payment Management](/business/payment-management/) like any other payment. All retries of a cycle are on that one transaction. The first payment is the transaction from your own checkout.
+  <FAQItem question="Where do I see AutoPay payments?">
+    Each billing cycle is one Ottu transaction in [Payment Management](/business/payment-management/), and all retries of that cycle are on it. The first payment is the transaction from your own checkout.
   </FAQItem>
   <FAQItem question="How do I refund a billing cycle?">
-    The same way as any payment: find the cycle's transaction in [Payment Management](/business/payment-management/) and refund it, in full or in part. A refund doesn't cancel the subscription. Cancel it separately if the customer is leaving.
+    Find the cycle's transaction in [Payment Management](/business/payment-management/) and refund it, in full or in part. A refund doesn't cancel the subscription. Cancel it separately if the customer is leaving.
   </FAQItem>
   <FAQItem question="What happens when my customer's card expires?">
     The charge fails like any other declined card. Ottu retries and emails the customer. If every attempt fails, the subscription moves to Past Due. The customer can add a new card and pay from their self-service page.
