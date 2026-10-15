@@ -46,7 +46,7 @@ Building the integration? See [AutoPay for developers](/developers/payments/auto
 What happens at each stage, and what you need to do.
 
 :::tip See it live
-Want to watch a subscription run before you read on? Try the [AutoPay live demo](/developers/payments/autopay/#live-demo) on Ottu's sandbox.
+Want to see setup for yourself? The [AutoPay live demo](/developers/payments/autopay/#live-demo) creates a test subscription and takes its first payment on Ottu's sandbox.
 :::
 
 <JourneyCards
@@ -118,7 +118,7 @@ Ottu sends an upcoming-charge reminder, a payment-failed notice, and a final-fai
   },
 ]} />
 
-The final email may talk about suspended access. That describes your product. Ottu itself never suspends or cancels a subscription because a payment failed.
+Ottu itself never suspends or cancels a subscription because a payment failed. Any decision about your customer's access to your product is yours.
 
 ### The self-service page {#the-self-service-page}
 
@@ -195,12 +195,6 @@ And these are the actions a customer can take:
     imageAlt: "Reactivation confirmation previewing the plan, amount, and next renewal date before the customer confirms",
   },
   {
-    title: "Accept terms, if asked",
-    description: <>Some gateways require the customer to accept terms before paying an outstanding balance.</>,
-    image: "/img/business/autopay/recovery-03-payment-terms-alert.png",
-    imageAlt: "Terms and conditions alert shown before completing an outstanding-balance payment",
-  },
-  {
     title: "Payment confirmed",
     description: <>The balance clears and the subscription returns to Active.</>,
     image: "/img/business/autopay/recovery-02-payment-confirmed.png",
@@ -220,11 +214,11 @@ Customers can hold several cards and switch the active one in a click. Ottu neve
 The previous link stops working instantly, and Ottu doesn't notify the customer. Deliver the new link the same way you delivered the first, or the customer is locked out.
 :::
 
-A regenerated link shows "link expired". A mistyped link shows "link not recognized". Links never expire on their own.
+An old link stops working once you regenerate it. Links never expire on their own.
 
 ## When a payment fails {#when-a-payment-fails}
 
-- **Four attempts by default.** That is one initial charge plus three retries, spaced one hour apart.
+- **Four attempts by default.** That is one initial charge plus three retries, spaced about an hour apart.
 - **The customer is emailed** after each failed attempt while retries remain, so they can update their card.
 - **After the last attempt,** the subscription moves to Past Due. The customer gets the final email with a link to pay.
 - **Paying the balance** returns the subscription to Active.
@@ -240,10 +234,10 @@ A subscription moves through seven states. Canceled and Expired are final.
 | State | What it means |
 |---|---|
 | Pending setup | Created and waiting for the first charge to resolve. |
-| Trialing | The first charge was zero, so no money has moved. The customer has access now, and the first real charge comes at the next billing cycle. |
+| Trialing | The first charge was zero, so no money has moved. The first real charge comes at the next billing cycle. |
 | Active | Billing normally. The latest cycle was paid. |
 | Past Due | Every retry on a cycle failed. The subscription is not canceled. It waits for the balance to be paid. |
-| Canceled | Billing has stopped and access has ended. A customer's cancellation lands here at the end of the paid period, except from Past Due, where it never takes effect. Your team's immediate cancel lands here at once. |
+| Canceled | Billing has stopped. A customer's cancellation lands here at the end of the paid period, except from Past Due, where it never takes effect. Your team's immediate cancel lands here at once. |
 | Expired | Billing stopped because the subscription reached its end date. |
 | Setup Failed | The customer never completed the first payment. Ottu doesn't retry it. Create a new subscription. |
 
@@ -313,7 +307,7 @@ AutoPay subscriptions have no plan catalog. The plan name is a free-text label, 
     Yes. Each subscription's emails go out in English or Arabic, chosen when it is created, and the self-service page offers both languages. The email subject stays in English.
   </FAQItem>
   <FAQItem question="What if a customer opens a link that was replaced?">
-    They see a "link expired" page instead of their subscription. Send them the new link yourself. Ottu doesn't offer to email one.
+    The old link doesn't open their subscription. Send them the new link yourself.
   </FAQItem>
 </FAQ>
 
