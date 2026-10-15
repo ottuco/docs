@@ -109,9 +109,9 @@ const SVG = String.raw`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 
   <rect class="arrow-label-bg" x="552" y="304" width="56" height="14" rx="3" />
   <text class="arrow-label" x="580" y="315" text-anchor="middle">ongoing</text>
 
-  <path class="arrow" stroke-dasharray="5 4" d="M 360 290 C 300 340 130 330 130 208" marker-end="url(#arrow-autopay-flow)" />
-  <rect class="arrow-label-bg" x="150" y="306" width="150" height="14" rx="3" />
-  <text class="arrow-label" x="225" y="317" text-anchor="middle">webhook · result (async)</text>
+  <path class="arrow" stroke-dasharray="4 3" d="M 360 290 C 300 340 130 330 130 208" marker-end="url(#arrow-autopay-flow)" />
+  <rect class="arrow-label-bg" x="128" y="302" width="160" height="14" rx="3" />
+  <text class="arrow-label" x="208" y="313" text-anchor="middle">webhook · result (async)</text>
 </svg>`;
 
 export default function AutoPayFlowDiagram(): React.JSX.Element {

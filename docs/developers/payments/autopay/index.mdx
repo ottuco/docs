@@ -53,6 +53,7 @@ By the end of this page your backend creates a subscription, sends the customer 
 - [ ] [Redirect the customer](#step-redirect) to `checkout_url`.
 - [ ] [Handle the webhook and confirm activation](#step-webhook).
 - [ ] [Get `page_url` and send it to the customer](#manage-the-customer-self-service-link).
+- [ ] [Poll List subscriptions](#list-subscriptions) with `status: "past_due"` to catch failed renewals.
 
 **Test**
 
@@ -77,19 +78,25 @@ By the end of this page your backend creates a subscription, sends the customer 
 5. **Your customer manages the subscription** from their own page.
 
 
+### What your customer sees {#what-your-customer-sees}
+
+Ottu emails your customer before each charge: about 3 days before for monthly plans, and about 31, 11 and 4 days before for yearly ones. Ottu also emails them after each failed attempt while retries remain, and a final notice when retries run out. Every email carries your business name, support email and privacy link, plus a link to the customer's self-service page. You can switch each email off per subscription when you create it, not afterwards.
+
+On the self-service page, your customer sees their status and billing history, adds or switches a card, pays an overdue balance, and cancels or undoes a pending cancellation. The emails go out in English or Arabic, fixed when you create the subscription. The page has its own English/Arabic switch. See [What your customer sees](/business/autopay/#what-your-customer-sees) for screenshots of each.
+
 ### Key concepts {#key-concepts}
 
 **CIT (customer-initiated transaction).** The first payment your customer makes on the checkout page. It also saves their card, so Ottu can charge the later cycles without the customer present. See [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments) for the CIT/MIT background.
 
-**Activation lags the first payment.** Your customer can pay while the subscription still shows `pending_setup`. Ottu confirms the payment on a recurring check and skips subscriptions younger than 2 minutes. Until the check succeeds:
+**Activation lags the first payment.** Your customer can pay while the subscription still shows `pending_setup`. Ottu confirms the payment on a recurring check and, by default, skips subscriptions younger than 2 minutes. Until the check succeeds:
 
 - `status` is `pending_setup`.
 - Your checkout webhook can arrive in that state. Treat it as "payment received, activation pending", not as a failure.
 - Do not hard-code a wait. Poll [Retrieve a subscription](#retrieve-a-subscription) until `status` leaves `pending_setup`.
 
-If the payment is never confirmed, the subscription becomes `setup_failed` after 24 hours. It becomes `setup_failed` sooner if the checkout session is canceled or voided. Ottu does not retry it; create a new subscription.
+If the payment is never confirmed, the subscription becomes `setup_failed` after 24 hours by default. It becomes `setup_failed` sooner if the checkout session is canceled or voided. Ottu does not retry it; create a new subscription.
 
-**Which webhook field identifies the subscription.** Read `extra.autopay.subscription_id`. It is the same value as `extra.autopay.subscription_id` in the create response. The webhook also carries the checkout `session_id`, which equals `setup_session_id` on the subscription.
+**Which webhook field identifies the subscription.** Read `extra.autopay.subscription_id`. It is the value you saved from the create response. The webhook also carries the checkout `session_id`, which equals `setup_session_id` on the subscription.
 
 **How `start_date`, the checkout charge and cycle 1 relate.** `start_date` does not delay the checkout charge. The customer pays it on the checkout page, whenever they complete checkout.
 
@@ -496,7 +503,7 @@ A `past_due` subscription stays that way until the customer pays or you [cancel 
 
 #### Notifications {#notifications}
 
-Ottu emails your customer an upcoming-charge reminder, a payment-failed notice after each failed attempt while retries remain, and a final-failure email when they run out. Monthly subscriptions get one reminder, 2 days before the charge. Yearly ones get three, at 30, 10 and 3 days. Each email can be switched off per subscription with `notification_preferences` on the `autopay` block. See [The emails](/business/autopay/#the-emails).
+Ottu emails your customer an upcoming-charge reminder, a payment-failed notice after each failed attempt while retries remain, and a final-failure email when they run out. Monthly subscriptions get one reminder, about 3 days before the charge. Yearly ones get three, about 31, 11 and 4 days before. Each email can be switched off per subscription with `notification_preferences` on the `autopay` block. See [The emails](/business/autopay/#the-emails).
 
 #### Customer Self-Service Page {#customer-self-service-page}
 
