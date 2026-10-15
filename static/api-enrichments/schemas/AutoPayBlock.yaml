@@ -37,4 +37,6 @@ properties:
       Retries run one hour apart, each timed from the previous failed attempt. This field changes how many retries happen, not how far apart they are; there is no exponential backoff.
   notification_preferences:
     description: |
-      Optional free-form object controlling the customer notifications AutoPay sends for this subscription. Connect does not validate its contents; it is passed through to AutoPay untouched, so its accepted keys are defined by AutoPay rather than by the Checkout API. Nullable.
+      Optional object that switches the customer emails off for this subscription. Set it when you create the subscription: it cannot be changed afterwards. Nullable.
+
+      The keys are `pre_charge_enabled` (the reminder before each charge), `failure_enabled` (the email after each failed attempt while retries remain) and `final_failure_enabled` (the email when retries run out). Each is a boolean that defaults to `true`. Connect passes the object through without validating it and ignores unknown keys, so a misspelled key silently does nothing.

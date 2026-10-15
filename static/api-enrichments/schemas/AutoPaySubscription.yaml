@@ -7,6 +7,8 @@ _description: |
 
   Connect forwards AutoPay's body unchanged, so read this object for the current state rather than caching what you sent at checkout. The customer's self-service link is deliberately not part of it; fetch that from the page-link endpoint.
 
+  Beyond the fields described below, the object carries `setup_session_id` (the checkout `session_id` of the first payment, which is how you match a webhook to a subscription), `card` (the active card's `masked_card` and `card_brand`), `current_cycle` (the latest billing cycle), and `amount_variability`, `cycle_interval_days` and `total_cycles` (taken from the agreement). While the status is `pending_setup`, `card`, `current_cycle`, `next_billing_date`, `amount_variability`, `cycle_interval_days` and `total_cycles` are `null`, and they are filled in once the first payment is confirmed.
+
 properties:
   id:
     description: |

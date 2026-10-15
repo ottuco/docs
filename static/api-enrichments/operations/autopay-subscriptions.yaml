@@ -1,0 +1,59 @@
+# Enrichments for tag: "AutoPay"
+# Operations: list, detail, cancel, cycles, page-link, regenerate-page-token.
+# These carry the integration rules that used to live in the hand-written
+# Step-by-Step on the AutoPay guide. Create is enriched in checkout-api.yaml.
+
+operations:
+  autopay_subscription_list:
+    description_append: |
+      The endpoint is a `POST` that only reads. Filters travel in the request body, so keep `customer_id` there and out of the URL.
+
+      **Paging.** `next` and `previous` are absolute URLs on your own Connect domain, and they carry `limit` and `offset` in the **query string**, even though you sent them in the body.
+
+      1. Follow them with `POST`, not `GET`. A `GET` returns `405 {"detail": "Method \"GET\" not allowed."}`. Reuse the same headers and API key.
+      2. The body is optional when you follow a link, because `limit` and `offset` are already in the query string. Resend your filters in the body if you want them applied to that page too.
+      3. Query parameters win over body parameters. `{"offset": 1}` posted to a URL that ends `?offset=5` returns the page at offset 5.
+
+      Each item in `results` is a short summary. For the active card and the latest cycle, call Retrieve with the item's `id`.
+
+  autopay_subscription_detail:
+    description_append: |
+      Poll this endpoint to see activation. The checkout webhook usually arrives while the subscription is still `pending_setup`, because Ottu confirms the first payment on a recurring check, normally within about 15 minutes. Do not hard-code a wait: poll until `status` leaves `pending_setup`. If it is still `pending_setup` an hour after a successful payment, contact Ottu support with the subscription ID.
+
+      To link a webhook to a subscription, match the webhook's `session_id` to `setup_session_id` on this object.
+
+      While the subscription is `pending_setup`, `card`, `current_cycle`, `next_billing_date`, `amount_variability`, `cycle_interval_days` and `total_cycles` are `null`. Ottu fills them in once the first payment is confirmed. If you did not send `end_date` in the `autopay` block, it is set to the agreement's `expiry_date` at that point, so the subscription ends when the agreement does.
+
+      `status`, `card` and `current_cycle` are the three fields worth polling. Together they tell you whether the first payment completed, which card is active and how the latest charge went. `plan_name`, `merchant_reference` and `total_cycles` are read-only: the `autopay` request block has no field for them.
+
+  autopay_subscription_cancel:
+    parameters:
+      Idempotency-Key:
+        description: |
+          Required. A UUID v4 that identifies this cancel request. Send the same key with the same body to retry safely: Ottu replays the first response. Send the same key with a different body and the call fails with `409` (`code: idempotency_conflict`).
+    description_append: |
+      `mode: "immediate"` stops the subscription now, stops scheduled charges and retries, and refunds nothing. `mode: "at_period_end"` keeps billing through the current period and finalizes on the next billing date. Cancelling a `past_due` subscription at period end never finalizes: cancel it immediately instead.
+
+      Only you can cancel immediately. A cancellation from the customer's self-service page always takes effect at the end of the paid period.
+
+      `cancellation_initiator` records who last scheduled a cancellation, `merchant` or `customer`. It is not cleared when the customer undoes a pending cancellation from the self-service page, and Ottu does not notify you of a cancel or an undo. Read `cancel_at_period_end` and `status` from Retrieve to know whether a cancellation is pending.
+
+  autopay_subscription_page_link:
+    description_append: |
+      The create response has no `page_url`. Call this endpoint at any time after creation, with no need to wait for the first payment, and send the link to your customer yourself: Ottu sends the customer no email at signup and does not resend links. To re-send a link that should keep working, read it here instead of regenerating it.
+
+  autopay_subscription_regenerate_page_token:
+    parameters:
+      Idempotency-Key:
+        description: |
+          Required. A UUID v4. Ottu rejects the call with `400` when the header is missing. The header does not make this call safe to repeat: replaying the same key still issues a new token and revokes the previous one.
+    description_append: |
+      The previous link stops working the moment you call this endpoint, and Ottu does not tell the customer. Send the new `page_url` yourself, or the customer reaches a dead link. Use it to revoke a link that leaked or was lost, not to re-send a working one.
+
+      After a timeout, read the current link with Retrieve an AutoPay hosted-page link and compare its `page_url` with the one you hold before you retry. A blind retry can revoke a link you have just delivered.
+
+  autopay_subscription_cycles:
+    description_append: |
+      Each billing cycle is one Ottu transaction with order number `<subscription ID>-c<cycle number>` (for example `sub_…-c2`). Every retry attempt belongs to that one transaction. The first payment is your own checkout transaction, so its `session_id` is the one you created.
+
+      `limit` and `offset` belong in the query string, and `next` and `previous` can be followed directly with `GET`. A cycle with `status: "needs_triage"` means you should contact Ottu support.

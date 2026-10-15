@@ -2,7 +2,7 @@
 # Response of POST /b/pbl/v2/subscriptions/.
 
 _description: |
-  One page of subscriptions. See [Paging through the list]({{apiBaseUrl}}/payments/autopay/#paging-through-the-list) for how to walk the pages of this `POST` list.
+  One page of subscriptions. To walk the pages, follow `next` with `POST`, the same verb as the first page. You can send an empty body `{}`, because the link already carries `limit` and `offset`. Query parameters win over body parameters.
 
 properties:
   count:
