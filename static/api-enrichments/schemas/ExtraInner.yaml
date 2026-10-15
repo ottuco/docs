@@ -10,4 +10,4 @@ _description: |
 properties:
   app_name:
     description: |
-      `Optional` field. The application that created the payment: `shopify`, `estate`, `event`, or your own identifier. A string of up to 64 characters; a number or any other type is rejected. Ottu trims and lower-cases it (`" Shopify "` is stored as `shopify`) and does not store `null`. The merchant sees it as **Application** in the dashboard. See [Application Name]({{apiBaseUrl}}/getting-started/api-fundamentals/#app-name).
+      `Optional` field. The application that created the payment: `shopify`, `estate`, `event`, or your own identifier. A string of up to 64 characters. A number or any other type is rejected. Ottu trims and lower-cases it (`" Shopify "` is stored as `shopify`) and does not store `null`. The merchant sees it as **Application** in the dashboard. See [Application Name]({{apiBaseUrl}}/getting-started/api-fundamentals/#app-name).

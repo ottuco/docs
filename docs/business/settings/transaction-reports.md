@@ -129,6 +129,8 @@ All field types require these additional settings:
 
 ### Application Header
 
+Report configurations list their columns under **Fields**, in two lists: **Available Headers** and **Selected Headers**. Only selected headers go into the file.
+
 The **Application** header (**التطبيق** in Arabic) adds a column with the application that created each payment, such as `shopify` or `event`. Payments without an application get an empty cell. It is not part of the default export, so add it where you need it:
 
 - **Periodic and flexible reports:** open the report configuration, and under **Fields** drag **Application** from **Available Headers** to **Selected Headers**.
