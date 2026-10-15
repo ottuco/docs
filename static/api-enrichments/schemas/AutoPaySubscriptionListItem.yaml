@@ -1,0 +1,36 @@
+# Overrides for: components/schemas/AutoPaySubscriptionListItem
+# One row of the subscription list. Mirrors SubscriptionListItem in AutoPay.
+
+_description: |
+  A lighter view of a subscription, returned for each row of the subscription list. It carries enough to show a table and to decide which subscriptions to open; call Retrieve a subscription for the full object.
+
+properties:
+  id:
+    description: |
+      The subscription's unique identifier. Pass it as `subscription_id` to retrieve, cancel, or list the cycles of this subscription.
+  customer_id:
+    description: |
+      Your own identifier for the customer, as sent in `customer_id` at checkout.
+  customer_email:
+    description: |
+      The customer's email address, captured when the subscription was created.
+  frequency:
+    description: |
+      How often the customer is charged. Enum: `monthly`, `yearly`.
+  recurring_amount:
+    description: |
+      The amount charged on each billing cycle, as a decimal string in `currency`.
+  currency:
+    description: |
+      Three-letter ISO 4217 currency code of the recurring charge, for example `KWD`.
+  status:
+    description: |
+      The subscription's lifecycle state. One of `pending_setup` (created, first payment not completed yet), `trialing` (set up with a `0` first charge, waiting for its first billing date), `active` (billing normally), `past_due` (a billing cycle used up every retry), `canceled`, `expired` (the `end_date` passed), or `setup_failed` (the first payment never completed).
+
+      A `past_due` subscription is never canceled automatically. See [Subscription States]({{apiBaseUrl}}/payments/autopay/#subscription-states).
+  next_billing_date:
+    description: |
+      The date of the next scheduled charge, in `YYYY-MM-DD` format. `null` when no charge is scheduled.
+  created_at:
+    description: |
+      UTC timestamp of when the subscription was created. The list is ordered by this field, newest first.

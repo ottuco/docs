@@ -12,6 +12,7 @@ import CodeBlock from "@theme/CodeBlock";
 import AutoPayFlowDiagram from "@site/src/diagrams/AutoPayFlowDiagram";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
+import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 
 # AutoPay
 
@@ -141,13 +142,19 @@ Call the [Checkout API](../checkout-api) with `payment_type: "auto_pay"`. Three 
     "customer_email": "customer@example.com",
     "webhook_url": "https://yourwebsite.com/webhook",
     "agreement": {
-      "id": "AGR-sub-001"
+      "id": "AGR-sub-001",
+      "type": "recurring",
+      "frequency": "monthly",
+      "amount_variability": "fixed",
+      "cycle_interval_days": 30,
+      "total_cycles": 12,
+      "expiry_date": "2027-09-01"
     },
     "autopay": {
       "frequency": "monthly",
       "recurring_amount": "9.900",
       "start_date": "2026-09-01",
-      "description": "Pro Plan — Monthly"
+      "description": "Pro Plan - Monthly"
     }
   }'`}</CodeBlock>
 
@@ -171,12 +178,20 @@ response = requests.post(
         "customer_id": "cust_123",
         "customer_email": "customer@example.com",
         "webhook_url": "https://yourwebsite.com/webhook",
-        "agreement": {"id": "AGR-sub-001"},
+        "agreement": {
+            "id": "AGR-sub-001",
+            "type": "recurring",
+            "frequency": "monthly",
+            "amount_variability": "fixed",
+            "cycle_interval_days": 30,
+            "total_cycles": 12,
+            "expiry_date": "2027-09-01",
+        },
         "autopay": {
             "frequency": "monthly",
             "recurring_amount": "9.900",
             "start_date": "2026-09-01",
-            "description": "Pro Plan — Monthly",
+            "description": "Pro Plan - Monthly",
         },
     },
 )
@@ -200,12 +215,20 @@ session = response.json()`}</CodeBlock>
     customer_id: "cust_123",
     customer_email: "customer@example.com",
     webhook_url: "https://yourwebsite.com/webhook",
-    agreement: { id: "AGR-sub-001" },
+    agreement: {
+      id: "AGR-sub-001",
+      type: "recurring",
+      frequency: "monthly",
+      amount_variability: "fixed",
+      cycle_interval_days: 30,
+      total_cycles: 12,
+      expiry_date: "2027-09-01",
+    },
     autopay: {
       frequency: "monthly",
       recurring_amount: "9.900",
       start_date: "2026-09-01",
-      description: "Pro Plan — Monthly",
+      description: "Pro Plan - Monthly",
     },
   }),
 });
@@ -230,12 +253,20 @@ const session = await response.json();`}</CodeBlock>
                 'customer_id' => 'cust_123',
                 'customer_email' => 'customer@example.com',
                 'webhook_url' => 'https://yourwebsite.com/webhook',
-                'agreement' => ['id' => 'AGR-sub-001'],
+                'agreement' => [
+                    'id' => 'AGR-sub-001',
+                    'type' => 'recurring',
+                    'frequency' => 'monthly',
+                    'amount_variability' => 'fixed',
+                    'cycle_interval_days' => 30,
+                    'total_cycles' => 12,
+                    'expiry_date' => '2027-09-01',
+                ],
                 'autopay' => [
                     'frequency' => 'monthly',
                     'recurring_amount' => '9.900',
                     'start_date' => '2026-09-01',
-                    'description' => 'Pro Plan — Monthly',
+                    'description' => 'Pro Plan - Monthly',
                 ],
             ]),
         ],
@@ -246,11 +277,25 @@ $session = json_decode($response, true);`}</CodeBlock>
 </TabItem>
 </Tabs>
 
-<CodeBlock language="json" title="Example response — 201 Created">{`{
-  "session_id": "sess_9f8e7d6c5b4a",
-  "checkout_url": "${OTTU_CONNECT_BASE_URL}/checkout/sess_9f8e7d6c5b4a",
-  "checkout_short_url": "${OTTU_CONNECT_BASE_URL}/c/sess_9f8e7d6c5b4a",
+<CodeBlock language="json" title="Example response — 201 Created (trimmed)">{`{
+  "session_id": "a53655b8354f73809e58f8a730a1050c731ed038",
+  "state": "created",
+  "payment_type": "auto_pay",
+  "amount": "9.900",
+  "currency_code": "KWD",
+  "customer_id": "cust_123",
+  "checkout_url": "${OTTU_CONNECT_BASE_URL}/b/checkout/redirect/start/?session_id=a53655b8354f73809e58f8a730a1050c731ed038",
+  "checkout_page_url": "${OTTU_CONNECT_BASE_URL}/en/checkout/a53655b8354f73809e58f8a730a1050c731ed038",
   "expiration_time": "00:30:00",
+  "agreement": {
+    "id": "AGR-sub-001",
+    "type": "recurring",
+    "frequency": "monthly",
+    "amount_variability": "fixed",
+    "cycle_interval_days": 30,
+    "total_cycles": 12,
+    "expiry_date": "01/09/2027"
+  },
   "extra": {
     "autopay": {
       "subscription_id": "sub_hA1YYmZz1xk8speCiPbOquIP"
@@ -370,7 +415,7 @@ All filter fields are optional: `status`, `customer_id`, `created_after`, `creat
   "start_date": "2026-04-24",
   "end_date": "2027-04-24",
   "billing_anchor_day": 24,
-  "setup_session_id": "sess_9f8e7d6c5b4a",
+  "setup_session_id": "a53655b8354f73809e58f8a730a1050c731ed038",
   "agreement_id": "AGR-abc123",
   "amount_variability": "fixed",
   "cycle_interval_days": 30,
@@ -383,21 +428,22 @@ All filter fields are optional: `status`, `customer_id`, `created_after`, `creat
   "cancellation_reason": null,
   "cancellation_note": null,
   "next_billing_date": "2026-05-24",
-  "description": "Pro Plan — Monthly",
+  "description": "Pro Plan - Monthly",
   "merchant_reference": "ref-001",
   "plan_name": "Pro Plan",
   "language": "en",
   "retry_count": 3,
   "created_at": "2026-04-24T10:30:00Z",
   "updated_at": "2026-04-24T10:30:00Z",
-  "card": {"masked_card": "**** 1111", "card_brand": "visa"},
+  "card": {"masked_card": "**** 1111", "card_brand": "VISA"},
   "current_cycle": {
     "cycle_number": 1,
     "scheduled_date": "2026-04-24",
     "amount_due": "49.990",
     "status": "paid",
     "paid_at": "2026-04-24T10:31:00Z",
-    "session_id": "sess_prev001",
+    "failure_reason": null,
+    "session_id": "a53655b8354f73809e58f8a730a1050c731ed038",
     "charge_type": "cit"
   }
 }
@@ -420,6 +466,8 @@ All filter fields are optional: `status`, `customer_id`, `created_after`, `creat
   --data '{"mode": "immediate"}'`}</CodeBlock>
 
 `mode: "immediate"` stops the subscription right away: `status` becomes `canceled` and no more cycles are scheduled. `mode: "at_period_end"` instead sets `cancel_at_period_end: true` and leaves `status` as-is; the subscription keeps billing through the current period and only flips to `canceled` when the next cycle would have been generated.
+
+`cancellation_initiator` (`merchant` or `customer`) records who last scheduled a cancellation. It is not cleared when the customer undoes a pending cancellation from the self-service page, so read `cancel_at_period_end` and `status` to know whether a cancellation is actually pending.
 
 :::note Only the merchant can cancel immediately
 The customer self-service page (below) can only schedule a cancellation for the end of the period, never immediately. See [Customer Self-Service Page](#customer-self-service-page).
@@ -471,6 +519,16 @@ Run steps 1–4 once against the sandbox with a sandbox API key. Pay the checkou
 Replace the sandbox API key with your production [API key](/developers/getting-started/authentication) and the sandbox base URL with your production base URL. No other request changes.
 
 
+Pagination works the same way as [the subscription list](#paging-through-the-list), with one difference that makes it simpler: this endpoint is a `GET`, so `limit` and `offset` belong in the query string and `next` / `previous` can be followed directly with `GET`. Connect rewrites both links onto your Connect domain, as it does for the list:
+
+```json title="next / previous on a paginated cycles response"
+{
+  "count": 2,
+  "next": "https://<your-ottu-domain>/b/pbl/v2/subscriptions/sub_abc123/cycles/?limit=1&offset=1",
+  "previous": null
+}
+```
+
 ### Use Cases
 
 #### Subscription States {#subscription-states}
@@ -517,6 +575,27 @@ A cancellation from the self-service page takes effect at the end of the current
 
 The request and response for each endpoint, including the checkout call that creates a subscription, are in [Step-by-Step](#step-by-step).
 
+### Configuration discovery {#configuration-discovery}
+
+`GET /b/api/v1/config/` reports whether AutoPay is enabled for a merchant, via an `autopay_api_url` field:
+
+<CodeBlock language="bash" title="Check whether AutoPay is enabled">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/api/v1/config/'`}</CodeBlock>
+
+```json title="Example response — 200 OK"
+{
+  "title": "Sandbox",
+  "websocket_url": "wss://wsprd01.ottu.net",
+  "autopay_api_url": "https://autopay.ottu.dev"
+}
+```
+
+Two things to know about it:
+
+- **Falsy values are stripped from this response**, so the key is simply absent when AutoPay is not enabled. Test for the key's presence, not for an empty value.
+- It **replaces the old build-time `VUE_APP_AUTOPAY_BACKEND_URL` environment variable**. Read the host at runtime from this endpoint rather than baking it into a build.
+
+`autopay_api_url` points at the AutoPay service itself, which is not where your integration sends requests. Merchant calls go to `/b/pbl/v2/subscriptions/` on your own Connect domain, as documented above. Treat this field as a capability flag.
+
 ## Best Practices
 
 - **Send a UUID `Idempotency-Key` on cancel and regenerate.** Only cancel replays safely. Before retrying a timed-out regenerate, call `page-link` and compare `page_url`.
@@ -525,6 +604,40 @@ The request and response for each endpoint, including the checkout call that cre
 - **Treat `past_due` as sticky.** Build your own monitoring if you need a cadence for subscriptions stuck in that state.
 - **Set `card_acceptance_criteria.min_expiry_time` yourself.** Auto-debit defaults it to 30 days; Ottu does not apply that default here.
 - **Always send `customer_email`.** It is required, and a missing one is rejected with a 400.
+
+## Compatibility Notes {#compatibility-notes}
+
+Two behaviours will look like bugs if you have not seen them documented.
+
+### `auto_pay` appears as `auto_debit` in SDK and gateway payloads {#auto-pay-appears-as-auto-debit}
+
+`auto_pay` is meaningful only to Connect, which orchestrates the subscription. Everything downstream treats the payment as an ordinary auto-debit charge, so `payment_type` is deliberately rewritten to `auto_debit` in:
+
+- the **[Checkout SDK](../checkout-sdk/web) preload payload** served for the session, and
+- payloads handed to **ottu_pg**.
+
+Create a session with `payment_type: "auto_pay"`, then read the SDK payload for that `session_id`, and you will see `payment_type: "auto_debit"` with no `autopay` key. That is expected, not a defect. Your own record of the payment type stays `auto_pay`: the Checkout API response, the [webhook](/developers/webhooks/payment-events/) and the signed field set all report `auto_pay`.
+
+### Cards saved before the CIT agreement fix are not backfilled {#cards-saved-before-the-agreement-fix}
+
+An earlier defect meant a CIT paid with `payment_type: "auto_pay"` saved its token with an **empty `agreements` list**, because the code that binds the agreement to the saved card keyed off an exact `auto_debit` check and skipped `auto_pay` entirely.
+
+Because a merchant-initiated charge is authorised by matching the agreement recorded on the card, every later MIT against such a token is rejected:
+
+```json title="Symptom — MIT against a card saved by a pre-fix auto_pay CIT"
+{
+  "detail": "No Cardholder Initiated Transaction (CIT) found. Before initiating an auto-debit request, ensure a successful CIT payment has been made by the customer.",
+  "result": "failed"
+}
+```
+
+The message points at a missing CIT, but the CIT did happen and did succeed. What is missing is the agreement binding on the saved card, which is what the lookup actually matches on.
+
+:::warning Affected cards are not repaired automatically
+The fix binds the agreement for every mandate-carrying payment type going forward, but **existing tokens are not backfilled**. A card saved by an `auto_pay` CIT before the fix keeps its empty `agreements` list and will keep failing on MIT.
+
+Recovery is to run a fresh CIT for that customer so a new token is saved with the agreement bound. Subscriptions created after the fix are unaffected.
+:::
 
 ## FAQ
 

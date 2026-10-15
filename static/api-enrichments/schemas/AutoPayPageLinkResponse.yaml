@@ -1,0 +1,15 @@
+# Overrides for: components/schemas/AutoPayPageLinkResponse
+# Response of GET /b/pbl/v2/subscriptions/{subscription_id}/page-link/.
+
+_description: |
+  The customer's current self-service link. Reading it never changes it, so a link the customer already has keeps working.
+
+properties:
+  page_token:
+    description: |
+      The signed token that identifies the subscription on the self-service page. Use it on its own only if you build the customer-facing URL yourself; otherwise hand out `page_url`.
+  page_url:
+    description: |
+      The complete link to hand to the customer. AutoPay builds it from your primary domain, the subscription's language and `page_token`.
+
+      Anyone holding this link can act on the subscription, so treat it as a credential and deliver it only to the subscription's own customer. See [Customer Self-Service Page]({{apiBaseUrl}}/payments/autopay/#customer-self-service-page).
