@@ -52,7 +52,7 @@ By the end of this page your backend creates a subscription, sends the customer 
 
 - [ ] [Create the subscription](/developers/payments/autopay/?autopay-api=create#api-reference) with the Checkout API and store the subscription ID it returns.
 - [ ] Send the customer to the `checkout_url` from the response to pay the first charge.
-- [ ] [Confirm activation](#first-payment-and-activation): match the webhook to the subscription, then retrieve the subscription until it leaves `pending_setup`.
+- [ ] [Confirm activation](#first-payment-and-activation): read `extra.autopay.subscription_id` from the webhook, then retrieve the subscription until it leaves `pending_setup`.
 - [ ] [Get the customer's page link](/developers/payments/autopay/?autopay-api=page-link#api-reference) and send it to the customer.
 - [ ] Poll [List subscriptions](/developers/payments/autopay/?autopay-api=list#api-reference) with `status: "past_due"` to catch failed renewals.
 
@@ -100,12 +100,12 @@ After the first payment Ottu runs the subscription. These are the behaviours you
 
 The first payment is a **CIT** (customer-initiated transaction): your customer pays on the checkout page, and Ottu saves their card so it can charge the later cycles without them. See [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments) for the CIT/MIT background.
 
-**Activation lags the payment.** Your customer can pay while the subscription still shows `pending_setup`. Ottu confirms the first payment on a recurring check, normally within about 15 minutes. Until then:
+**Activation lags the payment.** Your customer can pay while the subscription still shows `pending_setup`. Ottu confirms the first payment on a recurring check. Until then:
 
 - `status` is `pending_setup`.
 - Your checkout webhook arrives in that state. Treat it as "payment received, activation pending", not as a failure.
 - Do not hard-code a wait. Retrieve the subscription and poll until `status` leaves `pending_setup`. Do not grant access from the webhook's `autopay` block alone: it is not signed and can be missing.
-- If a subscription is still `pending_setup` an hour after a successful payment, contact Ottu support with the subscription ID.
+- If a subscription is still `pending_setup` well after a successful payment, contact Ottu support with the subscription ID.
 
 If the customer never pays, the subscription becomes `setup_failed` after 24 hours, or at once if they cancel the checkout. Ottu does not retry it; create a new subscription.
 
@@ -156,6 +156,8 @@ The `page_url` you read from the page-link endpoint is a credential: anyone hold
 
 :::note Customer cancellation is end-of-period
 A cancellation from the self-service page takes effect at the end of the current billing period. Only the merchant cancel call with `mode: "immediate"` stops a subscription right away. The customer can undo a pending cancellation while the subscription is `active`.
+
+A customer cancellation on a `past_due` subscription only schedules the cancellation: the subscription stays `past_due`. If the customer then pays the balance, the scheduled cancellation takes effect at once and the subscription becomes `canceled`, with no further charge. If the customer never pays, the subscription stays `past_due` until you cancel it with `mode: "immediate"`.
 :::
 
 ## API Reference
@@ -241,7 +243,7 @@ Create a session with `payment_type: "auto_pay"`, then read the [Checkout SDK](.
     The list endpoint takes its filters in a request body, and it only reads. Keep `customer_id` in that body: a customer identifier in a URL ends up in access logs.
   </FAQItem>
   <FAQItem question="How do I know when the customer finishes the first payment?">
-    Poll [Retrieve a subscription](/developers/payments/autopay/?autopay-api=retrieve#api-reference) and check `status`. It leaves `pending_setup` when Ottu confirms the first payment, normally within about 15 minutes. The checkout webhook for that session also fires if you set `webhook_url`, but it arrives while the subscription is still `pending_setup`, so use it as "payment received" only. See [First payment and activation](#first-payment-and-activation).
+    Poll [Retrieve a subscription](/developers/payments/autopay/?autopay-api=retrieve#api-reference) and check `status`. It leaves `pending_setup` when Ottu confirms the first payment, which is not instant. The checkout webhook for that session also fires if you set `webhook_url`, but it arrives while the subscription is still `pending_setup`, so use it as "payment received" only. See [First payment and activation](#first-payment-and-activation).
   </FAQItem>
   <FAQItem question="What happens when the customer's card expires?">
     Ottu doesn't track the card's expiry date, so there is no warning in advance. The next renewal fails and follows the normal path: retries, then `past_due` and the final email. The customer adds a new card and pays the balance on the [self-service page](#customer-self-service-page).
