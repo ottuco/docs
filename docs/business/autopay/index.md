@@ -45,6 +45,10 @@ Building the integration? See [AutoPay for developers](/developers/payments/auto
 
 What happens at each stage, and what you need to do.
 
+:::tip See it live
+Want to watch a subscription run before you read on? Try the [AutoPay live demo](/developers/payments/autopay/#live-demo) on Ottu's sandbox.
+:::
+
 <JourneyCards
   steps={[
     {
@@ -283,6 +287,18 @@ AutoPay subscriptions have no plan catalog. The plan name is a free-text label, 
   </FAQItem>
   <FAQItem question="Can I change the price of a subscription that's already running?">
     No. A running subscription's amount can't be edited. Cancel it and create a new one at the new price.
+  </FAQItem>
+  <FAQItem question="Can I pause a subscription?">
+    No. Cancel at the end of the paid period, so the customer keeps access until it runs out, then create a new subscription when they come back.
+  </FAQItem>
+  <FAQItem question="Which payment gateways and currencies does AutoPay support?">
+    Ottu charges the saved card through a gateway that supports both tokenization and auto-debit, in the currency of the subscription. In the [gateway catalog](/business/payments/gateways), Cybersource, MPGS, and Tap list both, and the catalog shows each gateway's currencies. KNET doesn't support auto-debit, so it can't pay renewals.
+  </FAQItem>
+  <FAQItem question="Where do I see the money AutoPay collects?">
+    Every billing cycle is a normal Ottu transaction, so it appears in [Payment Management](/business/payment-management/) like any other payment. All retries of a cycle are on that one transaction. The first payment is the transaction from your own checkout.
+  </FAQItem>
+  <FAQItem question="How do I refund a billing cycle?">
+    The same way as any payment: find the cycle's transaction in [Payment Management](/business/payment-management/) and refund it, in full or in part. A refund doesn't cancel the subscription. Cancel it separately if the customer is leaving.
   </FAQItem>
   <FAQItem question="What happens when my customer's card expires?">
     The charge fails like any other declined card. Ottu retries and emails the customer. If every attempt fails, the subscription moves to Past Due. The customer can add a new card and pay from their self-service page.
