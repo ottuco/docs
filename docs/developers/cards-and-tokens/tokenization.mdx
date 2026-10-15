@@ -171,7 +171,7 @@ To ensure the successful tokenization of a card, merchants are required to adher
 - **Payment Link:** Generate a [payment link](/developers/payments/checkout-api) by utilizing the [Checkout API](/developers/payments/checkout-api), ensuring all necessary parameters for the `Checkout API` are included, along with the [customer_id](/developers/payments/checkout-api) parameter.
 - **Payment Gateway:** Use a [Payment Gateway](/developers/payments/payment-methods#activating-payment-gateway-codes) that supports tokenization.
 - **Save Card:** Ensure the **Save Card** option is enabled and selected by the customer during his initial payment to facilitate token creation.
-- **Customer ID:** For subsequent payments utilizing the same token, the same `customer_id` associated with that token must be provided each time it is used.
+- **Customer ID:** For subsequent payments utilizing the same token, the same `customer_id` associated with that token must be provided each time it is used. A token saved by one customer cannot be charged on another customer's session: the payment is rejected with `This token is not valid for this session.`
 - **Successful Payment:** The customer must complete a successful payment.
 
 ### The Process {#the-process-1}
