@@ -26,7 +26,8 @@
   width: 100%;
 }
 
-.eyebrow {
+/* Beats `.markdown p` (0,1,1) and `[data-theme="dark"] .markdown p` (0,2,1) with (0,3,0). */
+.wrap .eyebrow.eyebrow {
   margin: 0 0 0.5rem;
   font-size: 0.75rem;
   font-weight: 600;
