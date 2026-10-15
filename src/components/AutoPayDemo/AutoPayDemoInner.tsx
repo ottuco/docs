@@ -300,7 +300,8 @@ export default function AutoPayDemoInner() {
               onEvent={(event) => set({ webhook: event.payload })}
             />
             <p className={styles.cardDescription} style={{ marginTop: 12 }}>
-              Match the webhook's <code>session_id</code> to <code>setup_session_id</code> on the
+              Read <code>extra.autopay.subscription_id</code> to find the subscription. As a fallback,
+              the webhook's <code>session_id</code> equals <code>setup_session_id</code> on the
               subscription. The subscription is usually still <code>pending_setup</code> when this
               webhook arrives, so treat it as "payment received", not "subscription active".
             </p>
@@ -315,9 +316,9 @@ export default function AutoPayDemoInner() {
             {state.sub && (
               <>
                 <ApiPanel label={`GET ${SUBSCRIPTIONS}/${state.subscriptionId}/`} data={state.sub} />
-                {state.webhook?.session_id && state.webhook.session_id === state.sub.setup_session_id && (
+                {state.webhook?.extra?.autopay?.subscription_id === state.sub.id && (
                   <p className={styles.cardDescription}>
-                    The webhook <code>session_id</code> equals <code>setup_session_id</code>.
+                    The webhook's <code>extra.autopay.subscription_id</code> equals this subscription's <code>id</code>.
                   </p>
                 )}
               </>

@@ -20,7 +20,7 @@ operations:
     description_append: |
       Poll this endpoint to see activation. The checkout webhook usually arrives while the subscription is still `pending_setup`, because Ottu confirms the first payment on a recurring check, normally within about 15 minutes. Do not hard-code a wait: poll until `status` leaves `pending_setup`. If it is still `pending_setup` an hour after a successful payment, contact Ottu support with the subscription ID.
 
-      To link a webhook to a subscription, match the webhook's `session_id` to `setup_session_id` on this object.
+      To link a webhook to a subscription, read `extra.autopay.subscription_id` in the webhook payload: it is the subscription ID you stored at creation. As a fallback, the webhook's `session_id` equals `setup_session_id` on this object.
 
       While the subscription is `pending_setup`, `card`, `current_cycle`, `next_billing_date`, `amount_variability`, `cycle_interval_days` and `total_cycles` are `null`. Ottu fills them in once the first payment is confirmed. If you did not send `end_date` in the `autopay` block, it is set to the agreement's `expiry_date` at that point, so the subscription ends when the agreement does.
 

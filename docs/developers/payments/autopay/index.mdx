@@ -109,7 +109,7 @@ The first payment is a **CIT** (customer-initiated transaction): your customer p
 
 If the customer never pays, the subscription becomes `setup_failed` after 24 hours, or at once if they cancel the checkout. Ottu does not retry it; create a new subscription.
 
-**Match the webhook to the subscription.** The webhook carries the checkout `session_id`. It equals `setup_session_id` on the subscription, so look the subscription up by that value.
+**Match the webhook to the subscription.** Read `extra.autopay.subscription_id` in the webhook payload: it is the subscription ID you stored when you created the subscription. As a fallback, the webhook's `session_id` equals `setup_session_id` on the subscription.
 
 #### Subscription States {#subscription-states}
 
@@ -148,7 +148,7 @@ A `past_due` subscription stays that way until the customer pays or you cancel i
 
 #### Notifications {#notifications}
 
-Ottu emails your customer an upcoming-charge reminder, a payment-failed notice after each failed attempt while retries remain, and a final-failure email when they run out. Monthly subscriptions get one reminder, about 3 days before the charge. Yearly ones get three, about 31, 11 and 4 days before. Each email can be switched off per subscription with `notification_preferences` on the `autopay` block. See [The emails](/business/autopay/#the-emails).
+Ottu emails your customer an upcoming-charge reminder, a payment-failed notice after each failed attempt while retries remain, and a final-failure email when they run out. Monthly subscriptions get one reminder, about 3 days before the charge. Yearly ones get three, about 31, 11 and 4 days before. Each email can be switched off per subscription with `notification_preferences` on the `autopay` block. The language comes from the checkout `language` field when you create the subscription (default `en`). It drives the customer page and every customer email. See [The emails](/business/autopay/#the-emails).
 
 #### Customer Self-Service Page {#customer-self-service-page}
 
@@ -215,34 +215,6 @@ The proxy maps upstream and transport failures onto a fixed set of statuses, so 
 | `404` | No such subscription for your merchant. | Do not retry. |
 | `409` | `Idempotency-Key` was already used on `cancel` with a different request body (`code: idempotency_conflict`). | Send a new key for a new request. Reuse a key only to retry the exact same request. |
 | `422` | AutoPay rejected the request after Connect forwarded it. Either a value is invalid (for example an unknown `status` filter on list, where `detail` lists each invalid field), or the subscription is in a state that does not allow it, such as canceling one that has already ended (`code: invalid_transition`). | Fix the request, or re-read the subscription's `status`. Retrying unchanged will fail again. |
-| `423` | The installation is paused. | Retry later; this is a temporary administrative state. |
-| `503` | AutoPay is unavailable or not configured on this deployment. | Retry with backoff. |
-| `504` | The call to AutoPay timed out. | Retry with backoff. For `cancel`, reuse the same `Idempotency-Key` so a retry cannot double-apply. |
-
-:::warning A 504 does not mean nothing happened
-A timeout means Connect stopped waiting, not that AutoPay stopped working. The operation may still have been applied upstream. For `cancel`, retry with the *same* `Idempotency-Key`. For `regenerate-page-token`, re-read the subscription before retrying, because that endpoint has no replay protection.
-:::
-
-### Configuration discovery {#configuration-discovery}
-
-`GET /b/api/v1/config/` reports whether AutoPay is enabled for a merchant, via an `autopay_api_url` field:
-
-<CodeBlock language="bash" title="Check whether AutoPay is enabled">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/api/v1/config/'`}</CodeBlock>
-
-```json title="Example response — 200 OK"
-{
-  "title": "Sandbox",
-  "websocket_url": "wss://wsprd01.ottu.net",
-  "autopay_api_url": "https://autopay.ottu.dev"
-}
-```
-
-Two things to know about it:
-
-- **Falsy values are stripped from this response**, so the key is simply absent when AutoPay is not enabled. Test for the key's presence, not for an empty value.
-- It **replaces the old build-time `VUE_APP_AUTOPAY_BACKEND_URL` environment variable**. Read the host at runtime from this endpoint rather than baking it into a build.
-
-`autopay_api_url` points at the AutoPay service itself, which is not where your integration sends requests. Merchant calls go to `/b/pbl/v2/subscriptions/` on your own Connect domain. Treat this field as a capability flag.
 
 ## Best Practices
 
@@ -255,37 +227,9 @@ Two things to know about it:
 
 ## Compatibility Notes {#compatibility-notes}
 
-Two behaviours will look like bugs if you have not seen them documented.
+### `auto_pay` appears as `auto_debit` in the SDK payload {#auto-pay-appears-as-auto-debit}
 
-### `auto_pay` appears as `auto_debit` in SDK and gateway payloads {#auto-pay-appears-as-auto-debit}
-
-`auto_pay` is meaningful only to Connect, which orchestrates the subscription. Everything downstream treats the payment as an ordinary auto-debit charge, so `payment_type` is deliberately rewritten to `auto_debit` in:
-
-- the **[Checkout SDK](../checkout-sdk/web) preload payload** served for the session, and
-- payloads handed to **ottu_pg**.
-
-Create a session with `payment_type: "auto_pay"`, then read the SDK payload for that `session_id`, and you will see `payment_type: "auto_debit"` with no `autopay` key. That is expected, not a defect. Your own record of the payment type stays `auto_pay`: the Checkout API response, the [webhook](/developers/webhooks/payment-events/) and the signed field set all report `auto_pay`.
-
-### Cards saved before the CIT agreement fix are not backfilled {#cards-saved-before-the-agreement-fix}
-
-An earlier defect meant a CIT paid with `payment_type: "auto_pay"` saved its token with an **empty `agreements` list**, because the code that binds the agreement to the saved card keyed off an exact `auto_debit` check and skipped `auto_pay` entirely.
-
-Because a merchant-initiated charge is authorised by matching the agreement recorded on the card, every later MIT against such a token is rejected:
-
-```json title="Symptom — MIT against a card saved by a pre-fix auto_pay CIT"
-{
-  "detail": "No Cardholder Initiated Transaction (CIT) found. Before initiating an auto-debit request, ensure a successful CIT payment has been made by the customer.",
-  "result": "failed"
-}
-```
-
-The message points at a missing CIT, but the CIT did happen and did succeed. What is missing is the agreement binding on the saved card, which is what the lookup actually matches on.
-
-:::warning Affected cards are not repaired automatically
-The fix binds the agreement for every mandate-carrying payment type going forward, but **existing tokens are not backfilled**. A card saved by an `auto_pay` CIT before the fix keeps its empty `agreements` list and will keep failing on MIT.
-
-Recovery is to run a fresh CIT for that customer so a new token is saved with the agreement bound. Subscriptions created after the fix are unaffected.
-:::
+Create a session with `payment_type: "auto_pay"`, then read the [Checkout SDK](../checkout-sdk/web) preload payload for that session, and you will see `payment_type: "auto_debit"` with no `autopay` key. That is expected, not a defect: Ottu charges every renewal as an ordinary auto-debit payment, so the SDK payload carries that type. Your own record stays `auto_pay`: the Checkout API response reports `auto_pay`.
 
 ## FAQ
 
@@ -306,7 +250,7 @@ Recovery is to run a fresh CIT for that customer so a new token is saved with th
     No. Nothing about a running subscription can be edited: amount, frequency, billing day, retry count or customer email. [Cancel](/developers/payments/autopay/?autopay-api=cancel#api-reference) the subscription with `mode: "at_period_end"` so the paid period runs out, then have the customer start a new one through checkout with the new `recurring_amount`. There is no proration.
   </FAQItem>
   <FAQItem question="How do I test a failed renewal?">
-    Pay the first charge with one of the three MIT-decline cards listed under [Standard Test Cards](/developers/payments/sandbox#standard-test-cards): the numbers ending `114` (issuer declined), `115` (expired card) and `116` (insufficient funds). Each one saves normally on the first payment, then declines on every later merchant-initiated charge. The first renewal is charged one billing period after `start_date`. When it declines, follow the cycle in [Billing cycles](/developers/payments/autopay/?autopay-api=cycles#api-reference): it moves through `retry_scheduled` to `failed`, and the subscription becomes `past_due`.
+    The sandbox [test card set](/developers/payments/sandbox#standard-test-cards) includes MIT-decline cards. They save normally on the first payment, then decline on every later merchant-initiated charge. Pay the first charge with one of them. The first renewal is charged one billing period after `start_date`. When it declines, follow the cycle in [Billing cycles](/developers/payments/autopay/?autopay-api=cycles#api-reference): it moves through `retry_scheduled` to `failed`, and the subscription becomes `past_due`.
   </FAQItem>
   <FAQItem question="Where do I see AutoPay charges in the dashboard?">
     In Payment Management, as normal transactions. Each billing cycle is one transaction with order number `<subscription ID>-c<cycle number>` (for example `sub_…-c2`) and payment type auto-debit, and every retry attempt sits on that one transaction. The first payment is your own checkout transaction. There is no AutoPay screen in the dashboard. A refund on a renewal is a normal [refund](/business/payment-management/) of that transaction, and it does not cancel the subscription.
