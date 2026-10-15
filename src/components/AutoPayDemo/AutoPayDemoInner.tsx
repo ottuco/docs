@@ -85,7 +85,7 @@ function reducer(state: State, action: Action): State {
 async function connectCall(
   method: "GET" | "POST",
   path: string,
-  options: { body?: unknown; headers?: Record<string, string> } = {},
+  options: { body?: unknown; headers?: Record<string, string>; keepalive?: boolean } = {},
 ): Promise<any> {
   const response = await fetch(`${ACTIVE_CONNECT.connectBaseUrl}${path}`, {
     method,
@@ -95,6 +95,7 @@ async function connectCall(
       ...options.headers,
     },
     body: options.body ? JSON.stringify(options.body) : undefined,
+    keepalive: options.keepalive,
   });
   const text = await response.text();
   if (!response.ok) {
@@ -145,13 +146,35 @@ export default function AutoPayDemoInner() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const set = useCallback((patch: Partial<State>) => dispatch({ type: "SET", patch }), []);
   const mounted = useRef(true);
+  // The subscription this run created and has not canceled. A ref, so the unmount and pagehide handlers see the current value.
+  const liveSubscription = useRef<string | undefined>(undefined);
+
+  // Each run leaves a monthly subscription on the sandbox merchant. Cancel it immediately, best effort.
+  const cleanUp = useCallback(() => {
+    const id = liveSubscription.current;
+    if (!id) return;
+    liveSubscription.current = undefined;
+    connectCall("POST", `${SUBSCRIPTIONS}/${id}/cancel/`, {
+      body: { mode: "immediate" },
+      headers: { "Idempotency-Key": crypto.randomUUID() },
+      keepalive: true, // lets the request outlive a page unload
+    }).catch((err) => console.warn("AutoPay demo: could not cancel the demo subscription", err));
+  }, []);
 
   useEffect(() => {
     mounted.current = true;
+    window.addEventListener("pagehide", cleanUp);
     return () => {
       mounted.current = false;
+      window.removeEventListener("pagehide", cleanUp);
+      cleanUp();
     };
-  }, []);
+  }, [cleanUp]);
+
+  const restart = useCallback(() => {
+    cleanUp();
+    dispatch({ type: "RESET" });
+  }, [cleanUp]);
 
   const fail = useCallback(
     (err: unknown) => {
@@ -191,13 +214,9 @@ export default function AutoPayDemoInner() {
       const createReq = buildAutoPayRequest(orderId, customerId, pgCodes);
       const { type, pg_codes, ...extra } = createReq;
       const createRes = await createSandboxSession({ type, pg_codes, extra });
-      set({
-        busy: false,
-        pgCodes,
-        createReq,
-        createRes,
-        subscriptionId: (createRes as any).extra?.autopay?.subscription_id,
-      });
+      const subscriptionId = (createRes as any).extra?.autopay?.subscription_id;
+      liveSubscription.current = subscriptionId;
+      set({ busy: false, pgCodes, createReq, createRes, subscriptionId });
     } catch (err) {
       fail(err);
     }
@@ -431,7 +450,7 @@ export default function AutoPayDemoInner() {
       <div className={styles.errorCard}>
         <Icon path={mdiAlertCircleOutline} size={1.5} className={styles.errorIcon} />
         <p className={styles.errorMessage}>{state.error}</p>
-        <button className={styles.secondaryBtn} onClick={() => dispatch({ type: "RESET" })}>
+        <button className={styles.secondaryBtn} onClick={restart}>
           Restart
         </button>
       </div>
@@ -479,7 +498,7 @@ export default function AutoPayDemoInner() {
             You created a subscription, paid its first charge, and read its status and customer page link.
             From here Ottu bills each cycle, retries failed charges and emails the customer.
           </p>
-          <button className={styles.secondaryBtn} onClick={() => dispatch({ type: "RESET" })}>
+          <button className={styles.secondaryBtn} onClick={restart}>
             Restart
           </button>
         </div>
