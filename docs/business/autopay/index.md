@@ -66,7 +66,7 @@ Want to see setup for yourself? The [AutoPay live demo](/developers/payments/aut
     {
       title: "If a payment fails",
       body: "Ottu retries and asks your customer to pay. Ottu never cancels the subscription on its own.",
-      yourPart: "Nothing",
+      yourPart: "Decide what to do if it stays Past Due.",
       href: "#when-a-payment-fails",
     },
   ]}
@@ -205,7 +205,7 @@ And these are the actions a customer can take:
 :::note A customer's cancellation waits for the end of the paid period
 It never takes effect immediately. Only your team can cancel immediately, through the API. Undo is available while an active subscription's cancellation is pending.
 
-A Past Due subscription is the exception: a customer's cancellation there never takes effect, and the subscription stays Past Due. Cancel it immediately instead.
+A Past Due subscription is the exception. If a Past Due customer cancels, the subscription stays Past Due. When they pay the balance, it ends at once, with no further charge. If they never pay, it stays Past Due until your team cancels it.
 :::
 
 Customers can hold several cards and switch the active one in a click. Ottu never deletes saved cards, so an old card still explains what paid an earlier cycle.
@@ -237,7 +237,7 @@ A subscription moves through seven states. Canceled and Expired are final.
 | Trialing | The first charge was zero, so no money has moved. The first real charge comes at the next billing cycle. |
 | Active | Billing normally. The latest cycle was paid. |
 | Past Due | Every retry on a cycle failed. The subscription is not canceled. It waits for the balance to be paid. |
-| Canceled | Billing has stopped. A customer's cancellation lands here at the end of the paid period, except from Past Due, where it never takes effect. Your team's immediate cancel lands here at once. |
+| Canceled | Billing has stopped. A customer's cancellation lands here at the end of the paid period. From Past Due, it lands here when the customer pays the balance, with no further charge. Your team's immediate cancel lands here at once. |
 | Expired | Billing stopped because the subscription reached its end date. |
 | Setup Failed | The customer never completed the first payment. Ottu doesn't retry it. Create a new subscription. |
 
@@ -271,7 +271,7 @@ AutoPay subscriptions have no plan catalog. The plan name is a free-text label, 
 
 - **A Past Due subscription never cancels itself.** See [When a payment fails](#when-a-payment-fails).
 - **A customer's cancellation waits for the end of the paid period.** See [The self-service page](#the-self-service-page).
-- **A Past Due customer's cancellation never takes effect.** The subscription stays Past Due. Cancel it immediately instead.
+- **A Past Due customer's cancellation waits for payment.** The subscription stays Past Due. When the customer pays the balance, it ends at once, with no further charge. If they never pay, it stays Past Due until your team cancels it.
 - **Regenerating a link silently revokes the old one.** Deliver the new link yourself. See [The self-service page](#the-self-service-page).
 - **A zero first charge starts a trial,** not an active subscription. See [Lifecycle](#lifecycle-and-billing-cycles).
 - **A cycle's amount is locked when it is generated,** not read fresh at charge time. See [Lifecycle and billing cycles](#lifecycle-and-billing-cycles).
@@ -280,7 +280,7 @@ AutoPay subscriptions have no plan catalog. The plan name is a free-text label, 
 
 <FAQ>
   <FAQItem question="Can I cancel a customer's subscription immediately?">
-    Yes, but only your team can, through the API. A cancellation the customer starts always waits for the end of their paid period. From Past Due it never takes effect, so cancel it immediately.
+    Yes, but only your team can, through the API. A cancellation the customer starts always waits for the end of their paid period. From Past Due the subscription stays Past Due. When the customer pays the balance it ends at once, with no further charge. If they never pay, it stays Past Due until your team cancels it.
   </FAQItem>
   <FAQItem question="Can I change the price of a subscription that's already running?">
     No. A running subscription's amount can't be edited. Cancel it and create a new one at the new price.
