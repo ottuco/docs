@@ -289,7 +289,7 @@ AutoPay subscriptions have no plan catalog. The plan name is a free-text label, 
     No. Cancel at the end of the paid period, so the customer keeps access until it runs out, then create a new subscription when they come back.
   </FAQItem>
   <FAQItem question="Which payment gateways and currencies does AutoPay support?">
-    Ottu charges the saved card through a gateway that supports both tokenization and auto-debit, in the currency of the subscription. In the [gateway catalog](/business/payments/gateways), Cybersource, MPGS, and Tap list both, and the catalog shows each gateway's currencies. KNET doesn't support auto-debit, so it can't pay renewals.
+    Ottu charges the saved card through a gateway that supports both tokenization and auto-debit, in the currency of the subscription. In the [gateway catalog](/business/payments/gateways), Cybersource, MPGS, and Tap list both, and the catalog shows each gateway's currencies. Benefit also works for Bahraini dinar when it is set up on your account. KNET doesn't support auto-debit, so it can't pay renewals.
   </FAQItem>
   <FAQItem question="Where do I see AutoPay payments?">
     Each billing cycle is one Ottu transaction in [Payment Management](/business/payment-management/), and all retries of that cycle are on it. The first payment is the transaction from your own checkout.
