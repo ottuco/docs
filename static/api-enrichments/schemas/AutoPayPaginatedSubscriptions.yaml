@@ -2,7 +2,7 @@
 # Response of POST /b/pbl/v2/subscriptions/.
 
 _description: |
-  One page of subscriptions. See [Paging through the list]({{apiBaseUrl}}/payments/autopay/#paging-through-the-list) for how to walk the pages of this `POST` list.
+  One page of subscriptions. See [List subscriptions]({{apiBaseUrl}}/apis/autopay-subscription-list/) for how to walk the pages of this `POST` list.
 
 properties:
   count:

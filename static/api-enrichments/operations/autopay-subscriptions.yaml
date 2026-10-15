@@ -1,0 +1,56 @@
+# Enrichments for tag: "AutoPay Subscriptions"
+# Operations: list, retrieve, cancel, billing cycles, page link, regenerate page token
+#
+# The developer page (#158910) has no hand-written walkthrough of these calls,
+# so the behaviour a caller must know lives here. Every statement below was
+# checked against a live Connect + AutoPay (betabulk, 2026-10-14/15).
+
+operations:
+  autopay_subscription_list:
+    description_append: |
+      **Why a POST.** The filters travel in the request body so a `customer_id` never lands in a URL or an access log. The call only reads.
+
+      **Paging.** `next` and `previous` are absolute URLs on your own Connect domain, with `limit` and `offset` in their query string. Three rules follow:
+
+      1. Follow them with `POST`, the same verb, headers and API key as the first page. A `GET` returns `405 {"detail": "Method \"GET\" not allowed."}`.
+      2. The body is optional when you follow a link: `POST` the `next` URL with `{}` and you get the right page. Resend your filters in the body to keep them applied.
+      3. When the query string and the body both carry `limit` or `offset`, the query string wins. The other filters are read from the body only.
+
+      Each item is a summary. Call [Retrieve a subscription]({{apiBaseUrl}}/apis/autopay-subscription-detail/) for the card and the latest billing cycle.
+
+  autopay_subscription_detail:
+    description_append: |
+      `status`, `card` and `current_cycle` together tell you whether the first payment completed, which card is active and how the latest charge went.
+
+      While the subscription is `pending_setup`, `card`, `current_cycle`, `next_billing_date`, `amount_variability`, `cycle_interval_days` and `total_cycles` are `null`. AutoPay fills them once it confirms the first payment, which it does on its own schedule, so allow a few minutes after the customer pays. If you sent no `end_date`, it is set to the agreement's `expiry_date` at that point.
+
+  autopay_subscription_cancel:
+    description_append: |
+      **`Idempotency-Key` is required** (a UUID v4). Without it Connect returns `400` before calling AutoPay.
+
+      - Retrying with the same key and the same body returns the same result and does not cancel twice. Use this after a timeout.
+      - The same key with a different body returns `409` with `code: idempotency_conflict`. Use a new key for a new request.
+
+      An unknown `mode` is rejected by Connect with `400`. Canceling a subscription that has already ended returns `422` with `code: invalid_transition`.
+
+      Only this endpoint can cancel immediately. A customer who cancels from the self-service page always cancels at the end of the period. `cancellation_initiator` records who last scheduled a cancellation and is not cleared if the customer undoes it, so read `cancel_at_period_end` and `status` to know whether a cancellation is pending.
+
+  autopay_subscription_cycles:
+    description_append: |
+      `limit` and `offset` go in the query string, and `next` and `previous` are rewritten onto your Connect domain, so you can follow them directly with `GET`.
+
+      A cycle is created only after the previous one is paid, so after the first payment you see the paid first cycle and the next scheduled one. Cycle `status` values: `scheduled`, `processing`, `retry_scheduled` (an attempt failed and the next retry is queued), `paid`, `failed` (every retry is exhausted, and the subscription is `past_due`) and `canceled`.
+
+  autopay_subscription_page_link:
+    description_append: |
+      Returns the customer's current self-service link **without changing it**, so a link the customer already has keeps working. Use this whenever you need to send the link again.
+
+      The token in `page_url` is the customer's credential: anyone holding the link can manage the subscription. Treat it like a password.
+
+  autopay_subscription_regenerate_page_token:
+    description_append: |
+      :::warning Regenerating revokes the old link immediately
+      The previous `page_token` stops working the moment this call succeeds (AutoPay answers it with `404 link_expired`), and AutoPay does not tell the customer. Deliver the new `page_url` yourself. To send a working link again, call [Get the page link]({{apiBaseUrl}}/apis/autopay-subscription-page-link/) instead.
+      :::
+
+      `Idempotency-Key` is required, and Connect returns `400` without it. It does **not** make the call idempotent: replaying the same key mints yet another token and revokes the previous one. Confirm the outcome before you retry.

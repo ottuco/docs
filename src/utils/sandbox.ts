@@ -282,3 +282,60 @@ export function extractPgCodes(pmResponse: any): string[] {
 export function generateDemoCustomerId(): string {
   return `demo_${Math.random().toString(36).slice(2, 10)}`;
 }
+
+/**
+ * AutoPay subscription management (the merchant-side proxy on Connect).
+ *
+ * The same private API key as the Checkout API; Connect resolves the merchant,
+ * so no Merchant-Id header is sent. Errors surface the body verbatim because the
+ * proxy's error contract (404 code, 409 idempotency_conflict, 422 detail list)
+ * is what the AutoPay demo shows the developer.
+ */
+async function callSubscriptionApi(
+  method: "GET" | "POST",
+  path: string,
+  body?: unknown,
+  extraHeaders?: Record<string, string>
+): Promise<any> {
+  const response = await fetch(
+    `${ACTIVE_CONNECT.connectBaseUrl}/b/pbl/v2/subscriptions/${path}`,
+    {
+      method,
+      headers: {
+        Authorization: `Api-Key ${ACTIVE_CONNECT.connectApiKey}`,
+        ...(body !== undefined && { "Content-Type": "application/json" }),
+        ...extraHeaders,
+      },
+      ...(body !== undefined && { body: JSON.stringify(body) }),
+    }
+  );
+
+  const text = await response.text().catch(() => "");
+  if (!response.ok) {
+    throw new Error(
+      `Subscription API failed (${response.status}): ${text || response.statusText}`
+    );
+  }
+  return text ? JSON.parse(text) : {};
+}
+
+export function retrieveSubscription(subscriptionId: string): Promise<any> {
+  return callSubscriptionApi("GET", `${subscriptionId}/`);
+}
+
+export function getSubscriptionPageLink(subscriptionId: string): Promise<any> {
+  return callSubscriptionApi("GET", `${subscriptionId}/page-link/`);
+}
+
+export function cancelSubscription(
+  subscriptionId: string,
+  mode: "immediate" | "at_period_end",
+  idempotencyKey: string
+): Promise<any> {
+  return callSubscriptionApi(
+    "POST",
+    `${subscriptionId}/cancel/`,
+    { mode },
+    { "Idempotency-Key": idempotencyKey }
+  );
+}

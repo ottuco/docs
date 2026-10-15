@@ -22,4 +22,4 @@ properties:
       How many subscriptions to return, from 1 to 100. Defaults to 20.
   offset:
     description: |
-      How many subscriptions to skip before the first one returned. Defaults to 0. See [Paging through the list]({{apiBaseUrl}}/payments/autopay/#paging-through-the-list).
+      How many subscriptions to skip before the first one returned. Defaults to 0. See [List subscriptions]({{apiBaseUrl}}/apis/autopay-subscription-list/) for the paging rules.

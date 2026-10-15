@@ -89,8 +89,9 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 ## Guide                          ← ALL walkthrough content lives here
   ### Workflow                    ← mermaid diagram + brief explanation of each step
-  ### Live Demo                   ← (optional) interactive demo component, before written reference
-  ### Step-by-Step                ← numbered steps with code examples
+  ### Live Demo                   ← REQUIRED when the feature has a sandbox flow
+  ### What your customer sees      ← REQUIRED for customer-facing features (real sandbox screenshots)
+  ### Step-by-Step                ← (optional) only for what the Live Demo + API Reference cannot cover
   ### Use Cases                   ← (optional) specific scenarios, provider-specific details
 
 ## API Reference                  ← interactive schema via <ApiDocEmbed>, always with this H2 heading
@@ -107,8 +108,9 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 - **"Guide" is the single walkthrough section** — all tutorial content goes here. No standalone "How it Works", "Integration Flows", "Quick Start", or "Provider Setup" at H2 level. Use these canonical `###` subsections within Guide:
   - `### Workflow` — mermaid diagram showing the flow + brief explanation of each step
-  - `### Live Demo` — (optional) interactive demo component, placed before the written reference so users experience the flow first
-  - `### Step-by-Step` — numbered instructions with code examples (the "how to actually call it" section)
+  - `### Live Demo` — interactive demo that makes real sandbox calls and shows each request and response. **Required for any feature with a sandbox flow.** Placed before the reference so users experience the flow first.
+  - `### What your customer sees` — a `<StepGuide>` of real sandbox screenshots of the customer's view (checkout, emails, self-service pages), linking to the business page for the full tour. **Required for customer-facing features.** Real captures from sandbox.ottu.net only: no mockups, no other hosts.
+  - `### Step-by-Step` — numbered instructions with code examples. **Drop it wherever the Live Demo and the API Reference already cover the flow** (AutoPay, #158910): a hand-written code walkthrough duplicates the OpenAPI reference, goes stale, and loses the reader. Field-level detail belongs in the OpenAPI descriptions (`static/api-enrichments/`), not in tables on the page.
   - `### Use Cases` — (optional) specific scenarios, provider-specific details
 - **"API Reference" always has an H2 heading** — never use bare `<ApiDocEmbed>` with `---` separators. If a page covers multiple related endpoints, use `<Tabs>` wrapping multiple `<ApiDocEmbed>` components. For unified endpoints with a discriminator parameter (e.g., `operation` = refund/capture/void), use tabs with per-tab example payloads above a shared `<ApiDocEmbed>`.
 - **Layout with API embeds** — Pages with `<ApiDocEmbed>` MUST use `hide_table_of_contents: true`. The API schema renders in the right column where the TOC would normally be. The page layout is: left sidebar + content + API explorer. No right-hand TOC.

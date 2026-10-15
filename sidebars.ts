@@ -256,8 +256,13 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
-                  label: "Guide",
-                  href: "/developers/payments/autopay#guide",
+                  label: "Live Demo",
+                  href: "/developers/payments/autopay#live-demo",
+                },
+                {
+                  type: "link",
+                  label: "What Your Customer Sees",
+                  href: "/developers/payments/autopay#what-your-customer-sees",
                 },
                 {
                   type: "link",
@@ -268,11 +273,6 @@ const sidebars: SidebarsConfig = {
                   type: "link",
                   label: "Best Practices",
                   href: "/developers/payments/autopay#best-practices",
-                },
-                {
-                  type: "link",
-                  label: "Compatibility Notes",
-                  href: "/developers/payments/autopay#compatibility-notes",
                 },
                 {
                   type: "link",
@@ -868,47 +868,37 @@ const sidebars: SidebarsConfig = {
           items: [
             {
               type: "link",
-              label: "Why use AutoPay",
+              label: "Why Use AutoPay",
               href: "/business/autopay#why-use-autopay",
             },
             {
               type: "link",
-              label: "How it works",
+              label: "How It Works",
               href: "/business/autopay#how-it-works",
             },
             {
               type: "link",
-              label: "Subscription lifecycle",
-              href: "/business/autopay#subscription-lifecycle",
+              label: "What Your Customer Sees",
+              href: "/business/autopay#what-your-customer-sees",
             },
             {
               type: "link",
-              label: "Billing cycles",
-              href: "/business/autopay#billing-cycles",
-            },
-            {
-              type: "link",
-              label: "Retries and dunning",
+              label: "When a Payment Fails",
               href: "/business/autopay#retries-and-dunning",
             },
             {
               type: "link",
-              label: "Customer self-service page",
-              href: "/business/autopay#customer-self-service-page",
+              label: "Lifecycle and Billing Cycles",
+              href: "/business/autopay#subscription-lifecycle",
             },
             {
               type: "link",
-              label: "Notifications",
-              href: "/business/autopay#notifications",
-            },
-            {
-              type: "link",
-              label: "Setting up AutoPay",
+              label: "Setting Up AutoPay",
               href: "/business/autopay#setting-up-autopay",
             },
             {
               type: "link",
-              label: "Things to know",
+              label: "Things to Know",
               href: "/business/autopay#things-to-know",
             },
             {

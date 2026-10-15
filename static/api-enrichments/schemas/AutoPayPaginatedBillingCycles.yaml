@@ -2,7 +2,7 @@
 # Response of GET /b/pbl/v2/subscriptions/{subscription_id}/cycles/.
 
 _description: |
-  One page of a subscription's billing cycles. See [Billing cycle history]({{apiBaseUrl}}/payments/autopay/#billing-cycle-history).
+  One page of a subscription's billing cycles. See [List billing cycles]({{apiBaseUrl}}/apis/autopay-subscription-cycles/) for paging.
 
 properties:
   count:
