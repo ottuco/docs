@@ -49,8 +49,36 @@
         "brand": "Mastercard",
         "status": "declined",
         "statusLabel": "Declined"
+      },
+      {
+        "cardNumber": "4111 1111 1111 114",
+        "expiry": "Any future",
+        "cvv": "Any 3 digits",
+        "brand": "Visa",
+        "status": "declined",
+        "statusLabel": "Issuer Declined",
+        "note": "Saves on the first payment, then declines on every merchant-initiated charge"
+      },
+      {
+        "cardNumber": "4111 1111 1111 115",
+        "expiry": "Any future",
+        "cvv": "Any 3 digits",
+        "brand": "Visa",
+        "status": "declined",
+        "statusLabel": "Expired Card",
+        "note": "Saves on the first payment, then declines on every merchant-initiated charge"
+      },
+      {
+        "cardNumber": "4111 1111 1111 116",
+        "expiry": "Any future",
+        "cvv": "Any 3 digits",
+        "brand": "Visa",
+        "status": "declined",
+        "statusLabel": "Insufficient Funds",
+        "note": "Saves on the first payment, then declines on every merchant-initiated charge"
       }
-    ]
+    ],
+    "testCardNotes": "The three MIT-decline cards tokenize normally on the first customer-initiated payment, then decline on every later merchant-initiated charge — use them to exercise AutoPay retry and past_due behaviour, and Auto-Debit failures."
   },
   {
     "slug": "abapayway",

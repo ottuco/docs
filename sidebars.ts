@@ -271,6 +271,11 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
+                  label: "Compatibility Notes",
+                  href: "/developers/payments/autopay#compatibility-notes",
+                },
+                {
+                  type: "link",
                   label: "FAQ",
                   href: "/developers/payments/autopay#faq",
                 },
@@ -283,8 +288,8 @@ const sidebars: SidebarsConfig = {
               items: [
                 {
                   type: "link",
-                  label: "Supported Providers",
-                  href: "/developers/payments/loyalty#supported-providers",
+                  label: "How it works",
+                  href: "/developers/payments/loyalty#overview",
                 },
                 {
                   type: "link",
@@ -303,7 +308,7 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
-                  label: "Refunding a Points-Funded Order",
+                  label: "Refund and Points Return",
                   href: "/developers/payments/loyalty#refund-points",
                 },
                 {
@@ -905,6 +910,63 @@ const sidebars: SidebarsConfig = {
               type: "link",
               label: "What's Next?",
               href: "/business/autopay#whats-next",
+            },
+          ],
+        },
+        {
+          type: "category",
+          label: "Loyalty",
+          link: { type: "doc", id: "business/loyalty/index" },
+          items: [
+            {
+              type: "link",
+              label: "Why use Loyalty",
+              href: "/business/loyalty#why-use-loyalty",
+            },
+            {
+              type: "link",
+              label: "How it works",
+              href: "/business/loyalty#how-it-works",
+            },
+            {
+              type: "link",
+              label: "Supported providers",
+              href: "/business/loyalty#supported-providers",
+            },
+            {
+              type: "link",
+              label: "What the reward is calculated on",
+              href: "/business/loyalty#what-the-reward-is-calculated-on",
+            },
+            {
+              type: "link",
+              label: "Earning vs. redeeming",
+              href: "/business/loyalty#earning-vs-redeeming",
+            },
+            {
+              type: "link",
+              label: "When a payment earns no reward",
+              href: "/business/loyalty#when-no-reward",
+            },
+            {
+              type: "link",
+              label: "Refunding an order paid with points",
+              href: "/business/loyalty#refund-rules",
+            },
+            {
+              type: "link",
+              label: "Setting up Loyalty",
+              href: "/business/loyalty#setting-up-loyalty",
+            },
+            {
+              type: "link",
+              label: "Things to know",
+              href: "/business/loyalty#things-to-know",
+            },
+            {
+              type: "link",
+              label: "FAQ",
+              href: "/business/loyalty#faq",
             },
           ],
         },

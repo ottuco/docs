@@ -1,0 +1,69 @@
+# Overrides for: components/schemas/AutoPaySubscription
+# Returned by retrieve and cancel. Field semantics mirror SubscriptionOut in
+# autopay/subscriptions/schemas.py.
+
+_description: |
+  A subscription as AutoPay holds it right now. Returned by Retrieve a subscription and by Cancel a subscription.
+
+  Connect forwards AutoPay's body unchanged, so read this object for the current state rather than caching what you sent at checkout. The customer's self-service link is deliberately not part of it; fetch that from the page-link endpoint.
+
+properties:
+  id:
+    description: |
+      The subscription's unique identifier. This is the same value returned as `extra.autopay.subscription_id` on the Checkout API response, and it is the `subscription_id` path parameter on every subscription endpoint.
+  customer_id:
+    description: |
+      Your own identifier for the customer, exactly as you sent it in `customer_id` on the checkout call that created the subscription. Use it to filter the subscription list.
+  customer_email:
+    description: |
+      The customer's email address, captured when the subscription was created. AutoPay sends the pre-charge, payment-failed and final-failure emails to this address.
+  frequency:
+    description: |
+      How often the customer is charged. Enum: `monthly`, `yearly`.
+  currency:
+    description: |
+      Three-letter ISO 4217 currency code that every recurring charge is made in, for example `KWD`. It is taken from the checkout transaction and cannot be changed afterwards.
+  recurring_amount:
+    description: |
+      The amount charged on each billing cycle, as a decimal string in `currency`. It is independent of `first_payment_amount`.
+  first_payment_amount:
+    description: |
+      The amount of the first, customer-initiated payment made at checkout, as a decimal string. `0` means the subscription started without a first charge (a free trial). `null` when no first payment applies.
+  start_date:
+    description: |
+      The date billing starts from, in `YYYY-MM-DD` format. Its day of the month becomes the billing anchor: a subscription anchored on the 31st bills on the last day of shorter months.
+  end_date:
+    description: |
+      The date after which AutoPay stops billing, in `YYYY-MM-DD` format. `null` for an open-ended subscription. When it passes, the subscription moves to `expired`.
+  status:
+    description: |
+      The subscription's lifecycle state. One of `pending_setup` (created, first payment not completed yet), `trialing` (set up with a `0` first charge, waiting for its first billing date), `active` (billing normally), `past_due` (a billing cycle used up every retry), `canceled`, `expired` (the `end_date` passed), or `setup_failed` (the first payment never completed).
+
+      A `past_due` subscription is never canceled automatically. See [Subscription States]({{apiBaseUrl}}/payments/autopay/#subscription-states).
+  cancel_at_period_end:
+    description: |
+      `true` when a cancellation is scheduled for the end of the current paid period. The subscription keeps its current `status` and keeps billing until then, and only becomes `canceled` when the next cycle would have been generated. `false` otherwise, including after an immediate cancellation.
+  canceled_at:
+    description: |
+      UTC timestamp of when the subscription became `canceled`. `null` while it is not canceled, including while a cancellation is only scheduled through `cancel_at_period_end`.
+  cancellation_initiator:
+    description: |
+      Who most recently requested a cancellation: `merchant` when you called Cancel a subscription, `customer` when the customer used the self-service page. `null` if none was ever requested. It is set as soon as a cancellation is scheduled, and it is not cleared if the customer later reactivates the subscription, so read `status` and `cancel_at_period_end` to know whether the subscription is actually ending.
+  agreement_id:
+    description: |
+      The `agreement.id` you supplied on the checkout call. It ties every charge in the subscription to the same card-on-file agreement with the customer.
+  next_billing_date:
+    description: |
+      The date of the next scheduled charge, in `YYYY-MM-DD` format. `null` when no charge is scheduled.
+  description:
+    description: |
+      The free-text label you sent in `autopay.description`, shown to the customer on the self-service page. `null` if you did not send one.
+  merchant_reference:
+    description: |
+      Your own reference attached to the subscription. `null` if none was provided.
+  retry_count:
+    description: |
+      How many times AutoPay retries a failed billing cycle before giving up, between 1 and 10. Retries run one hour apart. See [Retries & Dunning]({{apiBaseUrl}}/payments/autopay/#retries-and-dunning).
+  created_at:
+    description: |
+      UTC timestamp of when the subscription was created, in ISO 8601 format.

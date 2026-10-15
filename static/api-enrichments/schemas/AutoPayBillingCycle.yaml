@@ -1,0 +1,34 @@
+# Overrides for: components/schemas/AutoPayBillingCycle
+# One billing period. Mirrors BillingCycleOut in AutoPay.
+
+_description: |
+  One billing period of a subscription and every attempt made to collect it. A cycle that needed retries carries more than one entry in `payment_attempts`.
+
+properties:
+  cycle_number:
+    description: |
+      The position of this billing period in the subscription, starting at 1. Cycles are returned in this order, oldest first.
+  scheduled_date:
+    description: |
+      The date this period was, or is, due to be charged, in `YYYY-MM-DD` format.
+  amount_due:
+    description: |
+      The amount charged or to be charged for this period, as a decimal string in the subscription's currency.
+  status:
+    description: |
+      Where this cycle stands. One of `scheduled` (not attempted yet), `processing` (a charge is in flight), `paid`, `retry_scheduled` (an attempt failed and the next automatic retry is queued), `failed` (every retry was used up, and the subscription is now `past_due`), or `canceled` (canceled together with the subscription).
+  paid_at:
+    description: |
+      UTC timestamp of when the cycle was collected. `null` until it is `paid`.
+  failure_reason:
+    description: |
+      The gateway's message from the most recent failed attempt. `null` if no attempt has failed.
+  session_id:
+    description: |
+      The Ottu `session_id` of the latest charge attempt for this cycle. `null` while the cycle is `scheduled` and has not been attempted.
+  charge_type:
+    description: |
+      How the cycle was charged. `cit` is a customer-initiated payment: the first payment at checkout, or a recovery payment. `mit` is an automatic charge AutoPay made against the saved card. `null` while the cycle has not been attempted.
+  payment_attempts:
+    description: |
+      Every charge attempt made for this cycle, oldest first. More than one entry means the cycle was retried after a failure. See [Retries & Dunning]({{apiBaseUrl}}/payments/autopay/#retries-and-dunning).

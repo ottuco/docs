@@ -1,0 +1,71 @@
+---
+id: autopay-subscription-list
+title: "List AutoPay subscriptions"
+description: "Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant."
+sidebar_label: "List AutoPay subscriptions"
+hide_title: true
+hide_table_of_contents: true
+api: eJztWm1v2zgS/isD3uGSALLjuNnbqxeLXrZN97LdboImxaKX5CJaGtvcUKRKUnZ0gf/7YUhJlmynzRW3eyiQL4Fivg1nhs88M+Q90zka7oRWJykbMV44nfPyxhZjmxiRU8ONFNaxiKXY/MRG7K1IjLZo5iJB29NKlnBUOH3GS2gP7mVc8SlmqBzkRt+VfXiplcLEgUOTCcUdWsjQJDOuHPDCzVA5kXiRoLBCTSE3Ys4dwtHZCdxiGcEP3IrE941AG3iDZSI1v4Wffr2IwKDVco4W3AxXEztUXLkIJtosuElDq8GPBVoHTjeyL4SbwdtqVO8kjYCrFAy6wihb99qxtEqulUUY67T0fazjrrA0V3vh/pW6Uj8L62xHLbba2mrCiZAOTc9Pd3R20oczPiXtBDWghViKTLjYrxXrycSiiyPgSYK5wxSE6mzJz6MNcAsfCzQl5NzwDB0aC7vhl4VQdq8PF34U7Q9TiBXe1WvkBudCFzaG9+9+tpBrQQZy4GbCAqq0+kGlkHAFY4SJllIvMIVUGEycLPssYo5PLRtdslrB520tsOuIVRL/oNOSje5ZopVD5eiT57msPGH/N0ted89sMsOM05crc2Qjpse/YULumRtyZSfQ+n7eGq1+1hmhphtu/M7vHLz/dg3kFSqstyv24VgV2QjiHFUq1PTGoivyOILYGcGlUFP65okTc6SvnFt3kxb+O+EqQYkpfeNdLkz49DPcTLigpj6cZsKB8L4YrAE4JyuF5a8UW0YsKazTGZobkf53OyPP6O5OT0ArhHrGPhzf8cRBxl0yAx18KW6tF0OpC7AYXCCZYXKrC1fLZZA7TG/4xKHZJtlEm4w7NmIpd/iQpF0BqzlJFnJjmjnYg6aIyDrxhw8fPvTevu29ehVDWGFNnjFOtMHfRaAw9SMkgpc6GwuFZFsPLnFHW74fcD8HGK6mta39aW+JLpTDKRoWsYzfiazI2OhgMIhYJlT13/ou/qEXkHG17teNg0UwMTqDA/rlYDDowyuc8EI632U4qOQISLNdkHrpweOXtrciXykPYSKMdd4VawzqyjHowzkiXHo0nIKbGV1MZ34ohaXr3f0U5yjp6Nv9nJcUaOx+Fcb2/5T7Yb1qWM/NsEfD9vzmlutiv/YYbD2mhZHeOuunx6/sgbMEbjCcii34G4HSzv8aADd4XwSWQgSdoup4gUgp5k0ErW0dL0EXjk7o+3c/g9RT24djjwUTgTIFYUF7Obj8DrgCzHJXwk/np79AAMMmXNHSwwEoXJBIHVuQAiLmhJNk0wqc29hMMetd2Ay5Ad7xLJcBW6npyENdF8xH92zOZYFsdLkCYBZAka2hl//v5mD4jG3ABxsOhn/tDQ56gwO2eZZD68Gw94xaq1MyHKwcdbC8jpgtsoybko28sBBk6GqALckB2jHmrrdYLHp0bnuFkagSnWL6FHSegs5T0HkKOk9B548OOsuIZYV0IufG7XtUTrnjT3j8hMdPePyEx094/IfjMenKYlIY4UrP8akg9wZ94W/GRpfXy+iehdpc84sv8IRSmQfi4WDwJVUebgwvWcSEw8x+HvgTXajt7tq1NdW+nHZcgiqyMRrS95q3ko08IFKtzWhrgUtJjoE2mLbBVq3QB4zYoCXPjavDQyW1lSyXK/xRhZRUAWtwqDBiQ0Qyv574BWgiv3JE+FPqwjS11FRnXKg+vPYluBXMnJ2eX8RRcF6eIczRjKkmuDp1NN93wCH+8fgibpwmPhx8E/chJhHjOhRIXvWvNlYXCP8nm6sn+39ucDWg2mFlyS93xMfE6Is1ZNmxUCjxscAWJFA52FraNrcQd6rzFJYDnBuBc4wgUA1fGSeM8jtLykSiDboW3VL0l9CKD2QavVAtCRuQrCeKSNQaFbssYgt5qJsx40J+MliHHtuUWE+yY8F3Ap6mBq0lleSuMJjCYoZqE8oXvInslTwTD+EqKT+vCwpzeuKqeVdwbiGZcTOlWFbRxkwrN5Ml8b4SuZFl3LhZUhia/IZna8i1haxgIjJOGsi5c2hIhn/1XlxdpfeD6OBguftidHXVD/8+W+69+PNWXYWFahHpACBPZjAWknhs8BdvQQ7VglXkqqxpDGknbswX/n+MsxvEnkSSHE7OT+FwePAt1OOBSi41IjRaqaT0lzdQFaIgfvPrq3r5x/L8LSdNign6zdYU/1R5AdY4PuxW/hE1IOFZho8AiSaJiBaW6Pba6QDsWnRQ5AGsOMSDuBpfb2nBhasphnC2aq3NQIRwb5VTwG7doMgbpCz32mkG7PKuAeniKKXlQxZBEOFHbEtGYNezfVTpDa0aQ86txXTP40g3Twld1/RAS6w0sefvvY7awnVOnLD1iEoUus3TGaebPynLiu+1qQick33s57he5+7Rm9TuteLwTaUfv8fHxa2tyQF5kmfr7dBMrCUtaDO1dR9KB6qw49FI6ao7KaWZYj2p+gwmcIc9J7JNQd9fvARqsI5nOUn7eQT0N4I+chDJNCkScI7LEDk8+4xqNul9oKbRBJnkSqTOltwtdNjA+W7YacNuxPwPmzbbgpYNAFyv7/4IpJjOCGrmAgmmgXf2Ha1uPj22EAQaj+cP8f0TBwk3RiBdgYYsRIOd6QVwcHws0ecNTnvUTBEWM5HMNjMgnaP6DsjX4V0VuNdEa+LppJCy4vSP4usnDjO2kdWsQ58NnEfUfKtjUDiqEwpPd2o/dTNCFk+G0W61emWOmjZt2IPAldbb4Nm/T4LndUi2cRoWXN4GoknUvWFCgUAG427TbnULj2n3qmO5diXymvR2xqfYvQSp8pDDYZ0FsJlzuR3t71uu0rG+62vnir5Ctz/ez8dyfz7c7+hl/4UvAXw/HPwl5ODfDweszbwJSFo89TJQTmaL8c3z24/Dxbd3+WH2wOXLYHA43DyTo+aHv1c77Cc66xzOEauozLbTOGLP+8+fD9rnfsTe/PpqdUxbd0JbMLm54Olc/3iYCy10MXQx+Nvo4JvR4fCfbHndvfB53ZD4KmXtuiAdjcMvS0If4Pgpuq2cdf10VP2uVz72Iyo0Ijk2Rpu3aK2Xef2uLRPuaKzneBCErpzrvq4NXbJjZYu6CuVbCbclWp+8+joVfiy4rCs87HrZvR+jmiOnFaj5Ezo7+Fp09ot2R6t3ROEKr1FbvTI76j41Sgz6XIZLCws06JldbvRcpJj2WUdnv+jOSyVMH9bacPi1aO29ulV6oc79GQ1FsK2Ku2xWR1UQLkid0KJU7PJJSSk1TztBObNTNmInKi8cxcpCpvRcaKdDsXci2Kl5M30HiKCvmkLSd00X6btirjvk4TttgrpDmNC2V7W1+olWeGr1CZs9+1psdqKs41J6yc44sf3tvn4e3umBD/fUjV5mUa5F8oS2m9DQdfT2/FB3eEBt3wy+GrVVsf294nMuJLG2ByHCv1kbG5EGfl6shqxhQt231eMTqjr8ylR1ITJMTwv3KD01zyppEJWxH1BV0/6AougCEN1ME2PJtX+DmnOqK7OH2BKhDpo5mkCFCiM/QbmY5w1VPfuclF1tuVPVXlX+cvEGfWJC0s2Qp76grHhW0cWZNuLf3oQbWVj1cnX9eauvCtQmogroRNzBFTvKRe8NllfeV9r19EYW2hLt1QvNRmxMnbzCyHnerV5UHgdTti9DV+ljlxOuft58jnPYG3zbGz5/4DnOqrXiJJ3XOKSwifbCV2536lxBb1xZxMhUQUUH/UF/sKG4piuVm7V1GfdHo1K6f9uz7dWxXZ+oddieXi4/vVx+3MvlcNYc3rn9XHLhCzIeUu4rHLpkY8KkMRUy5pRKrfsgge2MkGt0ye7vx9zieyOXS/rZ74SuyCI250aEIERXaDW0EIDdIuHly+C6vQsSKKrx9xFP1+g+Lkxx5JX9wGAfcAgMG7SlpJhFgdKN7lkWmEJr5qj9TxCbb8DlrYfL6qPFG7kqW5KsI2cQmP6S+FuH3N8HMF4um/6h6cERDVyH3mTL6+Vy+R+r2Ue+
+sidebar_class_name: "post api-method"
+info_path: developers/apis/ottu-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+import Translate from "@docusaurus/Translate";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"List AutoPay subscriptions"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/b/pbl/v2/subscriptions/"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant.
+
+Lists subscriptions using AutoPay's filter-body API. Pagination uses `limit` and `offset`, accepted in the request body or as query parameters (query wins). The returned `next` and `previous` URLs point at this endpoint and can be followed directly.
+
+<pre style={{display:"none"}}>{"curl --location 'https://sandbox.ottu.net/b/pbl/v2/subscriptions/' \\\n--header 'Content-Type: application/json' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Api-Key YOUR_API_KEY' \\\n--data '{\n  \"status\": \"string\",\n  \"customer_id\": \"string\",\n  \"created_after\": \"2024-07-29\",\n  \"created_before\": \"2024-07-29\",\n  \"limit\": 0,\n  \"offset\": 0\n}'"}</pre>
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+>
+  <Translate id="theme.openapi.request.title">Request</Translate>
+</Heading>
+
+<ParamsDetails>
+  
+</ParamsDetails>
+
+<RequestSchema
+  {...require("./autopay-subscription-list.RequestSchema.json")}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  {...require("./autopay-subscription-list.StatusCodes.json")}
+>
+  
+</StatusCodes>
+
+
+      
