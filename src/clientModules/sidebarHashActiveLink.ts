@@ -471,8 +471,10 @@ function smoothScrollToHash(hashId: string): void {
   // Smooth scrolling is animation-driven, so it cannot progress while the
   // document is hidden — the position would simply never be applied. Jump
   // instantly in that case; there is no user watching an animation anyway.
+  // "auto" would not do: html has CSS `scroll-behavior: smooth`, so "auto"
+  // is smooth too.
   const behavior: ScrollBehavior =
-    document.visibilityState === "visible" ? "smooth" : "auto";
+    document.visibilityState === "visible" ? "smooth" : "instant";
   window.scrollTo({ top: Math.max(0, y), behavior });
 }
 
@@ -730,13 +732,10 @@ export function onRouteDidUpdate(): void {
   cancelMaintain?.();
   scheduleUpdate();
 
-  // Branch on initial-load vs cross-page SPA-nav. Same-page hash changes
-  // (click or back/forward to a hash on the current page) are NOT
-  // re-scrolled here — Docusaurus's own scroll handlers already do that
-  // synchronously, and adding our wait-for-stability + smooth-scroll on
-  // top makes them slower for no benefit. Captured BEFORE runInitialHashGate
-  // flips the flag, otherwise runSpaHashScroll would also fire on the
-  // very first route update and double-handle initial load.
+  // Branch on initial-load vs cross-page SPA-nav vs same-page hash change.
+  // Captured BEFORE runInitialHashGate flips the flag, otherwise
+  // runSpaHashScroll would also fire on the very first route update and
+  // double-handle initial load.
   const isFirstRouteUpdate = !initialLoadHandled;
   const prevPath = lastNavPathname;
   const currentPath = window.location.pathname;
@@ -753,6 +752,13 @@ export function onRouteDidUpdate(): void {
     // previous page's position). We wait for hydration ourselves,
     // then smooth-scroll, then run the layout-shift compensator.
     runSpaHashScroll();
+  } else {
+    // Same-page hash change (sidebar anchor click, back/forward). Nothing
+    // else scrolls here: Docusaurus only scrolls after a pathname change,
+    // and the router does not make the browser follow a pushState hash.
+    // The target already exists, so no hydration wait is needed.
+    const hashId = getHashTargetId();
+    if (hashId) smoothScrollToHash(hashId);
   }
 }
 
