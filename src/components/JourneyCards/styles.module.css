@@ -82,6 +82,33 @@
   font-weight: 500;
 }
 
+/*
+ * Cards render inside .markdown, so global rules (custom.css h3 / li / li p, Infima li + li)
+ * out-rank the single-class selectors above. Re-assert the card spacing with higher-specificity
+ * selectors. `.markdown li:not(:first-child)` is (0,2,1), so the card margin needs three classes.
+ */
+.wrap .steps > .card {
+  margin: 0;
+}
+
+.card .title {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  line-height: 1.4;
+}
+
+.card .body {
+  margin: 0 0 1rem;
+}
+
+.card .divider {
+  margin: auto 0 0.75rem;
+}
+
+.card .part {
+  margin: 0 0 0.5rem;
+}
+
 @container (max-width: 720px) {
   .steps {
     grid-template-columns: minmax(0, 1fr);
