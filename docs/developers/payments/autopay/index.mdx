@@ -12,8 +12,6 @@ import TabItem from "@theme/TabItem";
 import CodeBlock from "@theme/CodeBlock";
 import AutoPayFlowDiagram from "@site/src/diagrams/AutoPayFlowDiagram";
 import AutoPayDemo from "@site/src/components/AutoPayDemo";
-import StepGuide from "@site/src/components/StepGuide";
-import { autopayCustomerViewSteps } from "@site/src/data/autopay-customer-view";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
@@ -86,11 +84,17 @@ Run the whole journey against the sandbox: create a subscription, pay its first 
 
 ### What your customer sees {#what-your-customer-sees}
 
-{/* TODO #158913: real sandbox screenshots from Junaid, planned at /img/developers/autopay/first-charge-checkout.png, self-service-page.png and reminder-email.png. Add them to src/data/autopay-customer-view.tsx. */}
+{/* TODO #158913: real sandbox screenshots from Junaid, planned at /img/developers/autopay/first-charge-checkout.png, self-service-page.png and reminder-email.png. Add them to src/data/autopay-customer-view.tsx, then replace the list below with:
+import StepGuide from "@site/src/components/StepGuide";
+import { autopayCustomerViewSteps } from "@site/src/data/autopay-customer-view";
+<StepGuide steps={autopayCustomerViewSteps} />
+(the two imports go next to the other imports at the top of this file) */}
 
 Your customer meets AutoPay in three places. See [What your customer sees](/business/autopay/#what-your-customer-sees) on the business page for the full tour.
 
-<StepGuide steps={autopayCustomerViewSteps} />
+1. **The first-charge checkout.** Your customer pays the first charge on Ottu's checkout page. Ottu saves their card, so the later charges need no action from them.
+2. **The self-service page.** Your customer opens the private link you send them. They see their status and billing history, add or switch a card, pay an overdue balance, and cancel or undo a pending cancellation.
+3. **One email: the charge reminder.** Ottu emails your customer before each charge. The email carries your business name, your support email and a link to the self-service page.
 
 ### Use Cases
 
