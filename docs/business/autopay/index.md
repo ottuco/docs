@@ -7,11 +7,7 @@ toc_max_heading_level: 3
 
 import StepGuide from "@site/src/components/StepGuide";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
-import VideoEmbed from "@site/src/components/VideoEmbed";
-
-{/* The AutoPay <VideoEmbed> clips below are built from the real betabulk screenshots
-    (sequenced via the Reel component). To refresh: update a screenshot or composition in
-    remotion/, run `npm run render`, and the files in static/video/autopay/ update in place. */}
+import AutoPayJourneyDiagram from "@site/src/diagrams/AutoPayJourneyDiagram";
 
 # AutoPay
 
@@ -38,81 +34,25 @@ This page covers what AutoPay does for your business. The exact request and resp
 
 ## How it works {#how-it-works}
 
+<AutoPayJourneyDiagram />
+
+Each step in the picture links to the section that explains it. In short:
+
 1. **Your team creates a subscription with a single checkout call** — the plan details (amount, billing frequency, start date) travel with it.
 2. **AutoPay generates the first billing cycle** and, if there's a charge due right away, processes it against the card the customer just entered.
 3. **From then on, AutoPay generates each new cycle on schedule** and charges the saved card automatically — the next cycle is only created once the current one is paid.
 4. **If a charge fails, AutoPay retries it automatically** and keeps the customer posted by email — your team doesn't have to notice or act.
 5. **The customer manages everything else themselves** — checking their next charge date, updating a card, or canceling — from a private self-service page you send them.
 
-<VideoEmbed
-  src="/video/autopay/setup-subscription.mp4"
-  poster="/video/autopay/setup-subscription-poster.png"
-  caption="One checkout call creates the subscription; AutoPay then owns the schedule, retries, dunning, and the customer self-service page."
-/>
-
-## Subscription lifecycle {#subscription-lifecycle}
-
-A subscription moves through a small set of states from the moment it's created to the moment it stops billing. Knowing what each one means — and which ones can recover on their own — saves a lot of confused support tickets.
-
-| State | What it means |
-|---|---|
-| Pending setup | The subscription has been created and is waiting on its first charge attempt to resolve. |
-| Trialing | The first charge was for zero — no money has moved yet. The customer has access now; the first real charge happens at the next billing cycle. |
-| Active | The subscription is billing normally — the most recent cycle was paid. |
-| Past Due | A charge failed and every retry on that cycle has been used up. The subscription is not canceled — it's waiting for the balance to be paid. |
-| Canceled | Billing has stopped — either the customer canceled (their access continues until the end of the period they already paid for) or your team canceled it directly (effective immediately). |
-| Expired | Billing has stopped because the subscription reached a defined end date, rather than being canceled outright. |
-| Setup Failed | The very first charge attempt didn't go through. Unlike the two states above, this one isn't final — the subscription moves back to Pending setup so setup can be tried again. |
-
-Three of these are worth calling out specifically:
-
-- **A zero first charge creates a trial, not an active subscription.** If the first amount your checkout call charges is zero, the subscription starts in Trialing rather than Active — useful for free-trial plans where the real charge only happens once the first billing cycle comes due.
-- **Past Due only happens after every retry is used up.** A single declined card changes nothing; AutoPay retries automatically first (see [Retries and dunning](#retries-and-dunning)). The subscription moves to Past Due only once the whole retry sequence for a cycle is exhausted.
-- **Paying the outstanding balance is what moves a subscription back to Active.** The moment the customer pays what's owed — from their self-service page — the subscription returns to Active. There's no separate merchant-side action that does this; it's the customer's payment that clears it.
-
-:::tip
-See what each of these states looks like from your customer's side in [The customer self-service page](#customer-self-service-page).
+:::tip See it live
+Want to watch it happen? The [AutoPay live demo](/developers/payments/autopay/#live-demo) creates a real subscription on the sandbox, takes the first payment with a test card, and opens the customer's self-service page, all in your browser.
 :::
 
-## Billing cycles {#billing-cycles}
+## What your customer sees {#what-your-customer-sees}
 
-AutoPay doesn't pre-generate a year of invoices upfront. It creates billing cycles one at a time — the next cycle only comes into existence once the current one has been paid.
+Your customer never sees AutoPay as a separate product. They pay the first charge on the Ottu checkout, then they hear from AutoPay by email before each charge, and they manage the subscription from one private page that you send them.
 
-The amount charged on any given cycle is whatever was locked in on that cycle when it was generated — not whatever the subscription's amount happens to be by the time the charge actually runs. In practice, this means past cycles stay a reliable record of what was actually charged, no matter what happens to the subscription afterward.
-
-### How anchor-day clamping works
-
-Every subscription bills on the same day each cycle — its anchor day, set by the start date. Most months that's straightforward. The exception is a subscription anchored on the 29th, 30th, or 31st hitting a shorter month. AutoPay clamps the charge to the last real day of that month, then returns to the original anchor day as soon as the calendar allows it again.
-
-Here's a subscription anchored on the 31st, working through the January–March cycles:
-
-| Cycle | Anchor day | Bills on | Why |
-|---|---|---|---|
-| January | 31st | Jan 31 | The anchor day exists in January. |
-| February | 31st | Feb 28 (Feb 29 in a leap year) | February has no 31st, so the charge clamps to the month's last day. |
-| March | 31st | Mar 31 | March has a 31st again — the anchor day was never permanently moved. |
-
-## Retries and dunning {#retries-and-dunning}
-
-Not every card charge succeeds on the first try. AutoPay handles the follow-up automatically, so a single declined card doesn't need your team's attention.
-
-- **How many attempts.** AutoPay makes one initial attempt plus a set number of retries — four attempts in total by default (one initial charge, three retries).
-- **How they're spaced.** Retries run one hour apart, on a flat schedule — not the doubling delay you might expect from other billing systems.
-- **What happens when every attempt fails.** The cycle is marked failed, the subscription moves to Past Due, and the customer receives a final-failure email with a link back to their self-service page so they can pay directly.
-
-![The past-due self-service page: "We couldn't charge your card," the overdue-since date, the failed card flagged, and a Failed row in the payment history](/img/business/autopay/recovery-01-past-due.png)
-
-:::warning AutoPay never cancels a past-due subscription on its own
-A Past Due subscription stays Past Due indefinitely. AutoPay does not cancel it automatically, no matter how long the balance goes unpaid — it keeps waiting for the customer to pay, or for your team to cancel it directly. If you were assuming subscriptions eventually cancel themselves after enough failed attempts, they don't — build your own process (a scheduled report, a support workflow) around subscriptions that have been past due longer than you're comfortable with.
-:::
-
-<VideoEmbed
-  src="/video/autopay/retry-to-recovery.mp4"
-  poster="/video/autopay/retry-to-recovery-poster.png"
-  caption="The retry → past due → recovery journey: automatic retries, a final-failure email, and the customer clearing the balance to return to Active."
-/>
-
-## The customer self-service page {#customer-self-service-page}
+### The customer self-service page {#customer-self-service-page}
 
 Every subscription gets its own private page (the product calls it "Manage Subscription") — a link with a signed token that only that customer can use. Your team delivers the link; AutoPay hosts the page and keeps it in sync with the subscription's real state automatically, in English and Arabic.
 
@@ -126,13 +66,8 @@ From this page, a customer can:
 - Cancel their subscription
 - Undo a cancellation that hasn't taken effect yet
 
-<VideoEmbed
-  src="/video/autopay/self-service-tour.mp4"
-  poster="/video/autopay/self-service-tour-poster.png"
-  caption="The customer self-service page: view status, update a card, and pay an outstanding balance — all from one link."
-/>
 
-### What a subscription looks like to your customer
+#### What a subscription looks like to your customer
 
 The page is a single scrolling view — customer details, subscription summary, saved payment methods, and payment history all live on the one page; there's no separate screen to click into for billing history or cards. What it shows adapts to the subscription's state:
 
@@ -169,7 +104,7 @@ The page is a single scrolling view — customer details, subscription summary, 
   },
 ]} />
 
-### Canceling a subscription
+#### Canceling a subscription
 
 A cancellation the customer starts always takes effect at the end of their current billing period, never immediately — they keep access, and the option to change their mind, for whatever they've already paid for. If you need to cut a subscription off right away instead — a fraud case, a billing dispute — that's a merchant-side cancellation, and only your team can do it, immediately, via the AutoPay API.
 
@@ -188,13 +123,13 @@ A cancellation the customer starts always takes effect at the end of their curre
   },
 ]} />
 
-### Undoing a cancellation
+#### Undoing a cancellation
 
 As long as a canceled subscription hasn't reached the end of its period yet, the customer can undo the cancellation from the same page — one click, no new checkout needed.
 
 ![Reactivation confirmation previewing the plan, amount, and next renewal date before the customer confirms](/img/business/autopay/reactivation-01-confirm.png)
 
-### Paying an outstanding balance
+#### Paying an outstanding balance
 
 When a subscription is Past Due, **Pay Now** on the self-service page collects the outstanding balance immediately, using whichever saved card the customer picks.
 
@@ -213,7 +148,7 @@ When a subscription is Past Due, **Pay Now** on the self-service page collects t
   },
 ]} />
 
-### Managing saved cards
+#### Managing saved cards
 
 Customers can hold several cards on file and switch which one is active with a single click. Adding a new card opens a standard card-entry form right on the page, and the newly added card can be made active immediately — the next charge then uses it instead of the previous one.
 
@@ -221,17 +156,12 @@ Saved cards are never deleted. AutoPay keeps every card a customer has used as p
 
 ![Adding a card: a secure checkout where the customer enters and saves a new card to the subscription](/img/business/autopay/cards-02-add-card.png)
 
-<VideoEmbed
-  src="/video/autopay/add-card-flow.mp4"
-  poster="/video/autopay/add-card-flow-poster.png"
-  caption="Adding a card: the customer taps Add Another Card, enters details in a secure checkout, and the new card is saved to the subscription."
-/>
 
 :::warning Regenerating a customer's link revokes the old one instantly
 If you regenerate a subscription's self-service link, the previous link stops working immediately — and AutoPay does not tell the customer. Whatever channel delivered the first link (email, your own account area, a support reply), you need to deliver the new one the same way, or the customer is simply locked out with no explanation.
 :::
 
-### If a link stops working
+#### If a link stops working
 
 A customer opening a page that's loading, expired, no longer recognized, or unreachable sees one of these instead of their subscription:
 
@@ -262,7 +192,7 @@ A customer opening a page that's loading, expired, no longer recognized, or unre
   },
 ]} />
 
-## Notifications {#notifications}
+### Notifications {#notifications}
 
 AutoPay sends three emails over a subscription's life, each available in English and Arabic, and each one can be switched off individually per subscription if you don't want it sent.
 
@@ -271,13 +201,8 @@ AutoPay sends three emails over a subscription's life, each available in English
 | Monthly | 1 | 2 days before |
 | Yearly | 3 | 30, 10, and 3 days before |
 
-<VideoEmbed
-  src="/video/autopay/notification-emails.mp4"
-  poster="/video/autopay/notification-emails-poster.png"
-  caption="The three AutoPay emails over a subscription's life: upcoming charge, payment failed, and final failure."
-/>
 
-### Upcoming charge
+#### Upcoming charge
 
 Sent before money moves, so a declined or forgotten card doesn't come as a surprise.
 
@@ -296,7 +221,7 @@ Sent before money moves, so a declined or forgotten card doesn't come as a surpr
   },
 ]} />
 
-### Payment failed
+#### Payment failed
 
 Sent when a charge attempt fails and AutoPay still has retries left to run — a chance for the customer to update their card before the automatic retries continue.
 
@@ -315,7 +240,7 @@ Sent when a charge attempt fails and AutoPay still has retries left to run — a
   },
 ]} />
 
-### Final failure
+#### Final failure
 
 Sent once every retry on a cycle has been used up — see [Retries and dunning](#retries-and-dunning) — with a direct link back to the customer's self-service page so they can clear the balance.
 
@@ -337,6 +262,63 @@ The final-failure email talks about the customer's access being suspended — th
     imageAlt: "Final failure email in Arabic with outstanding balance and next steps",
   },
 ]} />
+
+## When a payment fails {#retries-and-dunning}
+
+Not every card charge succeeds on the first try. AutoPay handles the follow-up automatically, so a single declined card doesn't need your team's attention.
+
+- **How many attempts.** AutoPay makes one initial attempt plus a set number of retries — four attempts in total by default (one initial charge, three retries).
+- **How they're spaced.** Retries run one hour apart, on a flat schedule — not the doubling delay you might expect from other billing systems.
+- **What happens when every attempt fails.** The cycle is marked failed, the subscription moves to Past Due, and the customer receives a final-failure email with a link back to their self-service page so they can pay directly.
+
+![The past-due self-service page: "We couldn't charge your card," the overdue-since date, the failed card flagged, and a Failed row in the payment history](/img/business/autopay/recovery-01-past-due.png)
+
+:::warning AutoPay never cancels a past-due subscription on its own
+A Past Due subscription stays Past Due indefinitely. AutoPay does not cancel it automatically, no matter how long the balance goes unpaid — it keeps waiting for the customer to pay, or for your team to cancel it directly. If you were assuming subscriptions eventually cancel themselves after enough failed attempts, they don't — build your own process (a scheduled report, a support workflow) around subscriptions that have been past due longer than you're comfortable with.
+:::
+
+
+## Subscription lifecycle and billing cycles {#subscription-lifecycle}
+
+A subscription moves through a small set of states from the moment it's created to the moment it stops billing. Knowing what each one means — and which ones can recover on their own — saves a lot of confused support tickets.
+
+| State | What it means |
+|---|---|
+| Pending setup | The subscription has been created and is waiting on its first charge attempt to resolve. |
+| Trialing | The first charge was for zero — no money has moved yet. The customer has access now; the first real charge happens at the next billing cycle. |
+| Active | The subscription is billing normally — the most recent cycle was paid. |
+| Past Due | A charge failed and every retry on that cycle has been used up. The subscription is not canceled — it's waiting for the balance to be paid. |
+| Canceled | Billing has stopped — either the customer canceled (their access continues until the end of the period they already paid for) or your team canceled it directly (effective immediately). |
+| Expired | Billing has stopped because the subscription reached a defined end date, rather than being canceled outright. |
+| Setup Failed | The very first charge attempt didn't go through. Unlike the two states above, this one isn't final — the subscription moves back to Pending setup so setup can be tried again. |
+
+Three of these are worth calling out specifically:
+
+- **A zero first charge creates a trial, not an active subscription.** If the first amount your checkout call charges is zero, the subscription starts in Trialing rather than Active — useful for free-trial plans where the real charge only happens once the first billing cycle comes due.
+- **Past Due only happens after every retry is used up.** A single declined card changes nothing; AutoPay retries automatically first (see [Retries and dunning](#retries-and-dunning)). The subscription moves to Past Due only once the whole retry sequence for a cycle is exhausted.
+- **Paying the outstanding balance is what moves a subscription back to Active.** The moment the customer pays what's owed — from their self-service page — the subscription returns to Active. There's no separate merchant-side action that does this; it's the customer's payment that clears it.
+
+:::tip
+See what each of these states looks like from your customer's side in [The customer self-service page](#customer-self-service-page).
+:::
+
+### Billing cycles {#billing-cycles}
+
+AutoPay doesn't pre-generate a year of invoices upfront. It creates billing cycles one at a time — the next cycle only comes into existence once the current one has been paid.
+
+The amount charged on any given cycle is whatever was locked in on that cycle when it was generated — not whatever the subscription's amount happens to be by the time the charge actually runs. In practice, this means past cycles stay a reliable record of what was actually charged, no matter what happens to the subscription afterward.
+
+#### How anchor-day clamping works
+
+Every subscription bills on the same day each cycle — its anchor day, set by the start date. Most months that's straightforward. The exception is a subscription anchored on the 29th, 30th, or 31st hitting a shorter month. AutoPay clamps the charge to the last real day of that month, then returns to the original anchor day as soon as the calendar allows it again.
+
+Here's a subscription anchored on the 31st, working through the January–March cycles:
+
+| Cycle | Anchor day | Bills on | Why |
+|---|---|---|---|
+| January | 31st | Jan 31 | The anchor day exists in January. |
+| February | 31st | Feb 28 (Feb 29 in a leap year) | February has no 31st, so the charge clamps to the month's last day. |
+| March | 31st | Mar 31 | March has a 31st again — the anchor day was never permanently moved. |
 
 ## Setting up AutoPay {#setting-up-autopay}
 
