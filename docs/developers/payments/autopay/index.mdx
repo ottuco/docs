@@ -217,7 +217,7 @@ These are the statuses you will meet most often, so you can handle them without 
 | Status | Meaning | What to do |
 |---|---|---|
 | `400` | Ottu rejected the request as malformed, for example a `limit` above 100 on list, an unknown cancel `mode`, or a missing `Idempotency-Key` on cancel or regenerate. | Fix the request. Retrying unchanged will fail again. |
-| `401` | Not authenticated. | Check your [API key](/developers/getting-started/authentication) or bearer token. |
+| `401` | Not authenticated. | Check your [API key](/developers/getting-started/authentication). |
 | `404` | No such subscription for your merchant. | Do not retry. |
 | `409` | `Idempotency-Key` was already used on `cancel` with a different request body (`code: idempotency_conflict`). | Send a new key for a new request. Reuse a key only to retry the exact same request. |
 | `422` | Ottu rejected the request. Either a value is invalid (for example an unknown `status` filter on list, where `detail` lists each invalid field), or the subscription is in a state that does not allow it, such as canceling one that has already ended (`code: invalid_transition`). | Fix the request, or re-read the subscription's `status`. Retrying unchanged will fail again. |
