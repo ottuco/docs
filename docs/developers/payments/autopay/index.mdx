@@ -38,10 +38,6 @@ Every API call in this guide targets <code>{OTTU_CONNECT_BASE_URL}</code>. Swap 
 Use AutoPay when you want Ottu to own the whole subscription lifecycle after one checkout call. If you'd rather run the billing schedule and retry logic yourself and just charge a saved card on demand, use [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments) instead. It is the closer fit for installments, on-demand billing, and cases where your own system needs to decide exactly when a charge happens.
 :::
 
-:::tip Boost Your Integration
-Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../../getting-started/#boost-your-integration) for all available options.
-:::
-
 ## Setup {#setup}
 
 By the end of this page your backend creates a subscription, sends the customer to pay, learns the result, and hands the customer a link to manage it.
@@ -61,6 +57,11 @@ By the end of this page your backend creates a subscription, sends the customer 
 **Go live**
 
 - [ ] Switch to your production [API key](/developers/getting-started/authentication) and base URL. No other request changes.
+
+
+:::tip Boost Your Integration
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../../getting-started/#boost-your-integration) for all available options.
+:::
 
 
 ## Guide
