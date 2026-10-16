@@ -48,6 +48,8 @@ All limits are listed in [Limits](#limits).
   ]}
 />
 
+<p style={{fontSize: "0.875rem", color: "var(--ifm-color-emphasis-600)"}}>✗ means you would have to build this yourself. With AutoPay, Ottu runs it for you.</p>
+
 ## How it works {#how-it-works}
 
 What happens at each stage, and what you need to do.
@@ -217,6 +219,8 @@ A Past Due subscription is the exception. If a Past Due customer cancels, the su
 
 Customers can hold several cards and switch the active one in a click. Switching to a new card keeps the old card, so an old card still explains what paid an earlier cycle.
 
+<a id="regenerate-link"></a>
+
 :::warning Regenerating a link revokes the old one
 The previous link stops working instantly, and the page shows "link expired". Ottu doesn't notify the customer. Links never expire on their own, so only a regeneration revokes one. Deliver the new link the same way you delivered the first, or the customer is locked out.
 :::
@@ -321,7 +325,7 @@ AutoPay subscriptions have no plan catalog. The plan name is a free-text label, 
     Yes. Each subscription's emails go out in English or Arabic, chosen when it is created, and the self-service page offers both languages.
   </FAQItem>
   <FAQItem question="What if a customer opens a link that was replaced?">
-    The page shows "link expired". Send them the new link yourself. See [Regenerating a link revokes the old one](#the-self-service-page).
+    The page shows "link expired". Send them the new link yourself. See [Regenerating a link revokes the old one](#regenerate-link).
   </FAQItem>
 </FAQ>
 
