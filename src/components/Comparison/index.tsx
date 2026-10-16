@@ -48,6 +48,11 @@ export function ComparisonSubtitle({children}: {children: React.ReactNode}): Rea
   return <p className={styles.subtitle}>{children}</p>;
 }
 
+/** Small grey note under the table. */
+export function ComparisonLegend({children}: {children: React.ReactNode}): React.JSX.Element {
+  return <p className={styles.legend}>{children}</p>;
+}
+
 /** Icon-only comparison: the product column first, a highlighted column, one row per benefit. */
 export default function Comparison({
   rows,

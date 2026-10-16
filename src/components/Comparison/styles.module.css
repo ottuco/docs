@@ -122,3 +122,8 @@
     text-align: center;
   }
 }
+
+.legend {
+  font-size: 0.875rem;
+  color: var(--ifm-color-emphasis-600);
+}

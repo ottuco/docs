@@ -9,7 +9,7 @@ toc_max_heading_level: 3
 import StepGuide from "@site/src/components/StepGuide";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import JourneyCards from "@site/src/components/JourneyCards";
-import Comparison, {ComparisonEyebrow, ComparisonSubtitle} from "@site/src/components/Comparison";
+import Comparison, {ComparisonEyebrow, ComparisonLegend, ComparisonSubtitle} from "@site/src/components/Comparison";
 
 # AutoPay
 
@@ -19,7 +19,7 @@ Building the integration? See [AutoPay for developers](/developers/payments/auto
 
 :::info Before you start
 - **AutoPay is API-only.** There is no AutoPay screen in the dashboard. A developer makes the integration through the API.
-- **KNET cannot pay renewals.** Customers must pay with a card that Ottu can save and charge again later.
+- **KNET cannot pay renewals.** The limit is on the payment gateway, not on the card: KNET as a gateway cannot charge a saved card later. Customers must pay with a gateway that can.
 
 All limits are listed in [Limits](#limits).
 :::
@@ -48,7 +48,7 @@ All limits are listed in [Limits](#limits).
   ]}
 />
 
-<p style={{fontSize: "0.875rem", color: "var(--ifm-color-emphasis-600)"}}>In the Build it yourself column, ✗ means your team would have to build and run this. With AutoPay, Ottu runs it for you.</p>
+<ComparisonLegend>In the Build it yourself column, ✗ means your team would have to build and run this. With AutoPay, Ottu runs it for you.</ComparisonLegend>
 
 ## How it works {#how-it-works}
 
@@ -222,12 +222,12 @@ Customers can hold several cards and switch the active one in a click. Switching
 <a id="regenerate-link"></a>
 
 :::warning Regenerating a link revokes the old one
-The previous link stops working instantly, and the page shows "link expired". Ottu doesn't notify the customer. Links never expire on their own, so only a regeneration revokes one. Deliver the new link the same way you delivered the first, or the customer is locked out.
+The previous link stops working instantly, and the page shows "This link has expired". Ottu doesn't notify the customer. Links never expire on their own, so only a regeneration revokes one. Deliver the new link the same way you delivered the first, or the customer is locked out.
 :::
 
 ## When a payment fails {#when-a-payment-fails}
 
-- **Four attempts by default.** That is one initial charge plus three retries. Ottu fixes the spacing at about an hour. Your developer can set the retry count from 1 to 10 when they create the subscription.
+- **Four attempts by default.** That is one initial charge plus three retries, about an hour apart. Your developer can set from 1 to 10 retries when they create the subscription. Ottu fixes the interval.
 - **The customer is emailed** after each failed attempt while retries remain, so they can update their card.
 - **After the last attempt,** the subscription moves to Past Due. The customer gets the final email with a link to pay.
 - **Paying the balance** returns the subscription to Active.
@@ -271,7 +271,7 @@ Before your first subscription, make sure you have:
 1. **AutoPay enabled for your account.** Ask Ottu support to turn it on.
 2. **A support email.** It appears on the customer's page and in the footer of every email Ottu sends.
 3. **A privacy policy URL.** It is linked from the footer of every email Ottu sends.
-4. **A payment gateway that can save a card and charge it again later,** in the currency you bill in. Ottu needs somewhere to save and charge the card. KNET cannot do this.
+4. **A payment gateway that can save a card and charge it again later,** in the currency you bill in. Ottu needs somewhere to save and charge the card. See [Limits](#limits).
 5. **The three notification templates registered,** in English and Arabic. Ottu support sets these up, the same way [notification templates](/business/notifications/) work for one-off payments.
 
 AutoPay subscriptions have no plan catalog. The plan name is a free-text label, and the price is the amount your team passes in the checkout call that creates the subscription. The [developer docs](/developers/payments/autopay/#api-reference) show the request shape.
@@ -279,18 +279,19 @@ AutoPay subscriptions have no plan catalog. The plan name is a free-text label, 
 ## Limits {#limits}
 
 - **API-only.** There is no AutoPay screen in the dashboard. A developer makes the integration.
-- **KNET cannot pay renewals.** Customers must pay with a card that Ottu can save for later charges.
+- **KNET cannot pay renewals.** The limit is on the payment gateway, not on the card: KNET as a gateway cannot charge a saved card later. Customers must pay with a gateway that can.
 - **A running subscription cannot be edited.** Amount, frequency, billing day, retry count, and customer email are fixed. Cancel it and create a new one.
 - **No pause.** Cancel at the end of the paid period, then create a new subscription when the customer returns.
 - **Emails switch off only at creation.** You cannot switch them off afterwards.
 - **You cannot pick the exact charge time.**
+- **No dashboard list of subscriptions.** To see which subscriptions are Past Due, your developer [lists them through the API](/developers/payments/autopay#api-reference), filtered by status.
 
 ## Things to know {#things-to-know}
 
 - **A Past Due subscription never cancels itself.** See [When a payment fails](#when-a-payment-fails).
 - **A customer's cancellation waits for the end of the paid period.** See [The self-service page](#the-self-service-page).
 - **A Past Due customer's cancellation waits for payment.** See the note under [The self-service page](#the-self-service-page).
-- **Regenerating a link silently revokes the old one.** Deliver the new link yourself. See [The self-service page](#the-self-service-page).
+- **Regenerating a link silently revokes the old one.** Deliver the new link yourself. See [Regenerating a link revokes the old one](#regenerate-link).
 - **A zero first charge starts a trial,** not an active subscription. See [Lifecycle](#lifecycle-and-billing-cycles).
 - **A cycle's amount is locked when it is generated,** not read fresh at charge time. See [Lifecycle and billing cycles](#lifecycle-and-billing-cycles).
 
@@ -307,7 +308,7 @@ AutoPay subscriptions have no plan catalog. The plan name is a free-text label, 
     No. See [Limits](#limits).
   </FAQItem>
   <FAQItem question="Which payment gateways and currencies does AutoPay support?">
-    Ottu charges the saved card through a gateway that can save a card and charge it again later, in the currency of the subscription. In the [gateway catalog](/business/payments/gateways), Cybersource, MPGS, and Tap list both, and the catalog shows each gateway's currencies. KNET can't pay renewals. See [Limits](#limits).
+    Ottu charges the saved card through a gateway that can save a card and charge it again later, in the currency of the subscription. In the [gateway catalog](/business/payments/gateways), Cybersource, MPGS, and Tap list both Tokenization and AutoDebit, and the catalog shows each gateway's currencies. A gateway that can't charge a saved card later can't pay renewals. See [Limits](#limits).
   </FAQItem>
   <FAQItem question="Where do I see AutoPay payments?">
     Each billing cycle is one Ottu transaction in [Payment Management](/business/payment-management/), and all retries of that cycle are on it. The first payment is the transaction from your own checkout.
@@ -325,7 +326,7 @@ AutoPay subscriptions have no plan catalog. The plan name is a free-text label, 
     Yes. Each subscription's emails go out in English or Arabic, chosen when it is created, and the self-service page offers both languages.
   </FAQItem>
   <FAQItem question="What if a customer opens a link that was replaced?">
-    The page shows "link expired". Send them the new link yourself. See [Regenerating a link revokes the old one](#regenerate-link).
+    The page shows "This link has expired". Send them the new link yourself. See [Regenerating a link revokes the old one](#regenerate-link).
   </FAQItem>
 </FAQ>
 
