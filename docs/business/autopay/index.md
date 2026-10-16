@@ -48,7 +48,7 @@ All limits are listed in [Limits](#limits).
   ]}
 />
 
-<p style={{fontSize: "0.875rem", color: "var(--ifm-color-emphasis-600)"}}>✗ means you would have to build this yourself. With AutoPay, Ottu runs it for you.</p>
+<p style={{fontSize: "0.875rem", color: "var(--ifm-color-emphasis-600)"}}>In the Build it yourself column, ✗ means your team would have to build and run this. With AutoPay, Ottu runs it for you.</p>
 
 ## How it works {#how-it-works}
 
@@ -227,7 +227,7 @@ The previous link stops working instantly, and the page shows "link expired". Ot
 
 ## When a payment fails {#when-a-payment-fails}
 
-- **Four attempts by default.** That is one initial charge plus three retries, spaced about an hour apart. Ottu sets these values, not you.
+- **Four attempts by default.** That is one initial charge plus three retries. Ottu fixes the spacing at about an hour. Your developer can set the retry count from 1 to 10 when they create the subscription.
 - **The customer is emailed** after each failed attempt while retries remain, so they can update their card.
 - **After the last attempt,** the subscription moves to Past Due. The customer gets the final email with a link to pay.
 - **Paying the balance** returns the subscription to Active.
