@@ -898,6 +898,11 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "link",
+              label: "Limits",
+              href: "/business/autopay#limits",
+            },
+            {
+              type: "link",
               label: "Things to know",
               href: "/business/autopay#things-to-know",
             },

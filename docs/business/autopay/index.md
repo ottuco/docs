@@ -17,6 +17,13 @@ With AutoPay, a [subscription](/glossary/#term-subscription) is a single checkou
 
 Building the integration? See [AutoPay for developers](/developers/payments/autopay/).
 
+:::info Before you start
+- **AutoPay is API-only.** There is no AutoPay screen in the dashboard. A developer makes the integration through the API.
+- **KNET cannot pay renewals.** Customers must pay with a card that Ottu can save and charge again later.
+
+All limits are listed in [Limits](#limits).
+:::
+
 <ComparisonEyebrow>Compare</ComparisonEyebrow>
 
 ## Why choose AutoPay over <span style={{color: "var(--ifm-color-emphasis-600)"}}>building it yourself</span>? {#why-use-autopay}
@@ -208,17 +215,15 @@ It never takes effect immediately. Only your team can cancel immediately, throug
 A Past Due subscription is the exception. If a Past Due customer cancels, the subscription stays Past Due. When they pay the balance, it ends at once, with no further charge. If they never pay, it stays Past Due until your team cancels it.
 :::
 
-Customers can hold several cards and switch the active one in a click. Ottu never deletes saved cards, so an old card still explains what paid an earlier cycle.
+Customers can hold several cards and switch the active one in a click. Switching to a new card keeps the old card, so an old card still explains what paid an earlier cycle.
 
 :::warning Regenerating a link revokes the old one
-The previous link stops working instantly, and Ottu doesn't notify the customer. Deliver the new link the same way you delivered the first, or the customer is locked out.
+The previous link stops working instantly, and the page shows "link expired". Ottu doesn't notify the customer. Links never expire on their own, so only a regeneration revokes one. Deliver the new link the same way you delivered the first, or the customer is locked out.
 :::
-
-An old link stops working once you regenerate it. Links never expire on their own.
 
 ## When a payment fails {#when-a-payment-fails}
 
-- **Four attempts by default.** That is one initial charge plus three retries, spaced about an hour apart.
+- **Four attempts by default.** That is one initial charge plus three retries, spaced about an hour apart. Ottu sets these values, not you.
 - **The customer is emailed** after each failed attempt while retries remain, so they can update their card.
 - **After the last attempt,** the subscription moves to Past Due. The customer gets the final email with a link to pay.
 - **Paying the balance** returns the subscription to Active.
@@ -245,33 +250,42 @@ Ottu creates [billing cycles](/glossary/#term-billing-cycle) one at a time. The 
 
 ### Anchor days
 
-Every subscription bills on its anchor day, set by the start date. One anchored on the 29th, 30th, or 31st is clamped to the last day of a shorter month, then returns to its anchor day. Here is a subscription anchored on the 31st:
+Every subscription bills on the same day of the month, called its anchor day. The start date sets it. One anchored on the 29th, 30th, or 31st moves to the last day of a shorter month, then returns to its anchor day. Here is a subscription anchored on the 31st:
 
 | Cycle | Anchor day | Bills on | Why |
 |---|---|---|---|
 | January | 31st | Jan 31 | The anchor day exists in January. |
-| February | 31st | Feb 28 (Feb 29 in a leap year) | February has no 31st, so the charge clamps to the last day. |
+| February | 31st | Feb 28 (Feb 29 in a leap year) | February has no 31st, so the charge moves to the last day of the month. |
 | March | 31st | Mar 31 | March has a 31st again. The anchor day never moved. |
 
 ## Setting up AutoPay {#setting-up-autopay}
 
-AutoPay is an API-only integration. Your developers call the API to create, look up, and cancel subscriptions. There is no AutoPay screen in the dashboard.
+Your developers call the API to create, look up, and cancel subscriptions. See [Limits](#limits) for what AutoPay does not do.
 
 Before your first subscription, make sure you have:
 
 1. **AutoPay enabled for your account.** Ask Ottu support to turn it on.
 2. **A support email.** It appears on the customer's page and in the footer of every email Ottu sends.
 3. **A privacy policy URL.** It is linked from the footer of every email Ottu sends.
-4. **A tokenizable payment gateway that supports auto-debit,** in the currency you bill in. Ottu needs somewhere to save and charge the card.
+4. **A payment gateway that can save a card and charge it again later,** in the currency you bill in. Ottu needs somewhere to save and charge the card. KNET cannot do this.
 5. **The three notification templates registered,** in English and Arabic. Ottu support sets these up, the same way [notification templates](/business/notifications/) work for one-off payments.
 
 AutoPay subscriptions have no plan catalog. The plan name is a free-text label, and the price is the amount your team passes in the checkout call that creates the subscription. The [developer docs](/developers/payments/autopay/#api-reference) show the request shape.
+
+## Limits {#limits}
+
+- **API-only.** There is no AutoPay screen in the dashboard. A developer makes the integration.
+- **KNET cannot pay renewals.** Customers must pay with a card that Ottu can save for later charges.
+- **A running subscription cannot be edited.** Amount, frequency, billing day, retry count, and customer email are fixed. Cancel it and create a new one.
+- **No pause.** Cancel at the end of the paid period, then create a new subscription when the customer returns.
+- **Emails switch off only at creation.** You cannot switch them off afterwards.
+- **You cannot pick the exact charge time.**
 
 ## Things to know {#things-to-know}
 
 - **A Past Due subscription never cancels itself.** See [When a payment fails](#when-a-payment-fails).
 - **A customer's cancellation waits for the end of the paid period.** See [The self-service page](#the-self-service-page).
-- **A Past Due customer's cancellation waits for payment.** The subscription stays Past Due. When the customer pays the balance, it ends at once, with no further charge. If they never pay, it stays Past Due until your team cancels it.
+- **A Past Due customer's cancellation waits for payment.** See the note under [The self-service page](#the-self-service-page).
 - **Regenerating a link silently revokes the old one.** Deliver the new link yourself. See [The self-service page](#the-self-service-page).
 - **A zero first charge starts a trial,** not an active subscription. See [Lifecycle](#lifecycle-and-billing-cycles).
 - **A cycle's amount is locked when it is generated,** not read fresh at charge time. See [Lifecycle and billing cycles](#lifecycle-and-billing-cycles).
@@ -280,16 +294,16 @@ AutoPay subscriptions have no plan catalog. The plan name is a free-text label, 
 
 <FAQ>
   <FAQItem question="Can I cancel a customer's subscription immediately?">
-    Yes, but only your team can, through the API. A cancellation the customer starts always waits for the end of their paid period. From Past Due the subscription stays Past Due. When the customer pays the balance it ends at once, with no further charge. If they never pay, it stays Past Due until your team cancels it.
+    Yes, but only your team can, through the API. A cancellation the customer starts always waits for the end of their paid period. For Past Due, see the [lifecycle table](#lifecycle-and-billing-cycles).
   </FAQItem>
   <FAQItem question="Can I change the price of a subscription that's already running?">
-    No. A running subscription's amount can't be edited. Cancel it and create a new one at the new price.
+    No. See [Limits](#limits).
   </FAQItem>
   <FAQItem question="Can I pause a subscription?">
-    No. Cancel at the end of the paid period, so the customer keeps access until it runs out, then create a new subscription when they come back.
+    No. See [Limits](#limits).
   </FAQItem>
   <FAQItem question="Which payment gateways and currencies does AutoPay support?">
-    Ottu charges the saved card through a gateway that supports both tokenization and auto-debit, in the currency of the subscription. In the [gateway catalog](/business/payments/gateways), Cybersource, MPGS, and Tap list both, and the catalog shows each gateway's currencies. KNET doesn't support auto-debit, so it can't pay renewals.
+    Ottu charges the saved card through a gateway that can save a card and charge it again later, in the currency of the subscription. In the [gateway catalog](/business/payments/gateways), Cybersource, MPGS, and Tap list both, and the catalog shows each gateway's currencies. KNET can't pay renewals. See [Limits](#limits).
   </FAQItem>
   <FAQItem question="Where do I see AutoPay payments?">
     Each billing cycle is one Ottu transaction in [Payment Management](/business/payment-management/), and all retries of that cycle are on it. The first payment is the transaction from your own checkout.
@@ -307,7 +321,7 @@ AutoPay subscriptions have no plan catalog. The plan name is a free-text label, 
     Yes. Each subscription's emails go out in English or Arabic, chosen when it is created, and the self-service page offers both languages.
   </FAQItem>
   <FAQItem question="What if a customer opens a link that was replaced?">
-    The old link doesn't open their subscription. Send them the new link yourself.
+    The page shows "link expired". Send them the new link yourself. See [Regenerating a link revokes the old one](#the-self-service-page).
   </FAQItem>
 </FAQ>
 
