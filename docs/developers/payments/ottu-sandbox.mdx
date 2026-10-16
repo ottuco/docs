@@ -52,10 +52,14 @@ Tokenization, auto-debit, and authorize/void are **off** on a new MID until you 
 
 `POST /b/pbl/v2/osb/create/` provisions a Sandbox MID with its full configuration in one call, so you can stand up a test environment without going through the admin. The complete request and response schemas — every field, its type, enum values, constraints and defaults — are in the [API Reference](#api-reference).
 
-Three things about it are worth knowing before your first call, because none of them are visible in the schema:
+Several things about it are worth knowing before your first call, because none of them are visible in the schema:
 
 :::note[Authentication — three accepted modes]
 This endpoint accepts a **private** API key (`Authorization: Api-Key <private_key>`), a logged-in user's **JWT**, or a **Keycloak JWT** — both JWTs as `Authorization: Bearer <token>`. A **public** API key is rejected with `401`, and so is Basic auth. Reaching for the public key first is the most likely mistake. See [Authentication](/developers/getting-started/authentication).
+:::
+
+:::warning[Permission, availability and body format]
+The caller needs the `ottu_sandbox.add_ottusandboxmid` permission; a **scoped** private API key must hold it too. The endpoint is also only available where the server has `SANDBOX_MID_API_ENABLED` turned on, and it is **off by default** (production keeps it off). Either way the answer is `403`. The body must be `application/json`: form and multipart bodies are rejected with `415`. A NUL byte (`\u0000`) in any field is rejected with `400`.
 :::
 
 :::tip[Send OPTIONS first]
@@ -69,7 +73,11 @@ This endpoint accepts a **private** API key (`Authorization: Api-Key <private_ke
 `plugins` is optional, but a MID created without it will not appear anywhere in the product — not in the checkout SDK, not in the dashboard, not in the Payment Methods API. Pass the plugins you actually use, e.g. `["e_commerce", "payment_request"]`. Separately, the 5-per-hour provisioning limit is counted **per caller** (per user or per API key) and only **successful** creations consume quota — a run of `400`s while you get the payload right will not lock you out.
 :::
 
-The MID is always a **sandbox** MID; `type` is not a request field and a production MID can never be minted here. The `code` it returns is the `pg_code` you pass to the [Checkout API](/developers/payments/checkout-api/) — omit it and it is derived from `name_en` and capped at 16 characters.
+The MID is always a **sandbox** MID; `type` is not a request field and a production MID can never be minted here. The `code` it returns is the `pg_code` you pass to the [Checkout API](/developers/payments/checkout-api/).
+
+- **`code`** — omit it and it is derived from `name_en`, capped at 16 characters. A name with no Latin letters or digits (for example an Arabic-only name) cannot be derived from, so send an explicit `code`. Any `code` must contain at least one letter or digit, and must be unique across **all** MIDs, ignoring case (`OTTU-SANDBOX` and `ottu-sandbox` are the same code).
+- **`extra_currency_codes`** — each extra currency needs an exchange rate **from** that currency **into** `currency_code`. If any are missing, the call fails with a `400` that names the currencies.
+- **Exchange configuration** — an existing configuration is reused only when its currency set matches yours **exactly**; otherwise a new one is created.
 
 ## Guide
 
