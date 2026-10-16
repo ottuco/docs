@@ -2,7 +2,7 @@
 # Response of POST /b/pbl/v2/subscriptions/{subscription_id}/regenerate-page-token/.
 
 _description: |
-  The newly issued self-service link. The previous link stopped working the moment it was replaced, and AutoPay does not tell the customer, so you must deliver `page_url` yourself.
+  The newly issued self-service link. The previous link stopped working the moment it was replaced, and Ottu does not tell the customer, so you must deliver `page_url` yourself.
 
 properties:
   page_token:
@@ -10,6 +10,6 @@ properties:
       The new signed token. It replaces the previous one, which is now rejected.
   page_url:
     description: |
-      The complete link to hand to the customer. AutoPay builds it from your primary domain, the subscription's language and `page_token`.
+      The complete link to hand to the customer. Ottu builds it from your primary domain, the subscription's language and `page_token`.
 
       Anyone holding this link can act on the subscription, so treat it as a credential and deliver it only to the subscription's own customer. See [Customer Self-Service Page]({{apiBaseUrl}}/payments/autopay/#customer-self-service-page).

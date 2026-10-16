@@ -261,18 +261,23 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
+                  label: "Live Demo",
+                  href: "/developers/payments/autopay#live-demo",
+                },
+                {
+                  type: "link",
                   label: "API Reference",
                   href: "/developers/payments/autopay#api-reference",
                 },
                 {
                   type: "link",
-                  label: "Best Practices",
-                  href: "/developers/payments/autopay#best-practices",
+                  label: "Limits",
+                  href: "/developers/payments/autopay#limits",
                 },
                 {
                   type: "link",
-                  label: "Compatibility Notes",
-                  href: "/developers/payments/autopay#compatibility-notes",
+                  label: "Best Practices",
+                  href: "/developers/payments/autopay#best-practices",
                 },
                 {
                   type: "link",

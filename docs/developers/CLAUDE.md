@@ -11,11 +11,11 @@ Context-specific guidance for the developer documentation section. Supplements t
 
 ## Writing Style: Stripe-Inspired Developer Docs
 
-- **Code-first**: Every guide starts with a minimal working example showing the happy path
+- **Code-first where there is a sandbox flow**: the Live Demo is the quickstart where one exists; otherwise start with a minimal working example showing the happy path
 - **Multi-language tabs**: Use Docusaurus `<Tabs>` with `groupId="language"` in this order: cURL, Python, Node.js, PHP
-- **Error-first after happy path**: Immediately after the working example, show common error responses and how to handle them
+- **Errors after the happy path**: show common error responses and how to handle them, in the Live Demo, the Step-by-Step or the API Reference, wherever the happy path lives
 - **Copy-paste ready**: Every code snippet must work against the sandbox environment with only an API key substitution
-- **5-minute quickstarts**: Each major feature should have a quickstart getting developers from zero to a working call quickly
+- **Fast to a working call**: the Live Demo (or, without one, Step-by-Step) should get developers from zero to a working call quickly
 - **Interactive**: Reference the auto-generated API docs at `apis/` for try-it-out exploration; link to specific endpoints using deep-link anchors
 - **Self-contained**: Each page provides full context. Include authentication setup, prerequisites, and essential context inline — don't redirect the reader elsewhere for critical information
 
@@ -89,8 +89,9 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 ## Guide                          ← ALL walkthrough content lives here
   ### Workflow                    ← mermaid diagram + brief explanation of each step
-  ### Live Demo                   ← (optional) interactive demo component, before written reference
-  ### Step-by-Step                ← numbered steps with code examples
+  ### Live Demo                   ← required when the feature has a sandbox flow; before written reference
+  ### What your customer sees     ← required for customer-facing features (screenshots/captures, link to the business page)
+  ### Step-by-Step                ← only where the Live Demo + API Reference don't cover it
   ### Use Cases                   ← (optional) specific scenarios, provider-specific details
 
 ## API Reference                  ← interactive schema via <ApiDocEmbed>, always with this H2 heading
@@ -107,8 +108,9 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 - **"Guide" is the single walkthrough section** — all tutorial content goes here. No standalone "How it Works", "Integration Flows", "Quick Start", or "Provider Setup" at H2 level. Use these canonical `###` subsections within Guide:
   - `### Workflow` — mermaid diagram showing the flow + brief explanation of each step
-  - `### Live Demo` — (optional) interactive demo component, placed before the written reference so users experience the flow first
-  - `### Step-by-Step` — numbered instructions with code examples (the "how to actually call it" section)
+  - `### Live Demo` — **required when the feature has a sandbox flow**; an interactive demo component, placed before the written reference so users experience the flow first
+  - `### What your customer sees` — **required for customer-facing features**; captures of what the payer sees, linking to the business page
+  - `### Step-by-Step` — numbered instructions with code examples, **only where the Live Demo and the API Reference don't cover it**
   - `### Use Cases` — (optional) specific scenarios, provider-specific details
 - **"API Reference" always has an H2 heading** — never use bare `<ApiDocEmbed>` with `---` separators. If a page covers multiple related endpoints, use `<Tabs>` wrapping multiple `<ApiDocEmbed>` components. For unified endpoints with a discriminator parameter (e.g., `operation` = refund/capture/void), use tabs with per-tab example payloads above a shared `<ApiDocEmbed>`.
 - **Layout with API embeds** — Pages with `<ApiDocEmbed>` MUST use `hide_table_of_contents: true`. The API schema renders in the right column where the TOC would normally be. The page layout is: left sidebar + content + API explorer. No right-hand TOC.
@@ -121,8 +123,8 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 - **No per-page SDK/package callouts** — all integration options are documented centrally in `getting-started/index.md#boost-your-integration`. Individual pages use the `:::tip Boost Your Integration` block shown above.
 - **Every page ends with "What's Next?"** — 3-5 links to the logical next steps in the developer journey.
 - **Code block titles** — API request/response examples and webhook payloads use the Docusaurus `title` attribute for premium styling (constrained width, labeled header bar). Use the `/code-blocks` skill for the full convention and naming patterns.
-- **FAQ is always second-to-last** (before What's Next). Use H4 (####) for individual questions, not H3 (H3s create sidebar entries).
-- **Section headings use H2 (##)** — sub-sections use H3 (###). H4 (####) only for items within a section (e.g., FAQ questions, best practice items).
+- **FAQ is always second-to-last** (before What's Next). Use the `<FAQ>` / `<FAQItem>` component from `@site/src/components/FAQ` for questions (not H3s, which create sidebar entries).
+- **Section headings use H2 (##)** — sub-sections use H3 (###). H4 (####) only for items within a section (e.g., best practice items).
 
 ## API Documentation
 

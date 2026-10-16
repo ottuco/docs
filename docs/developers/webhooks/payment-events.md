@@ -171,7 +171,7 @@ Payments belonging to an [AutoPay](/developers/payments/autopay/) subscription m
 | `cycle_number` | Sequential number of the billing cycle being charged. Nullable. |
 | `cycle_status` | Status of that billing cycle, for example `paid`, `retry_scheduled`, `failed`. Nullable. |
 | `next_billing_date` | Next scheduled billing date, or `null` when nothing further is scheduled. |
-| `event_type` | One of `cit_success`, `cit_failure`, `mit_success`, `mit_failure`, `card_updated`, `recovery_success`, or `null`. `null` means AutoPay could not yet tell whether the subscription's setup payment succeeded — it does **not** mean success. |
+| `event_type` | One of `cit_success`, `cit_failure`, `mit_success`, `mit_failure`, `card_updated`, or `null`. `null` means AutoPay could not yet tell whether the subscription's setup payment succeeded — it does **not** mean success. |
 
 :::danger The top-level `autopay` block is not signed — never trust it
 Two blocks carry a `subscription_id`, and only one of them is trustworthy.
@@ -184,7 +184,7 @@ The top-level block is also fetched live from the AutoPay service while the webh
 Two consequences worth designing for:
 
 - **Its absence proves nothing.** A payment with no `autopay` block may still be an AutoPay payment whose lookup did not complete in time. Do not infer "this is not a subscription payment" from a missing block.
-- **`event_type` is a best-guess hint, not an authoritative outcome.** AutoPay classifies it independently from the payment result you're reading it alongside. For what actually happened to this payment, read `result` and `state`; for authoritative subscription state, use the [subscription endpoints](/developers/payments/autopay/#step-by-step).
+- **`event_type` is a best-guess hint, not an authoritative outcome.** AutoPay classifies it independently from the payment result you're reading it alongside. For what actually happened to this payment, read `result` and `state`; for authoritative subscription state, use the [subscription endpoints](/developers/payments/autopay/#api-reference).
 
 Never make a security or money-moving decision from the top-level `autopay` block.
 :::

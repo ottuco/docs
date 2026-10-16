@@ -2,7 +2,7 @@
 # Response of GET /b/pbl/v2/subscriptions/{subscription_id}/cycles/.
 
 _description: |
-  One page of a subscription's billing cycles. See [Billing cycle history]({{apiBaseUrl}}/payments/autopay/#billing-cycle-history).
+  One page of a subscription's billing cycles. `limit` and `offset` belong in the query string, and `next` and `previous` can be followed directly with `GET`.
 
 properties:
   count:
@@ -10,10 +10,10 @@ properties:
       The total number of billing cycles that match, across all pages, not only the ones in `results`.
   next:
     description: |
-      URL of the next page, on your Connect domain. Follow it with `GET`. `null` on the last page.
+      URL of the next page, on your Ottu domain. Follow it with `GET`. `null` on the last page.
   previous:
     description: |
-      URL of the previous page, on your Connect domain. Follow it with `GET`. `null` on the first page.
+      URL of the previous page, on your Ottu domain. Follow it with `GET`. `null` on the first page.
   results:
     description: |
       The billing cycles on this page, oldest first. An empty array when nothing matches.
