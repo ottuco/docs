@@ -156,7 +156,7 @@
         "event_type": {
           "type": "string",
           "nullable": true,
-          "description": "What AutoPay classified this payment as. One of `cit_success`, `cit_failure`, `mit_success`, `mit_failure`, `card_updated`, `recovery_success`, or `null` when the setup outcome is still undecided. A hint only; read `result` and `state` for the payment outcome."
+          "description": "What AutoPay classified this payment as. One of `cit_success`, `cit_failure`, `mit_success`, `mit_failure`, `card_updated`, or `null` when the setup outcome is still undecided. A hint only; read `result` and `state` for the payment outcome.\n"
         },
         "next_billing_date": {
           "type": "string",

@@ -20,7 +20,7 @@ import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 
 AutoPay is Ottu's managed subscriptions feature. You make one [Checkout API](../checkout-api) call with `payment_type: "auto_pay"`, and Ottu then generates each [billing cycle](/glossary/#term-billing-cycle), retries failed charges, sends the [dunning](/glossary/#term-dunning) emails and hosts a self-service page for your customer. With [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments) you own that schedule yourself. Want to see the result first? [See what your customers see](/business/autopay/) on the business page.
 
-Every call on this page uses the standard [Ottu API key](/developers/getting-started/authentication), with no separate credential. There is no AutoPay screen in the dashboard, so your developers manage subscriptions through the API.
+Every call on this page uses the standard [Ottu API key](/developers/getting-started/authentication), with no separate credential. AutoPay is API-only. See [Limits](#limits).
 
 :::note Base URL
 Every API call in this guide targets <code>{OTTU_CONNECT_BASE_URL}</code>. Swap in your own merchant domain when you integrate.
@@ -171,6 +171,38 @@ All six subscription-management endpoints, plus the Checkout API call that creat
 
 Every management endpoint authenticates with your [API key](/developers/getting-started/authentication) and applies to your own merchant account. You never send a `Merchant-Id` header yourself.
 
+Here is a complete `auto_pay` request. `agreement` is a full recurring agreement and the `autopay` block repeats the same schedule.
+
+<CodeBlock language="bash" title="Create an AutoPay subscription — POST /b/checkout/v1/pymt-txn/">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/' \\
+  --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
+  --header 'Content-Type: application/json' \\
+  --data-raw '{
+    "type": "e_commerce",
+    "pg_codes": ["<TOKENIZABLE_PG_CODE>"],
+    "amount": "9.900",
+    "currency_code": "KWD",
+    "customer_id": "cust_1001",
+    "customer_email": "customer@example.com",
+    "payment_type": "auto_pay",
+    "order_no": "order-1001",
+    "webhook_url": "https://merchant.example.com/ottu/webhook",
+    "agreement": {
+      "id": "AGR-1001",
+      "type": "recurring",
+      "frequency": "monthly",
+      "amount_variability": "fixed",
+      "cycle_interval_days": 30,
+      "total_cycles": 12,
+      "expiry_date": "2027-12-31"
+    },
+    "autopay": {
+      "frequency": "monthly",
+      "recurring_amount": "9.900",
+      "start_date": "2026-11-01",
+      "description": "Pro Plan - monthly"
+    }
+  }'`}</CodeBlock>
+
 <Tabs groupId="autopay-api" queryString>
 <TabItem value="create" label="Create">
 
@@ -223,6 +255,16 @@ These are the statuses you will meet most often, so you can handle them without 
 | `409` | `Idempotency-Key` was already used on `cancel` with a different request body (`code: idempotency_conflict`). | Send a new key for a new request. Reuse a key only to retry the exact same request. |
 | `422` | Ottu rejected the request. Either a value is invalid (for example an unknown `status` filter on list, where `detail` lists each invalid field), or the subscription is in a state that does not allow it, such as canceling one that has already ended (`code: invalid_transition`). | Fix the request, or re-read the subscription's `status`. Retrying unchanged will fail again. |
 
+## Limits {#limits}
+
+- **Gateways.** KNET and other gateways that cannot save a card for auto-debit cannot renew a subscription. `pg_codes` must name a gateway that supports tokenization and auto-debit.
+- **Billing periods.** `frequency` is `monthly` or `yearly`. There is no weekly or custom interval.
+- **No edits.** A running subscription cannot be edited: amount, frequency, billing day, retry count, `language`, `notification_preferences` or customer email. [Cancel](/developers/payments/autopay/?autopay-api=cancel#api-reference) it and create a new one. There is no proration.
+- **Retries.** Ottu sets the retry interval: 1 hour apart. The count defaults to 3 retries and you can set 1 to 10 with `retry_count` when you create the subscription.
+- **`past_due` is sticky.** Build your own monitoring: poll [List subscriptions](/developers/payments/autopay/?autopay-api=list#api-reference) with `status: "past_due"`.
+- **No dashboard screen.** AutoPay is API-only. Renewal charges appear in Payment Management as normal transactions.
+- **Sandbox.** You cannot trigger a renewal early.
+
 ## Best Practices
 
 - **Send a UUID `Idempotency-Key` on cancel and regenerate.** Only cancel replays safely. Before retrying a timed-out regenerate, call `page-link` and compare `page_url`.
@@ -248,13 +290,13 @@ These are the statuses you will meet most often, so you can handle them without 
     Ottu doesn't track the card's expiry date, so there is no warning in advance. The next renewal fails and follows the normal path: retries, then `past_due` and the final email. The customer adds a new card and pays the balance on the [self-service page](#customer-self-service-page).
   </FAQItem>
   <FAQItem question="Can I change the amount of a running subscription?">
-    No. Nothing about a running subscription can be edited: amount, frequency, billing day, retry count or customer email. [Cancel](/developers/payments/autopay/?autopay-api=cancel#api-reference) the subscription with `mode: "at_period_end"` so the paid period runs out, then have the customer start a new one through checkout with the new `recurring_amount`. There is no proration.
+    No. A running subscription cannot be edited (see [Limits](#limits)). [Cancel](/developers/payments/autopay/?autopay-api=cancel#api-reference) the subscription with `mode: "at_period_end"` so the paid period runs out, then have the customer start a new one through checkout with the new `recurring_amount`. There is no proration.
   </FAQItem>
   <FAQItem question="How do I test a failed renewal?">
-    The sandbox [test card set](/developers/payments/sandbox#standard-test-cards) includes MIT-decline cards. They save normally on the first payment, then decline on every later merchant-initiated charge. Pay the first charge with one of them. The first renewal is charged one billing period after `start_date`. When it declines, follow the cycle in [Billing cycles](/developers/payments/autopay/?autopay-api=cycles#api-reference): it moves through `retry_scheduled` to `failed`, and the subscription becomes `past_due`.
+    The sandbox [test card set](/developers/payments/sandbox#standard-test-cards) includes three Visa cards that decline renewals: `4111 1111 1111 114`, `4111 1111 1111 115` and `4111 1111 1111 116`. They save normally on the first payment and decline on every later merchant-initiated charge. Pay the first charge with one of them. The sandbox has no way to trigger a renewal early: the first renewal is charged one billing period after `start_date`. When it declines, follow the cycle in [Billing cycles](/developers/payments/autopay/?autopay-api=cycles#api-reference): it moves through `retry_scheduled` to `failed`, and the subscription becomes `past_due`.
   </FAQItem>
   <FAQItem question="Where do I see AutoPay charges in the dashboard?">
-    In Payment Management, as normal transactions. Each billing cycle is one transaction with order number `<subscription ID>-c<cycle number>` (for example `sub_…-c2`) and payment type auto-debit, and every retry attempt sits on that one transaction. The first payment is your own checkout transaction. There is no AutoPay screen in the dashboard. A refund on a renewal is a normal [refund](/business/payment-management/) of that transaction, and it does not cancel the subscription.
+    In Payment Management, as normal transactions. Each billing cycle is one transaction with order number `<subscription ID>-c<cycle number>` (for example `sub_…-c2`) and payment type auto-debit, and every retry attempt sits on that one transaction. The first payment is your own checkout transaction. A refund on a renewal is a normal [refund](/business/payment-management/) of that transaction, and it does not cancel the subscription.
   </FAQItem>
 </FAQ>
 

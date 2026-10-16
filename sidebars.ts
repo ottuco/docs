@@ -271,6 +271,11 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
+                  label: "Limits",
+                  href: "/developers/payments/autopay#limits",
+                },
+                {
+                  type: "link",
                   label: "Best Practices",
                   href: "/developers/payments/autopay#best-practices",
                 },
