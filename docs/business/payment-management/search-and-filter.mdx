@@ -7,7 +7,7 @@ import StepGuide from "@site/src/components/StepGuide";
 
 # Search & Filter Payments
 
-This guide explains how to display and filter payment links within the Ottu Dashboard. By following these steps, you can view payment links created by a specific user or processed through a specific [payment gateway](/business/payments/gateways).
+This guide explains how to display and filter payment links within the Ottu Dashboard. By following these steps, you can view payment links created by a specific user or processed through a specific [payment gateway](/business/payments/gateways), and find payments by the [application](#filter-by-application) that created them.
 
 ## Step-by-Step Instructions
 
@@ -29,6 +29,35 @@ This guide explains how to display and filter payment links within the Ottu Dash
     description: <>1. In the filter options, specify the desired <strong>Payment Gateway</strong>.<br />2. Click <strong>Search</strong>.<br /><br />All payment links associated with the selected payment gateway are displayed.</>,
   },
 ]} nextSectionId="video-demonstration" />
+
+## Filter by Application
+
+The **Application** filter (**التطبيق** in Arabic) shows only the payments that one application created, such as Shopify, Event or Estate, or an application your developers built.
+
+1. Open a transactions table: a plugin's **Transactions**, the table of all transactions, or **Refunds**.
+2. Click **Filter**.
+3. Choose an application from the **Application** dropdown. Clear it to see all payments again.
+
+The dropdown lists the applications found on your payments, each with a capital first letter (`shopify` shows as **Shopify**). A new application shows the next time the page loads. The filter matches the exact application. On the **Refunds** table, it matches the application of the original payment.
+
+:::note[No Application filter?]
+An administrator adds it once, for all tables: go to **Administration Panel** > **Search** > **Search Config**, add a row under **Filter Fields** with **Field** set to **Application**, and save.
+:::
+
+:::tip
+Older payments, created before Ottu began storing the name in lower case, keep the spelling they were sent with. So one application can show twice in the dropdown, for example as **Shopify** for both `Shopify` and `shopify`. Choose each one to see all of its payments.
+:::
+
+## Search by Application
+
+To search by application name, choose **Application** as the search field and type part of the name: `shop` finds `shopify`. The search ignores case.
+
+**Application** shows in the search field list once an administrator selects it under **Internal Fields**:
+
+- **Administration Panel** > **Search** > **Search Config**: for the table of all transactions, and for plugins without their own search config.
+- **Administration Panel** > **Search** > **Plugin Search Configs**: in the plugin's config, when the plugin has one. A plugin's own config replaces the general one for that plugin.
+
+Developers set the application with [`extra.app_name`](/developers/getting-started/api-fundamentals#app-name) when they create the payment.
 
 ## Video Demonstration
 

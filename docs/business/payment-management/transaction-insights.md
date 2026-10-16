@@ -105,6 +105,17 @@ Ottu shows the gateway's own reference for the transaction whenever the gateway 
 Which value you see depends on the payment gateway. Gateways that return their own reference in their response show it directly; others show Ottu's internal reference instead.
 :::
 
+### Application
+
+The **Application** column (**التطبيق** in Arabic) shows which application created the payment, such as `shopify`, `event` or `estate`, or the name your developers send. The cell is empty for payments that no application marked.
+
+- **Plugin tables:** every plugin's **Table Headers** lists **Application**, off by default. Add it like any other header (see [Managing the Header List](#managing-the-header-list)).
+- **All transactions:** the table of all transactions always shows the column.
+- **Refunds:** a refund shows the application of the original payment.
+- **Payment details:** the payment's detail page shows **Application** on the **Primary** tab, when the payment has one.
+
+To list the payments of one application, see [Filter by Application](/business/payment-management/search-and-filter#filter-by-application). Developers set the value with [`extra.app_name`](/developers/getting-started/api-fundamentals#app-name).
+
 ## Dashboard Charts
 
 The Ottu Dashboard provides visual charts so you can track transactions and sales performance at a glance. These charts update in real time and are available from the main dashboard.

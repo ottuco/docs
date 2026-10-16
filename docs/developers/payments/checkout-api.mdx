@@ -17,6 +17,8 @@ In order to ensure optimal transaction success tracking and minimize the number 
 
 By updating the same payment transaction, rather than creating a new one for each payment attempt, merchants can more effectively trace customer interactions with their cart. This is particularly useful for events such as insufficient funds, where a customer may remove an item from their cart and successfully complete a transaction on their next attempt. Tracking and analyzing such events can help merchants make data-driven decisions for future improvements.
 
+Use the `extra` object to store your own key-value data with the payment. If your integration is an application that creates payments, such as a POS app or a platform plugin, put its name in [`extra.app_name`](/developers/getting-started/api-fundamentals#app-name) so the merchant can filter and export payments by **Application** in the dashboard.
+
 :::tip[Boost Your Integration]
 Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
 :::

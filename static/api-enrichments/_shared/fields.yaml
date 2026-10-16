@@ -84,7 +84,7 @@ pg_codes:
 
 extra:
   description: |
-    An object for extra data aka dynamic fields. Extra data can accept any value by default. However, if the merchant wants to enforce a specific type, they can use the plugins.Field class to do so. All CUSTOM fields are validated inside extra field.
+    Your own key-value data, stored with the payment and sent back in its responses and [webhooks]({{apiBaseUrl}}/webhooks/payment-events/). Any keys are accepted. Ottu validates only `app_name` and the custom fields set up for the plugin. See [Custom Data]({{apiBaseUrl}}/getting-started/api-fundamentals/#custom-data).
 
 expiration_time:
   description: |
