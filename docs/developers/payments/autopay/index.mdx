@@ -305,6 +305,9 @@ These are the statuses you will meet most often, so you can handle them without 
   <FAQItem question="How do I check that AutoPay is enabled on my account?">
     Call `GET /b/api/v1/config/`. The response includes `autopay_api_url` when AutoPay is enabled, and leaves the key out entirely when it is not. Test for the key, not its value.
   </FAQItem>
+  <FAQItem question="A card saved before the agreement fix keeps failing. Why?">
+    An earlier defect saved cards from `auto_pay` first payments without their agreement, and renewals against such a card are rejected with "No Cardholder Initiated Transaction (CIT) found". Those cards are not repaired automatically. Have the customer complete a new first payment so the card is saved with its agreement.
+  </FAQItem>
   <FAQItem question="Where do I see AutoPay charges in the dashboard?">
     In Payment Management, as normal transactions. Each billing cycle is one transaction with order number `<subscription ID>-c<cycle number>` (for example `sub_…-c2`) and payment type auto-debit, and every retry attempt sits on that one transaction. The first payment is your own checkout transaction. A refund on a renewal is a normal [refund](/business/payment-management/) of that transaction, and it does not cancel the subscription.
   </FAQItem>
