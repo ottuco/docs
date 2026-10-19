@@ -141,7 +141,9 @@ flowchart TD
 
 Payments belonging to an [AutoPay](/developers/payments/autopay/) subscription may carry an additional `autopay` object. Note where it sits: at the **top level** of the payload, not inside `extra`.
 
-```json title="Payload excerpt — an AutoPay renewal"
+You receive it for the subscription's first payment only, the checkout session you created. Ottu charges renewals itself and sends no webhook to your `webhook_url` for them, so read renewal outcomes from the [subscription endpoints](/developers/payments/autopay/#api-reference).
+
+```json title="Payload excerpt — an AutoPay first payment"
 {
    "amount":"49.990",
    "result":"success",
@@ -155,14 +157,16 @@ Payments belonging to an [AutoPay](/developers/payments/autopay/) subscription m
    },
    "autopay":{
       "subscription_id":"sub_abc123",
-      "subscription_status":"active",
-      "cycle_number":3,
-      "cycle_status":"paid",
-      "next_billing_date":"2026-10-01",
-      "event_type":"mit_success"
+      "subscription_status":"pending_setup",
+      "cycle_number":null,
+      "cycle_status":null,
+      "next_billing_date":null,
+      "event_type":null
    }
 }
 ```
+
+The webhook usually arrives before Ottu has confirmed the payment, so the subscription is still `pending_setup` and the cycle fields and `event_type` are `null`. See [First payment and activation](/developers/payments/autopay/#first-payment-and-activation).
 
 | Field | Description |
 |---|---|
