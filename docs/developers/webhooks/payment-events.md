@@ -7,6 +7,10 @@ import SchemaEmbed from "@site/src/components/SchemaEmbed";
 
 # Payment Notification
 
+:::note This page describes webhook formats 1 and 2
+If your account uses [format 3](/developers/webhooks/event-catalogue), your payments arrive inside an event envelope as `data.payment`; see [Webhook Events (v3)](/developers/webhooks/event-catalogue) and [Migrating to v3](/developers/webhooks/migrate-to-v3). Each delivery also carries an [`Idempotency-Key`](/developers/webhooks/delivery-and-retries#idempotency-key) header with the event id on every format.
+:::
+
 Payment webhooks are specific to payment events and are triggered on multiple occasions:
 
 1.  #### Post-Payment Completion
@@ -260,3 +264,11 @@ For general webhook setup and configuration, see the [Webhooks Overview](./).
 - [**Operation Events**](/developers/webhooks/operation-events/) — Webhook notifications for refunds, captures, and voids
 - [**Verify Signatures**](/developers/webhooks/verify-signatures/) — Validate webhook authenticity with HMAC-SHA256
 - [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration
+
+## Related
+
+- [Webhook Events (v3)](/developers/webhooks/event-catalogue): the format 3 envelope, with this payload as `data.payment`
+- [Migrating to v3](/developers/webhooks/migrate-to-v3)
+- [Delivery and Retries](/developers/webhooks/delivery-and-retries)
+- [Verify Signatures](/developers/webhooks/verify-signatures)
+- [Webhooks Overview](/developers/webhooks)

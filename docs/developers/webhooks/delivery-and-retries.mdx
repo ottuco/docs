@@ -1,0 +1,302 @@
+---
+title: Webhook Delivery and Retries
+sidebar_label: Delivery & Retries
+description: How Ottu delivers webhooks - success rules, the 8-attempt retry schedule, the Idempotency-Key header and the failure email.
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Webhook Delivery and Retries
+
+Ottu delivers every [webhook event](/developers/webhooks/event-catalogue) with an HTTP `POST` to your URL and judges the delivery by your response. If your server does not answer with success, Ottu tries again on a fixed schedule. This page explains exactly what counts as success, when the retries happen, the **`Idempotency-Key`** header that lets you drop duplicates, and when you get a failure email.
+
+It applies to all three webhook formats, and says where [format 3](/developers/webhooks/event-catalogue) differs from [formats 1 and 2](/developers/webhooks/migrate-to-v3#formats).
+
+## Use cases
+
+- Decide which HTTP status your receiver should return, and when.
+- Make order fulfilment safe when the same event arrives more than once.
+- Plan for downtime: how long Ottu keeps trying while your system is unavailable.
+- Know when Ottu gives up and emails you.
+
+## Quick implementation
+
+A receiver that is safe against duplicates does four things, in this order: verify the signature, check the `Idempotency-Key`, process once, answer `2xx`.
+
+<Tabs groupId="language">
+<TabItem value="curl" label="cURL">
+
+Send the same delivery twice to your local receiver. The second call must return `200` without running your business logic again.
+
+```bash
+BODY='{"id":"evt_01JABCDEFGHJKMNPQRSTVWXYZ0","type":"payment.paid","created":"2026-10-22T10:00:00Z","version":3,"is_sandbox":true,"merchant_id":"merchant.ottu.net","data":{"payment":{"order_no":"ORDER-1","reference_number":"GOLDENATT1","state":"paid"}}}'
+
+for i in 1 2; do
+  curl -s -o /dev/null -w "attempt $i -> HTTP %{http_code}\n" \
+    -X POST http://localhost:8000/webhooks/ottu \
+    -H "Content-Type: application/json" \
+    -H "Idempotency-Key: evt_01JABCDEFGHJKMNPQRSTVWXYZ0" \
+    -H "Ottu-Signature: t=$(date +%s),v2=<computed-with-your-key>" \
+    --data-binary "$BODY"
+done
+```
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+```python
+import json
+import sqlite3
+
+from flask import Flask, request
+
+app = Flask(__name__)
+db = sqlite3.connect("webhooks.db", isolation_level=None, check_same_thread=False)
+db.execute("CREATE TABLE IF NOT EXISTS processed_events (event_id TEXT PRIMARY KEY)")
+
+
+def first_time(event_id: str) -> bool:
+    """True only for the first caller. The PRIMARY KEY makes concurrent retries safe."""
+    cursor = db.execute("INSERT OR IGNORE INTO processed_events (event_id) VALUES (?)", (event_id,))
+    return cursor.rowcount == 1
+
+
+@app.post("/webhooks/ottu")
+def ottu_webhook():
+    raw_body = request.get_data()
+    if not verify_ottu_signature(raw_body, request.headers.get("Ottu-Signature", ""), HMAC_KEY):
+        return "invalid signature", 401
+
+    event = json.loads(raw_body)
+    # On format 3 the header equals event["id"]; the id in the signed body is the one to trust.
+    if not first_time(event["id"]):
+        return "", 200  # already processed: acknowledge, do nothing
+
+    try:
+        handle_event(event)  # also check the business reference here, see the warning below
+    except Exception:
+        db.execute("DELETE FROM processed_events WHERE event_id = ?", (event["id"],))
+        raise  # 500 -> Ottu retries and the event is processed again
+    return "", 200
+```
+
+</TabItem>
+<TabItem value="node" label="Node.js">
+
+```javascript
+import express from "express";
+
+const app = express();
+const processed = new Set(); // use a database table with a unique key in production
+
+app.post("/webhooks/ottu", express.raw({ type: "*/*" }), async (req, res) => {
+  if (!verifyOttuSignature(req.body, req.get("Ottu-Signature") ?? "", HMAC_KEY)) {
+    return res.status(401).send("invalid signature");
+  }
+
+  const event = JSON.parse(req.body.toString("utf8"));
+  // On format 3 the header equals event.id; the id in the signed body is the one to trust.
+  if (processed.has(event.id)) return res.sendStatus(200); // already processed
+
+  processed.add(event.id);
+  try {
+    await handleEvent(event); // also check the business reference here, see the warning below
+  } catch (err) {
+    processed.delete(event.id);
+    return res.sendStatus(500); // Ottu retries and the event is processed again
+  }
+  res.sendStatus(200);
+});
+```
+
+</TabItem>
+<TabItem value="php" label="PHP">
+
+```php
+<?php
+$pdo = new PDO('sqlite:webhooks.db');
+$pdo->exec('CREATE TABLE IF NOT EXISTS processed_events (event_id TEXT PRIMARY KEY)');
+
+function firstTime(PDO $pdo, string $eventId): bool {
+    // The PRIMARY KEY makes concurrent retries safe: only one insert succeeds.
+    $stmt = $pdo->prepare('INSERT OR IGNORE INTO processed_events (event_id) VALUES (?)');
+    $stmt->execute([$eventId]);
+    return $stmt->rowCount() === 1;
+}
+
+$rawBody = file_get_contents('php://input');
+if (!verifyOttuSignature($rawBody, $_SERVER['HTTP_OTTU_SIGNATURE'] ?? '', $hmacKey)) {
+    http_response_code(401);
+    exit;
+}
+
+$event = json_decode($rawBody, true);
+// On format 3 the header equals $event['id']; the id in the signed body is the one to trust.
+if (!firstTime($pdo, $event['id'])) {
+    http_response_code(200); // already processed
+    exit;
+}
+
+try {
+    handleEvent($event); // also check the business reference here, see the warning below
+} catch (Throwable $e) {
+    $pdo->prepare('DELETE FROM processed_events WHERE event_id = ?')->execute([$event['id']]);
+    http_response_code(500); // Ottu retries and the event is processed again
+    exit;
+}
+http_response_code(200);
+```
+
+</TabItem>
+</Tabs>
+
+## Detailed guide
+
+### What counts as success {#success-rules}
+
+Ottu reads only the **HTTP status code** of your response; the body is ignored.
+
+| Format | Delivered when your server answers | Anything else |
+|---|---|---|
+| **3** | Any `2xx` (200 to 299) | Failure, retried |
+| **1 and 2** | `200` or `201` only | Failure |
+
+- A `3xx` response is a **failure** on every format: Ottu does not follow redirects. Point the URL at the final address.
+- A timeout, a refused connection or a TLS error is a failure. Your URL must answer within the configured **timeout** (15 seconds by default).
+- On formats 1 and 2, retries are limited to the merchant `retries` and `backoff_factor` settings and, as before, are triggered by timeouts. See [Webhooks Overview](/developers/webhooks#webhook-notification-mechanism).
+
+:::warning On the payment's webhook URL, 200 and 201 behave differently for the payer on formats 1 and 2 only
+For the payment's own `webhook_url` (the one the payer waits on), formats 1 and 2 send the payer back to your `redirect_url` on `200` and keep them on the Ottu page on `201`. On format 3 **any `2xx` is success and lets the redirect proceed**, so `201` no longer keeps the payer on the Ottu page. If your receiver relied on `201` to hold the payer, change that before moving to format 3. See [Payment Events](/developers/webhooks/payment-events#setup).
+:::
+
+### The request Ottu sends {#request}
+
+| Header | Value |
+|---|---|
+| `Content-Type` | `application/json` (format 3 is always JSON; XML is a format 1 and 2 option) |
+| `Ottu-Signature` | `t=<unix seconds>,v2=<hex>` on format 3. Formats 1 and 2 send `v1` by default. See [Verify Signatures](/developers/webhooks/verify-signatures#ottu-signature-header). `t` is read fresh for every attempt. |
+| `Idempotency-Key` | The event id, `evt_...`. See [below](#idempotency-key). |
+
+### Same URL on a legacy route {#same-url}
+
+If an event is also configured to reach a URL that is one of your existing webhook URLs (the payment's `webhook_url`, a plugin URL or the operations URL), that URL receives **one** delivery, in the format of that existing route. Events are selected on Ottu's side; you do not need to do anything in your receiver, but you must still de-duplicate on the event id when the same event reaches two different URLs.
+
+### Retry schedule {#retry-schedule}
+
+Format 3 deliveries to the operations URL and (after a failed first try) the payment's `webhook_url` are retried in the background. There are **8 attempts in total**: the first attempt and seven retries.
+
+| Attempt | Waits before it | Counted from the start (about) |
+|---|---|---|
+| 1 | immediately | 0 |
+| 2 | 1 minute | 1 minute |
+| 3 | 5 minutes | 6 minutes |
+| 4 | 30 minutes | 36 minutes |
+| 5 | 2 hours | 2.5 hours |
+| 6 | 5 hours | 7.5 hours |
+| 7 | 10 hours | 17.5 hours |
+| 8 | 24 hours | about 42 hours |
+
+Each wait is randomly varied by **plus or minus 10 percent** (jitter), so a burst of failures does not retry in one synchronized wave. After attempt 8 fails the delivery is marked `failed` and Ottu stops.
+
+- Every retry sends the **same body bytes** and the **same `Idempotency-Key`**; only the `Ottu-Signature` `t` and signature are new.
+- For the payment's `webhook_url`, attempt 1 runs while the payer waits on the Ottu page. If it fails, attempts 2 to 8 follow in the background and never change what the payer sees.
+
+### Idempotency-Key {#idempotency-key}
+
+Every delivery carries `Idempotency-Key: <event id>`, for example `Idempotency-Key: evt_01JABCDEFGHJKMNPQRSTVWXYZ0`, on **every format** (payment and operation webhooks alike).
+
+| Situation | Same key? |
+|---|---|
+| The first attempt and every retry of a delivery | Yes |
+| A manual re-disclose of a payment from the Ottu dashboard whose state did not change | Yes |
+| The same event delivered to several URLs (for example the payment's `webhook_url` and the operations URL, when you configured the same URL) | Yes, identical on each |
+| A new state, a new attempt, or a second partial refund | No: it is a **new event** with a new id, so a new key |
+
+- **Format 3:** the header equals the envelope's `id`. Because the body is signed, the `id` inside it is authenticated; the header lets you check for a duplicate *before* parsing the body.
+- **Formats 1 and 2:** the body bytes are unchanged, so the event id is only available in the header. The header is **not covered by the `v1` signature**: treat it as a de-duplication hint. Replay of a captured request is limited by checking the `t` tolerance of `Ottu-Signature`.
+- A delivery whose event could not be recorded on formats 1 and 2 is sent **without** the header. It is never sent with an invented id, so make a missing header a case you handle (fall back to your business reference).
+
+**Receiver guidance:**
+
+1. Store each processed id.
+2. When an id you have seen arrives again, answer `2xx` **without reprocessing it**.
+3. Record the id and the business effect together (one database transaction), so a crash cannot mark an event processed that was never applied.
+
+:::warning The key de-duplicates deliveries, not business actions
+Two different events can describe the same business outcome: a payment can be re-disclosed, retried, or confirmed by an inquiry. Before you **fulfil an order or refund money**, also check your own record of the business reference: `reference_number` of the payment, or the operation's `reference_number` for a refund or capture. Act only when the `Idempotency-Key` is unseen **and** the `reference_number` has not already been applied.
+:::
+
+### Failure email {#failure-email}
+
+When the last attempt fails (attempt 8 on format 3; formats 1 and 2 keep their existing behaviour), Ottu sends **one** failure email to the addresses in your webhook configuration, provided **error notification** is enabled (`notify_on_error`, default on) and at least one recipient is set in `emails`. There is no email per attempt. See [Webhooks Overview](/developers/webhooks#webhook-notification-mechanism) for these settings.
+
+## The delivery flow
+
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
+sequenceDiagram
+    participant O as Ottu
+    participant M as Your receiver
+    participant S as Your database
+
+    O->>O: Record event evt_X, store the body bytes once
+    O->>M: Attempt 1: POST body + Ottu-Signature + Idempotency-Key evt_X
+    M->>M: Verify v2 on the raw body
+    M->>S: Insert evt_X (unique)
+    S-->>M: First time
+    M->>M: Fulfil order, check reference_number
+    M--xO: Timeout or 5xx
+    Note over O: Wait 1 minute, plus or minus 10 percent
+    O->>M: Attempt 2: same bytes, same key, fresh signature
+    M->>S: Insert evt_X (unique)
+    S-->>M: Already there
+    M-->>O: 200, nothing reprocessed
+    Note over O: Delivered. Any 2xx stops the retries
+    Note over O: If all 8 attempts fail: status failed, one failure email
+
+    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
+    class O accent
+```
+
+## API reference
+
+There is no endpoint to call: this page describes what Ottu sends to you. The related references are:
+
+- The body: [Webhook Events (v3)](/developers/webhooks/event-catalogue#envelope).
+- The signature: [Verify Signatures](/developers/webhooks/verify-signatures#ottu-signature-header).
+
+## Error handling
+
+| Your response | Ottu does | What to do |
+|---|---|---|
+| `2xx` (format 3), `200`/`201` (formats 1, 2) | Marks the delivery `delivered`, stops. | Nothing. |
+| `3xx` | Failure. Redirects are not followed. | Register the final URL. |
+| `400`, `401`, `404` | Failure, retried on the schedule. | Fix the cause (signature check, route). Retries recover once fixed. |
+| `5xx` | Failure, retried. | Return `5xx` on purpose to ask for a retry after a transient fault. |
+| Timeout or connection error | Failure, retried (last error `timeout` or `connection error`). | Answer faster; move heavy work to a queue. |
+| All 8 attempts failed | Marks the delivery failed and sends one failure email. | Fix the receiver, then reconcile with the [Payment Status API](/developers/payments/psq). |
+| Duplicate `Idempotency-Key` | Not applicable: Ottu cannot tell, you decide. | Answer `2xx` and skip processing. |
+
+## Best practices
+
+- Answer `2xx` as soon as the event is stored, then process asynchronously.
+- Make the id store and the business change one transaction.
+- Treat the retry window as roughly two days: monitor failure emails, and use the [Payment Status API](/developers/payments/psq) to reconcile anything you may have missed.
+- Do not rely on one URL receiving events in order; see [ordering](/developers/webhooks/event-catalogue#ordering).
+- Keep the URL reachable on a public HTTPS address.
+
+## What's Next?
+
+- [**Verify Signatures**](/developers/webhooks/verify-signatures#ottu-signature-header): authenticate each delivery
+- [**Webhook Events (v3)**](/developers/webhooks/event-catalogue): the envelope and every event type
+- [**Migrating to v3**](/developers/webhooks/migrate-to-v3): move from format 1 or 2
+
+## Related
+
+- [Webhooks Overview](/developers/webhooks)
+- [Payment Status API (inquiry)](/developers/payments/psq)
+- [Payment Events (formats 1 and 2)](/developers/webhooks/payment-events)
+- [Operation Events (formats 1 and 2)](/developers/webhooks/operation-events)

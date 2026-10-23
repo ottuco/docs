@@ -13,6 +13,23 @@ Ottu simplifies the integration process by providing a unified response across a
 
 Moreover, for those who might need it, the original response from the payment gateway, always converted to `JSON` format, is included in Ottu’s webhooks. This means that while Ottu takes on the heavy lifting of interpreting and standardizing payment gateway responses, you still have access to the raw data if required. The beauty of this approach is its extensibility. As you expand and decide to incorporate more payment gateways into your system, there’s no need for additional integration work on your end. Ottu ensures that everything will work seamlessly out of the box, saving you time and effort in the long run.
 
+## **Webhook formats** {#webhook-formats}
+
+Ottu sends webhooks in one of three **formats**, set per account. **Ottu never switches you to a new format on its own.**
+
+| Format | What you receive | Read |
+|---|---|---|
+| **1 and 2** | A flat payment body or operation body, in JSON (XML on request), signed in the body and in the `Ottu-Signature` header | [Payment Events](./payment-events.md), [Operation Events](./operation-events.md) |
+| **3** | An **envelope** (`id`, `type`, `created`, `version`, `is_sandbox`, `merchant_id`, `data`) per event, in JSON, signed with `Ottu-Signature` `v2` over the raw body | [Webhook Events (v3)](./event-catalogue.mdx) |
+
+Format 3 adds a catalogue of event types (`payment.paid`, `payment.refunded`, ...), a fixed [retry schedule](./delivery-and-retries.mdx#retry-schedule), and `Idempotency-Key`. To move from format 1 or 2, follow [Migrating to v3](./migrate-to-v3.md).
+
+On **every** format each delivery carries an `Idempotency-Key` header with the event id, so you can drop a duplicate before you fulfil an order. See [Delivery and Retries](./delivery-and-retries.mdx#idempotency-key).
+
+:::note Ordering is not guaranteed
+Events can arrive out of order, especially after a retry. Use the `created` time of a format 3 event to order them, and fetch the payment's current state with the [Payment Status API](/developers/payments/psq) when the final state matters.
+:::
+
 ## **Types of Webhooks**
 
 Ottu supports two primary types of webhooks:
@@ -38,7 +55,7 @@ Additionally, the user-agent header in the webhook mimics a Chrome browser by de
 Ottu prides itself on a **99.99%** delivery guarantee for webhooks. However, merchants should be aware of the following:
 
 * There might be multiple hits for the same payment event.
-* By default, the retry mechanism is enabled. If the webhook fails to deliver on the first attempt, Ottu will try to resend it. The default number of retries is set to 3.
+* By default, the retry mechanism is enabled. If the webhook fails to deliver on the first attempt, Ottu will try to resend it. On formats 1 and 2 the default number of retries is set to 3. On format 3 there are 8 attempts over about 42 hours: see [Delivery and Retries](./delivery-and-retries.mdx#retry-schedule).
 
 More details on the delivery mechanism and other related configurations will be discussed in subsequent sections.
 
@@ -49,8 +66,8 @@ For a seamless experience, merchants should ensure that their webhook endpoint:
 * Is secure, preferably using HTTPS.
 * Is always online and accessible to the public.
 * Has a response time of less than **25 seconds** to ensure timely processing.
-* Returns an HTTP status of 200 or 201. Any other status will lead Ottu to mark the notification as failed.
-* Is idempotent. This is crucial as Ottu might notify the URL multiple times for the same event, and this ensures that the repeated calls do not result in unintended side effects.
+* Returns an HTTP status of 200 or 201 (formats 1 and 2) or any `2xx` (format 3). Any other status will lead Ottu to mark the notification as failed; redirects (`3xx`) are not followed.
+* Is idempotent. This is crucial as Ottu might notify the URL multiple times for the same event, and this ensures that the repeated calls do not result in unintended side effects. Use the [`Idempotency-Key`](./delivery-and-retries.mdx#idempotency-key) header (the event id) to detect repeats, and also check the business `reference_number` before you fulfil or refund.
 
 While Ottu supports endpoints with disabled SSL verification, it’s not recommended due to potential security vulnerabilities.
 
@@ -107,7 +124,7 @@ All the fields mentioned below come with default values to ensure a smooth integ
     Ottu uses the **SHA-256** [signing mechanism](/developers/webhooks/verify-signatures) to sign all webhook payloads. By verifying the signature attached to each payload, you can ensure its authenticity and integrity. Detailed steps on how to verify the signature can be found [here](/developers/webhooks/verify-signatures#4-verification-by-merchant).
   </FAQItem>
   <FAQItem question="What should I do if I receive the same webhook notification multiple times?">
-    Webhooks can be retried, especially in cases of timeouts. It’s essential to make your webhook processing idempotent, meaning processing the same webhook notification more than once should not have a different effect. Always check the event ID or transaction ID to ensure you’re not processing duplicates.
+    Webhooks can be retried, especially in cases of timeouts. It’s essential to make your webhook processing idempotent, meaning processing the same webhook notification more than once should not have a different effect. Always check the event ID (the [`Idempotency-Key`](./delivery-and-retries.mdx#idempotency-key) header) and the transaction `reference_number` to ensure you’re not processing duplicates.
   </FAQItem>
   <FAQItem question="How long will Ottu retry a webhook if my server doesn’t respond?">
     By default, Ottu will retry a webhook three times, with a `backoff` factor of 5 seconds between retries. This behavior can be adjusted in the webhook settings.
@@ -115,3 +132,10 @@ All the fields mentioned below come with default values to ensure a smooth integ
     Feel free to ask any other questions or provide more context, and we can craft more FAQs accordingly!
   </FAQItem>
 </FAQ>
+
+## Related
+
+- [**Webhook Events (v3)**](./event-catalogue.mdx): the envelope and every event type
+- [**Delivery and Retries**](./delivery-and-retries.mdx): success rules, retry schedule, `Idempotency-Key`
+- [**Migrating to v3**](./migrate-to-v3.md): move from format 1 or 2
+- [**Verify Signatures**](./verify-signatures.md): `Ottu-Signature` v1 and v2

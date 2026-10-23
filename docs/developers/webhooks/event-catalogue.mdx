@@ -1,0 +1,386 @@
+---
+title: Webhook Events (v3)
+sidebar_label: Events & Envelope (v3)
+description: The version 3 webhook envelope, every event type Ottu sends, which data keys each one carries, and worked examples with receiving code.
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Webhook Events (v3)
+
+Webhook **format 3** wraps every notification in one small, stable **envelope**. The envelope tells you *what happened* (`type`), *when* (`created`), *which event it is* (`id`), and carries the details in `data`. The payment or operation inside `data` is the same body you already know from [format 2](/developers/webhooks/payment-events), minus the body `signature` field, because format 3 is authenticated by the [`Ottu-Signature` header](/developers/webhooks/verify-signatures#ottu-signature-header) instead.
+
+This page is self-contained: it lists every event type Ottu sends, what each `data` object contains, and shows a worked example of receiving one. Delivery rules (success, retries, `Idempotency-Key`) live on [Delivery and Retries](/developers/webhooks/delivery-and-retries); moving from format 1 or 2 is on [Migrating to v3](/developers/webhooks/migrate-to-v3).
+
+:::note Formats are never switched silently
+Ottu enables format 3 for your account only when you ask for it. Until then you keep receiving format 1 or 2 exactly as before. See [Migrating to v3](/developers/webhooks/migrate-to-v3).
+:::
+
+## Use cases
+
+- Fulfil an order when `payment.paid` arrives, and release stock when `payment.expired` or `payment.canceled` arrives.
+- Record a refund or capture when `payment.refunded` or `payment.captured` arrives, including each partial refund as its own event.
+- Receive payments and operations at one URL and branch on `type`, instead of running separate payment and operation receivers.
+
+## Quick implementation
+
+An event is a `POST` with a JSON body and two headers you care about: `Ottu-Signature` (authenticity) and `Idempotency-Key` (the event `id`). Verify first, then dedupe, then act. The `verify_ottu_signature` helper is on [Verify Signatures](/developers/webhooks/verify-signatures#verify-v2); the dedupe pattern is on [Delivery and Retries](/developers/webhooks/delivery-and-retries#idempotency-key).
+
+<Tabs groupId="language">
+<TabItem value="curl" label="cURL">
+
+Send yourself a sample event while developing. The body below is a minimal `payment.paid` envelope; your receiver should reject it unless the signature is valid, which is the point of the test.
+
+```bash
+curl -X POST http://localhost:8000/webhooks/ottu \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: evt_01JABCDEFGHJKMNPQRSTVWXYZ0" \
+  -H "Ottu-Signature: t=1792417440,v2=0000000000000000000000000000000000000000000000000000000000000000" \
+  --data-binary '{"id":"evt_01JABCDEFGHJKMNPQRSTVWXYZ0","type":"payment.paid","created":"2026-10-22T10:00:00Z","version":3,"is_sandbox":true,"merchant_id":"merchant.ottu.net","data":{"payment":{"order_no":"ORDER-1","reference_number":"GOLDENATT1","state":"paid"}}}'
+# Expect HTTP 400/401 from your receiver: the signature above is a placeholder.
+```
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+```python
+import json
+
+from flask import Flask, request
+
+app = Flask(__name__)
+HMAC_KEY = "your-hmac-key"  # from the Webhook configuration, keep it secret
+
+
+@app.post("/webhooks/ottu")
+def ottu_webhook():
+    raw_body = request.get_data()  # the exact bytes Ottu sent, never request.json re-dumped
+    if not verify_ottu_signature(raw_body, request.headers.get("Ottu-Signature", ""), HMAC_KEY):
+        return "invalid signature", 401
+
+    event = json.loads(raw_body)
+    data = event["data"]
+
+    if event["type"] == "payment.paid":
+        fulfil_order(data["payment"]["order_no"], data["payment"]["reference_number"])
+    elif event["type"] == "payment.refunded":
+        record_refund(data["operation"]["reference_number"], data["operation"]["amount"])
+    # Unknown types: acknowledge and ignore, new types are added over time.
+    return "", 200
+```
+
+</TabItem>
+<TabItem value="node" label="Node.js">
+
+```javascript
+import express from "express";
+
+const app = express();
+const HMAC_KEY = "your-hmac-key"; // from the Webhook configuration, keep it secret
+
+// express.raw keeps the exact bytes Ottu sent. Do not use express.json() on this route.
+app.post("/webhooks/ottu", express.raw({ type: "*/*" }), (req, res) => {
+  if (!verifyOttuSignature(req.body, req.get("Ottu-Signature") ?? "", HMAC_KEY)) {
+    return res.status(401).send("invalid signature");
+  }
+
+  const event = JSON.parse(req.body.toString("utf8"));
+  const { data } = event;
+
+  if (event.type === "payment.paid") {
+    fulfilOrder(data.payment.order_no, data.payment.reference_number);
+  } else if (event.type === "payment.refunded") {
+    recordRefund(data.operation.reference_number, data.operation.amount);
+  }
+  // Unknown types: acknowledge and ignore, new types are added over time.
+  res.sendStatus(200);
+});
+```
+
+</TabItem>
+<TabItem value="php" label="PHP">
+
+```php
+<?php
+$hmacKey = 'your-hmac-key'; // from the Webhook configuration, keep it secret
+
+$rawBody = file_get_contents('php://input'); // the exact bytes Ottu sent
+$header = $_SERVER['HTTP_OTTU_SIGNATURE'] ?? '';
+
+if (!verifyOttuSignature($rawBody, $header, $hmacKey)) {
+    http_response_code(401);
+    exit('invalid signature');
+}
+
+$event = json_decode($rawBody, true);
+$data = $event['data'];
+
+switch (true) {
+    case $event['type'] === 'payment.paid':
+        fulfilOrder($data['payment']['order_no'], $data['payment']['reference_number']);
+        break;
+    case $event['type'] === 'payment.refunded':
+        recordRefund($data['operation']['reference_number'], $data['operation']['amount']);
+        break;
+}
+// Unknown types: acknowledge and ignore, new types are added over time.
+http_response_code(200);
+```
+
+</TabItem>
+</Tabs>
+
+## The envelope {#envelope}
+
+Every format 3 body is a JSON object with exactly these top-level keys:
+
+| Key | Type | Meaning |
+|---|---|---|
+| `id` | string | The event id, `evt_` followed by 26 characters. Unique per event and **identical** on every retry and on every URL that receives the event. Also sent as the [`Idempotency-Key`](/developers/webhooks/delivery-and-retries#idempotency-key) header. |
+| `type` | string | The event type, such as `payment.paid`. See the [catalogue](#catalogue). |
+| `created` | string | When Ottu recorded the event, UTC, `YYYY-MM-DDTHH:MM:SSZ`. |
+| `version` | integer | Always `3` for this format. |
+| `is_sandbox` | boolean | `true` when the payment belongs to a sandbox environment. |
+| `merchant_id` | string | Your merchant domain, for example `merchant.ottu.net`. |
+| `data` | object | The event details, keyed by resource. See [Data keys by event type](#data-keys). |
+
+:::warning The body is snapshotted once
+Ottu renders the body the first time it is needed and stores those exact bytes. Every delivery and retry of the event sends the **same bytes**, so `data.payment.state` shows the payment *as it was when the event was created*, not as it is now. Do not treat an old retry as the current state: when the current state matters, call the [Payment Status API](/developers/payments/psq) instead.
+:::
+
+## Event catalogue {#catalogue}
+
+### Payment events
+
+| Event type | Fires when | One event per |
+|---|---|---|
+| `payment.paid` | The payment succeeded. | payment |
+| `payment.authorized` | The payment was authorized and the funds are held, waiting for a capture. | payment |
+| `payment.canceled` | The payment was canceled. Canceled through Ottu (dashboard or API) it carries `data.operation`; canceled by the payer on the payment page it is per attempt and carries `data.payment` only. | payment, or attempt for a payer cancel |
+| `payment.expired` | The payment passed its expiry without being paid. | payment |
+| `payment.invalidated` | The payment was invalidated. | payment |
+| `payment.deleted` | The payment was deleted. | payment |
+| `payment.cod_confirmed` | A cash-on-delivery payment was confirmed. | payment |
+| `payment.failed` | A payment attempt failed or ended in an error. The payment itself may still be paid by a later attempt. | attempt |
+| `payment.pending` | The gateway reported the attempt as pending. Sent only when the gateway reports it. | attempt |
+| `payment.captured` | A capture on an authorized payment completed. | operation |
+| `payment.refunded` | A refund completed. Each partial refund is its own event. | operation |
+| `payment.voided` | A void completed. | operation |
+
+"One event per" is what makes an event unique. A payment that fails twice and then succeeds produces two `payment.failed` events (one per attempt, each with its own `id`) and one `payment.paid`. Two partial refunds produce two `payment.refunded` events.
+
+## Data keys by event type {#data-keys}
+
+| Event types | `data` keys | Notes |
+|---|---|---|
+| `payment.paid`, `authorized`, `invalidated`, `cod_confirmed`, `failed`, `pending` | `payment` | |
+| `payment.canceled` (by the payer, per attempt) | `payment` | No `operation`. |
+| `payment.canceled` (through Ottu), `payment.expired`, `payment.deleted` | `payment`, `operation` | `operation.operation` is `cancel`, `expire` or `delete`. |
+| `payment.captured`, `payment.refunded`, `payment.voided` | `payment`, `operation` | `operation.operation` is `capture`, `refund` or `void`. |
+
+- **`data.payment`** is the format 2 [payment body](/developers/webhooks/payment-events) without the body `signature` field, without the format 1 remap of `state` to `refunded`, and without gateway enrichment. After a refund, `data.payment.state` is still the payment's own state (for example `paid`); the refund is described by `data.operation`.
+- **`data.operation`** is the format 2 [operation body](/developers/webhooks/operation-events) without `signature`. Its `reference_number` identifies the operation (the refund, the capture), and its `session_id` is the **original** payment's session. `operation.txn` describes the child transaction the operation created.
+- A payment that has no attempt yet (for example deleted before anyone paid) still renders: attempt-based fields such as `gateway_name` and `reference_number` are empty strings.
+
+### Worked example: `payment.paid`
+
+```json
+{
+  "id": "evt_01JABCDEFGHJKMNPQRSTVWXYZ0",
+  "type": "payment.paid",
+  "created": "2026-10-22T10:00:00Z",
+  "version": 3,
+  "is_sandbox": true,
+  "merchant_id": "merchant.ottu.net",
+  "data": {
+    "payment": {
+      "amount": "100.000",
+      "amount_details": {
+        "currency_code": "KWD",
+        "amount": "100.000",
+        "total": "100.000",
+        "fee": "0.000",
+        "exchange_rate": "1.000000"
+      },
+      "currency_code": "KWD",
+      "customer_address_city": "Kuwait City",
+      "customer_address_country": "KW",
+      "customer_address_line1": "1 Golden Street",
+      "customer_address_line2": "Floor 2",
+      "customer_address_postal_code": "12345",
+      "customer_address_state": "Capital",
+      "customer_birthdate": "2030-01-15",
+      "customer_email": "customer1@example.com",
+      "customer_first_name": "Casey",
+      "customer_id": "CUST-1",
+      "customer_last_name": "Customer",
+      "customer_phone": "+96550000000",
+      "extra": { "merchant_id": "example.com" },
+      "fee": "0.000 KWD",
+      "gateway_account": "mpgs",
+      "gateway_name": "mpgs",
+      "gateway_response": {},
+      "initiator": {
+        "id": 1,
+        "first_name": "Golden",
+        "last_name": "User",
+        "username": "golden-user",
+        "email": "golden-user@example.com",
+        "phone": "+96500000001"
+      },
+      "is_sandbox": true,
+      "order_no": "ORDER-1",
+      "paid_amount": "100.000",
+      "payment_type": "one_off",
+      "pg_params": {},
+      "reference_number": "GOLDENATT1",
+      "result": "success",
+      "session_id": "golden-session-1",
+      "settled_amount": "100.000",
+      "state": "paid",
+      "timestamp_utc": "2026-10-22 12:00:00"
+    }
+  }
+}
+```
+
+Field meanings inside `data.payment` are documented on [Payment Events](/developers/webhooks/payment-events#params) and [PG Params](/developers/webhooks/pg-params).
+
+### Worked example: `payment.refunded`
+
+The envelope carries the original payment **and** the refund. `operation.amount` is the refunded amount, which is smaller than `payment.amount` for a partial refund.
+
+```json
+{
+  "id": "evt_01JABCDEFGHJKMNPQRSTVWXYZ1",
+  "type": "payment.refunded",
+  "created": "2026-10-22T11:30:00Z",
+  "version": 3,
+  "is_sandbox": true,
+  "merchant_id": "merchant.ottu.net",
+  "data": {
+    "payment": {
+      "amount": "100.000",
+      "currency_code": "KWD",
+      "order_no": "ORDER-1",
+      "reference_number": "GOLDENATT1",
+      "result": "success",
+      "session_id": "golden-session-1",
+      "state": "paid",
+      "timestamp_utc": "2026-10-22 12:00:00"
+    },
+    "operation": {
+      "amount": "30.000",
+      "extra": {},
+      "initiator": {
+        "id": 1,
+        "first_name": "Golden",
+        "last_name": "User",
+        "username": "golden-user",
+        "email": "golden-user@example.com",
+        "phone": "+96500000001"
+      },
+      "is_sandbox": true,
+      "operation": "refund",
+      "order_no": "ORDER-1",
+      "pg_code": "mpgs",
+      "pg_params": {},
+      "pg_response": { "refunded": "success" },
+      "reference_number": "GOLDENATT2",
+      "result": "success",
+      "session_id": "golden-session-1",
+      "source": "input",
+      "success": true,
+      "timestamp_utc": "2026-10-22 12:00:00",
+      "txn": {
+        "amount": "30.000",
+        "currency_code": "KWD",
+        "order_no": "ORDER-2",
+        "session_id": "golden-session-2",
+        "state": "refunded"
+      }
+    }
+  }
+}
+```
+
+:::note
+The `data.payment` object in this example is shortened to the keys the refund handler needs. A real event carries the full payment body shown for `payment.paid`.
+:::
+
+### Worked example: `payment.failed`
+
+A failed attempt carries the payment as it stood for that attempt. `result` and `state` are `failed`.
+
+```json
+{
+  "id": "evt_01JABCDEFGHJKMNPQRSTVWXYZ2",
+  "type": "payment.failed",
+  "created": "2026-10-22T09:55:00Z",
+  "version": 3,
+  "is_sandbox": true,
+  "merchant_id": "merchant.ottu.net",
+  "data": {
+    "payment": {
+      "amount": "100.000",
+      "currency_code": "KWD",
+      "gateway_account": "mpgs",
+      "gateway_name": "mpgs",
+      "gateway_response": {},
+      "order_no": "ORDER-1",
+      "payment_type": "one_off",
+      "pg_params": {},
+      "reference_number": "GOLDENATT1",
+      "remaining_amount": "100.000",
+      "result": "failed",
+      "session_id": "golden-session-1",
+      "state": "failed",
+      "timestamp_utc": "2026-10-22 12:00:00"
+    }
+  }
+}
+```
+
+## Handling order and unknown types {#ordering}
+
+:::warning Order is not guaranteed
+Events can arrive out of order, especially after a retry: a `payment.paid` that was retried for an hour can arrive after a `payment.refunded` that succeeded first time. Use `created` to order events for the same payment, and fetch the payment's current state with the [Payment Status API](/developers/payments/psq) when the final state matters.
+:::
+
+- **Ignore unknown `type` values.** New event types are added over time. Answer `2xx` and move on.
+- **Ignore unknown keys** inside `data`. Existing keys keep their meaning.
+- Match on `type`, not on `data.payment.state`: the state is a snapshot, the type is the event.
+
+## Error handling
+
+| Situation | Respond with | Why |
+|---|---|---|
+| Signature missing or invalid | `401` | Do not process. Ottu retries; fix your key or your raw-body handling. |
+| Body is not valid JSON | `400` | Should never happen with a valid signature. |
+| Event already processed (`id` seen before) | `200` | Acknowledge without re-running side effects. See [Idempotency-Key](/developers/webhooks/delivery-and-retries#idempotency-key). |
+| Unknown `type` | `200` | Not an error. |
+| Your system is temporarily unavailable | `503` | Ottu retries on a [schedule over about 42 hours](/developers/webhooks/delivery-and-retries#retry-schedule). |
+
+## Best practices
+
+- Verify the signature on the **raw** body before parsing anything.
+- Store each processed `id` and answer `2xx` without reprocessing when you see it again.
+- Before fulfilling or refunding, also check the business reference (`reference_number`): the `id` de-duplicates deliveries, not business actions.
+- Answer quickly, do heavy work asynchronously: Ottu waits for your response only up to the configured timeout.
+- Log `id` and `type` for every event you receive; they identify the exact delivery if you need to ask Ottu about it.
+
+## What's Next?
+
+- [**Verify Signatures**](/developers/webhooks/verify-signatures#ottu-signature-header): verify `Ottu-Signature` v2 on the raw body, with Python, Node.js and PHP code
+- [**Delivery and Retries**](/developers/webhooks/delivery-and-retries): success rules, the 8-attempt schedule and `Idempotency-Key`
+- [**Migrating to v3**](/developers/webhooks/migrate-to-v3): map format 1 and 2 fields to their v3 location
+
+## Related
+
+- [Webhooks Overview](/developers/webhooks)
+- [Payment Events (formats 1 and 2)](/developers/webhooks/payment-events)
+- [Operation Events (formats 1 and 2)](/developers/webhooks/operation-events)
+- [Payment States](/developers/reference/payment-states)
