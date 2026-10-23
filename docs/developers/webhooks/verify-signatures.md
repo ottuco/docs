@@ -23,8 +23,8 @@ Two proofs of origin exist, and which one you verify depends on your [webhook fo
 | **1 and 2** | `signature` field in the JSON body | 18 fields concatenated | [Body signature](#body-signature) (unchanged) |
 | Synchronous responses and the [Sign API](#sign-api) | `signature` field, and `ottu_signature` on the Sign API | as above | [Sign API](#sign-api) |
 
-:::note Ottu support chooses the header versions for formats 1 and 2
-For formats 1 and 2 the header carries `v1` unless support enables `v2` as well (`t=...,v1=...,v2=...`). Format 3 always sends `v2` only. A signing failure never blocks the delivery: if the header is missing, treat the request as unsigned and reject it.
+:::note Header versions
+On formats 1 and 2 the header carries `v1` (and may also carry `v2`: `t=...,v1=...,v2=...`). Format 3 always sends `v2` only. A signing failure never blocks the delivery: if the header is missing, treat the request as unsigned and reject it.
 :::
 
 ## The Ottu-Signature header {#ottu-signature-header}
@@ -779,6 +779,5 @@ The above examples provide a way for developers in different languages to genera
 ## Related
 
 - [Webhooks Overview](/developers/webhooks)
-- [Webhook Endpoints](/developers/webhooks/endpoints)
 - [Payment States](/developers/reference/payment-states)
 - [Authentication](/developers/getting-started/authentication)

@@ -13,18 +13,17 @@ import TabItem from "@theme/TabItem";
 
 Webhook **format 3** wraps every notification in one small, stable **envelope**. The envelope tells you *what happened* (`type`), *when* (`created`), *which event it is* (`id`), and carries the details in `data`. The payment or operation inside `data` is the same body you already know from [format 2](/developers/webhooks/payment-events), minus the body `signature` field, because format 3 is authenticated by the [`Ottu-Signature` header](/developers/webhooks/verify-signatures#ottu-signature-header) instead.
 
-This page is self-contained: it lists every event type Ottu sends, what each `data` object contains, and shows a worked example of receiving one. Delivery rules (success, retries, `Idempotency-Key`) live on [Delivery and Retries](/developers/webhooks/delivery-and-retries); registering where events go is on [Webhook Endpoints](/developers/webhooks/endpoints); moving from format 1 or 2 is on [Migrating to v3](/developers/webhooks/migrate-to-v3).
+This page is self-contained: it lists every event type Ottu sends, what each `data` object contains, and shows a worked example of receiving one. Delivery rules (success, retries, `Idempotency-Key`) live on [Delivery and Retries](/developers/webhooks/delivery-and-retries); moving from format 1 or 2 is on [Migrating to v3](/developers/webhooks/migrate-to-v3).
 
-:::note Formats are chosen by Ottu, never switched silently
-Format 3 is an opt-in setting on your Ottu account, changed by Ottu staff at your request. Until then you keep receiving format 1 or 2 exactly as before. See [Migrating to v3](/developers/webhooks/migrate-to-v3).
+:::note Formats are never switched silently
+Ottu enables format 3 for your account only when you ask for it. Until then you keep receiving format 1 or 2 exactly as before. See [Migrating to v3](/developers/webhooks/migrate-to-v3).
 :::
 
 ## Use cases
 
 - Fulfil an order when `payment.paid` arrives, and release stock when `payment.expired` or `payment.canceled` arrives.
 - Record a refund or capture when `payment.refunded` or `payment.captured` arrives, including each partial refund as its own event.
-- Track subscription lifecycle (`subscription.renewed`, `subscription.past_due`, ...) from [AutoPay](/developers/payments/autopay/) without polling.
-- Send every event to one URL and branch on `type`, instead of running separate payment and operation receivers.
+- Receive payments and operations at one URL and branch on `type`, instead of running separate payment and operation receivers.
 
 ## Quick implementation
 
@@ -33,14 +32,14 @@ An event is a `POST` with a JSON body and two headers you care about: `Ottu-Sign
 <Tabs groupId="language">
 <TabItem value="curl" label="cURL">
 
-Send yourself a sample event while developing. The body below is a minimal `webhook.ping`-shaped envelope; your receiver should reject it unless the signature is valid, which is the point of the test.
+Send yourself a sample event while developing. The body below is a minimal `payment.paid` envelope; your receiver should reject it unless the signature is valid, which is the point of the test.
 
 ```bash
 curl -X POST http://localhost:8000/webhooks/ottu \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: evt_01JABCDEFGHJKMNPQRSTVWXYZ0" \
   -H "Ottu-Signature: t=1792417440,v2=0000000000000000000000000000000000000000000000000000000000000000" \
-  --data-binary '{"id":"evt_01JABCDEFGHJKMNPQRSTVWXYZ0","type":"webhook.ping","created":"2026-10-22T10:00:00Z","version":3,"is_sandbox":true,"merchant_id":"merchant.ottu.net","data":{"endpoint":{"id":"1","url":"https://shop.example.com/webhooks/ottu"}}}'
+  --data-binary '{"id":"evt_01JABCDEFGHJKMNPQRSTVWXYZ0","type":"payment.paid","created":"2026-10-22T10:00:00Z","version":3,"is_sandbox":true,"merchant_id":"merchant.ottu.net","data":{"payment":{"order_no":"ORDER-1","reference_number":"GOLDENATT1","state":"paid"}}}'
 # Expect HTTP 400/401 from your receiver: the signature above is a placeholder.
 ```
 
@@ -69,8 +68,6 @@ def ottu_webhook():
         fulfil_order(data["payment"]["order_no"], data["payment"]["reference_number"])
     elif event["type"] == "payment.refunded":
         record_refund(data["operation"]["reference_number"], data["operation"]["amount"])
-    elif event["type"].startswith("subscription."):
-        update_subscription(data["subscription"])
     # Unknown types: acknowledge and ignore, new types are added over time.
     return "", 200
 ```
@@ -97,8 +94,6 @@ app.post("/webhooks/ottu", express.raw({ type: "*/*" }), (req, res) => {
     fulfilOrder(data.payment.order_no, data.payment.reference_number);
   } else if (event.type === "payment.refunded") {
     recordRefund(data.operation.reference_number, data.operation.amount);
-  } else if (event.type.startsWith("subscription.")) {
-    updateSubscription(data.subscription);
   }
   // Unknown types: acknowledge and ignore, new types are added over time.
   res.sendStatus(200);
@@ -130,9 +125,6 @@ switch (true) {
     case $event['type'] === 'payment.refunded':
         recordRefund($data['operation']['reference_number'], $data['operation']['amount']);
         break;
-    case str_starts_with($event['type'], 'subscription.'):
-        updateSubscription($data['subscription']);
-        break;
 }
 // Unknown types: acknowledge and ignore, new types are added over time.
 http_response_code(200);
@@ -147,16 +139,16 @@ Every format 3 body is a JSON object with exactly these top-level keys:
 
 | Key | Type | Meaning |
 |---|---|---|
-| `id` | string | The event id, `evt_` followed by 26 characters. Unique per event and **identical** on every retry, resend and URL. Also sent as the [`Idempotency-Key`](/developers/webhooks/delivery-and-retries#idempotency-key) header. |
+| `id` | string | The event id, `evt_` followed by 26 characters. Unique per event and **identical** on every retry and on every URL that receives the event. Also sent as the [`Idempotency-Key`](/developers/webhooks/delivery-and-retries#idempotency-key) header. |
 | `type` | string | The event type, such as `payment.paid`. See the [catalogue](#catalogue). |
 | `created` | string | When Ottu recorded the event, UTC, `YYYY-MM-DDTHH:MM:SSZ`. |
 | `version` | integer | Always `3` for this format. |
-| `is_sandbox` | boolean | `true` when the payment belongs to a sandbox environment. Always `false` for events that are not tied to a payment (subscription events, `webhook.ping`). |
+| `is_sandbox` | boolean | `true` when the payment belongs to a sandbox environment. |
 | `merchant_id` | string | Your merchant domain, for example `merchant.ottu.net`. |
 | `data` | object | The event details, keyed by resource. See [Data keys by event type](#data-keys). |
 
 :::warning The body is snapshotted once
-Ottu renders the body the first time it is needed and stores those exact bytes. Every delivery, retry and Resend of the event sends the **same bytes**, so `data.payment.state` shows the payment *as it was when the event was created*, not as it is now. Do not treat an old retry as the current state: when the current state matters, call the [Payment Status API](/developers/payments/psq) instead.
+Ottu renders the body the first time it is needed and stores those exact bytes. Every delivery and retry of the event sends the **same bytes**, so `data.payment.state` shows the payment *as it was when the event was created*, not as it is now. Do not treat an old retry as the current state: when the current state matters, call the [Payment Status API](/developers/payments/psq) instead.
 :::
 
 ## Event catalogue {#catalogue}
@@ -167,7 +159,7 @@ Ottu renders the body the first time it is needed and stores those exact bytes. 
 |---|---|---|
 | `payment.paid` | The payment succeeded. | payment |
 | `payment.authorized` | The payment was authorized and the funds are held, waiting for a capture. | payment |
-| `payment.canceled` | The payment was canceled. Canceled by your side or by staff it carries `data.operation`; canceled by the payer on the payment page it is per attempt and carries `data.payment` only. | payment, or attempt for a payer cancel |
+| `payment.canceled` | The payment was canceled. Canceled through Ottu (dashboard or API) it carries `data.operation`; canceled by the payer on the payment page it is per attempt and carries `data.payment` only. | payment, or attempt for a payer cancel |
 | `payment.expired` | The payment passed its expiry without being paid. | payment |
 | `payment.invalidated` | The payment was invalidated. | payment |
 | `payment.deleted` | The payment was deleted. | payment |
@@ -180,44 +172,14 @@ Ottu renders the body the first time it is needed and stores those exact bytes. 
 
 "One event per" is what makes an event unique. A payment that fails twice and then succeeds produces two `payment.failed` events (one per attempt, each with its own `id`) and one `payment.paid`. Two partial refunds produce two `payment.refunded` events.
 
-### Subscription events
-
-Published by [AutoPay](/developers/payments/autopay/). Subscription events are delivered to [webhook endpoints](/developers/webhooks/endpoints) only, never to a payment's `webhook_url`.
-
-| Event type | Fires when |
-|---|---|
-| `subscription.created` | A subscription was created. |
-| `subscription.activated` | The first payment settled and the subscription went live. |
-| `subscription.setup_failed` | The customer never completed the first payment. |
-| `subscription.renewed` | A billing cycle was charged successfully. |
-| `subscription.payment_failed` | A billing attempt failed (the cycle may still be retried). |
-| `subscription.past_due` | A cycle used up every retry. |
-| `subscription.card_updated` | The customer replaced the card on the subscription. |
-| `subscription.cancel_scheduled` | A cancellation was scheduled for the end of the period. |
-| `subscription.cancel_reverted` | A scheduled cancellation was reverted. |
-| `subscription.canceled` | The subscription was canceled. |
-| `subscription.expired` | The subscription reached its end date. |
-
-### Test event
-
-| Event type | Fires when |
-|---|---|
-| `webhook.ping` | Ottu staff send a test event to one endpoint. It is never subscribed to, never retried, and carries `data.endpoint`. See [Webhook Endpoints](/developers/webhooks/endpoints#test-event). |
-
-:::note `token.*` and `wallet.*` are not available
-The `token` and `wallet` namespaces are reserved for future use. No event of those kinds is sent and you cannot subscribe to them.
-:::
-
 ## Data keys by event type {#data-keys}
 
 | Event types | `data` keys | Notes |
 |---|---|---|
 | `payment.paid`, `authorized`, `invalidated`, `cod_confirmed`, `failed`, `pending` | `payment` | |
 | `payment.canceled` (by the payer, per attempt) | `payment` | No `operation`. |
-| `payment.canceled` (by you or staff), `payment.expired`, `payment.deleted` | `payment`, `operation` | `operation.operation` is `cancel`, `expire` or `delete`. |
+| `payment.canceled` (through Ottu), `payment.expired`, `payment.deleted` | `payment`, `operation` | `operation.operation` is `cancel`, `expire` or `delete`. |
 | `payment.captured`, `payment.refunded`, `payment.voided` | `payment`, `operation` | `operation.operation` is `capture`, `refund` or `void`. |
-| `subscription.*` | `subscription`, and `payment` when AutoPay sent one | The `subscription` object is supplied by AutoPay. |
-| `webhook.ping` | `endpoint` | `{"id", "url"}` of the endpoint being tested. |
 
 - **`data.payment`** is the format 2 [payment body](/developers/webhooks/payment-events) without the body `signature` field, without the format 1 remap of `state` to `refunded`, and without gateway enrichment. After a refund, `data.payment.state` is still the payment's own state (for example `paid`); the refund is described by `data.operation`.
 - **`data.operation`** is the format 2 [operation body](/developers/webhooks/operation-events) without `signature`. Its `reference_number` identifies the operation (the refund, the capture), and its `session_id` is the **original** payment's session. `operation.txn` describes the child transaction the operation created.
@@ -382,40 +344,6 @@ A failed attempt carries the payment as it stood for that attempt. `result` and 
 }
 ```
 
-### Worked example: `subscription.renewed`
-
-The `data.subscription` object is produced by [AutoPay](/developers/payments/autopay/). Ottu passes it through as AutoPay sent it, so its keys follow the AutoPay subscription object (the example shows an `id` and a `status`, one of the [subscription states](/developers/payments/autopay/#subscription-states)). Read the full object from the AutoPay subscription endpoints when you need more.
-
-```json
-{
-  "id": "evt_01JABCDEFGHJKMNPQRSTVWXYZ3",
-  "type": "subscription.renewed",
-  "created": "2026-10-22T08:00:00Z",
-  "version": 3,
-  "is_sandbox": false,
-  "merchant_id": "merchant.ottu.net",
-  "data": {
-    "subscription": { "id": "sub_1", "status": "active" }
-  }
-}
-```
-
-### Worked example: `webhook.ping`
-
-```json
-{
-  "id": "evt_01JABCDEFGHJKMNPQRSTVWXYZ4",
-  "type": "webhook.ping",
-  "created": "2026-10-22T07:00:00Z",
-  "version": 3,
-  "is_sandbox": false,
-  "merchant_id": "merchant.ottu.net",
-  "data": {
-    "endpoint": { "id": "7", "url": "https://shop.example.com/webhooks/ottu" }
-  }
-}
-```
-
 ## Handling order and unknown types {#ordering}
 
 :::warning Order is not guaranteed
@@ -442,13 +370,12 @@ Events can arrive out of order, especially after a retry: a `payment.paid` that 
 - Store each processed `id` and answer `2xx` without reprocessing when you see it again.
 - Before fulfilling or refunding, also check the business reference (`reference_number`): the `id` de-duplicates deliveries, not business actions.
 - Answer quickly, do heavy work asynchronously: Ottu waits for your response only up to the configured timeout.
-- Log `id` and `type` for every event you receive; support can find the exact delivery from them.
+- Log `id` and `type` for every event you receive; they identify the exact delivery if you need to ask Ottu about it.
 
 ## What's Next?
 
 - [**Verify Signatures**](/developers/webhooks/verify-signatures#ottu-signature-header): verify `Ottu-Signature` v2 on the raw body, with Python, Node.js and PHP code
 - [**Delivery and Retries**](/developers/webhooks/delivery-and-retries): success rules, the 8-attempt schedule and `Idempotency-Key`
-- [**Webhook Endpoints**](/developers/webhooks/endpoints): choose which events go to which URL
 - [**Migrating to v3**](/developers/webhooks/migrate-to-v3): map format 1 and 2 fields to their v3 location
 
 ## Related
@@ -457,4 +384,3 @@ Events can arrive out of order, especially after a retry: a `payment.paid` that 
 - [Payment Events (formats 1 and 2)](/developers/webhooks/payment-events)
 - [Operation Events (formats 1 and 2)](/developers/webhooks/operation-events)
 - [Payment States](/developers/reference/payment-states)
-- [AutoPay](/developers/payments/autopay/)

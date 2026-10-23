@@ -136,4 +136,3 @@ For general webhook setup and configuration, see the [Webhooks Overview](./).
 ## Related
 
 - [Delivery and Retries](/developers/webhooks/delivery-and-retries)
-- [Webhook Endpoints](/developers/webhooks/endpoints)

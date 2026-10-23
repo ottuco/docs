@@ -6,13 +6,12 @@ description: The three Ottu webhook formats, what format 3 changes, a field-by-f
 
 # Webhook Formats and Migrating to v3
 
-Ottu has three webhook **formats**. Your account uses exactly one, chosen by Ottu staff. **Ottu never switches a merchant to a new format on its own**: you keep receiving the format you have today until you ask for a change. This page explains what format 3 changes, maps every format 1 and 2 field to its place in format 3, and gives a step-by-step migration that you can test before anything changes for your customers.
+Ottu has three webhook **formats**. Your account uses exactly one. **Ottu never switches a merchant to a new format on its own**: you keep receiving the format you have today until you ask for a change. This page explains what format 3 changes, maps every format 1 and 2 field to its place in format 3, and gives a step-by-step migration that you can test before anything changes for your customers.
 
 ## Use cases
 
 - You receive `payment` and operation webhooks today and want the event envelope, `Idempotency-Key` and `Ottu-Signature` v2.
-- You need subscription events, which only exist in format 3.
-- You want to receive events at more than one URL, which uses [endpoints](/developers/webhooks/endpoints).
+- You want one event type per payment moment (`payment.paid`, `payment.refunded`, ...) instead of inferring it from `state`.
 
 ## The three formats {#formats}
 
@@ -24,27 +23,25 @@ Ottu has three webhook **formats**. Your account uses exactly one, chosen by Ott
 | Success | HTTP `200` or `201` | Any `2xx` |
 | Retries | Your `retries` and `backoff_factor` settings, mainly on timeouts | 8 attempts over about 42 hours, see [Delivery and Retries](/developers/webhooks/delivery-and-retries#retry-schedule) |
 | Event id | Only in the `Idempotency-Key` header | In the body `id` and the `Idempotency-Key` header |
-| Subscription events | No (an informational `autopay` block may appear on a payment) | `subscription.*` events to [endpoints](/developers/webhooks/endpoints) |
 
 Format 1 and format 2 differ from each other as described on [Payment Events](/developers/webhooks/payment-events) and [Operation Events](/developers/webhooks/operation-events); both are unchanged. The only addition on them is the new **header**: `Ottu-Signature` (controlled by your account's signature versions, default `v1`) and `Idempotency-Key`. Your body bytes, retries and redirect behaviour stay exactly as they were.
 
 :::warning Format 3 is JSON only
-If your account receives XML today, switching to format 3 means you receive JSON from then on. Ottu shows a warning to the person who makes the change. Update your parser before you switch.
+If your account receives XML today, switching to format 3 means you receive JSON from then on. Update your parser before format 3 is enabled.
 :::
 
 ## Quick implementation
 
-The shortest safe path, with nothing changing for your customers until step 4:
+The shortest safe path:
 
-1. **Add an endpoint.** Ask [Ottu support](mailto:support@ottu.com) to register a test [endpoint](/developers/webhooks/endpoints) with `payment.*`. Endpoints always receive format 3.
-2. **Build the receiver** using [Webhook Events (v3)](/developers/webhooks/event-catalogue#quick-implementation) and [Verify Signatures](/developers/webhooks/verify-signatures#verify-v2). Ask for a [test event](/developers/webhooks/endpoints#test-event) and confirm you answer `2xx`.
-3. **Run a sandbox payment** and a refund. Compare what the endpoint receives with what your current receiver gets, using the [field map](#field-map).
-4. **Ask support to set your webhook format to 3.** From that moment your existing `webhook_url` and operations URL receive format 3. Remove the test endpoint (or keep it for another consumer); note that when an endpoint has the same URL as a legacy URL, [the legacy route wins](/developers/webhooks/endpoints#legacy-urls) and you get one delivery.
+1. **Update the receiver** using [Webhook Events (v3)](/developers/webhooks/event-catalogue#quick-implementation) and [Verify Signatures](/developers/webhooks/verify-signatures#verify-v2): parse the JSON envelope, read `data.payment` / `data.operation`, verify `Ottu-Signature` `v2` on the raw body, answer any `2xx`.
+2. **Test it with the published vector** in [Verify Signatures](/developers/webhooks/verify-signatures#test-vectors), then with a sandbox payment and a refund, comparing against the [field map](#field-map).
+3. **Ottu enables format 3 for your account.** Your existing `webhook_url` and operations URL then receive format 3 with the same moments. Deploy the new receiver before this happens.
 
-If something is wrong, ask support to set the format back; formats 1 and 2 keep working as before.
+If a URL is also configured to receive the same event through another route, that URL gets one delivery, in the format of the existing route: see [Same URL on a legacy route](/developers/webhooks/delivery-and-retries#same-url).
 
 :::tip Prepare your signature check first
-While still on format 1 or 2, ask support to send both `v1` and `v2` in the `Ottu-Signature` header. You can then build and test the [v2 verification](/developers/webhooks/verify-signatures#verify-v2) on live traffic, with no change to the body.
+While still on format 1 or 2 you can already build and test the [v2 verification](/developers/webhooks/verify-signatures#verify-v2) against the vector, with no change to the body.
 :::
 
 ## Detailed guide
@@ -63,10 +60,9 @@ While still on format 1 or 2, ask support to send both `v1` and `v2` in the `Ott
 | `is_sandbox` | Top-level `is_sandbox`, and still inside `data.payment` / `data.operation` | |
 | `extra.merchant_id` | Top-level `merchant_id` | `extra.merchant_id` stays inside `data.payment`. |
 | `timestamp_utc` | `created` for the event time, `data.*.timestamp_utc` for the payment or operation time | `created` is ISO 8601, `2026-10-22T10:00:00Z`. |
-| Top-level `autopay` block | `subscription.*` events | The `autopay` block is not part of `data.payment`. Use the events, or `extra.autopay.subscription_id` to correlate. |
 | Duplicate detection by `session_id` or `reference_number` | `Idempotency-Key` / body `id`, plus `reference_number` | Keep the business reference check as well. |
 | Success status `200`/`201` | Any `2xx` | A `3xx` is a failure on every format. |
-| `webhook_url` and operations URL | Same URLs, same moments | The payment's `webhook_url` and the operations URL receive the same moments in format 3 as in format 2. Subscription events reach endpoints only. |
+| `webhook_url` and operations URL | Same URLs, same moments | The payment's `webhook_url` and the operations URL receive the same moments in format 3 as in format 2. |
 
 ### Behaviours that change for the payer {#payer-behaviour}
 
@@ -100,15 +96,13 @@ Nothing to call to migrate. The related references are:
 
 ## Best practices
 
-- Test on an endpoint first, switch the account last.
+- Deploy the new receiver before format 3 is enabled, and test sandbox before production.
 - Keep your format 1 or 2 receiver deployable until the first live day on format 3 has passed.
 - Ignore unknown `type` values and unknown keys.
-- Switch sandbox before production.
 
 ## What's Next?
 
 - [**Webhook Events (v3)**](/developers/webhooks/event-catalogue): every event and example
-- [**Webhook Endpoints**](/developers/webhooks/endpoints): register a test endpoint
 - [**Verify Signatures**](/developers/webhooks/verify-signatures#ottu-signature-header): build the v2 check
 - [**Delivery and Retries**](/developers/webhooks/delivery-and-retries): success rules and `Idempotency-Key`
 

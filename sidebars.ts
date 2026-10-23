@@ -634,11 +634,6 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "doc",
-              id: "developers/webhooks/endpoints",
-              label: "Endpoints",
-            },
-            {
-              type: "doc",
               id: "developers/webhooks/delivery-and-retries",
               label: "Delivery & Retries",
             },

@@ -15,14 +15,14 @@ Moreover, for those who might need it, the original response from the payment ga
 
 ## **Webhook formats** {#webhook-formats}
 
-Ottu sends webhooks in one of three **formats**, chosen per account by Ottu staff. **Ottu never switches you to a new format on its own.**
+Ottu sends webhooks in one of three **formats**, set per account. **Ottu never switches you to a new format on its own.**
 
 | Format | What you receive | Read |
 |---|---|---|
 | **1 and 2** | A flat payment body or operation body, in JSON (XML on request), signed in the body and in the `Ottu-Signature` header | [Payment Events](./payment-events.md), [Operation Events](./operation-events.md) |
 | **3** | An **envelope** (`id`, `type`, `created`, `version`, `is_sandbox`, `merchant_id`, `data`) per event, in JSON, signed with `Ottu-Signature` `v2` over the raw body | [Webhook Events (v3)](./event-catalogue.mdx) |
 
-Format 3 adds a catalogue of event types (`payment.paid`, `payment.refunded`, `subscription.renewed`, ...), [webhook endpoints](./endpoints.md) that subscribe to events at one or more URLs, a fixed [retry schedule](./delivery-and-retries.mdx#retry-schedule), and `Idempotency-Key`. To move from format 1 or 2, follow [Migrating to v3](./migrate-to-v3.md).
+Format 3 adds a catalogue of event types (`payment.paid`, `payment.refunded`, ...), a fixed [retry schedule](./delivery-and-retries.mdx#retry-schedule), and `Idempotency-Key`. To move from format 1 or 2, follow [Migrating to v3](./migrate-to-v3.md).
 
 On **every** format each delivery carries an `Idempotency-Key` header with the event id, so you can drop a duplicate before you fulfil an order. See [Delivery and Retries](./delivery-and-retries.mdx#idempotency-key).
 
@@ -136,7 +136,6 @@ All the fields mentioned below come with default values to ensure a smooth integ
 ## Related
 
 - [**Webhook Events (v3)**](./event-catalogue.mdx): the envelope and every event type
-- [**Webhook Endpoints**](./endpoints.md): choose where events are sent
 - [**Delivery and Retries**](./delivery-and-retries.mdx): success rules, retry schedule, `Idempotency-Key`
 - [**Migrating to v3**](./migrate-to-v3.md): move from format 1 or 2
 - [**Verify Signatures**](./verify-signatures.md): `Ottu-Signature` v1 and v2
