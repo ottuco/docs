@@ -7,6 +7,10 @@ import SchemaEmbed from "@site/src/components/SchemaEmbed";
 
 # Operation Notification
 
+:::note This page describes webhook formats 1 and 2
+If your account uses [format 3](/developers/webhooks/event-catalogue), your operations arrive inside an event envelope as `data.operation`, next to the original payment in `data.payment`; see [Webhook Events (v3)](/developers/webhooks/event-catalogue) and [Migrating to v3](/developers/webhooks/migrate-to-v3). Each delivery also carries an [`Idempotency-Key`](/developers/webhooks/delivery-and-retries#idempotency-key) header with the event id on every format.
+:::
+
 Ottu’s operation webhooks provide real-time insights into post-transaction activities, specifically focusing on `refund`, `capture`, and `void`. Operating asynchronously, they ensure merchants are promptly informed about these crucial subsequent payment gateway operations without disrupting the main transaction flow. By utilizing these webhooks, merchants gain a clearer view of their transactional landscape, enhancing decision-making and customer interactions.
 
 ## Setup
@@ -126,3 +130,10 @@ For general webhook setup and configuration, see the [Webhooks Overview](./).
 - [**Payment Events**](/developers/webhooks/payment-events/) — Webhook notifications for payment transactions
 - [**Verify Signatures**](/developers/webhooks/verify-signatures/) — Validate webhook authenticity with HMAC-SHA256
 - [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration
+- [**Webhook Events (v3)**](/developers/webhooks/event-catalogue/) — Operations as `payment.refunded`, `payment.captured`, `payment.voided`
+- [**Migrating to v3**](/developers/webhooks/migrate-to-v3/) — Field map from this payload to `data.operation`
+
+## Related
+
+- [Delivery and Retries](/developers/webhooks/delivery-and-retries)
+- [Webhook Endpoints](/developers/webhooks/endpoints)
