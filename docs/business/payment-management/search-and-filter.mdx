@@ -7,7 +7,7 @@ import StepGuide from "@site/src/components/StepGuide";
 
 # Search & Filter Payments
 
-This guide explains how to display and filter payment links within the Ottu Dashboard. By following these steps, you can view payment links created by a specific user or processed through a specific [payment gateway](/business/payments/gateways).
+This guide explains how to display and filter payment links within the Ottu Dashboard. By following these steps, you can view payment links created by a specific user or processed through a specific [payment gateway](/business/payments/gateways). Administrators can also [choose the filters and search fields](#choose-the-filters-and-search-fields) that every transactions table offers.
 
 ## Step-by-Step Instructions
 
@@ -35,6 +35,34 @@ This guide explains how to display and filter payment links within the Ottu Dash
 A tutorial video is available to provide a visual walkthrough of the filtering process:
 
 <a href="https://drive.google.com/file/d/15hT4UKNmbXPppT6CdjwS0Hwi3cw_96mA/view?usp=sharing" target="_blank">Watch the video tutorial</a>
+
+## Choose the Filters and Search Fields
+
+An administrator chooses which filters and search fields the transaction tables offer, in **Administration Panel** > **Search** > **Search Config**.
+
+### Filters
+
+Each row under **Filter Fields** adds one filter to every transactions table:
+
+| Setting | What it does |
+|---------|--------------|
+| **Field** | The transaction field to filter on. Most transaction fields can be used, plus **Seen**, **Email Seen** and **Application** (the application that created the payment). |
+| **Label** and **Label (Arabic)** | Optional. When empty, the field's own name is shown. |
+| **Filter Type** | **Dropdown**, **Boolean**, **Date**, **Date Time** or **Amount Range**. When empty, Ottu picks the type that fits the field. |
+| **Minimum Amount** and **Maximum Amount** | The range of the slider of an **Amount Range** filter. |
+| **Order** | The position of the filter. |
+| **Is active?** | Clear it to hide the filter without deleting it. |
+
+By default there are filters for the created, modified and state-changed dates, the state, gateway, currency and initiator, and the **Seen** and **Email Seen** flags. A dropdown lists the values its field can have, for example your gateways, your users, or the applications found on your payments.
+
+### Search Fields
+
+Choose what the search box can search on:
+
+- **Internal Fields**: select any of **Internal ID**, **Customer Email** and **Application**.
+- **Search Fields**: add fields of your plugins, including custom fields.
+
+A search matches part of the value and ignores case, so `shop` finds `shopify`. A plugin with its own entry in **Administration Panel** > **Search** > **Plugin Search Configs** uses that entry's search fields instead.
 
 ---
 

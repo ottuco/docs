@@ -1,0 +1,13 @@
+# Overrides for: components/schemas/ExtraInner
+#
+# The `extra` object of the Checkout and Invoice APIs. Ottu core describes it
+# with the serializer's internal docstring, so the object description is
+# replaced, and `app_name` points to Custom Data.
+
+_description: |
+  Your own key-value data. Any keys are accepted. A few keys have a meaning to Ottu, such as `app_name`, `remarks` and the plugin's custom fields.
+
+properties:
+  app_name:
+    description: |
+      `Optional` field. The application that created the payment, such as `shopify`, `estate`, `event`, or your own identifier. Must be a string of up to 64 characters (other types are rejected). Ottu stores it trimmed and lower-cased (`" Shopify "` becomes `shopify`) and does not store `null`. The merchant sees it as **Application** in the dashboard. See [Custom Data]({{apiBaseUrl}}/getting-started/api-fundamentals/#custom-data).
