@@ -4,8 +4,17 @@ operations:
 
   get_user_cards:
     permissions:
-      - $perm:api_key_only
+      - $perm:api_key_admin
+      - $perm:basic_auth_user_cards_view
 
   delete_user_cards:
     permissions:
-      - $perm:api_key_only
+      - $perm:api_key_admin
+      - $perm:basic_auth_user_cards_delete
+
+  # Session-scoped delete used by the Checkout SDK (#159290). Warns "not found in spec"
+  # until static/Ottu_API.yaml is refreshed from a core release that ships the route.
+  delete_user_card_by_session:
+    permissions:
+      - $perm:public_key_session_card_delete
+      - $perm:api_key_admin

@@ -2,6 +2,14 @@ import type { ChangelogEntry } from "@site/src/components/Changelog";
 
 export const changelogEntries: ChangelogEntry[] = [
   {
+    date: "2026-09-15",
+    category: "api",
+    title: "Public key no longer accepted on User Cards, Payment Methods and auto-debit",
+    link: "/developers/getting-started/authentication/#public-key",
+    description:
+      "POST /b/pbl/v2/card/, DELETE /b/pbl/v2/card/{token}/, POST /b/pbl/v2/payment-methods/ and the auto-debit endpoints answer 401 to the public key; call them from your server with the private key. The Checkout SDK now deletes saved cards through a session-scoped route.",
+  },
+  {
     date: "2026-03-16",
     category: "dashboard",
     title: "Connect Frontend redesign with updated navigation",

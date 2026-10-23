@@ -36,8 +36,9 @@ There are no separate sandbox and production URLs. The **MID (Merchant Identific
 | **Native Payments** | `/b/pbl/v2/payment/apple-pay/` | POST | [Apple Pay direct payment](/developers/payments/native-payments) |
 | | `/b/pbl/v2/payment/google-pay/` | POST | [Google Pay direct payment](/developers/payments/native-payments) |
 | | `/b/pbl/v2/payment/auto-debit/` | POST | [Charge saved card](/developers/payments/native-payments) |
-| **User Cards** | `/b/pbl/v2/card/` | GET | [List saved cards](/developers/cards-and-tokens/user-cards) |
+| **User Cards** | `/b/pbl/v2/card/` | POST | [List saved cards](/developers/cards-and-tokens/user-cards) |
 | | `/b/pbl/v2/card/{token}/` | DELETE | [Delete saved card](/developers/cards-and-tokens/user-cards) |
+| | `/b/pbl/v2/card/{token}/session/{session_id}/` | DELETE | [Delete saved card from a checkout session (Checkout SDK)](/developers/cards-and-tokens/user-cards#delete-a-card-from-a-checkout-session-checkout-sdk) |
 | **Invoices** | `/b/invoice/v1/invoice/` | POST | [Create invoice](/developers/invoices) |
 | **Notifications** | `/b/pbl/v2/message-notification/` | POST | [Resend payment notification](/developers/notifications) |
 | **Reports** | `/b/api/v1/reports/files/` | GET | [List transaction reports](/developers/reports) |
@@ -49,10 +50,10 @@ Ottu supports two authentication methods for API calls:
 
 | Method | Header | Access Level |
 |--------|--------|-------------|
-| **API Key** | `Authorization: Api-Key <your_private_key>` | Admin — all permissions |
+| **API Key** | `Authorization: Api-Key <your_private_key>` | Full access, or scoped to the [permissions](/developers/reference/api-key-permissions) it holds |
 | **Basic Auth** | `Authorization: Basic <base64(username:password)>` | Granular — explicit permissions per user |
 
-A third key type — the **Public Key** — is used only for [Checkout SDK](/developers/payments/checkout-sdk/) initialization, not for API calls.
+A third key type — the **Public Key** — is used by the [Checkout SDK](/developers/payments/checkout-sdk/). Server APIs that name a customer or charge a card (User Cards list and delete, Payment Methods, auto-debit) refuse it with `401`.
 
 For setup instructions and permission details, see [Authentication](/developers/getting-started/authentication/).
 

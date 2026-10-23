@@ -48,7 +48,9 @@ operations:
   cash_payment_acknowledgement:
     permissions:
       - $perm:api_key_admin
+      - $perm:basic_auth_acknowledge_payment
 
   cash_payment_acknowledgement_2:
     permissions:
       - $perm:api_key_admin
+      - $perm:basic_auth_acknowledge_payment
