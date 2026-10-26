@@ -167,7 +167,7 @@ A customer cancellation on a `past_due` subscription only schedules the cancella
 
 ## API Reference
 
-All six subscription-management endpoints, plus the Checkout API call that creates a subscription, are in the interactive reference below. Expand any field for its type, enum values, constraints and defaults.
+All six subscription-management endpoints, plus the Checkout API call that creates a subscription, are in the interactive reference below. Expand any field for its type, enum values, constraints and defaults. Each endpoint's Responses tabs list every status it can return, with an example and what to do about it.
 
 Every management endpoint authenticates with your [API key](/developers/getting-started/authentication) and applies to your own merchant account. You never send a `Merchant-Id` header yourself.
 
@@ -245,24 +245,9 @@ Create a subscription with the Checkout API: set `payment_type` to `auto_pay` an
 </TabItem>
 </Tabs>
 
-### Error contract {#error-contract}
-
-These are the statuses you will meet most often, so you can handle them without parsing message text. The full list of status codes for each endpoint, with examples, is in the [API Reference](#api-reference) tabs above.
-
-| Status | Meaning | What to do |
-|---|---|---|
-| `400` | Ottu rejected the request as malformed, for example a `limit` above 100 on list, an unknown cancel `mode`, or a missing `Idempotency-Key` on cancel or regenerate. | Fix the request. Retrying unchanged will fail again. |
-| `401` | Not authenticated. | Check your [API key](/developers/getting-started/authentication). |
-| `404` | No such subscription for your merchant. | Do not retry. |
-| `409` | `Idempotency-Key` was already used on `cancel` with a different request body (`code: idempotency_conflict`). | Send a new key for a new request. Reuse a key only to retry the exact same request. |
-| `422` | Ottu rejected the request. Either a value is invalid (for example an unknown `status` filter on list, where `detail` lists each invalid field), or the subscription is in a state that does not allow it, such as canceling one that has already ended (`code: invalid_transition`). | Fix the request, or re-read the subscription's `status`. Retrying unchanged will fail again. |
-| `423` | The Ottu installation is paused (`code: service_paused`). All six subscription endpoints return it. | Retry later. |
-| `503` | The subscription service is unavailable. | Retry with backoff. |
-| `504` | The subscription service timed out. The request may still have been applied. | Retry a cancel with the same `Idempotency-Key`. Before retrying anything else, retrieve the subscription to see whether it changed. |
-
 ## Limits {#limits}
 
-- **Gateways.** KNET and other gateways that cannot save a card for auto-debit cannot renew a subscription. `pg_codes` must name a gateway that supports tokenization and auto-debit.
+- **Gateways.** A payment gateway without auto-debit cannot renew a subscription. `pg_codes` must name a gateway that supports tokenization and auto-debit.
 - **Billing periods.** `autopay.frequency` is `monthly` or `yearly`. There is no weekly or custom interval.
 - **No edits.** A running subscription cannot be edited: amount, `autopay.frequency`, billing day, retry count, `language`, `notification_preferences` or customer email. [Cancel](/developers/payments/autopay/?autopay-api=cancel#api-reference) it and create a new one. There is no proration.
 - **Retries.** You set only the retry count, and only when you create the subscription. Ottu sets the interval. See [Retries & Dunning](#retries-and-dunning).
