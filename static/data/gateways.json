@@ -1090,6 +1090,15 @@
         "status": "success",
         "statusLabel": "Success",
         "note": "For not captured, use expiry 08/21"
+      },
+      {
+        "cardNumber": "8888 8800 0000 0856",
+        "expiry": "09/30",
+        "cvv": "1234",
+        "brand": "KNET",
+        "status": "success",
+        "statusLabel": "Success",
+        "note": "KNET V3"
       }
     ]
   },
