@@ -2259,7 +2259,7 @@ paths:
                     limit:
                     - Ensure this value is less than or equal to 100.
                   summary: Limit above 100
-          description: ''
+          description: "The request is malformed, for example a `limit` above 100. Fix it: retrying unchanged fails again."
         '401':
           content:
             application/json:
@@ -2270,7 +2270,7 @@ paths:
                   value:
                     detail: Authentication credentials were not provided.
                   summary: Not authenticated
-          description: ''
+          description: "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`."
         '422':
           content:
             application/json:
@@ -2287,19 +2287,19 @@ paths:
                       - status
                       msg: Input should be 'pending_setup', 'trialing', 'active', 'past_due', 'canceled', 'expired' or 'setup_failed'
                   summary: Unknown status filter
-          description: ''
+          description: "A filter value is invalid, and `detail` lists each one. Fix it: retrying unchanged fails again."
         '423':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
               examples:
-                InstallationPaused:
+                PaymentsPaused:
                   value:
                     detail: Service is paused.
                     code: service_paused
-                  summary: Installation paused
-          description: ''
+                  summary: Payments paused
+          description: "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed."
         '503':
           content:
             application/json:
@@ -2310,7 +2310,7 @@ paths:
                   value:
                     detail: AutoPay bridge is unavailable.
                   summary: AutoPay unavailable
-          description: ''
+          description: "The subscription service is unavailable. Retry with backoff."
         '504':
           content:
             application/json:
@@ -2321,7 +2321,7 @@ paths:
                   value:
                     detail: AutoPay bridge request timed out.
                   summary: AutoPay timed out
-          description: ''
+          description: "The subscription service timed out. Nothing was changed, so the request is safe to retry."
   /b/pbl/v2/subscriptions/{subscription_id}/:
     get:
       operationId: autopay_subscription_detail
@@ -2390,7 +2390,7 @@ paths:
                   value:
                     detail: Authentication credentials were not provided.
                   summary: Not authenticated
-          description: ''
+          description: "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`."
         '404':
           content:
             application/json:
@@ -2402,19 +2402,19 @@ paths:
                     detail: Not found
                     code: subscription_not_found
                   summary: Unknown subscription
-          description: ''
+          description: "No subscription with this id exists on your account. Do not retry."
         '423':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
               examples:
-                InstallationPaused:
+                PaymentsPaused:
                   value:
                     detail: Service is paused.
                     code: service_paused
-                  summary: Installation paused
-          description: ''
+                  summary: Payments paused
+          description: "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed."
         '503':
           content:
             application/json:
@@ -2425,7 +2425,7 @@ paths:
                   value:
                     detail: AutoPay bridge is unavailable.
                   summary: AutoPay unavailable
-          description: ''
+          description: "The subscription service is unavailable. Retry with backoff."
         '504':
           content:
             application/json:
@@ -2436,7 +2436,7 @@ paths:
                   value:
                     detail: AutoPay bridge request timed out.
                   summary: AutoPay timed out
-          description: ''
+          description: "The subscription service timed out. Nothing was changed, so the request is safe to retry."
   /b/pbl/v2/subscriptions/{subscription_id}/cancel/:
     post:
       operationId: autopay_subscription_cancel
@@ -2539,7 +2539,7 @@ paths:
                     mode:
                     - '"now" is not a valid choice.'
                   summary: Unknown mode
-          description: ''
+          description: "The `Idempotency-Key` header is missing, or `mode` is not `immediate` or `at_period_end`."
         '401':
           content:
             application/json:
@@ -2550,7 +2550,7 @@ paths:
                   value:
                     detail: Authentication credentials were not provided.
                   summary: Not authenticated
-          description: ''
+          description: "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`."
         '404':
           content:
             application/json:
@@ -2562,7 +2562,7 @@ paths:
                     detail: Not found
                     code: subscription_not_found
                   summary: Unknown subscription
-          description: ''
+          description: "No subscription with this id exists on your account. Do not retry."
         '409':
           content:
             application/json:
@@ -2574,7 +2574,7 @@ paths:
                     detail: Idempotency key 3f6c2a9e-8b1d-4c7a-9e2f-5d4b6a1c0e93 was already used with a different request payload.
                     code: idempotency_conflict
                   summary: Idempotency-Key reused
-          description: ''
+          description: "This `Idempotency-Key` was already used with a different body (`code: idempotency_conflict`). Send a new key for a new request, and reuse a key only to retry the same request."
         '422':
           content:
             application/json:
@@ -2586,19 +2586,19 @@ paths:
                     detail: 'Cancel is only allowed from pending_setup, setup_failed, trialing, active, past_due. Current status: canceled'
                     code: invalid_transition
                   summary: Already canceled
-          description: ''
+          description: "The subscription's status does not allow a cancel, for example it has already ended (`code: invalid_transition`). Retrieve it to read its `status`."
         '423':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
               examples:
-                InstallationPaused:
+                PaymentsPaused:
                   value:
                     detail: Service is paused.
                     code: service_paused
-                  summary: Installation paused
-          description: ''
+                  summary: Payments paused
+          description: "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed."
         '503':
           content:
             application/json:
@@ -2609,7 +2609,7 @@ paths:
                   value:
                     detail: AutoPay bridge is unavailable.
                   summary: AutoPay unavailable
-          description: ''
+          description: "The subscription service is unavailable. Retry with backoff."
         '504':
           content:
             application/json:
@@ -2620,7 +2620,7 @@ paths:
                   value:
                     detail: AutoPay bridge request timed out.
                   summary: AutoPay timed out
-          description: ''
+          description: "The subscription service timed out, and the cancel may still have been applied. Retry with the same `Idempotency-Key`."
   /b/pbl/v2/subscriptions/{subscription_id}/cycles/:
     get:
       operationId: autopay_subscription_cycles
@@ -2710,7 +2710,7 @@ paths:
                   value:
                     detail: Authentication credentials were not provided.
                   summary: Not authenticated
-          description: ''
+          description: "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`."
         '404':
           content:
             application/json:
@@ -2722,19 +2722,19 @@ paths:
                     detail: Not found
                     code: subscription_not_found
                   summary: Unknown subscription
-          description: ''
+          description: "No subscription with this id exists on your account. Do not retry."
         '423':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
               examples:
-                InstallationPaused:
+                PaymentsPaused:
                   value:
                     detail: Service is paused.
                     code: service_paused
-                  summary: Installation paused
-          description: ''
+                  summary: Payments paused
+          description: "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed."
         '503':
           content:
             application/json:
@@ -2745,7 +2745,7 @@ paths:
                   value:
                     detail: AutoPay bridge is unavailable.
                   summary: AutoPay unavailable
-          description: ''
+          description: "The subscription service is unavailable. Retry with backoff."
         '504':
           content:
             application/json:
@@ -2756,7 +2756,7 @@ paths:
                   value:
                     detail: AutoPay bridge request timed out.
                   summary: AutoPay timed out
-          description: ''
+          description: "The subscription service timed out. Nothing was changed, so the request is safe to retry."
   /b/pbl/v2/subscriptions/{subscription_id}/page-link/:
     get:
       operationId: autopay_subscription_page_link
@@ -2808,7 +2808,7 @@ paths:
                   value:
                     detail: Authentication credentials were not provided.
                   summary: Not authenticated
-          description: ''
+          description: "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`."
         '404':
           content:
             application/json:
@@ -2820,19 +2820,19 @@ paths:
                     detail: Not found
                     code: subscription_not_found
                   summary: Unknown subscription
-          description: ''
+          description: "No subscription with this id exists on your account. Do not retry."
         '423':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
               examples:
-                InstallationPaused:
+                PaymentsPaused:
                   value:
                     detail: Service is paused.
                     code: service_paused
-                  summary: Installation paused
-          description: ''
+                  summary: Payments paused
+          description: "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed."
         '503':
           content:
             application/json:
@@ -2843,7 +2843,7 @@ paths:
                   value:
                     detail: AutoPay bridge is unavailable.
                   summary: AutoPay unavailable
-          description: ''
+          description: "The subscription service is unavailable. Retry with backoff."
         '504':
           content:
             application/json:
@@ -2854,7 +2854,7 @@ paths:
                   value:
                     detail: AutoPay bridge request timed out.
                   summary: AutoPay timed out
-          description: ''
+          description: "The subscription service timed out. Nothing was changed, so the request is safe to retry."
   /b/pbl/v2/subscriptions/{subscription_id}/regenerate-page-token/:
     post:
       operationId: autopay_subscription_regenerate_page_token
@@ -2914,7 +2914,7 @@ paths:
                     Idempotency-Key:
                     - This header is required.
                   summary: Missing Idempotency-Key
-          description: ''
+          description: "The `Idempotency-Key` header is missing."
         '401':
           content:
             application/json:
@@ -2925,7 +2925,7 @@ paths:
                   value:
                     detail: Authentication credentials were not provided.
                   summary: Not authenticated
-          description: ''
+          description: "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`."
         '404':
           content:
             application/json:
@@ -2937,19 +2937,19 @@ paths:
                     detail: Not found
                     code: subscription_not_found
                   summary: Unknown subscription
-          description: ''
+          description: "No subscription with this id exists on your account. Do not retry."
         '423':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericErrorMessage'
               examples:
-                InstallationPaused:
+                PaymentsPaused:
                   value:
                     detail: Service is paused.
                     code: service_paused
-                  summary: Installation paused
-          description: ''
+                  summary: Payments paused
+          description: "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed."
         '503':
           content:
             application/json:
@@ -2960,7 +2960,7 @@ paths:
                   value:
                     detail: AutoPay bridge is unavailable.
                   summary: AutoPay unavailable
-          description: ''
+          description: "The subscription service is unavailable. Retry with backoff."
         '504':
           content:
             application/json:
@@ -2971,7 +2971,7 @@ paths:
                   value:
                     detail: AutoPay bridge request timed out.
                   summary: AutoPay timed out
-          description: ''
+          description: "The subscription service timed out, and a new link may already have been issued. Call page-link and compare `page_url` before retrying."
 components:
   schemas:
     Address:
@@ -4094,6 +4094,50 @@ components:
             * `at_period_end` - at_period_end
       required:
       - mode
+    AutoPayCycleSummary:
+      type: object
+      properties:
+        cycle_number:
+          type: integer
+          description: Sequential billing cycle number.
+        scheduled_date:
+          type: string
+          format: date
+          description: Date this billing period is or was scheduled to charge.
+        amount_due:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+          description: Amount charged or attempted for this cycle.
+        status:
+          type: string
+          description: Current billing cycle status, such as scheduled, processing, paid, retry_scheduled, failed, or canceled.
+        paid_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Timestamp when this cycle was paid, or null if unpaid.
+        failure_reason:
+          type:
+          - string
+          - 'null'
+          description: Gateway failure message from the last failed attempt, or null if not failed.
+        session_id:
+          type:
+          - string
+          - 'null'
+          description: Connect session ID for the latest charge attempt, or null before any attempt.
+        charge_type:
+          type:
+          - string
+          - 'null'
+          description: 'Charge type: cit, mit, or null before any attempt.'
+      required:
+      - amount_due
+      - cycle_number
+      - scheduled_date
+      - status
     AutoPayPaginatedBillingCycles:
       type: object
       properties:
@@ -4188,6 +4232,12 @@ components:
           type: string
           format: email
           description: Customer email address captured when the subscription was created.
+        customer_name:
+          type: string
+          description: Customer name captured when the subscription was created, or empty.
+        customer_phone:
+          type: string
+          description: Customer phone number captured when the subscription was created, or empty.
         frequency:
           type: string
           description: Subscription billing frequency.
@@ -4205,8 +4255,7 @@ components:
           - 'null'
           format: decimal
           pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
-          description: Initial customer-initiated payment amount, or null when not
-            applicable.
+          description: Initial customer-initiated payment amount, or null when not applicable.
         start_date:
           type: string
           format: date
@@ -4217,38 +4266,110 @@ components:
           - 'null'
           format: date
           description: Optional date after which AutoPay must stop billing.
+        billing_anchor_day:
+          type: integer
+          description: Day of the month billing is anchored to, taken from start_date.
+        setup_session_id:
+          type:
+          - string
+          - 'null'
+          description: Checkout session ID of the first payment.
+        agreement_id:
+          type:
+          - string
+          - 'null'
+          description: Agreement identifier supplied during Checkout subscription creation.
+        amount_variability:
+          enum:
+          - fixed
+          - variable
+          - null
+          type:
+          - string
+          - 'null'
+          x-spec-enum-id: 785209a99eed16de
+          description: 'Agreement amount variability, or null until the first payment is confirmed.
+    
+    
+            * `fixed` - fixed
+    
+            * `variable` - variable'
+        cycle_interval_days:
+          type:
+          - integer
+          - 'null'
+          description: Agreement cycle interval in days, or null until the first payment is confirmed.
+        total_cycles:
+          type:
+          - integer
+          - 'null'
+          description: Agreement total number of cycles, or null until the first payment is confirmed.
+        notification_config:
+          oneOf:
+          - {}
+          - type: 'null'
+          description: Notification preferences sent in the autopay block, or null for the defaults.
         status:
           type: string
           description: Current AutoPay subscription status.
         cancel_at_period_end:
           type: boolean
-          description: Whether the subscription is scheduled to cancel at the current
-            period end.
+          description: Whether the subscription is scheduled to cancel at the current period end.
+        cancels_on:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Date a scheduled cancellation takes effect, or null.
         canceled_at:
           type:
           - string
           - 'null'
           format: date-time
-          description: Timestamp when the subscription was canceled, or null if it
-            is not canceled.
+          description: Timestamp when the subscription was canceled, or null if it is not canceled.
         cancellation_initiator:
           type:
           - string
           - 'null'
           description: Actor that initiated cancellation, such as merchant or customer.
-        agreement_id:
+        cancellation_reason:
+          enum:
+          - too_expensive
+          - not_using
+          - missing_feature
+          - switched
+          - temporary
+          - other
+          - null
           type:
           - string
           - 'null'
-          description: Agreement identifier supplied during Checkout subscription
-            creation.
+          x-spec-enum-id: 2e62b76d1de9b5aa
+          description: 'Reason the customer chose when canceling, or null.
+    
+    
+            * `too_expensive` - too_expensive
+    
+            * `not_using` - not_using
+    
+            * `missing_feature` - missing_feature
+    
+            * `switched` - switched
+    
+            * `temporary` - temporary
+    
+            * `other` - other'
+        cancellation_note:
+          type:
+          - string
+          - 'null'
+          description: Free-text note the customer left when canceling, or null.
         next_billing_date:
           type:
           - string
           - 'null'
           format: date
-          description: Next scheduled billing date, or null when no future charge
-            is scheduled.
+          description: Next scheduled billing date, or null when no future charge is scheduled.
         description:
           type:
           - string
@@ -4259,22 +4380,78 @@ components:
           - string
           - 'null'
           description: Merchant reference attached to the subscription.
+        plan_name:
+          type: string
+          description: Plan name, or empty.
+        language:
+          enum:
+          - en
+          - ar
+          type: string
+          x-spec-enum-id: 5b7bbf1ef388f556
+          description: 'Language of the customer page and emails.
+    
+    
+            * `en` - en
+    
+            * `ar` - ar'
         retry_count:
           type: integer
-          description: Maximum retry attempts AutoPay may make for a failed billing
-            cycle.
+          description: Maximum retry attempts AutoPay may make for a failed billing cycle.
         created_at:
           type: string
           format: date-time
           description: Timestamp when AutoPay created the subscription record.
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp when AutoPay last changed the subscription record.
+        card:
+          oneOf:
+          - $ref: '#/components/schemas/AutoPaySubscriptionCard'
+          - type: 'null'
+          description: The active card, or null until the first payment is confirmed.
+        current_cycle:
+          oneOf:
+          - $ref: '#/components/schemas/AutoPayCycleSummary'
+          - type: 'null'
+          description: The latest attempted billing cycle, or null.
       required:
+      - amount_variability
+      - billing_anchor_day
+      - cancellation_note
+      - cancellation_reason
+      - cancels_on
+      - card
       - currency
+      - current_cycle
       - customer_id
+      - customer_name
+      - customer_phone
+      - cycle_interval_days
       - frequency
       - id
+      - language
+      - notification_config
+      - plan_name
       - recurring_amount
+      - setup_session_id
       - start_date
       - status
+      - total_cycles
+      - updated_at
+    AutoPaySubscriptionCard:
+      type: object
+      properties:
+        masked_card:
+          type: string
+          description: Masked number of the active card.
+        card_brand:
+          type: string
+          description: Brand of the active card, such as VISA.
+      required:
+      - card_brand
+      - masked_card
     AutoPaySubscriptionListItem:
       type: object
       properties:
