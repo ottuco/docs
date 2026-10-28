@@ -31,7 +31,8 @@ Every export produces a spreadsheet file you can open in Excel, Google Sheets, o
 | What you export | Where you start | What the file contains |
 |---|---|---|
 | Payment transactions | Transactions page | Payment links, amounts, statuses, gateway info |
-| Wallet activity | Wallet → Accounts → an account | Wallet credits, debits, and balances |
+| Wallet accounts | Wallet → Accounts | One row per customer wallet account, with currency, status, and balances |
+| Wallet activity | Wallet → Accounts → an account | Wallet credits, debits, and operations for that account |
 | Event bookings | Events → Bookings | One row per booking, with customer and event details |
 
 :::tip
@@ -97,7 +98,20 @@ The main export source. Each [plugin](/business/plugins) has its own **Transacti
 
 ### Wallet Reports
 
-If your account uses the [M-Wallet](/business/wallet/) feature, you can export wallet ledger entries — credits, debits, and operations — directly from any customer wallet account.
+If your account uses the [M-Wallet](/business/wallet/) feature, you can export wallet data at two levels: the list of all wallet accounts, or the ledger entries of a single account. Both files land in **Generated Reports → Wallet Exports**.
+
+#### Export the list of wallet accounts
+
+**Where:** Dashboard → Wallet → Accounts → **Export**
+
+**What you get:** One row per customer wallet account, with its currency, status, balance, and available balance.
+
+1. Go to **Wallet → Accounts** and click **Export** (top right, next to **Filter**).
+2. Narrow the export if you need to: **Customer ID**, **Currency**, **Status**, and a **Date From** / **Date To** range. Leave them empty to export every account.
+3. Choose **CSV** or **XLSX** under **File Format**, then click **EXPORT**.
+4. Ottu takes you to **Generated Reports → Wallet Exports**, where the new file is listed at the top with its number of records. Click the green **download icon** to save it.
+
+#### Export one account's ledger entries
 
 **Where:** Dashboard → Wallet → Accounts → (open an account) → **Export Entries**
 
@@ -113,10 +127,32 @@ If your account uses the Events plugin, you can export the list of bookings for 
 
 **What you get:** One row per booking, including the event, quantity, customer name, purchase type (free or paid), email, event date, booking date, and customer phone.
 
-1. Go to **Events → Bookings** and click **Export Bookings**.
-2. In the menu that opens, under **Select file type**, choose **CSV** or **XLSX**.
-3. Click **Export Bookings** in the menu. A green *"Your export request was successful"* message confirms the request.
-4. Go to **Events → Event Reports**. Your export is listed with its file format and number of records. Click the green **download icon** in the **Download URL** column to download the file.
+<StepGuide steps={[
+  {
+    title: "Click Export Bookings",
+    description: <>Go to <strong>Events → Bookings</strong> and click <strong>Export Bookings</strong> (top right, next to <strong>Filter</strong>).</>,
+    image: "/img/business/reports/event-bookings-01-export-button.png",
+    imageAlt: "Events Bookings page with the Export Bookings button highlighted next to Filter",
+  },
+  {
+    title: "Choose CSV or XLSX",
+    description: <>In the menu that opens, under <strong>Select file type</strong>, choose <strong>CSV</strong> or <strong>XLSX</strong>.</>,
+    image: "/img/business/reports/event-bookings-02-file-type.png",
+    imageAlt: "Export Bookings menu open, showing the Select file type options CSV and XLSX",
+  },
+  {
+    title: "Confirm the export",
+    description: <>Click <strong>Export Bookings</strong> inside the menu. A green <em>"Your export request was successful"</em> message confirms the request.</>,
+    image: "/img/business/reports/event-bookings-03-success.png",
+    imageAlt: "Green confirmation message reading Your export request was successful at the bottom of the Bookings page",
+  },
+  {
+    title: "Download from Event Reports",
+    description: <>Go to <strong>Events → Event Reports</strong>. Your export is listed with its file format and number of records. Click the green <strong>download icon</strong> in the <strong>Download URL</strong> column to save the file.</>,
+    image: "/img/business/reports/event-bookings-04-event-reports.png",
+    imageAlt: "Event Booking Reports list with the download icon highlighted in the Download URL column",
+  },
+]} />
 
 :::warning
 Don't look for event booking exports in **Generated Reports** — they only appear under **Events → Event Reports**.
@@ -156,11 +192,10 @@ Every transaction and wallet export is collected in one place: the **Generated R
   },
   {
     title: "Find your report in the list",
-    description: <>The table lists each export with its date, module, format, report type, number of records, file size, the data range it covers (<strong>Duration</strong>), who exported it, and an expiry date (<strong>Available Until</strong>). Your most recent export appears at the top. If you just queued a report and the download icon has not appeared yet, the file is still being generated — wait a moment and refresh the page.</>,
+    description: <>The table lists each export with its date, module, format, report type, number of records, file size, the data range it covers (<strong>Duration</strong>), who exported it, and an expiry date (<strong>Available Until</strong>). The <strong>Wallet Exports</strong> tab is simpler: it shows when the export was requested, its format, the number of records, and who requested it. Your most recent export appears at the top. If you just queued a report and the download icon has not appeared yet, the file is still being generated — wait a moment and refresh the page.</>,
     image: "/img/business/reports/generated-reports-02-statuses.png",
     imageAlt: "Generated Reports table showing columns: Export Date, Module, Format, Report Type, Records, Size, Duration, Available Until, Exported By, and a download icon",
-  },
-  {
+  },  {
     title: "Click the download icon",
     description: <>Click the green <strong>download icon</strong> (↓) in the rightmost column next to your report. The file (CSV or XLSX, whichever you chose when exporting) saves to your browser's default Downloads folder.</>,
     image: "/img/business/reports/generated-reports-03-download.png",
