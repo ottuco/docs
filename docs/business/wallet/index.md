@@ -7,6 +7,7 @@ toc_max_heading_level: 3
 
 import StepGuide from "@site/src/components/StepGuide";
 import { businessWalletScenariosSteps } from "@site/src/data/wallet-scenarios";
+import { walletExportSteps } from "@site/src/data/wallet-export-steps";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 
 # M-Wallet
@@ -347,26 +348,7 @@ Every wallet leg — debit, credit, reserve, release — has a single canonical 
 
 Export Accounts or Ledger data as **CSV** or **XLSX** for offline analysis and accounting. Exports are generated asynchronously — you queue a report from the account, then pick it up from **Generated Reports** once it's ready.
 
-<StepGuide steps={[
-  {
-    title: "Click Export Entries",
-    description: <>From any account's detail page, click <strong>Export Entries</strong> next to the Filter button.</>,
-    image: "/img/business/wallet/reporting-06-ledger-exporting.png",
-    imageAlt: "Cursor pointing at the Export Entries button on the account detail page",
-  },
-  {
-    title: "Choose filters and format",
-    description: <>Narrow the rows by Order Number, Session ID, Direction, Entry Type, Status, Provider, PG Code, or Date range, pick <strong>CSV</strong> or <strong>XLSX</strong>, then click <strong>Export</strong>.</>,
-    image: "/img/business/wallet/reporting-06-export.png",
-    imageAlt: "Export Entries dialog with filter fields and CSV / XLSX file-format options",
-  },
-  {
-    title: "Download from Generated Reports",
-    description: <>Open <strong>Generated Reports → Wallet Exports</strong>. A green arrow means the file is ready to download, a progress circle means it's still processing, and an X means generation failed.</>,
-    image: "/img/business/wallet/reporting-07-export-cursor-step.png",
-    imageAlt: "Generated Reports → Wallet Exports list with download icons per row",
-  },
-]} />
+<StepGuide steps={walletExportSteps} />
 
 
 ## Things to know

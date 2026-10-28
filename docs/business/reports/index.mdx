@@ -1,0 +1,223 @@
+---
+title: Reports
+sidebar_label: Reports
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import StepGuide from "@site/src/components/StepGuide";
+import { walletExportSteps } from "@site/src/data/wallet-export-steps";
+
+# Reports
+
+Ottu lets you export and download your payment data at any time. Whether you need a snapshot of today's transactions or a record of wallet activity, the reports system gives you a file you can open in Excel, share with your finance team, or archive for compliance.
+
+This guide covers everything from generating your first export to re-downloading a file you created last week.
+
+## How it works
+
+When you export data from any screen in Ottu — the Transactions page, wallet activity, or other sections — Ottu queues a file to be generated in the background. This usually takes a few seconds to a few minutes depending on how many records are included.
+
+Once the file is ready, it appears in the **Generated Reports** page, where you can download it for 30 days (event booking exports are the one exception — see [Event Bookings](#event-bookings)). You do not need to wait on the screen where you clicked Export — you can close the browser, come back later, and the file will still be there.
+
+:::note
+Which reports you see in Generated Reports depends on your dashboard permissions. The **Exported By** column shows who created each export. Rows with no name in that column are scheduled reports that Ottu generates automatically — see [Transaction Report Configuration](/business/settings/transaction-reports).
+:::
+
+### What gets exported
+
+Every export produces a spreadsheet file you can open in Excel, Google Sheets, or any spreadsheet tool. You choose the format when you export — **CSV** or **XLSX**.
+
+| What you export | Where you start | What the file contains |
+|---|---|---|
+| Payment transactions | Transactions page | Payment links, amounts, statuses, gateway info |
+| Wallet accounts | Wallet → Accounts | One row per customer wallet account, with currency, status, and balances |
+| Wallet activity | Wallet → Accounts → an account | Wallet credits, debits, and operations for that account |
+| Event bookings | Events → Bookings | One row per booking, with customer and event details |
+
+:::tip
+If you need reports delivered automatically on a schedule — for example, a daily CSV emailed to your finance team — see [Transaction Report Configuration](/business/settings/transaction-reports) under Settings.
+:::
+
+## Generate a Report
+
+The most common way to generate a report is from the **Transactions** page. You apply filters to narrow the data to what you need, then click **Export Transactions** to queue the file.
+
+<StepGuide steps={[
+  {
+    title: "Open the Transactions page",
+    description: <>From the Ottu Dashboard, go to <strong>Payment Request</strong> (a <a href="/business/plugins">plugin</a> in the left sidebar) and click <strong>Transactions</strong>. All payment transactions for your account are listed here.</>,
+    image: "/img/business/reports/transactions-01-open.gif",
+    imageAlt: "Animated walkthrough: opening Payment Request, then Transactions, from the Ottu Dashboard sidebar",
+  },
+  {
+    title: "Apply filters (optional)",
+    description: <>Use the <strong>Filter</strong> button to narrow the data before exporting. You can filter by date range, payment status, payment gateway, amount, and more. Filtering first means your exported file contains only the rows you need — making it faster to generate and easier to work with.<br /><br />Click <strong>Search</strong> after setting your filters to preview the results.</>,
+    image: "/img/business/reports/transactions-02-filter.gif",
+    imageAlt: "Animated walkthrough: opening the Filter panel, setting a date range, and clicking Search to refine the transaction list",
+  },
+  {
+    title: "Choose your columns and format",
+    description: <>Click the <strong>Export Transactions</strong> button (in the toolbar above the transactions table, next to <strong>Filter</strong>) to open the export panel. Here you decide exactly what the file contains:<br /><br /><strong>Columns</strong> — tick the fields you want. They are grouped by source: <strong>Default</strong> holds the core transaction fields (Id, Created, State, Type, Gateway Code, Amount, Currency Code, Order No, Reference Number, Payment Service, Initiator), while <strong>Pg Attribute</strong> holds values returned by the payment gateway, such as Auth Code. Hover the <strong>ⓘ</strong> icon next to a field to see what it means.<br /><br /><strong>Timezone</strong> — pick the timezone used for date and time columns in the file.<br /><br /><strong>File type</strong> — choose <strong>CSV</strong> or <strong>XLSX</strong>.<br /><br />Click <strong>EXPORT</strong> at the bottom of the panel to queue the report.</>,
+    image: "/img/business/reports/transactions-03-export.gif",
+    imageAlt: "Animated walkthrough: clicking Export Transactions to open the export panel, ticking columns under Default and Pg Attribute, choosing CSV or XLSX, and clicking Export",
+  },
+  {
+    title: "Wait for the file to be ready",
+    description: <>The report is generated in the background. For small exports (a few hundred rows) this takes seconds. For large exports (thousands of rows), it may take a minute or two. You do not need to stay on this page.</>,
+    image: "/img/business/reports/transactions-04-queued.png",
+    imageAlt: "Confirmation notification showing the report has been queued for generation",
+  },
+  {
+    title: "Download from Generated Reports",
+    description: <>Once ready, your file appears in <strong>Generated Reports</strong>. See <a href="#download-your-reports">Download Your Reports</a> below for the full walkthrough.</>,
+    image: "/img/business/reports/transactions-05-ready.png",
+    imageAlt: "Generated Reports page showing the newly created report file ready to download",
+  },
+]} />
+
+:::warning
+The columns in your exported file are the ones you tick in the **export panel** — not the columns visible in your transactions table. Changing your table headers does not change the export, and vice versa. Check the panel before every export to make sure the fields you need are ticked.
+:::
+
+:::tip
+Set the **Timezone** in the export panel to match the timezone your finance team works in. Otherwise date and time columns may appear shifted by several hours once the file is opened, and reconciling against your own records gets confusing.
+:::
+
+## Export Sources
+
+Ottu offers export from multiple screens in the dashboard. Every export source produces a **CSV** or **XLSX** file, and transaction and wallet exports all land in the same **Generated Reports** download center. The one exception is [Event Bookings](#event-bookings), which has its own download list.
+
+### Transactions
+
+The main export source. Each [plugin](/business/plugins) has its own **Transactions** page with an **Export Transactions** button, and every export covers only that plugin's transactions. The steps are the same everywhere, so the [Generate a Report](#generate-a-report) walkthrough above applies to all of them.
+
+**Where:** Dashboard → Payment Request → Transactions → **Export Transactions** (or the Transactions page of any other plugin, listed in [Other Export Sources](#other-export-sources) below)
+
+**What you get:** One row per transaction, including amount, currency, payment status, gateway, creation date, customer details, and any custom columns you have configured.
+
+### Wallet Reports
+
+If your account uses the [M-Wallet](/business/wallet/) feature, you can export wallet data at two levels: the list of all wallet accounts, or the ledger entries of a single account. Both files land in **Generated Reports → Wallet Exports**.
+
+#### Export the list of wallet accounts
+
+**Where:** Dashboard → Wallet → Accounts → **Export**
+
+**What you get:** One row per customer wallet account, with its currency, status, balance, and available balance.
+
+1. Go to **Wallet → Accounts** and click **Export** (top right, next to **Filter**).
+2. Narrow the export if you need to: **Customer ID**, **Currency**, **Status**, and a **Date From** / **Date To** range. Leave them empty to export every account.
+3. Choose **CSV** or **XLSX** under **File Format**, then click **EXPORT**.
+4. Ottu takes you to **Generated Reports → Wallet Exports**, where the new file is listed at the top with its number of records. Click the green **download icon** to save it.
+
+#### Export one account's ledger entries
+
+**Where:** Dashboard → Wallet → Accounts → (open an account) → **Export Entries**
+
+**What you get:** One row per wallet ledger entry, including event type (credit/debit/reservation), amount, currency, customer ID, status, and linked payment session.
+
+<StepGuide steps={walletExportSteps} />
+
+### Event Bookings
+
+If your account uses the Events plugin, you can export the list of bookings for your events. Event booking exports work differently from every other source: the file does **not** appear in Generated Reports. It has its own list under **Events → Event Reports**.
+
+**Where:** Dashboard → Events → Bookings → **Export Bookings**
+
+**What you get:** One row per booking, including the event, quantity, customer name, purchase type (free or paid), email, event date, booking date, and customer phone.
+
+<StepGuide steps={[
+  {
+    title: "Click Export Bookings",
+    description: <>Go to <strong>Events → Bookings</strong> and click <strong>Export Bookings</strong> (top right, next to <strong>Filter</strong>).</>,
+    image: "/img/business/reports/event-bookings-01-export-button.png",
+    imageAlt: "Events Bookings page with the Export Bookings button highlighted next to Filter",
+  },
+  {
+    title: "Choose CSV or XLSX",
+    description: <>In the menu that opens, under <strong>Select file type</strong>, choose <strong>CSV</strong> or <strong>XLSX</strong>.</>,
+    image: "/img/business/reports/event-bookings-02-file-type.png",
+    imageAlt: "Export Bookings menu open, showing the Select file type options CSV and XLSX",
+  },
+  {
+    title: "Confirm the export",
+    description: <>Click <strong>Export Bookings</strong> inside the menu. A green <em>"Your export request was successful"</em> message confirms the request.</>,
+    image: "/img/business/reports/event-bookings-03-success.png",
+    imageAlt: "Green confirmation message reading Your export request was successful at the bottom of the Bookings page",
+  },
+  {
+    title: "Download from Event Reports",
+    description: <>Go to <strong>Events → Event Reports</strong>. Your export is listed with its file format and number of records. Click the green <strong>download icon</strong> in the <strong>Download URL</strong> column to save the file.</>,
+    image: "/img/business/reports/event-bookings-04-event-reports.png",
+    imageAlt: "Event Booking Reports list with the download icon highlighted in the Download URL column",
+  },
+]} />
+
+:::warning
+Don't look for event booking exports in **Generated Reports** — they only appear under **Events → Event Reports**.
+:::
+
+### Other Export Sources
+
+The following screens also have an **Export Transactions** button. Each works exactly like the [Transactions export](#generate-a-report): open the export panel, choose columns, timezone and file type, click **EXPORT**, and collect the file from Generated Reports.
+
+| Section | How to reach it |
+|---|---|
+| **Payment Request — deleted transactions** | Dashboard → Payment Request → Deleted Paid Transactions → **Export Transactions** |
+| **Bulk** | Dashboard → Bulk → Transactions (or Deleted Paid Transactions) → **Export Transactions** |
+| **Customer Payment** | Dashboard → Customer payment → Transactions (or Deleted Paid Transactions) → **Export Transactions** |
+| **Catalogue** | Dashboard → Catalogue → Transactions (or Deleted Paid Transactions) → **Export Transactions** |
+| **E-Commerce** | Dashboard → E-commerce → Transactions (or Deleted Paid Transactions) → **Export Transactions** |
+| **Refund Transactions** | Dashboard → Refund Transactions → **Export Transactions** |
+
+:::note
+**Invoices**, **Bulk Uploads**, **Access Logs**, and the **Tickets** approval queue do not have an export option.
+:::
+
+:::note
+The exact sections available in your dashboard depend on which [plugins](/business/plugins) are enabled for your merchant account. If a section listed above is not visible, it may not be activated. Contact your Ottu account manager to enable it.
+:::
+
+## Download Your Reports
+
+Every transaction and wallet export is collected in one place: the **Generated Reports** page. You can download them immediately after they are ready, or come back days later to re-download the same file.
+
+<StepGuide steps={[
+  {
+    title: "Open Generated Reports",
+    description: <>From the Ottu Dashboard, click <strong>Generated Reports</strong> in the left sidebar. Reports are split into two tabs: <strong>Transaction Exports</strong> (the default) and <strong>Wallet Exports</strong>. Each tab lists its reports with the most recent at the top.</>,
+    image: "/img/business/reports/generated-reports-01-open.png",
+    imageAlt: "Generated Reports page showing a table of exported report files",
+  },
+  {
+    title: "Find your report in the list",
+    description: <>The table lists each export with its date, module, format, report type, number of records, file size, the data range it covers (<strong>Duration</strong>), who exported it, and an expiry date (<strong>Available Until</strong>). The <strong>Wallet Exports</strong> tab is simpler: it shows when the export was requested, its format, the number of records, and who requested it. Your most recent export appears at the top. If you just queued a report and the download icon has not appeared yet, the file is still being generated — wait a moment and refresh the page.</>,
+    image: "/img/business/reports/generated-reports-02-statuses.png",
+    imageAlt: "Generated Reports table showing columns: Export Date, Module, Format, Report Type, Records, Size, Duration, Available Until, Exported By, and a download icon",
+  },  {
+    title: "Click the download icon",
+    description: <>Click the green <strong>download icon</strong> (↓) in the rightmost column next to your report. The file (CSV or XLSX, whichever you chose when exporting) saves to your browser's default Downloads folder.</>,
+    image: "/img/business/reports/generated-reports-03-download.png",
+    imageAlt: "Download icon highlighted in the rightmost column next to a report row",
+  },
+  {
+    title: "Re-download before the expiry date",
+    description: <>Each report shows an <strong>Available Until</strong> date — 30 days from when you exported it. You can click the download icon again at any time before that date to get another copy. Nothing changes between downloads — the file reflects the data at the moment you clicked Export.</>,
+    image: "/img/business/reports/generated-reports-04-redownload.png",
+    imageAlt: "Generated Reports list showing the Available Until date column next to older reports still available to download",
+  },
+]} />
+
+:::tip
+Use your browser's built-in search (Ctrl+F / Cmd+F) on the Generated Reports page to quickly find a specific export by date or name if you have many reports listed.
+:::
+
+---
+
+## What's Next?
+
+- [Transaction Report Configuration](/business/settings/transaction-reports) — Set up scheduled reports delivered by email or SFTP automatically
+- [Payment Management](/business/payment-management/) — Search, filter, and inspect individual transactions
+- [Wallet](/business/wallet/) — Understand wallet credits, debits, and how wallet activity is reported
+- [Plugins](/business/plugins/) — Learn about the Payment Request, E-Commerce, and Bulk plugins that generate the data you export

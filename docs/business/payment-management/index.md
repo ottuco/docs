@@ -40,4 +40,5 @@ Configure when and how notifications are sent, use short URLs for SMS delivery, 
 - [Operations](/business/operations) -- Manage refunds, voids, and captures
 - [Plugins](/business/plugins) -- Configure payment request and e-commerce plugins
 - [Notification Channels](/business/notifications) -- Set up email, SMS, and WhatsApp notifications
-- [Transaction Reports](/business/settings/transaction-reports) -- Export and analyze transaction data
+- [Reports](/business/reports/) -- Generate, export, and download transaction data as CSV files
+- [Transaction Report Configuration](/business/settings/transaction-reports) -- Set up scheduled automated reports
