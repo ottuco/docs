@@ -247,7 +247,7 @@ Create a subscription with the Checkout API: set `payment_type` to `auto_pay` an
 
 ## Limits {#limits}
 
-- **Gateways.** A payment gateway without auto-debit cannot renew a subscription. `pg_codes` must name a gateway that supports tokenization and auto-debit.
+- **Gateways.** A payment gateway without auto-debit cannot renew a subscription, so every gateway in `pg_codes` must support tokenization and auto-debit. To list the gateways you can use, call the [Payment Methods API](/developers/payments/payment-methods/) with `auto_debit: true`.
 - **Billing periods.** `autopay.frequency` is `monthly` or `yearly`. There is no weekly or custom interval.
 - **No edits.** A running subscription cannot be edited: amount, `autopay.frequency`, billing day, retry count, `language`, `notification_preferences` or customer email. [Cancel](/developers/payments/autopay/?autopay-api=cancel#api-reference) it and create a new one. There is no proration.
 - **Retries.** You set only the retry count, and only when you create the subscription. Ottu sets the interval. See [Retries & Dunning](#retries-and-dunning).
