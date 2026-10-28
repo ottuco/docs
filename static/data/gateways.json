@@ -282,8 +282,7 @@
     "inquiryMinutes": 8,
     "operations": [
       "purchase",
-      "refund",
-      "autodebit"
+      "refund"
     ],
     "integrationType": "redirect",
     "category": "local_debit",
@@ -1465,8 +1464,7 @@
     "inquiryMinutes": 8,
     "operations": [
       "purchase",
-      "refund",
-      "autodebit"
+      "refund"
     ],
     "integrationType": "redirect",
     "category": "local_debit",
@@ -1735,7 +1733,8 @@
       "refund",
       "auth",
       "capture",
-      "tokenization"
+      "tokenization",
+      "autodebit"
     ],
     "integrationType": "redirect",
     "category": "gateway",
@@ -2065,8 +2064,7 @@
       "refund",
       "auth",
       "capture",
-      "tokenization",
-      "autodebit"
+      "tokenization"
     ],
     "integrationType": "redirect/direct",
     "category": "acquirer",
