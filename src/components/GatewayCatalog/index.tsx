@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { useLocation } from "@docusaurus/router";
 import useBaseUrl, { useBaseUrlUtils } from "@docusaurus/useBaseUrl";
 import gatewaysData from "@site/static/data/gateways.json";
 import type { Gateway, GatewayCategory } from "@site/src/types/gateway";
@@ -36,6 +37,36 @@ function gatewayMatchesRegion(gw: Gateway, region: RegionKey): boolean {
 function gatewayMatchesCountry(gw: Gateway, country: string): boolean {
   if (gw.countries.includes("Global")) return true;
   return gw.countries.includes(country);
+}
+
+// Features are operation slugs; "auth" stands for auth & capture, which always come together.
+const FEATURE_ORDER = ["refund", "auth", "void", "tokenization", "autodebit"] as const;
+type Feature = (typeof FEATURE_ORDER)[number];
+const FEATURE_LABELS: Record<Feature, string> = {
+  refund: "Refund",
+  auth: "Auth & capture",
+  void: "Void",
+  tokenization: "Tokenization",
+  autodebit: "Auto-debit",
+};
+
+// ── URL state ────────────────────────────────────────
+// Filters live in the query string so other pages can link to a pre-filtered
+// list, e.g. /business/payments/gateways?features=autodebit.
+
+const URL_KEYS = {
+  search: "q",
+  region: "region",
+  countries: "countries",
+  gatewayTypes: "types",
+  networks: "networks",
+  features: "features",
+} as const;
+
+function readList<T extends string>(params: URLSearchParams, key: string, allowed: readonly T[]): T[] {
+  const raw = params.get(key);
+  if (!raw) return [];
+  return raw.split(",").filter((v): v is T => (allowed as readonly string[]).includes(v));
 }
 
 // ── Logo fallback ────────────────────────────────────
@@ -514,6 +545,15 @@ function IconCheck({ className }: { className?: string }) {
   );
 }
 
+function IconTickSquare({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7.50033 18.3333H12.5003C16.667 18.3333 18.3337 16.6667 18.3337 12.5V7.49999C18.3337 3.33332 16.667 1.66666 12.5003 1.66666H7.50033C3.33366 1.66666 1.66699 3.33332 1.66699 7.49999V12.5C1.66699 16.6667 3.33366 18.3333 7.50033 18.3333Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M6.45801 9.99999L8.81634 12.3583L13.5413 7.64166" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
 function IconFilter({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -682,7 +722,52 @@ export default function GatewayCatalog(): React.JSX.Element {
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [selectedGatewayTypes, setSelectedGatewayTypes] = useState<GatewayCategory[]>([]);
   const [selectedNetworks, setSelectedNetworks] = useState<string[]>([]);
+  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  // Don't write the URL until it has been read, or the first render would wipe it.
+  const [urlRead, setUrlRead] = useState(false);
+  // Our own replaceState doesn't reach the router, so this changes only when a
+  // link navigates here, including one on this page.
+  const { search: locationSearch } = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(locationSearch);
+    const region = params.get(URL_KEYS.region);
+    const validRegion = (REGION_ORDER as readonly string[]).includes(region ?? "")
+      ? (region as RegionKey)
+      : null;
+    const countryPool = validRegion
+      ? [...REGION_CONFIG[validRegion].countries]
+      : Object.values(REGION_CONFIG).flatMap((r) => [...r.countries]);
+    setSearch(params.get(URL_KEYS.search) ?? "");
+    setSelectedRegion(validRegion);
+    setSelectedCountries(readList(params, URL_KEYS.countries, countryPool));
+    setSelectedGatewayTypes(readList(params, URL_KEYS.gatewayTypes, CATEGORY_ORDER));
+    setSelectedNetworks(readList(params, URL_KEYS.networks, allNetworks));
+    setSelectedFeatures(readList(params, URL_KEYS.features, FEATURE_ORDER));
+    setUrlRead(true);
+  }, [locationSearch]);
+
+  useEffect(() => {
+    if (!urlRead) return;
+    const params = new URLSearchParams(window.location.search);
+    const values: [string, string][] = [
+      [URL_KEYS.search, search],
+      [URL_KEYS.region, selectedRegion ?? ""],
+      [URL_KEYS.countries, selectedCountries.join(",")],
+      [URL_KEYS.gatewayTypes, selectedGatewayTypes.join(",")],
+      [URL_KEYS.networks, selectedNetworks.join(",")],
+      [URL_KEYS.features, selectedFeatures.join(",")],
+    ];
+    for (const [key, value] of values) {
+      if (value) params.set(key, value);
+      else params.delete(key);
+    }
+    // Values are slugs and codes, so commas can stay readable in a shared link.
+    const query = params.toString().replace(/%2C/g, ",");
+    const url = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
+    window.history.replaceState(window.history.state, "", url);
+  }, [urlRead, search, selectedRegion, selectedCountries, selectedGatewayTypes, selectedNetworks, selectedFeatures]);
 
   // Cascading: region change resets countries
   const handleRegionChange = (value: string) => {
@@ -712,6 +797,13 @@ export default function GatewayCatalog(): React.JSX.Element {
   const handleNetworkToggle = (value: string) => {
     setSelectedNetworks((prev) =>
       prev.includes(value) ? prev.filter((n) => n !== value) : [...prev, value],
+    );
+  };
+
+  const handleFeatureToggle = (value: string) => {
+    const feature = value as Feature;
+    setSelectedFeatures((prev) =>
+      prev.includes(feature) ? prev.filter((f) => f !== feature) : [...prev, feature],
     );
   };
 
@@ -752,6 +844,16 @@ export default function GatewayCatalog(): React.JSX.Element {
     }));
   }, [brandsBaseUrl]);
 
+  const operationsBaseUrl = useBaseUrl("/img/operations/");
+
+  const featureOptions = useMemo(() => {
+    return FEATURE_ORDER.map((f) => ({
+      value: f,
+      label: FEATURE_LABELS[f],
+      icon: <img src={`${operationsBaseUrl}${OPERATION_ICONS[f]}`} alt="" className={styles.opIcon} />,
+    }));
+  }, [operationsBaseUrl]);
+
   // Region options
   const regionOptions = useMemo(() => {
     return REGION_ORDER.map((r) => ({
@@ -778,6 +880,8 @@ export default function GatewayCatalog(): React.JSX.Element {
       if (selectedNetworks.length > 0) {
         if (!selectedNetworks.some((n) => gw.cardBrands.includes(n))) return false;
       }
+      // A merchant picking features needs a gateway that has all of them.
+      if (!selectedFeatures.every((f) => gw.operations.includes(f))) return false;
       if (search) {
         const q = search.toLowerCase();
         const fields = [
@@ -795,13 +899,14 @@ export default function GatewayCatalog(): React.JSX.Element {
       return CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category);
     });
     return result;
-  }, [search, selectedRegion, selectedCountries, selectedGatewayTypes, selectedNetworks]);
+  }, [search, selectedRegion, selectedCountries, selectedGatewayTypes, selectedNetworks, selectedFeatures]);
 
   const activeFilterCount =
     (selectedRegion ? 1 : 0) +
     selectedCountries.length +
     selectedGatewayTypes.length +
-    selectedNetworks.length;
+    selectedNetworks.length +
+    selectedFeatures.length;
 
   // Build tags from all active filters
   const tags = useMemo(() => {
@@ -837,8 +942,16 @@ export default function GatewayCatalog(): React.JSX.Element {
         onRemove: () => setSelectedNetworks((prev) => prev.filter((x) => x !== n)),
       });
     }
+    for (const f of selectedFeatures) {
+      t.push({
+        key: `feature-${f}`,
+        category: "Feature:",
+        value: FEATURE_LABELS[f],
+        onRemove: () => setSelectedFeatures((prev) => prev.filter((x) => x !== f)),
+      });
+    }
     return t;
-  }, [selectedRegion, selectedCountries, selectedGatewayTypes, selectedNetworks]);
+  }, [selectedRegion, selectedCountries, selectedGatewayTypes, selectedNetworks, selectedFeatures]);
 
   return (
     <div className={styles.catalog}>
@@ -922,6 +1035,15 @@ export default function GatewayCatalog(): React.JSX.Element {
             multi
             searchable
             minWidth={210}
+          />
+          <FilterDropdown
+            icon={<IconTickSquare className={styles.dropdownIcon} />}
+            label="Features"
+            options={featureOptions}
+            selected={selectedFeatures}
+            onChange={handleFeatureToggle}
+            multi
+            minWidth={150}
           />
         </div>
 
