@@ -10,11 +10,11 @@
 
 api_key_admin:
   auth_method: "[API Key]({{apiBaseUrl}}/getting-started/authentication/#api-key-auth)"
-  permissions: "All permissions (admin access)"
+  permissions: "Full-access keys: all permissions. Scoped keys: the permission listed for this operation — see [API Key Permissions]({{apiBaseUrl}}/reference/api-key-permissions/)"
 
 api_key_only:
   auth_method: "[API Key]({{apiBaseUrl}}/getting-started/authentication/#api-key-auth)"
-  permissions: "Required (Basic Auth not supported for this endpoint)"
+  permissions: "Required (Basic Auth not supported for this endpoint). Full-access keys: allowed. Scoped keys: see [API Key Permissions]({{apiBaseUrl}}/reference/api-key-permissions/)"
 
 # ── Checkout API ──────────────────────────────────────────────
 
@@ -36,14 +36,14 @@ basic_auth_view_checkout:
 
 basic_auth_payment_methods:
   auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
-  permissions: "User-specific access based on assigned permissions"
+  permissions: "`Can view Settings` (`gateway.view_pgmid`). The public key is refused with `401`."
   extra: "`Can use pg_code` — grants access to the specific [payment gateway]({{apiBaseUrl}}/payments/payment-methods/) (e.g., \"Can use Credit Card\")"
 
 # ── Operations API ────────────────────────────────────────────
 
 basic_auth_operations:
   auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
-  permissions: "Requires the specific operation permission: `payment.capture`, `payment.refund`, `payment.void`, `payment.cancel`, `payment.expire`, or `payment.delete`"
+  permissions: "Requires the specific operation permission: `payment.capture`, `payment.refund`, `payment.void`, `payment.cancel`, `payment.do_expire`, or `payment.delete`"
 
 basic_auth_inquiry:
   auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
@@ -53,11 +53,35 @@ basic_auth_inquiry:
 
 basic_auth_auto_debit:
   auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
-  permissions: "`Can add payment requests` or `Can add e-commerce payments`"
+  permissions: "`Can perform auto-debits` (`user.do_autodebit`). The public key is refused with `401`."
 
 basic_auth_native_payment:
   auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
-  permissions: "`Can add payment requests` or `Can add e-commerce payments`"
+  permissions: "`Can execute native payment` (`payment.native_payment`)"
+
+basic_auth_acknowledge_payment:
+  auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
+  permissions: "`Can acknowledge payment` (`payment.acknowledge_payment`)"
+
+# ── Notifications API ─────────────────────────────────────────
+
+basic_auth_send_notification:
+  auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
+  permissions: "`Can send payment notification` (`payment.send_notification`)"
+
+# ── User Cards API ────────────────────────────────────────────
+
+basic_auth_user_cards_view:
+  auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
+  permissions: "`Can view Card` (`card.view_card`). The public key is refused with `401`."
+
+basic_auth_user_cards_delete:
+  auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
+  permissions: "`Can delete Card` (`card.delete_card`). The public key is refused with `401`."
+
+public_key_session_card_delete:
+  auth_method: "[Public Key]({{apiBaseUrl}}/getting-started/authentication/#public-key)"
+  permissions: "Accepted — this is the route the Checkout SDK calls. The customer is read from the session, never from the request. A private key or Basic Auth user needs `Can delete Card` (`card.delete_card`)."
 
 # ── Invoice API ───────────────────────────────────────────────
 
@@ -70,11 +94,11 @@ basic_auth_create_invoice:
 
 basic_auth_view_reports:
   auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
-  permissions: "`report.can_view_report`"
+  permissions: "`Can view Report` (`report.view_report`)"
 
 # ── Wallet API ────────────────────────────────────────────────
 
 basic_auth_wallet_read:
   auth_method: "[Basic Auth]({{apiBaseUrl}}/getting-started/authentication/#basic-auth)"
-  permissions: "`wallet.view`"
+  permissions: "`Can view Wallet section` (`wallet.can_view_wallet_section`)"
   extra: "Read-only access to wallet accounts, ledger entries, and operations. Refund-to-wallet (which credits a wallet) uses `payment.refund` — see `basic_auth_operations`."
