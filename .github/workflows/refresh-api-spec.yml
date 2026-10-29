@@ -1,0 +1,64 @@
+name: Refresh API Reference
+
+# Reads the OpenAPI schema from a Connect server, regenerates the API pages
+# and opens a PR with the result. Run it after a Connect release reaches the
+# server, so static/Ottu_API.yaml does not fall behind the code.
+
+on:
+  workflow_dispatch:
+    inputs:
+      schema_url:
+        description: "Connect base URL. The schema is read from <url>/schema/public"
+        required: true
+        default: "https://sandbox.ottu.net/b"
+      base:
+        description: "Branch to open the PR against"
+        required: true
+        default: "dev"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: refresh-api-spec
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.base }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.6"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch the schema and regenerate the API pages
+        run: npm run update-api
+        env:
+          OTTU_SCHEMA_URL: ${{ inputs.schema_url }}
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Open a PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          base: ${{ inputs.base }}
+          branch: chore/refresh-api-spec-${{ inputs.base }}
+          delete-branch: true
+          commit-message: "chore(api-reference): refresh the API spec from ${{ inputs.schema_url }}"
+          title: "chore(api-reference): refresh the API spec"
+          body: |
+            Schema read from `${{ inputs.schema_url }}/schema/public` and the API pages regenerated (`npm run update-api`).
+
+            Before merging, check the diff of `static/Ottu_API.yaml`: every change should match a Connect release that is live on that server.
