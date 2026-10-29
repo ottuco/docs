@@ -270,6 +270,78 @@ const sidebars: SidebarsConfig = {
               ],
             },
             {
+              type: "category",
+              label: "Connect SDK (Checkout v4)",
+              link: {
+                type: "doc",
+                id: "developers/payments/connect-sdk/index",
+              },
+              items: [
+                {
+                  type: "doc",
+                  id: "developers/payments/connect-sdk/quick-start",
+                  label: "Quick Start",
+                },
+                {
+                  type: "doc",
+                  id: "developers/payments/connect-sdk/reference",
+                  label: "API Reference",
+                },
+                {
+                  type: "category",
+                  label: "Payment Methods",
+                  collapsed: true,
+                  items: [
+                    {
+                      type: "doc",
+                      id: "developers/payments/connect-sdk/cards",
+                      label: "Cards & Saved Cards",
+                    },
+                    {
+                      type: "doc",
+                      id: "developers/payments/connect-sdk/wallets",
+                      label: "Apple Pay, Google Pay & Samsung Pay",
+                    },
+                    {
+                      type: "doc",
+                      id: "developers/payments/connect-sdk/mobile-payments",
+                      label: "STC Pay & urpay",
+                    },
+                    {
+                      type: "doc",
+                      id: "developers/payments/connect-sdk/bnpl",
+                      label: "Buy Now, Pay Later",
+                    },
+                    {
+                      type: "doc",
+                      id: "developers/payments/connect-sdk/qitaf",
+                      label: "Qitaf Loyalty",
+                    },
+                    {
+                      type: "doc",
+                      id: "developers/payments/connect-sdk/friend-pay",
+                      label: "Friend Pay",
+                    },
+                  ],
+                },
+                {
+                  type: "doc",
+                  id: "developers/payments/connect-sdk/theming-and-localisation",
+                  label: "Theming & Localisation",
+                },
+                {
+                  type: "doc",
+                  id: "developers/payments/connect-sdk/errors",
+                  label: "Error Handling",
+                },
+                {
+                  type: "doc",
+                  id: "developers/payments/connect-sdk/migration-from-v3",
+                  label: "Migrating from v3",
+                },
+              ],
+            },
+            {
               type: "doc",
               id: "developers/payments/sandbox",
               label: "Sandbox & Test Cards",

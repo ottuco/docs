@@ -1,0 +1,267 @@
+---
+title: Theming & Localisation
+description: Match the Connect SDK checkout to your brand with the CheckoutTheme builder, and show it in English or Arabic with automatic right-to-left layout.
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { CONNECT_SDK_CDN_URL } from "@site/src/constants/api";
+
+The [Connect SDK](./index.mdx) renders the checkout inside your page. You control how it looks with a **theme** built by `OttuSDK.CheckoutTheme`, and the language it speaks follows the [payment session](../checkout-api.mdx) you create on your server. Arabic sessions switch the checkout to right-to-left automatically.
+
+<CodeBlock language="html" title="Brand the checkout">{`<div id="ottu-checkout"></div>
+<script src="${CONNECT_SDK_CDN_URL}"></script>
+<script>
+  const theme = OttuSDK.CheckoutTheme.create()
+    .setPrimaryColor("#0053A4")
+    .setOnPrimaryColor("#FFFFFF")
+    .setFontFamily("'Poppins', sans-serif")
+    .setBorderRadius("8px")
+    .build();
+
+  const sdk = new OttuSDK.ConnectSDK();
+  sdk
+    .init({
+      merchant_id: "sandbox.ottu.net",
+      session_id: "your_session_id",
+      apiKey: "your_public_api_key",
+      selector: "#ottu-checkout",
+      theme,
+      onSuccess: (data) => { window.location.href = data.redirect_url; },
+      onError: (data) => console.error(data.message),
+      onCancel: (data) => console.log(data.message),
+    })
+    .catch((err) => console.error("Checkout failed to load", err));
+</script>`}</CodeBlock>
+
+Replace `your_session_id` with the `session_id` returned by the [Checkout API](../checkout-api.mdx), and `your_public_api_key` with your [public key](/developers/getting-started/authentication#public-key).
+
+## When to Use
+
+- **Brand consistency** — use your brand colours, font and corner radius so the checkout looks like part of your site.
+- **Dark pages** — start from the `CheckoutTheme.dark` preset when the checkout sits on a dark background.
+- **Accessibility** — use `CheckoutTheme.highContrast` for stronger contrast between text and surfaces.
+- **Arabic-speaking customers** — create the session in Arabic and the checkout renders in Arabic, right-to-left, with no extra code.
+- **Custom wording** — change the Pay button, Cancel link and Friend Pay text per language.
+
+## Guide
+
+### Workflow
+
+1. **Build the theme** with `OttuSDK.CheckoutTheme.create()`, chain the setters you need, then call `.build()`. Or use a preset.
+2. **Pass it to `init`** as the [`theme`](./reference.mdx#theme) option.
+3. **Set the language on the session.** Your server creates the [Checkout API](../checkout-api.mdx) session with `language: "en"` or `language: "ar"`; the SDK uses that language for every label and sets the layout direction.
+4. **Override text** where you need to with [`payButtonText`](./reference.mdx#paybuttontext), [`rejectButtonConfig`](./reference.mdx#rejectbuttonconfig) and [`friendPay.shareText`](./friend-pay.mdx).
+
+### Theme Builder
+
+`CheckoutTheme` is a builder. Start it with the static `create()` method (calling `new CheckoutTheme()` throws a `TypeError`), call any setters, and finish with `build()`. Each setter takes a string and returns the builder, so calls chain.
+
+```js
+const theme = OttuSDK.CheckoutTheme.create()
+  .setPrimaryColor("#7B2CBF")
+  .setSurfaceColor("#FFFFFF")
+  .setBorderColor("#E0E0E0")
+  .setPillRadius("999px")
+  .build();
+```
+
+You only set what you want to change. Anything you leave out keeps the SDK's built-in styling. There is no merging with a preset: a built theme contains exactly the setters you called.
+
+:::warning Plain objects are ignored
+`theme` must be the value returned by `build()` or a preset. A hand-written object (for example a theme copied from the Checkout SDK v3) is discarded without an error, and the checkout renders with its default look. See [Migrating from v3](./migration-from-v3.mdx).
+:::
+
+#### Colours
+
+| Setter | CSS variable | Styles |
+|---|---|---|
+| `setPrimaryColor` | `--ottu-primary` | Brand colour: Pay button, selected method, focus states |
+| `setOnPrimaryColor` | `--ottu-on-primary` | Text and icons drawn on the primary colour |
+| `setSurfaceColor` | `--ottu-surface` | Cards and method rows |
+| `setOnSurfaceColor` | `--ottu-on-surface` | Text on surfaces |
+| `setSurfaceVariantColor` | `--ottu-surface-variant` | Secondary surfaces |
+| `setOnSurfaceVariantColor` | `--ottu-on-surface-variant` | Secondary text |
+| `setBackgroundColor` | `--ottu-background` | Checkout background |
+| `setOnBackgroundColor` | `--ottu-on-background` | Text on the background |
+| `setBorderColor` | `--ottu-border` | Borders and dividers |
+| `setDangerColor` | `--ottu-danger` | Errors |
+| `setOnDangerColor` | `--ottu-on-danger` | Text on the danger colour |
+| `setSuccessColor` | `--ottu-success` | Success states |
+
+#### Typography and shape
+
+| Setter | CSS variable | Styles |
+|---|---|---|
+| `setFontFamily` | `--ottu-font-family` | Font stack for the checkout. Load any web font on your page first. |
+| `setBorderRadius` | `--ottu-radius` | Corner radius of rectangular elements (method rows, inputs) |
+| `setPillRadius` | `--ottu-radius-pill` | Corner radius of pill-shaped elements |
+
+`setBaseFontSize` (`--ottu-font-size-base`) is reserved: the builder accepts it, but it does not change the checkout today.
+
+#### Dialogs
+
+| Setter | CSS variable |
+|---|---|
+| `setModalOverlayColor` | `--ottu-modal-overlay` |
+| `setModalBackground` | `--ottu-modal-bg` |
+| `setModalRadius` | `--ottu-modal-radius` |
+| `setModalTitleColor` | `--ottu-modal-title-color` |
+| `setModalTextColor` | `--ottu-modal-text-color` |
+
+:::note
+The theme is applied to the checkout panel: payment details, the method list and the Pay button. Dialogs and bottom sheets the SDK opens (processing, OTP entry, failure messages, the Friend Pay sheet) are rendered separately; check them in the [sandbox](../sandbox.mdx) before relying on the dialog setters.
+:::
+
+#### Wallet buttons
+
+The Apple Pay and Google Pay buttons are drawn by Apple and Google, so they take a fixed set of values rather than colours. A value outside the list falls back to the default.
+
+| Setter | Values | Default |
+|---|---|---|
+| `setApplePayButtonType` | `add-money`, `book`, `buy`, `check-out`, `continue`, `contribute`, `donate`, `order`, `pay`, `plain`, `reload`, `rent`, `set-up`, `subscribe`, `support`, `tip`, `top-up` | `pay` |
+| `setApplePayButtonStyle` | `black`, `white`, `white-outline` | `black` |
+| `setGooglePayButtonColor` | `default`, `black`, `white` | `default` |
+| `setGooglePayButtonType` | `plain`, `buy`, `book`, `checkout`, `donate`, `order`, `pay`, `subscribe` | `pay` |
+| `setGooglePayButtonSizeMode` | `fill`, `static` | `fill` |
+
+See [Apple Pay & Google Pay](./wallets.mdx) for when these buttons appear.
+
+### Presets
+
+Four ready-made themes are available as static properties. Pass one straight to `init`:
+
+| Preset | Look |
+|---|---|
+| `OttuSDK.CheckoutTheme.light` | Ottu blue (`#0053A4`) primary and the Poppins font stack |
+| `OttuSDK.CheckoutTheme.dark` | Dark surfaces (`#121212`) with a light-blue (`#4DA1FF`) primary |
+| `OttuSDK.CheckoutTheme.highContrast` | High contrast between text and surfaces |
+| `OttuSDK.CheckoutTheme.vibrant` | Purple (`#8E44AD`) primary |
+
+```js
+sdk.init({
+  // ...required options
+  theme: OttuSDK.CheckoutTheme.dark,
+});
+```
+
+A preset is a finished theme, not a builder: you can't chain setters onto it. To tweak a preset, build your own theme with the setters you need.
+
+The checkout has no automatic dark mode. If your page switches between light and dark, choose the theme before you call `init`, for example with `window.matchMedia("(prefers-color-scheme: dark)").matches`.
+
+### Validation
+
+`build()` checks every value and throws a `ThemeError` before anything renders:
+
+| `code` | When |
+|---|---|
+| `INVALID_VALUE` | A value was rejected. `error.field` names the CSS variable. Values containing `url(`, `expression(`, `javascript:`, `@import`, comments or the characters `< > ; { } \` are rejected, as are wallet values outside the allowed list. |
+| `EMPTY_THEME` | `build()` was called without any setter. |
+
+```js
+let theme;
+try {
+  theme = OttuSDK.CheckoutTheme.create()
+    .setPrimaryColor(brandColour)
+    .build();
+} catch (err) {
+  if (err.name === "ThemeError") {
+    console.warn(`Theme rejected (${err.code})`, err.field);
+  }
+  theme = undefined; // fall back to the default look
+}
+```
+
+The theme is read once, when you call `init`. To change it, call `init` again with the new theme (or [`cleanup()`](./reference.mdx#cleanup) and `init`).
+
+### SDK Studio
+
+Some checkout settings are managed by Ottu per merchant in **SDK Studio**, and the SDK loads them when it starts. You don't pass anything for this, but Studio settings **take precedence** over your `init` options where they overlap:
+
+- [`displayRejectButton`](./reference.mdx#displayrejectbutton) — Studio can show or hide the Cancel link.
+- Apple Pay — Studio's per-gateway `version`, `buttonLocale`, `supportedNetworks`, `merchantCapabilities` and `supportedCountries` override the same keys in [`applePayInit`](./wallets.mdx).
+
+SDK Studio does not change the theme or the language. If an option you pass seems to have no effect, ask [Ottu support](mailto:csd@ottu.com) whether Studio sets it for your account.
+
+### Localisation
+
+The checkout ships in **English** (`en`) and **Arabic** (`ar`). All strings are bundled with the SDK; there is nothing to load.
+
+#### Choosing the language
+
+The checkout uses the language of the **payment session**. Set `language` when your server [creates the session](../checkout-api.mdx):
+
+```json
+{
+  "type": "e_commerce",
+  "amount": "19.000",
+  "currency_code": "KWD",
+  "pg_codes": ["credit-card"],
+  "language": "ar"
+}
+```
+
+The [`lang`](./reference.mdx#lang) init option is also sent to Ottu with each SDK request, but the labels follow the session's language. Until the session loads, the checkout shows its loading state in English. An unsupported language falls back to English.
+
+#### Right-to-left
+
+When the language is Arabic, the checkout sets `dir="rtl"` on its own elements and mirrors its layout. Your page's `dir` is not changed. Other parts of the payment follow the same language: the hosted card page opens in Arabic, the card form receives the language, and Apple Pay uses it for its button unless you set `buttonLocale`.
+
+:::note
+The Google Pay button does not follow the checkout language. Set `googlePayInit.buttonLocale` (for example `"ar"`) to localise it. See [Apple Pay & Google Pay](./wallets.mdx).
+:::
+
+#### Overriding text
+
+You can't replace the SDK's translations or add a language, but three labels accept your own text per language:
+
+| Option | What it changes |
+|---|---|
+| [`payButtonText`](./reference.mdx#paybuttontext) `{ en?, ar? }` | The Pay button label |
+| [`rejectButtonConfig.text`](./reference.mdx#rejectbuttonconfig) `{ en?, ar? }` | The Cancel link shown by `displayRejectButton` |
+| [`friendPay.shareText`](./friend-pay.mdx) `string` or `{ en?, ar? }` | The Friend Pay tile label and the default share message |
+
+```js
+sdk.init({
+  // ...required options
+  payButtonText: { en: "Complete order", ar: "إتمام الطلب" },
+  displayRejectButton: true,
+  rejectButtonConfig: { text: { en: "Back to cart", ar: "العودة إلى السلة" } },
+});
+```
+
+The SDK uses the entry for the session's language. If that entry is missing, the default label is shown.
+
+## Best Practices
+
+- **Set only what you need.** A few brand setters (primary, on-primary, font, radius) usually give the right look; the defaults handle the rest.
+- **Check contrast.** When you set a colour, set its `on-` partner too (for example `setPrimaryColor` with `setOnPrimaryColor`) so text stays readable.
+- **Build the theme once** and handle a `ThemeError` by falling back to no theme, so a bad value never blocks payment.
+- **Test both languages** in the [sandbox](../sandbox.mdx): create one session with `language: "en"` and one with `language: "ar"`.
+- **Provide both languages** in every text override so Arabic customers never see an English label.
+
+## FAQ
+
+#### Can I style the checkout with my own CSS classes?
+
+No. The checkout is isolated from your page's CSS. Use the `CheckoutTheme` setters; they are the supported styling interface.
+
+#### Why didn't my v3 theme object apply?
+
+The Connect SDK only accepts a theme built by `CheckoutTheme` (or a preset). Plain objects are ignored. Rebuild the theme with the setters above; the [migration guide](./migration-from-v3.mdx) maps the main v3 keys.
+
+#### Why is the checkout in Arabic when I passed `lang: "en"`?
+
+The labels follow the session's `language`. Create the session with `language: "en"`.
+
+#### Can I add another language?
+
+No. The SDK supports English and Arabic.
+
+## What's Next?
+
+- [**API Reference**](./reference.mdx) — every `init` option, method and callback
+- [**Apple Pay & Google Pay**](./wallets.mdx) — wallet buttons and their settings
+- [**Error Handling**](./errors.mdx) — what the customer sees when something goes wrong
+- [**Quick Start**](./quick-start.mdx) — from a payment session to a working checkout

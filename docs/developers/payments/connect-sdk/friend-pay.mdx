@@ -1,0 +1,160 @@
+---
+title: Friend Pay
+description: Let a customer share a payment link so a friend or relative pays the order for them.
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { CONNECT_SDK_CDN_URL } from "@site/src/constants/api";
+
+Friend Pay lets a customer ask someone else to pay for their order. When you turn on Friend Pay in the [Connect SDK](./index.mdx), the checkout shows a **Friend Pay** tile. The customer shares a link to the order by WhatsApp, Messenger, SMS, email or any other app. The friend opens the link and pays the whole order on Ottu's hosted checkout page.
+
+:::tip Boost Your Integration
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
+:::
+
+## When to Use
+
+- Customers who don't have a card or wallet to hand can ask a family member or friend to pay.
+- Gift purchases or shared orders, where the person ordering isn't the person paying.
+- Markets where "ask someone to pay for me" is a common way to shop.
+
+## Setup
+
+Friend Pay is a Connect SDK option. It needs no payment gateway or `pg_code` of its own.
+
+Turn it on with the [`friendPay`](./reference.mdx#friendpay) option:
+
+```js
+friendPay: {
+  enabled: true,                       // required to show the tile
+  shareText: {                         // optional
+    en: "Please help me pay for my order!",
+    ar: "ساعدني في دفع طلبي!",
+  },
+}
+```
+
+| Field | Type | Required | Default | What it does |
+|---|---|---|---|---|
+| `enabled` | `boolean` | Yes | — | `true` shows the Friend Pay tile. |
+| `shareText` | `string` or `{ en?, ar? }` | No | Tile: *"Friend Pay"*. Message: *"Please help me pay for my order!"* | Replaces the tile label and pre-fills the share message. With an `{ en, ar }` object, the SDK uses only the entry for the checkout language. It doesn't fall back to the other language. |
+
+:::warning
+- Friend Pay is **off** by default. If `friendPay` has the wrong shape, the SDK logs a warning and leaves Friend Pay off.
+- Adding `"friendPay"` to [`formsOfPayment`](./reference.mdx#formsofpayment) does **not** enable it. The SDK ignores that value and logs a warning. Use the `friendPay` option.
+:::
+
+## Guide
+
+### Workflow
+
+1. Your server creates a payment session with the [Checkout API](../checkout-api.mdx), as usual.
+2. Your page initialises the Connect SDK with `friendPay: { enabled: true }`. The checkout shows a **Friend Pay** tile with the notice *"We'll create a link so someone else can pay for your order."*
+3. The customer selects **Friend Pay** and taps **Pay**. A sheet opens with:
+   - the order total
+   - a countdown to when the link expires
+   - **Send to friend**, **Change payment method**, and **Already paid? Update**
+4. **Send to friend** opens a share sheet. The customer can edit the message (up to 200 characters) and share it through:
+   - WhatsApp, Messenger, Messages (SMS), Email or Facebook
+   - the device's native **Share** menu, where the browser supports it
+   - **Copy link**
+5. The friend opens the link: Ottu's hosted checkout page for this session. They pay the **whole order** there.
+6. Back on your page, the customer can tap **Update** to check the status. It shows paid, pending, expired or an error. Once the order is paid, the sheet closes and the customer can't pay again.
+7. Ottu sends the result to your `webhook_url` as a [payment webhook](../../webhooks/payment-events.md).
+
+:::danger Friend Pay fires no callbacks
+`onBeforePayment`, `onSuccess`, `onError` and `onCancel` **never** fire for Friend Pay, even after the friend pays. Your server learns the result only from the [payment webhook](../../webhooks/payment-events.md). Don't wait for a browser callback to fulfil a Friend Pay order.
+:::
+
+### Step-by-Step
+
+#### 1. Create the session
+
+Create the session on your server with the [Checkout API](../checkout-api.mdx). Nothing Friend Pay-specific is needed. Set a `webhook_url`, because the webhook is how you learn that the friend paid. See the [Connect SDK quick start](./quick-start.mdx) for complete server code in cURL, Python, Node.js and PHP.
+
+#### 2. Initialise the SDK with `friendPay`
+
+<CodeBlock language="html" title="checkout.html">
+{`<div id="ottu-checkout"></div>
+<script src="${CONNECT_SDK_CDN_URL}"></script>
+<script>
+  const sdk = new OttuSDK.ConnectSDK();
+
+  sdk.init({
+    merchant_id: "sandbox.ottu.net",
+    session_id: "your_session_id",
+    apiKey: "your_public_api_key",
+    selector: "#ottu-checkout",
+
+    friendPay: {
+      enabled: true,
+      shareText: {
+        en: "Can you help me pay for my order?",
+        ar: "هل يمكنك مساعدتي في دفع طلبي؟",
+      },
+    },
+
+    // These fire for the other payment methods, not for Friend Pay.
+    onSuccess: (data) => { window.location.href = data.redirect_url; },
+    onCancel: (data) => console.log("Payment canceled:", data.message),
+    onError: (data) => console.error("Payment error:", data.message),
+  }).catch((err) => {
+    console.error("Checkout failed to load", err);
+  });
+</script>`}
+</CodeBlock>
+
+Use your [public API key](/developers/getting-started/authentication#public-key) for `apiKey`.
+
+#### 3. Fulfil from the webhook
+
+Handle the [payment webhook](../../webhooks/payment-events.md) on your server and [verify its signature](../../webhooks/verify-signatures.md) before you fulfil the order. If you need to show the original customer a confirmation, take it from your own order status, which the webhook updates.
+
+### Use Cases
+
+#### Link expiry
+
+The countdown uses the session's expiration time, or 24 hours if the session has none. When the link expires:
+- the customer can no longer share it or change the payment method
+- **Update** still works, so the customer can check whether the friend paid in time
+
+Create sessions with an expiration that gives the friend enough time to pay.
+
+#### Customer changes their mind
+
+If the customer closes the sheet or taps **Change payment method** before anyone pays, **Pay** is enabled again and they can pick another method. No callback fires.
+
+## Best Practices
+
+- **Always set a `webhook_url`.** It's the only way you learn that a Friend Pay order was paid.
+- **Pick a sensible session expiry.** Too short and the friend misses it. Too long and stock may be held for an unpaid order.
+- **Localise `shareText`** with an `{ en, ar }` object if you serve both languages. A single string is used as-is in both.
+- **Keep other payment methods on the session** so the customer can switch away from Friend Pay.
+
+## FAQ
+
+#### Does the friend pay part of the order?
+
+No. The friend pays the whole order on Ottu's hosted checkout page. Friend Pay doesn't split payments.
+
+#### Does Friend Pay need a payment gateway?
+
+Not its own. The friend pays with the gateways configured on the session's hosted checkout page.
+
+#### Why didn't `onSuccess` fire when the friend paid?
+
+Friend Pay never fires SDK callbacks. The payment happens on another device, outside the SDK. Use the [payment webhook](../../webhooks/payment-events.md).
+
+#### Can I turn it on with `formsOfPayment: ["friendPay"]`?
+
+No. That value is ignored. Use `friendPay: { enabled: true }`.
+
+## What's Next?
+
+- [Connect SDK quick start](./quick-start.mdx): from session to working checkout.
+- [API reference: `friendPay`](./reference.mdx#friendpay): the option in full.
+- [Payment webhooks](../../webhooks/payment-events.md): how your server learns the friend paid.
+- [Verify webhook signatures](../../webhooks/verify-signatures.md): trust the webhook before fulfilling.
+- [Theming & localisation](./theming-and-localisation.mdx): English, Arabic and RTL in the checkout.

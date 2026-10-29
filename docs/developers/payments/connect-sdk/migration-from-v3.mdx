@@ -1,0 +1,221 @@
+---
+title: Migrating from Checkout SDK v3
+description: Move a web integration from the Checkout SDK v3 (checkout.min.js) to the Connect SDK — the new script, entry point, callbacks, theme and every option that changed.
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { CONNECT_SDK_CDN_URL } from "@site/src/constants/api";
+
+The Connect SDK (Checkout v4) replaces the web [Checkout SDK v3](../checkout-sdk/web.mdx). It still takes a [Checkout API](../checkout-api.mdx) `session_id`, your `merchant_id` and your [public key](/developers/getting-started/authentication#public-key), and most option names are unchanged. What changes is how you load and start it, how you receive callbacks, and how you theme it.
+
+**Before (v3):**
+
+```html
+<script
+  src="https://assets.ottu.net/checkout/v3/checkout.min.js"
+  data-success="successCallback"
+  data-error="errorCallback"
+  data-cancel="cancelCallback"
+  data-beforepayment="beforePayment"
+></script>
+
+<div id="checkout"></div>
+<script>
+  window.successCallback = (data) => { window.location.href = data.redirect_url; };
+  window.errorCallback = (data) => console.error(data.message);
+  window.cancelCallback = (data) => console.log(data.message);
+  window.beforePayment = (data) => Promise.resolve();
+
+  Checkout.init({
+    selector: "checkout",
+    merchant_id: "sandbox.ottu.net",
+    session_id: "your_session_id",
+    apiKey: "your_public_api_key",
+  });
+</script>
+```
+
+**After (Connect SDK):**
+
+<CodeBlock language="html">{`<script src="${CONNECT_SDK_CDN_URL}"></script>
+
+<div id="checkout"></div>
+<script>
+  const sdk = new OttuSDK.ConnectSDK();
+
+  sdk
+    .init({
+      selector: "#checkout",
+      merchant_id: "sandbox.ottu.net",
+      session_id: "your_session_id",
+      apiKey: "your_public_api_key",
+
+      onSuccess: (data) => { window.location.href = data.redirect_url; },
+      onError: (data) => console.error(data.message),
+      onCancel: (data) => console.log(data.message),
+      onBeforePayment: (data) => Promise.resolve(),
+    })
+    .catch((err) => console.error("Checkout failed to load", err));
+</script>`}</CodeBlock>
+
+## When to Use
+
+Use this guide if your web checkout loads `checkout/v3/checkout.min.js` and calls `Checkout.init`. Your server-side integration — creating sessions with the [Checkout API](../checkout-api.mdx) and handling [payment webhooks](../../webhooks/payment-events.md) — does not change.
+
+## Guide
+
+### Migration Checklist
+
+Work through these ten changes. Each links to the details below.
+
+1. **Load the new script and create an instance.** Replace the v3 `<script>` with the Connect SDK bundle and call `new OttuSDK.ConnectSDK()` then `sdk.init(...)` instead of `Checkout.init(...)`. → [Entry point](#entry-point-and-methods)
+2. **Move callbacks into `init`.** Drop the `data-success`, `data-error`, `data-cancel`, `data-beforepayment` and `data-validatepayment` attributes and the `window` functions; pass `onSuccess`, `onError`, `onCancel` and `onBeforePayment` to `init`. → [Callbacks](#callbacks)
+3. **Merge `validatePayment` and `beforePayment` into `onBeforePayment`.** It runs **before** the payment is submitted, and rejecting it stops the payment. It no longer receives `redirect_url`. → [Callbacks](#callbacks)
+4. **Rebuild your theme with `CheckoutTheme`.** A v3 theme object is silently ignored. Wallet button styles move to builder setters. → [Theme](#theme)
+5. **Enable Friend Pay with the `friendPay` option.** `'friendPay'` in `formsOfPayment` and the top-level `shareText` no longer work. → [Options](#options)
+6. **Remove APIs and options that no longer exist.** `Checkout.pay()`, `Checkout.runDiagnostics()`, `Checkout.showPopup()` and several options are gone, and unknown options are ignored without a warning. → [Removed](#removed-apis-and-options)
+7. **Handle `init()` rejections.** v3 never threw; `init()` now returns a promise that rejects when the checkout can't start. → [Entry point](#entry-point-and-methods)
+8. **Review your callback logic.** `onError` now also fires when Ottu refuses a payment, declines arrive as `onCancel`, and the Cancel link no longer fires `onCancel`. → [Behaviour changes](#behaviour-changes)
+9. **Trim `applePayInit` and `googlePayInit`.** They no longer accept amounts, currency, environment, gateway ids or URLs. → [Options](#options)
+10. **Check `mobilePayOtpLength`.** It must be 4–8 and now defaults to 4. → [Options](#options)
+
+### Entry Point and Methods
+
+| v3 | Connect SDK | Notes |
+|---|---|---|
+| `https://assets.ottu.net/checkout/v3/checkout.min.js` | <code>{CONNECT_SDK_CDN_URL}</code> | New file and host. No stylesheet to include in either version. |
+| Global `Checkout` (a single object) | Global `OttuSDK`; create an instance with `new OttuSDK.ConnectSDK()` | The theme builder is `OttuSDK.CheckoutTheme`. |
+| `Checkout.init(config)` — returns nothing useful, never throws | `sdk.init(config)` — returns a `Promise` that **rejects** on failure | Add `.catch()` or `try/await`. See [Error Handling](./errors.mdx). |
+| `Checkout.reload()` | `sdk.reload()` | Now returns a promise; rejects if called before `init`. |
+| `Checkout.showPopup(type, message, response)` | `sdk.showFailureMessage(title?, message?, buttonText?, onButtonClick?)` | Failure messages only, plain text. No success or redirect popup. |
+| `Checkout.pay({ token })` | — | Removed. Saved cards are paid from the checkout UI. |
+| `Checkout.runDiagnostics()` / `debug: true` | — | Removed. |
+| — | `sdk.cleanup()` | New: removes the checkout from the page. |
+| — | `sdk.getConfig()`, `sdk.getVersion()` | New. |
+| — | `sdk.initCardForm()`, `tokenizeCard()`, `submitCardPayment()`, `isCardFormValid()`, `validateCardForm()` | New [card form mode](./reference.mdx#card-form-mode). |
+
+### Callbacks
+
+| v3 | Connect SDK | What changed |
+|---|---|---|
+| `data-success` → `window.successCallback(data)` | [`onSuccess(data)`](./reference.mdx#onsuccess) | Passed to `init`. Payload adds `form_of_payment`. Not fired for redirect flows, BNPL or Friend Pay. |
+| `data-error` → `window.errorCallback(data)` | [`onError(data)`](./reference.mdx#onerror) | Also fires when Ottu refuses the payment request (v3 only showed its popup). |
+| `data-cancel` → `window.cancelCallback(data)` | [`onCancel(data)`](./reference.mdx#oncancel) | Gateway `failed` is now a cancel for every method. Not fired by the Cancel link. |
+| `data-validatepayment` → `window.validatePayment()` | [`onBeforePayment(data)`](./reference.mdx#onbeforepayment) | Merged. Reject to block the payment. |
+| `data-beforepayment` → `window.beforePayment(data)` | [`onBeforePayment(data)`](./reference.mdx#onbeforepayment) | Runs **before** submit with `{ method, form_of_payment, card? }`. No `redirect_url`. |
+| — | [`onThreeDSChallenge(data)`](./reference.mdx#onthreedschallenge) | New: a 3-D Secure challenge is shown on your page. |
+| — | `onCardFormChange({ isValid })` | New: card form mode only. |
+
+If your v3 `beforePayment` read `data.redirect_url` to do something before navigating, move that logic to your server and the [payment webhook](../../webhooks/payment-events.md), or run it in `onBeforePayment` before the payment is submitted.
+
+### Options
+
+| v3 option | Connect SDK | Change |
+|---|---|---|
+| `merchant_id`, `session_id`, `apiKey` | Same | Still required |
+| `selector` — element id without `#` | `selector` — element id or any CSS selector | Compatible; `"#checkout"` and `"checkout"` both work |
+| — | `selectors: { details, methods, button, cardForm?, threeds? }` | New: place parts of the checkout in separate containers |
+| `lang` | `lang` | Same. The labels follow the session's `language`. |
+| `formsOfPayment` | `formsOfPayment` | Same names. `'friendPay'` is no longer accepted. |
+| `formsOfPayment: [..., 'friendPay']` + `shareText` | `friendPay: { enabled: true, shareText }` | Moved. See [Friend Pay](./friend-pay.mdx). |
+| `theme` (plain object) | `theme` built with `CheckoutTheme` | Rebuilt. See [Theme](#theme). |
+| `applePayInit` | `applePayInit` | Narrowed to `shop_name`, `fee_description`, `merchantCapabilities`, `supportedNetworks`, `supportedCountries`, `version`, `buttonLocale`, `lineItems` |
+| `googlePayInit` | `googlePayInit` | Narrowed to `merchant_name`, `fee_description`, `allowedCardNetworks`, `allowedCardAuthMethods`, `allowPrepaidCards`, `allowCreditCards`, `assuranceDetailsRequired`, `billingAddressRequired`, `billingAddressParameters`, `emailRequired`, `existingPaymentMethodRequired`, `totalPriceStatus` (`FINAL` or `ESTIMATED`), `totalPriceLabel`, `displayItems`, `buttonLocale` |
+| `payButtonText` | `payButtonText` | Same |
+| `displayRejectButton` | `displayRejectButton` | Same; shown only when the session has a `cancel_url` |
+| `rejectButtonConfig: { text, renderAsLink }` | `rejectButtonConfig: { text }` | `renderAsLink` removed; always a link |
+| `mobilePayOtpLength` (default 1) | `mobilePayOtpLength` | Whole number 4–8, default 4 |
+| `mobilePayOtpCooldownTime` | `mobilePayOtpCooldownTime` | Same (default 60 seconds) |
+| `customer_phone`, `setupPreload` | Same | Same |
+| — | `cardFormLayout`, `cardFormPgCode` | New: card form mode only |
+
+Amounts, currency, Google Pay environment and gateway identifiers now come only from the session; the SDK drops them from `applePayInit` and `googlePayInit` with a console warning. See [Apple Pay & Google Pay](./wallets.mdx).
+
+### Theme
+
+v3 themes were objects keyed by component (`pay-button`, `applePay`, `googlePay`, …) with CSS properties and responsive breakpoints. The Connect SDK uses a builder with a fixed set of design tokens:
+
+```js
+// v3
+Checkout.init({
+  // ...
+  theme: {
+    "pay-button": { background: "#0053A4", color: "#fff", "border-radius": "8px" },
+    applePay: { buttonColor: "white-outline", buttonType: "buy" },
+  },
+});
+
+// Connect SDK
+const theme = OttuSDK.CheckoutTheme.create()
+  .setPrimaryColor("#0053A4")
+  .setOnPrimaryColor("#FFFFFF")
+  .setBorderRadius("8px")
+  .setApplePayButtonStyle("white-outline")
+  .setApplePayButtonType("buy")
+  .build();
+
+sdk.init({ /* ... */ theme });
+```
+
+Responsive breakpoints and STC Pay / urpay button colours have no equivalent. See [Theming & Localisation](./theming-and-localisation.mdx) for every setter and the presets.
+
+### Removed APIs and Options
+
+These v3 features have no Connect SDK equivalent. Remove them: the Connect SDK accepts unknown options **without a warning**, so a leftover option silently does nothing.
+
+- Methods: `Checkout.pay()`, `Checkout.runDiagnostics()`, `Checkout.showPopup()` (use `showFailureMessage()` for failures)
+- Options: `render`, `displayMode`, `splitOrder`, `splitReversed`, `displayPciLogos`, `termsAndConditions`, `debug`, `rejectButtonConfig.renderAsLink`, `shadowRootClosed`, `captureAll`
+- `data-*` callback attributes on the `<script>` tag
+
+### Behaviour Changes
+
+- **`init()` rejects** when the checkout can't start, after showing a failure panel. `onError` is not called for start-up failures.
+- **`onError` fires on refused requests too.** When Ottu refuses a payment request, the SDK shows its dialog **and** calls `onError`. If you also show your own error popup, customers will see two.
+- **Declines arrive as `onCancel`.** A gateway status of `failed` is reported as a cancel for every payment method, including wallets.
+- **The Cancel link doesn't call `onCancel`.** With `displayRejectButton`, the customer confirms and the browser goes to the result page.
+- **Some flows never fire `onSuccess`:** redirect to the hosted card page, BNPL, 3-D Secure by redirect and [Friend Pay](./friend-pay.mdx). Confirm those with the [payment webhook](../../webhooks/payment-events.md).
+- **`mobilePayOtpLength`** values outside 4–8 fall back to 4.
+
+### New in the Connect SDK
+
+- [`selectors`](./reference.mdx#selectors) to place the payment details, method list and Pay button in separate containers.
+- [`onThreeDSChallenge`](./reference.mdx#onthreedschallenge) when a 3-D Secure challenge is shown on your page.
+- [Card form mode](./reference.mdx#card-form-mode) to embed only the card fields and drive payment from your own UI.
+- [`cleanup()`](./reference.mdx#cleanup) to remove the checkout, and `getConfig()` / `getVersion()`.
+- [Theme presets](./theming-and-localisation.mdx#presets) — light, dark, high contrast and vibrant.
+- Payment methods: [BNPL](./bnpl.mdx) (Tamara, Tabby, Taly), [Qitaf loyalty](./qitaf.mdx) and [Friend Pay](./friend-pay.mdx).
+
+### Test the Migration
+
+1. Create a session in the [sandbox](../sandbox.mdx) with the Checkout API.
+2. Load the page and confirm the checkout renders and `init()` resolves.
+3. Pay with a [test card](../sandbox.mdx), then decline one, and check `onSuccess` and `onCancel`.
+4. Pass a wrong `selector` and confirm your `.catch()` runs.
+5. Confirm your server receives the [payment webhook](../../webhooks/payment-events.md) for each attempt.
+
+## FAQ
+
+#### Do I need to change my server code?
+
+No. Sessions are created with the same [Checkout API](../checkout-api.mdx) and results arrive through the same [webhooks](../../webhooks/payment-events.md).
+
+#### Can v3 and the Connect SDK run on the same page?
+
+Load only one checkout per page. They use different globals, but each renders its own checkout for the session.
+
+#### My old theme no longer applies. What happened?
+
+The Connect SDK ignores plain theme objects. Rebuild it with `OttuSDK.CheckoutTheme` — see [Theme](#theme).
+
+#### Where did `Checkout.showPopup('success', …)` go?
+
+There is no success popup. Redirect or update your page in `onSuccess`. For failures, use `sdk.showFailureMessage()`.
+
+## What's Next?
+
+- [**Quick Start**](./quick-start.mdx) — a complete Connect SDK integration
+- [**API Reference**](./reference.mdx) — every option, method and callback
+- [**Error Handling**](./errors.mdx) — `init()` rejections and callback payloads
+- [**Theming & Localisation**](./theming-and-localisation.mdx) — rebuild your theme
