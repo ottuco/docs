@@ -1,0 +1,165 @@
+---
+title: Buy Now, Pay Later
+description: How Tamara, Tabby and Taly appear in the Connect SDK, how eligibility works, and how to confirm the result.
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { CONNECT_SDK_CDN_URL } from "@site/src/constants/api";
+
+Buy Now, Pay Later (BNPL) lets your customers split a purchase into instalments with a provider. The [Connect SDK](./index.mdx) supports three BNPL providers: **Tamara**, **Tabby** and **Taly**. Each one shows as a payment method tile in the checkout. The SDK checks with the provider whether the customer qualifies. When the customer pays, the SDK redirects them to the provider's hosted page to complete the instalment plan.
+
+:::tip Boost Your Integration
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
+:::
+
+## When to Use
+
+- You sell in a market where your customers expect to pay in instalments (for example Saudi Arabia or the UAE).
+- You want higher-value baskets without carrying the credit risk yourself. The BNPL provider pays you and collects from the customer.
+- You already use the Connect SDK and want BNPL in the same checkout as cards and wallets, with no extra front-end code.
+
+## Setup
+
+BNPL needs **no Connect SDK option**. Whether Tamara, Tabby or Taly show depends on the payment gateways on the session.
+
+1. **Get a BNPL gateway enabled.** Ask Ottu to configure Tamara, Tabby or Taly on your account. Each provider gets its own [`pg_code`](../payment-methods.md).
+2. **Include the BNPL `pg_code` in the session.** Pass it in `pg_codes` when you create the session with the [Checkout API](../checkout-api.mdx). The session then includes the provider as a payment method.
+3. **Initialise the SDK as usual.** BNPL tiles appear alongside your other payment methods. The [`formsOfPayment`](./reference.mdx#formsofpayment) option does **not** hide or show BNPL. If the session offers a BNPL provider, the SDK shows it.
+
+:::note
+To stop offering a BNPL provider on a checkout, leave its `pg_code` out of the session. `formsOfPayment` cannot filter it.
+:::
+
+## Guide
+
+### Workflow
+
+1. Your server creates a payment session with the [Checkout API](../checkout-api.mdx), including the BNPL `pg_code`.
+2. Your page initialises the Connect SDK with the `session_id`.
+3. The SDK renders the checkout right away. The BNPL tile shows as a loading placeholder while the SDK asks the provider whether this customer and order qualify.
+4. The provider answers:
+   - **Approved:** the tile becomes selectable. Tamara shows its own instalment summary widget for the order amount. Tabby and Taly show the method name.
+   - **Not approved, or the check fails:** the tile stays in the list but is disabled, with a message such as *"Sorry, Tabby is unable to approve this purchase"* or *"Installments Payment option is Not available for you"*.
+5. The customer selects the BNPL tile and taps **Pay**.
+6. The SDK calls your [`onBeforePayment`](./reference.mdx#onbeforepayment) hook. If the hook rejects, the payment stops.
+7. The SDK submits the payment, shows a short "Redirecting…" screen and sends the customer to the provider's hosted page.
+8. The customer completes or abandons the instalment plan on the provider's page. The provider and Ottu then redirect the customer to your `redirect_url`.
+9. Ottu sends the final result to your `webhook_url` as a [payment webhook](../../webhooks/payment-events.md).
+
+:::warning `onSuccess` never fires for BNPL
+The customer leaves your page to finish the payment, so the SDK never learns the outcome. **`onSuccess` is not called for BNPL payments.** Confirm the result from the [payment webhook](../../webhooks/payment-events.md), or by checking the payment status on your `redirect_url` page.
+:::
+
+### Step-by-Step
+
+#### 1. Create the session with a BNPL gateway
+
+Create the session on your server with the [Checkout API](../checkout-api.mdx). Include the BNPL provider's `pg_code` in `pg_codes`, along with any other gateways you want to offer. See the [Connect SDK quick start](./quick-start.mdx) for complete server code in cURL, Python, Node.js and PHP.
+
+#### 2. Initialise the SDK
+
+No BNPL-specific option is needed. Handle `onBeforePayment`, `onCancel` and `onError`. Don't rely on `onSuccess` for BNPL.
+
+<CodeBlock language="html" title="checkout.html">
+{`<div id="ottu-checkout"></div>
+<script src="${CONNECT_SDK_CDN_URL}"></script>
+<script>
+  const sdk = new OttuSDK.ConnectSDK();
+
+  sdk.init({
+    merchant_id: "sandbox.ottu.net",
+    session_id: "your_session_id",
+    apiKey: "your_public_api_key",
+    selector: "#ottu-checkout",
+
+    // Runs before the customer is redirected to the BNPL provider.
+    // Reject to stop the payment.
+    onBeforePayment: async (data) => {
+      console.log("Paying with", data.method, data.form_of_payment);
+    },
+
+    // Fires for card and wallet payments. BNPL results arrive by webhook.
+    onSuccess: (data) => {
+      window.location.href = data.redirect_url;
+    },
+
+    onCancel: (data) => {
+      console.log("Payment canceled:", data.message);
+    },
+
+    onError: (data) => {
+      console.error("Payment error:", data.message);
+    },
+  }).catch((err) => {
+    console.error("Checkout failed to load", err);
+  });
+</script>`}
+</CodeBlock>
+
+Use your [public API key](/developers/getting-started/authentication#public-key) for `apiKey`. Never use your private key in the browser.
+
+#### 3. Confirm the result on your server
+
+When the customer comes back to your `redirect_url`, don't trust the redirect alone. Wait for the [payment webhook](../../webhooks/payment-events.md) and [verify its signature](../../webhooks/verify-signatures.md). You can also retrieve the session with the [Checkout API](../checkout-api.mdx) before you fulfil the order.
+
+### Use Cases
+
+#### Callbacks for BNPL
+
+| Situation | What the customer sees | Callback |
+|---|---|---|
+| Customer taps **Pay** | — | [`onBeforePayment`](./reference.mdx#onbeforepayment) with `{ method, form_of_payment }`. There is no `card` and no redirect URL. |
+| Your `onBeforePayment` rejects | Nothing; **Pay** is enabled again | None |
+| Payment submitted, customer redirected | "Redirecting…", then the provider's page | None. Use the webhook. |
+| Submit returns `canceled` or `failed` | **Pay** is enabled again | [`onCancel`](./reference.mdx#oncancel) |
+| Submit fails (4xx refusal, 5xx, network error) | "Payment failed" dialog | [`onError`](./reference.mdx#onerror) |
+| Provider declines the customer at the eligibility check | Disabled tile with a "not available" message | None |
+
+See [Error Handling](./errors.mdx) for the payloads of each callback.
+
+#### Tamara instalment widget
+
+When Tamara approves the customer, the tile shows Tamara's own instalment summary for the order amount in place of the logo. Tamara renders the widget, so its text and styling come from Tamara.
+
+#### When every method is BNPL and none qualifies
+
+If a session offers only BNPL providers and all of them decline the customer, every tile is disabled and the **Pay** button stays disabled. To always give the customer a way to pay, include at least one non-BNPL gateway (for example a card gateway) in the session.
+
+## Best Practices
+
+- **Fulfil orders from the webhook, not the browser.** BNPL completes on the provider's page, so your server is the only reliable place to learn the result.
+- **Offer a fallback method.** Keep a card or wallet gateway on the session so customers the provider declines can still pay.
+- **Use `onBeforePayment` for last-moment checks**, such as stock or basket validation, before the customer leaves your site. Keep it fast: the SDK waits for it.
+- **Don't hard-code eligibility rules.** The provider decides who qualifies, per customer and order. Let the SDK's eligibility check show or disable the tile.
+
+## FAQ
+
+#### Which currencies, amounts and countries does each provider support?
+
+Each provider decides who is eligible for each customer and order. The Connect SDK doesn't apply its own currency, amount or country limits. It shows or disables the tile from the provider's answer. Ask Ottu or the provider for the limits that apply to your account.
+
+#### Can I hide BNPL with `formsOfPayment`?
+
+No. [`formsOfPayment`](./reference.mdx#formsofpayment) doesn't filter BNPL providers. To hide one, leave its `pg_code` out when you create the session.
+
+#### Why is the BNPL tile shown but disabled?
+
+The provider didn't approve this purchase, or the eligibility check couldn't complete. The tile stays visible with a "not available" message so the customer understands why they can't select it.
+
+#### Why didn't `onSuccess` fire after a Tamara, Tabby or Taly payment?
+
+BNPL payments finish on the provider's page, outside the SDK. Use the [payment webhook](../../webhooks/payment-events.md) to get the result.
+
+#### Does the customer see a popup?
+
+No. BNPL uses a full-page redirect to the provider's hosted page. There's no popup and no code entry inside the SDK.
+
+## What's Next?
+
+- [Connect SDK quick start](./quick-start.mdx): from session to working checkout.
+- [API reference](./reference.mdx): every `init` option, method and callback.
+- [Error handling](./errors.mdx): what each callback receives and what the customer sees.
+- [Payment webhooks](../../webhooks/payment-events.md): the payload your server receives with the final result.
+- [Cards & saved cards](./cards.mdx): add a card gateway as a fallback for customers who aren't eligible.

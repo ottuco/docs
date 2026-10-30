@@ -1,0 +1,201 @@
+---
+title: Error Handling
+description: How the Connect SDK reports failures — init() rejections, the onError and onCancel callbacks, what the customer sees in each case, and how to confirm the real payment result.
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { CONNECT_SDK_CDN_URL } from "@site/src/constants/api";
+
+The [Connect SDK](./index.mdx) reports problems in two ways. If the checkout **can't start**, the promise returned by `init()` rejects. Once the checkout is running, **payment outcomes** reach your page through the [`onError`](./reference.mdx#onerror) and [`onCancel`](./reference.mdx#oncancel) callbacks. In both cases the SDK also shows the customer a message, so your code decides what else to do: log, notify, or offer another path.
+
+<CodeBlock language="html" title="Handle every failure path">{`<div id="ottu-checkout"></div>
+<script src="${CONNECT_SDK_CDN_URL}"></script>
+<script>
+  const sdk = new OttuSDK.ConnectSDK();
+
+  sdk
+    .init({
+      merchant_id: "sandbox.ottu.net",
+      session_id: "your_session_id",
+      apiKey: "your_public_api_key",
+      selector: "#ottu-checkout",
+
+      onSuccess: (data) => {
+        window.location.href = data.redirect_url;
+      },
+      // Something went wrong: network, server or gateway error.
+      onError: (data) => {
+        console.error("Payment error", data.form_of_payment, data.message);
+      },
+      // Declined, failed or canceled. The customer can pick another method.
+      onCancel: (data) => {
+        console.info("Payment not completed", data.message);
+      },
+    })
+    // The checkout could not start (bad options, network, server error).
+    .catch((err) => {
+      console.error("Checkout failed to load:", err.message);
+    });
+</script>`}</CodeBlock>
+
+Replace `your_session_id` with the `session_id` from the [Checkout API](../checkout-api.mdx) and `your_public_api_key` with your [public key](/developers/getting-started/authentication#public-key).
+
+:::danger Callbacks are not proof of payment
+Callbacks run in the customer's browser and some payment flows never fire them. Always confirm the result on your server with the [payment webhook](../../webhooks/payment-events.md) or the [Payment Status Query](../psq.mdx) before you fulfil an order.
+:::
+
+## When to Use
+
+- **Before going live** — make sure every path (init failure, error, cancel, no callback at all) leaves your page in a sensible state.
+- **Logging and monitoring** — record `onError` payloads and `init()` rejections to spot configuration problems early.
+- **Custom recovery** — offer a different payment option, or return the customer to the cart after a decline.
+
+## Guide
+
+### Workflow
+
+1. **`init()` rejects** when the checkout can't start. The SDK shows a failure panel where it can; your `.catch()` receives the cause. `onError` is **not** called for these.
+2. **The session is closed** (already paid, canceled or expired): the SDK shows an informational panel and `init()` resolves. No callback fires.
+3. **The customer pays.** The outcome arrives as `onSuccess`, `onError` or `onCancel`, and the SDK shows its own message where needed.
+4. **The customer leaves the page** (redirect flows, BNPL, 3-D Secure by redirect, Friend Pay): no outcome callback fires. Your server learns the result from the [webhook](../../webhooks/payment-events.md); the customer returns to your `redirect_url`.
+
+### When `init()` Fails
+
+`init()` is asynchronous and never throws synchronously. Every start-up failure arrives as a rejected promise:
+
+| Cause | What the customer sees | Your `.catch()` receives |
+|---|---|---|
+| Missing `merchant_id`, `session_id` or `apiKey` | Nothing | `Error` with `[ConfigService] Missing required fields: …` |
+| Neither `selector` nor `selectors` given, or one of `selectors.details`, `methods`, `button` missing | Nothing | `Error` naming the missing option |
+| Container element not found on the page | Nothing | `Error` with `Container element not found: <selector>` |
+| Network failure or Ottu server error while loading the session | Panel "Something Went Wrong" with a **Try Again** button that reloads the page | The underlying error |
+| Ottu refuses the request (for example a wrong `apiKey` or `merchant_id`) | The same panel, or Ottu's message when it is safe to show | The underlying error |
+
+Use `await` if you prefer:
+
+```js
+try {
+  await sdk.init(config);
+} catch (err) {
+  showFallbackMessage(); // e.g. "Payments are unavailable, please try again"
+  reportToMonitoring(err);
+}
+```
+
+The same rule applies to the [card form mode](./reference.mdx#card-form-mode): `initCardForm()`, `tokenizeCard()` and `submitCardPayment()` reject on failure.
+
+### Closed Sessions
+
+If the session can no longer be paid, the checkout shows a panel instead of payment methods and `init()` **resolves**. No callback fires.
+
+| Session state | Panel |
+|---|---|
+| Paid, authorized or cash on delivery | **Payment Completed** — "This payment has already been completed." |
+| Canceled | **Payment Canceled** — "This payment was canceled and can no longer be paid." |
+| Expired | **Payment Link Expired** — "This payment link has expired." |
+| Failed or invalid | **Payment Unavailable** — "This payment can no longer be completed. Please contact the merchant." |
+| No payment methods available | **No Payment Options** |
+
+To avoid these, create a fresh session with the [Checkout API](../checkout-api.mdx) for each checkout attempt, and check the payment methods returned for your [`pg_codes`](../payment-methods.md).
+
+### Callback Payloads
+
+#### `onError`
+
+Called when a payment attempt fails because of an error: network or server failure, a timeout, an unexpected gateway response, or an error status from the gateway.
+
+| Field | Type | Description |
+|---|---|---|
+| `status` | `"error"` | Always `error` |
+| `message` | string | Human-readable reason. Defaults to `Payment failed`. |
+| `detail` | string | Extra detail from Ottu, when it is text |
+| `session_id` | string | The payment session |
+| `form_of_payment` | string | The flow that failed, for example `apple_pay`, `google_pay`, `token_pay`, `redirect`, `stc_pay`, `urpay`, `wallet` |
+| `originalError` | Error | The underlying JavaScript error, when there is one |
+| *other fields* | — | Any fields from Ottu's response are spread into the payload |
+
+#### `onCancel`
+
+Called when the payment did not go through but nothing broke: the gateway **declined** it, it **failed**, or it was **canceled**.
+
+| Field | Type | Description |
+|---|---|---|
+| `status` | `"canceled"` | Always `canceled` |
+| `message` | string | The gateway's reason. Defaults to `Payment canceled`. |
+| `session_id` | string | The payment session |
+| `order_no` | string | Your order number, or empty |
+| `operation` | string | Usually `pay` |
+| `reference_number` | string | Ottu's reference, or empty |
+| `redirect_url` | string | Where to send the customer; the current page when Ottu returns none |
+| `form_of_payment` | string | The flow, as for `onError` |
+| *other fields* | — | Any fields from Ottu's response are spread into the payload |
+
+:::warning Declines arrive as `onCancel`
+A gateway status of `failed` — for example a card declined by the bank — is reported through **`onCancel`**, not `onError`, for every payment method. Treat `onCancel` as "not paid; the customer may try again", and `onError` as "something went wrong".
+:::
+
+If your callback throws, the SDK catches and logs the exception and carries on. The exception is [`onBeforePayment`](./reference.mdx#onbeforepayment): rejecting it stops the payment on purpose, and no other callback fires.
+
+### What the Customer Sees
+
+The table covers what a merchant can observe. "Failure dialog" is the SDK's **Payment failed** dialog: for errors it offers Cancel and Retry, for declines and refusals a single OK. Both close the dialog and let the customer try again.
+
+| Situation | Customer sees | Your page receives |
+|---|---|---|
+| Card details invalid when Pay is pressed | Inline errors in the card fields | Nothing |
+| Card or saved card declined by the bank | The gateway's reason, with OK | `onCancel` |
+| Card payment error from the gateway | Field errors in the card form | `onError` |
+| Saved card payment error | Failure dialog | `onError` |
+| Network failure, timeout or Ottu server error during payment | Failure dialog: "Oops, something went wrong. Refresh the page and try again." | `onError` |
+| Ottu refuses the payment request | Failure dialog with Ottu's message | `onError` |
+| 3-D Secure challenge shown on your page | The bank's challenge in place of the checkout | [`onThreeDSChallenge`](./reference.mdx#onthreedschallenge), then `onSuccess`, `onError` or `onCancel` |
+| 3-D Secure by redirect, hosted card page, BNPL | The browser leaves for the bank or provider | Nothing — use the [webhook](../../webhooks/payment-events.md) |
+| Apple Pay, Google Pay or Samsung Pay not available on the device | A message under the method asking to use another one | Nothing |
+| Google Pay or Samsung Pay script fails to load | The same message | `onError` |
+| Customer closes the Apple Pay or Google Pay sheet | Nothing; they can try again | Nothing |
+| Wallet payment declined | Failure in the wallet sheet and a dialog with the reason | `onCancel` (or `onError` for other errors) |
+| Too many Google Pay attempts (more than 3 in a minute) | Nothing | `onError`: "Too many payment attempts. Please try again in N seconds." |
+| STC Pay / urpay: wrong phone number or OTP | Inline message in the OTP dialog | Nothing |
+| STC Pay / urpay: payment declined | Message in the dialog | `onCancel` |
+| Qitaf loyalty: OTP or redemption fails | A loyalty error message with Try Again | Nothing |
+| Friend Pay, any outcome | The Friend Pay sheet | Nothing — use the webhook |
+| Customer uses the Cancel link (`displayRejectButton`) | A confirmation, then the browser goes to the result page | Nothing |
+| [`onBeforePayment`](./reference.mdx#onbeforepayment) rejects | Nothing; Pay is enabled again | Nothing |
+
+See the payment-method pages for method-specific behaviour: [Cards](./cards.mdx), [Apple Pay & Google Pay](./wallets.mdx), [BNPL](./bnpl.mdx), [Qitaf](./qitaf.mdx), [Friend Pay](./friend-pay.mdx).
+
+## Best Practices
+
+- **Always attach `.catch()` to `init()`.** Start-up failures never reach `onError`, and a missing container shows the customer nothing.
+- **Confirm on the server.** Fulfil orders from the [payment webhook](../../webhooks/payment-events.md) or a [Payment Status Query](../psq.mdx), never from a callback alone.
+- **Don't duplicate the SDK's messages.** The SDK already shows a dialog for most errors and declines; use the callbacks for logging and navigation rather than a second error popup.
+- **Log `form_of_payment` and `message`** from `onError` and `onCancel`, not the whole payload: payloads can contain gateway data you don't need to store.
+- **Keep callbacks short and safe.** Wrap your own logic in `try/catch`; an exception inside a callback is swallowed by the SDK and your code after it won't run.
+- **Create a new session per attempt** to avoid the closed-session panels.
+
+## FAQ
+
+#### Why didn't `onError` fire when the checkout failed to load?
+
+Start-up failures reject the `init()` promise instead. Add `.catch()` (or `try/await`) around `init()`.
+
+#### A card was declined but `onError` didn't fire. Why?
+
+Declines and failed payments are reported through `onCancel`. `onError` is for errors such as network failures or unexpected responses.
+
+#### The customer paid by BNPL but no callback fired. Is that a problem?
+
+No. BNPL, the hosted card page, 3-D Secure by redirect and Friend Pay take the customer away from your page (or to someone else), so the SDK can't report the result. The [webhook](../../webhooks/payment-events.md) tells your server, and the customer comes back to your `redirect_url`.
+
+#### Can I show my own error message instead of the SDK's?
+
+The SDK's messages always show. You can show additional information from your callbacks, or use [`showFailureMessage()`](./reference.mdx#showfailuremessage) to display your own failure message in the SDK's style.
+
+## What's Next?
+
+- [**API Reference**](./reference.mdx) — all callbacks and their payloads
+- [**Payment Webhooks**](../../webhooks/payment-events.md) — confirm the result on your server
+- [**Payment Status Query**](../psq.mdx) — check a payment when the webhook hasn't arrived
+- [**Migrating from v3**](./migration-from-v3.mdx) — callback behaviour that changed

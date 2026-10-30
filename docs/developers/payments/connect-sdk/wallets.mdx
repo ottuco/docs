@@ -1,0 +1,307 @@
+---
+title: Apple Pay, Google Pay & Samsung Pay
+description: Accept Apple Pay, Google Pay and Samsung Pay with the Connect SDK — setup, eligibility, button styling and the callbacks each wallet fires.
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { CONNECT_SDK_CDN_URL } from "@site/src/constants/api";
+
+The [Connect SDK](./index.mdx) shows Apple Pay, Google Pay and Samsung Pay as payment method tiles inside your checkout. When the customer selects one of them, the SDK replaces its **Pay** button with the wallet's own button. It then opens the wallet's payment sheet and sends the wallet token to Ottu for you. You never handle card data or wallet tokens on your page.
+
+<CodeBlock language="html" title="Checkout with device wallets">
+{`<div id="ottu-checkout"></div>
+<script src="${CONNECT_SDK_CDN_URL}"></script>
+<script>
+  const theme = OttuSDK.CheckoutTheme.create()
+    .setApplePayButtonType("buy")
+    .setGooglePayButtonColor("black")
+    .build();
+
+  const sdk = new OttuSDK.ConnectSDK();
+  sdk.init({
+    merchant_id: "sandbox.ottu.net",
+    session_id: "your_session_id",
+    apiKey: "your_public_api_key",
+    selector: "#ottu-checkout",
+    formsOfPayment: ["applePay", "googlePay", "samsungPay", "ottuPG", "jazz"],
+    applePayInit: { shop_name: "My Store" },
+    googlePayInit: { merchant_name: "My Store" },
+    theme,
+    onSuccess: (data) => { window.location.href = data.redirect_url; },
+    onError: (data) => console.error(data.form_of_payment, data.message),
+    onCancel: (data) => console.log("Payment canceled", data.message),
+  }).catch((err) => console.error("Checkout failed to load", err));
+</script>`}
+</CodeBlock>
+
+Replace `your_session_id` with the `session_id` from the [Checkout API](../checkout-api.mdx) and `your_public_api_key` with your [public API key](/developers/getting-started/authentication#public-key).
+
+## When to Use
+
+- You want customers on iPhone, iPad and Safari on Mac (or Chrome and Edge with an iPhone nearby) to pay with **Apple Pay**.
+- You want customers on Android and Chrome to pay with **Google Pay**.
+- You want customers with Samsung devices to pay with **Samsung Pay**.
+- You want a one-tap checkout with the wallet's own payment sheet, without building the wallet integration yourself.
+
+## Setup
+
+### Enable the wallets on your account
+
+Wallets are switched on **per payment gateway** by Ottu, not in your code. Ask Ottu to enable Apple Pay, Google Pay or Samsung Pay on the gateway (`pg_code`) you use. Your [Checkout API](../checkout-api.mdx) session must include that `pg_code`. See [Payment Methods](../payment-methods.md) to discover which `pg_codes` your account offers.
+
+Once a wallet is enabled, the session carries everything the SDK needs: the wallet merchant identifiers, amount, currency and the endpoints the SDK calls. You don't pass any of these yourself, and you can't override them from the browser.
+
+:::note Apple Pay domain verification
+Apple Pay only works on domains Apple has verified for the merchant. Ottu handles merchant validation with Apple on your behalf. Contact Ottu support to register the domains your checkout runs on.
+:::
+
+### Choose which wallets show
+
+By default the SDK shows every payment method the session offers. To limit them, pass [`formsOfPayment`](./reference.mdx#formsofpayment) with the exact, case-sensitive names:
+
+| Wallet | `formsOfPayment` value | `form_of_payment` in callbacks |
+|---|---|---|
+| Apple Pay | `applePay` | `apple_pay` |
+| Google Pay | `googlePay` | `google_pay` |
+| Samsung Pay | `samsungPay` | `samsung_pay` |
+
+If you pass `formsOfPayment`, list every method you want, including cards (`ottuPG`, `jazz`) and saved cards (`tokenPay`). An empty array `[]` hides every method it controls.
+
+## Guide
+
+### Workflow
+
+All three wallets follow the same shape:
+
+1. **The customer selects the wallet tile.** The SDK shows a short notice under the tile and a loading placeholder where the Pay button was.
+2. **The SDK checks eligibility.** It loads the wallet's script if needed and asks the browser or device whether the wallet can pay.
+   - **Eligible:** the wallet's own button replaces the Pay button.
+   - **Not eligible:** the customer sees a message asking them to choose another method. No button shows and no callback fires.
+3. **The customer taps the wallet button.** The SDK runs your [`onBeforePayment`](./reference.mdx#onbeforepayment) hook first. If your hook rejects, nothing opens and no other callback fires.
+4. **The wallet sheet opens.** The customer confirms the payment on their device.
+5. **The SDK sends the wallet token to Ottu,** and Ottu charges it through your gateway.
+6. **The SDK reports the result** through [`onSuccess`](./reference.mdx#onsuccess), [`onCancel`](./reference.mdx#oncancel) or [`onError`](./reference.mdx#onerror).
+
+How the result maps to a callback is the same for all three wallets:
+
+| Gateway result | Callback | What the customer sees |
+|---|---|---|
+| `success` | `onSuccess` with the full gateway response | The sheet shows success |
+| `canceled` or `failed` (a decline) | `onCancel` | The sheet fails, then a "Payment failed" message with an **OK** button |
+| Any other status, a server error or a timeout | `onError` | The sheet fails, then a "Payment failed" message with a **Retry** button |
+| The customer closes the sheet | **No callback** | The checkout stays open, so they can try again |
+
+:::warning A declined wallet payment arrives in `onCancel`
+A gateway `failed` status is reported through `onCancel`, not `onError`. Handle declines in `onCancel`. See [Error Handling](./errors.mdx) for the full list.
+:::
+
+The SDK does not navigate after a successful payment. Redirect the customer from `onSuccess` (for example to `data.redirect_url`). Always confirm the final status on your server with the [payment webhook](../../webhooks/payment-events.md).
+
+### Apple Pay
+
+Apple Pay works in Safari on Apple devices. In Chrome and Edge, the SDK loads Apple's own script so the customer can pay by scanning a code with their iPhone. The script loads when the customer selects Apple Pay, not when the checkout loads.
+
+#### `applePayInit`
+
+Pass `applePayInit` to `init()` to adjust the payment sheet. Only these keys are accepted. A key with the wrong type is dropped, with a warning in the browser console.
+
+| Key | Type | Default | What it does |
+|---|---|---|---|
+| `shop_name` | `string` | The shop name set up by Ottu, else `"Total"` | The label on the total line of the sheet |
+| `fee_description` | `string` | — | The label for the fee line, when the session has a fee |
+| `merchantCapabilities` | `string[]` | `["supports3DS"]` | Apple Pay merchant capabilities |
+| `supportedNetworks` | `string[]` | `["amex", "masterCard", "maestro", "visa", "mada"]` | Card networks the sheet accepts |
+| `supportedCountries` | `string[]` | — | ISO country codes of cards the sheet accepts |
+| `version` | `integer` | The highest version the device supports, up to 14 | The Apple Pay JS version to request |
+| `buttonLocale` | `string` | The checkout language | The language of the Apple Pay button |
+| `lineItems` | `{label, amount, type?}[]` | — | Extra lines shown above the total |
+
+```js
+applePayInit: {
+  shop_name: "My Store",
+  supportedNetworks: ["visa", "masterCard", "mada"],
+  lineItems: [{ label: "Delivery", amount: "2.000" }],
+},
+```
+
+The amount, currency, Apple merchant ID and Ottu endpoints come from the session and can't be set here.
+
+- **Version and networks:** if you ask for a version the device doesn't support, the SDK steps down to the highest supported one. It also drops networks that version can't handle (for example, `mada` needs version 5 or later).
+- **SDK Studio takes precedence:** if Ottu has configured Apple Pay settings for your gateway in SDK Studio (`version`, `buttonLocale`, `supportedNetworks`, `merchantCapabilities`, `supportedCountries`), those values win over your `applePayInit`. See [Theming & Localisation](./theming-and-localisation.mdx) for how SDK Studio works.
+
+#### Eligibility
+
+The Apple Pay button shows when the browser supports Apple Pay and the device can make payments.
+
+- **Not supported:** the customer sees *"Apple Pay is unavailable. Please update your device, set up Wallet, add an active card, ensure the domain is verified by Apple, and refresh the page."* No callback fires.
+- **No active card in Wallet:** the button still shows, with the same message beside it. Tapping it opens Apple's **Set up Apple Pay** screen so the customer can add a card. If that screen can't open, `onError` fires with `"Failed to open wallet app."`.
+
+#### Customize Button
+
+Style the Apple Pay button with the [`CheckoutTheme`](./theming-and-localisation.mdx) builder:
+
+| Setter | Values | Default |
+|---|---|---|
+| `setApplePayButtonType` | `add-money`, `book`, `buy`, `check-out`, `continue`, `contribute`, `donate`, `order`, `pay`, `plain`, `reload`, `rent`, `set-up`, `subscribe`, `support`, `tip`, `top-up` | `pay` |
+| `setApplePayButtonStyle` | `black`, `white`, `white-outline` | `black` |
+
+```js
+const theme = OttuSDK.CheckoutTheme.create()
+  .setApplePayButtonType("check-out")
+  .setApplePayButtonStyle("white-outline")
+  .build();
+```
+
+The button fills the checkout width and follows your theme's border radius. Its language follows `buttonLocale`, then the checkout language.
+
+#### Flow and callbacks
+
+1. The customer taps the button and the sheet opens.
+2. The SDK runs `onBeforePayment` (`{ method, form_of_payment: "apple_pay" }`). If it rejects, the sheet closes and no callback fires.
+3. Ottu validates the merchant session with Apple. If that fails, the sheet closes and `onError` fires.
+4. The customer authorizes the payment with Face ID, Touch ID or their passcode.
+5. Ottu charges the token, and the SDK fires `onSuccess`, `onCancel` or `onError` as in the [result table](#workflow).
+
+If the customer dismisses the sheet, no callback fires and they can tap the button again.
+
+### Google Pay
+
+Google Pay works in Chrome and other supported browsers on Android and desktop. The SDK loads Google's `pay.js` when the customer selects Google Pay.
+
+#### `googlePayInit`
+
+Pass `googlePayInit` to `init()` to adjust the payment sheet. Only these keys are accepted. A malformed value is dropped with a console warning, and so are keys that only Ottu's server can set (amount, currency, environment, gateway).
+
+| Key | Type | Default | What it does |
+|---|---|---|---|
+| `merchant_name` | `string` | The name set up by Ottu | The merchant name on the sheet (`merchantName` also works) |
+| `fee_description` | `string` | — | The label for the fee line, when the session has a fee |
+| `allowedCardNetworks` | subset of `AMEX`, `DISCOVER`, `INTERAC`, `JCB`, `MASTERCARD`, `VISA` | All six | Card networks the sheet accepts |
+| `allowedCardAuthMethods` | subset of `PAN_ONLY`, `CRYPTOGRAM_3DS` | Both | Card authentication methods accepted |
+| `allowPrepaidCards` | `boolean` | `true` | Accept prepaid cards |
+| `allowCreditCards` | `boolean` | `true` | Accept credit cards |
+| `assuranceDetailsRequired` | `boolean` | `false` | Ask Google for card assurance details |
+| `billingAddressRequired` | `boolean` | `false` | Ask the customer for a billing address |
+| `billingAddressParameters` | `{format: "MIN" \| "FULL", phoneNumberRequired}` | — | How much of the billing address to collect |
+| `emailRequired` | `boolean` | `false` | Ask the customer for an email address |
+| `existingPaymentMethodRequired` | `boolean` | `false` | Show the button only if the customer already has a usable card in Google Pay |
+| `totalPriceStatus` | `"FINAL"` \| `"ESTIMATED"` | `"FINAL"` | Whether the total is final |
+| `totalPriceLabel` | `string` | `"Total"` | The label of the total line |
+| `displayItems` | `{label, type: "LINE_ITEM" \| "SUBTOTAL", price, status?}[]` | — | Extra lines shown above the total |
+| `buttonLocale` | `string` such as `"en"` or `"ar-SA"` | `"en"` | The language of the Google Pay button |
+
+```js
+googlePayInit: {
+  merchant_name: "My Store",
+  allowedCardNetworks: ["VISA", "MASTERCARD"],
+  emailRequired: true,
+},
+```
+
+:::note
+Unlike Apple Pay, the Google Pay button does **not** follow the checkout language. Set `buttonLocale: "ar"` yourself for an Arabic button.
+:::
+
+#### Eligibility
+
+The SDK asks Google Pay whether the customer can pay with the networks and authentication methods you allow (and, if you set `existingPaymentMethodRequired`, whether they already have a card saved).
+
+- **Not ready:** the customer sees *"Google Pay is unavailable on this device or browser. Please choose another payment method."* No callback fires.
+- **Google's script fails to load:** the customer sees the same message, and `onError` fires with `form_of_payment: "google_pay"` (only while Google Pay is still selected).
+
+#### Customize Button
+
+| Setter | Values | Default |
+|---|---|---|
+| `setGooglePayButtonColor` | `default`, `black`, `white` | `default` |
+| `setGooglePayButtonType` | `plain`, `buy`, `book`, `checkout`, `donate`, `order`, `pay`, `subscribe` | `pay` |
+| `setGooglePayButtonSizeMode` | `fill`, `static` | `fill` |
+
+```js
+const theme = OttuSDK.CheckoutTheme.create()
+  .setGooglePayButtonColor("black")
+  .setGooglePayButtonType("checkout")
+  .build();
+```
+
+#### Flow and callbacks
+
+1. The customer taps the button. The SDK runs `onBeforePayment` (`{ method, form_of_payment: "google_pay" }`). If it rejects, the payment stops and no callback fires.
+2. The Google Pay sheet opens. If the customer closes it, no callback fires.
+3. The customer confirms, and Ottu charges the token. The sheet shows the result, and the SDK fires `onSuccess`, `onCancel` or `onError` as in the [result table](#workflow). On a decline or error the customer can retry inside the sheet.
+
+**Rate limit:** the SDK allows 3 Google Pay attempts per session every 60 seconds. A fourth attempt fires `onError` with *"Too many payment attempts. Please try again in N seconds."*
+
+##### 3-D Secure
+
+Some gateways ask for [3-D Secure](/glossary/) after Google Pay. The SDK handles it according to what Ottu returns:
+
+- **In the page:** the SDK shows the bank's challenge inside the checkout and fires [`onThreeDSChallenge`](./reference.mdx#onthreedschallenge). The final result arrives as `onSuccess`, `onCancel` or `onError`.
+- **By redirect:** the SDK fires `onSuccess` with `status: "pending_authentication"` and a `redirect_url`. **The SDK does not navigate.** Send the customer to `redirect_url` yourself to finish authentication:
+
+```js
+onSuccess: (data) => {
+  // Covers both a finished payment and a Google Pay 3DS redirect.
+  window.location.href = data.redirect_url;
+},
+```
+
+The payment is not complete at this point. Confirm the outcome with the [payment webhook](../../webhooks/payment-events.md).
+
+### Samsung Pay
+
+Samsung Pay opens Samsung's web checkout. The customer approves the payment on their Samsung device.
+
+#### Setup
+
+- Ottu enables Samsung Pay on an MPGS gateway and links it to one of your card payment methods. The session carries everything else.
+- There is no `samsungPayInit` option and no button setter. The button is Samsung's own **Buy** button.
+- Samsung Pay accepts **Visa** and **Mastercard** cards and always uses 3-D Secure.
+- The SDK loads Samsung's script when the checkout loads, if the session offers Samsung Pay and `formsOfPayment` allows it.
+
+#### Eligibility
+
+If Samsung's script fails to load, or Samsung Pay doesn't confirm readiness within 15 seconds, the customer sees *"Samsung Pay is unavailable on this device or browser. Please choose another payment method."* The SDK also fires `onError` with `form_of_payment: "samsung_pay"` while Samsung Pay is still selected. Selecting it again retries.
+
+#### Flow and callbacks
+
+1. The customer taps the Samsung Pay button. The SDK runs `onBeforePayment` (`{ method, form_of_payment: "samsung_pay" }`). If it rejects, nothing opens and no callback fires.
+2. Samsung's payment sheet opens and the customer approves on their device. If they close it, no callback fires.
+3. Ottu charges the payment. The SDK fires `onSuccess`, `onCancel` or `onError` as in the [result table](#workflow).
+4. If the gateway asks for 3-D Secure, the challenge shows in the page (`onThreeDSChallenge`, then the result callback) or the customer is redirected to the bank.
+
+## Best Practices
+
+- **Handle all three result callbacks.** Declines come through `onCancel`, server problems through `onError`.
+- **Confirm on the server.** Treat callbacks as UI signals. Use the [payment webhook](../../webhooks/payment-events.md) or the [Payment Status Query](../psq.mdx) before fulfilling the order.
+- **Keep `onBeforePayment` fast.** Apple Pay needs the sheet to open soon after the tap. A slow hook can make the browser refuse to open it.
+- **Test on real devices.** Wallet eligibility depends on the device, browser and the cards in the customer's wallet. See [Sandbox & Test Cards](../sandbox.mdx).
+- **Don't log the whole callback payload** in production. It can include gateway details you don't need to keep.
+
+## FAQ
+
+#### Why don't I see the Apple Pay button?
+
+The browser doesn't support Apple Pay, Wallet has no card, the domain isn't verified for Apple Pay, or Apple Pay isn't enabled on the session's gateway. The customer sees the unavailable message instead. Check that the session includes a `pg_code` with Apple Pay and that `formsOfPayment` (if you pass it) includes `applePay`.
+
+#### Can I set the amount or currency in `applePayInit` or `googlePayInit`?
+
+No. The amount, currency, endpoints and wallet merchant identifiers come from the payment session, so a page can't change what the customer is charged. Update the session with the [Checkout API](../checkout-api.mdx) instead.
+
+#### Which callback fires when the customer closes the wallet sheet?
+
+None. The checkout stays open and the customer can try again or choose another method.
+
+#### Why did `onSuccess` fire with `status: "pending_authentication"`?
+
+Google Pay needed a 3-D Secure redirect. Send the customer to `data.redirect_url` to complete it, and confirm the result with the webhook.
+
+## What's Next?
+
+- [STC Pay & urpay](./mobile-payments.mdx) — mobile wallets paid by phone number and one-time code
+- [Cards & Saved Cards](./cards.mdx) — the card form, saved cards and 3-D Secure
+- [Theming & Localisation](./theming-and-localisation.mdx) — every `CheckoutTheme` setter
+- [API Reference](./reference.mdx) — every `init` option and callback
+- [Error Handling](./errors.mdx) — what each callback receives when a payment fails
