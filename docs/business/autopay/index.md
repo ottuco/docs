@@ -9,7 +9,8 @@ toc_max_heading_level: 3
 import StepGuide from "@site/src/components/StepGuide";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import JourneyCards from "@site/src/components/JourneyCards";
-import Comparison, {ComparisonEyebrow, ComparisonLegend, ComparisonSubtitle} from "@site/src/components/Comparison";
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 # AutoPay
 
@@ -19,36 +20,19 @@ Building the integration? See [AutoPay for developers](/developers/payments/auto
 
 :::info Before you start
 - **AutoPay is API-only.** There is no AutoPay screen in the dashboard. A developer makes the integration through the API.
-- **KNET cannot pay renewals.** The limit is on the payment gateway, not on the card: KNET as a gateway cannot charge a saved card later. Customers must pay with a gateway that can.
+- **Renewals need a gateway with auto-debit.** The limit is on the payment gateway, not on the card: a gateway without auto-debit cannot charge a saved card later. See the [gateways with auto-debit](/business/payments/gateways/?features=autodebit).
 
 All limits are listed in [Limits](#limits).
 :::
 
-<ComparisonEyebrow>Compare</ComparisonEyebrow>
+## Why use AutoPay {#why-use-autopay}
 
-## Why choose AutoPay over <span style={{color: "var(--ifm-color-emphasis-600)"}}>building it yourself</span>? {#why-use-autopay}
+Ottu runs the schedule, retries, emails, and customer page. You make one checkout call.
 
-<ComparisonSubtitle>Ottu runs the schedule, retries, emails, and customer page. You make one checkout call.</ComparisonSubtitle>
-
-<Comparison
-  rows={[
-    {label: "Charges on a schedule", withOk: true, withoutOk: false},
-    {label: "Automatic retries", withOk: true, withoutOk: false},
-    {label: "Reminder and failure emails", withOk: true, withoutOk: false},
-    {label: "Emails in English or Arabic", withOk: true, withoutOk: false},
-    {label: "Switch emails off at creation", withOk: true, withoutOk: false},
-    {label: "Hosted customer page", withOk: true, withoutOk: false},
-    {label: "Customer changes their card", withOk: true, withoutOk: false},
-    {label: "Customer cancels on their own", withOk: true, withoutOk: false},
-    {label: "Customer pays an overdue balance", withOk: true, withoutOk: false},
-    {label: "Free first period (trial)", withOk: true, withoutOk: false},
-    {label: "Month-end billing dates handled", withOk: true, withoutOk: false},
-    {label: "Customer sees billing history", withOk: true, withoutOk: false},
-    {label: "You pick the exact charge time", withOk: false, withoutOk: true},
-  ]}
-/>
-
-<ComparisonLegend>In the Build it yourself column, ✗ means your team would have to build and run this. With AutoPay, Ottu runs it for you.</ComparisonLegend>
+- **Charges on a schedule**, with automatic retries when a payment fails.
+- **Reminder and failure emails** in English or Arabic.
+- **A hosted customer page** where your customer changes their card, pays an overdue balance, sees their billing history, or cancels on their own.
+- **A free first period** if you want to offer a trial.
 
 ## How it works {#how-it-works}
 
@@ -95,10 +79,10 @@ Your customer gets two things: emails and one private page. Ottu hosts both.
 
 Ottu sends an upcoming-charge reminder, a payment-failed notice, and a final-failure notice. You can switch each one off, but only when you create the subscription, not afterwards. Emails go out in English or Arabic, chosen when the subscription is created. Reminders go out ahead of each charge:
 
-| Billing frequency | Reminders | When |
-|---|---|---|
-| Monthly | 1 | About 3 days before |
-| Yearly | 3 | About 31, 11, and 4 days before |
+Monthly subscriptions get one reminder, about 3 days before the charge. Yearly subscriptions get three, about 31, 11, and 4 days before.
+
+<Tabs groupId="email-language" queryString>
+<TabItem value="en" label="English">
 
 <StepGuide steps={[
   {
@@ -119,13 +103,34 @@ Ottu sends an upcoming-charge reminder, a payment-failed notice, and a final-fai
     image: "/img/business/autopay/notifications-05-final-failure-en.png",
     imageAlt: "Final failure email in English with outstanding balance and next steps",
   },
+]} />
+
+</TabItem>
+<TabItem value="ar" label="العربية">
+
+<StepGuide steps={[
   {
-    title: "The same email in Arabic",
-    description: <>Each email comes in the language chosen when the first payment was created, English or Arabic. This is the Arabic version of the final-failure email.</>,
+    title: "Upcoming charge",
+    description: <>Sent before money moves. Shows the amount, billing date, and card on file, with a link to manage the subscription.</>,
+    image: "/img/business/autopay/notifications-02-upcoming-charge-ar.png",
+    imageAlt: "Upcoming charge reminder email in Arabic",
+  },
+  {
+    title: "Payment failed",
+    description: <>Sent after a failed attempt while retries remain. Shows the reason, when the next retry runs, and a link to update the card.</>,
+    image: "/img/business/autopay/notifications-04-payment-failed-ar.png",
+    imageAlt: "Payment failed email in Arabic",
+  },
+  {
+    title: "Final failure",
+    description: <>Sent when every retry is used up. Shows the outstanding balance and links the customer straight to paying it.</>,
     image: "/img/business/autopay/notifications-06-final-failure-ar.png",
     imageAlt: "Final failure email in Arabic with outstanding balance and next steps",
   },
 ]} />
+
+</TabItem>
+</Tabs>
 
 The final email may talk about suspended access. That describes your product. Ottu itself never suspends or cancels a subscription because a payment failed. Any decision about your customer's access to your product is yours.
 
@@ -279,7 +284,7 @@ AutoPay subscriptions have no plan catalog. The plan name is a free-text label, 
 ## Limits {#limits}
 
 - **API-only.** There is no AutoPay screen in the dashboard. A developer makes the integration.
-- **KNET cannot pay renewals.** The limit is on the payment gateway, not on the card: KNET as a gateway cannot charge a saved card later. Customers must pay with a gateway that can.
+- **Renewals need a gateway with auto-debit.** The limit is on the payment gateway, not on the card: a gateway without auto-debit cannot charge a saved card later. See the [gateways with auto-debit](/business/payments/gateways/?features=autodebit).
 - **A running subscription cannot be edited.** Amount, frequency, billing day, retry count, and customer email are fixed. Cancel it and create a new one.
 - **No pause.** Cancel at the end of the paid period, then create a new subscription when the customer returns.
 - **Emails switch off only at creation.** You cannot switch them off afterwards.
