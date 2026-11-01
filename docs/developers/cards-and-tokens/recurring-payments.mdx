@@ -177,6 +177,10 @@ Once you have the token, you can charge the customer automatically using either 
 Use the **same** `pg_code`, `agreement.id`, and `customer_id` as the first payment. The amount may vary if the agreement's `amount_variability` is set to `"variable"`.
 :::
 
+:::warning[Charge from your server, never with the public key]
+`POST /b/pbl/v2/payment/auto-debit/` (and its legacy alias `POST /b/pbl/v2/auto-debit/`) charges a card without the customer present. Send it from your server with your [private API key](/developers/getting-started/authentication/#api-key-auth); a scoped key or [Basic Auth](/developers/getting-started/authentication/#basic-auth) user needs `Can perform auto-debits` (`user.do_autodebit`) or gets `403`. The [public key](/developers/getting-started/authentication/#public-key) is refused with `401 {"detail": "Authentication credentials were not provided."}`.
+:::
+
 **One-Step (Checkout API with `payment_instrument`):**
 
 Combine session creation and payment in a single call using [`payment_instrument`](/developers/payments/checkout-api#one-step-checkout). To see this in action, try the [Live Demo](#live-demo) above.
