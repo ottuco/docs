@@ -1,0 +1,5 @@
+# Overrides for: components/schemas/Checkout
+# Request and response body for PUT /checkout/v1/pymt-txn/{session_id}/
+
+properties:
+  extra: $shared

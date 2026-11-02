@@ -18,6 +18,7 @@ properties:
   redirect_url: $shared
   webhook_url: $shared
   pg_codes: $shared
+  extra: $shared
   expiration_time: $shared
   due_datetime: $shared
   product_type: $shared

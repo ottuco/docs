@@ -3486,6 +3486,10 @@ components:
         expiration_time:
           type: string
           description: If defined, any payment transactions created more than the specified period of time ago will be invalidated or expired if the customer attempts to complete them. By default, this expiration period is set to 24 hours from the time of transaction creation. This feature helps ensure that payment transactions are processed promptly.
+        extra:
+          allOf:
+            - $ref: "#/components/schemas/ExtraInner"
+          description: The extra information for the payment details, which the merchant has sent it in key value form.
         generate_qr_code:
           type: boolean
           writeOnly: true
@@ -3817,6 +3821,10 @@ components:
         expiration_time:
           type: string
           description: If defined, any payment transactions created more than the specified period of time ago will be invalidated or expired if the customer attempts to complete them. By default, this expiration period is set to 24 hours from the time of transaction creation. This feature helps ensure that payment transactions are processed promptly.
+        extra:
+          allOf:
+            - $ref: "#/components/schemas/ExtraInner"
+          description: The extra information for the payment details, which the merchant has sent it in key value form.
         generate_qr_code:
           type: boolean
           writeOnly: true
@@ -4148,6 +4156,10 @@ components:
         expiration_time:
           type: string
           description: If defined, any payment transactions created more than the specified period of time ago will be invalidated or expired if the customer attempts to complete them. By default, this expiration period is set to 24 hours from the time of transaction creation. This feature helps ensure that payment transactions are processed promptly.
+        extra:
+          allOf:
+            - $ref: "#/components/schemas/ExtraInner"
+          description: The extra information for the payment details, which the merchant has sent it in key value form.
         generate_qr_code:
           type: boolean
           writeOnly: true
@@ -4479,6 +4491,10 @@ components:
         expiration_time:
           type: string
           description: If defined, any payment transactions created more than the specified period of time ago will be invalidated or expired if the customer attempts to complete them. By default, this expiration period is set to 24 hours from the time of transaction creation. This feature helps ensure that payment transactions are processed promptly.
+        extra:
+          allOf:
+            - $ref: "#/components/schemas/ExtraInner"
+          description: The extra information for the payment details, which the merchant has sent it in key value form.
         generate_qr_code:
           type: boolean
           writeOnly: true
@@ -4810,6 +4826,10 @@ components:
         expiration_time:
           type: string
           description: If defined, any payment transactions created more than the specified period of time ago will be invalidated or expired if the customer attempts to complete them. By default, this expiration period is set to 24 hours from the time of transaction creation. This feature helps ensure that payment transactions are processed promptly.
+        extra:
+          allOf:
+            - $ref: "#/components/schemas/ExtraInner"
+          description: The extra information for the payment details, which the merchant has sent it in key value form.
         generate_qr_code:
           type: boolean
           writeOnly: true
@@ -5727,6 +5747,27 @@ components:
         - success
         - timestamp_utc
         - txn
+    ExtraInner:
+      type: object
+      description: |-
+        Serializer for extra data aka dynamic fields.
+        Extra data can accept any value by default. However,
+        if the merchant wants to enforce a specific type, they can
+        use the plugins.Field class to do so. All CUSTOM fields are
+        validated inside extra field.
+    
+        Implementation:
+            - requires to have a config property in the parent
+            serializer which has to return a PluginConfig instance,
+            to which fields are attached.
+      properties:
+        app_name:
+          type:
+            - string
+            - "null"
+          title: Application
+          description: The application that created the payment, e.g. shopify, estate, event. Trimmed and lower-cased; drives the Application column, filter and export in the dashboard.
+          maxLength: 64
     FieldErrors:
       type: object
       properties:
@@ -6369,6 +6410,10 @@ components:
         expiration_time:
           type: string
           description: If defined, any payment transactions created more than the specified period of time ago will be invalidated or expired if the customer attempts to complete them. By default, this expiration period is set to 24 hours from the time of transaction creation. This feature helps ensure that payment transactions are processed promptly.
+        extra:
+          allOf:
+            - $ref: "#/components/schemas/ExtraInner"
+          description: The extra information for the payment details, which the merchant has sent it in key value form.
         generate_qr_code:
           type: boolean
           writeOnly: true
@@ -6787,6 +6832,10 @@ components:
         expiration_time:
           type: string
           description: If defined, any payment transactions created more than the specified period of time ago will be invalidated or expired if the customer attempts to complete them. By default, this expiration period is set to 24 hours from the time of transaction creation. This feature helps ensure that payment transactions are processed promptly.
+        extra:
+          allOf:
+            - $ref: "#/components/schemas/ExtraInner"
+          description: The extra information for the payment details, which the merchant has sent it in key value form.
         generate_qr_code:
           type: boolean
           writeOnly: true
@@ -7820,6 +7869,10 @@ components:
         expiration_time:
           type: string
           description: If defined, any payment transactions created more than the specified period of time ago will be invalidated or expired if the customer attempts to complete them. By default, this expiration period is set to 24 hours from the time of transaction creation. This feature helps ensure that payment transactions are processed promptly.
+        extra:
+          allOf:
+            - $ref: "#/components/schemas/ExtraInner"
+          description: The extra information for the payment details, which the merchant has sent it in key value form.
         generate_qr_code:
           type: boolean
           writeOnly: true

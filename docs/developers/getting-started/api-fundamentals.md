@@ -159,6 +159,17 @@ Use the `extra` field to attach arbitrary key-value data to a payment transactio
 
 The `extra` object is stored with the transaction and included in [webhook payloads](/developers/webhooks/payment-events) — use it to pass context your backend needs when processing the payment result.
 
+Any key is accepted, but a few have a meaning to Ottu:
+
+| Key | What Ottu does with it |
+|-----|------------------------|
+| `app_name` | The application that created the payment, such as `shopify`, `estate` or `event`, or your own identifier if you build an app that creates payments. The dashboard shows it as **Application**, which merchants can add as a column, filter, search field and export header. Up to 64 characters, stored trimmed and lower-cased. |
+| `remarks` | A note for the customer, shown on the payment page and in payment emails. Must not contain `<` or `>`. |
+| `full_name` | The customer's name, used when the payment has neither `customer_first_name` nor `customer_last_name`: on the payment page, receipts, notifications and reports. |
+| Your custom fields | Values for the [custom fields](/business/plugins/payment-request#custom-field-settings) set up in the plugin. Ottu checks each value against its field's settings. |
+
+A value that breaks these rules returns `400` with the error under `extra`, for example `{"extra": {"app_name": ["Not a valid string."]}}`.
+
 ## Pagination
 
 Endpoints that return lists (reports, cards) use `limit` and `offset` parameters:
