@@ -33,7 +33,7 @@ Click **Add Periodic Report Config**, then fill in the fields below.
 | **Is Enabled?**                      | The report only becomes active once all required fields are completed: Report Generation Start Date, Period, Cut-off Time, and the **Is Active** flag                                             |
 | **Is active?**                       | Whether this report configuration is currently active and visible on the dashboard                                                                                                                |
 | **Period**                           | How often the report is generated (e.g., daily, weekly, monthly)                                                                                                                                  |
-| **Report generation date/time**      | The date and time when report generation starts                                                                                                                                                   |
+| **Report Generation Start Date**     | The date report generation starts from                                                                                                                                                            |
 | **Cut-off time**                     | The time at which transactions are evaluated for inclusion in the next report. Also determines when the report is sent. If not set, the report will not generate even if **Is Active** is enabled |
 | **Report timezone**                  | The timezone of the dates and times in the report. Default: Asia/Kuwait                                                                                                                           |
 | **Plugins**                          | Which [plugin](/business/plugins/) the report covers                                                                                                                                              |
@@ -88,10 +88,10 @@ Each report configuration has a **Fields** section that sets the columns of the 
 
 1. Open the report configuration and scroll to **Fields**.
 2. Drag a header from **Available Headers** to **Selected Headers**. The search box above each list finds a header by name.
-3. In the form that opens, change the English or Arabic label if you want. The label is the column title in the file.
+3. In the form that opens, change the English or Arabic label if you want. The label is the column title in the file. An English label can use only letters, digits and spaces.
 4. Drag the selected headers into the order you want. Double-click a selected header to edit its label again.
 
-To add a column with the same value on every row, such as a merchant code, click **Add Static Header** and fill in **Field Name**, **English Header Name**, **Arabic Header Name** (optional) and **Static Value**.
+To add a column with the same value on every row, such as a merchant code, click **Add Static Header** and fill in **Field Name**, **English Header Name**, **Arabic Header Name** (optional), **Static Value** and **Formatter** (**String**, **Decimal**, **Date** or **Date Time**). The button works once at least one transaction or gateway header is selected.
 
 ### Dashboard Export
 
