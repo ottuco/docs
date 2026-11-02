@@ -1,0 +1,769 @@
+---
+title: Connect SDK API Reference
+description: Every public method, init option and callback of the Ottu Connect SDK (Checkout v4) for the web.
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import FAQ, { FAQItem } from "@site/src/components/FAQ";
+import { CONNECT_SDK_CDN_URL } from "@site/src/constants/api";
+
+The Connect SDK (Checkout v4) is Ottu's JavaScript checkout for the web. It renders the payment methods available for a payment session — cards, saved cards, Apple Pay, Google Pay, Samsung Pay, STC Pay, urpay, buy now pay later, Qitaf and Friend Pay — and reports the outcome to your page through callbacks.
+
+This page lists every public method, `init` option and callback. For a guided first integration, start with the [Quick Start](./quick-start.mdx).
+
+:::warning
+
+The SDK needs a payment session. Create it on your server with the [Checkout API](/developers/payments/checkout-api/) and pass its `session_id` to the SDK. Call Ottu's REST APIs from your server only, never from the browser.
+
+:::
+
+## Installation
+
+Load the SDK with a script tag. It defines one global, `OttuSDK`, which holds the `ConnectSDK` class and the [`CheckoutTheme`](./theming-and-localisation.mdx) builder.
+
+<CodeBlock language="html" title="Load the Connect SDK">
+{`<script src="${CONNECT_SDK_CDN_URL}"></script>`}
+</CodeBlock>
+
+The SDK loads its own styles at runtime, so you don't add a stylesheet. Create an instance, then call [`init`](#init):
+
+```js
+const sdk = new OttuSDK.ConnectSDK();
+```
+
+Each instance manages one checkout. The SDK renders inside shadow roots, so your page CSS doesn't leak into the checkout; style it with the [`theme`](#theme) option instead.
+
+## Methods
+
+### `init`
+
+```ts
+sdk.init(config: CheckoutConfig): Promise<void>
+```
+
+Fetches the payment session and renders the full checkout — order details, payment methods and the Pay button — into the element(s) you name with [`selector`](#selector) or [`selectors`](#selectors). `config` takes the [options](#options) and [callbacks](#callbacks) below.
+
+- **Resolves** once the checkout is rendered. It also resolves when the session can no longer be paid (paid, canceled, expired or failed): the SDK then shows a panel saying so instead of the checkout.
+- **Rejects** with the cause when initialization fails: missing required options, a container that can't be found, a network or server error. Where it has a container, the SDK first shows its own "Something Went Wrong" panel with a **Try Again** button. [`onError`](#onerror) is **not** called for initialization failures, so always handle the rejection.
+
+```js
+sdk.init({ /* options and callbacks */ }).catch((error) => {
+  console.error("Checkout failed to load", error);
+});
+```
+
+When the customer comes back to your page with the browser's Back button (and the browser restores it from its back/forward cache), the SDK initializes the checkout again by itself.
+
+### `reload`
+
+```ts
+sdk.reload(): Promise<void>
+```
+
+Renders the checkout again with the config last passed to `init`. Use it to refresh the checkout after you [update the session](/developers/payments/checkout-api/) on your server. A `setupPreload` in that config is reused, not fetched again. Rejects if called before `init`.
+
+### `cleanup`
+
+```ts
+sdk.cleanup(): void
+```
+
+Removes the checkout from the page and stops the SDK's listeners. Call it when your page or component unmounts — for example in a single-page app when the customer leaves the checkout route. After `cleanup`, call `init` again to show a new checkout.
+
+### `getConfig`
+
+```ts
+sdk.getConfig(): CheckoutConfig
+```
+
+Returns the configuration the SDK is running with. It can include values the SDK added while initializing, so use it for debugging rather than as input to `init`.
+
+### `getVersion`
+
+```ts
+sdk.getVersion(): string
+```
+
+Returns the SDK's version string. Include it when you report an issue to Ottu.
+
+### `showFailureMessage`
+
+```ts
+sdk.showFailureMessage(
+  title?: string,
+  message?: string,
+  buttonText?: string,
+  onButtonClick?: () => void
+): void
+```
+
+Shows the SDK's failure panel in place of the checkout, with your own title, message and button. Use it when your page decides the customer can't pay, for example after a failed check in [`onBeforePayment`](#onbeforepayment). All arguments are plain text: HTML in them is shown as written, not rendered. Throws in [card form mode](#card-form-mode).
+
+```js
+sdk.showFailureMessage(
+  "Order unavailable",
+  "This order can no longer be paid. Please start a new order.",
+  "Back to cart",
+  () => { window.location.href = "/cart"; }
+);
+```
+
+The [card form mode](#card-form-mode) methods — `initCardForm`, `isCardFormValid`, `validateCardForm`, `tokenizeCard` and `submitCardPayment` — are described in their own section.
+
+## Options
+
+Options are passed to [`init`](#init) as one object, together with the [callbacks](#callbacks).
+
+| Option | Type | Required | Default |
+|---|---|---|---|
+| [`merchant_id`](#merchant_id) | string | Yes | — |
+| [`session_id`](#session_id) | string | Yes | — |
+| [`apiKey`](#apikey) | string | Yes | — |
+| [`selector`](#selector) | string | Yes, unless `selectors` is set | — |
+| [`selectors`](#selectors) | object | Yes, unless `selector` is set | — |
+| [`lang`](#lang) | `"en"` or `"ar"` | No | `"en"` |
+| [`formsOfPayment`](#formsofpayment) | string[] | No | every form of payment |
+| [`payButtonText`](#paybuttontext) | object | No | "Pay" in the checkout language |
+| [`displayRejectButton`](#displayrejectbutton) | boolean | No | `false` |
+| [`rejectButtonConfig`](#rejectbuttonconfig) | object | No | — |
+| [`setupPreload`](#setuppreload) | object | No | — |
+| [`theme`](#theme) | theme | No | built-in look |
+| [`applePayInit`](#applepayinit) | object | No | — |
+| [`googlePayInit`](#googlepayinit) | object | No | — |
+| [`friendPay`](#friendpay) | object | No | off |
+| [`mobilePayOtpLength`](#mobilepayotplength) | number | No | `4` |
+| [`mobilePayOtpCooldownTime`](#mobilepayotpcooldowntime) | number | No | `60` |
+| [`customer_phone`](#customer_phone) | string | No | the session's phone number |
+
+:::warning Option names are not checked
+
+The SDK ignores option names it doesn't know, without a warning. A typo such as `formOfPayment` or `apikey` is dropped silently, so copy names exactly as written here.
+
+:::
+
+### Required Options
+
+#### `merchant_id`
+
+**Type:** string · **Required**
+
+Your Ottu merchant domain, without `https://` — for example `sandbox.ottu.net`. The SDK sends every request for the session to this host.
+
+#### `session_id`
+
+**Type:** string · **Required**
+
+The `session_id` of the payment transaction, returned when your server creates it with the [Checkout API](/developers/payments/checkout-api/).
+
+#### `apiKey`
+
+**Type:** string · **Required**
+
+Your Ottu [public API key](/developers/getting-started/authentication#public-key). The SDK runs in the browser, where anyone can read it, so never pass your private API key here.
+
+#### `selector`
+
+**Type:** string · **Required unless [`selectors`](#selectors) is set**
+
+The container the checkout renders into. Pass an element `id` (`"ottu-checkout"`) or any CSS selector (`"#ottu-checkout"`). The element must exist before you call `init`.
+
+#### `selectors`
+
+**Type:** object · **Required unless [`selector`](#selector) is set**
+
+Places each part of the checkout in its own container, so you can lay them out around your own page content. When you use `selectors`, `details`, `methods` and `button` are all required.
+
+| Key | Type | Required | What it places |
+|---|---|---|---|
+| `details` | string | Yes | Order details: amount, fees and the save-card toggle |
+| `methods` | string | Yes | The list of payment methods |
+| `button` | string | Yes | The Pay button (or the selected wallet's button) |
+| `threeds` | string | No | Where an embedded 3-D Secure challenge is shown. Without it, the challenge is shown in the parent element of the `details` section. |
+| `cardForm` | string | No | [Card form mode](#card-form-mode) only |
+
+```js
+sdk.init({
+  // ...required options
+  selectors: {
+    details: "#order-summary",
+    methods: "#payment-methods",
+    button: "#pay-button",
+  },
+});
+```
+
+`selectors` takes precedence over `selector` when you pass both.
+
+### Display Options
+
+#### `lang`
+
+**Type:** `"en"` or `"ar"` · **Default:** `"en"`
+
+The language the SDK asks Ottu for when it loads the session. The checkout is shown in the language the session returns, and Arabic is rendered right to left. To make sure the checkout is in a given language, set `language` when you [create the session](/developers/payments/checkout-api/). See [Theming & Localisation](./theming-and-localisation.mdx).
+
+#### `formsOfPayment`
+
+**Type:** string[] · **Default:** every form of payment the session offers
+
+Limits which forms of payment the checkout shows. Leave it out to show everything the session offers; pass `[]` to hide every form below. Values are case-sensitive:
+
+| Value | Shows |
+|---|---|
+| `ottuPG` | Card payments through Ottu's payment gateway |
+| `jazz` | The card form embedded in the checkout. Without it, card payments redirect to the gateway's hosted page. Use with `ottuPG`. |
+| `tokenPay` | The customer's [saved cards](./cards.mdx) |
+| `redirect` | Payment methods that redirect to the gateway's page |
+| `applePay` | [Apple Pay](./wallets.mdx) |
+| `googlePay` | [Google Pay](./wallets.mdx) |
+| `samsungPay` | [Samsung Pay](./wallets.mdx) |
+| `stcPay` | [STC Pay](./mobile-payments.mdx) |
+| `urPay` | [urpay](./mobile-payments.mdx) |
+| `wallet` | The customer's [Ottu wallet](/developers/payments/wallet/) balance |
+
+```js
+formsOfPayment: ["ottuPG", "jazz", "tokenPay", "applePay", "googlePay"],
+```
+
+Unknown values are ignored with a console warning. [Buy now, pay later](./bnpl.mdx) methods and [Qitaf](./qitaf.mdx) are not filtered by this option: they show whenever the session offers them. [Friend Pay](./friend-pay.mdx) is turned on with the [`friendPay`](#friendpay) option, not here.
+
+#### `payButtonText`
+
+**Type:** `{ en?: string, ar?: string }` · **Default:** "Pay", translated
+
+The Pay button's label in each language. The SDK uses the entry for the checkout's language.
+
+```js
+payButtonText: { en: "Place order", ar: "تأكيد الطلب" },
+```
+
+#### `displayRejectButton`
+
+**Type:** boolean · **Default:** `false`
+
+Shows a "Cancel Payment" link under the Pay button. The link only appears when the session has a `cancel_url`. When the customer confirms, the SDK cancels the payment and sends the customer to the session's result page; [`onCancel`](#oncancel) is not called. Ottu can also set this from your SDK configuration, which takes precedence over the value you pass.
+
+#### `rejectButtonConfig`
+
+**Type:** `{ text?: { en?: string, ar?: string } }`
+
+The cancel link's text in each language. Only applies when [`displayRejectButton`](#displayrejectbutton) shows the link.
+
+```js
+displayRejectButton: true,
+rejectButtonConfig: { text: { en: "Cancel order", ar: "إلغاء الطلب" } },
+```
+
+### Preloading
+
+#### `setupPreload`
+
+**Type:** object
+
+The session data your server already has. When your server [creates the session](/developers/payments/checkout-api/) with `include_sdk_setup_preload: true`, the response carries an `sdk_setup_preload_payload`; pass it here unchanged and the SDK renders without fetching the session again, which saves a round trip.
+
+```js
+setupPreload: sessionResponse.sdk_setup_preload_payload,
+```
+
+If the payload is incomplete or invalid, the SDK ignores it and fetches the session as usual. [`reload`](#reload) reuses the same payload, so after you update the session on your server, call `init` with a fresh payload (or none) instead.
+
+### Theme
+
+#### `theme`
+
+**Type:** theme built with `OttuSDK.CheckoutTheme` · **Default:** the built-in look
+
+Colors, font, corner radius, modal colors and the Apple Pay and Google Pay button styles. Build it with the `CheckoutTheme` builder or use a ready-made theme:
+
+```js
+const theme = OttuSDK.CheckoutTheme.create()
+  .setPrimaryColor("#0053A4")
+  .setBorderRadius("8px")
+  .build();
+
+sdk.init({ /* ...required options */ theme });
+
+// or a ready-made theme:
+sdk.init({ /* ...required options */ theme: OttuSDK.CheckoutTheme.dark });
+```
+
+A plain object (such as a Checkout SDK v3 theme) is ignored. `build()` throws an `OttuSDK.ThemeError` when a value is rejected. Every setter and its allowed values are listed in [Theming & Localisation](./theming-and-localisation.mdx).
+
+### Payment Method Options
+
+#### `applePayInit`
+
+**Type:** object
+
+Customizes the Apple Pay sheet. Accepted keys: `shop_name`, `fee_description`, `merchantCapabilities`, `supportedNetworks`, `supportedCountries`, `version`, `buttonLocale` and `lineItems`. The amount, currency and Apple merchant identity come from the session and can't be changed here. Other keys, and values of the wrong type, are dropped with a console warning. See [Apple Pay, Google Pay & Samsung Pay](./wallets.mdx) for each key.
+
+```js
+applePayInit: {
+  shop_name: "My Store",
+  supportedNetworks: ["visa", "masterCard", "mada"],
+},
+```
+
+#### `googlePayInit`
+
+**Type:** object
+
+Customizes the Google Pay sheet. Accepted keys: `merchant_name` (or `merchantName`), `fee_description`, `allowedCardNetworks`, `allowedCardAuthMethods`, `allowPrepaidCards`, `allowCreditCards`, `assuranceDetailsRequired`, `billingAddressRequired`, `billingAddressParameters`, `emailRequired`, `existingPaymentMethodRequired`, `totalPriceStatus` (`FINAL` or `ESTIMATED`), `totalPriceLabel`, `displayItems` and `buttonLocale`. The amount, currency, environment and gateway come from the session. See [Apple Pay, Google Pay & Samsung Pay](./wallets.mdx) for each key.
+
+```js
+googlePayInit: {
+  merchant_name: "My Store",
+  allowedCardNetworks: ["VISA", "MASTERCARD"],
+  emailRequired: true,
+},
+```
+
+#### `friendPay`
+
+**Type:** `{ enabled: boolean, shareText?: string | { en?: string, ar?: string } }` · **Default:** off
+
+Adds a [Friend Pay](./friend-pay.mdx) option, which lets the customer share a link so someone else pays the order. `shareText` replaces the option's label and pre-fills the shared message; pass one string for every language or one per language. If the value isn't in this shape, Friend Pay stays off and the SDK logs a warning.
+
+```js
+friendPay: { enabled: true, shareText: { en: "Can you pay for my order?" } },
+```
+
+:::note
+
+Friend Pay fires no callbacks. Your server learns that the order was paid from the [payment webhook](/developers/webhooks/payment-events/).
+
+:::
+
+#### `mobilePayOtpLength`
+
+**Type:** number, a whole number from 4 to 8 · **Default:** `4`
+
+The number of digits in the one-time code the customer enters for [STC Pay and urpay](./mobile-payments.mdx). Values outside 4–8 fall back to 4.
+
+#### `mobilePayOtpCooldownTime`
+
+**Type:** number (seconds) · **Default:** `60`
+
+How long the customer waits before they can ask for a new STC Pay or urpay code.
+
+#### `customer_phone`
+
+**Type:** string · **Default:** the session's `customer_phone`
+
+Pre-fills the mobile number the customer pays with in STC Pay and urpay.
+
+## Callbacks
+
+Callbacks are functions you pass to [`init`](#init) (or [`initCardForm`](#initcardform)) alongside the options. All are optional, but if the SDK reaches a point where it would call `onSuccess`, `onError` or `onCancel` and you haven't set it, it logs a console warning.
+
+| Callback | Fires when |
+|---|---|
+| [`onSuccess`](#onsuccess) | The payment succeeded on the page |
+| [`onError`](#onerror) | The payment failed with an error |
+| [`onCancel`](#oncancel) | The payment was canceled or declined by the gateway |
+| [`onBeforePayment`](#onbeforepayment) | The customer pressed Pay, before anything is submitted. Can stop the payment. |
+| [`onThreeDSChallenge`](#onthreedschallenge) | An embedded 3-D Secure challenge is shown |
+
+:::warning Confirm every payment on your server
+
+Callbacks run in the customer's browser and don't fire for every flow: when the customer is redirected to a gateway, a buy-now-pay-later provider or a 3-D Secure page, or pays through Friend Pay, the page is left before an outcome is known. Treat callbacks as UI signals. Fulfil orders only from the [payment webhook](/developers/webhooks/payment-events/), [verified with its signature](/developers/webhooks/verify-signatures/).
+
+:::
+
+Every callback payload has a `form_of_payment` when it's known: the method's flow in lower case, such as `ottu_pg`, `token_pay`, `apple_pay`, `google_pay`, `samsung_pay`, `stc_pay`, `urpay`, `redirect` or `wallet`. A [Qitaf](./qitaf.mdx) redemption that covers the whole order reports `wallet`. Payloads also carry the other fields of Ottu's response, so treat unknown fields as optional.
+
+If your `onSuccess`, `onError` or `onCancel` throws, the SDK logs the error and carries on.
+
+### `onSuccess`
+
+```ts
+onSuccess?: (data: SuccessCallbackData) => void
+```
+
+Fires when the payment succeeded without leaving the page: the embedded card form, saved cards, wallets, or after an embedded 3-D Secure challenge. The SDK does not navigate; send the customer on yourself, typically to `data.redirect_url`.
+
+| Field | Type | Description |
+|---|---|---|
+| `status` | `"success"` | Always `"success"` |
+| `message` | string | A message describing the result |
+| `session_id` | string | The payment session |
+| `order_no` | string | Your order number from the session |
+| `operation` | string | The operation performed, such as `pay` or `authorize` |
+| `reference_number` | string | Ottu's reference for the payment, when available |
+| `redirect_url` | string | Where to send the customer next. The current page's URL when the session has none. |
+| `form_of_payment` | string | How the customer paid |
+
+`onSuccess` does **not** fire when the payment continues on another page: card payments redirected to the gateway, [buy now, pay later](./bnpl.mdx), 3-D Secure by redirect, and [Friend Pay](./friend-pay.mdx).
+
+```js
+onSuccess: (data) => {
+  window.location.href = data.redirect_url;
+},
+```
+
+:::note Google Pay with 3-D Secure by redirect
+
+When Google Pay needs a 3-D Secure redirect, `onSuccess` fires with `status: "pending_authentication"` and a `redirect_url` for the bank's page. The payment isn't complete yet: send the customer to `redirect_url` to finish it.
+
+:::
+
+### `onError`
+
+```ts
+onError?: (data: ErrorCallbackData) => void
+```
+
+Fires when a payment attempt fails with an error: a server or network failure, a request Ottu refused, a 3-D Secure failure, or a wallet that couldn't start. In most cases the SDK also shows its own failure message to the customer, and the customer can try again.
+
+| Field | Type | Description |
+|---|---|---|
+| `status` | `"error"` | Always `"error"` |
+| `message` | string | What went wrong |
+| `detail` | string or object | Ottu's error detail, when the response has one. Field errors arrive as an object. |
+| `session_id` | string | The payment session, when known |
+| `form_of_payment` | string | The method being paid with, when known |
+| `originalError` | Error | The underlying error, when there is one |
+
+`onError` is not called when [`init`](#init) fails — handle the rejected promise instead — nor for invalid card fields, which the card form marks inline. See [Error Handling](./errors.mdx) for every case.
+
+```js
+onError: (data) => {
+  console.error("Payment failed:", data.message);
+},
+```
+
+### `onCancel`
+
+```ts
+onCancel?: (data: CancelCallbackData) => void
+```
+
+Fires when the payment ends as `canceled` or `failed`: the gateway declined the card, the customer canceled inside the 3-D Secure or gateway screen, or a wallet payment was declined. A **declined payment arrives here, not in `onError`.** The SDK shows the gateway's reason, and the customer can choose another method.
+
+| Field | Type | Description |
+|---|---|---|
+| `status` | `"canceled"` | Always `"canceled"`, also for a `failed` payment |
+| `message` | string | The reason, usually the gateway's message |
+| `session_id` | string | The payment session |
+| `order_no` | string | Your order number, or `""` |
+| `operation` | string | The operation, such as `pay` |
+| `reference_number` | string | Ottu's reference, or `""` |
+| `redirect_url` | string | The session's result page, or the current page's URL |
+| `form_of_payment` | string | The method that was used, when known |
+
+`onCancel` doesn't fire when the customer closes the Apple Pay or Google Pay sheet (they can simply try again), when they use the [cancel link](#displayrejectbutton), or for [Friend Pay](./friend-pay.mdx).
+
+### `onBeforePayment`
+
+```ts
+onBeforePayment?: (data: BeforePaymentCallbackData) => Promise<void>
+```
+
+Fires once per payment attempt, after the SDK has validated the customer's input and before it submits the payment, opens a wallet sheet or redirects. The SDK waits for the returned promise:
+
+- **Resolve** to let the payment go ahead.
+- **Reject** (or throw) to stop it. Nothing is submitted, no other callback fires, and the customer can try again.
+
+Use it for last-moment checks on your side, such as confirming stock or that the cart hasn't changed. It doesn't fire for [Friend Pay](./friend-pay.mdx).
+
+| Field | Type | Description |
+|---|---|---|
+| `method` | string | The selected method's `pg_code` |
+| `form_of_payment` | string | The selected form of payment |
+| `card` | object | On card payments only: the card being paid with |
+| `card.number` | string | First six and last four digits only, e.g. `424242XXXXXX4242` for a new card or `424242**** 4242` for a saved card |
+| `card.brand` | string | The card brand |
+| `card.scheme` | string | The card scheme (the brand when there is no separate scheme) |
+| `card.expiry_month` | string | Expiry month |
+| `card.expiry_year` | string | Expiry year |
+
+Any `card` field can be `null` when it isn't known.
+
+```js
+onBeforePayment: async (data) => {
+  const response = await fetch("/api/cart/check", { method: "POST" });
+  if (!response.ok) {
+    throw new Error("Cart changed"); // stops the payment
+  }
+},
+```
+
+:::tip
+
+Apple Pay requires the payment sheet to open quickly after the customer taps the button. Keep `onBeforePayment` fast — a single short request at most.
+
+:::
+
+### `onThreeDSChallenge`
+
+```ts
+onThreeDSChallenge?: (data: ThreeDSChallengeCallbackData) => void
+```
+
+Fires when the SDK shows an embedded 3-D Secure challenge in place of the checkout. Use it to reflect the step in your own page, for example by hiding your own buttons. The challenge then ends with `onSuccess`, `onError` or `onCancel`. It doesn't fire for 3-D Secure by redirect, where the page goes to the bank.
+
+| Field | Type | Description |
+|---|---|---|
+| `status` | `"three_ds_challenge"` | Always `"three_ds_challenge"` |
+| `message` | string | `"3D Secure authentication in progress"` |
+| `session_id` | string | The payment session, when known |
+| `reference_number` | string | Ottu's reference, when known |
+| `form_of_payment` | string | The method being paid with |
+
+The payload also includes the challenge content. Don't log or send the whole payload.
+
+## Card Form Mode
+
+Card form mode renders only Ottu's card form — no method list, no Pay button — so you can build your own checkout around it and decide when to pay. It uses the session's embedded card method (Ottu's payment gateway with the card form enabled). Saved cards, wallets and the save-card toggle are not part of this mode.
+
+### `initCardForm`
+
+```ts
+sdk.initCardForm(config: CheckoutConfig): Promise<void>
+```
+
+Renders the card form. It takes the same [required options](#required-options) and [callbacks](#callbacks) as `init`, plus the options below. Calling it removes any checkout `init` rendered with the same instance.
+
+It rejects when the session has no card method that supports the embedded form, when the mount element is missing, or when the session can no longer be paid. In that last case the error is an `OttuSDK.SessionClosedError`: card form mode shows no panel, so your page decides what to show.
+
+| `SessionClosedError` property | Values |
+|---|---|
+| `state` | `completed`, `canceled`, `expired` or `unavailable` |
+| `sessionState` | The session's own state, such as `paid` or `expired` |
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `selectors.cardForm` | string | the [`selector`](#selector) | Where the card form renders |
+| `selectors.threeds` | string | — | Where a 3-D Secure challenge is shown. **Required** for cards that need an embedded challenge: without it, the payment fails with `onError`. |
+| `cardFormLayout` | `"inline"` or `"separate"` | `"inline"` | `inline` puts all card fields in one row; `separate` shows each field as its own block. |
+| `cardFormPgCode` | string | the first card method | The `pg_code` to use when the session has more than one card method |
+| `onCardFormChange` | `({ isValid }) => void` | — | Fires whenever the form becomes valid or invalid. Use it to enable your own Pay button. |
+
+### `isCardFormValid`
+
+```ts
+sdk.isCardFormValid(): boolean
+```
+
+Whether the entered card details are currently valid. Throws if called before `initCardForm`.
+
+### `validateCardForm`
+
+```ts
+sdk.validateCardForm(): boolean
+```
+
+Validates the form, shows the errors inline in the card fields and returns the result. Throws if called before `initCardForm`.
+
+### `tokenizeCard`
+
+```ts
+sdk.tokenizeCard(options?: { save_card?: boolean }): Promise<TokenizeCardResult>
+```
+
+Step 1 of paying: encrypts the entered card inside the card form and returns a single-use reference. The card number never reaches your page. Pass `save_card: true` to save the card for the customer with the payment. Rejects if called before `initCardForm` or when the card can't be tokenized.
+
+| Field | Type | Description |
+|---|---|---|
+| `token_ref` | string | Single-use reference to the encrypted card |
+| `card.masked_pan` | string | The masked card number |
+| `card.brand` | string | The card brand |
+| `card.expiry_month` | string | Expiry month |
+| `card.expiry_year` | string | Expiry year |
+| `created_at` | string | When the reference was created |
+
+The reference survives removing the card form from the page (for example, moving to a review step in a single-page app), but not a full page load.
+
+### `submitCardPayment`
+
+```ts
+sdk.submitCardPayment(): Promise<SubmitCardPaymentResult>
+```
+
+Step 2: pays with the card from `tokenizeCard`. It calls [`onBeforePayment`](#onbeforepayment) first, then handles 3-D Secure and fires [`onSuccess`](#onsuccess), [`onError`](#onerror) or [`onCancel`](#oncancel).
+
+- **Resolves** with `{ success, message?, session_id?, redirect_url? }` when the payment succeeds.
+- **Rejects** when it fails or is declined (after the callback fires), or when `onBeforePayment` stops it. A payment stopped by `onBeforePayment` gives the reference back, so you can submit again without tokenizing again.
+
+### Card Form Example
+
+```html
+<div id="card-form"></div>
+<div id="three-ds"></div>
+<button id="pay" disabled>Pay</button>
+
+<script>
+  const sdk = new OttuSDK.ConnectSDK();
+  const payButton = document.getElementById("pay");
+
+  sdk
+    .initCardForm({
+      merchant_id: "sandbox.ottu.net",
+      session_id: "your_session_id",
+      apiKey: "your_public_api_key",
+      selectors: { cardForm: "#card-form", threeds: "#three-ds" },
+      onCardFormChange: ({ isValid }) => {
+        payButton.disabled = !isValid;
+      },
+      onSuccess: (data) => {
+        window.location.href = data.redirect_url;
+      },
+      onError: (data) => console.error("Payment failed:", data.message),
+      onCancel: (data) => console.warn("Payment declined:", data.message),
+    })
+    .catch((error) => {
+      if (error instanceof OttuSDK.SessionClosedError) {
+        console.warn("This order can no longer be paid:", error.sessionState);
+      } else {
+        console.error("Card form failed to load", error);
+      }
+    });
+
+  payButton.addEventListener("click", async () => {
+    if (!sdk.validateCardForm()) return;
+    payButton.disabled = true;
+    try {
+      await sdk.tokenizeCard({ save_card: false });
+      await sdk.submitCardPayment();
+    } catch (error) {
+      payButton.disabled = false; // the callbacks have already reported why
+    }
+  });
+</script>
+```
+
+## Examples
+
+### Basic Example
+
+The smallest working checkout. Replace `session_id` with a session your server created with the [Checkout API](/developers/payments/checkout-api/), and `apiKey` with your [public API key](/developers/getting-started/authentication#public-key).
+
+<CodeBlock language="html" title="Basic Connect SDK checkout">
+{`<div id="ottu-checkout"></div>
+
+<script src="${CONNECT_SDK_CDN_URL}"></script>
+<script>
+  const sdk = new OttuSDK.ConnectSDK();
+
+  sdk
+    .init({
+      merchant_id: "sandbox.ottu.net",
+      session_id: "your_session_id",
+      apiKey: "your_public_api_key",
+      selector: "#ottu-checkout",
+      onSuccess: (data) => {
+        window.location.href = data.redirect_url;
+      },
+      onError: (data) => console.error("Payment failed:", data.message),
+      onCancel: (data) => console.warn("Payment canceled:", data.message),
+    })
+    .catch((error) => console.error("Checkout failed to load", error));
+</script>`}
+</CodeBlock>
+
+### Full Example
+
+A checkout with its parts placed separately, a theme, limited forms of payment, wallet settings, Friend Pay and every callback.
+
+<CodeBlock language="html" title="Full Connect SDK checkout">
+{`<div class="checkout">
+  <section id="order-summary"></section>
+  <section id="payment-methods"></section>
+  <div id="pay-button"></div>
+  <div id="three-ds"></div>
+</div>
+
+<script src="${CONNECT_SDK_CDN_URL}"></script>
+<script>
+  const sdk = new OttuSDK.ConnectSDK();
+
+  const theme = OttuSDK.CheckoutTheme.create()
+    .setPrimaryColor("#0053A4")
+    .setOnPrimaryColor("#FFFFFF")
+    .setFontFamily("Inter, sans-serif")
+    .setBorderRadius("8px")
+    .setApplePayButtonStyle("black")
+    .setGooglePayButtonColor("black")
+    .build();
+
+  sdk
+    .init({
+      merchant_id: "sandbox.ottu.net",
+      session_id: "your_session_id",
+      apiKey: "your_public_api_key",
+      selectors: {
+        details: "#order-summary",
+        methods: "#payment-methods",
+        button: "#pay-button",
+        threeds: "#three-ds",
+      },
+      lang: "en",
+      theme: theme,
+      formsOfPayment: ["ottuPG", "jazz", "tokenPay", "applePay", "googlePay"],
+      payButtonText: { en: "Place order", ar: "تأكيد الطلب" },
+      displayRejectButton: true,
+      applePayInit: { shop_name: "My Store" },
+      googlePayInit: { merchant_name: "My Store", emailRequired: true },
+      friendPay: { enabled: true },
+
+      onBeforePayment: async (data) => {
+        const response = await fetch("/api/cart/check", { method: "POST" });
+        if (!response.ok) throw new Error("Cart changed");
+      },
+      onThreeDSChallenge: () => {
+        document.querySelector(".checkout").classList.add("authenticating");
+      },
+      onSuccess: (data) => {
+        window.location.href = data.redirect_url;
+      },
+      onError: (data) => {
+        console.error("Payment failed:", data.message, data.detail);
+      },
+      onCancel: (data) => {
+        console.warn("Payment canceled or declined:", data.message);
+      },
+    })
+    .catch((error) => console.error("Checkout failed to load", error));
+</script>`}
+</CodeBlock>
+
+## FAQ
+
+<FAQ>
+<FAQItem question="Is ConnectSDK.init a static method?">
+
+No. Create an instance first with `new OttuSDK.ConnectSDK()` and call `init` on it. Each instance manages one checkout.
+
+</FAQItem>
+<FAQItem question="Why didn't onSuccess fire after a successful payment?">
+
+The payment finished on another page: a gateway's hosted page, a buy-now-pay-later provider, a 3-D Secure redirect, or a friend paying through Friend Pay. The SDK can't see those outcomes. Confirm the payment from the [payment webhook](/developers/webhooks/payment-events/) and show the result on your `redirect_url` page.
+
+</FAQItem>
+<FAQItem question="A declined card called onCancel, not onError. Is that right?">
+
+Yes. A payment the gateway declines ends as `canceled` or `failed`, and both arrive in `onCancel`. `onError` is for errors such as network or server failures.
+
+</FAQItem>
+<FAQItem question="Do I need to handle the promise init returns?">
+
+Yes. Initialization failures — missing options, a missing container, network errors — reject the promise and don't reach `onError`.
+
+</FAQItem>
+<FAQItem question="Can I set the checkout language?">
+
+Set `language` when you create the session with the Checkout API; the checkout follows the session's language. `lang` only states the language the SDK asks for when it loads the session.
+
+</FAQItem>
+</FAQ>
+
+## What's Next?
+
+- [Quick Start](./quick-start.mdx) — from a payment session to a working checkout
+- [Cards & Saved Cards](./cards.mdx) — the card form, saved cards and 3-D Secure
+- [Apple Pay, Google Pay & Samsung Pay](./wallets.mdx) — wallet setup and button styling
+- [Error Handling](./errors.mdx) — what the customer sees and what your callbacks receive
+- [Migrating from v3](./migration-from-v3.mdx) — move from the Checkout SDK v3

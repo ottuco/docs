@@ -1,0 +1,152 @@
+---
+title: Qitaf Loyalty
+description: Let customers redeem Qitaf loyalty points in the Connect SDK, to cover all or part of an order.
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { CONNECT_SDK_CDN_URL } from "@site/src/constants/api";
+
+Qitaf is STC's loyalty programme. With Qitaf in the [Connect SDK](./index.mdx), customers can redeem their points to pay for all or part of an order. The SDK shows a **Use loyalty points** block above the payment methods. The customer confirms their phone number with a one-time code (OTP), chooses how much to redeem, and the SDK reserves the points. If the points cover the whole order, the customer pays with Qitaf alone. If not, they pay the rest with another method.
+
+:::tip Boost Your Integration
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
+:::
+
+## When to Use
+
+- Your customers are Qitaf members and you want them to spend their points in your checkout.
+- You want to accept partial redemptions: points first, then a card or wallet for the rest.
+- You already use the Connect SDK and want loyalty redemption without building an OTP flow yourself.
+
+## Setup
+
+Qitaf needs **no Connect SDK option**.
+
+1. **Get Qitaf enabled.** Ask Ottu to configure Qitaf on your account. It gets its own [`pg_code`](../payment-methods.md).
+2. **Include it in the session.** Pass the Qitaf `pg_code` in `pg_codes` when you create the session with the [Checkout API](../checkout-api.mdx), together with the gateways the customer can use for any remaining amount. Pass the customer's phone number (`customer_phone`) so the SDK can send the OTP to it.
+3. **Initialise the SDK as usual.** The loyalty block appears when the session offers Qitaf. The [`formsOfPayment`](./reference.mdx#formsofpayment) option doesn't hide or show it.
+
+:::note Qitaf and the M-Wallet can't be combined
+A customer can use either Qitaf points or their [M-Wallet](../wallet/index.mdx) balance on a payment, not both. While one is active, the SDK disables the other.
+:::
+
+## Guide
+
+### Workflow
+
+1. Your server creates a session with the [Checkout API](../checkout-api.mdx), including the Qitaf `pg_code` and the other gateways.
+2. Your page initialises the Connect SDK. A **Use loyalty points** switch shows above the payment methods. While loyalty is on offer, the SDK doesn't pre-select a payment method.
+3. **Send the code.** The customer turns the switch on and taps **Send OTP**. The block shows the end of the phone number the code goes to. The customer can change the number, or choose **Skip loyalty for this payment**.
+4. **Enter the code.** The customer enters the **4-digit** code. A countdown shows when they can request a new code.
+5. **Choose an amount.** The customer picks **¼** or **½** of the order total, **Max**, or **Custom**. A custom amount must be a whole number and can't exceed the order total.
+6. **Reserve.** The SDK verifies the code and reserves the points in one step. If the code is wrong, the customer goes back to code entry with *"Invalid OTP"*.
+7. **Summary.** The block shows *Loyalty Applied* and *Remaining*. Then one of two things happens:
+   - **Full coverage:** the points cover the whole order. All other payment methods are disabled and **Pay** charges Qitaf directly.
+   - **Partial coverage:** the customer selects another payment method below to pay the remaining amount.
+8. The payment completes. The SDK fires your callbacks as described in [Callbacks for Qitaf](#callbacks-for-qitaf), and Ottu sends a [payment webhook](../../webhooks/payment-events.md).
+
+Turning the switch off releases the reserved points. If the customer reloads the page or comes back from a payment gateway, the SDK restores a reservation that's still held, so the customer doesn't need a new code.
+
+### Step-by-Step
+
+#### 1. Create the session
+
+Create the session on your server with the [Checkout API](../checkout-api.mdx). Include the Qitaf `pg_code` and the customer's phone number. See the [Connect SDK quick start](./quick-start.mdx) for complete server code in cURL, Python, Node.js and PHP.
+
+#### 2. Initialise the SDK
+
+No Qitaf-specific option is needed.
+
+<CodeBlock language="html" title="checkout.html">
+{`<div id="ottu-checkout"></div>
+<script src="${CONNECT_SDK_CDN_URL}"></script>
+<script>
+  const sdk = new OttuSDK.ConnectSDK();
+
+  sdk.init({
+    merchant_id: "sandbox.ottu.net",
+    session_id: "your_session_id",
+    apiKey: "your_public_api_key",
+    selector: "#ottu-checkout",
+
+    onSuccess: (data) => {
+      // data.form_of_payment is "wallet" when Qitaf covered the whole order
+      window.location.href = data.redirect_url;
+    },
+    onCancel: (data) => console.log("Payment canceled:", data.message),
+    onError: (data) => console.error("Payment error:", data.message),
+  }).catch((err) => {
+    console.error("Checkout failed to load", err);
+  });
+</script>`}
+</CodeBlock>
+
+Use your [public API key](/developers/getting-started/authentication#public-key) for `apiKey`.
+
+#### 3. Confirm the result on your server
+
+Fulfil the order from the [payment webhook](../../webhooks/payment-events.md), after [verifying its signature](../../webhooks/verify-signatures.md). This matters most when the customer pays the remainder with a redirect-based method, because `onSuccess` doesn't fire for redirects.
+
+### Use Cases
+
+#### Callbacks for Qitaf
+
+| Situation | Callbacks |
+|---|---|
+| Points cover the whole order and the customer taps **Pay** | [`onSuccess`](./reference.mdx#onsuccess), [`onCancel`](./reference.mdx#oncancel) or [`onError`](./reference.mdx#onerror), like an M-Wallet payment. **`form_of_payment` is `"wallet"`**, not `"qitaf"`. |
+| Points cover part of the order | The callbacks of the method that pays the remainder, with that method's `form_of_payment`. See [Cards](./cards.mdx), [Apple Pay & Google Pay](./wallets.mdx) or [BNPL](./bnpl.mdx). |
+| Sending the code, reserving points or releasing points fails | **No callback.** The SDK shows the error to the customer inside the loyalty block. |
+
+:::warning Detecting a Qitaf payment
+In callbacks, a payment fully covered by Qitaf reports `form_of_payment: "wallet"`. To tell Qitaf apart from an M-Wallet payment, use the [payment webhook](../../webhooks/payment-events.md) or retrieve the session with the [Checkout API](../checkout-api.mdx).
+:::
+
+#### Errors the customer sees
+
+| Situation | Message |
+|---|---|
+| The code couldn't be sent | *Unable to Send Verification Code* |
+| Wrong code | *Invalid OTP*, then back to code entry |
+| Reserving the points failed | *Loyalty Redemption Failed*, with **Try Again** |
+| Releasing the points failed | *Loyalty Redemption Cancel Failed*. The points stay reserved. |
+
+**Pay** stays disabled while the customer is entering the code, choosing an amount, or looking at an error.
+
+## Best Practices
+
+- **Always pass `customer_phone`** on the session. The customer can still change the number in the loyalty block, but a pre-filled number saves a step.
+- **Offer gateways for the remainder.** Partial redemptions are common, so include at least one card or wallet gateway in the session.
+- **Rely on the webhook for fulfilment**, especially when the remainder is paid by a redirect method such as [BNPL](./bnpl.mdx).
+- **Don't key business logic on `form_of_payment: "wallet"` alone**, because it covers both Qitaf and the M-Wallet.
+
+## FAQ
+
+#### Do I need a special init option to show Qitaf?
+
+No. The loyalty block appears when the session offers Qitaf. Add the Qitaf `pg_code` when you create the session.
+
+#### How long is the code?
+
+Four digits.
+
+#### Can customers redeem a fraction of a point?
+
+No. A custom amount must be a whole number, and it can't exceed the order total.
+
+#### Can a customer use Qitaf and their M-Wallet balance together?
+
+No. The SDK allows one of them per payment.
+
+#### Do I get a callback when the code fails?
+
+No. Code, reservation and release errors are handled inside the loyalty block, and no merchant callback fires. You only get callbacks for the payment itself.
+
+## What's Next?
+
+- [Connect SDK quick start](./quick-start.mdx): from session to working checkout.
+- [M-Wallet](../wallet/index.mdx): the stored-balance wallet that can't be combined with Qitaf.
+- [API reference](./reference.mdx): callbacks and their payloads.
+- [Error handling](./errors.mdx): what each callback receives.
+- [Payment webhooks](../../webhooks/payment-events.md): confirm the final result on your server.
