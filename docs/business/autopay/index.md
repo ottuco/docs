@@ -19,7 +19,7 @@ Building the integration? See [AutoPay for developers](/developers/payments/auto
 
 :::info Before you start
 - **AutoPay is API-only.** There is no AutoPay screen in the dashboard. A developer makes the integration through the API.
-- **KNET cannot pay renewals.** The limit is on the payment gateway, not on the card: KNET as a gateway cannot charge a saved card later. Customers must pay with a gateway that can.
+- **Payment gateways without auto-debit cannot pay renewals.** The limit is on the payment gateway, not on the card: such a gateway cannot charge a saved card later. Customers must pay with one of the [gateways that support auto-debit](/business/payments/gateways/?features=autodebit).
 
 All limits are listed in [Limits](#limits).
 :::
@@ -279,7 +279,7 @@ AutoPay subscriptions have no plan catalog. The plan name is a free-text label, 
 ## Limits {#limits}
 
 - **API-only.** There is no AutoPay screen in the dashboard. A developer makes the integration.
-- **KNET cannot pay renewals.** The limit is on the payment gateway, not on the card: KNET as a gateway cannot charge a saved card later. Customers must pay with a gateway that can.
+- **Payment gateways without auto-debit cannot pay renewals.** The limit is on the payment gateway, not on the card: such a gateway cannot charge a saved card later. Customers must pay with one of the [gateways that support auto-debit](/business/payments/gateways/?features=autodebit).
 - **A running subscription cannot be edited.** Amount, frequency, billing day, retry count, and customer email are fixed. Cancel it and create a new one.
 - **No pause.** Cancel at the end of the paid period, then create a new subscription when the customer returns.
 - **Emails switch off only at creation.** You cannot switch them off afterwards.
