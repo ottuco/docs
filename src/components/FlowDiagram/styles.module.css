@@ -1,0 +1,229 @@
+/* FlowDiagram: every colour comes from Infima variables, so light and dark
+   themes need no separate rules. React Flow's own --xy-* variables are set on
+   the canvas, which wins over its built-in light/dark defaults. */
+
+.root {
+  margin: 1.75rem 0;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 14px;
+  background: var(--ifm-background-surface-color);
+  overflow: hidden;
+}
+
+.canvas {
+  position: relative;
+  min-width: 0;
+  --xy-background-color: transparent;
+  --xy-edge-stroke: var(--ifm-color-emphasis-500);
+  --xy-edge-stroke-width: 1.5;
+  --xy-edge-label-color: var(--ifm-color-emphasis-800);
+  --xy-edge-label-background-color: var(--ifm-background-surface-color);
+  --xy-node-border-radius: 10px;
+  --xy-controls-button-background-color: var(--ifm-background-surface-color);
+  --xy-controls-button-background-color-hover: var(--ifm-color-emphasis-100);
+  --xy-controls-button-color: var(--ifm-color-emphasis-800);
+  --xy-controls-button-color-hover: var(--ifm-color-emphasis-900);
+  --xy-controls-button-border-color: var(--ifm-color-emphasis-200);
+  --xy-attribution-background-color: transparent;
+}
+
+.canvas :global(.react-flow__attribution a) {
+  color: var(--ifm-color-emphasis-500);
+}
+
+.canvas :global(.react-flow__edge-textbg) {
+  fill: var(--ifm-background-surface-color);
+}
+
+.canvas :global(.react-flow__edge-text) {
+  fill: var(--ifm-color-emphasis-800);
+  font-family: var(--ifm-font-family-base);
+  font-size: 12px;
+}
+
+/* Remove React Flow's default node chrome; the button below is the node. */
+.canvas :global(.react-flow__node) {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.edgeDashed :global(.react-flow__edge-path) {
+  stroke-dasharray: 6 4;
+}
+
+/* Handles only anchor edges; nobody connects nodes on a docs page. */
+.handle {
+  opacity: 0;
+  pointer-events: none;
+  width: 1px;
+  height: 1px;
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+}
+
+/* Width must match NODE_WIDTH in FlowDiagramInner.tsx. */
+.node {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 220px;
+  min-height: 64px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--ifm-color-emphasis-300);
+  border-radius: 10px;
+  background: var(--ifm-background-color);
+  color: var(--ifm-font-color-base);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.node:hover {
+  border-color: var(--ifm-color-primary-light);
+}
+
+.node:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+.node_accent {
+  border-color: var(--ifm-color-primary);
+}
+
+.node_danger {
+  border-color: var(--ifm-color-danger);
+}
+
+.nodeSelected {
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 0 0 3px var(--ifm-color-primary-lightest);
+}
+
+[data-theme="dark"] .nodeSelected {
+  box-shadow: 0 0 0 3px var(--ifm-color-primary-darkest);
+}
+
+.badge {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ifm-color-emphasis-400);
+  color: var(--ifm-color-emphasis-700);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.node_accent .badge,
+.nodeSelected .badge {
+  border-color: var(--ifm-color-primary);
+  background: var(--ifm-color-primary);
+  color: #fff;
+}
+
+.nodeText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.kicker {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* ── Side panel ───────────────────────────────────── */
+.panel {
+  padding: 20px;
+  border-left: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-color-emphasis-100);
+  font-size: 0.95rem;
+}
+
+.panelKicker {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.panelTitle {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.panelBody > :last-child {
+  margin-bottom: 0;
+}
+
+.panelLink {
+  display: inline-block;
+  margin-top: 12px;
+  font-weight: 600;
+}
+
+.panelHint {
+  margin: 0;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.caption {
+  margin-top: 0.65rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--ifm-color-emphasis-600);
+}
+
+/* ── Static fallback (server render, no JavaScript) ─ */
+.fallbackList {
+  margin: 0;
+}
+
+.fallbackList > li + li {
+  margin-top: 0.5rem;
+}
+
+.fallbackKicker {
+  color: var(--ifm-color-emphasis-600);
+}
+
+/* ── Phones and narrow columns: panel stacks under the diagram ── */
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .panel {
+    border-left: 0;
+    border-top: 1px solid var(--ifm-color-emphasis-200);
+  }
+}
