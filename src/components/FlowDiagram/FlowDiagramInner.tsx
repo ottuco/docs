@@ -222,6 +222,9 @@ export default function FlowDiagramInner({
             zoomOnScroll={false}
             zoomOnDoubleClick={false}
             preventScrolling={false}
+            // React Flow turns pointer events off on a node that is neither selectable,
+            // draggable nor clickable, so without this a click falls through to the pane.
+            onNodeClick={(_event, node) => onSelect(node.id)}
             onPaneClick={() => setSelectedId(undefined)}
           >
             <Controls showInteractive={false} position="bottom-left" />
