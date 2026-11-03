@@ -40,7 +40,7 @@ The shortest safe path:
 
 1. **Update the receiver** using [Webhook Events (v3)](/developers/webhooks/event-catalogue#quick-implementation) and [Verify Signatures](/developers/webhooks/verify-signatures#verify-v2): parse the JSON envelope, read `data.payment` / `data.operation`, verify `Ottu-Signature` `v2` on the raw body, answer any `2xx`.
 2. **Test it with the published vector** in [Verify Signatures](/developers/webhooks/verify-signatures#test-vectors), then with a sandbox payment and a refund, comparing against the [field map](#field-map).
-3. **Ottu enables format 3 for your account.** Your existing `webhook_url` and operations URL then receive format 3 with the same moments. Deploy the new receiver before this happens.
+3. **Ask Ottu to enable format 3 for your account:** contact [support@ottu.com](mailto:support@ottu.com) with the webhook configuration you want switched. Your existing `webhook_url` and operations URL then receive format 3 with the same moments. Deploy the new receiver before you ask.
 
 If a URL is also configured to receive the same event through another route, that URL gets one delivery, in the format of the existing route: see [Same URL on a legacy route](/developers/webhooks/delivery-and-retries#same-url).
 
@@ -89,7 +89,7 @@ A format 3 account never receives a format 1 or 2 body. If a payment moment has 
 | Refund logic never fires | Waiting for `state == "refunded"` | Branch on `type == "payment.refunded"`. |
 | Duplicate fulfilment | Not de-duplicating | Use [`Idempotency-Key`](/developers/webhooks/delivery-and-retries#idempotency-key) and the business reference. |
 
-## API Reference
+### Related references
 
 Nothing to call to migrate. The related references are:
 
@@ -115,6 +115,9 @@ Nothing to call to migrate. The related references are:
 <FAQ>
   <FAQItem question="Will Ottu switch my account to format 3 on its own?">
     No. Ottu never switches a merchant to a new format on its own; you keep receiving the format you have today until you ask for a change.
+  </FAQItem>
+  <FAQItem question="How do I ask for format 3?">
+    Contact [support@ottu.com](mailto:support@ottu.com) and name the webhook configuration you want switched. Deploy and test your new receiver first.
   </FAQItem>
   <FAQItem question="Can I test format 3 before it affects my customers?">
     Yes. Deploy the new receiver first and test it in the sandbox before production; the steps are in [Quick implementation](#quick-implementation).

@@ -247,7 +247,7 @@ Ottu renders the body the first time it is needed and stores those exact bytes. 
       "session_id": "golden-session-1",
       "settled_amount": "100.000",
       "state": "paid",
-      "timestamp_utc": "2026-10-22 12:00:00"
+      "timestamp_utc": "2026-10-22 10:00:00"
     }
   }
 }
@@ -276,7 +276,7 @@ The envelope carries the original payment **and** the refund. `operation.amount`
       "result": "success",
       "session_id": "golden-session-1",
       "state": "paid",
-      "timestamp_utc": "2026-10-22 12:00:00"
+      "timestamp_utc": "2026-10-22 10:00:00"
     },
     "operation": {
       "amount": "30.000",
@@ -300,7 +300,7 @@ The envelope carries the original payment **and** the refund. `operation.amount`
       "session_id": "golden-session-1",
       "source": "input",
       "success": true,
-      "timestamp_utc": "2026-10-22 12:00:00",
+      "timestamp_utc": "2026-10-22 11:30:00",
       "txn": {
         "amount": "30.000",
         "currency_code": "KWD",
@@ -344,7 +344,7 @@ A failed attempt carries the payment as it stood for that attempt. `result` and 
       "result": "failed",
       "session_id": "golden-session-1",
       "state": "failed",
-      "timestamp_utc": "2026-10-22 12:00:00"
+      "timestamp_utc": "2026-10-22 09:55:00"
     }
   }
 }
@@ -353,7 +353,7 @@ A failed attempt carries the payment as it stood for that attempt. `result` and 
 ### Handling order and unknown types {#ordering}
 
 :::warning Order is not guaranteed
-Events can arrive out of order, especially after a retry: a `payment.paid` that was retried for an hour can arrive after a `payment.refunded` that succeeded first time. Use `created` to order events for the same payment, and fetch the payment's current state with the [Payment Status API](/developers/payments/psq) when the final state matters.
+Events can arrive out of order, especially after a retry: a `payment.paid` that was retried for an hour can arrive after a `payment.refunded` that succeeded first time. Use `created` to order events for the same payment, and fetch the payment's current state with the [Payment Status API](/developers/payments/psq) when the final state matters. `created` has one-second resolution, so two events for the same payment can carry the same value: treat a tie as unordered and fetch the current state instead of guessing.
 :::
 
 - **Ignore unknown `type` values.** New event types are added over time. Answer `2xx` and move on.

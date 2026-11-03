@@ -21,7 +21,7 @@ Two proofs of origin exist, and which one you verify depends on your [webhook fo
 | **3** (envelope) | `Ottu-Signature` header, `v2=` part | `<t>.` followed by the **raw body bytes** | [`v2` over the raw body](#verify-v2) |
 | **1 and 2** | `Ottu-Signature` header, `v1=` part (default) | `t=<t>` plus 26 `path=value` lines of the payload | [`v1`](#header-v1) |
 | **1 and 2** | `signature` field in the JSON body | 18 fields concatenated | [Body signature](#body-signature) (unchanged) |
-| Synchronous responses and the [Sign API](#sign-api) | `signature` field, and `ottu_signature` on the Sign API | as above | [Sign API](#sign-api) |
+| Synchronous responses and the [Sign API](#sign-api) | `signature` field, and `ottu_signature` on the Sign API | `signature`: the same 18-field recipe as the body signature. `ottu_signature`: the header value for the `t` you pass. | [Sign API](#sign-api) |
 
 :::note Header versions
 On formats 1 and 2 the header carries `v1` (and may also carry `v2`: `t=...,v1=...,v2=...`). Format 3 always sends `v2` only. A signing failure never blocks the delivery: if the header is missing, treat the request as unsigned and reject it.
@@ -29,7 +29,7 @@ On formats 1 and 2 the header carries `v1` (and may also carry `v2`: `t=...,v1=.
 
 ## The Ottu-Signature header {#ottu-signature-header}
 
-Every webhook delivery carries one header:
+Every webhook delivery carries one header. The example below is shape-only: its `v1` and `v2` values come from two different sample payloads on this page, so it does not verify against any single body.
 
 ```text
 Ottu-Signature: t=1792417440,v1=469fb5c5ad75e589acd9c6d14c78af62f7c807adb49004dbe71b80c11467d837,v2=b230321937edb54b51b91f65d544aa8039e413f0a8e034e59acb9b13e11e7d4e
@@ -81,7 +81,7 @@ TOLERANCE_SECONDS = 300
 
 
 def verify_ottu_signature(raw_body: bytes, header: str, key: str,
-                          tolerance: int = TOLERANCE_SECONDS, now: float | None = None) -> bool:
+                          tolerance: int = TOLERANCE_SECONDS, now: "float | None" = None) -> bool:
     """raw_body is the request body exactly as received (bytes), never re-serialised JSON."""
     parts = {}
     for item in header.split(","):
@@ -110,7 +110,7 @@ export function verifyOttuSignature(rawBody, header, key, tolerance = TOLERANCE_
   const parts = Object.fromEntries(
     header.split(",").map((item) => {
       const i = item.indexOf("=");
-      return [item.slice(0, i).trim(), item.slice(i + 1)];
+      return i < 0 ? [item.trim(), ""] : [item.slice(0, i).trim(), item.slice(i + 1)];
     }),
   );
   if (!/^\d+$/.test(parts.t ?? "") || !parts.v2) return false;

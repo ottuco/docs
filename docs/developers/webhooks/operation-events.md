@@ -130,8 +130,8 @@ For general webhook setup and configuration, see the [Webhooks Overview](./).
 - [**Payment Events**](/developers/webhooks/payment-events/) — Webhook notifications for payment transactions
 - [**Verify Signatures**](/developers/webhooks/verify-signatures/) — Validate webhook authenticity with HMAC-SHA256
 - [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration
-- [**Webhook Events (v3)**](/developers/webhooks/event-catalogue/) — Operations as `payment.refunded`, `payment.captured`, `payment.voided`
-- [**Migrating to v3**](/developers/webhooks/migrate-to-v3/) — Field map from this payload to `data.operation`
+- [**Webhook Events (v3)**](/developers/webhooks/event-catalogue) — Operations as `payment.refunded`, `payment.captured`, `payment.voided`
+- [**Migrating to v3**](/developers/webhooks/migrate-to-v3) — Field map from this payload to `data.operation`
 
 ## Related
 
