@@ -31,3 +31,8 @@ declare module "@theme-original/ApiExplorer/Response" {
   const Response: any;
   export default Response;
 }
+
+declare module "@theme-original/ApiExplorer/Request" {
+  const Request: any;
+  export default Request;
+}

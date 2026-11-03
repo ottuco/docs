@@ -49,6 +49,19 @@ export default function ParamTextFormItem({ param }: { param: any }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // A value set from outside the input (the Prerequisites step dispatches
+  // setParam) reaches redux but not the form: copy it into the input. Typing
+  // stores the encoded input in redux, so it compares equal and stays a no-op.
+  useEffect(() => {
+    if (!didInit.current || !setValue || !formCtx?.getValues) return;
+    if (param.value === undefined) return;
+    const current = String(formCtx.getValues(param.name) ?? "");
+    if (encodeForParam(current) !== param.value) {
+      setValue(param.name, param.value, { shouldValidate: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [param.value]);
+
   const registered = register
     ? register(param.name, {
         required: param.required ? "This field is required" : false,
