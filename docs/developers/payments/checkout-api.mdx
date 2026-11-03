@@ -4,6 +4,8 @@ description: "Checkout API"
 hide_table_of_contents: true
 ---
 
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 import CodeBlock from "@theme/CodeBlock";
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
@@ -36,6 +38,167 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/
 ---
 
 <ApiDocEmbed path="partial-update-payment-transaction-checkout.api.mdx" />
+
+---
+
+## Request Body Rules
+
+Your server sends the Checkout API one JSON object per request. Two rules keep that object unambiguous, and both apply when you create a payment transaction (`POST`) and when you update one (`PATCH` or `PUT`):
+
+1. List every [payment gateway](/glossary/#term-payment-gateway) in **one** `pg_codes` array.
+2. Use each **top-level** key **once**.
+
+A request that breaks the second rule is rejected with `400 Bad Request` and nothing is created or changed. Before this check existed, the last copy of a repeated key silently won and the earlier copy was dropped, which could leave a customer with a different list of payment methods than you intended.
+
+### Send several gateways in one array
+
+[`pg_codes`](/glossary/#term-pg-code) is the list of gateway codes the customer can choose from. The customer pays with exactly one of them. Take the codes from the [Payment Methods API](./payment-methods.md) for your account.
+
+<Tabs groupId="language">
+<TabItem value="curl" label="cURL">
+
+<CodeBlock language="bash" title="Create a transaction with two gateways">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/' \\
+--header 'Authorization: Api-Key YOUR_PRIVATE_API_KEY' \\
+--header 'Content-Type: application/json' \\
+--data '{
+  "type": "e_commerce",
+  "amount": "20.000",
+  "currency_code": "KWD",
+  "pg_codes": ["mpgs", "credit-card"],
+  "customer_email": "customer@example.com",
+  "order_no": "ORD-12345"
+}'`}</CodeBlock>
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+<CodeBlock language="python" title="Create a transaction with two gateways">{`import requests
+
+body = {
+    "type": "e_commerce",
+    "amount": "20.000",
+    "currency_code": "KWD",
+    "pg_codes": ["mpgs", "credit-card"],
+    "customer_email": "customer@example.com",
+    "order_no": "ORD-12345",
+}
+
+response = requests.post(
+    "${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/",
+    headers={"Authorization": "Api-Key YOUR_PRIVATE_API_KEY"},
+    json=body,  # a dict cannot hold the same key twice
+)
+response.raise_for_status()
+print(response.json()["session_id"])`}</CodeBlock>
+
+</TabItem>
+<TabItem value="node" label="Node.js">
+
+<CodeBlock language="javascript" title="Create a transaction with two gateways">{`const body = {
+  type: "e_commerce",
+  amount: "20.000",
+  currency_code: "KWD",
+  pg_codes: ["mpgs", "credit-card"],
+  customer_email: "customer@example.com",
+  order_no: "ORD-12345",
+};
+
+const response = await fetch("${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/", {
+  method: "POST",
+  headers: {
+    Authorization: "Api-Key YOUR_PRIVATE_API_KEY",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify(body), // an object cannot hold the same key twice
+});
+const payment = await response.json();
+console.log(payment.session_id);`}</CodeBlock>
+
+</TabItem>
+<TabItem value="php" label="PHP">
+
+<CodeBlock language="php" title="Create a transaction with two gateways">{`<?php
+$body = [
+    "type" => "e_commerce",
+    "amount" => "20.000",
+    "currency_code" => "KWD",
+    "pg_codes" => ["mpgs", "credit-card"],
+    "customer_email" => "customer@example.com",
+    "order_no" => "ORD-12345",
+];
+
+$ch = curl_init("${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/");
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    "Authorization: Api-Key YOUR_PRIVATE_API_KEY",
+    "Content-Type: application/json",
+]);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body)); // an array cannot hold the same key twice
+$payment = json_decode(curl_exec($ch), true);
+curl_close($ch);
+echo $payment["session_id"];`}</CodeBlock>
+
+</TabItem>
+</Tabs>
+
+The response is `201 Created` with the `session_id` and the `checkout_url` for the customer. See [Authentication](../getting-started/authentication.md) for the API key.
+
+### Use each key once
+
+This body repeats `pg_codes`. A JSON parser would keep only the second list, so Ottu refuses to guess which one you meant:
+
+<CodeBlock language="json" title="Request body that is rejected">{`{
+  "type": "e_commerce",
+  "amount": "20.000",
+  "currency_code": "KWD",
+  "pg_codes": ["mpgs", "credit-card"],
+  "customer_email": "customer@example.com",
+  "pg_codes": ["stc-pay"]
+}`}</CodeBlock>
+
+<CodeBlock language="json" title="Response: 400 Bad Request">{`{
+  "detail": "JSON parse error - duplicate top-level key: 'pg_codes'. Each key may appear only once; send several values as one array."
+}`}</CodeBlock>
+
+The message names the repeated key. If several keys are repeated, all of them are named, in alphabetical order (for example `'amount', 'pg_codes'`). To fix the request above, merge the two lists into one: `"pg_codes": ["mpgs", "credit-card", "stc-pay"]`.
+
+| What you send | What happens |
+|---------------|--------------|
+| A top-level key twice in a JSON `POST` | `400`; no payment transaction is created |
+| A top-level key twice in a JSON `PATCH` or `PUT` | `400`; the transaction is left exactly as it was |
+| The same key inside a nested object, such as `city` twice in `billing_address` | Accepted; the last value is used. Only top-level keys are checked |
+| The same key in two different nested objects, such as `city` in both `billing_address` and `shipping_address` | Accepted; these are different keys |
+| `pg_codes` more than once in a form or multipart request | Accepted; it is how an array is sent in those formats (see below) |
+
+:::warning Build the body from an object, not from text
+If you assemble the JSON by joining strings, a key can end up in the body twice without anyone noticing, for example when two code paths each add `"pg_codes"`. Build a dictionary (Python), object (JavaScript) or associative array (PHP) and serialize it once, as in the examples above. Those types cannot hold the same key twice.
+:::
+
+:::note Environments that have not been updated
+An Ottu environment that does not have this check keeps only the last value of a repeated key and returns no error, so the first `pg_codes` list is dropped without warning. If you integrate with more than one Ottu environment, send each key once everywhere.
+:::
+
+### Form and multipart requests
+
+With `application/x-www-form-urlencoded` or `multipart/form-data`, repeating `pg_codes` is how you send an array, so it is accepted and every value is used. The repeated-key check applies to JSON bodies only.
+
+<CodeBlock language="bash" title="Form-encoded request with two gateways">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/' \\
+--header 'Authorization: Api-Key YOUR_PRIVATE_API_KEY' \\
+--header 'Content-Type: application/x-www-form-urlencoded' \\
+--data 'type=e_commerce&amount=20.000&currency_code=KWD&customer_email=customer@example.com&pg_codes=mpgs&pg_codes=credit-card'`}</CodeBlock>
+
+Use `application/json` for everything except file uploads. It is the recommended format (see [API Fundamentals](../getting-started/api-fundamentals.md#request-format)).
+
+### Errors
+
+| HTTP | Response body | Cause | What to do |
+|:----:|---------------|-------|------------|
+| `400` | `{"detail": "JSON parse error - duplicate top-level key: '...'. ..."}` | A top-level key appears more than once in a JSON body | Remove the repeat. For `pg_codes`, put every code in one array. Do not retry the same body |
+| `400` | `{"detail": "JSON parse error - ..."}` | The body is not valid JSON | Fix the JSON syntax and send it again |
+| `400` | `{"pg_codes": ["..."]}` (keyed by the field name) | The JSON is fine but a field value is not, for example a currency the first gateway does not accept | Read the message under the field name and correct that value |
+
+Treat the text after `detail` as a message for people, not a value to match in code. Branch on the HTTP status, and log the whole body so you can read it later. The complete list of errors is in [Error Codes](../reference/error-codes.md#checkout-api-request-body).
 
 ---
 
@@ -420,11 +583,15 @@ When a valid [payment_instrument](/developers/payments/checkout-api/) is provide
 
     - `amount` – Payment amount
     - `currency_code` – Transaction currency
-    - `pg_codes` – Payment gateways allowed
+    - `pg_codes` – Payment gateways allowed, as one array (see [Request Body Rules](#request-body-rules))
     - `type` - `e_commerce` or `payment_request`
 
     After submission, the API returns a `session_id`, which is required for processing the transaction.
 
+  </FAQItem>
+
+  <FAQItem question="Why does my request fail with “duplicate top-level key”?">
+    Your JSON body contains the same top-level key more than once, most often `pg_codes` listed twice. Ottu rejects it with `400` and creates or changes nothing, because it cannot tell which copy you meant. Merge the values into a single array, for example `"pg_codes": ["mpgs", "credit-card"]`, and build the body from a dictionary or object so a key cannot repeat. See [Request Body Rules](#request-body-rules).
   </FAQItem>
 
   <FAQItem question="How can I ensure that the payer cannot make a payment after a certain amount of time since redirection?">
@@ -540,3 +707,4 @@ When a valid [payment_instrument](/developers/payments/checkout-api/) is provide
 - [**Webhooks**](../webhooks/payment-events.md) — Handle payment results on your server
 - [**Operations**](../operations.md) — Refund, capture, or void completed transactions
 - [**Recurring Payments**](/developers/cards-and-tokens/recurring-payments/) — Set up auto-debit using saved cards
+- [**Error Codes**](../reference/error-codes.md#checkout-api-request-body) — Every error the Checkout API request body can return

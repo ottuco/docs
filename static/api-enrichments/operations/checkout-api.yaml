@@ -12,6 +12,10 @@ operations:
       to use the previously defined payment gateway [code]({{apiBaseUrl}}/payments/payment-methods/) on the transaction.
       :::
 
+      :::warning
+      Send the body as one JSON object and use each top-level key once. List every gateway in a single `pg_codes` array. A JSON body that repeats a top-level key is rejected with `400` and no transaction is created. See [Request Body Rules]({{apiBaseUrl}}/payments/checkout-api/#request-body-rules).
+      :::
+
       **Creating an AutoPay subscription.** Set `payment_type` to `auto_pay` and send the `autopay` block. Six things are easy to miss:
 
       - `agreement` is a full [recurring agreement]({{apiBaseUrl}}/cards-and-tokens/recurring-payments/#agreement-types), not only an id. Because the agreement `type` defaults to `recurring`, `agreement.id`, `frequency`, `amount_variability`, `cycle_interval_days`, `total_cycles` and `expiry_date` are all required. A missing field is rejected with a `400` that names it. Repeat the same schedule in the `autopay` block: the agreement is what the gateway sees, and the `autopay` block is what Ottu bills on.
@@ -37,6 +41,10 @@ operations:
       PUT requires permission for the existing `pg_code`.
       :::
 
+      :::warning
+      A JSON body that repeats a top-level key is rejected with `400` and the transaction is left unchanged. List every gateway in a single `pg_codes` array. See [Request Body Rules]({{apiBaseUrl}}/payments/checkout-api/#request-body-rules).
+      :::
+
   partial_update_payment_transaction_checkout:
     permissions:
       - $perm:api_key_admin
@@ -45,6 +53,10 @@ operations:
       :::info
       For PATCH, updates can be performed as long as the payment gateway
       codes are not updated.
+      :::
+
+      :::warning
+      A JSON body that repeats a top-level key is rejected with `400` and the transaction is left unchanged. See [Request Body Rules]({{apiBaseUrl}}/payments/checkout-api/#request-body-rules).
       :::
 
   upload_attachment:

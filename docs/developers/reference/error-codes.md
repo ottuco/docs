@@ -67,6 +67,7 @@ Returned when request parameters are missing, malformed, or invalid.
 - Invalid field values (negative amount, unsupported currency, malformed date)
 - Conflicting parameters (e.g., both `discount_percentage` and `discount_amount` in invoices)
 - Invalid date ranges (e.g., `created_before` < `created_after` in reports)
+- A top-level JSON key sent twice in a Checkout API request (see [Checkout API request body](#checkout-api-request-body))
 
 ### Authentication Errors (401)
 
@@ -146,6 +147,18 @@ payment link cannot be paid (HTTP 200) and when its gateway is misconfigured (HT
 Branch on `code`, never on the message text — see [Checkout Status Codes](/developers/reference/checkout-status-codes)
 for the full contract, the bilingual copy, and the SDK error shapes.
 
+### Checkout API request body
+
+These errors are returned for `POST /checkout/v1/pymt-txn/` and for `PATCH` and `PUT /checkout/v1/pymt-txn/{session_id}/`. They concern the body as a whole, so the response is a single `detail` string and not the `error` object shown above. Nothing is created or changed when one is returned.
+
+| Cause | HTTP | Response body | Remedy |
+|-------|:----:|---------------|--------|
+| A top-level key appears more than once in a JSON body | 400 | `{"detail": "JSON parse error - duplicate top-level key: 'pg_codes'. Each key may appear only once; send several values as one array."}` | Send each key once. Put every gateway code in one `pg_codes` array. Do not retry the same body |
+| Several top-level keys are repeated | 400 | The same message, naming every repeated key in alphabetical order, for example `'amount', 'pg_codes'` | Remove each repeat |
+| The body is not valid JSON | 400 | `{"detail": "JSON parse error - <reason>"}` | Fix the JSON syntax and send it again |
+
+Only the top-level keys are checked. A key repeated inside a nested object, such as `billing_address`, is accepted and the last value is used. In `application/x-www-form-urlencoded` and `multipart/form-data` requests, repeating `pg_codes` sends an array and is accepted. Branch on the HTTP status and treat the text after `detail` as a message for people. See [Request Body Rules](/developers/payments/checkout-api#request-body-rules) for examples in four languages.
+
 ### Operations API
 
 | HTTP | Code | When |
@@ -190,6 +203,10 @@ for the full contract, the bilingual copy, and the SDK error shapes.
 
   <FAQItem question="Why am I getting 403 with valid credentials?">
     Your user account is authenticated but lacks the specific permission for this endpoint. Check the Permissions table in the API Reference for the required permission code. Contact your admin to grant access.
+  </FAQItem>
+
+  <FAQItem question="Why does the Checkout API say “duplicate top-level key”?">
+    Your JSON body contains the same top-level key twice, most often `pg_codes`. Ottu rejects it with `400` and creates or changes nothing, because it cannot know which copy you meant. Merge the values into one array, for example `"pg_codes": ["mpgs", "credit-card"]`. See [Checkout API request body](#checkout-api-request-body).
   </FAQItem>
 
   <FAQItem question="Are error response formats consistent across all endpoints?">
