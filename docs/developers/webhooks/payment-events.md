@@ -264,11 +264,6 @@ For general webhook setup and configuration, see the [Webhooks Overview](./).
 - [**Operation Events**](/developers/webhooks/operation-events/) — Webhook notifications for refunds, captures, and voids
 - [**Verify Signatures**](/developers/webhooks/verify-signatures/) — Validate webhook authenticity with HMAC-SHA256
 - [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration
-
-## Related
-
-- [Webhook Events (v3)](/developers/webhooks/event-catalogue): the format 3 envelope, with this payload as `data.payment`
-- [Migrating to v3](/developers/webhooks/migrate-to-v3)
-- [Delivery and Retries](/developers/webhooks/delivery-and-retries)
-- [Verify Signatures](/developers/webhooks/verify-signatures)
-- [Webhooks Overview](/developers/webhooks)
+- [**Webhook Events (v3)**](/developers/webhooks/event-catalogue/) — The format 3 envelope, with this payload as `data.payment`
+- [**Migrating to v3**](/developers/webhooks/migrate-to-v3/) — Move from format 1 or 2
+- [**Delivery and Retries**](/developers/webhooks/delivery-and-retries/) — Success rules, retry schedule, `Idempotency-Key`

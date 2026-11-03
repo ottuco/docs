@@ -65,7 +65,7 @@ For a seamless experience, merchants should ensure that their webhook endpoint:
 
 * Is secure, preferably using HTTPS.
 * Is always online and accessible to the public.
-* Has a response time of less than **25 seconds** to ensure timely processing.
+* Answers within the configured `timeout` (**15 seconds** by default; see [Webhook Notification Mechanism](#webhook-notification-mechanism)), so the delivery is not treated as failed.
 * Returns an HTTP status of 200 or 201 (formats 1 and 2) or any `2xx` (format 3). Any other status will lead Ottu to mark the notification as failed; redirects (`3xx`) are not followed.
 * Is idempotent. This is crucial as Ottu might notify the URL multiple times for the same event, and this ensures that the repeated calls do not result in unintended side effects. Use the [`Idempotency-Key`](./delivery-and-retries.mdx#idempotency-key) header (the event id) to detect repeats, and also check the business `reference_number` before you fulfil or refund.
 
@@ -116,18 +116,18 @@ All the fields mentioned below come with default values to ensure a smooth integ
     **There could be several reasons:**
 
     1. Ensure that the webhook is enabled, either via the Ottu dashboard or the Checkout API.
-    2. Check that your endpoint meets all the requirements, such as being secure (HTTPS) and having a response time under 25 seconds.
+    2. Check that your endpoint meets all the requirements, such as being secure (HTTPS) and answering within the configured `timeout` (15 seconds by default).
     3. Verify that your endpoint returns an HTTP status of 200 or 201 to acknowledge receipt.
     4. If you’re still facing issues, reach out to our support team for assistance.
   </FAQItem>
   <FAQItem question="How can I ensure the webhook notifications I receive are genuinely from Ottu?">
-    Ottu uses the **SHA-256** [signing mechanism](/developers/webhooks/verify-signatures) to sign all webhook payloads. By verifying the signature attached to each payload, you can ensure its authenticity and integrity. Detailed steps on how to verify the signature can be found [here](/developers/webhooks/verify-signatures#4-verification-by-merchant).
+    Ottu signs every webhook with the `Ottu-Signature` header: `v2` (HMAC-SHA256 over the raw body) on format 3, `v1` by default on formats 1 and 2, plus the `signature` field in the body of formats 1 and 2. See the [signing mechanism](/developers/webhooks/verify-signatures#ottu-signature-header). By verifying the signature attached to each payload, you can ensure its authenticity and integrity. Detailed steps on how to verify the signature can be found [here](/developers/webhooks/verify-signatures#4-verification-by-merchant).
   </FAQItem>
   <FAQItem question="What should I do if I receive the same webhook notification multiple times?">
     Webhooks can be retried, especially in cases of timeouts. It’s essential to make your webhook processing idempotent, meaning processing the same webhook notification more than once should not have a different effect. Always check the event ID (the [`Idempotency-Key`](./delivery-and-retries.mdx#idempotency-key) header) and the transaction `reference_number` to ensure you’re not processing duplicates.
   </FAQItem>
   <FAQItem question="How long will Ottu retry a webhook if my server doesn’t respond?">
-    By default, Ottu will retry a webhook three times, with a `backoff` factor of 5 seconds between retries. This behavior can be adjusted in the webhook settings.
+    On formats 1 and 2, Ottu retries a webhook three times by default, with a `backoff` factor of 5 seconds between retries; this can be adjusted in the webhook settings. On format 3 there are 8 attempts over about 42 hours: see the [retry schedule](./delivery-and-retries.mdx#retry-schedule).
 
     Feel free to ask any other questions or provide more context, and we can craft more FAQs accordingly!
   </FAQItem>
