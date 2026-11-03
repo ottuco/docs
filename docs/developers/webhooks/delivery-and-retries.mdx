@@ -8,6 +8,7 @@ toc_max_heading_level: 3
 
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
+import FAQ, { FAQItem } from "@site/src/components/FAQ";
 
 # Webhook Delivery and Retries
 
@@ -15,31 +16,40 @@ Ottu delivers every [webhook event](/developers/webhooks/event-catalogue) with a
 
 It applies to all three webhook formats, and says where [format 3](/developers/webhooks/event-catalogue) differs from [formats 1 and 2](/developers/webhooks/migrate-to-v3#formats).
 
-## Use cases
+## When to Use
 
 - Decide which HTTP status your receiver should return, and when.
 - Make order fulfilment safe when the same event arrives more than once.
 - Plan for downtime: how long Ottu keeps trying while your system is unavailable.
 - Know when Ottu gives up and emails you.
 
-## Quick implementation
+## Guide
+
+### Quick implementation {#quick-implementation}
 
 A receiver that is safe against duplicates does four things, in this order: verify the signature, check the `Idempotency-Key`, process once, answer `2xx`.
+
+:::note These samples receive format 3
+They verify the `v2` signature and de-duplicate on the envelope's `id`, which a format 3 body carries. A format 1 or 2 body has no `id`: verify its `v1` as shown in [Verify Signatures](/developers/webhooks/verify-signatures#header-v1) and de-duplicate on the `Idempotency-Key` header instead (see [Idempotency-Key](#idempotency-key)).
+:::
 
 <Tabs groupId="language">
 <TabItem value="curl" label="cURL">
 
-Send the same delivery twice to your local receiver. The second call must return `200` without running your business logic again.
+Send the same signed delivery twice to your local receiver. Set `KEY` to the HMAC key the receiver verifies with, and both calls return `200`; the second one must not run your business logic again.
 
 ```bash
+KEY='your-hmac-key'  # the key your receiver verifies with
 BODY='{"id":"evt_01JABCDEFGHJKMNPQRSTVWXYZ0","type":"payment.paid","created":"2026-10-22T10:00:00Z","version":3,"is_sandbox":true,"merchant_id":"merchant.ottu.net","data":{"payment":{"order_no":"ORDER-1","reference_number":"GOLDENATT1","state":"paid"}}}'
+T=$(date +%s)
+SIG=$(printf '%s' "$T.$BODY" | openssl dgst -sha256 -hmac "$KEY" | awk '{print $NF}')
 
 for i in 1 2; do
   curl -s -o /dev/null -w "attempt $i -> HTTP %{http_code}\n" \
     -X POST http://localhost:8000/webhooks/ottu \
     -H "Content-Type: application/json" \
     -H "Idempotency-Key: evt_01JABCDEFGHJKMNPQRSTVWXYZ0" \
-    -H "Ottu-Signature: t=$(date +%s),v2=<computed-with-your-key>" \
+    -H "Ottu-Signature: t=$T,v2=$SIG" \
     --data-binary "$BODY"
 done
 ```
@@ -57,12 +67,10 @@ app = Flask(__name__)
 db = sqlite3.connect("webhooks.db", isolation_level=None, check_same_thread=False)
 db.execute("CREATE TABLE IF NOT EXISTS processed_events (event_id TEXT PRIMARY KEY)")
 
-
 def first_time(event_id: str) -> bool:
     """True only for the first caller. The PRIMARY KEY makes concurrent retries safe."""
     cursor = db.execute("INSERT OR IGNORE INTO processed_events (event_id) VALUES (?)", (event_id,))
     return cursor.rowcount == 1
-
 
 @app.post("/webhooks/ottu")
 def ottu_webhook():
@@ -153,7 +161,6 @@ http_response_code(200);
 </TabItem>
 </Tabs>
 
-## Detailed guide
 
 ### What counts as success {#success-rules}
 
@@ -233,7 +240,7 @@ Two different events can describe the same business outcome: a payment can be re
 
 When the last attempt fails (attempt 8 on format 3; formats 1 and 2 keep their existing behaviour), Ottu sends **one** failure email to the addresses in your webhook configuration, provided **error notification** is enabled (`notify_on_error`, default on) and at least one recipient is set in `emails`. There is no email per attempt. See [Webhooks Overview](/developers/webhooks#webhook-notification-mechanism) for these settings.
 
-## The delivery flow
+### Workflow {#the-delivery-flow}
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
@@ -256,19 +263,9 @@ sequenceDiagram
     M-->>O: 200, nothing reprocessed
     Note over O: Delivered. Any 2xx stops the retries
     Note over O: If all 8 attempts fail: status failed, one failure email
-
-    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
-    class O accent
 ```
 
-## API reference
-
-There is no endpoint to call: this page describes what Ottu sends to you. The related references are:
-
-- The body: [Webhook Events (v3)](/developers/webhooks/event-catalogue#envelope).
-- The signature: [Verify Signatures](/developers/webhooks/verify-signatures#ottu-signature-header).
-
-## Error handling
+### Error handling
 
 | Your response | Ottu does | What to do |
 |---|---|---|
@@ -280,13 +277,34 @@ There is no endpoint to call: this page describes what Ottu sends to you. The re
 | All 8 attempts failed | Marks the delivery failed and sends one failure email. | Fix the receiver, then reconcile with the [Payment Status API](/developers/payments/psq). |
 | Duplicate `Idempotency-Key` | Not applicable: Ottu cannot tell, you decide. | Answer `2xx` and skip processing. |
 
-## Best practices
+## API Reference
+
+There is no endpoint to call: this page describes what Ottu sends to you. The related references are:
+
+- The body: [Webhook Events (v3)](/developers/webhooks/event-catalogue#envelope).
+- The signature: [Verify Signatures](/developers/webhooks/verify-signatures#ottu-signature-header).
+
+## Best Practices
 
 - Answer `2xx` as soon as the event is stored, then process asynchronously.
 - Make the id store and the business change one transaction.
 - Treat the retry window as roughly two days: monitor failure emails, and use the [Payment Status API](/developers/payments/psq) to reconcile anything you may have missed.
 - Do not rely on one URL receiving events in order; see [ordering](/developers/webhooks/event-catalogue#ordering).
 - Keep the URL reachable on a public HTTPS address.
+
+## FAQ
+
+<FAQ>
+  <FAQItem question="Which HTTP status should my receiver return?">
+    On format 3 any `2xx` is success. On formats 1 and 2 only `200` or `201` is. Ottu reads only the status code and ignores the body. See [What counts as success](#success-rules).
+  </FAQItem>
+  <FAQItem question="How long does Ottu keep retrying?">
+    A format 3 delivery gets 8 attempts in total over about 42 hours, then the delivery is marked failed and you get one failure email. See the [retry schedule](#retry-schedule).
+  </FAQItem>
+  <FAQItem question="The same event arrived twice. Is something wrong?">
+    No. Retries and manual re-disclose reuse the same `Idempotency-Key`. Answer `2xx` and skip processing; see [Idempotency-Key](#idempotency-key).
+  </FAQItem>
+</FAQ>
 
 ## What's Next?
 

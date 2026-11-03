@@ -4,16 +4,20 @@ sidebar_label: Formats & Migration
 description: The three Ottu webhook formats, what format 3 changes, a field-by-field map from formats 1 and 2, and the steps to switch safely.
 ---
 
+import FAQ, { FAQItem } from "@site/src/components/FAQ";
+
 # Webhook Formats and Migrating to v3
 
 Ottu has three webhook **formats**. Your account uses exactly one. **Ottu never switches a merchant to a new format on its own**: you keep receiving the format you have today until you ask for a change. This page explains what format 3 changes, maps every format 1 and 2 field to its place in format 3, and gives a step-by-step migration that you can test before anything changes for your customers.
 
-## Use cases
+## When to Use
 
 - You receive `payment` and operation webhooks today and want the event envelope, `Idempotency-Key` and `Ottu-Signature` v2.
 - You want one event type per payment moment (`payment.paid`, `payment.refunded`, ...) instead of inferring it from `state`.
 
-## The three formats {#formats}
+## Guide
+
+### The three formats {#formats}
 
 | | Formats 1 and 2 | Format 3 |
 |---|---|---|
@@ -30,7 +34,7 @@ Format 1 and format 2 differ from each other as described on [Payment Events](/d
 If your account receives XML today, switching to format 3 means you receive JSON from then on. Update your parser before format 3 is enabled.
 :::
 
-## Quick implementation
+### Quick implementation {#quick-implementation}
 
 The shortest safe path:
 
@@ -44,7 +48,6 @@ If a URL is also configured to receive the same event through another route, tha
 While still on format 1 or 2 you can already build and test the [v2 verification](/developers/webhooks/verify-signatures#verify-v2) against the vector, with no change to the body.
 :::
 
-## Detailed guide
 
 ### Field map: formats 1 and 2 to format 3 {#field-map}
 
@@ -75,15 +78,7 @@ On the payment's own `webhook_url` the payer waits for your answer on Ottu's pag
 
 A format 3 account never receives a format 1 or 2 body. If a payment moment has no event type in the [catalogue](/developers/webhooks/event-catalogue#catalogue), nothing is sent for it. Ottu logs the skip, and when the moment concerns the payer's waiting page, that page moves to its failure state instead of waiting for your answer. Build your integration on the catalogue types and reconcile anything else with the [Payment Status API](/developers/payments/psq).
 
-## API reference
-
-Nothing to call to migrate. The related references are:
-
-- The new body: [Webhook Events (v3)](/developers/webhooks/event-catalogue#envelope)
-- The old bodies: [Payment Events](/developers/webhooks/payment-events#params), [Operation Events](/developers/webhooks/operation-events#params)
-- The header: [Verify Signatures](/developers/webhooks/verify-signatures#ottu-signature-header)
-
-## Error handling
+### Error handling
 
 | Symptom after switching | Likely cause | Fix |
 |---|---|---|
@@ -94,11 +89,33 @@ Nothing to call to migrate. The related references are:
 | Refund logic never fires | Waiting for `state == "refunded"` | Branch on `type == "payment.refunded"`. |
 | Duplicate fulfilment | Not de-duplicating | Use [`Idempotency-Key`](/developers/webhooks/delivery-and-retries#idempotency-key) and the business reference. |
 
-## Best practices
+## API Reference
+
+Nothing to call to migrate. The related references are:
+
+- The new body: [Webhook Events (v3)](/developers/webhooks/event-catalogue#envelope)
+- The old bodies: [Payment Events](/developers/webhooks/payment-events#params), [Operation Events](/developers/webhooks/operation-events#params)
+- The header: [Verify Signatures](/developers/webhooks/verify-signatures#ottu-signature-header)
+
+## Best Practices
 
 - Deploy the new receiver before format 3 is enabled, and test sandbox before production.
 - Keep your format 1 or 2 receiver deployable until the first live day on format 3 has passed.
 - Ignore unknown `type` values and unknown keys.
+
+## FAQ
+
+<FAQ>
+  <FAQItem question="Will Ottu switch my account to format 3 on its own?">
+    No. Ottu never switches a merchant to a new format on its own; you keep receiving the format you have today until you ask for a change.
+  </FAQItem>
+  <FAQItem question="Can I test format 3 before it affects my customers?">
+    Yes. Deploy the new receiver first and test it in the sandbox before production; the steps are in [Quick implementation](#quick-implementation).
+  </FAQItem>
+  <FAQItem question="What changes for the payer when I move to format 3?">
+    On the payment's `webhook_url`, any `2xx` now lets the redirect proceed, so `201` no longer holds the payer on the Ottu page. See [behaviours that change for the payer](#payer-behaviour).
+  </FAQItem>
+</FAQ>
 
 ## What's Next?
 

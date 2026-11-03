@@ -89,13 +89,11 @@ def verify_ottu_signature(raw_body: bytes, header: str, key: str,
         parts[name] = value
     if "t" not in parts or "v2" not in parts:
         return False
-    try:
-        t = int(parts["t"])
-    except ValueError:
+    if not (parts["t"].isascii() and parts["t"].isdigit()):
         return False
-    if abs((now if now is not None else time.time()) - t) > tolerance:
+    if abs((now if now is not None else time.time()) - int(parts["t"])) > tolerance:
         return False
-    expected = hmac.new(key.encode(), f"{t}.".encode() + raw_body, hashlib.sha256).hexdigest()
+    expected = hmac.new(key.encode(), f"{parts['t']}.".encode() + raw_body, hashlib.sha256).hexdigest()
     return hmac.compare_digest(expected, parts["v2"])
 ```
 
@@ -115,12 +113,11 @@ export function verifyOttuSignature(rawBody, header, key, tolerance = TOLERANCE_
       return [item.slice(0, i).trim(), item.slice(i + 1)];
     }),
   );
-  const t = Number(parts.t);
-  if (!Number.isInteger(t) || !parts.v2) return false;
-  if (Math.abs(now - t) > tolerance) return false;
+  if (!/^\d+$/.test(parts.t ?? "") || !parts.v2) return false;
+  if (Math.abs(now - Number(parts.t)) > tolerance) return false;
   const expected = crypto
     .createHmac("sha256", key)
-    .update(Buffer.concat([Buffer.from(`${t}.`), rawBody]))
+    .update(Buffer.concat([Buffer.from(`${parts.t}.`), rawBody]))
     .digest("hex");
   const received = Buffer.from(parts.v2, "utf8");
   const wanted = Buffer.from(expected, "utf8");
@@ -143,11 +140,10 @@ function verifyOttuSignature(string $rawBody, string $header, string $key, int $
     if (!isset($parts['t'], $parts['v2']) || !ctype_digit($parts['t'])) {
         return false;
     }
-    $t = (int) $parts['t'];
-    if (abs(($now ?? time()) - $t) > $tolerance) {
+    if (abs(($now ?? time()) - (int) $parts['t']) > $tolerance) {
         return false;
     }
-    $expected = hash_hmac('sha256', $t . '.' . $rawBody, $key);
+    $expected = hash_hmac('sha256', $parts['t'] . '.' . $rawBody, $key);
     return hash_equals($expected, $parts['v2']);
 }
 ```
@@ -318,9 +314,9 @@ The body `signature` field (the [18-field recipe](#body-signature)) is also retu
 | Endpoint | Notes |
 |---|---|
 | `POST /b/pbl/v2/payment/auto-debit` | Charging a saved token (MIT) |
-| `POST /b/pbl/v2/payment/apple-pay` | [Native payments](/developers/payments/native-payments/) |
-| `POST /b/pbl/v2/payment/google-pay` | [Native payments](/developers/payments/native-payments/) |
-| `POST /b/pbl/v2/payment/wallet` | [Wallet](/developers/payments/wallet/) balance payment |
+| `POST /b/pbl/v2/payment/apple-pay` | [Native payments](/developers/payments/native-payments) |
+| `POST /b/pbl/v2/payment/google-pay` | [Native payments](/developers/payments/native-payments) |
+| `POST /b/pbl/v2/payment/wallet` | [Wallet](/developers/payments/wallet) balance payment |
 | `POST /b/pbl/v2/payment/cash` | Cash / COD acknowledgement |
 | `POST /b/pbl/v2/sign/` | Signs a payload you supply, using your HMAC Key. See [Sign API](#sign-api) |
 
@@ -373,12 +369,12 @@ Two related additions land alongside this change, and the distinction between th
 
 **`extra.merchant_id` is always present now**, even when you sent no `extra` object on the checkout call. It holds your merchant domain, and it **is** inside the signed set.
 
-**A top-level `autopay` block may be present** on payments created through [AutoPay](/developers/payments/autopay/). It sits at the top level of the payload, *not* under `extra`, and contains `subscription_id`, `subscription_status`, `cycle_number`, `cycle_status`, `next_billing_date` and `event_type`.
+**A top-level `autopay` block may be present** on payments created through [AutoPay](/developers/payments/autopay). It sits at the top level of the payload, *not* under `extra`, and contains `subscription_id`, `subscription_status`, `cycle_number`, `cycle_status`, `next_billing_date` and `event_type`.
 
 :::warning The top-level `autopay` block is not covered by the signature
 It is fetched live from the AutoPay service while the response is being assembled, with a short timeout, and is **silently omitted** if that lookup times out or fails. Treat it as informational only:
 
-- **Never** make a security or money-moving decision based on it. Use the signed [`extra.autopay.subscription_id`](#2-fields-for-signature) to identify the subscription, then read authoritative state from the [subscription endpoints](/developers/payments/autopay/#api-reference).
+- **Never** make a security or money-moving decision based on it. Use the signed [`extra.autopay.subscription_id`](#2-fields-for-signature) to identify the subscription, then read authoritative state from the [subscription endpoints](/developers/payments/autopay#api-reference).
 - Its absence means the lookup did not complete. It does **not** mean the payment is not an AutoPay payment.
 - `event_type` is one of `cit_success`, `cit_failure`, `mit_success`, `mit_failure`, `card_updated`, or `null`. `null` means the setup outcome is still undecided, not that it succeeded. It's AutoPay's own best-guess classification, computed independently of the payment result; it is **not** authoritative. Read `result` and `state` on the payment for the actual outcome.
 :::
@@ -459,10 +455,10 @@ Compare that against the `v1` part of the `Ottu-Signature` header you received.
 
 ## Signature Generation
 
-The `v2` check for [Python, Node.js and PHP](#verify-v2) and the [body signature](#body-signature) are covered above with tested code. The implementations below compute the **field lines** of the `v1` recipe (steps 1 to 4 of [Signature Creation](#3-signature-creation)) in other languages.
+The `v2` check for [Python, Node.js and PHP](#verify-v2) and the [body signature](#body-signature) are covered above. The implementations below compute the **`v1` part** of the `Ottu-Signature` header on formats 1 and 2 in other languages.
 
-:::warning These samples were written for the field lines only
-To get the `v1` value of the `Ottu-Signature` header with them, make `t=<t>` the **first line** of the joined string and skip only missing, `null` and empty-string values (so `0` and `false` are signed), then compare against the header's `v1` part instead of a `signature` body field. The example digest above is the check: your result for the payload and `t` in the [example](#example) must equal it.
+:::info How these samples were checked
+The Java and Go samples were run against the [`v1` test vector](#header-v1) and return `469fb5c5...`. The .NET and Ruby samples follow the same logic but were not executed. Run the test vector against them before relying on them.
 :::
 
 ## Specific Examples
@@ -473,7 +469,9 @@ To get the `v1` value of the `Ottu-Signature` header with them, make `t=<t>` the
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -508,25 +506,22 @@ public class SignatureGenerator {
         return current;
     }
 
-    private static boolean isFalsy(Object value) {
-        if (value == null) return true;
-        if (value instanceof String) return ((String) value).isEmpty();
-        if (value instanceof Boolean) return !((Boolean) value);
-        if (value instanceof Number) return ((Number) value).doubleValue() == 0d;
-        if (value instanceof Map) return ((Map<?, ?>) value).isEmpty();
-        if (value instanceof List) return ((List<?>) value).isEmpty();
-        return false;
+    // Only a missing path, null and "" are skipped. 0 and false are signed.
+    private static boolean isSkipped(Object value) {
+        return value == null || (value instanceof String && ((String) value).isEmpty());
     }
 
-    public static String generateHmacSignature(Map<String, Object> payload, String hmacKey)
+    // t is the "t" part of the Ottu-Signature header, exactly as received.
+    public static String generateV1(Map<String, Object> payload, String hmacKey, String t)
             throws Exception {
-        List<String> fields = new java.util.ArrayList<>(SIGNED_FIELDS);
-        java.util.Collections.sort(fields);
+        List<String> fields = new ArrayList<>(SIGNED_FIELDS);
+        Collections.sort(fields);
 
         StringJoiner message = new StringJoiner("\n");
+        message.add("t=" + t);
         for (String path : fields) {
             Object value = resolvePath(payload, path);
-            if (isFalsy(value)) {
+            if (isSkipped(value)) {
                 continue;
             }
             message.add(path + "=" + value);
@@ -578,26 +573,21 @@ public class SignatureGenerator {
         return current;
     }
 
-    private static bool IsFalsy(object value) {
-        switch (value) {
-            case null: return true;
-            case string s: return s.Length == 0;
-            case bool b: return !b;
-            case int i: return i == 0;
-            case double d: return d == 0d;
-            case System.Collections.ICollection c: return c.Count == 0;
-            default: return false;
-        }
+    // Only a missing path, null and "" are skipped. 0 and false are signed.
+    private static bool IsSkipped(object value) {
+        return value == null || (value is string s && s.Length == 0);
     }
 
-    public static string GenerateHmacSignature(IDictionary<string, object> payload, string hmacKey) {
-        var parts = SignedFields
+    // t is the "t" part of the Ottu-Signature header, exactly as received.
+    public static string GenerateV1(IDictionary<string, object> payload, string hmacKey, string t) {
+        var lines = new List<string> { $"t={t}" };
+        lines.AddRange(SignedFields
             .OrderBy(f => f, StringComparer.Ordinal)
             .Select(path => new { path, value = ResolvePath(payload, path) })
-            .Where(x => !IsFalsy(x.value))
-            .Select(x => $"{x.path}={x.value}");
+            .Where(x => !IsSkipped(x.value))
+            .Select(x => $"{x.path}={x.value}"));
 
-        var message = string.Join("\n", parts);
+        var message = string.Join("\n", lines);
 
         using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(hmacKey))) {
             byte[] hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(message));
@@ -635,24 +625,29 @@ def resolve_path(payload, path)
   current
 end
 
-def falsy?(value)
-  value.nil? || value == false || value == '' || value == 0 ||
-    (value.respond_to?(:empty?) && value.empty?)
+# Only a missing path, nil and '' are skipped. 0 and false are signed.
+def skipped?(value)
+  value.equal?(MISSING) || value.nil? || value == ''
 end
 
-def generate_hmac_signature(payload, hmac_key)
-  parts = SIGNED_FIELDS.sort.filter_map do |path|
+# t is the "t" part of the Ottu-Signature header, exactly as received.
+def generate_v1(payload, hmac_key, t)
+  lines = ["t=#{t}"]
+  SIGNED_FIELDS.sort.each do |path|
     value = resolve_path(payload, path)
-    next if value.equal?(MISSING) || falsy?(value)
-    "#{path}=#{value}"
+    next if skipped?(value)
+    lines << "#{path}=#{value}"
   end
 
-  OpenSSL::HMAC.hexdigest('sha256', hmac_key, parts.join("\n"))
+  OpenSSL::HMAC.hexdigest('sha256', hmac_key, lines.join("\n"))
 end
 
-def verify(payload, hmac_key)
-  expected = generate_hmac_signature(payload, hmac_key)
-  OpenSSL.secure_compare(expected, payload['signature'].to_s)
+def verify_v1(payload, hmac_key, header)
+  parts = header.split(',').map { |item| item.strip.split('=', 2) }.to_h
+  return false unless parts['t'] && parts['v1']
+
+  expected = generate_v1(payload, hmac_key, parts['t'])
+  OpenSSL.secure_compare(expected, parts['v1'])
 end
 ```
 
@@ -717,63 +712,61 @@ func resolvePath(payload map[string]interface{}, path string) (interface{}, bool
 	return current, true
 }
 
-func isFalsy(value interface{}) bool {
-	switch v := value.(type) {
-	case nil:
+// Only a missing path, null and "" are skipped. 0 and false are signed.
+func isSkipped(value interface{}) bool {
+	if value == nil {
 		return true
-	case string:
-		return v == ""
-	case bool:
-		return !v
-	case float64:
-		return v == 0
-	case int:
-		return v == 0
-	case []interface{}:
-		return len(v) == 0
-	case map[string]interface{}:
-		return len(v) == 0
 	}
-	return false
+	s, isString := value.(string)
+	return isString && s == ""
 }
 
-func SignMerchantPayload(payload map[string]interface{}, key string) string {
+// SignV1 returns the v1 value for the "t" part of the Ottu-Signature header, exactly as received.
+func SignV1(payload map[string]interface{}, key, t string) string {
 	fields := append([]string(nil), signedFields...)
 	sort.Strings(fields)
 
-	var parts []string
+	lines := []string{"t=" + t}
 	for _, path := range fields {
 		value, found := resolvePath(payload, path)
-		if !found || isFalsy(value) {
+		if !found || isSkipped(value) {
 			continue
 		}
-		parts = append(parts, fmt.Sprintf("%s=%v", path, value))
+		lines = append(lines, fmt.Sprintf("%s=%v", path, value))
 	}
 
 	h := hmac.New(sha256.New, []byte(key))
-	h.Write([]byte(strings.Join(parts, "\n")))
+	h.Write([]byte(strings.Join(lines, "\n")))
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func Verify(payload map[string]interface{}, key string) bool {
-	expected := SignMerchantPayload(payload, key)
-	received, _ := payload["signature"].(string)
-	return subtle.ConstantTimeCompare([]byte(expected), []byte(received)) == 1
+func VerifyV1(payload map[string]interface{}, key, header string) bool {
+	parts := map[string]string{}
+	for _, item := range strings.Split(header, ",") {
+		name, value, _ := strings.Cut(strings.TrimSpace(item), "=")
+		parts[name] = value
+	}
+	t, v1 := parts["t"], parts["v1"]
+	if t == "" || v1 == "" {
+		return false
+	}
+	expected := SignV1(payload, key, t)
+	return subtle.ConstantTimeCompare([]byte(expected), []byte(v1)) == 1
 }
 ```
 
-The above examples provide a way for developers in different languages to generate the HMAC signature from a payload using the provided HMAC key.
+The above examples generate the `v1` value from a payload, the `t` of the header and your HMAC key. Compare it with the `v1` part of the header.
 
 **Need Further Assistance?** Our dedicated support team is always on hand to help. Reach out to us at [support@ottu.com](mailto:support@ottu.com).
 
 ## What's Next?
 
-- [**Webhook Events (v3)**](/developers/webhooks/event-catalogue/) — The format 3 envelope and every event type
-- [**Delivery and Retries**](/developers/webhooks/delivery-and-retries/) — Success rules, retry schedule and `Idempotency-Key`
-- [**Migrating to v3**](/developers/webhooks/migrate-to-v3/) — Format 1 and 2 to format 3
-- [**Payment Events**](/developers/webhooks/payment-events/) — Payment webhook payload reference
-- [**Operation Events**](/developers/webhooks/operation-events/) — Operation webhook payload reference
-- [**AutoPay**](/developers/payments/autopay/) — Subscriptions, and the `autopay` payload blocks described above
+- [**Webhook Events (v3)**](/developers/webhooks/event-catalogue) — The format 3 envelope and every event type
+- [**Delivery and Retries**](/developers/webhooks/delivery-and-retries) — Success rules, retry schedule and `Idempotency-Key`
+- [**Migrating to v3**](/developers/webhooks/migrate-to-v3) — Format 1 and 2 to format 3
+- [**Payment Events**](/developers/webhooks/payment-events) — Payment webhook payload reference
+- [**Operation Events**](/developers/webhooks/operation-events) — Operation webhook payload reference
+- [**AutoPay**](/developers/payments/autopay) — Subscriptions, and the `autopay` payload blocks described above
 - [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration
 
 ## Related

@@ -8,6 +8,7 @@ toc_max_heading_level: 3
 
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
+import FAQ, { FAQItem } from "@site/src/components/FAQ";
 
 # Webhook Events (v3)
 
@@ -19,13 +20,15 @@ This page is self-contained: it lists every event type Ottu sends, what each `da
 Ottu enables format 3 for your account only when you ask for it. Until then you keep receiving format 1 or 2 exactly as before. See [Migrating to v3](/developers/webhooks/migrate-to-v3).
 :::
 
-## Use cases
+## When to Use
 
 - Fulfil an order when `payment.paid` arrives, and release stock when `payment.expired` or `payment.canceled` arrives.
 - Record a refund or capture when `payment.refunded` or `payment.captured` arrives, including each partial refund as its own event.
 - Receive payments and operations at one URL and branch on `type`, instead of running separate payment and operation receivers.
 
-## Quick implementation
+## Guide
+
+### Quick implementation {#quick-implementation}
 
 An event is a `POST` with a JSON body and two headers you care about: `Ottu-Signature` (authenticity) and `Idempotency-Key` (the event `id`). Verify first, then dedupe, then act. The `verify_ottu_signature` helper is on [Verify Signatures](/developers/webhooks/verify-signatures#verify-v2); the dedupe pattern is on [Delivery and Retries](/developers/webhooks/delivery-and-retries#idempotency-key).
 
@@ -53,7 +56,6 @@ from flask import Flask, request
 
 app = Flask(__name__)
 HMAC_KEY = "your-hmac-key"  # from the Webhook configuration, keep it secret
-
 
 @app.post("/webhooks/ottu")
 def ottu_webhook():
@@ -133,7 +135,7 @@ http_response_code(200);
 </TabItem>
 </Tabs>
 
-## The envelope {#envelope}
+### The envelope {#envelope}
 
 Every format 3 body is a JSON object with exactly these top-level keys:
 
@@ -151,9 +153,9 @@ Every format 3 body is a JSON object with exactly these top-level keys:
 Ottu renders the body the first time it is needed and stores those exact bytes. Every delivery and retry of the event sends the **same bytes**, so `data.payment.state` shows the payment *as it was when the event was created*, not as it is now. Do not treat an old retry as the current state: when the current state matters, call the [Payment Status API](/developers/payments/psq) instead.
 :::
 
-## Event catalogue {#catalogue}
+### Event catalogue {#catalogue}
 
-### Payment events
+#### Payment events
 
 | Event type | Fires when | One event per |
 |---|---|---|
@@ -172,7 +174,7 @@ Ottu renders the body the first time it is needed and stores those exact bytes. 
 
 "One event per" is what makes an event unique. A payment that fails twice and then succeeds produces two `payment.failed` events (one per attempt, each with its own `id`) and one `payment.paid`. Two partial refunds produce two `payment.refunded` events.
 
-## Data keys by event type {#data-keys}
+### Data keys by event type {#data-keys}
 
 | Event types | `data` keys | Notes |
 |---|---|---|
@@ -185,7 +187,7 @@ Ottu renders the body the first time it is needed and stores those exact bytes. 
 - **`data.operation`** is the format 2 [operation body](/developers/webhooks/operation-events) without `signature`. Its `reference_number` identifies the operation (the refund, the capture), and its `session_id` is the **original** payment's session. `operation.txn` describes the child transaction the operation created.
 - A payment that has no attempt yet (for example deleted before anyone paid) still renders: attempt-based fields such as `gateway_name` and `reference_number` are empty strings.
 
-### Worked example: `payment.paid`
+#### Worked example: `payment.paid`
 
 ```json
 {
@@ -249,7 +251,7 @@ Ottu renders the body the first time it is needed and stores those exact bytes. 
 
 Field meanings inside `data.payment` are documented on [Payment Events](/developers/webhooks/payment-events#params) and [PG Params](/developers/webhooks/pg-params).
 
-### Worked example: `payment.refunded`
+#### Worked example: `payment.refunded`
 
 The envelope carries the original payment **and** the refund. `operation.amount` is the refunded amount, which is smaller than `payment.amount` for a partial refund.
 
@@ -311,7 +313,7 @@ The envelope carries the original payment **and** the refund. `operation.amount`
 The `data.payment` object in this example is shortened to the keys the refund handler needs. A real event carries the full payment body shown for `payment.paid`.
 :::
 
-### Worked example: `payment.failed`
+#### Worked example: `payment.failed`
 
 A failed attempt carries the payment as it stood for that attempt. `result` and `state` are `failed`.
 
@@ -344,7 +346,7 @@ A failed attempt carries the payment as it stood for that attempt. `result` and 
 }
 ```
 
-## Handling order and unknown types {#ordering}
+### Handling order and unknown types {#ordering}
 
 :::warning Order is not guaranteed
 Events can arrive out of order, especially after a retry: a `payment.paid` that was retried for an hour can arrive after a `payment.refunded` that succeeded first time. Use `created` to order events for the same payment, and fetch the payment's current state with the [Payment Status API](/developers/payments/psq) when the final state matters.
@@ -354,7 +356,7 @@ Events can arrive out of order, especially after a retry: a `payment.paid` that 
 - **Ignore unknown keys** inside `data`. Existing keys keep their meaning.
 - Match on `type`, not on `data.payment.state`: the state is a snapshot, the type is the event.
 
-## Error handling
+### Error handling
 
 | Situation | Respond with | Why |
 |---|---|---|
@@ -364,13 +366,27 @@ Events can arrive out of order, especially after a retry: a `payment.paid` that 
 | Unknown `type` | `200` | Not an error. |
 | Your system is temporarily unavailable | `503` | Ottu retries on a [schedule over about 42 hours](/developers/webhooks/delivery-and-retries#retry-schedule). |
 
-## Best practices
+## Best Practices
 
 - Verify the signature on the **raw** body before parsing anything.
 - Store each processed `id` and answer `2xx` without reprocessing when you see it again.
 - Before fulfilling or refunding, also check the business reference (`reference_number`): the `id` de-duplicates deliveries, not business actions.
 - Answer quickly, do heavy work asynchronously: Ottu waits for your response only up to the configured timeout.
 - Log `id` and `type` for every event you receive; they identify the exact delivery if you need to ask Ottu about it.
+
+## FAQ
+
+<FAQ>
+  <FAQItem question="Can events arrive out of order?">
+    Yes, especially after a retry. Use `created` to order events for the same payment, and fetch the current state from the [Payment Status API](/developers/payments/psq) when the final state matters. See [ordering](#ordering).
+  </FAQItem>
+  <FAQItem question="What do I do with an event type I do not recognise?">
+    Answer `2xx` and ignore it. New event types and new keys inside `data` are added over time; existing keys keep their meaning.
+  </FAQItem>
+  <FAQItem question="Which header proves the event came from Ottu?">
+    `Ottu-Signature`. Verify `v2` over the raw body bytes before you parse the JSON; see [Verify Signatures](/developers/webhooks/verify-signatures#verify-v2).
+  </FAQItem>
+</FAQ>
 
 ## What's Next?
 
