@@ -82,7 +82,7 @@ curl -X POST "https://<your-domain>.ottu.net/b/checkout/v1/pymt-txn/" \
 
 ### Send each JSON key once
 
-A JSON object must not contain the same key twice. The [Checkout API](/developers/payments/checkout-api#request-body-rules) checks the top-level keys of a JSON body and rejects a repeat with `400 Bad Request`. Nothing is created or changed.
+A JSON object must not contain the same key twice. The [Checkout API](../payments/checkout-api.mdx#request-body-rules) checks the top-level keys of a JSON body and rejects a repeat with `400 Bad Request`. Nothing is created or changed.
 
 ```json title="Request body that is rejected"
 {"amount": "20.000", "currency_code": "KWD", "pg_codes": ["kpay"], "pg_codes": ["mpgs"]}
@@ -92,7 +92,7 @@ A JSON object must not contain the same key twice. The [Checkout API](/developer
 {"detail": "JSON parse error - duplicate top-level key: 'pg_codes'. Each key may appear only once; send several values as one array."}
 ```
 
-To send several [payment gateways](/glossary/#term-payment-gateway), put them in one array: `"pg_codes": ["kpay", "mpgs"]`. Build the body from a dictionary or object in your language rather than joining strings, so a key cannot be repeated by accident. Keys inside nested objects are not checked. In form-encoded and multipart requests, repeating `pg_codes` is how an array is sent, so it is accepted. See [Request Body Rules](/developers/payments/checkout-api#request-body-rules) for the full behaviour and [Error Codes](/developers/reference/error-codes#checkout-api-request-body) for every response.
+To send several [payment gateways](/glossary/#term-payment-gateway), put them in one array: `"pg_codes": ["kpay", "mpgs"]`. Build the body from a dictionary or object in your language rather than joining strings, so a key cannot be repeated by accident. Keys inside nested objects are not checked. In form-encoded and multipart requests, repeating `pg_codes` is how an array is sent, so it is accepted. See [Request Body Rules](../payments/checkout-api.mdx#request-body-rules) for the full behaviour and [Error Codes](../reference/error-codes.md#checkout-api-request-body) for every response.
 
 ## Response Format
 

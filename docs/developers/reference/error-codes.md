@@ -149,7 +149,7 @@ for the full contract, the bilingual copy, and the SDK error shapes.
 
 ### Checkout API request body
 
-These errors are returned for `POST /checkout/v1/pymt-txn/` and for `PATCH` and `PUT /checkout/v1/pymt-txn/{session_id}/`. They concern the body as a whole, so the response is a single `detail` string and not the `error` object shown above. Nothing is created or changed when one is returned.
+These errors are returned for `POST /b/checkout/v1/pymt-txn/` and for `PATCH` and `PUT /b/checkout/v1/pymt-txn/{session_id}/`. They concern the body as a whole, so the response is a single `detail` string and not the `error` object shown above. Nothing is created or changed when one is returned.
 
 | Cause | HTTP | Response body | Remedy |
 |-------|:----:|---------------|--------|
@@ -157,7 +157,7 @@ These errors are returned for `POST /checkout/v1/pymt-txn/` and for `PATCH` and 
 | Several top-level keys are repeated | 400 | The same message, naming every repeated key in alphabetical order, for example `'amount', 'pg_codes'` | Remove each repeat |
 | The body is not valid JSON | 400 | `{"detail": "JSON parse error - <reason>"}` | Fix the JSON syntax and send it again |
 
-Only the top-level keys are checked. A key repeated inside a nested object, such as `billing_address`, is accepted and the last value is used. In `application/x-www-form-urlencoded` and `multipart/form-data` requests, repeating `pg_codes` sends an array and is accepted. Branch on the HTTP status and treat the text after `detail` as a message for people. See [Request Body Rules](/developers/payments/checkout-api#request-body-rules) for examples in four languages.
+Only the top-level keys are checked. A key repeated inside a nested object, such as `billing_address`, is accepted and the last value is used. In `application/x-www-form-urlencoded` and `multipart/form-data` requests, repeating `pg_codes` sends an array and is accepted. Branch on the HTTP status and treat the text after `detail` as a message for people. See [Request Body Rules](../payments/checkout-api.mdx#request-body-rules) for examples in four languages.
 
 ### Operations API
 
@@ -210,7 +210,7 @@ Only the top-level keys are checked. A key repeated inside a nested object, such
   </FAQItem>
 
   <FAQItem question="Are error response formats consistent across all endpoints?">
-    Most endpoints follow the standard error format documented above. Gateway-specific operations may include additional fields in the response (e.g., `pg_response` for operation errors). For normalized gateway fields, see [PG Params](/developers/webhooks/pg-params). Always check the `message` field for human-readable details.
+    Most endpoints follow the standard error format documented above. Gateway-specific operations may include additional fields in the response (e.g., `pg_response` for operation errors). For normalized gateway fields, see [PG Params](/developers/webhooks/pg-params). Always check the `message` field for human-readable details. The one exception is the Checkout API request-body errors, which return a single `detail` string; see [Checkout API request body](#checkout-api-request-body).
   </FAQItem>
 </FAQ>
 
