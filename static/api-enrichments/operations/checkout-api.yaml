@@ -12,6 +12,17 @@ operations:
       to use the previously defined payment gateway [code]({{apiBaseUrl}}/payments/payment-methods/) on the transaction.
       :::
 
+      **Creating an AutoPay subscription.** Set `payment_type` to `auto_pay` and send the `autopay` block. Six things are easy to miss:
+
+      - `agreement` is a full [recurring agreement]({{apiBaseUrl}}/cards-and-tokens/recurring-payments/#agreement-types), not only an id. Because the agreement `type` defaults to `recurring`, `agreement.id`, `frequency`, `amount_variability`, `cycle_interval_days`, `total_cycles` and `expiry_date` are all required. A missing field is rejected with a `400` that names it. Repeat the same schedule in the `autopay` block: the agreement is what the gateway sees, and the `autopay` block is what Ottu bills on.
+      - `customer_id` is required.
+      - `language` is optional and defaults to `en`. It sets the language of the customer's self-service page and of every customer email, and cannot be changed afterwards.
+      - `customer_email` is required, because every customer email goes there. A missing one returns a `400` with the error under the `autopay` key, which looks like a problem with the autopay block. Check `customer_email` first.
+      - `pg_codes` must name a gateway that supports tokenization and auto-debit, because Ottu charges every renewal by auto-debit against the card saved at checkout.
+      - `amount` is the first charge only. `"0.000"` creates a trial: the card is saved, no money moves, and the subscription starts in `trialing` instead of `active`.
+
+      The `201` response carries `extra.autopay.subscription_id`. Store it: it is your handle on the subscription. The `autopay` block is write-only and is not echoed back. Every call with `payment_type: "auto_pay"` creates a new subscription, so guard against double submits on your side. See the [AutoPay guide]({{apiBaseUrl}}/payments/autopay/).
+
   retrieve_payment_transaction_checkout:
     permissions:
       - $perm:api_key_admin
