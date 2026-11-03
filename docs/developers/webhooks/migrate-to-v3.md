@@ -103,6 +103,13 @@ Nothing to call to migrate. The related references are:
 - Keep your format 1 or 2 receiver deployable until the first live day on format 3 has passed.
 - Ignore unknown `type` values and unknown keys.
 
+## Related
+
+- [Webhooks Overview](/developers/webhooks)
+- [Payment Events (formats 1 and 2)](/developers/webhooks/payment-events)
+- [Operation Events (formats 1 and 2)](/developers/webhooks/operation-events)
+- [PG Params](/developers/webhooks/pg-params)
+
 ## FAQ
 
 <FAQ>
@@ -122,10 +129,3 @@ Nothing to call to migrate. The related references are:
 - [**Webhook Events (v3)**](/developers/webhooks/event-catalogue): every event and example
 - [**Verify Signatures**](/developers/webhooks/verify-signatures#ottu-signature-header): build the v2 check
 - [**Delivery and Retries**](/developers/webhooks/delivery-and-retries): success rules and `Idempotency-Key`
-
-## Related
-
-- [Webhooks Overview](/developers/webhooks)
-- [Payment Events (formats 1 and 2)](/developers/webhooks/payment-events)
-- [Operation Events (formats 1 and 2)](/developers/webhooks/operation-events)
-- [PG Params](/developers/webhooks/pg-params)

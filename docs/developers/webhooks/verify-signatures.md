@@ -458,7 +458,7 @@ Compare that against the `v1` part of the `Ottu-Signature` header you received.
 The `v2` check for [Python, Node.js and PHP](#verify-v2) and the [body signature](#body-signature) are covered above. The implementations below compute the **`v1` part** of the `Ottu-Signature` header on formats 1 and 2 in other languages.
 
 :::info How these samples were checked
-The Java and Go samples were run against the [`v1` test vector](#header-v1) and return `469fb5c5...`. The .NET and Ruby samples follow the same logic but were not executed. Run the test vector against them before relying on them.
+All four samples (Java, .NET, Ruby and Go) were run against the [`v1` test vector](#header-v1) and return `469fb5c5...`. The Python, Node.js and PHP `v2` verifiers above were run against the [`v2` vectors](#test-vectors), including the rejection cases.
 :::
 
 ## Specific Examples
@@ -759,6 +759,12 @@ The above examples generate the `v1` value from a payload, the `t` of the header
 
 **Need Further Assistance?** Our dedicated support team is always on hand to help. Reach out to us at [support@ottu.com](mailto:support@ottu.com).
 
+## Related
+
+- [Webhooks Overview](/developers/webhooks)
+- [Payment States](/developers/reference/payment-states)
+- [Authentication](/developers/getting-started/authentication)
+
 ## What's Next?
 
 - [**Webhook Events (v3)**](/developers/webhooks/event-catalogue) — The format 3 envelope and every event type
@@ -768,9 +774,3 @@ The above examples generate the `v1` value from a payload, the `t` of the header
 - [**Operation Events**](/developers/webhooks/operation-events) — Operation webhook payload reference
 - [**AutoPay**](/developers/payments/autopay) — Subscriptions, and the `autopay` payload blocks described above
 - [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration
-
-## Related
-
-- [Webhooks Overview](/developers/webhooks)
-- [Payment States](/developers/reference/payment-states)
-- [Authentication](/developers/getting-started/authentication)

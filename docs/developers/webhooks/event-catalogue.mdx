@@ -35,15 +35,19 @@ An event is a `POST` with a JSON body and two headers you care about: `Ottu-Sign
 <Tabs groupId="language">
 <TabItem value="curl" label="cURL">
 
-Send yourself a sample event while developing. The body below is a minimal `payment.paid` envelope; your receiver should reject it unless the signature is valid, which is the point of the test.
+Send yourself a signed sample event while developing. The body below is a minimal `payment.paid` envelope. Set `KEY` to the HMAC key your receiver verifies with, and it should return `200`; change one character of `BODY` after signing and it should return `401`.
 
 ```bash
+KEY='your-hmac-key'
+BODY='{"id":"evt_01JABCDEFGHJKMNPQRSTVWXYZ0","type":"payment.paid","created":"2026-10-22T10:00:00Z","version":3,"is_sandbox":true,"merchant_id":"merchant.ottu.net","data":{"payment":{"order_no":"ORDER-1","reference_number":"GOLDENATT1","state":"paid"}}}'
+T=$(date +%s)
+SIG=$(printf '%s' "$T.$BODY" | openssl dgst -sha256 -hmac "$KEY" | awk '{print $NF}')
+
 curl -X POST http://localhost:8000/webhooks/ottu \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: evt_01JABCDEFGHJKMNPQRSTVWXYZ0" \
-  -H "Ottu-Signature: t=1792417440,v2=0000000000000000000000000000000000000000000000000000000000000000" \
-  --data-binary '{"id":"evt_01JABCDEFGHJKMNPQRSTVWXYZ0","type":"payment.paid","created":"2026-10-22T10:00:00Z","version":3,"is_sandbox":true,"merchant_id":"merchant.ottu.net","data":{"payment":{"order_no":"ORDER-1","reference_number":"GOLDENATT1","state":"paid"}}}'
-# Expect HTTP 400/401 from your receiver: the signature above is a placeholder.
+  -H "Ottu-Signature: t=$T,v2=$SIG" \
+  --data-binary "$BODY"
 ```
 
 </TabItem>
@@ -374,6 +378,13 @@ Events can arrive out of order, especially after a retry: a `payment.paid` that 
 - Answer quickly, do heavy work asynchronously: Ottu waits for your response only up to the configured timeout.
 - Log `id` and `type` for every event you receive; they identify the exact delivery if you need to ask Ottu about it.
 
+## Related
+
+- [Webhooks Overview](/developers/webhooks)
+- [Payment Events (formats 1 and 2)](/developers/webhooks/payment-events)
+- [Operation Events (formats 1 and 2)](/developers/webhooks/operation-events)
+- [Payment States](/developers/reference/payment-states)
+
 ## FAQ
 
 <FAQ>
@@ -393,10 +404,3 @@ Events can arrive out of order, especially after a retry: a `payment.paid` that 
 - [**Verify Signatures**](/developers/webhooks/verify-signatures#ottu-signature-header): verify `Ottu-Signature` v2 on the raw body, with Python, Node.js and PHP code
 - [**Delivery and Retries**](/developers/webhooks/delivery-and-retries): success rules, the 8-attempt schedule and `Idempotency-Key`
 - [**Migrating to v3**](/developers/webhooks/migrate-to-v3): map format 1 and 2 fields to their v3 location
-
-## Related
-
-- [Webhooks Overview](/developers/webhooks)
-- [Payment Events (formats 1 and 2)](/developers/webhooks/payment-events)
-- [Operation Events (formats 1 and 2)](/developers/webhooks/operation-events)
-- [Payment States](/developers/reference/payment-states)
