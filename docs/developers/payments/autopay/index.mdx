@@ -11,6 +11,8 @@ import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import CodeBlock from "@theme/CodeBlock";
 import AutoPayFlowDiagram from "@site/src/diagrams/AutoPayFlowDiagram";
+import FlowDiagram from "@site/src/components/FlowDiagram";
+import { autopayWorkflowNodes, autopayWorkflowEdges } from "@site/src/data/autopay-workflow";
 import AutoPayDemo from "@site/src/components/AutoPayDemo";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
@@ -70,11 +72,23 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 <AutoPayFlowDiagram />
 
+<FlowDiagram
+  title="AutoPay workflow"
+  nodes={autopayWorkflowNodes}
+  edges={autopayWorkflowEdges}
+  hint="Select a step to see what happens and where to read more."
+/>
+
+<details>
+<summary>The workflow as a list</summary>
+
 1. **You create the subscription** with one [Checkout API](../checkout-api) call that describes the plan and its schedule.
 2. **Your customer pays the first charge** on the checkout page, and Ottu saves their card.
 3. **You get the result.** When your customer completes checkout, Ottu sends the result to your webhook URL, if you set one, as for any checkout. That is the only webhook you get: renewals don't send one, so you read their outcome from the subscription, which you can look up at any time.
 4. **Ottu bills each cycle**, retries failed charges and emails your customer.
 5. **Your customer manages the subscription** from their own page. You send them the link.
+
+</details>
 
 
 ### Live Demo {#live-demo}
