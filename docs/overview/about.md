@@ -1,6 +1,6 @@
 # About Ottu
 
-Ottu is a payment orchestration platform built for the Middle East and expanding globally. It sits between your business and 50+ payment gateways — handling routing, multi-currency exchange, notifications, and compliance so you can focus on your product.
+Ottu is a payment orchestration platform built for the Middle East and expanding globally. It sits between your business and 45+ payment gateways — handling routing, multi-currency exchange, notifications, and compliance so you can focus on your product.
 
 ## What Ottu Does
 
