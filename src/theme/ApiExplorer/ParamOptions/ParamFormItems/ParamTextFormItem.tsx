@@ -13,6 +13,15 @@ export default function ParamTextFormItem({ param }: { param: any }) {
   const setValue = formCtx?.setValue;
   const errors = formCtx?.formState?.errors;
   const didInit = useRef(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const decodeForDisplay = (val: string) => {
+    try {
+      return decodeURIComponent(val);
+    } catch {
+      return val;
+    }
+  };
 
   const example =
     typeof param.example !== "undefined"
@@ -50,14 +59,21 @@ export default function ParamTextFormItem({ param }: { param: any }) {
   }, []);
 
   // A value set from outside the input (the Prerequisites step dispatches
-  // setParam) reaches redux but not the form: copy it into the input. Typing
-  // stores the encoded input in redux, so it compares equal and stays a no-op.
+  // setParam) reaches redux but not the input: copy it in. Typing stores the
+  // encoded input in redux, so it compares equal and stays a no-op. The params
+  // form has no react-hook-form provider, so most inputs are written directly.
   useEffect(() => {
-    if (!didInit.current || !setValue || !formCtx?.getValues) return;
-    if (param.value === undefined) return;
-    const current = String(formCtx.getValues(param.name) ?? "");
-    if (encodeForParam(current) !== param.value) {
-      setValue(param.name, param.value, { shouldValidate: true });
+    if (!didInit.current || param.value === undefined) return;
+    if (setValue && formCtx?.getValues) {
+      const current = String(formCtx.getValues(param.name) ?? "");
+      if (encodeForParam(current) !== param.value) {
+        setValue(param.name, param.value, { shouldValidate: true });
+      }
+      return;
+    }
+    const input = inputRef.current;
+    if (input && encodeForParam(input.value) !== param.value) {
+      input.value = decodeForDisplay(String(param.value));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [param.value]);
@@ -79,6 +95,10 @@ export default function ParamTextFormItem({ param }: { param: any }) {
     <>
       <input
         {...(registered ?? {})}
+        ref={(el) => {
+          inputRef.current = el;
+          registered?.ref(el);
+        }}
         className={clsx("openapi-explorer__form-item-input", {
           error: errorMessage,
         })}
