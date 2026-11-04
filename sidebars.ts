@@ -763,6 +763,11 @@ const sidebars: SidebarsConfig = {
               id: "developers/reference/checkout-status-codes",
               label: "Checkout Status Codes",
             },
+            {
+              type: "doc",
+              id: "developers/reference/api-key-permissions",
+              label: "API Key Permissions",
+            },
           ],
         },
       ],
