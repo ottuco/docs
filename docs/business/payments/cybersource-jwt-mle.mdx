@@ -38,12 +38,8 @@ The authentication mode only applies to calls Ottu makes to the CyberSource **RE
 
 | Gateway | Uses the REST API, so affected | Not affected |
 | --- | --- | --- |
-| **CyberSource** | Refunds. Apple Pay payments. | The hosted payment page itself, which uses the Access key, Profile ID and Secret key. |
+| **CyberSource** | Refunds. Apple Pay payments. | The hosted payment page itself, which uses the Access key, Profile ID and Secret key. Ottu does not capture, void or check status over the REST API on this gateway. |
 | **CyberSource Unified Checkout** | Every call: starting the checkout, taking the payment, capture, void, refund and transaction status checks. | Nothing. |
-
-:::note
-For the **CyberSource** gateway, Ottu does not capture, void or check status over the REST API, so those operations are not affected by this setting.
-:::
 
 The **REST API host** field applies to the same calls, in both authentication modes.
 
@@ -122,7 +118,7 @@ You can return a MID to HTTP Signature at any time, as long as CyberSource still
 3. If you had changed **REST API host**, empty it to return to the standard host.
 4. Click **Save**.
 
-HTTP Signature uses the **API key ID** and **API secret key**, so keep them filled in. Saving a different **REST authentication** value also resumes a MID that was paused (see below).
+HTTP Signature uses the **API key ID** and **API secret key**, so keep them filled in. Saving the changed **REST authentication** value is also how you resume a MID that was paused. See [If a reply cannot be decrypted](#if-a-reply-cannot-be-decrypted).
 
 ## If a reply cannot be decrypted
 
@@ -139,7 +135,7 @@ How the pause works:
 - It affects only the MID where the failure happened. Other MIDs keep working.
 - It does not expire by itself. It lifts when you save changes to the MID that could fix the problem: the Response MLE key or password, the key ID, the request certificate, the JWT signing key or password, or the **REST authentication** mode. Saving the page without changing any of these does not resume the MID.
 - While the MID is paused, operations on it fail with the **paused** message in the table below.
-- Your customer sees only: "We could not confirm your payment. Please contact the merchant before trying again." They never see the two staff messages in the table below. Be ready to check the Business Center when they contact you. If you also use Apple Pay or Unified Checkout, this is the message shown during their payment.
+- Your customer sees only: "We could not confirm your payment. Please contact the merchant before trying again." They never see the two messages you see in the dashboard (in the table below). Be ready to check the Business Center when they contact you. If you also use Apple Pay or Unified Checkout, this is the message shown during their payment.
 - On the **CyberSource** gateway, if CyberSource refuses a request before it encrypts anything (for example because of a bad token or a wrong host), it replies in plain JSON. Ottu reads that reply normally and it does not pause the MID.
 
 ## Troubleshooting
