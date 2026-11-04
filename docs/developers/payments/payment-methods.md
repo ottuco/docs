@@ -23,6 +23,20 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/
 - **Customized checkout** — tailor payment options per customer based on their history or preferences.
 - **Dynamic updates** — when gateway settings or MID configurations change in the dashboard, the API automatically reflects the updates. No code changes needed.
 
+## Authentication
+
+Call the Payment Methods API **from your server**, with your [private API key](/developers/getting-started/authentication/#api-key-auth) or a [Basic Authentication](/developers/getting-started/authentication/#basic-auth) user:
+
+| Caller | Access |
+|---|---|
+| Full-access private key | Allowed |
+| Scoped private key or Basic Auth user | Needs `Can view Settings` (`gateway.view_pgmid`); without it, `403` |
+| [Public key](/developers/getting-started/authentication/#public-key) | Refused — `401 {"detail": "Authentication credentials were not provided."}` |
+
+:::warning[The public key is no longer accepted]
+When you send a `customer_id`, the response includes the gateways that customer has paid with, so this API only accepts credentials that stay on your server. If a headless checkout of yours called it from the browser with the public key, move the call to your server and use the private key. The [Checkout SDK](/developers/payments/checkout-sdk/) does not call this API and is not affected.
+:::
+
 ## Guide
 
 The Payment Methods API is a foundation for other Ottu APIs. It returns detailed information about each available payment method — supported operations, wallet integrations, currencies, and tokenization capabilities — giving you the data needed to create payment sessions with the right gateways.
