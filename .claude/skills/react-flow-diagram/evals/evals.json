@@ -1,0 +1,39 @@
+{
+  "skill_name": "react-flow-diagram",
+  "notes": "Each eval is a realistic docs-author request. Shared expectations encode the skill's hard rules; eval-specific ones check task fidelity. Visual quality (layout, no overlaps, light/dark, phone width) is judged in the browser on the dev server.",
+  "shared_expectations": [
+    "Creates a data file under src/diagrams/flow/ that imports only from @site/src/components/FlowDiagram (plus react and @mdi/js)",
+    "The diagram file sets no colours, fonts, sizes or style props",
+    "At most 2 accent cards (3 in a long story) and at most 1 danger card",
+    "Results coming back (webhooks, replies, redirects) use the reply kind",
+    "No microservice (AutoPay, Wallet, ...) is drawn as its own lane or actor; the customer never calls an API",
+    "The page importing the diagram is .mdx",
+    "npm run typecheck passes"
+  ],
+  "evals": [
+    {
+      "id": 1,
+      "name": "webhook-story",
+      "prompt": "Add an interactive diagram to the webhooks overview page that shows how a payment webhook works: Ottu POSTs the signed result to the merchant's webhook_url, the merchant verifies the HMAC signature, answers 200, and Ottu retries if it doesn't. Readers should be able to click a step to read more.",
+      "expected_output": "A StoryDiagram with merchant and Ottu lanes (maybe gateway), detail text on each step, journeys for success and retry, signature verification visible, rendered on the webhooks page.",
+      "files": [],
+      "expectations": ["Uses StoryDiagram with journeys so the side panel shows", "Has a retry path"]
+    },
+    {
+      "id": 2,
+      "name": "sequence-3ds",
+      "prompt": "I need a sequence diagram for 3-D Secure on the Checkout SDK page: merchant creates a session, customer enters card in the SDK, Ottu asks the issuer for 3DS, the customer completes the challenge, Ottu charges and tells the merchant.",
+      "expected_output": "A SequenceDiagram with merchant, Ottu, customer and issuer/gateway actors, orange request arrows and blue reply arrows (both flowing by default), under 12 messages.",
+      "files": [],
+      "expectations": ["Uses SequenceDiagram", "Customer only talks to the SDK/Ottu, never an API"]
+    },
+    {
+      "id": 3,
+      "name": "convert-autopay",
+      "prompt": "Replace the static AutoPay workflow diagram on docs/developers/payments/autopay/index.mdx with an interactive React Flow one like the card payment reference.",
+      "expected_output": "A StoryDiagram with customer, merchant and Ottu lanes (no AutoPay lane), first charge and every cycle journeys, replacing the old import on the page.",
+      "files": [],
+      "expectations": ["Old diagram import removed from the page", "No 'AutoPay' lane"]
+    }
+  ]
+}
