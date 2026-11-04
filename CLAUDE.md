@@ -309,7 +309,7 @@ Pick the tool by what the reader does with the diagram:
 | Static picture | Inline SVG via `src/components/Diagram/`, files in `src/diagrams/` | `svg-diagram` (`.claude/skills/svg-diagram/`) |
 | Quick draft only | Mermaid (rules below) | none |
 
-React Flow diagrams take their colours, fonts and dark mode from the tokens in `src/components/FlowDiagram/styles.module.css` (Ottu design system); a diagram file never sets styling. Reference page: `/diagrams/react-flow/`.
+React Flow diagrams take their colours, fonts and dark mode from the tokens in `src/components/FlowDiagram/styles.module.css` (Ottu design system); a diagram file never sets styling. Their accent is Ottu orange (`#F77D1A`), with blue (`#0B82BE`) for replies and results; this differs on purpose from the Mermaid rule below (blue accent), so don't put a Mermaid and a React Flow diagram side by side on one page. Reference page: `/diagrams/react-flow/` (unlisted, excluded from the MCP server).
 
 ## Mermaid Diagrams
 

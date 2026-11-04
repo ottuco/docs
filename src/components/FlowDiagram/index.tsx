@@ -27,6 +27,10 @@ function Shell({
 }): React.JSX.Element {
   return (
     <figure className={styles.figure}>
+      {/* The full text version (steps, details, actors, journeys). Kept on
+          purpose after the live diagram loads: it is the one place a screen
+          reader gets everything at once, it names the figure, and search and
+          the MCP server read it from the server HTML. */}
       <figcaption className={styles.srOnly}>
         {title}
         {text}
@@ -131,9 +135,10 @@ export function SequenceDiagram(input: SequenceProps): React.JSX.Element {
       height={sequenceHeight(props)}
       text={
         <ol>
-          {props.messages.map(([from, to, label], i) => (
+          {props.messages.map(([from, to, label, kind], i) => (
             <li key={i}>
               {props.actors[from].title} to {props.actors[to].title}: {label}
+              {kind === "reply" ? " (reply)" : ""}
             </li>
           ))}
         </ol>
@@ -162,6 +167,7 @@ export function FlowDiagram(input: FlowProps): React.JSX.Element {
             <li key={i}>
               {name.get(a.from)} to {name.get(a.to)}
               {a.label ? `: ${a.label}` : ""}
+              {a.kind === "reply" ? " (reply)" : ""}
             </li>
           ))}
         </ul>

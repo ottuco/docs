@@ -254,6 +254,8 @@ const config: Config = {
           "/search*",
           "/developers/reference/*",
           "/overview/changelog*",
+          // Internal reference page for authors of React Flow diagrams.
+          "/diagrams/*",
         ],
       },
     ],
