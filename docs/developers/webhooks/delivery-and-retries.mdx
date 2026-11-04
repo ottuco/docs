@@ -9,6 +9,7 @@ toc_max_heading_level: 3
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
+import WebhookDeliveryStory from "@site/src/diagrams/flow/WebhookDeliveryStory";
 
 # Webhook Delivery and Retries
 
@@ -244,28 +245,7 @@ When the last attempt fails (attempt 8 on format 3; formats 1 and 2 keep their e
 
 ### Workflow {#the-delivery-flow}
 
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
-sequenceDiagram
-    participant O as Ottu
-    participant M as Your receiver
-    participant S as Your database
-
-    O->>O: Record event evt_X, store the body bytes once
-    O->>M: Attempt 1: POST body + Ottu-Signature + Idempotency-Key evt_X
-    M->>M: Verify v2 on the raw body
-    M->>S: Insert evt_X (unique)
-    S-->>M: First time
-    M->>M: Fulfil order, check reference_number
-    M--xO: Timeout or 5xx
-    Note over O: Wait 1 minute, plus or minus 10 percent
-    O->>M: Attempt 2: same bytes, same key, fresh signature
-    M->>S: Insert evt_X (unique)
-    S-->>M: Already there
-    M-->>O: 200, nothing reprocessed
-    Note over O: Delivered. Any 2xx stops the retries
-    Note over O: If all 8 attempts fail: status failed, one failure email
-```
+<WebhookDeliveryStory />
 
 ### Error handling
 
