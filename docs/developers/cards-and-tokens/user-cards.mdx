@@ -78,14 +78,21 @@ When a customer taps delete on a saved card that is held by a running [auto-debi
   "result": "failed"
 }`}</CodeBlock>
 
-| Status | Language | Message |
+**`400 Bad Request`: the card is held by an agreement that Ottu tracks.**
+
+| Case | Language | Message |
 | --- | --- | --- |
-| `400` | English (dated) | This card is linked to an auto-debit agreement active until `{expiry_date}`. Contact the merchant to cancel the agreement before deleting this card. |
-| `400` | العربية (dated) | <span dir="rtl">هذه البطاقة مرتبطة باتفاقية خصم تلقائي سارية حتى `{expiry_date}`. تواصل مع التاجر لإلغاء الاتفاقية قبل حذف هذه البطاقة.</span> |
-| `400` | English (ongoing) | This card is linked to an ongoing auto-debit agreement. Contact the merchant to cancel the agreement before deleting this card. |
-| `400` | العربية (ongoing) | <span dir="rtl">هذه البطاقة مرتبطة باتفاقية خصم تلقائي مستمرة. تواصل مع التاجر لإلغاء الاتفاقية قبل حذف هذه البطاقة.</span> |
-| `409` | English (card held by Ottu PG) | This card is linked to an active auto debit agreement and cannot be deleted. Pay once with another card to move the agreement, then delete this card. |
-| `409` | العربية (card held by Ottu PG) | <span dir="rtl">هذه البطاقة مرتبطة باتفاقية خصم تلقائي نشطة ولا يمكن حذفها. ادفع مرة واحدة ببطاقة أخرى لنقل الاتفاقية، ثم احذف هذه البطاقة.</span> |
+| Dated | English | This card is linked to an auto-debit agreement active until `{expiry_date}`. Contact the merchant to cancel the agreement before deleting this card. |
+| Dated | العربية | <span dir="rtl">هذه البطاقة مرتبطة باتفاقية خصم تلقائي سارية حتى `{expiry_date}`. تواصل مع التاجر لإلغاء الاتفاقية قبل حذف هذه البطاقة.</span> |
+| Ongoing | English | This card is linked to an ongoing auto-debit agreement. Contact the merchant to cancel the agreement before deleting this card. |
+| Ongoing | العربية | <span dir="rtl">هذه البطاقة مرتبطة باتفاقية خصم تلقائي مستمرة. تواصل مع التاجر لإلغاء الاتفاقية قبل حذف هذه البطاقة.</span> |
+
+**`409 Conflict`: the card was saved through Ottu's own payment gateway (Ottu PG).**
+
+| Language | Message |
+| --- | --- |
+| English | This card is linked to an active auto debit agreement and cannot be deleted. Pay once with another card to move the agreement, then delete this card. |
+| العربية | <span dir="rtl">هذه البطاقة مرتبطة باتفاقية خصم تلقائي نشطة ولا يمكن حذفها. ادفع مرة واحدة ببطاقة أخرى لنقل الاتفاقية، ثم احذف هذه البطاقة.</span> |
 
 `{expiry_date}` is the end date of the agreement, always written as `YYYY-MM-DD` (for example `2026-12-31`). It is the `expiry_date` you sent in the `agreement` object, shown in that fixed form whatever format you sent it in.
 
@@ -197,7 +204,7 @@ if ($status === 204) {
 
 #### Delete as the merchant
 
-From your server, call [`DELETE /b/pbl/v2/card/{token}/`](/developers/apis/delete-user-cards) with your **private** key (see [Authentication](/developers/getting-started/authentication/#api-key-auth)), or delete the card from the dashboard. The `customer_id` and `type` (`sandbox` or `production`) query parameters are required. The agreement rules do not apply to you, so the card is removed even while an agreement is running.
+From your server, call [`DELETE /b/pbl/v2/card/{token}/`](/developers/apis/delete-user-cards) with your **private** key (see [Authentication](/developers/getting-started/authentication/#api-key-auth)). The `customer_id` and `type` (`sandbox` or `production`) query parameters are required. The agreement rules do not apply to you, so the card is removed even while an agreement is running.
 
 <Tabs groupId="language">
 <TabItem value="curl" label="cURL" default>
@@ -285,9 +292,9 @@ A refused cardholder delete leaves the card untouched and fully usable: Ottu che
 | `204` | The card was deleted | Remove it from your UI |
 | `400` | The card is held by a running or open-ended agreement (see the rules below), or `token` / `session_id` is longer than 128 characters | Show `detail` to the customer. Do not retry until the agreement has ended |
 | `401` | No API key, or an invalid, revoked or expired one | Send `Authorization: Api-Key <YOUR_PUBLIC_KEY>` |
-| `403` | A private key or dashboard user without the delete-card permission | Grant the permission, or use the public key |
+| `403` | A private key or dashboard user without the `card.delete_card` permission. It cannot happen with the public key, which is accepted without that permission check | Grant the permission to that key or user |
 | `404` | Unknown or expired session, a session with no `customer_id`, a token that does not belong to the session's customer, or the card could not be deleted at its payment gateway (the gateway refused it, or offers no way to delete tokens). The body is `Not found.` (<span dir="rtl">غير موجودة.</span> in Arabic) | Treat the card as not deletable. The answer is deliberately the same for all of these, so a caller cannot probe for other customers' cards |
-| `409` | The card is held by Ottu PG and an auto-debit agreement is attached to it | Show `detail`. The customer can pay once with another card to move the agreement, then delete this card |
+| `409` | The card was saved through Ottu PG and an auto-debit agreement is attached to it | Show `detail`. The customer can pay once with another card to move the agreement, then delete this card |
 | `429` | More than 30 delete requests in a minute from one client IP address (the default limit) | Wait, then retry |
 
 ### Use Cases
@@ -296,9 +303,9 @@ A refused cardholder delete leaves the card untouched and fully usable: Ottu che
 
 A saved card can be linked to an [auto-debit agreement](/developers/cards-and-tokens/recurring-payments/): the customer's consent for you to charge the card again later. Deleting such a card would silently break that agreement, so Ottu does not let the **cardholder** delete it while the agreement is still running. **You** (the merchant) can always delete it.
 
-Who is asking is decided only by the credential on the request, never by a parameter. A public key (the one embedded in the Checkout SDK) is always treated as the cardholder. A private key, or a signed-in dashboard user, is always treated as the merchant. Anything else you add to the request, such as extra query parameters, does not change this.
+Who is asking is decided only by the credential on the request, never by a parameter. A public key (the one embedded in the Checkout SDK) is always treated as the cardholder. A private key, or a signed-in dashboard user, is always treated as the merchant. The request carries no other way to claim a role.
 
-**Which cards.** The agreement rules apply to cards Ottu holds itself, saved through a [payment gateway](/developers/payments/payment-methods/) that supports deleting tokens: Checkout.com, KNET V3, MPGS, Al Rajhi or STC Pay. A card saved through [Ottu PG](/glossary/#term-payment-gateway) is checked by Ottu PG instead, and a refused delete there answers `409` with its own message (see [What your customer sees](#what-your-customer-sees)).
+**Which cards.** The agreement rules apply to cards Ottu holds itself, saved through a [payment gateway](/developers/payments/payment-methods/) that supports deleting tokens: Checkout.com, KNET V3, MPGS, Al Rajhi or STC Pay. A card saved through Ottu's own payment gateway (Ottu PG) is checked by Ottu PG instead, and a refused delete there answers `409` with its own message (see [What your customer sees](#what-your-customer-sees)).
 
 **What counts as running.** For a card Ottu holds, a cardholder's delete is decided by the agreement's `type`:
 
@@ -307,12 +314,16 @@ Who is asking is decided only by the credential on the request, never by a param
 | None, or every agreement has ended | Deleted, `204 No Content` | Deleted |
 | `recurring` with an `expiry_date` that has not passed | Refused, `400` with the end date | Deleted |
 | `recurring` whose `expiry_date` is missing or cannot be read | Refused, `400`, "ongoing" message | Deleted |
-| `unscheduled`, `installment`, `event_based` or `other`, with or without an `expiry_date` | Refused, `400`, "ongoing" message | Deleted |
+| Any other type (`unscheduled`, `installment`, ...), with or without an `expiry_date` | Refused, `400`, "ongoing" message | Deleted |
 | Agreement whose terms Ottu cannot find | Refused, `400`, "ongoing" message | Deleted |
 
 Only `recurring` agreements are dated. An `installment` agreement is treated like any other open-ended type, so even if you sent it an `expiry_date`, it gives the "ongoing" message. The `type` defaults to `recurring` when you omit it.
 
-A recurring agreement keeps blocking **up to and including** the day of its `expiry_date`, and stops blocking the next day. The day is compared in Ottu's time zone (Asia/Kuwait). The `expiry_date` is the one you sent in the `agreement` object when the customer saved the card; see [Recurring Payments](/developers/cards-and-tokens/recurring-payments/). You can send it in any of the accepted date formats (the Recurring Payments example uses `01/04/2027`); the message always shows it as `YYYY-MM-DD`.
+A recurring agreement keeps blocking **up to and including** the day of its `expiry_date`, and stops blocking the next day. The `expiry_date` is the one you sent in the `agreement` object when the customer saved the card; see [Recurring Payments](/developers/cards-and-tokens/recurring-payments/). You can send it in any of the accepted date formats (the Recurring Payments example uses `01/04/2027`); the message always shows it as `YYYY-MM-DD`.
+
+:::note
+The end date is compared with today's calendar day in Ottu's time zone, Asia/Kuwait. A merchant in another time zone can see the card unblock earlier or later than their own local midnight.
+:::
 
 If a card is linked to **several** agreements, the message shows the **latest** end date among those still running, and ended ones are ignored. If any one of them is open-ended or cannot be read, the "ongoing" message is shown instead, because an open-ended agreement outlasts any dated one. When an agreement has been resumed with a new payment (the same `agreement.id`), the newest payment's terms are the ones that count.
 
