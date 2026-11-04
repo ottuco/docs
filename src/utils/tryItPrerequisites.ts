@@ -92,7 +92,8 @@ const AUTOPAY_SUBSCRIPTION_STEPS: PrereqStep[] = [
       expiry.setUTCFullYear(today.getUTCFullYear() + 1);
       return {
         type: "e_commerce",
-        pg_codes: ctx.pg_codes,
+        // One gateway: checkout rejects the whole list if any code in it is not valid for the session.
+        pg_codes: (ctx.pg_codes as string[]).slice(0, 1),
         amount: "9.900",
         currency_code: "KWD",
         customer_id: `cust_${ref}`,
