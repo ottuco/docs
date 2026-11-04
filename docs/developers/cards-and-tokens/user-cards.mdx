@@ -34,8 +34,8 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/
 
 When integrating the User Cards API, here are the key points:
 
-1. You will not receive the full card number (PAN). Instead, you'll get the last 4 digits and a token. This token is what you use for payments or authorizations.
-2. If you're using the [Checkout SDK](/developers/payments/checkout-sdk/), customers can delete their saved cards at any point. This gives users control over their payment information.
+1. You will not receive the full card number (PAN). Instead, you'll get the last 4 digits and a [token](/glossary/#term-tokenization). This token is what you use for payments or authorizations.
+2. If you're using the [Checkout SDK](/developers/payments/checkout-sdk/), customers can delete their saved cards themselves, unless an [auto-debit agreement](#deleting-a-card-that-has-an-auto-debit-agreement) is still running on the card. This gives users control over their payment information.
 3. When a customer saves their card during payment, the corresponding token is included in the payload sent to your [webhook_url](/developers/payments/checkout-api/).
 4. Ottu already handles displaying saved cards and card deletion. Use these APIs only if you need more granular control.
 
@@ -64,37 +64,47 @@ graph LR
 3. **List saved cards** — call the User Cards API with `customer_id` to retrieve all saved cards (masked PAN + token).
 4. **Delete a card** — call the delete endpoint with the card token to remove it.
 
+### What your customer sees
+
+When a customer taps delete on a saved card that is held by a running [auto-debit agreement](/developers/cards-and-tokens/recurring-payments/), the card is not deleted. The Checkout SDK (or your own card list) receives an explanation in the `detail` field, in the language of the `Accept-Language` header (English and Arabic are supported), and should show it to the customer as-is. The rules behind these messages are in [Deleting a card that has an auto-debit agreement](#deleting-a-card-that-has-an-auto-debit-agreement).
+
+<CodeBlock language="json" title="400 Bad Request: recurring agreement still running">{`{
+  "detail": "This card is linked to an auto-debit agreement active until 2026-12-31. Contact the merchant to cancel the agreement before deleting this card.",
+  "result": "failed"
+}`}</CodeBlock>
+
+<CodeBlock language="json" title="400 Bad Request: ongoing agreement">{`{
+  "detail": "This card is linked to an ongoing auto-debit agreement. Contact the merchant to cancel the agreement before deleting this card.",
+  "result": "failed"
+}`}</CodeBlock>
+
+| Status | Language | Message |
+| --- | --- | --- |
+| `400` | English (dated) | This card is linked to an auto-debit agreement active until `{expiry_date}`. Contact the merchant to cancel the agreement before deleting this card. |
+| `400` | العربية (dated) | <span dir="rtl">هذه البطاقة مرتبطة باتفاقية خصم تلقائي سارية حتى `{expiry_date}`. تواصل مع التاجر لإلغاء الاتفاقية قبل حذف هذه البطاقة.</span> |
+| `400` | English (ongoing) | This card is linked to an ongoing auto-debit agreement. Contact the merchant to cancel the agreement before deleting this card. |
+| `400` | العربية (ongoing) | <span dir="rtl">هذه البطاقة مرتبطة باتفاقية خصم تلقائي مستمرة. تواصل مع التاجر لإلغاء الاتفاقية قبل حذف هذه البطاقة.</span> |
+| `409` | English (card held by Ottu PG) | This card is linked to an active auto debit agreement and cannot be deleted. Pay once with another card to move the agreement, then delete this card. |
+| `409` | العربية (card held by Ottu PG) | <span dir="rtl">هذه البطاقة مرتبطة باتفاقية خصم تلقائي نشطة ولا يمكن حذفها. ادفع مرة واحدة ببطاقة أخرى لنقل الاتفاقية، ثم احذف هذه البطاقة.</span> |
+
+`{expiry_date}` is the end date of the agreement, always written as `YYYY-MM-DD` (for example `2026-12-31`). It is the `expiry_date` you sent in the `agreement` object, shown in that fixed form whatever format you sent it in.
+
 ### Step-by-Step
 
 1. **Fetch saved cards** — call `GET /b/pbl/v2/card/?customer_id={id}` to retrieve all tokenized cards for a customer.
 2. **Display cards** — show the masked card number, brand, and expiry in your UI.
-3. **Delete a card** — call `DELETE /b/pbl/v2/card/{token}/` to remove a specific card.
+3. **Delete a card** — as the cardholder (public key, [below](#delete-as-the-cardholder)) or as the merchant (private key, [below](#delete-as-the-merchant)). A cardholder's delete can be refused when an auto-debit agreement still holds the card; see [Handle a refusal](#handle-a-refusal).
 4. **Use a card for payment** — pass the token to the [Checkout API](/developers/payments/checkout-api/) or [Auto-Debit API](/developers/payments/native-payments/) for subsequent charges.
 
-## Deleting a Card That Has an Auto-Debit Agreement
+#### Delete as the cardholder
 
-A saved card can be linked to an [auto-debit agreement](/developers/cards-and-tokens/recurring-payments/) — the customer's consent for you to charge the card again later. Deleting such a card would silently break that agreement, so Ottu does not let the **cardholder** delete it while the agreement is still running. **You** (the merchant) can always delete it.
+The Checkout SDK calls this for you when a customer taps delete on a saved card. If you build your own card list, call the session route with your **public** key (see [Authentication](/developers/getting-started/authentication/#public-key)). The session must belong to the same customer as the card and must not have expired.
 
-This applies to cards saved with a gateway that Ottu integrates directly, for example MPGS, Checkout.com, Al Rajhi and STC Pay.
+Replace the placeholders:
 
-### Who can delete what
-
-| Card | Deleted by the cardholder (Checkout SDK, or your own UI using the public key) | Deleted by you (private key, or a dashboard user) |
-| --- | --- | --- |
-| No agreement, or every agreement has ended | Yes — `204 No Content` | Yes |
-| Recurring agreement still running | No — `400`, the message shows the end date | Yes |
-| Unscheduled agreement | No — `400`, "ongoing" message | Yes |
-| Agreement terms Ottu cannot read | No — `400`, "ongoing" message | Yes |
-
-A recurring agreement is still running **up to and including** the day of its `expiry_date`. It stops blocking from the next day. The `expiry_date` is the one you sent in the `agreement` object when the customer saved the card — see [Recurring Payments](/developers/cards-and-tokens/recurring-payments/).
-
-:::note
-Who is asking is decided by the credential on the request, never by a parameter. A public key (the one embedded in the Checkout SDK) is always treated as the cardholder; a private key or a signed-in dashboard user is always treated as the merchant. Adding extra query parameters does not change this.
-:::
-
-### Quick implementation
-
-The Checkout SDK calls this for you when a customer taps delete on a saved card. If you build your own card list, call the session route with your **public** key. The session must belong to the same customer as the card and must not have expired.
+- `<CARD_TOKEN>` — the token of the saved card, from the [webhook payload](/developers/payments/checkout-api/) or the cards list.
+- `<SESSION_ID>` — the `session_id` of the [Checkout API](/developers/payments/checkout-api/) session the customer is on.
+- `<YOUR_PUBLIC_KEY>` — your public API key (the one the Checkout SDK uses).
 
 <Tabs groupId="language">
 <TabItem value="curl" label="cURL" default>
@@ -115,9 +125,15 @@ response = requests.delete(
 
 if response.status_code == 204:
     print("Card deleted")
-elif response.status_code == 400:
+elif response.status_code in (400, 409):
     # Show this text to the customer as-is: it is already translated.
     print(response.json()["detail"])
+elif response.status_code == 401:
+    print("Check the Authorization header and the public key")
+elif response.status_code == 404:
+    print("Card cannot be deleted from this session")
+elif response.status_code == 429:
+    print("Too many requests, wait and retry")
 else:
     print("Not deleted:", response.status_code)`}</CodeBlock>
 
@@ -134,9 +150,15 @@ else:
 
 if (response.status === 204) {
   console.log("Card deleted");
-} else if (response.status === 400) {
+} else if (response.status === 400 || response.status === 409) {
   // Show this text to the customer as-is: it is already translated.
   console.log((await response.json()).detail);
+} else if (response.status === 401) {
+  console.log("Check the Authorization header and the public key");
+} else if (response.status === 404) {
+  console.log("Card cannot be deleted from this session");
+} else if (response.status === 429) {
+  console.log("Too many requests, wait and retry");
 } else {
   console.log("Not deleted:", response.status);
 }`}</CodeBlock>
@@ -153,71 +175,149 @@ curl_setopt_array($ch, [
 ]);
 $body = curl_exec($ch);
 $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
 
 if ($status === 204) {
     echo "Card deleted";
-} elseif ($status === 400) {
+} elseif ($status === 400 || $status === 409) {
     // Show this text to the customer as-is: it is already translated.
     echo json_decode($body, true)["detail"];
+} elseif ($status === 401) {
+    echo "Check the Authorization header and the public key";
+} elseif ($status === 404) {
+    echo "Card cannot be deleted from this session";
+} elseif ($status === 429) {
+    echo "Too many requests, wait and retry";
+} else {
+    echo "Not deleted: " . $status;
 }`}</CodeBlock>
 
 </TabItem>
 </Tabs>
 
-### What the customer sees
+#### Delete as the merchant
 
-When the card is refused, the response is `400 Bad Request` with the explanation in `detail`, in the language of the `Accept-Language` header (English and Arabic are supported):
+From your server, call [`DELETE /b/pbl/v2/card/{token}/`](/developers/apis/delete-user-cards) with your **private** key (see [Authentication](/developers/getting-started/authentication/#api-key-auth)), or delete the card from the dashboard. The `customer_id` and `type` (`sandbox` or `production`) query parameters are required. The agreement rules do not apply to you, so the card is removed even while an agreement is running.
 
-<CodeBlock language="json" title="Recurring agreement still running">{`{
-  "detail": "This card is linked to an auto-debit agreement active until 2026-12-31. Contact the merchant to cancel the agreement before deleting this card.",
-  "result": "failed"
+<Tabs groupId="language">
+<TabItem value="curl" label="cURL" default>
+
+<CodeBlock language="bash" title="Merchant deletes a saved card">{`curl --request DELETE '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/card/<CARD_TOKEN>/?customer_id=<CUSTOMER_ID>&type=sandbox' \\
+  --header 'Authorization: Api-Key <YOUR_PRIVATE_KEY>'`}</CodeBlock>
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+<CodeBlock language="python" title="Merchant deletes a saved card">{`import requests
+
+response = requests.delete(
+    "${OTTU_CONNECT_BASE_URL}/b/pbl/v2/card/<CARD_TOKEN>/",
+    params={"customer_id": "<CUSTOMER_ID>", "type": "sandbox"},
+    headers={"Authorization": "Api-Key <YOUR_PRIVATE_KEY>"},
+)
+
+if response.status_code == 204:
+    print("Card deleted")
+elif response.status_code == 400:
+    print(response.json()["detail"])
+elif response.status_code in (401, 403):
+    print("Check the private key and its permissions")
+else:
+    print("Not deleted:", response.status_code)`}</CodeBlock>
+
+</TabItem>
+<TabItem value="node" label="Node.js">
+
+<CodeBlock language="javascript" title="Merchant deletes a saved card">{`const query = new URLSearchParams({ customer_id: "<CUSTOMER_ID>", type: "sandbox" });
+const response = await fetch(
+  \`${OTTU_CONNECT_BASE_URL}/b/pbl/v2/card/<CARD_TOKEN>/?\${query}\`,
+  { method: "DELETE", headers: { Authorization: "Api-Key <YOUR_PRIVATE_KEY>" } }
+);
+
+if (response.status === 204) {
+  console.log("Card deleted");
+} else if (response.status === 400) {
+  console.log((await response.json()).detail);
+} else if (response.status === 401 || response.status === 403) {
+  console.log("Check the private key and its permissions");
+} else {
+  console.log("Not deleted:", response.status);
 }`}</CodeBlock>
 
-<CodeBlock language="json" title="Unscheduled agreement, or terms Ottu cannot read">{`{
-  "detail": "This card is linked to an ongoing auto-debit agreement. Contact the merchant to cancel the agreement before deleting this card.",
-  "result": "failed"
+</TabItem>
+<TabItem value="php" label="PHP">
+
+<CodeBlock language="php" title="Merchant deletes a saved card">{`<?php
+$query = http_build_query(["customer_id" => "<CUSTOMER_ID>", "type" => "sandbox"]);
+$ch = curl_init("${OTTU_CONNECT_BASE_URL}/b/pbl/v2/card/<CARD_TOKEN>/?" . $query);
+curl_setopt_array($ch, [
+    CURLOPT_CUSTOMREQUEST => "DELETE",
+    CURLOPT_HTTPHEADER => ["Authorization: Api-Key <YOUR_PRIVATE_KEY>"],
+    CURLOPT_RETURNTRANSFER => true,
+]);
+$body = curl_exec($ch);
+$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+if ($status === 204) {
+    echo "Card deleted";
+} elseif ($status === 400) {
+    echo json_decode($body, true)["detail"];
+} elseif ($status === 401 || $status === 403) {
+    echo "Check the private key and its permissions";
+} else {
+    echo "Not deleted: " . $status;
 }`}</CodeBlock>
 
-| Language | Message |
-| --- | --- |
-| English (dated) | This card is linked to an auto-debit agreement active until `{date}`. Contact the merchant to cancel the agreement before deleting this card. |
-| العربية (dated) | هذه البطاقة مرتبطة باتفاقية خصم تلقائي سارية حتى `{date}`. تواصل مع التاجر لإلغاء الاتفاقية قبل حذف هذه البطاقة. |
-| English (ongoing) | This card is linked to an ongoing auto-debit agreement. Contact the merchant to cancel the agreement before deleting this card. |
-| العربية (ongoing) | هذه البطاقة مرتبطة باتفاقية خصم تلقائي مستمرة. تواصل مع التاجر لإلغاء الاتفاقية قبل حذف هذه البطاقة. |
-
-`{date}` is in `YYYY-MM-DD` form, exactly as stored.
-
-If a card is linked to **several** agreements, the message shows the **latest** end date. If any one of them is unscheduled (or cannot be read), the "ongoing" message is shown instead, because an open-ended agreement outlasts any dated one. When an agreement has been resumed with a new payment, the newest payment's terms are the ones that count.
-
-:::warning A refused delete leaves the card fully usable
-Ottu checks the agreement **before** anything is revoked at the gateway. A refused delete does not touch the token, so the card keeps working for the running agreement.
-:::
-
-### Errors
-
-| HTTP status | When | What to do |
-| --- | --- | --- |
-| `204` | The card was deleted | Remove it from your UI |
-| `400` | The card is linked to a running or unscheduled agreement | Show `detail` to the customer. Do not retry until the agreement has ended |
-| `401` | No API key, or an invalid one | Send `Authorization: Api-Key <YOUR_PUBLIC_KEY>` |
-| `404` | Unknown or expired session, a token that does not belong to the session's customer, or the gateway refused to delete the card | Treat the card as not deletable. The answer is deliberately the same for all of these, so a caller cannot probe for other customers' cards |
-| `429` | Too many delete requests from one address | Wait, then retry |
-
-### Deleting as the merchant
-
-Call [`DELETE /b/pbl/v2/card/{token}/`](#api-reference) with your **private** key (or from the dashboard). The agreement rules above do not apply to you, so the card is removed even while an agreement is running.
+</TabItem>
+</Tabs>
 
 :::warning Deleting a card ends the agreement's charging
 When you delete a card, its token is revoked at the gateway, so later [auto-debit](/developers/payments/native-payments/) charges with that token cannot succeed. Delete a card with a running agreement only when you intend to stop it, and tell the customer.
 :::
 
-### Best practices
+#### Handle a refusal
 
-:::tip
-- Show the `detail` text to the customer instead of a generic "could not delete" message. It already says who to contact and, when known, until when.
-- Send `Accept-Language` so the message matches the customer's language.
-- Hide or disable the delete button for a card you know has a running agreement, and keep the API answer as the final authority.
-- Never ship your private key in a browser or mobile app. Customer-facing delete calls use the public key only.
+A refused cardholder delete leaves the card untouched and fully usable: Ottu checks the agreement **before** anything is revoked at the gateway. For the general error format, see [Error Codes](/developers/reference/error-codes/).
+
+| HTTP status | When | What to do |
+| --- | --- | --- |
+| `204` | The card was deleted | Remove it from your UI |
+| `400` | The card is held by a running or open-ended agreement (see the rules below), or `token` / `session_id` is longer than 128 characters | Show `detail` to the customer. Do not retry until the agreement has ended |
+| `401` | No API key, or an invalid, revoked or expired one | Send `Authorization: Api-Key <YOUR_PUBLIC_KEY>` |
+| `403` | A private key or dashboard user without the delete-card permission | Grant the permission, or use the public key |
+| `404` | Unknown or expired session, a session with no `customer_id`, a token that does not belong to the session's customer, or the card could not be deleted at its payment gateway (the gateway refused it, or offers no way to delete tokens). The body is `Not found.` (<span dir="rtl">غير موجودة.</span> in Arabic) | Treat the card as not deletable. The answer is deliberately the same for all of these, so a caller cannot probe for other customers' cards |
+| `409` | The card is held by Ottu PG and an auto-debit agreement is attached to it | Show `detail`. The customer can pay once with another card to move the agreement, then delete this card |
+| `429` | More than 30 delete requests in a minute from one client IP address (the default limit) | Wait, then retry |
+
+### Use Cases
+
+#### Deleting a card that has an auto-debit agreement
+
+A saved card can be linked to an [auto-debit agreement](/developers/cards-and-tokens/recurring-payments/): the customer's consent for you to charge the card again later. Deleting such a card would silently break that agreement, so Ottu does not let the **cardholder** delete it while the agreement is still running. **You** (the merchant) can always delete it.
+
+Who is asking is decided only by the credential on the request, never by a parameter. A public key (the one embedded in the Checkout SDK) is always treated as the cardholder. A private key, or a signed-in dashboard user, is always treated as the merchant. Anything else you add to the request, such as extra query parameters, does not change this.
+
+**Which cards.** The agreement rules apply to cards Ottu holds itself, saved through a [payment gateway](/developers/payments/payment-methods/) that supports deleting tokens: Checkout.com, KNET V3, MPGS, Al Rajhi or STC Pay. A card saved through [Ottu PG](/glossary/#term-payment-gateway) is checked by Ottu PG instead, and a refused delete there answers `409` with its own message (see [What your customer sees](#what-your-customer-sees)).
+
+**What counts as running.** For a card Ottu holds, a cardholder's delete is decided by the agreement's `type`:
+
+| Agreement on the card | Cardholder (public key) | You (private key, or a dashboard user) |
+| --- | --- | --- |
+| None, or every agreement has ended | Deleted, `204 No Content` | Deleted |
+| `recurring` with an `expiry_date` that has not passed | Refused, `400` with the end date | Deleted |
+| `recurring` whose `expiry_date` is missing or cannot be read | Refused, `400`, "ongoing" message | Deleted |
+| `unscheduled`, `installment`, `event_based` or `other`, with or without an `expiry_date` | Refused, `400`, "ongoing" message | Deleted |
+| Agreement whose terms Ottu cannot find | Refused, `400`, "ongoing" message | Deleted |
+
+Only `recurring` agreements are dated. An `installment` agreement is treated like any other open-ended type, so even if you sent it an `expiry_date`, it gives the "ongoing" message. The `type` defaults to `recurring` when you omit it.
+
+A recurring agreement keeps blocking **up to and including** the day of its `expiry_date`, and stops blocking the next day. The day is compared in Ottu's time zone (Asia/Kuwait). The `expiry_date` is the one you sent in the `agreement` object when the customer saved the card; see [Recurring Payments](/developers/cards-and-tokens/recurring-payments/). You can send it in any of the accepted date formats (the Recurring Payments example uses `01/04/2027`); the message always shows it as `YYYY-MM-DD`.
+
+If a card is linked to **several** agreements, the message shows the **latest** end date among those still running, and ended ones are ignored. If any one of them is open-ended or cannot be read, the "ongoing" message is shown instead, because an open-ended agreement outlasts any dated one. When an agreement has been resumed with a new payment (the same `agreement.id`), the newest payment's terms are the ones that count.
+
+:::note
+The agreement check is for the cardholder only. It does not apply on the merchant route, or when you call the session route with your private key.
 :::
 
 ## API Reference
@@ -228,6 +328,13 @@ When you delete a card, its token is revoked at the gateway, so later [auto-debi
 
 <ApiDocEmbed path="delete-user-cards.api.mdx" />
 
+## Best Practices
+
+- Show the `detail` text to the customer instead of a generic "could not delete" message. It already says who to contact and, when known, until when.
+- Send `Accept-Language` so the message matches the customer's language.
+- Hide or disable the delete button for a card you know has a running agreement, and keep the API answer as the final authority.
+- Never ship your private key in a browser or mobile app. Customer-facing delete calls use the public key only.
+
 ## FAQ
 
 <FAQ>
@@ -235,7 +342,7 @@ When you delete a card, its token is revoked at the gateway, so later [auto-debi
     Not currently. A card can only be tokenized after a successful payment transaction. This ensures the card's validity.
   </FAQItem>
   <FAQItem question="How can I delete a card?">
-    Two options: call the User Cards API [delete endpoint](#api-reference) directly, or use the [Checkout SDK](/developers/payments/checkout-sdk/) which handles card management for you.
+    Two options: call the User Cards API [delete endpoint](/developers/apis/delete-user-cards) directly, or use the [Checkout SDK](/developers/payments/checkout-sdk/) which handles card management for you.
   </FAQItem>
   <FAQItem question="Why can't my customer delete a saved card?">
     The card is linked to an auto-debit agreement that is still running or has no end date. See [Deleting a card that has an auto-debit agreement](#deleting-a-card-that-has-an-auto-debit-agreement). You can still delete it with your private key.
