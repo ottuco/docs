@@ -133,9 +133,9 @@ If CyberSource replies but Ottu cannot decrypt the reply, CyberSource has alread
 How the pause works:
 
 - It affects only the MID where the failure happened. Other MIDs keep working.
-- It does not expire by itself. It lifts when you save changes to the MID that could fix the problem: the Response MLE key or password, the key ID, the request certificate, the JWT signing key or password, or the **REST authentication** mode. Saving the page without changing any of these does not resume the MID.
+- It does not expire by itself. It lifts when you save changes to the MID that could fix the problem: the Response MLE key or password, the key ID, the request certificate, the JWT signing key or password, or the **REST authentication** mode. Saving the page without changing any of these does not resume the MID. Changing only the **REST API host** does not resume it.
 - While the MID is paused, operations on it fail with the **paused** message in the table below.
-- Your customer sees only: "We could not confirm your payment. Please contact the merchant before trying again." They never see the two messages you see in the dashboard (in the table below). Be ready to check the Business Center when they contact you. If you also use Apple Pay or Unified Checkout, this is the message shown during their payment.
+- Your customer sees only: "We could not confirm your payment. Please contact the merchant before trying again." They never see the two operation messages in the table below. Be ready to check the Business Center when they contact you. If you also use Apple Pay or Unified Checkout, this is the message shown during their payment.
 - On the **CyberSource** gateway, if CyberSource refuses a request before it encrypts anything (for example because of a bad token or a wrong host), it replies in plain JSON. Ottu reads that reply normally and it does not pause the MID.
 
 ## Troubleshooting
