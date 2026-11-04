@@ -8,7 +8,7 @@ import CybersourceJwtMleStory from "@site/src/diagrams/flow/CybersourceJwtMleSto
 
 # Migrate your CyberSource connection to JWT + MLE
 
-CyberSource is retiring the **HTTP Signature** way of signing REST API calls. Its replacement is **JWT with Message-Level Encryption (MLE)**: each request is encrypted for CyberSource and signed with a JWT, and each reply comes back encrypted for you. Ottu supports both, per merchant account (MID), so you can switch one MID at a time.
+CyberSource is retiring the **HTTP Signature** way of signing REST API calls. Its replacement is **JWT with Message-Level Encryption (MLE)**: each request is encrypted for CyberSource and signed with a JWT (a signed token that proves who is calling), and each reply comes back encrypted for you. MLE means the request and reply bodies themselves are encrypted, not just the connection. Ottu supports both, per merchant account (MID), so you can switch one MID at a time.
 
 This page shows you how to prepare the keys in the CyberSource Business Center, switch a MID in Ottu, test it in the sandbox, and roll back. You do not write any code.
 
@@ -24,7 +24,7 @@ This applies to you if you accept payments through either of these gateways:
 | What changes | What you do | When |
 | --- | --- | --- |
 | CyberSource retires HTTP Signature | Switch each MID to **JWT with Message-Level Encryption** | Before CyberSource stops accepting HTTP Signature. Ask your CyberSource contact for the exact date for your account. |
-| CyberSource moves its API to **visaacceptance.com** | Enter the new host in **REST API host**, when you are ready | Production (`api.visaacceptance.com`) starts on **2027-01-31**. The sandbox host `apitest.visaacceptance.com` is available for testing. |
+| CyberSource moves its API to **visaacceptance.com** | Enter the new host in **REST API host**, when you are ready | CyberSource's migration timeline gives **2027-01-31** for production (`api.visaacceptance.com`), and a sandbox host, `apitest.visaacceptance.com`, for testing first. See [CyberSource's release note](https://developer.cybersource.com/docs/cybs/en-us/platform/relnote/all/na/rn-2026-09-18.html). |
 
 :::note
 **Nothing changes until you switch.** Every existing MID keeps **HTTP Signature**, and an empty **REST API host** keeps the standard CyberSource host. Ottu does not move a MID for you.
@@ -82,8 +82,8 @@ Labels appear in English or Arabic according to the dashboard language.
 
 | English label | Arabic label | Required for JWT? | What it is |
 | --- | --- | --- | --- |
-| REST authentication | مصادقة REST | Yes | The mode. Choose **HTTP Signature** (توقيع HTTP) or **JWT with Message-Level Encryption** (JWT مع تشفير مستوى الرسالة (MLE)). Existing MIDs are on HTTP Signature. |
-| REST API host | مضيف REST API | Optional | Leave empty for the standard host: `apitest.cybersource.com` (sandbox) or `api.cybersource.com` (production). Enter `apitest.visaacceptance.com` (sandbox) or `api.visaacceptance.com` (production, from 2027-01-31) only when you are ready to switch. Enter the host name only, with no `https://`, path or port. It must end with `.cybersource.com` or `.visaacceptance.com`. |
+| REST authentication | مصادقة REST | n/a (this is the switch) | The mode. Choose **HTTP Signature** (توقيع HTTP) or **JWT with Message-Level Encryption** (JWT مع تشفير مستوى الرسالة (MLE)). Existing MIDs are on HTTP Signature. |
+| REST API host | مضيف REST API | Optional | Leave empty for the standard host: `apitest.cybersource.com` (sandbox) or `api.cybersource.com` (production). Enter `apitest.visaacceptance.com` (sandbox) or `api.visaacceptance.com` (production) only when you are ready to switch. For the dates, see [Who must act, and when](#who-must-act-and-when). Enter the host name only, with no `https://`, path or port. It must end with `.cybersource.com` or `.visaacceptance.com`. |
 | Response MLE key (.p12) | مفتاح MLE للاستجابة (.p12) | Yes | The **REST - API Response MLE** .p12 file from the Business Center. Ottu uses it to decrypt CyberSource replies. Accepted file types: `.p12`, `.pfx`. |
 | Response MLE key password | كلمة مرور مفتاح MLE للاستجابة | Yes | The password of that .p12 file. |
 | Response MLE key ID | معرّف مفتاح MLE للاستجابة | Optional | Leave empty to let Ottu read it from the .p12 that CyberSource generated. |
@@ -110,7 +110,7 @@ Switch a **sandbox** MID first. A sandbox MID uses the sandbox host (`apitest.cy
 3. Run an operation that uses the REST API:
    - **CyberSource:** refund the test payment, or make an Apple Pay test payment.
    - **CyberSource Unified Checkout:** the test payment itself already uses the REST API. Also try a refund, and a void or capture if you use them.
-4. If you also plan to change the host, do it now as a separate step. Enter `apitest.visaacceptance.com` in **REST API host**, save, and repeat step 2.
+4. If you also plan to change the host, do it now as a separate step. Enter the sandbox `visaacceptance.com` host from the [Fields](#fields) table in **REST API host**, save, and repeat step 2.
 5. When everything passes, repeat the switch on your production MID, and the host change after it.
 
 ## Roll back
@@ -139,7 +139,8 @@ How the pause works:
 - It affects only the MID where the failure happened. Other MIDs keep working.
 - It does not expire by itself. It lifts when you save changes to the MID that could fix the problem: the Response MLE key or password, the key ID, the request certificate, the JWT signing key or password, or the **REST authentication** mode. Saving the page without changing any of these does not resume the MID.
 - While the MID is paused, operations on it fail with the **paused** message in the table below.
-- Your customer never sees these messages. They see "We could not confirm your payment. Please contact the merchant before trying again." Be ready to check the Business Center when they contact you.
+- Your customer sees only: "We could not confirm your payment. Please contact the merchant before trying again." They never see the two staff messages in the table below. Be ready to check the Business Center when they contact you. If you also use Apple Pay or Unified Checkout, this is the message shown during their payment.
+- On the **CyberSource** gateway, if CyberSource refuses a request before it encrypts anything (for example because of a bad token or a wrong host), it replies in plain JSON. Ottu reads that reply normally and it does not pause the MID.
 
 ## Troubleshooting
 
@@ -158,9 +159,12 @@ Messages are shown in English or Arabic according to the dashboard language.
 | Enter the password of the JWT signing .p12. | A JWT signing .p12 is uploaded but its password is empty. | Enter the password, or remove the file to sign with the API key instead. |
 | The JWT signing .p12 could not be opened. Upload the .p12 file from CyberSource and check its password. | The signing file is wrong or damaged, or its password is wrong. | Upload the original file and re-enter its password. |
 | Required for JWT unless a JWT signing .p12 is uploaded. | **API key ID** or **API secret key** is empty and no JWT signing .p12 is uploaded. | Fill in both, or upload a JWT signing .p12 and its password. |
-| Extension 'x' not allowed. Allowed extensions are: 'p12, pfx.' | A key file has the wrong extension. | Upload a `.p12` or `.pfx` file. For the request certificate the allowed extensions are `pem, crt, cer`. |
+| Extension 'x' not allowed. Allowed extensions are: 'p12, pfx.' | A .p12 file (Response MLE key or JWT signing key) has another extension. `x` is the file's own extension, in lower case and without the dot. The allowed list is joined with commas, and the full stop sits inside the closing quote. | Upload a `.p12` or `.pfx` file. |
+| Extension 'x' not allowed. Allowed extensions are: 'pem, crt, cer.' | The request MLE certificate has another extension. | Upload a `.pem`, `.crt` or `.cer` file. |
 
 ### When an operation runs
+
+The two decrypt messages are different moments of the same problem. The first ("CyberSource replied but the response could not be decrypted ...") is shown once, on the operation whose reply failed. The second ("Operations on this gateway are paused ...") is shown on every later operation on that MID until you change its MLE, signing or mode settings and save.
 
 | Message | Cause | Fix |
 | --- | --- | --- |
@@ -178,7 +182,11 @@ Messages are shown in English or Arabic according to the dashboard language.
 - **Keep your API key ID and API secret key** filled in. JWT reuses them, and they are what you need to roll back.
 - **Keep the .p12 files and passwords in your password manager**, not in email or chat.
 - **Do not retry after an UNKNOWN outcome.** Check the Business Center first.
-- **Plan the host move** before 2027-01-31. Test `apitest.visaacceptance.com` on a sandbox MID well before then.
+- **Plan the host move** using the dates in [Who must act, and when](#who-must-act-and-when). Test the sandbox host on a sandbox MID well before then.
+
+## What's next
+
+Switch a sandbox MID first and test it, then move your production MIDs. Once every MID is on JWT with Message-Level Encryption, plan the host change.
 
 ## Related
 
