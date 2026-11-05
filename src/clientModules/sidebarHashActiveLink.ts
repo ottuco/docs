@@ -717,6 +717,12 @@ function scheduleUpdate(): void {
   });
 }
 
+// Pages whose `queryString` tabs sit far below the hash target, so a tab
+// change must not scroll back to it.
+const QUERY_TABS_KEEP_SCROLL = ["/developers/payments/autopay/"];
+let lastNavSearch = typeof window !== "undefined" ? window.location.search : "";
+let lastNavHash = typeof window !== "undefined" ? window.location.hash : "";
+
 export function onRouteDidUpdate(): void {
   // New route: drop stale state so the scroll listener doesn't act on
   // a previous page's cached sections. Re-mute scroll-spy on every
@@ -739,7 +745,13 @@ export function onRouteDidUpdate(): void {
   const isFirstRouteUpdate = !initialLoadHandled;
   const prevPath = lastNavPathname;
   const currentPath = window.location.pathname;
+  const prevSearch = lastNavSearch;
+  const prevHash = lastNavHash;
+  const currentSearch = window.location.search;
+  const currentHash = window.location.hash;
   lastNavPathname = currentPath;
+  lastNavSearch = currentSearch;
+  lastNavHash = currentHash;
 
   if (isFirstRouteUpdate) {
     runInitialHashGate();
@@ -752,6 +764,13 @@ export function onRouteDidUpdate(): void {
     // previous page's position). We wait for hydration ourselves,
     // then smooth-scroll, then run the layout-shift compensator.
     runSpaHashScroll();
+  } else if (
+    QUERY_TABS_KEEP_SCROLL.includes(normalizePath(currentPath)) &&
+    currentSearch &&
+    currentSearch !== prevSearch &&
+    currentHash === prevHash
+  ) {
+    // A `queryString` tab changed the query only: stay on the tab.
   } else {
     // Same-page hash change (sidebar anchor click, back/forward). Nothing
     // else scrolls here: Docusaurus only scrolls after a pathname change,
