@@ -41,7 +41,7 @@ In the samples, `verify_ottu_signature` / `verifyOttuSignature` is the helper de
 
 Send the same signed delivery twice to your local receiver. Set `KEY` to the HMAC key the receiver verifies with, and both calls return `200`; the second one must not run your business logic again.
 
-```bash
+```bash title="Send the same signed delivery twice"
 KEY='your-hmac-key'  # the key your receiver verifies with
 BODY='{"id":"evt_01JABCDEFGHJKMNPQRSTVWXYZ0","event":"payment.paid","created":"2026-10-22T10:00:00Z","version":3,"is_sandbox":true,"merchant_id":"merchant.ottu.net","initiator":{"kind":"customer","id":"CUST-1","first_name":null,"last_name":null,"email":null},"data":{"session_id":"golden-session-1","order_no":"ORDER-1","status":"paid","operation":"purchase","result":"success","connector":{"reference_number":"GOLDENATT1"}}}'
 T=$(date +%s)
@@ -60,7 +60,7 @@ done
 </TabItem>
 <TabItem value="python" label="Python">
 
-```python
+```python title="Flask receiver with de-duplication"
 import json
 import sqlite3
 

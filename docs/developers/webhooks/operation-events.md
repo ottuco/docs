@@ -46,7 +46,7 @@ Operation webhooks are activated under the following scenarios:
 
 ## Payload example (refund)
 
-```json
+```json title="Operation webhook (refund)"
 {
    "amount":"9.000",
    "initiator":{

@@ -54,14 +54,17 @@ docs/developers/
 │   └── recurring-payments.mdx      # Auto-debit, CIT/MIT, agreement setup, recurring billing
 │
 ├── webhooks/
-│   ├── index.md                    # Webhook setup, retries, delivery guarantees
-│   ├── payment-events.md           # Payment webhook payload reference
+│   ├── index.md                    # Webhook setup, formats, retries, delivery guarantees
+│   ├── event-catalogue.mdx         # Format 3 envelope, 15 payment events, flat data
+│   ├── migrate-to-v3.md            # Format 1/2 to format 3 field map
+│   ├── delivery-and-retries.mdx    # Success rules, retry schedule, Idempotency-Key
+│   ├── payment-events.mdx          # Payment webhook payload reference (formats 1 and 2)
 │   ├── operation-events.md         # Operation webhook payload reference
 │   └── verify-signatures.md        # HMAC-SHA256 signature verification with code examples
 │
 ├── reference/
 │   ├── error-codes.md              # Error code reference (EMPTY — needs content)
-│   ├── payment-states.md           # Payment state machine (EMPTY — needs content)
+│   ├── payment-states.mdx          # Payment state machine, attempt states, v3 names
 │   └── glossary.md                 # Developer glossary (EMPTY — needs content)
 │
 └── apis/                           # Auto-generated from OpenAPI spec — DO NOT EDIT
@@ -155,12 +158,12 @@ These links are mandatory whenever the topic is mentioned:
 | pg_codes / payment gateways | `payments/payment-methods.md` |
 | Webhook events / notifications | `webhooks/` (specific events page) |
 | Error responses / error codes | `reference/error-codes.md` |
-| Payment states (created, paid, etc.) | `reference/payment-states.md` |
+| Payment states (created, paid, etc.) | `reference/payment-states.mdx` |
 | Domain terms (MID, PG, PCI DSS, tokenization) | Glossary (first use per page) |
 | Checkout API / session_id | `payments/checkout-api.mdx` |
 | Operations (refund, capture, void) | `operations.md` |
 
-Use relative links within the developers section (e.g., `../webhooks/payment-events.md`). Use absolute paths when linking outside (e.g., `/glossary/`).
+Use relative links within the developers section (e.g., `../webhooks/payment-events.mdx`). Use absolute paths when linking outside (e.g., `/glossary/`).
 
 ## Payment Domain Context
 
@@ -183,7 +186,7 @@ These files exist but are empty (0 bytes). Priority for content creation:
 | `index.md` | Developer hub landing page — overview of all developer resources |
 | `payments/index.md` | Payments section overview — what Ottu's payment capabilities are |
 | `reference/error-codes.md` | Comprehensive error code reference table |
-| `reference/payment-states.md` | Payment state machine diagram and transitions |
+| `reference/payment-states.mdx` | Payment state machine diagram and transitions |
 | `reference/glossary.md` | Developer-focused payment glossary |
 | `cards-and-tokens/recurring-payments.mdx` | Auto-debit and recurring payment guide |
 
