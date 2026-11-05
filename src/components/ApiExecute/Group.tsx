@@ -1,14 +1,14 @@
 import React from "react";
 import BrowserOnly from "@docusaurus/BrowserOnly";
-import styles from "./styles.module.css";
 
+// Wraps the AutoPay API tabs: shows the shared test subscription above them.
 export default function ApiExecuteGroup({
   children,
 }: {
   children: React.ReactNode;
 }): React.JSX.Element {
   return (
-    <div className={styles.group}>
+    <>
       <BrowserOnly>
         {() => {
           const { SubscriptionBar } = require("./ApiExecuteInner");
@@ -16,6 +16,6 @@ export default function ApiExecuteGroup({
         }}
       </BrowserOnly>
       {children}
-    </div>
+    </>
   );
 }

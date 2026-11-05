@@ -1,20 +1,95 @@
-.execute {
-  margin: 16px 0 32px;
-  padding: 16px;
+/* The right column of an ApiReference: a request box over a response box. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.box {
   border: 1px solid var(--ifm-color-emphasis-200);
   border-radius: 10px;
   background: var(--ifm-background-surface-color);
+  overflow: hidden;
 }
 
-.toolbar {
+/* The language tabs (Docusaurus <Tabs groupId="language">) inside a box. */
+.langTabs :global(.tabs) {
+  padding: 0 10px;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.langTabs :global(.tabs__item) {
+  padding: 8px 10px;
+  font-size: 12.5px;
+}
+
+/* Docusaurus wraps the tab panels in Infima's `.margin-top--md`, whose
+   `!important` sits in a cascade layer and cannot be overridden from here.
+   Pull the code panel up by the same spacing so it meets the tab row. */
+.langTabs .boxPanel {
+  margin-top: calc(-1 * var(--ifm-spacing-vertical)) !important;
+}
+
+.langTabs :global(.tabs-container) {
+  margin-bottom: 0;
+}
+
+/* An ApiPanel inside a box: the box draws the border. */
+.box .boxPanel {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.boxHead,
+.boxFoot {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+}
+
+.boxHead {
+  justify-content: flex-start;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.boxFoot {
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.boxTitle {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.liveTag {
+  display: inline-flex;
+  align-items: center;
   gap: 12px;
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.select {
+  margin-left: auto;
+  max-width: 100%;
+  padding: 4px 8px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 6px;
+  font: inherit;
+  font-size: 12px;
+  color: inherit;
+  background: var(--ifm-background-color);
 }
 
 .method {
-  margin-right: 10px;
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 12px;
@@ -28,13 +103,24 @@
 }
 
 .note {
-  margin: 8px 0 0;
-  font-size: 13px;
+  margin: 0;
+  font-size: 12px;
   color: var(--ifm-color-emphasis-700);
 }
 
-.path {
+/* p.note: beats the site's paragraph size inside the box. */
+.box > p.note,
+.box > .error {
+  margin: 0;
+  padding: 10px 14px;
   font-size: 12px;
+}
+
+.path {
+  padding: 0;
+  border: 0;
+  font-size: 12px;
+  background: none;
   overflow-wrap: anywhere;
 }
 
@@ -67,16 +153,8 @@
   cursor: default;
 }
 
-/* The panel above replaces the theme's try-it; its code samples stay. */
-.group :global(.openapi-explorer__request-form),
-.group :global(.openapi-explorer__response-container) {
-  display: none;
-}
-
+/* Above the tabs, not sticky: the run panel on the right is the sticky part. */
 .subscription {
-  position: sticky;
-  top: calc(var(--ifm-navbar-height) + 8px);
-  z-index: 2;
   margin-bottom: 16px;
   padding: 10px 14px;
   border: 1px solid var(--ifm-color-emphasis-200);
@@ -218,7 +296,6 @@
 }
 
 @media (max-width: 600px) {
-  .toolbar,
   .dialogHeader {
     flex-direction: column;
     align-items: stretch;

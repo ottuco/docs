@@ -14,8 +14,7 @@ import AutoPayStory from "@site/src/diagrams/flow/AutoPayStory";
 import AutoPayDemo from "@site/src/components/AutoPayDemo";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
-import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
-import ApiExecute from "@site/src/components/ApiExecute";
+import ApiReference from "@site/src/components/ApiReference";
 import ApiExecuteGroup from "@site/src/components/ApiExecute/Group";
 import StepGuide from "@site/src/components/StepGuide";
 import { autopayCustomerViewSteps } from "@site/src/data/autopay-customer-view";
@@ -162,7 +161,7 @@ A customer cancellation on a `past_due` subscription only schedules the cancella
 
 ## API Reference
 
-All six subscription-management endpoints, plus the Checkout API call that creates a subscription, are in the interactive reference below. Expand any field for its type, enum values, constraints and defaults.
+All six subscription-management endpoints, plus the Checkout API call that creates a subscription, are in the reference below. Each tab lists the fields you send and the fields you get back, with their types, values and defaults; open "Show child attributes" for nested fields. Press **Run** to call the endpoint on the Ottu sandbox.
 
 Every management endpoint authenticates with your [API key](/developers/getting-started/authentication) and applies to your own merchant account. You never send a `Merchant-Id` header yourself.
 
@@ -207,51 +206,37 @@ Replace `<START_DATE>` with the date of the first billing cycle (today or later,
 
 Create a subscription with the Checkout API: set `payment_type` to `auto_pay` and send the `autopay` block.
 
-<ApiExecute endpoint="create" />
-
-<ApiDocEmbed path="create-payment-transaction-checkout.api.mdx" />
+<ApiReference api="create-payment-transaction-checkout" run="create" tabGroup="autopay-api" />
 
 </TabItem>
 <TabItem value="list" label="List">
 
-<ApiExecute endpoint="list" />
-
-<ApiDocEmbed path="autopay-subscription-list.api.mdx" />
+<ApiReference api="autopay-subscription-list" run="list" tabGroup="autopay-api" />
 
 </TabItem>
 <TabItem value="retrieve" label="Retrieve">
 
-<ApiExecute endpoint="retrieve" />
-
-<ApiDocEmbed path="autopay-subscription-detail.api.mdx" />
+<ApiReference api="autopay-subscription-detail" run="retrieve" tabGroup="autopay-api" />
 
 </TabItem>
 <TabItem value="cancel" label="Cancel">
 
-<ApiExecute endpoint="cancel" />
-
-<ApiDocEmbed path="autopay-subscription-cancel.api.mdx" />
+<ApiReference api="autopay-subscription-cancel" run="cancel" tabGroup="autopay-api" />
 
 </TabItem>
 <TabItem value="cycles" label="Billing cycles">
 
-<ApiExecute endpoint="cycles" />
-
-<ApiDocEmbed path="autopay-subscription-cycles.api.mdx" />
+<ApiReference api="autopay-subscription-cycles" run="cycles" tabGroup="autopay-api" />
 
 </TabItem>
 <TabItem value="page-link" label="Page link">
 
-<ApiExecute endpoint="page-link" />
-
-<ApiDocEmbed path="autopay-subscription-page-link.api.mdx" />
+<ApiReference api="autopay-subscription-page-link" run="page-link" tabGroup="autopay-api" />
 
 </TabItem>
 <TabItem value="regenerate-page-token" label="Regenerate page token">
 
-<ApiExecute endpoint="regenerate-page-token" />
-
-<ApiDocEmbed path="autopay-subscription-regenerate-page-token.api.mdx" />
+<ApiReference api="autopay-subscription-regenerate-page-token" run="regenerate-page-token" tabGroup="autopay-api" />
 
 </TabItem>
 </Tabs>
@@ -260,7 +245,7 @@ Create a subscription with the Checkout API: set `payment_type` to `auto_pay` an
 
 ### Error contract {#error-contract}
 
-These are the statuses you will meet most often, so you can handle them without parsing message text. The full list of status codes for each endpoint, with examples, is in the [API Reference](#api-reference) tabs above.
+These are the statuses you will meet most often, so you can handle them without parsing message text. Each tab in the [API Reference](#api-reference) above lists every status code its endpoint returns. On the subscription tabs, pick a status in the response panel to see an example body.
 
 | Status | Meaning | What to do |
 |---|---|---|
