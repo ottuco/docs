@@ -43,7 +43,7 @@ Send the same signed delivery twice to your local receiver. Set `KEY` to the HMA
 
 ```bash
 KEY='your-hmac-key'  # the key your receiver verifies with
-BODY='{"id":"evt_01JABCDEFGHJKMNPQRSTVWXYZ0","type":"payment.paid","created":"2026-10-22T10:00:00Z","version":3,"is_sandbox":true,"merchant_id":"merchant.ottu.net","data":{"payment":{"order_no":"ORDER-1","reference_number":"GOLDENATT1","state":"paid"}}}'
+BODY='{"id":"evt_01JABCDEFGHJKMNPQRSTVWXYZ0","event":"payment.paid","created":"2026-10-22T10:00:00Z","version":3,"is_sandbox":true,"merchant_id":"merchant.ottu.net","initiator":{"kind":"customer","id":"CUST-1","first_name":null,"last_name":null,"email":null},"data":{"session_id":"golden-session-1","order_no":"ORDER-1","status":"paid","operation":"purchase","result":"success","connector":{"reference_number":"GOLDENATT1"}}}'
 T=$(date +%s)
 SIG=$(printf '%s' "$T.$BODY" | openssl dgst -sha256 -hmac "$KEY" | awk '{print $NF}')
 
@@ -236,7 +236,7 @@ Every delivery carries `Idempotency-Key: <event id>`, for example `Idempotency-K
 3. Record the id and the business effect together (one database transaction), so a crash cannot mark an event processed that was never applied.
 
 :::warning The key de-duplicates deliveries, not business actions
-Two different events can describe the same business outcome: a payment can be re-disclosed, retried, or confirmed by an inquiry. Before you **fulfil an order or refund money**, also check your own record of the business reference: `reference_number` of the payment, or the operation's `reference_number` for a refund or capture. Act only when the `Idempotency-Key` is unseen **and** the `reference_number` has not already been applied.
+Two different events can describe the same business outcome: a payment can be re-disclosed, retried, or confirmed by an inquiry. Before you **fulfil an order or refund money**, also check your own record of the business reference: `connector.reference_number` of the event on format 3 (the attempt's own reference, so a refund or capture has its own), or `reference_number` on formats 1 and 2. Act only when the `Idempotency-Key` is unseen **and** the `reference_number` has not already been applied.
 :::
 
 ### Failure email {#failure-email}
@@ -271,7 +271,7 @@ There is no endpoint to call: this page describes what Ottu sends to you. The re
 - Answer `2xx` as soon as the event is stored, then process asynchronously.
 - Make the id store and the business change one transaction.
 - Treat the retry window as roughly two days: monitor failure emails, and use the [Payment Status API](/developers/payments/psq) to reconcile anything you may have missed.
-- Do not rely on one URL receiving events in order; see [ordering](/developers/webhooks/event-catalogue#ordering).
+- Do not rely on one URL receiving events in order (`payment.created` can arrive after a fast `payment.paid`): order by `created`; see [ordering](/developers/webhooks/event-catalogue#ordering).
 - Keep the URL reachable on a public HTTPS address.
 
 ## Related
@@ -298,5 +298,5 @@ There is no endpoint to call: this page describes what Ottu sends to you. The re
 ## What's Next?
 
 - [**Verify Signatures**](/developers/webhooks/verify-signatures#ottu-signature-header): authenticate each delivery
-- [**Webhook Events (v3)**](/developers/webhooks/event-catalogue): the envelope and every event type
+- [**Webhook Events (v3)**](/developers/webhooks/event-catalogue): the envelope and every event
 - [**Migrating to v3**](/developers/webhooks/migrate-to-v3): move from format 1 or 2

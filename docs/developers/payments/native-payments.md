@@ -366,4 +366,4 @@ Select the payment provider to see its full interactive API schema:
 
 - [**Checkout API**](./checkout-api.mdx) — Create sessions with `payment_instrument` for one-step checkout
 - [**Recurring Payments**](../cards-and-tokens/recurring-payments.mdx) — Use tokens for auto-debit payments
-- [**Webhooks**](../webhooks/payment-events.md) — Receive payment result notifications
+- [**Webhooks**](../webhooks/payment-events.mdx) — Receive payment result notifications

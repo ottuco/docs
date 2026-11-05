@@ -5,6 +5,8 @@ sidebar_label: Payment States
 
 import FAQ, { FAQItem } from '@site/src/components/FAQ';
 import PaymentObjectModel from '@site/src/components/PaymentObjectModel.mdx';
+import PaymentStatesLifecycle from "@site/src/diagrams/flow/PaymentStatesLifecycle";
+import PaymentAttemptStates from "@site/src/diagrams/flow/PaymentAttemptStates";
 
 # Payment States
 
@@ -37,38 +39,20 @@ For most integrations, check the `state` field in [webhook payloads](/developers
 | `refund_rejected` | Gateway rejected the refund request.                                                                                                                                |    Yes    | —                                                                                |
 | `voided`          | [Authorization reversed](/developers/operations#void) before the acquirer sent it for processing. Child payment transaction state.                                  |    Yes    | —                                                                                |
 
+### Names in webhook format 3 {#v3-names}
+
+:::warning Two states are renamed
+[Webhook format 3](/developers/webhooks/event-catalogue#catalogue) names an event after the status the transaction reached, and renames two states: `refund_queued` is sent as **`refund_pending`** (event `payment.refund_pending`, `data.status` `refund_pending`) and `invalided` is sent as **`invalidated`** (event `payment.invalidated`). The [Payment Status](/developers/payments/psq) and [Operations](/developers/operations) APIs, and webhook formats 1 and 2, keep the stored values `refund_queued` and `invalided`.
+:::
+
 ### Payment Transaction Lifecycle
 
 The diagram below shows the most common state transitions. For the complete list of all possible transitions, see the [State Groups](#state-groups) table.
 
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
-flowchart TD
-    CREATED([created]) --> PENDING([pending])
-    PENDING --> ATTEMPTED([attempted])
-    ATTEMPTED -->|Retry succeeds| PAID([paid])
-    PENDING -->|Payment succeeds| PAID
-    PENDING -->|Auth succeeds| AUTH([authorized])
-
-    CREATED --> FAILED([failed])
-    CREATED --> EXPIRED([expired])
-    CREATED --> CANCELED([canceled])
-
-    FAILED -.->|Delayed gateway response| PAID
-    EXPIRED -.->|Delayed gateway response| PAID
-
-    PAID --> REFUNDED([refunded])
-    PAID --> RQ([refund_queued])
-    RQ --> REFUNDED
-    RQ --> RR([refund_rejected])
-    AUTH --> VOIDED([voided])
-
-    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
-    class PAID,AUTH accent
-```
+<PaymentStatesLifecycle />
 
 :::tip
-Dashed arrows show that even `failed` and `expired` payment transactions can receive a delayed successful payment from the gateway (e.g., via automatic inquiry). Always handle webhook updates for payment transactions you consider "failed."
+Even `failed` and `expired` payment transactions can receive a delayed successful payment from the gateway (e.g., via automatic inquiry). Always handle webhook updates for payment transactions you consider "failed."
 :::
 
 ## Payment Attempt States
@@ -84,21 +68,7 @@ Each payment attempt represents a single interaction with a payment gateway. A p
 | `error`    | Error occurred creating the payment gateway link (connectivity, invalid config). | PSP link creation fails                               |
 | `cod`      | Cash on Delivery payment acknowledged.                                           | CoD gateway confirms offline payment                  |
 
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
-flowchart TD
-    PENDING([pending]) -->|Gateway succeeds| SUCCESS([success])
-    PENDING -->|Gateway fails| FAILED([failed])
-    PENDING -->|Customer cancels| CANCELED([canceled])
-    PENDING -->|Link creation error| ERROR([error])
-    PENDING -->|CoD acknowledged| COD([cod])
-
-    FAILED -.->|Refund succeeds| SUCCESS
-    ERROR -.->|Refund succeeds| SUCCESS
-
-    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
-    class SUCCESS accent
-```
+<PaymentAttemptStates />
 
 ## How Payment Transactions and Payment Attempts Interact
 
@@ -186,11 +156,11 @@ Child payment transactions appear in the parent's webhook payload and can be ret
   <FAQItem question="What does `invalided` mean?">
     A configuration change made the payment transaction unprocessable after creation — for example, the currency was removed or the payment gateway was disabled. This is rare and indicates a backend configuration issue.
 
-    The English label shown to people reads **Unavailable**. The stored value is still `invalided`, so webhooks, the [Operations API](/developers/operations), exports and filters are unaffected — only the display label changed. A customer opening such a link sees the `unavailable` [checkout status code](/developers/reference/checkout-status-codes).
+    The English label shown to people reads **Unavailable**. The stored value is still `invalided`, so webhook formats 1 and 2, the [Operations API](/developers/operations), exports and filters are unaffected — only the display label changed. [Webhook format 3](/developers/webhooks/event-catalogue#catalogue) sends it as `invalidated`. A customer opening such a link sees the `unavailable` [checkout status code](/developers/reference/checkout-status-codes).
   </FAQItem>
 
   <FAQItem question="What does `refund_queued` mean?">
-    The refund request was sent to the payment gateway, but the gateway hasn't confirmed it yet. Some gateways process refunds asynchronously — they accept the request, return a pending status, and later send a webhook to confirm the refund. The state transitions to `refunded` on confirmation or `refund_rejected` if the gateway rejects it.
+    The refund request was sent to the payment gateway, but the gateway hasn't confirmed it yet. Some gateways process refunds asynchronously — they accept the request, return a pending status, and later send a webhook to confirm the refund. The state transitions to `refunded` on confirmation or `refund_rejected` if the gateway rejects it. [Webhook format 3](/developers/webhooks/event-catalogue#catalogue) calls this state `refund_pending` and sends `payment.refund_pending`, then `payment.refunded` or `payment.refund_rejected`.
   </FAQItem>
 
   <FAQItem question="How do child payment transactions relate to the parent?">

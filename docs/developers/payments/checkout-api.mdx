@@ -392,7 +392,7 @@ In this example, Ottu receives an Apple Pay token in `payment_instrument.payload
 
 ### Response Behavior When `payment_instrument` Is Used
 
-When a valid [payment_instrument](/developers/payments/checkout-api/) is provided, Ottu creates the transaction and attempts to complete the payment immediately in the same [Checkout API](/developers/payments/checkout-api/) call. Instead of returning the standard Checkout API [response](/developers/payments/checkout-api/) (used for redirect/hosted flows), the API returns a transaction result payload that follows the same structure as the [payment notification (webhook)](../webhooks/payment-events.md) data. Your backend can process this response directly as the final payment result (e.g., mark the order as paid when `state = "paid"`).
+When a valid [payment_instrument](/developers/payments/checkout-api/) is provided, Ottu creates the transaction and attempts to complete the payment immediately in the same [Checkout API](/developers/payments/checkout-api/) call. Instead of returning the standard Checkout API [response](/developers/payments/checkout-api/) (used for redirect/hosted flows), the API returns a transaction result payload that follows the same structure as the [payment notification (webhook)](../webhooks/payment-events.mdx) data. Your backend can process this response directly as the final payment result (e.g., mark the order as paid when `state = "paid"`).
 
 #### Response Example
 
@@ -452,7 +452,7 @@ When a valid [payment_instrument](/developers/payments/checkout-api/) is provide
 </FAQItem>
 
 <FAQItem question="How do I get notified when a payment is completed?">
-  Ottu sends a [payment notification](../webhooks/payment-events.md) webhook to
+  Ottu sends a [payment notification](../webhooks/payment-events.mdx) webhook to
   the `webhook_url` you provided in the API request. The webhook contains
   details like `status`, `amount`, `currency_code`, and
   [`pg_params`](../webhooks/pg-params) (normalized gateway response fields).
@@ -463,14 +463,14 @@ When a valid [payment_instrument](/developers/payments/checkout-api/) is provide
     - **`webhook_url`** – Ottu sends real-time payment updates to it (for backend processing).
     - **`redirect_url`** – After payment, the customer is redirected to it (for UI redirection).
 
-    For more details on redirection behavior, please refer to [Payment Webhooks](../webhooks/payment-events.md). Both are optional but recommended for a seamless experience.
+    For more details on redirection behavior, please refer to [Payment Webhooks](../webhooks/payment-events.mdx). Both are optional but recommended for a seamless experience.
 
   </FAQItem>
 
 <FAQItem question="Can I retry a failed payment?">
   Yes, if a transaction fails, you can reuse the same `session_id`. The payment
   state will be `attempted`. For more information, please refer to [Payment
-  States](../reference/payment-states.md).
+  States](../reference/payment-states.mdx).
 </FAQItem>
 
 <FAQItem question="Can I set up recurring payments using the Checkout API?">
@@ -537,6 +537,6 @@ When a valid [payment_instrument](/developers/payments/checkout-api/) is provide
 ## What's Next?
 
 - [**Checkout SDK**](/developers/payments/checkout-sdk/) — Drop-in UI for web and mobile that uses the Checkout API
-- [**Webhooks**](../webhooks/payment-events.md) — Handle payment results on your server
+- [**Webhooks**](../webhooks/payment-events.mdx) — Handle payment results on your server
 - [**Operations**](../operations.md) — Refund, capture, or void completed transactions
 - [**Recurring Payments**](/developers/cards-and-tokens/recurring-payments/) — Set up auto-debit using saved cards

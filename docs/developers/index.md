@@ -16,7 +16,7 @@ Ottu supports multi-currency transactions. If your MID is set up for KWD but you
 
 #### Payment Transaction
 
-Every payment starts with a **payment transaction** — the metadata for the payment including amount, currency, customer data (email, phone, address), and more. A transaction's state changes throughout its lifecycle: `created`, `paid`, `expired`, `canceled`, etc. Learn more in the [Payment States](reference/payment-states.md) reference.
+Every payment starts with a **payment transaction** — the metadata for the payment including amount, currency, customer data (email, phone, address), and more. A transaction's state changes throughout its lifecycle: `created`, `paid`, `expired`, `canceled`, etc. Learn more in the [Payment States](reference/payment-states.mdx) reference.
 
 #### REST API
 

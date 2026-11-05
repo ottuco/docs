@@ -296,4 +296,4 @@ Select the operation to see its example payload and the full interactive API sch
 
 - [**Webhooks**](./webhooks/operation-events.md) — Receive notifications when operations complete
 - [**Checkout API**](./payments/checkout-api.mdx) — Create payment sessions to operate on
-- [**Payment States**](./reference/payment-states.md) — Understand how operations change transaction states
+- [**Payment States**](./reference/payment-states.mdx) — Understand how operations change transaction states
