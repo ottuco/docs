@@ -191,16 +191,16 @@ And these are the actions a customer can take:
     imageAlt: "Adding a card: a secure checkout where the customer enters and saves a new card to the subscription",
   },
   {
-    title: "Confirm a cancellation",
-    description: <>The dialog states when access ends and that no further charges follow.</>,
-    image: "/img/business/autopay/cancellation-01-confirm.png",
-    imageAlt: "Cancellation confirmation dialog stating access continues until the end of the paid period",
-  },
-  {
     title: "Give a reason",
     description: <>A short reason list, clearly marked optional.</>,
     image: "/img/business/autopay/cancellation-02-reason-options.png",
     imageAlt: "Optional cancellation reason selection dialog",
+  },
+  {
+    title: "Confirm a cancellation",
+    description: <>The dialog states when access ends and that no further charges follow.</>,
+    image: "/img/business/autopay/cancellation-01-confirm.png",
+    imageAlt: "Cancellation confirmation dialog stating access continues until the end of the paid period",
   },
   {
     title: "Undo the cancellation",
