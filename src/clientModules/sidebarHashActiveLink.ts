@@ -719,7 +719,10 @@ function scheduleUpdate(): void {
 
 // Pages whose `queryString` tabs sit far below the hash target, so a tab
 // change must not scroll back to it.
-const QUERY_TABS_KEEP_SCROLL = ["/developers/payments/autopay/"];
+const QUERY_TABS_KEEP_SCROLL = [
+  "/developers/payments/autopay/",
+  "/business/autopay/",
+];
 let lastNavSearch = typeof window !== "undefined" ? window.location.search : "";
 let lastNavHash = typeof window !== "undefined" ? window.location.hash : "";
 
