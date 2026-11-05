@@ -15,6 +15,8 @@ import AutoPayDemo from "@site/src/components/AutoPayDemo";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
+import ApiExecute from "@site/src/components/ApiExecute";
+import ApiExecuteGroup from "@site/src/components/ApiExecute/Group";
 
 # AutoPay
 
@@ -205,45 +207,63 @@ Replace `<START_DATE>` with the date of the first billing cycle (today or later,
     }
   }'`}</CodeBlock>
 
+<ApiExecuteGroup>
+
 <Tabs groupId="autopay-api" queryString>
 <TabItem value="create" label="Create">
 
 Create a subscription with the Checkout API: set `payment_type` to `auto_pay` and send the `autopay` block.
+
+<ApiExecute endpoint="create" />
 
 <ApiDocEmbed path="create-payment-transaction-checkout.api.mdx" />
 
 </TabItem>
 <TabItem value="list" label="List">
 
+<ApiExecute endpoint="list" />
+
 <ApiDocEmbed path="autopay-subscription-list.api.mdx" />
 
 </TabItem>
 <TabItem value="retrieve" label="Retrieve">
+
+<ApiExecute endpoint="retrieve" />
 
 <ApiDocEmbed path="autopay-subscription-detail.api.mdx" />
 
 </TabItem>
 <TabItem value="cancel" label="Cancel">
 
+<ApiExecute endpoint="cancel" />
+
 <ApiDocEmbed path="autopay-subscription-cancel.api.mdx" />
 
 </TabItem>
 <TabItem value="cycles" label="Billing cycles">
+
+<ApiExecute endpoint="cycles" />
 
 <ApiDocEmbed path="autopay-subscription-cycles.api.mdx" />
 
 </TabItem>
 <TabItem value="page-link" label="Page link">
 
+<ApiExecute endpoint="page-link" />
+
 <ApiDocEmbed path="autopay-subscription-page-link.api.mdx" />
 
 </TabItem>
 <TabItem value="regenerate-page-token" label="Regenerate page token">
 
+<ApiExecute endpoint="regenerate-page-token" />
+
 <ApiDocEmbed path="autopay-subscription-regenerate-page-token.api.mdx" />
 
 </TabItem>
 </Tabs>
+
+</ApiExecuteGroup>
 
 ### Error contract {#error-contract}
 
