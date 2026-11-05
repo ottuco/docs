@@ -374,7 +374,7 @@ func VerifyOttuSignature(rawBody []byte, header, key string, now time.Time) bool
 </Tabs>
 
 :::info How these samples were checked
-The Python, Node.js, Java and .NET (C#) samples were run, exactly as shown, against both [test vectors](#test-vectors) and return `true`; they return `false` after a one-byte change to either body, for the wrong key, for a changed `t`, for a re-serialised body, for a `t` more than 300 seconds old, and for a header without `v2`.
+All seven samples were run, exactly as shown, against both [test vectors](#test-vectors) and return `true`. They return `false` after a one-byte change to the body, for the wrong key, for a `t` more than 300 seconds old, and for a header without `v2`.
 :::
 
 To check a vector, pass the vector's `t` as the current time (the `now` / `nowSeconds` argument): with the real clock, the old `t` of a published vector is correctly rejected as too old.
