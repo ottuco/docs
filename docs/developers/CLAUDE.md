@@ -186,7 +186,6 @@ These files exist but are empty (0 bytes). Priority for content creation:
 | `index.md` | Developer hub landing page — overview of all developer resources |
 | `payments/index.md` | Payments section overview — what Ottu's payment capabilities are |
 | `reference/error-codes.md` | Comprehensive error code reference table |
-| `reference/payment-states.mdx` | Payment state machine diagram and transitions |
 | `reference/glossary.md` | Developer-focused payment glossary |
 | `cards-and-tokens/recurring-payments.mdx` | Auto-debit and recurring payment guide |
 
