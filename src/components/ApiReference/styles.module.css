@@ -1,0 +1,241 @@
+/* Two columns, Stripe style: fields on the left, a sticky request / response
+   panel on the right. One column below 997px (Docusaurus' mobile breakpoint). */
+.reference {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  gap: 32px;
+  align-items: start;
+  margin: 16px 0 32px;
+}
+
+.left {
+  min-width: 0;
+}
+
+.right {
+  position: sticky;
+  top: calc(var(--ifm-navbar-height) + 16px);
+  min-width: 0;
+  max-height: calc(100vh - var(--ifm-navbar-height) - 32px);
+  overflow-y: auto;
+}
+
+@media (max-width: 996px) {
+  .reference {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .right {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+/* Beats the site's heading margins (`.markdown h3`). */
+.left .title {
+  margin: 0 0 8px;
+}
+
+.endpoint {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.endpoint code {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.description {
+  font-size: 15px;
+}
+
+.muted {
+  font-size: 13px;
+  color: var(--ifm-color-emphasis-700);
+}
+
+/* Sections: Path parameters, Headers, Request body, Response, Other responses */
+.section {
+  margin-top: 32px;
+}
+
+.section .sectionTitle {
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ifm-color-emphasis-300);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ifm-color-emphasis-700);
+}
+
+/* Field rows */
+.fields {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.field {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  scroll-margin-top: calc(var(--ifm-navbar-height) + 16px);
+}
+
+.field:last-child {
+  border-bottom: 0;
+}
+
+.fieldHead {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+.fieldHead .fieldName {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ifm-heading-color);
+  overflow-wrap: anywhere;
+}
+
+.fieldHead .fieldName:hover {
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+.fieldType {
+  font-size: 12px;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.required,
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.required {
+  color: var(--ifm-color-primary);
+}
+
+.badge {
+  color: var(--ifm-color-emphasis-600);
+}
+
+.fieldText {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--ifm-color-emphasis-800);
+}
+
+.fieldText p:last-child {
+  margin-bottom: 0;
+}
+
+.facts {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12.5px;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.facts code {
+  font-size: 11.5px;
+  overflow-wrap: anywhere;
+}
+
+/* Child attributes: a bordered, folded box under the field */
+.children {
+  margin-top: 8px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+}
+
+.children > summary {
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ifm-color-emphasis-800);
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.children[open] > summary {
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.children > .fields {
+  padding: 0 12px;
+}
+
+/* Shape anchors (`<field>--<label>`) land below the navbar, like field rows. */
+.children[id],
+.variant {
+  scroll-margin-top: calc(var(--ifm-navbar-height) + 16px);
+}
+
+.variant + .variant {
+  margin-top: 16px;
+}
+
+.variantTitle {
+  margin: 12px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Other responses */
+.codes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.codes li {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  font-size: 13.5px;
+}
+
+.codeHead {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.code {
+  flex-shrink: 0;
+  font-family: var(--ifm-font-family-monospace);
+  font-weight: 600;
+}
+
+.code[data-code="2"] {
+  color: var(--ifm-color-success-darker);
+}
+
+.code[data-code="4"] {
+  color: var(--ifm-color-warning-darker);
+}
+
+.code[data-code="5"] {
+  color: var(--ifm-color-danger);
+}
+
+.codeText {
+  color: var(--ifm-color-emphasis-800);
+}

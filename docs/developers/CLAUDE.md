@@ -94,7 +94,7 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
   ### Step-by-Step                ← only where the Live Demo + API Reference don't cover it
   ### Use Cases                   ← (optional) specific scenarios, provider-specific details
 
-## API Reference                  ← interactive schema via <ApiDocEmbed>, always with this H2 heading
+## API Reference                  ← interactive schema via <ApiDocEmbed> (or <ApiReference>), always with this H2 heading
   <ApiDocEmbed path="..." />
 
 ## Best Practices                 ← (optional) caching, error handling, performance tips
@@ -113,6 +113,7 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
   - `### Step-by-Step` — numbered instructions with code examples, **only where the Live Demo and the API Reference don't cover it**
   - `### Use Cases` — (optional) specific scenarios, provider-specific details
 - **"API Reference" always has an H2 heading** — never use bare `<ApiDocEmbed>` with `---` separators. If a page covers multiple related endpoints, use `<Tabs>` wrapping multiple `<ApiDocEmbed>` components. For unified endpoints with a discriminator parameter (e.g., `operation` = refund/capture/void), use tabs with per-tab example payloads above a shared `<ApiDocEmbed>`.
+- **Stripe-style reference (`<ApiReference>`)** — `src/components/ApiReference/` renders one endpoint from its generated page's OpenAPI data: fields on the left (path / query parameters, headers, request body, response, other responses; nested fields fold under "Show child attributes") and a sticky request + response panel on the right with Run (via `ApiExecute`). Used on the AutoPay page (`<ApiReference api="autopay-subscription-detail" run="retrieve" tabGroup="autopay-api" />` inside `<Tabs groupId="autopay-api" queryString>`; `tabGroup` lets a deep link to a field open its tab, so each `<TabItem value>` must equal its `run`). Each `api` slug must be listed in `src/components/ApiReference/sources.ts`, and each `run` key needs a request in `src/components/ApiExecute/ApiExecuteInner.tsx`. The rules for `<ApiDocEmbed>` below (H2 heading, `hide_table_of_contents: true`) apply the same way.
 - **Layout with API embeds** — Pages with `<ApiDocEmbed>` MUST use `hide_table_of_contents: true`. The API schema renders in the right column where the TOC would normally be. The page layout is: left sidebar + content + API explorer. No right-hand TOC.
 - **Section order is fixed** — Overview → When to Use → Setup → Guide → API Reference → Best Practices → FAQ → What's Next? Skip optional sections, never reorder.
 - **Optional sections** — Setup, Best Practices can be omitted. When to Use, Guide, FAQ, and What's Next? should be on every page.
@@ -133,7 +134,7 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 - **Generated files per endpoint**: `{slug}.api.mdx`, `{slug}.RequestSchema.json`, `{slug}.StatusCodes.json`, `{slug}.ParamsDetails.json`
 - **Regenerate**: `npx docusaurus gen-api-docs ottuApi`
 - **Never manually edit** files in `apis/` — they are overwritten on regeneration
-- **Deep-link to response fields**: use fragment ID pattern `#response-{path}-{to}-{field}` (see root CLAUDE.md for full schema permalink documentation)
+- **Deep-link to response fields**: use fragment ID pattern `#response-{path}-{to}-{field}` (see root CLAUDE.md for full schema permalink documentation). On a page that uses `<ApiReference>` the fields have their own anchors instead: `#{run}-api-{path|query|headers|body|response}-{field}-{child}`, e.g. `#create-api-body-autopay-frequency`; error bodies use `#{run}-api-errors-{code}-{field}`; a field inside a oneOf shape adds `--` and the shape's label (its schema title, or `option_N`), e.g. `#create-api-body-payment_instrument--ApplePayInstrument-payload` or, for a response that is one of several shapes, `#create-api-response--CheckoutPOSTResponse-session_id`. Characters other than letters, digits, `_` and `-` become `_`.
 - Swizzled `Schema` and `SchemaItem` components in `src/theme/` provide deep-nested permalink support
 
 ## Sidebar Configuration

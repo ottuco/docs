@@ -403,12 +403,106 @@ function nextFrame(callback: () => void): void {
   timerId = window.setTimeout(run, FRAME_FALLBACK_MS);
 }
 
+/**
+ * True when a closed <details> hides `el`. A closed box still shows its own
+ * <summary>, so a target there (the schema's collapsible headers put their
+ * anchor in the summary) is visible.
+ */
+function inClosedDetails(el: HTMLElement): boolean {
+  for (
+    let box = el.closest("details:not([open])");
+    box;
+    box = box.parentElement?.closest("details:not([open])") ?? null
+  ) {
+    const summary = box.querySelector(":scope > summary");
+    if (!summary?.contains(el)) return true;
+  }
+  return false;
+}
+
+/**
+ * Same-page hash change: scroll once the target can be seen. A new hash can
+ * open collapsed parents on its render (ApiReference child attributes, schema
+ * collapsibles) or switch the tab that holds it (ApiReference), so wait until
+ * the target is no longer inside a closed <details> or a hidden tab panel.
+ * Gives up after REVEAL_TIMEOUT_MS if the target never becomes visible.
+ * Function declarations used here (smoothScrollToHash, waitForScrollIdle,
+ * maintainTargetPosition) are defined below and hoisted.
+ */
+// Each same-page hash change gets a ticket; an older loop still waiting for
+// its target to appear stops once a newer hash has been asked for.
+let scrollTicket = 0;
+
+// How long to wait for a target to become visible. A tab switch re-renders
+// the whole panel, which can take ~0.5 s on a slow device or in dev mode.
+const REVEAL_TIMEOUT_MS = 2000;
+
+function scrollWhenVisible(
+  hashId: string,
+  deadline = performance.now() + REVEAL_TIMEOUT_MS,
+  revealed = false,
+  ticket = ++scrollTicket,
+): void {
+  nextFrame(() => {
+    if (ticket !== scrollTicket) return; // a newer link took over
+    const target = document.getElementById(hashId);
+    if (!target) {
+      // Not rendered yet (a tab switch, lazy content): wait for it too.
+      if (performance.now() < deadline)
+        scrollWhenVisible(hashId, deadline, revealed, ticket);
+      return;
+    }
+    const hidden = target.closest("[hidden]") || inClosedDetails(target);
+    if (hidden) {
+      // Try again next frame. If it is still hidden at the deadline, nothing
+      // reveals it (a tab nothing switches, a box that never opens): do
+      // nothing. Scrolling to it, and pinning it, would measure a zero
+      // position and drag the page up.
+      if (performance.now() < deadline)
+        scrollWhenVisible(hashId, deadline, true, ticket);
+      return;
+    }
+    smoothScrollToHash(hashId);
+    // Only when the target had to be revealed (a tab switched, a box opened):
+    // the page is still settling and moves it during the smooth scroll, so
+    // keep it pinned once the scroll stops, as the initial-load path does.
+    // A plain anchor on visible content needs no pin.
+    if (revealed) waitForScrollIdle(4000, () => maintainTargetPosition(hashId));
+  });
+}
+
+/**
+ * Runs `callback` once the target is visible (not in a hidden tab panel or a
+ * closed <details>), or after 500 ms anyway: the first-load and
+ * cross-page paths always scrolled, and keep doing so when nothing reveals it.
+ */
+function whenVisible(hashId: string, callback: () => void): void {
+  // Short: these paths already waited for the layout to settle, by which
+  // time a component that reveals the target has done so. Don't hold the
+  // first-load overlay for a target nothing will reveal.
+  const deadline = performance.now() + 500;
+  const check = () => {
+    const target = document.getElementById(hashId);
+    const hidden =
+      !target || target.closest("[hidden]") || inClosedDetails(target);
+    if (!hidden || performance.now() >= deadline) callback();
+    else nextFrame(check);
+  };
+  check();
+}
+
 let initialLoadHandled = false;
 
 function getHashTargetId(): string | null {
   const { hash } = window.location;
   if (!hash || hash === "#") return null;
-  return decodeURIComponent(hash.slice(1));
+  try {
+    return decodeURIComponent(hash.slice(1));
+  } catch {
+    // A malformed %-escape (e.g. a mangled shared link "#50%") would throw
+    // here while the module loads and stop the whole page from rendering.
+    return hash.slice(1);
+  }
 }
 
 // Loader visuals live entirely in CSS: src/css/custom.css uses
@@ -513,8 +607,10 @@ function maintainTargetPosition(hashId: string): void {
     if (!spyMuted) return false; // user took over
     if (performance.now() - startedAt > MAINTAIN_DURATION_MS) return false;
     // If the element fell out of the live DOM (route change since we
-    // started), bail rather than chasing a phantom drift.
+    // started), or is hidden again (its box closed, its tab switched away),
+    // bail rather than chasing a phantom drift: a hidden target measures 0.
     if (!target.isConnected) return false;
+    if (target.closest("[hidden]") || inClosedDetails(target)) return false;
 
     const topOffset = getNavbarHeight() + 16;
     const rect = target.getBoundingClientRect();
@@ -652,7 +748,7 @@ function runInitialHashGate(): void {
   // scheduleUpdate() — those keep sidebar highlight / URL-hash in
   // sync while the loader is up.
 
-  waitForLayoutStability(hashId, () => {
+  waitForLayoutStability(hashId, () => whenVisible(hashId, () => {
     // Sequence: snap to top under the loader → fade loader and start
     // smooth-scroll TOGETHER. The user sees the page scrolling toward
     // the target through a fading overlay, with no "page at top" flash
@@ -666,7 +762,7 @@ function runInitialHashGate(): void {
       smoothScrollToHash(hashId);
       waitForScrollIdle(4000, () => maintainTargetPosition(hashId));
     });
-  });
+  }));
 }
 
 /**
@@ -697,10 +793,12 @@ function runSpaHashScroll(): void {
   // same layout-shift scroll noise we mute on initial load.
   spyMuted = true;
 
-  waitForLayoutStability(hashId, () => {
-    smoothScrollToHash(hashId);
-    window.setTimeout(() => maintainTargetPosition(hashId), 1200);
-  });
+  waitForLayoutStability(hashId, () =>
+    whenVisible(hashId, () => {
+      smoothScrollToHash(hashId);
+      window.setTimeout(() => maintainTargetPosition(hashId), 1200);
+    }),
+  );
 }
 
 // ── Retry / route change ─────────────────────────────────────────────────
@@ -717,13 +815,11 @@ function scheduleUpdate(): void {
   });
 }
 
-// Pages whose `queryString` tabs sit far below the hash target, so a tab
-// change must not scroll back to it.
-const QUERY_TABS_KEEP_SCROLL = [
-  "/developers/payments/autopay/",
-  "/business/autopay/",
-];
 let lastNavSearch = typeof window !== "undefined" ? window.location.search : "";
+// When the reader last clicked a link. Docusaurus tabs are buttons, so a
+// query-only change right after a link click came from a link (e.g. the
+// page's `?autopay-api=cancel#api-reference`), not from a tab.
+let linkClickedAt = -Infinity;
 let lastNavHash = typeof window !== "undefined" ? window.location.hash : "";
 
 export function onRouteDidUpdate(): void {
@@ -755,6 +851,11 @@ export function onRouteDidUpdate(): void {
   lastNavPathname = currentPath;
   lastNavSearch = currentSearch;
   lastNavHash = currentHash;
+  const fromLink = performance.now() - linkClickedAt < 1000;
+  // A new hash or a new page makes an older pending reveal loop stale. A
+  // query-only change (a tab, including ApiReference opening the tab of the
+  // target) must not: that loop is waiting for exactly that tab.
+  if (currentHash !== prevHash || currentPath !== prevPath) scrollTicket += 1;
 
   if (isFirstRouteUpdate) {
     runInitialHashGate();
@@ -768,19 +869,25 @@ export function onRouteDidUpdate(): void {
     // then smooth-scroll, then run the layout-shift compensator.
     runSpaHashScroll();
   } else if (
-    QUERY_TABS_KEEP_SCROLL.includes(normalizePath(currentPath)) &&
     currentSearch &&
     currentSearch !== prevSearch &&
-    currentHash === prevHash
+    currentHash === prevHash &&
+    !fromLink
   ) {
-    // A `queryString` tab changed the query only: stay on the tab.
+    // A `queryString` tab changed the query only (it always writes a value):
+    // stay on the tab, on any page. The hash target may sit far above it.
+    // A link (e.g. `?tab=x#same-hash`) or one without a query still
+    // scrolls, below.
   } else {
     // Same-page hash change (sidebar anchor click, back/forward). Nothing
     // else scrolls here: Docusaurus only scrolls after a pathname change,
     // and the router does not make the browser follow a pushState hash.
-    // The target already exists, so no hydration wait is needed.
+    // No hydration wait is needed, but the new hash can open collapsed
+    // parents or switch a tab on this render (ApiReference), so
+    // scrollWhenVisible waits (up to 2 s) until the target can be
+    // seen, then scrolls and pins it.
     const hashId = getHashTargetId();
-    if (hashId) smoothScrollToHash(hashId);
+    if (hashId) scrollWhenVisible(hashId);
   }
 }
 
@@ -792,16 +899,33 @@ if (typeof window !== "undefined") {
   // real scroll input — regardless of how long hydration takes.
 
   window.addEventListener("hashchange", () => updateActiveLinks());
+  document.addEventListener(
+    "click",
+    (e) => {
+      if ((e.target as Element | null)?.closest?.("a[href]"))
+        linkClickedAt = performance.now();
+    },
+    { capture: true, passive: true },
+  );
   document.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", onScroll, { passive: true });
 
-  // Real user-scroll intent lifts the mute. Touch/wheel/keyboard only
+  // Real user-scroll intent lifts the mute. Touch/wheel/keyboard/mouse press only
   // — layout-shift scroll events don't originate from any of these.
   const unmute = () => {
     spyMuted = false;
   };
   window.addEventListener("wheel", unmute, { passive: true });
   window.addEventListener("touchmove", unmute, { passive: true });
+  // Dragging the page scrollbar (a press on <html> itself) or middle-click
+  // autoscroll. Other clicks (a tab, a box, Run) are not scrolling.
+  window.addEventListener(
+    "mousedown",
+    (e) => {
+      if (e.button === 1 || e.target === document.documentElement) unmute();
+    },
+    { passive: true },
+  );
   window.addEventListener(
     "keydown",
     (e) => {
