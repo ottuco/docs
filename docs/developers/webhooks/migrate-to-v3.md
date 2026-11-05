@@ -55,7 +55,7 @@ While still on format 1 or 2 you can already build and test the [v2 verification
 `refund_queued` is **`refund_pending`** and `invalided` is **`invalidated`**, in the event name and in `data.status`. Formats 1 and 2 keep sending the old values. If your code compares `state` to either value, change the comparison when you move to format 3. There is no `payment.refund_queued` event.
 :::
 
-Three points that earlier drafts of format 3 got wrong: a capture is `payment.paid` with `data.operation` equal to `capture` (there is no `payment.captured`), cash on delivery is `payment.cod` (there is no `payment.cod_confirmed`), and the envelope key is `event`, not `type`.
+Three points to get right: a capture is `payment.paid` with `data.operation` equal to `capture`, cash on delivery is `payment.cod`, and the envelope key is `event`.
 
 ### Field map: formats 1 and 2 to format 3 {#field-map}
 
@@ -119,7 +119,6 @@ A format 3 account never receives a format 1 or 2 body. If a payment moment has 
 | Signature fails only on some payments | The body was parsed and re-serialised before verifying | Verify before parsing: [raw bytes](/developers/webhooks/verify-signatures#verify-v2). |
 | Payers stay on the Ottu page | Receiver answered a non-`2xx` | Answer `200` for the redirect, within the timeout. |
 | Refund logic never fires | Waiting for `state == "refunded"` | Branch on `event == "payment.refunded"`. |
-| Code that reads `type`, `data.payment` or `data.operation` finds nothing | Reading an earlier draft's shape | Read `event`, and the keys directly under `data`. |
 | A `refund_queued` or `invalided` comparison never matches | Those values are renamed | Compare with `refund_pending` and `invalidated`. |
 | Duplicate fulfilment | Not de-duplicating | Use [`Idempotency-Key`](/developers/webhooks/delivery-and-retries#idempotency-key) and the business reference. |
 

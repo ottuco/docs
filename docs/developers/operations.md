@@ -8,6 +8,7 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import FAQ, { FAQItem } from '@site/src/components/FAQ';
+import OperationsWorkflow from "@site/src/diagrams/flow/OperationsWorkflow";
 
 # Operations
 
@@ -45,18 +46,7 @@ Store the `session_id` securely — it's required for all operation requests. Pr
 
 ### Workflow
 
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
-graph LR
-    A([Merchant]) -->|Operation request| B[Operations API]
-    B -->|Internal ops| C{{Updated State}}
-    B -->|External ops| D[Payment Gateway]
-    D -->|PG response| B
-    B --> E{{Child Transaction}}
-
-    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
-    class B accent
-```
+<OperationsWorkflow />
 
 1. **Merchant sends an operation request** with `session_id`, `operation` type, and optional `amount`.
 2. **For internal operations** (cancel, expire, delete) — Ottu updates the transaction state directly.

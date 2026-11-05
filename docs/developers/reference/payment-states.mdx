@@ -52,7 +52,7 @@ The diagram below shows the most common state transitions. For the complete list
 <PaymentStatesLifecycle />
 
 :::tip
-Even `failed` and `expired` payment transactions can receive a delayed successful payment from the gateway (e.g., via automatic inquiry). Always handle webhook updates for payment transactions you consider "failed."
+Even `failed` and `expired` payment transactions can receive a delayed successful payment from the gateway (e.g., via automatic inquiry). Always handle webhook updates for payment transactions you consider "failed." A `canceled` payment transaction does not move to `paid`.
 :::
 
 ## Payment Attempt States

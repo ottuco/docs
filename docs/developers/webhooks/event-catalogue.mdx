@@ -216,7 +216,7 @@ An event is named after the **status** the transaction reached: `payment.<status
 :::
 
 :::note Events that do not exist in v3
-A capture is not a separate event: it is `payment.paid` with `data.operation` equal to `capture`. Cash on delivery is `payment.cod`. Older drafts of this page listed `payment.captured` and `payment.cod_confirmed`; Ottu never sends them.
+A capture is not a separate event: it is `payment.paid` with `data.operation` equal to `capture`. Cash on delivery is `payment.cod`. The envelope key is `event`.
 :::
 
 How to read the matrix:
@@ -511,8 +511,8 @@ Events can arrive out of order. `payment.created` is delivered a few seconds aft
   <FAQItem question="Can events arrive out of order?">
     Yes. `payment.created` can arrive after a fast `payment.paid`, and a retried event can arrive late. Order events for the same payment by `created`, de-duplicate on the event `id`, and fetch the current state from the [Payment Status API](/developers/payments/psq) when the final state matters. See [ordering](#ordering).
   </FAQItem>
-  <FAQItem question="Is there a payment.captured or payment.cod_confirmed event?">
-    No. A capture is `payment.paid` with `data.operation` equal to `capture`, and cash on delivery is `payment.cod`.
+  <FAQItem question="How do I recognise a capture or a cash-on-delivery payment?">
+    A capture is `payment.paid` with `data.operation` equal to `capture`, and cash on delivery is `payment.cod`. Read the event name from the envelope key `event`.
   </FAQItem>
   <FAQItem question="Why is is_sandbox false before the payer chooses a gateway?">
     A payment that offers both sandbox and live gateways has no single answer until a try picks one, so it is not called sandbox. See [`is_sandbox`](#is-sandbox).

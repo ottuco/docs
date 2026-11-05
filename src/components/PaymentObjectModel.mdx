@@ -1,3 +1,6 @@
+import PaymentObjectHierarchy from "@site/src/diagrams/flow/PaymentObjectHierarchy";
+import PaymentTransactionTypes from "@site/src/diagrams/flow/PaymentTransactionTypes";
+
 ## Payment Object Model
 
 Every payment in Ottu is described by four core objects. Knowing what each one is — and how they relate — makes the state tables below much easier to follow.
@@ -11,29 +14,8 @@ Every payment in Ottu is described by four core objects. Knowing what each one i
 
 A `Payment Transaction` is the parent record. Every gateway-level try against it is a `Payment Attempt` child:
 
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
-flowchart LR
-    PT["<b>Payment Transaction</b><br/>parent · intent · lifecycle"]:::accent
-    PA["<b>Payment Attempt</b><br/>single gateway try · own FSM"]:::accent
-    PT -->|"1..N children"| PA
-
-    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
-```
+<PaymentObjectHierarchy />
 
 The `type` field on `Payment Transaction` tells you what kind of intent it represents — a `Payment Request`, an `E-commerce Payment`, or one of several other types:
 
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
-flowchart TB
-    PT["<b>Payment Transaction</b><br/>parent · intent · lifecycle"]:::accent
-    PR["Payment Request<br/>type: payment_request<br/>merchant-initiated link"]
-    EC["E-commerce Payment<br/>type: e_commerce<br/>storefront-initiated"]
-    OT["Other types<br/>bulk · event · food_ordering · …"]
-
-    PT -->|type| PR
-    PT -->|type| EC
-    PT -->|type| OT
-
-    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
-```
+<PaymentTransactionTypes />
