@@ -1,0 +1,193 @@
+---
+title: Migrate CyberSource to JWT + MLE
+sidebar_label: CyberSource JWT + MLE
+description: Switch your CyberSource and CyberSource Unified Checkout connection from HTTP Signature to JWT with Message-Level Encryption, test it in the sandbox, and roll back if you need to.
+---
+
+import CybersourceJwtMleStory from "@site/src/diagrams/flow/CybersourceJwtMleStory";
+
+# Migrate your CyberSource connection to JWT + MLE
+
+CyberSource is retiring the **HTTP Signature** way of signing REST API calls. Its replacement is **JWT with Message-Level Encryption (MLE)**: each request is encrypted for CyberSource and signed with a JWT (a signed token that proves who is calling), and each reply comes back encrypted for you. MLE means the request and reply bodies themselves are encrypted, not just the connection. Ottu supports both, per merchant account (MID), so you can switch one MID at a time.
+
+This page shows you how to prepare the keys in the CyberSource Business Center, switch a MID in Ottu, test it in the sandbox, and roll back. You do not write any code.
+
+<CybersourceJwtMleStory />
+
+## Who must act, and when
+
+This applies to you if you accept payments through either of these gateways:
+
+- **CyberSource** (the hosted Secure Acceptance page).
+- **CyberSource Unified Checkout**, shown in the dashboard as **Cybersource Unified Checkout**.
+
+| What changes | What you do | When |
+| --- | --- | --- |
+| CyberSource retires HTTP Signature | Switch each MID to **JWT with Message-Level Encryption** | Before CyberSource stops accepting HTTP Signature. Ask your CyberSource contact for the exact date for your account. |
+| CyberSource moves its API to **visaacceptance.com** | Enter the new host in **REST API host**, when you are ready | CyberSource's migration timeline gives **2027-01-31** for production (`api.visaacceptance.com`), and a sandbox host, `apitest.visaacceptance.com`, for testing first. See [CyberSource's release note](https://developer.cybersource.com/docs/cybs/en-us/platform/relnote/all/na/rn-2026-09-18.html). |
+
+:::note
+**Nothing changes until you switch.** Every existing MID keeps **HTTP Signature**, and an empty **REST API host** keeps the standard CyberSource host. Ottu does not move a MID for you.
+:::
+
+The two changes are independent. You can switch the authentication mode without changing the host, and the other way round. Do them one at a time so that, if something fails, you know which change caused it.
+
+## Which operations are affected
+
+The authentication mode only applies to calls Ottu makes to the CyberSource **REST API**. Other parts of a payment do not use it.
+
+| Gateway | Uses the REST API, so affected | Not affected |
+| --- | --- | --- |
+| **CyberSource** | Refunds. Apple Pay payments. | The hosted payment page itself, which uses the Access key, Profile ID and Secret key. Ottu does not capture, void or check status over the REST API on this gateway. |
+| **CyberSource Unified Checkout** | Every call: starting the checkout, taking the payment, capture, void, refund and transaction status checks. | Nothing. |
+
+The **REST API host** field applies to the same calls, in both authentication modes.
+
+## What to prepare in the CyberSource Business Center
+
+Do this in the CyberSource Business Center for the account the MID belongs to. Use the test Business Center for a sandbox MID and the production one for a live MID.
+
+1. Log in and open **Payment Configuration**, then **Key Management**.
+2. Click **+ Generate Key** and generate a **REST - API Response MLE** key.
+3. Download the **.p12** file. Note down the **password** you set and, if shown, the **key ID**. Keep both somewhere safe.
+4. Download the **request-encryption certificate** (a public certificate in `.pem`, `.crt` or `.cer` format). Ottu uses it to encrypt requests.
+5. Check which signing key you will use:
+   - **Your existing REST - Shared Secret key** (API key ID and API secret key). Ottu reuses it to sign the JWT. You do not need to do anything new.
+   - Or a **JWT signing .p12**, if you prefer to sign with a key file. This is optional.
+
+:::warning
+The .p12 files and their passwords are private keys. Never email them or paste them into a ticket. Upload them only in the Ottu MID settings.
+:::
+
+If you have not yet generated a shared-secret key, follow [Generating a Cybersource RESTful Key](/business/payments/services/apple-pay/setup-cybersource#generating-a-cybersource-restful-key).
+
+## Switch a MID to JWT + MLE
+
+1. Log in to the **Ottu Dashboard** and open the **Administration Panel**.
+2. Go to the **Gateway** tab, then **Settings**.
+3. Open the **CyberSource** or **Cybersource Unified Checkout** setting for the MID. Start with a **sandbox** MID.
+4. Fill in the fields in the table below.
+5. Set **REST authentication** to **JWT with Message-Level Encryption**.
+6. Click **Save**. Ottu checks the files and passwords when you save. If it shows an error, use the [troubleshooting table](#troubleshooting) below.
+
+Leave **REST API host** empty unless you are ready to move to the new CyberSource host.
+
+### Fields
+
+Labels appear in English or Arabic according to the dashboard language.
+
+| English label | Arabic label | Required for JWT? | What it is |
+| --- | --- | --- | --- |
+| REST authentication | مصادقة REST | n/a (this is the switch) | The mode. Choose **HTTP Signature** (توقيع HTTP) or **JWT with Message-Level Encryption** (JWT مع تشفير مستوى الرسالة (MLE)). Existing MIDs are on HTTP Signature. |
+| REST API host | مضيف REST API | Optional | Leave empty for the standard host: `apitest.cybersource.com` (sandbox) or `api.cybersource.com` (production). Enter `apitest.visaacceptance.com` (sandbox) or `api.visaacceptance.com` (production) only when you are ready to switch. For the dates, see [Who must act, and when](#who-must-act-and-when). Enter the host name only, with no `https://`, path or port. It must end with `.cybersource.com` or `.visaacceptance.com`. |
+| Response MLE key (.p12) | مفتاح MLE للاستجابة (.p12) | Yes | The **REST - API Response MLE** .p12 file from the Business Center. Ottu uses it to decrypt CyberSource replies. Accepted file types: `.p12`, `.pfx`. |
+| Response MLE key password | كلمة مرور مفتاح MLE للاستجابة | Yes | The password of that .p12 file. |
+| Response MLE key ID | معرّف مفتاح MLE للاستجابة | Optional | Leave empty to let Ottu read it from the .p12 that CyberSource generated. |
+| Request MLE certificate | شهادة MLE للطلب | Yes, unless you upload a JWT signing .p12 that contains it | The public CyberSource certificate (`.pem`, `.crt` or `.cer`) Ottu uses to encrypt requests. |
+| JWT signing key (.p12) | مفتاح توقيع JWT (.p12) | Optional | A .p12 key to sign the JWT with. Leave empty to sign with the API key ID and API secret key. |
+| JWT signing key password | كلمة مرور مفتاح توقيع JWT | Only if you upload a JWT signing .p12 | The password of the JWT signing .p12. |
+| API key ID | Not translated yet, shown in English | Yes, unless you upload a JWT signing .p12 | Your existing REST - Shared Secret key ID. It is reused to sign the JWT. |
+| API secret key | Not translated yet, shown in English | Yes, unless you upload a JWT signing .p12 | Your existing REST - Shared Secret key. It is reused to sign the JWT. |
+
+:::tip
+Password boxes show empty after you save. Leave a password box empty when you edit the MID to keep the stored password. Type a value only to replace it.
+:::
+
+:::note
+The checks in the table apply only when **REST authentication** is **JWT with Message-Level Encryption**. A MID on **HTTP Signature** still needs the **API key ID** and **API secret key** for refunds and Apple Pay.
+:::
+
+## Test in the sandbox
+
+Switch a **sandbox** MID first. A sandbox MID uses the sandbox host (`apitest.cybersource.com` when **REST API host** is empty), so a mistake cannot affect real customers. See [Sandbox](/developers/payments/sandbox) for how to make test payments.
+
+1. Switch the sandbox MID as described above and save.
+2. Make a test payment through that gateway and confirm it succeeds.
+3. Run an operation that uses the REST API:
+   - **CyberSource:** refund the test payment, or make an Apple Pay test payment.
+   - **CyberSource Unified Checkout:** the test payment itself already uses the REST API. Also try a refund, and a void or capture if you use them.
+4. If you also plan to change the host, do it now as a separate step. Enter the sandbox `visaacceptance.com` host from the [Fields](#fields) table in **REST API host**, save, and repeat step 2.
+5. When everything passes, repeat the switch on your production MID, and the host change after it.
+
+## Roll back
+
+You can return a MID to HTTP Signature at any time, as long as CyberSource still accepts it.
+
+1. Open the same MID setting in the Administration Panel.
+2. Set **REST authentication** back to **HTTP Signature**.
+3. If you had changed **REST API host**, empty it to return to the standard host.
+4. Click **Save**.
+
+HTTP Signature uses the **API key ID** and **API secret key**, so keep them filled in. Saving the changed **REST authentication** value is also how you resume a MID that was paused. See [If a reply cannot be decrypted](#if-a-reply-cannot-be-decrypted).
+
+## If a reply cannot be decrypted
+
+:::danger
+If CyberSource replies but Ottu cannot decrypt the reply, CyberSource has already acted on the request and Ottu cannot tell how. **The outcome is UNKNOWN.** Ottu then pauses REST operations on that MID.
+
+1. **Do NOT retry** the payment or operation. A retry could charge or refund twice.
+2. **Check the transaction in the CyberSource Business Center** to see what actually happened.
+3. **Check the Response MLE key and password**, correct them in the MID setting, and **save the settings** to resume.
+:::
+
+How the pause works:
+
+- It affects only the MID where the failure happened. Other MIDs keep working.
+- It does not expire by itself. It lifts when you save changes to the MID that could fix the problem: the Response MLE key or password, the key ID, the request certificate, the JWT signing key or password, or the **REST authentication** mode. Saving the page without changing any of these does not resume the MID. Changing only the **REST API host** does not resume it.
+- While the MID is paused, operations on it fail with the **paused** message in the table below.
+- Your customer sees only: "We could not confirm your payment. Please contact the merchant before trying again." They never see the two operation messages in the table below. Be ready to check the Business Center when they contact you. If you also use Apple Pay or Unified Checkout, this is the message shown during their payment.
+- On the **CyberSource** gateway, if CyberSource refuses a request before it encrypts anything (for example because of a bad token or a wrong host), it replies in plain JSON. Ottu reads that reply normally and it does not pause the MID.
+
+## Troubleshooting
+
+Messages are shown in English or Arabic according to the dashboard language.
+
+### When you save the MID
+
+| Message | Cause | Fix |
+| --- | --- | --- |
+| Enter a bare CyberSource host name such as api.cybersource.com (no https://, path or port). It must end with .cybersource.com or .visaacceptance.com. | **REST API host** contains `https://`, a path, a port, or a host outside CyberSource. | Enter only the host name, for example `api.visaacceptance.com`, or empty the field. |
+| Upload the 'REST - API Response MLE' .p12 from CyberSource. | JWT is selected and no Response MLE key is uploaded. | Upload the .p12 you generated in the Business Center. |
+| Enter the password of the Response MLE .p12. | JWT is selected and the Response MLE key password is empty. | Enter the password you set when you generated the key. |
+| The Response MLE .p12 could not be opened. Upload the .p12 file from CyberSource and check its password. | The file is not the .p12 from CyberSource, is damaged, or the password is wrong. | Upload the original file and re-enter its password. |
+| Upload the CyberSource request MLE certificate, or upload a JWT signing .p12 that contains it. | JWT is selected and there is neither a request certificate nor a JWT signing .p12. | Upload the request-encryption certificate from the Business Center. |
+| The request MLE certificate could not be read. Upload the PEM certificate file from CyberSource. | The certificate file is not a PEM certificate. | Download the certificate again from the Business Center and upload it unchanged. |
+| Enter the password of the JWT signing .p12. | A JWT signing .p12 is uploaded but its password is empty. | Enter the password, or remove the file to sign with the API key instead. |
+| The JWT signing .p12 could not be opened. Upload the .p12 file from CyberSource and check its password. | The signing file is wrong or damaged, or its password is wrong. | Upload the original file and re-enter its password. |
+| Required for JWT unless a JWT signing .p12 is uploaded. | **API key ID** or **API secret key** is empty and no JWT signing .p12 is uploaded. | Fill in both, or upload a JWT signing .p12 and its password. |
+| Extension 'x' not allowed. Allowed extensions are: 'p12, pfx.' | A .p12 file (Response MLE key or JWT signing key) has another extension. `x` is the file's own extension, in lower case and without the dot. The allowed list is joined with commas, and the full stop sits inside the closing quote. | Upload a `.p12` or `.pfx` file. |
+| Extension 'x' not allowed. Allowed extensions are: 'pem, crt, cer.' | The request MLE certificate has another extension. | Upload a `.pem`, `.crt` or `.cer` file. |
+
+### When an operation runs
+
+The two decrypt messages are different moments of the same problem. The first ("CyberSource replied but the response could not be decrypted ...") is shown once, on the operation whose reply failed. The second ("Operations on this gateway are paused ...") is shown on every later operation on that MID until you change its MLE, signing or mode settings and save.
+
+| Message | Cause | Fix |
+| --- | --- | --- |
+| CyberSource JWT with Message-Level Encryption is not fully configured. Please set the Response MLE key and password, the request MLE certificate, and either the API Key ID and API Secret Key or a JWT signing .p12 and its password in the payment gateway settings to perform this operation. | The MID is on JWT but a required field is empty. | Complete the fields in the [table above](#fields) and save. |
+| CyberSource JWT authentication could not be set up. Check the keys, certificates and passwords in the payment gateway settings. | The stored keys could not be read or used. | Upload the files again, check the passwords, and save. |
+| CyberSource replied but the response could not be decrypted, so the outcome of this operation is UNKNOWN. Do NOT retry it. Check the transaction in the CyberSource Business Center. Operations on this gateway are paused until its settings are saved. | The reply could not be decrypted with the stored Response MLE key and password. | Follow the [steps above](#if-a-reply-cannot-be-decrypted). Do not retry. |
+| Operations on this gateway are paused because a CyberSource reply could not be decrypted. Verify the Response MLE key and password and save the payment gateway settings to resume. Check the transaction in the CyberSource Business Center before retrying. | The MID is paused after the failure above. | Check the Business Center, fix the key or password, and save. |
+| We could not confirm your payment. Please contact the merchant before trying again. | What your customer sees when either failure above happens during their payment (Apple Pay, or Unified Checkout). | Check the Business Center for the transaction before you ask the customer to pay again. |
+| CyberSource REST API credentials (API Key ID and API Secret Key) are not configured. Please configure them in the payment gateway settings to perform this operation. | The CyberSource MID is on HTTP Signature and has no API key ID or API secret key. Only the CyberSource gateway shows this message. | Fill in both keys and save. |
+
+## Best practices
+
+- **Switch one MID at a time**, sandbox first, then production.
+- **Change the authentication mode and the host separately**, with a test in between.
+- **Keep your API key ID and API secret key** filled in. JWT reuses them, and they are what you need to roll back.
+- **Keep the .p12 files and passwords in your password manager**, not in email or chat.
+- **Do not retry after an UNKNOWN outcome.** Check the Business Center first.
+- **Plan the host move** using the dates in [Who must act, and when](#who-must-act-and-when). Test the sandbox host on a sandbox MID well before then.
+
+## What's next
+
+Switch a sandbox MID first and test it, then move your production MIDs. Once every MID is on JWT with Message-Level Encryption, plan the host change.
+
+## Related
+
+- [Apple Pay: CyberSource setup](/business/payments/services/apple-pay/setup-cybersource): generate the REST - Shared Secret key.
+- [Payment Gateways](/business/payments/gateways): operations and gateway catalog.
+- [Operations and Controls](/business/operations/): who can refund and void.
+- [Sandbox](/developers/payments/sandbox): make test payments.
+- [Operations (for developers)](/developers/operations): refund, capture and void via the API.
