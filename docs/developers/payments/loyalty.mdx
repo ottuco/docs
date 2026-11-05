@@ -16,7 +16,7 @@ import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
 # Loyalty
 
-Loyalty lets your customers **earn points** on a payment. You opt a transaction in when you create it, the customer pays as usual, and Ottu issues a reward to the customer's account at the loyalty provider as soon as the payment reaches the [`paid`](../reference/payment-states.md) state. If you later refund, Ottu reverses the reward automatically.
+Loyalty lets your customers **earn points** on a payment. You opt a transaction in when you create it, the customer pays as usual, and Ottu issues a reward to the customer's account at the loyalty provider as soon as the payment reaches the [`paid`](../reference/payment-states.mdx) state. If you later refund, Ottu reverses the reward automatically.
 
 ## How it works {#overview}
 
@@ -178,7 +178,7 @@ On a split order the gateway refund and the points return happen in the same req
 }
 ```
 
-**2. The parent's payment webhook** (see [Payment events](../webhooks/payment-events.md)), whose `transactions[]` lists every child. After both halves of the refund it shows the original points leg, the gateway refund, and the points return — the last one is the record you are looking for: `state: refunded` with the points amount.
+**2. The parent's payment webhook** (see [Payment events](../webhooks/payment-events.mdx)), whose `transactions[]` lists every child. After both halves of the refund it shows the original points leg, the gateway refund, and the points return — the last one is the record you are looking for: `state: refunded` with the points amount.
 
 ```json title="Parent payment webhook after a full refund of a 100 SAR split order (abridged)"
 {
