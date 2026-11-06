@@ -90,6 +90,8 @@ export type FlowCard = {
   href?: string;
   /** Show `sub` in a monospace font (a code value). */
   mono?: boolean;
+  /** Invisible: only reserves room (the fit and the scroll width count it), e.g. for an arrow that loops outside the cards. */
+  hidden?: boolean;
   /** Id of a FlowGroup this card sits inside. */
   parent?: string;
 };
