@@ -3,7 +3,6 @@
 import React from "react";
 import Icon from "@mdi/react";
 import { mdiChevronLeft, mdiChevronRight } from "@mdi/js";
-import { STORY_PANEL_H } from "./layout";
 import type { StoryJourney, StoryLane, StoryStep } from "./types";
 import styles from "./styles.module.css";
 
@@ -17,6 +16,7 @@ type Props = {
   pinnedStep: number | null;
   onStop: (stop: number) => void;
   onEscape: () => void;
+  id?: string;
 };
 
 export default function StoryPanel(p: Props): React.JSX.Element {
@@ -47,7 +47,7 @@ export default function StoryPanel(p: Props): React.JSX.Element {
         {step.detail ? <p>{step.detail}</p> : null}
       </>
     );
-  } else if (actor) {
+  } else if (actor && (actor.about?.does || actor.about?.relies)) {
     text = (
       <>
         <div className={styles.panelEyebrow}>{actor.title}</div>
@@ -70,8 +70,8 @@ export default function StoryPanel(p: Props): React.JSX.Element {
 
   return (
     <aside
+      id={p.id}
       className={styles.panel}
-      style={{ height: STORY_PANEL_H }}
       onKeyDown={(e) => e.key === "Escape" && p.onEscape()}
     >
       {/* Only the text is a live region: a screen reader reads the new step,
