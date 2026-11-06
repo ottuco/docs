@@ -93,6 +93,7 @@ const STATES: Record<
   },
 };
 
+// KEEP IN SYNC: this text must match the per-state headings on both pages (docs/business/autopay/index.mdx, docs/developers/payments/autopay/index.mdx). Edit all together.
 // Facts: facts-autopay.md section 2. The text matches the headings under the diagram on each page.
 const TEXT: Record<Audience, Record<Id, Info>> = {
   business: {
