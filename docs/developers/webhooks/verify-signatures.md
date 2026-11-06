@@ -3,186 +3,465 @@ title: Verify Signatures
 sidebar_label: Verify Signatures
 ---
 
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import CodeBlock from "@theme/CodeBlock";
+import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
+
 # Signing Mechanism
 
 To ensure the integrity and authenticity of the [webhook notifications](/developers/webhooks/payment-events) sent to the merchant, Ottu employs a signing mechanism based on HMAC (Hash-based Message Authentication Code). By leveraging HMAC, Ottu can guarantee that the webhook's content remains untampered during transmission.
 
+Two proofs of origin exist, and which one you verify depends on your [webhook format](/developers/webhooks/migrate-to-v3#formats). This page is self-contained: it gives the exact recipe, a published test vector and working code for each.
+
+## Which signature do I verify? {#which-signature}
+
+| Webhook format | Where the signature is | What is signed | Verify this |
+|---|---|---|---|
+| **3** (envelope) | `Ottu-Signature` header, `v2=` part | `<t>.` followed by the **raw body bytes** | [`v2` over the raw body](#verify-v2) |
+| **1 and 2** | `Ottu-Signature` header, `v1=` part (default) | `t=<t>` plus 26 `path=value` lines of the payload | [`v1`](#header-v1) |
+| **1 and 2** | `signature` field in the JSON body | 18 fields concatenated | [Body signature](#body-signature) (unchanged) |
+| Synchronous responses and the [Sign API](#sign-api) | `signature` field, and `ottu_signature` on the Sign API | `signature`: the same 18-field recipe as the body signature. `ottu_signature`: the header value for the `t` you pass. | [Sign API](#sign-api) |
+
+:::note Header versions
+On formats 1 and 2 the header carries `v1` (and may also carry `v2`: `t=...,v1=...,v2=...`). Format 3 always sends `v2` only. A signing failure never blocks the delivery: if the header is missing, treat the request as unsigned and reject it.
+:::
+
+## The Ottu-Signature header {#ottu-signature-header}
+
+Every webhook delivery carries one header. The example below is shape-only: its `v1` and `v2` values come from two different sample payloads on this page, so it does not verify against any single body.
+
+```text
+Ottu-Signature: t=1792417440,v1=469fb5c5ad75e589acd9c6d14c78af62f7c807adb49004dbe71b80c11467d837,v2=b230321937edb54b51b91f65d544aa8039e413f0a8e034e59acb9b13e11e7d4e
+```
+
+| Part | Meaning |
+|---|---|
+| `t` | Unix time in **seconds** when this attempt was signed. It is recomputed for **every attempt**, so a retry has a new `t` and a new signature. |
+| `v1` | Signs the payload fields (formats 1 and 2 only). See [Header v1](#header-v1). |
+| `v2` | `HMAC-SHA256(key, "<t>." + raw body bytes)`, hex-encoded, lowercase. |
+
+The key is your **HMAC Key** from the Webhook configuration, the same key as for the body signature. Parts are separated by commas; read them by name, not by position.
+
+### Verify v2 {#verify-v2}
+
+1. Read the **raw request body** as bytes, before any JSON parsing.
+2. Split the header on `,`, then each part on the first `=`. Take `t` and `v2`.
+3. Reject if `t` is more than **300 seconds** from your clock (replay protection).
+4. Compute `HMAC-SHA256(key, t + "." + raw_body)` and hex-encode it.
+5. Compare with `v2` using a **constant-time** comparison.
+
+:::danger Never re-serialise the body before verifying
+`v2` covers the exact bytes Ottu sent. Parsing the JSON and dumping it again changes spacing, key order and non-ASCII escaping, and the signature then fails (or, worse, you are tempted to disable the check). Read the raw body first, verify, and only then parse it. In Express use `express.raw()`, in Flask `request.get_data()`, in PHP `file_get_contents('php://input')`.
+:::
+
+<Tabs groupId="language">
+<TabItem value="curl" label="cURL">
+
+Compute the expected `v2` for a body you saved, with `openssl`. `printf '%s'` adds no trailing newline, which would change the bytes.
+
+```bash
+KEY='pu9MpX3yPR'
+T=1792417440
+BODY='{"id":"evt_1","data":{"customer_first_name":"Zoë احمد"}}'
+
+printf '%s' "$T.$BODY" | openssl dgst -sha256 -hmac "$KEY" | awk '{print $NF}'
+# b230321937edb54b51b91f65d544aa8039e413f0a8e034e59acb9b13e11e7d4e
+```
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+```python
+import hashlib
+import hmac
+import time
+
+TOLERANCE_SECONDS = 300
+
+
+def verify_ottu_signature(raw_body: bytes, header: str, key: str,
+                          tolerance: int = TOLERANCE_SECONDS, now: "float | None" = None) -> bool:
+    """raw_body is the request body exactly as received (bytes), never re-serialised JSON."""
+    parts = {}
+    for item in header.split(","):
+        name, _, value = item.strip().partition("=")
+        parts[name] = value
+    if "t" not in parts or "v2" not in parts:
+        return False
+    if not (parts["t"].isascii() and parts["t"].isdigit()):
+        return False
+    if abs((now if now is not None else time.time()) - int(parts["t"])) > tolerance:
+        return False
+    expected = hmac.new(key.encode(), f"{parts['t']}.".encode() + raw_body, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected, parts["v2"])
+```
+
+</TabItem>
+<TabItem value="node" label="Node.js">
+
+```javascript
+import crypto from "node:crypto";
+
+const TOLERANCE_SECONDS = 300;
+
+// rawBody must be the Buffer exactly as received (express.raw), never JSON.stringify(req.body).
+export function verifyOttuSignature(rawBody, header, key, tolerance = TOLERANCE_SECONDS, now = Date.now() / 1000) {
+  const parts = Object.fromEntries(
+    header.split(",").map((item) => {
+      const i = item.indexOf("=");
+      return i < 0 ? [item.trim(), ""] : [item.slice(0, i).trim(), item.slice(i + 1)];
+    }),
+  );
+  if (!/^\d+$/.test(parts.t ?? "") || !parts.v2) return false;
+  if (Math.abs(now - Number(parts.t)) > tolerance) return false;
+  const expected = crypto
+    .createHmac("sha256", key)
+    .update(Buffer.concat([Buffer.from(`${parts.t}.`), rawBody]))
+    .digest("hex");
+  const received = Buffer.from(parts.v2, "utf8");
+  const wanted = Buffer.from(expected, "utf8");
+  return received.length === wanted.length && crypto.timingSafeEqual(received, wanted);
+}
+```
+
+</TabItem>
+<TabItem value="php" label="PHP">
+
+```php
+<?php
+function verifyOttuSignature(string $rawBody, string $header, string $key, int $tolerance = 300, ?int $now = null): bool {
+    // $rawBody = file_get_contents('php://input'); the exact bytes, never json_encode($decoded)
+    $parts = [];
+    foreach (explode(',', $header) as $item) {
+        [$name, $value] = array_pad(explode('=', trim($item), 2), 2, '');
+        $parts[$name] = $value;
+    }
+    if (!isset($parts['t'], $parts['v2']) || !ctype_digit($parts['t'])) {
+        return false;
+    }
+    if (abs(($now ?? time()) - (int) $parts['t']) > $tolerance) {
+        return false;
+    }
+    $expected = hash_hmac('sha256', $parts['t'] . '.' . $rawBody, $key);
+    return hash_equals($expected, $parts['v2']);
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Test vectors {#test-vectors}
+
+Use these published values to prove your implementation before you receive live traffic. The body is UTF-8 and contains non-ASCII characters on purpose.
+
+| Input | Value |
+|---|---|
+| Key | `pu9MpX3yPR` |
+| `t` | `1792417440` |
+| Raw body (UTF-8) | `{"id":"evt_1","data":{"customer_first_name":"Zoë احمد"}}` |
+| Expected `v2` | `b230321937edb54b51b91f65d544aa8039e413f0a8e034e59acb9b13e11e7d4e` |
+| Header | `t=1792417440,v2=b230321937edb54b51b91f65d544aa8039e413f0a8e034e59acb9b13e11e7d4e` |
+
+Each of these must be **rejected**:
+
+| Change | `v2` you would get |
+|---|---|
+| `t` changed to `1792417441` | `b8e9781183a995e3834b3fadf4b5af4db2d0b5fb5b0417ec8d17a9ad141e3f91` |
+| Key `wrongkey000` | `7e13ee0138c41bb2037bb631f6f7254be8c04cecb366c8884cd680028906660d` |
+| Body re-serialised with non-ASCII escaped (`json.dumps`) | does not match `b2303219...` |
+
+Pass `now=1792417440` (the `now` argument in the samples above) so that the old `t` of the vector is inside the tolerance window. With the real clock the same header is correctly rejected as too old.
+
+### Header v1 {#header-v1}
+
+On formats 1 and 2 the `v1=` part signs the payload's fields rather than its bytes. It is the same 26-field recipe described in [Important components](#important-components) below with one addition: the string starts with a first line `t=<t>`, taking `t` from the same header, so a captured header cannot be reused later. The test vector for `v1`:
+
+| Input | Value |
+|---|---|
+| Key | `pu9MpX3yPR` |
+| `t` | `1792417440` |
+| Payload | the sample below |
+| Expected `v1` | `469fb5c5ad75e589acd9c6d14c78af62f7c807adb49004dbe71b80c11467d837` |
+
+```json
+{
+  "amount": "86.000", "currency_code": "KWD", "customer_email": "jane@example.com",
+  "customer_first_name": "Jane", "customer_last_name": "", "gateway_account": "credit-card",
+  "gateway_name": "mpgs", "order_no": "ORD-1001", "reference_number": "ABC12",
+  "result": "success", "state": "paid", "session_id": "6c2a1f0e9b", "payment_type": "auto_pay",
+  "extra": { "merchant_id": "merchant.ottu.net", "autopay": { "subscription_id": "sub_1eQ" } },
+  "token": { "token": "9923965822244314", "pg_code": "credit-card", "customer_id": "cust_123", "brand": "VISA" },
+  "agreement": { "id": "A123456789" }
+}
+```
+
+:::warning In `v1`, `0` and `false` are signed
+Only a **missing** path, `null` and an **empty string** are skipped in the `v1` string. The number `0` and the boolean `false` are signed, not skipped. Skipping every falsy value is the mistake that makes `v1` fail only on zero-amount payments.
+:::
+
+### Body signature (formats 1 and 2) {#body-signature}
+
+The `signature` field inside a format 1 or 2 body is **unchanged**. It is the HMAC-SHA256 (hex) of the concatenation of `fieldvalue` pairs, with no separators, over these 18 fields only, in **alphabetical order of the field name**, skipping any field that is missing or empty:
+
+`amount`, `currency_code`, `customer_address_city`, `customer_address_country`, `customer_address_line1`, `customer_address_line2`, `customer_address_postal_code`, `customer_address_state`, `customer_email`, `customer_first_name`, `customer_last_name`, `customer_phone`, `gateway_account`, `gateway_name`, `order_no`, `reference_number`, `result`, `state`.
+
+```python
+import hashlib
+import hmac
+
+BODY_SIGNATURE_FIELDS = {
+    "amount", "currency_code", "customer_address_city", "customer_address_country",
+    "customer_address_line1", "customer_address_line2", "customer_address_postal_code",
+    "customer_address_state", "customer_email", "customer_first_name", "customer_last_name",
+    "customer_phone", "gateway_account", "gateway_name", "order_no", "reference_number",
+    "result", "state",
+}
+
+
+def body_signature(payload: dict, key: str) -> str:
+    message = "".join(
+        f"{name}{payload[name]}"
+        for name in sorted(payload)
+        if name in BODY_SIGNATURE_FIELDS and payload[name]
+    )
+    return hmac.new(key.encode(), message.encode(), hashlib.sha256).hexdigest()
+```
+
+Test vector: key `pu9MpX3yPR` and payload `{"amount": "86.000", "currency_code": "KWD", "customer_first_name": "example-customer"}` give `6143b8ad4bd283540721ab000f6de746e722231aaaa90bc38f639081d3ff9f67`. The body signature is not present in format 3, where `data.payment` and `data.operation` have no `signature` field.
+
+
 ## Important Components
+
+This section describes the 26-field recipe used by the `v1` part of the [`Ottu-Signature` header](#header-v1) on formats 1 and 2. For the body `signature` field see [Body signature](#body-signature); for format 3 see [Verify v2](#verify-v2).
 
 #### 1. HMAC Key (Secret Key)
 
 - This is the backbone of the signing and verification process. Merchants can retrieve their unique HMAC Key from the Webhook Configuration panel within Ottu's admin dashboard [here](/developers/webhooks).
 - It's paramount that this key remains confidential. Always store it securely and avoid exposing it to the public.
 
-#### 2. Fields for Signature
+#### 2. Fields for Signature {#2-fields-for-signature}
 
-The signature is not derived from every field in the webhook payload. See payload example [here](/developers/webhooks/payment-events#payload-example-paid). Only specific fields are considered. These are:
+The signature is not derived from every field in the payload. See payload example [here](/developers/webhooks/payment-events#payload-example-paid). Only the following 26 paths are signed, listed here in the exact sort order used to build the signed string:
 
-- amount
-- currency_code
-- customer_first_name
-- customer_last_name
-- customer_email
-- customer_phone
-- customer_address_line1
-- customer_address_line2
-- customer_address_city
-- customer_address_state
-- customer_address_country
-- customer_address_postal_code
-- gateway_account
-- gateway_name
-- order_no
-- reference_number
-- result
-- state
+```
+agreement.id
+amount
+currency_code
+customer_address_city
+customer_address_country
+customer_address_line1
+customer_address_line2
+customer_address_postal_code
+customer_address_state
+customer_email
+customer_first_name
+customer_last_name
+customer_phone
+extra.autopay.subscription_id
+extra.merchant_id
+gateway_account
+gateway_name
+order_no
+payment_type
+reference_number
+result
+session_id
+state
+token.customer_id
+token.pg_code
+token.token
+```
+
+**Dotted paths address nested objects.** A path such as `token.pg_code` means "the `pg_code` key inside the `token` object", not a top-level field literally named `token.pg_code`. Walk the payload one segment at a time; if any segment is missing, or the value at the end is not an object when more segments remain, treat the whole path as absent.
+
+**Eight of these are newly signed**, and they are the ones existing verifiers miss: `session_id`, `payment_type`, `agreement.id`, `token.token`, `token.pg_code`, `token.customer_id`, `extra.merchant_id`, and `extra.autopay.subscription_id`.
+
+:::note Why `session_id` is now signed
+`session_id` identifies the payment session the notification belongs to. Leaving it unsigned meant a captured webhook could be replayed against a different session while its signature still verified. Signing it binds each notification to exactly one session and closes that replay hole.
+:::
+
+**`token.brand` and `token.number` are deliberately *not* signed.** They exist for display (showing "MASTERCARD •••• 0008" in a UI) and are excluded on purpose. Do not add them to your verifier.
 
 **Key Considerations**:
 
-1. Fields not present in the webhook payload or those with an empty string value are not considered when constructing the signature.
-2. Only fields present in the above list and in the payload with valid non-empty values are considered for signature generation.
-
-This update ensures that developers understand the significance of field presence and their values in the payload when constructing the HMAC signature.
+1. A path that is absent from the payload is skipped.
+2. A path whose value is `null` or an empty string is also skipped. **An empty string signs identically to an absent key.** `0` and `false` are **not** skipped: they are signed.
+3. Values are used exactly as they appear in the payload, with no type coercion, trimming, or case folding.
 
 #### 3. Signature Creation
 
-- Fields from the payload are extracted based on the aforementioned list, sorted alphabetically by key name, and then concatenated to form a unique message string.
-- This string, combined with the HMAC Key, is used to create the **HMAC-SHA256** signature. This resultant signature is then dispatched with the [webhook notification](/developers/webhooks/payment-events).
+0. Start the string with the line `t=<t>`, where `<t>` is the `t` value from the same `Ottu-Signature` header.
+1. Sort the 26 paths above alphabetically. (The list is already in sorted order, so you can hard-code it as shown.)
+2. For each path in that order, resolve it against the payload. Skip it if it is missing, `null` or an empty string.
+3. Render each surviving path as `path=value`.
+4. Join the `t=<t>` line and the rendered pairs with a single newline character, `\n`. There is no trailing newline.
+5. Compute **HMAC-SHA256** over that string using your HMAC Key, and hex-encode the result.
+
+The resulting signature is dispatched with the [webhook notification](/developers/webhooks/payment-events) as the `v1=` part of the `Ottu-Signature` header.
 
 #### 4. Verification by Merchant
 
-- On receipt of the webhook, merchants should rebuild the message string, using the listed fields.
-- Generate an HMAC signature using their stored [HMAC Key](/developers/webhooks).
-- If the computed signature corresponds to the provided one, the payload's authenticity is confirmed. Any discrepancies suggest potential tampering.
+- On receipt, rebuild the signed string from the payload you received, using the steps above.
+- Generate an HMAC signature using your stored [HMAC Key](/developers/webhooks).
+- Compare it to the `v1` value of the `Ottu-Signature` header. Use a constant-time comparison (`hmac.compare_digest` in Python, `hash_equals` in PHP, `crypto.timingSafeEqual` in Node.js) rather than `==`.
+- If they match, the payload is authentic. Any discrepancy suggests tampering, or a verifier that skips `0`/`false` or forgot the `t=<t>` first line.
+
+## Where signatures appear {#where-signatures-appear}
+
+The body `signature` field (the [18-field recipe](#body-signature)) is also returned by the synchronous responses of these endpoints:
+
+| Endpoint | Notes |
+|---|---|
+| `POST /b/pbl/v2/payment/auto-debit` | Charging a saved token (MIT) |
+| `POST /b/pbl/v2/payment/apple-pay` | [Native payments](/developers/payments/native-payments) |
+| `POST /b/pbl/v2/payment/google-pay` | [Native payments](/developers/payments/native-payments) |
+| `POST /b/pbl/v2/payment/wallet` | [Wallet](/developers/payments/wallet) balance payment |
+| `POST /b/pbl/v2/payment/cash` | Cash / COD acknowledgement |
+| `POST /b/pbl/v2/sign/` | Signs a payload you supply, using your HMAC Key. See [Sign API](#sign-api) |
+
+Those five payment responses share the payment-webhook body shape, so they also carry `extra.merchant_id` (see below).
+
+## Sign API {#sign-api}
+
+`POST /b/pbl/v2/sign/` signs a JSON payload you send with your HMAC Key. Use it while migrating: post a payload to it and compare the values it returns with what your own implementation produces for the same payload. It uses the same [authentication](/developers/getting-started/authentication) as the other operations endpoints and requires the permission to view the webhook configuration.
+
+**Query parameter**
+
+| Parameter | Type | Required | Meaning |
+|---|---|---|---|
+| `t` | integer | No | Unix time in seconds to sign with. Defaults to the current time. Pass a fixed `t` to reproduce a [test vector](#test-vectors). |
+
+**Request body:** the JSON payload to sign (for example a payment body).
+
+**Response (200)**
+
+| Key | Meaning |
+|---|---|
+| `signature` | The [body signature](#body-signature) of the payload. |
+| `ottu_signature` | `t=<t>,v1=<hex>`: the [`v1` header value](#header-v1) for this payload and `t`. |
+
+<CodeBlock language="bash" title="Sign a payload with a fixed t">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/sign/?t=1792417440' \
+  --header 'Authorization: Api-Key YOUR_API_KEY' \
+  --header 'Content-Type: application/json' \
+  --data '{"amount": "86.000", "currency_code": "KWD", "customer_first_name": "example-customer"}'`}</CodeBlock>
+
+<CodeBlock language="json" title="Response">{`{
+  "signature": "6143b8ad4bd283540721ab000f6de746e722231aaaa90bc38f639081d3ff9f67",
+  "ottu_signature": "t=1792417440,v1=c8ade60bcdb15089987a636cdc451d85728e498b814ac1d2b1cf5e88fc75362c"
+}`}</CodeBlock>
+
+**Errors**
+
+| Status | Body | Cause | Fix |
+|---|---|---|---|
+| 400 | `{"t": "Must be a unix timestamp in seconds.", "code": "invalid_t"}` | `t` is not an integer | Send whole seconds, for example `t=1792417440` |
+| 401 | authentication error | Missing or invalid credentials | See [Authentication](/developers/getting-started/authentication) |
+| 403 | permission error | The caller cannot view the webhook configuration | Use a user with that permission |
+
+:::warning The Sign API cannot produce `v2`
+`v2` signs the exact raw body bytes of a delivery, which the Sign API never sees (it re-reads your JSON). The response carries `signature` and `ottu_signature` (`v1`) only. The earlier `signature_v2` response key is gone; use `ottu_signature`. To check a `v2` implementation, use the [published vector](#test-vectors).
+:::
+
+## Payload additions you should know about {#payload-additions}
+
+Two related additions land alongside this change, and the distinction between them matters for security.
+
+**`extra.merchant_id` is always present now**, even when you sent no `extra` object on the checkout call. It holds your merchant domain, and it **is** inside the signed set.
+
+**A top-level `autopay` block may be present** on payments created through [AutoPay](/developers/payments/autopay). It sits at the top level of the payload, *not* under `extra`, and contains `subscription_id`, `subscription_status`, `cycle_number`, `cycle_status`, `next_billing_date` and `event_type`.
+
+:::warning The top-level `autopay` block is not covered by the signature
+It is fetched live from the AutoPay service while the response is being assembled, with a short timeout, and is **silently omitted** if that lookup times out or fails. Treat it as informational only:
+
+- **Never** make a security or money-moving decision based on it. Use the signed [`extra.autopay.subscription_id`](#2-fields-for-signature) to identify the subscription, then read authoritative state from the [subscription endpoints](/developers/payments/autopay#api-reference).
+- Its absence means the lookup did not complete. It does **not** mean the payment is not an AutoPay payment.
+- `event_type` is one of `cit_success`, `cit_failure`, `mit_success`, `mit_failure`, `card_updated`, or `null`. `null` means the setup outcome is still undecided, not that it succeeded. It's AutoPay's own best-guess classification, computed independently of the payment result; it is **not** authoritative. Read `result` and `state` on the payment for the actual outcome.
+:::
 
 ## Example
 
-For illustration purposes, let's consider a sample webhook payload and a hypothetical HMAC key.
+Consider this payload and a hypothetical HMAC key.
 
 **Webhook Payload**:
 
 ```json
 {
-  "amount": "86.000",
+  "amount": "49.990",
   "currency_code": "KWD",
-  "customer_first_name": "example-customer"
+  "customer_email": "customer@example.com",
+  "customer_first_name": "Jane",
+  "customer_last_name": "",
+  "gateway_account": "credit-card",
+  "gateway_name": "mpgs",
+  "order_no": "ORD-1001",
+  "payment_type": "auto_pay",
+  "reference_number": "sandboxAQ5DJ",
+  "result": "success",
+  "session_id": "a12f71075a834a34d692736ac43a212fcebfb6ec",
+  "state": "paid",
+  "agreement": { "id": "AGR-abc123" },
+  "extra": {
+    "merchant_id": "merchant.ottu.net",
+    "autopay": { "subscription_id": "sub_abc123" }
+  },
+  "token": {
+    "token": "9491500736137502",
+    "pg_code": "credit-card",
+    "customer_id": "cust_12345",
+    "brand": "MASTERCARD",
+    "number": "**** 0008"
+  }
 }
 ```
 
-**HMAC Key**: `pu9MpX3yPR`
+**HMAC Key**: `pu9MpX3yPR`, **`t`**: `1792417440`
 
-Given this payload and key, the steps to construct the HMAC signature are:
+The `v1` string built from it is exactly this — the `t` line plus 18 lines, joined by `\n`, with no trailing newline:
 
-1. Sort the payload keys.
-2. Use the list of specific fields (as defined in the [Fields for Signature](#2-fields-for-signature) section) to extract values from the payload.
-3. Concatenate the key-value pairs.
-4. Apply the HMAC algorithm using the **SHA256** hash function and the provided HMAC key.
+```text title="Canonical string"
+t=1792417440
+agreement.id=AGR-abc123
+amount=49.990
+currency_code=KWD
+customer_email=customer@example.com
+customer_first_name=Jane
+extra.autopay.subscription_id=sub_abc123
+extra.merchant_id=merchant.ottu.net
+gateway_account=credit-card
+gateway_name=mpgs
+order_no=ORD-1001
+payment_type=auto_pay
+reference_number=sandboxAQ5DJ
+result=success
+session_id=a12f71075a834a34d692736ac43a212fcebfb6ec
+state=paid
+token.customer_id=cust_12345
+token.pg_code=credit-card
+token.token=9491500736137502
+```
 
-Following these steps, the resulting signature is:
+Note what is missing from it, and why:
 
-`6143b8ad4bd283540721ab000f6de746e722231aaaa90bc38f639081d3ff9f67`
+- `customer_last_name` is present in the payload but empty, so it is skipped.
+- `token.brand` and `token.number` are present but are not in the signed set.
+- The eight address and phone paths are absent from the payload, so they are skipped.
 
-Developers should compare this generated signature to the signature received in the webhook payload to validate its authenticity.
+Applying HMAC-SHA256 with the key above gives:
+
+`a1bc78c76d5652f605f1fe5d9223d401cee354853f2cf40c3efb2a608da618bc`
+
+Compare that against the `v1` part of the `Ottu-Signature` header you received.
 
 ## Signature Generation
 
-Ensuring the integrity and authenticity of webhook payloads is paramount for the security of both the service provider and the merchants. To achieve this, an HMAC (Hash-Based Message Authentication Code) signature is generated and sent along with the payload. This signature needs to be validated at the merchant's end to confirm that the data has not been tampered with. For the convenience of developers working with different programming languages, we provide ready-to-use code snippets in various popular languages to generate and verify this HMAC signature. This section showcases how to compute the HMAC signature for the payload in languages like [Python](#python), [PHP](#php), [Java](#java), [.NET (C#)](#net-c), [Node.js](#nodejs) [Ruby](#ruby), and [Go](#go).
+The `v2` check for [Python, Node.js and PHP](#verify-v2) and the [body signature](#body-signature) are covered above. The implementations below compute the **`v1` part** of the `Ottu-Signature` header on formats 1 and 2 in other languages.
+
+:::info How these samples were checked
+All four samples (Java, .NET, Ruby and Go) were run against the [`v1` test vector](#header-v1) and return `469fb5c5...`. The Python, Node.js and PHP `v2` verifiers above were run against the [`v2` vectors](#test-vectors), including the rejection cases.
+:::
 
 ## Specific Examples
-
-### Python
-
-Python function for generating the HMAC signature given a payload and an HMAC key:
-
-```python title="Python"
-import hmac
-import hashlib
-
-def generate_hmac_signature(payload, hmac_key):
-    # List of fields that are considered for the HMAC signature
-    keys = [
-        "amount",
-        "currency_code",
-        "customer_first_name",
-        "customer_last_name",
-        "customer_email",
-        "customer_phone",
-        "customer_address_line1",
-        "customer_address_line2",
-        "customer_address_city",
-        "customer_address_state",
-        "customer_address_country",
-        "customer_address_postal_code",
-        "gateway_name",
-        "gateway_account",
-        "order_no",
-        "reference_number",
-        "result",
-        "state",
-    ]
-
-    # Extract and sort the payload keys based on the 'keys' list, and ignore any missing or empty string values
-    message = [(k, payload[k]) for k in sorted(payload) if k in keys and payload[k]]
-
-    # Concatenate the key-value pairs
-    message_str = "".join([f"{k}{v}" for (k, v) in message])
-
-    # Compute the HMAC signature
-    digest = hmac.new(
-        bytes(hmac_key, encoding="utf8"),
-        bytes(message_str, encoding="utf8"),
-        digestmod=hashlib.sha256
-    ).hexdigest()
-
-    return digest
-
-# Test
-payload = {
-   "amount":"86.000",
-   "currency_code":"KWD",
-   "customer_first_name":"example-customer"
-}
-hmac_key = "pu9MpX3yPR"
-
-print(generate_hmac_signature(payload, hmac_key))
-```
-
-When you run this code, the printed result should match the provided HMAC signature: `6143b8ad4bd283540721ab000f6de746e722231aaaa90bc38f639081d3ff9f67`.
-
-### PHP
-
-```php title="PHP"
-<?php
-
-function generateHmacSignature($payload, $hmacKey) {
-    $keys = [
-        "amount", "currency_code", "customer_first_name",
-        "customer_last_name", "customer_email", "customer_phone",
-        // ... [add all the other keys here] ...
-        "reference_number", "result", "state"
-    ];
-
-    $message = "";
-    foreach ($keys as $key) {
-        if (isset($payload[$key]) && $payload[$key] !== "") {
-            $message .= $key . $payload[$key];
-        }
-    }
-
-    return hash_hmac('sha256', $message, $hmacKey);
-}
-
-// Test
-$payload = [
-    "amount" => "86.000",
-    "currency_code" => "KWD",
-    "customer_first_name" => "example-customer"
-];
-$hmacKey = "pu9MpX3yPR";
-
-echo generateHmacSignature($payload, $hmacKey);
-?>
-```
 
 ### Java
 
@@ -191,70 +470,72 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 public class SignatureGenerator {
 
-    public static String generateHmacSignature(Map<String, String> payload, String hmacKey) throws Exception {
-        String[] keys = {
-            "amount",
-            "currency_code",
-            "customer_first_name",
-            "customer_last_name",
-            "customer_email",
-            "customer_phone",
-            "customer_address_line1",
-            "customer_address_line2",
-            "customer_address_city",
-            "customer_address_state",
-            "customer_address_country",
-            "customer_address_postal_code",
-            "gateway_name",
-            "gateway_account",
-            "order_no",
-            "reference_number",
-            "result",
-            "state",
-        };
+    private static final List<String> SIGNED_FIELDS = Arrays.asList(
+        "agreement.id", "amount", "currency_code",
+        "customer_address_city", "customer_address_country",
+        "customer_address_line1", "customer_address_line2",
+        "customer_address_postal_code", "customer_address_state",
+        "customer_email", "customer_first_name", "customer_last_name",
+        "customer_phone", "extra.autopay.subscription_id", "extra.merchant_id",
+        "gateway_account", "gateway_name", "order_no", "payment_type",
+        "reference_number", "result", "session_id", "state",
+        "token.customer_id", "token.pg_code", "token.token"
+    );
 
-        List<String> sortedKeys = new ArrayList<>();
-        StringBuilder message = new StringBuilder();
-        for (String key : keys) {
-            if (payload.containsKey(key) && !payload.get(key).isEmpty()) {
-              sortedKeys.add(key);
+    @SuppressWarnings("unchecked")
+    private static Object resolvePath(Map<String, Object> payload, String path) {
+        Object current = payload;
+        for (String part : path.split("\\.")) {
+            if (!(current instanceof Map)) {
+                return null;
             }
+            Map<String, Object> node = (Map<String, Object>) current;
+            if (!node.containsKey(part)) {
+                return null;
+            }
+            current = node.get(part);
         }
-        Collections.sort(sortedKeys);
-        for (String key : sortedKeys)
-        {
-              message.append(key).append(payload.get(key));
-        }
+        return current;
+    }
 
+    // Only a missing path, null and "" are skipped. 0 and false are signed.
+    private static boolean isSkipped(Object value) {
+        return value == null || (value instanceof String && ((String) value).isEmpty());
+    }
+
+    // t is the "t" part of the Ottu-Signature header, exactly as received.
+    public static String generateV1(Map<String, Object> payload, String hmacKey, String t)
+            throws Exception {
+        List<String> fields = new ArrayList<>(SIGNED_FIELDS);
+        Collections.sort(fields);
+
+        StringJoiner message = new StringJoiner("\n");
+        message.add("t=" + t);
+        for (String path : fields) {
+            Object value = resolvePath(payload, path);
+            if (isSkipped(value)) {
+                continue;
+            }
+            message.add(path + "=" + value);
+        }
 
         Mac sha256HMAC = Mac.getInstance("HmacSHA256");
-        SecretKeySpec secretKey = new SecretKeySpec(hmacKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-        sha256HMAC.init(secretKey);
-
+        sha256HMAC.init(new SecretKeySpec(hmacKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
         byte[] hashBytes = sha256HMAC.doFinal(message.toString().getBytes(StandardCharsets.UTF_8));
+
         StringBuilder sb = new StringBuilder();
         for (byte b : hashBytes) {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
-    }
-
-    public static void main(String[] args) throws Exception {
-        Map<String, String> payload = new HashMap<>();
-        payload.put("amount", "86.000");
-        payload.put("currency_code", "KWD");
-        payload.put("customer_first_name", "example-customer");
-
-        String hmacKey = "pu9MpX3yPR";
-
-        System.out.println(generateHmacSignature(payload, hmacKey));
     }
 }
 ```
@@ -264,79 +545,56 @@ public class SignatureGenerator {
 ```csharp title="C# (.NET)"
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
 public class SignatureGenerator {
-    public static string GenerateHmacSignature(Dictionary<string, string> payload, string hmacKey) {
-        string[] keys = {
-            "amount", "currency_code", "customer_first_name",
-            // ... [add all the other keys here] ...
-            "reference_number", "result", "state"
-        };
+    private static readonly string[] SignedFields = {
+        "agreement.id", "amount", "currency_code",
+        "customer_address_city", "customer_address_country",
+        "customer_address_line1", "customer_address_line2",
+        "customer_address_postal_code", "customer_address_state",
+        "customer_email", "customer_first_name", "customer_last_name",
+        "customer_phone", "extra.autopay.subscription_id", "extra.merchant_id",
+        "gateway_account", "gateway_name", "order_no", "payment_type",
+        "reference_number", "result", "session_id", "state",
+        "token.customer_id", "token.pg_code", "token.token"
+    };
 
-        StringBuilder message = new StringBuilder();
-        foreach (string key in keys) {
-            if (payload.ContainsKey(key) && !String.IsNullOrEmpty(payload[key])) {
-                message.Append(key).Append(payload[key]);
+    private static object ResolvePath(IDictionary<string, object> payload, string path) {
+        object current = payload;
+        foreach (var part in path.Split('.')) {
+            if (!(current is IDictionary<string, object> node) || !node.ContainsKey(part)) {
+                return null;
             }
+            current = node[part];
         }
+        return current;
+    }
+
+    // Only a missing path, null and "" are skipped. 0 and false are signed.
+    private static bool IsSkipped(object value) {
+        return value == null || (value is string s && s.Length == 0);
+    }
+
+    // t is the "t" part of the Ottu-Signature header, exactly as received.
+    public static string GenerateV1(IDictionary<string, object> payload, string hmacKey, string t) {
+        var lines = new List<string> { $"t={t}" };
+        lines.AddRange(SignedFields
+            .OrderBy(f => f, StringComparer.Ordinal)
+            .Select(path => new { path, value = ResolvePath(payload, path) })
+            .Where(x => !IsSkipped(x.value))
+            .Select(x => $"{x.path}={x.value}"));
+
+        var message = string.Join("\n", lines);
 
         using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(hmacKey))) {
-            byte[] hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(message.ToString()));
+            byte[] hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(message));
             return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
         }
     }
-
-    static void Main(string[] args) {
-        var payload = new Dictionary<string, string> {
-            {"amount", "86.000"},
-            {"currency_code", "KWD"},
-            {"customer_first_name", "example-customer"}
-        };
-        string hmacKey = "pu9MpX3yPR";
-
-        Console.WriteLine(GenerateHmacSignature(payload, hmacKey));
-    }
 }
-```
-
-### Node.js
-
-```javascript title="Node.js"
-const crypto = require("crypto");
-
-function generateHmacSignature(payload, hmacKey) {
-  const keys = [
-    "amount",
-    "currency_code",
-    "customer_first_name",
-    // ... [add all the other keys here] ...
-    "reference_number",
-    "result",
-    "state",
-  ];
-
-  const sortedKeys = Object.keys(payload).sort();
-  const messageArray = sortedKeys
-    .filter((key) => keys.includes(key))
-    .map((key) => [key, payload[key]]);
-  const message = messageArray.map(([k, v]) => `${k}${v}`).join("");
-
-  const hmac = crypto.createHmac("sha256", hmacKey);
-  hmac.update(message);
-
-  return hmac.digest("hex");
-}
-
-const payload = {
-  amount: "86.000",
-  currency_code: "KWD",
-  customer_first_name: "example-customer",
-};
-const hmacKey = "pu9MpX3yPR";
-
-console.log(generateHmacSignature(payload, hmacKey));
 ```
 
 ### Ruby
@@ -344,35 +602,53 @@ console.log(generateHmacSignature(payload, hmacKey));
 ```ruby title="Ruby"
 require 'openssl'
 
-def generate_hmac_signature(payload, hmac_key)
-    keys = [
-        'amount', 'currency_code', 'customer_first_name',
-        # ... [add all the other keys here] ...
-        'reference_number', 'result', 'state'
-    ]
+SIGNED_FIELDS = [
+  'agreement.id', 'amount', 'currency_code',
+  'customer_address_city', 'customer_address_country',
+  'customer_address_line1', 'customer_address_line2',
+  'customer_address_postal_code', 'customer_address_state',
+  'customer_email', 'customer_first_name', 'customer_last_name',
+  'customer_phone', 'extra.autopay.subscription_id', 'extra.merchant_id',
+  'gateway_account', 'gateway_name', 'order_no', 'payment_type',
+  'reference_number', 'result', 'session_id', 'state',
+  'token.customer_id', 'token.pg_code', 'token.token'
+].freeze
 
-    message = ""
-    keys.each do |key|
-        if payload[key] && payload[key] != ''
-            message += key + payload[key]
-        end
-    end
+MISSING = Object.new
 
-    digest = OpenSSL::HMAC.hexdigest('sha256', hmac_key, message)
-    return digest
+def resolve_path(payload, path)
+  current = payload
+  path.split('.').each do |part|
+    return MISSING unless current.is_a?(Hash) && current.key?(part)
+    current = current[part]
+  end
+  current
 end
 
-# Test
-payload = {
-    "amount" => "86.000",
-    "currency_code" => "KWD",
-    "customer_first_name" => "example-customer"
-}
+# Only a missing path, nil and '' are skipped. 0 and false are signed.
+def skipped?(value)
+  value.equal?(MISSING) || value.nil? || value == ''
+end
 
+# t is the "t" part of the Ottu-Signature header, exactly as received.
+def generate_v1(payload, hmac_key, t)
+  lines = ["t=#{t}"]
+  SIGNED_FIELDS.sort.each do |path|
+    value = resolve_path(payload, path)
+    next if skipped?(value)
+    lines << "#{path}=#{value}"
+  end
 
-hmac_key = "pu9MpX3yPR"
+  OpenSSL::HMAC.hexdigest('sha256', hmac_key, lines.join("\n"))
+end
 
-puts generate_hmac_signature(payload, hmac_key)
+def verify_v1(payload, hmac_key, header)
+  parts = header.split(',').map { |item| item.strip.split('=', 2) }.to_h
+  return false unless parts['t'] && parts['v1']
+
+  expected = generate_v1(payload, hmac_key, parts['t'])
+  OpenSSL.secure_compare(expected, parts['v1'])
+end
 ```
 
 ### Go
@@ -380,119 +656,121 @@ puts generate_hmac_signature(payload, hmac_key)
 ```go title="Go"
 package main
 
-import(
-    "crypto/hmac"
-    "crypto/sha256"
-    "encoding/hex"
-    "fmt"
-    "sort"
-    "strings"
+import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/hex"
+	"fmt"
+	"sort"
+	"strings"
 )
 
-func SignMerchantPayload(payload map[string] interface {}, key string) string {
-    // Define keys in sorted order
-    keys: = [] string {
-        "amount",
-        "currency_code",
-        "customer_email",
-        "customer_first_name",
-        "customer_last_name",
-        "customer_phone",
-        "gateway_account",
-        "gateway_name",
-        "order_no",
-        "reference_number",
-        "result",
-        "state",
-    }
-
-    // Sort the keys
-    sort.Strings(keys)
-
-    // Create the message by concatenating key-value pairs
-    var message strings.Builder
-    for _,
-    k: = range keys {
-        v: = fmt.Sprintf("%v", payload[k]) // Get value as string
-        if v != "" {
-            message.WriteString(k + v)
-        }
-    }
-
-    // Generate the HMAC
-    h: = hmac.New(sha256.New, [] byte(key))
-    h.Write([] byte(message.String()))
-    digest: = hex.EncodeToString(h.Sum(nil))
-
-    return digest
+var signedFields = []string{
+	"agreement.id",
+	"amount",
+	"currency_code",
+	"customer_address_city",
+	"customer_address_country",
+	"customer_address_line1",
+	"customer_address_line2",
+	"customer_address_postal_code",
+	"customer_address_state",
+	"customer_email",
+	"customer_first_name",
+	"customer_last_name",
+	"customer_phone",
+	"extra.autopay.subscription_id",
+	"extra.merchant_id",
+	"gateway_account",
+	"gateway_name",
+	"order_no",
+	"payment_type",
+	"reference_number",
+	"result",
+	"session_id",
+	"state",
+	"token.customer_id",
+	"token.pg_code",
+	"token.token",
 }
 
-func main() {
-    // Example payload
-    payload: = map[string] interface {} {
-        "amount": "14.000",
-        "amount_details": map[string] interface {} {
-            "currency_code": "KWD",
-            "amount": "14.000",
-            "total": "14.000",
-            "fee": "0.000",
-        },
-        "currency_code": "KWD",
-        "customer_email": "example@gmail.com",
-        "customer_first_name": "name",
-        "customer_id": "1",
-        "customer_last_name": "last name",
-        "customer_phone": "+96500000000",
-        "fee": "0.000 KWD",
-        "gateway_account": "credit-card",
-        "gateway_name": "mpgs",
-        "gateway_response": map[string] interface {} {},
-        "initiator": map[string] interface {} {},
-        "is_sandbox": true,
-        "order_no": "4567f45оkgkh6hjаhjg77hjh5645",
-        "paid_amount": "14.000",
-        "payment_type": "one_off",
-        "pg_params": map[string] interface {} {},
-        "reference_number": "sandboxAQ5DJ",
-        "result": "success",
-        "session_id": "a12f71075a834a34d692736ac43a212fcebfb6ec",
-        "settled_amount": "14.000",
-        "signature": "293023d42eec624fc92b869812a53ee97c98398a80511537deaa27501ff378c3",
-        "state": "paid",
-        "timestamp_utc": "2024-04-17 08:46:21",
-        "token": map[string] interface {} {
-            "customer_id": "1",
-            "brand": "MASTERCARD",
-            "name_on_card": "Test Test",
-            "number": "**** 0008",
-            "expiry_month": "01",
-            "expiry_year": "39",
-            "token": "9491500736137502",
-            "pg_code": "credit-card",
-            "pg": "mpgs",
-            "is_preferred": true,
-            "is_expired": false,
-            "will_expire_soon": false,
-            "cvv_required": true,
-            "agreements": [] interface {} {},
-        },
-    }
+// resolvePath walks a dotted path through nested maps.
+// The second return value reports whether the path was found.
+func resolvePath(payload map[string]interface{}, path string) (interface{}, bool) {
+	var current interface{} = payload
+	for _, part := range strings.Split(path, ".") {
+		node, ok := current.(map[string]interface{})
+		if !ok {
+			return nil, false
+		}
+		current, ok = node[part]
+		if !ok {
+			return nil, false
+		}
+	}
+	return current, true
+}
 
-    // Example HMAC key
-    key: = "your_hmac_key"
+// Only a missing path, null and "" are skipped. 0 and false are signed.
+func isSkipped(value interface{}) bool {
+	if value == nil {
+		return true
+	}
+	s, isString := value.(string)
+	return isString && s == ""
+}
 
-    // Sign the payload
-    signature: = SignMerchantPayload(payload, key)
-    fmt.Println("Signature:", signature)
+// SignV1 returns the v1 value for the "t" part of the Ottu-Signature header, exactly as received.
+func SignV1(payload map[string]interface{}, key, t string) string {
+	fields := append([]string(nil), signedFields...)
+	sort.Strings(fields)
+
+	lines := []string{"t=" + t}
+	for _, path := range fields {
+		value, found := resolvePath(payload, path)
+		if !found || isSkipped(value) {
+			continue
+		}
+		lines = append(lines, fmt.Sprintf("%s=%v", path, value))
+	}
+
+	h := hmac.New(sha256.New, []byte(key))
+	h.Write([]byte(strings.Join(lines, "\n")))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+func VerifyV1(payload map[string]interface{}, key, header string) bool {
+	parts := map[string]string{}
+	for _, item := range strings.Split(header, ",") {
+		name, value, _ := strings.Cut(strings.TrimSpace(item), "=")
+		parts[name] = value
+	}
+	t, v1 := parts["t"], parts["v1"]
+	if t == "" || v1 == "" {
+		return false
+	}
+	expected := SignV1(payload, key, t)
+	return subtle.ConstantTimeCompare([]byte(expected), []byte(v1)) == 1
 }
 ```
 
-The above examples provide a way for developers in different languages to generate the HMAC signature from a payload using the provided HMAC key.
+The above examples generate the `v1` value from a payload, the `t` of the header and your HMAC key. Compare it with the `v1` part of the header.
 
 **Need Further Assistance?** Our dedicated support team is always on hand to help. Reach out to us at [support@ottu.com](mailto:support@ottu.com).
 
+## Related
+
+- [Webhooks Overview](/developers/webhooks)
+- [Payment States](/developers/reference/payment-states)
+- [Authentication](/developers/getting-started/authentication)
+
 ## What's Next?
 
-- [**Payment Events**](/developers/webhooks/payment-events/) — Payment webhook payload reference
-- [**Operation Events**](/developers/webhooks/operation-events/) — Operation webhook payload reference
+- [**Webhook Events (v3)**](/developers/webhooks/event-catalogue) — The format 3 envelope and every event type
+- [**Delivery and Retries**](/developers/webhooks/delivery-and-retries) — Success rules, retry schedule and `Idempotency-Key`
+- [**Migrating to v3**](/developers/webhooks/migrate-to-v3) — Format 1 and 2 to format 3
+- [**Payment Events**](/developers/webhooks/payment-events) — Payment webhook payload reference
+- [**Operation Events**](/developers/webhooks/operation-events) — Operation webhook payload reference
+- [**AutoPay**](/developers/payments/autopay) — Subscriptions, and the `autopay` payload blocks described above
 - [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration

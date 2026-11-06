@@ -7,6 +7,10 @@ import SchemaEmbed from "@site/src/components/SchemaEmbed";
 
 # Payment Notification
 
+:::note This page describes webhook formats 1 and 2
+If your account uses [format 3](/developers/webhooks/event-catalogue), your payments arrive inside an event envelope as `data.payment`; see [Webhook Events (v3)](/developers/webhooks/event-catalogue) and [Migrating to v3](/developers/webhooks/migrate-to-v3). Each delivery also carries an [`Idempotency-Key`](/developers/webhooks/delivery-and-retries#idempotency-key) header with the event id on every format.
+:::
+
 Payment webhooks are specific to payment events and are triggered on multiple occasions:
 
 1.  #### Post-Payment Completion
@@ -124,9 +128,74 @@ flowchart TD
    "settled_amount":"10.000",
    "signature":"60bf40cf******",
    "state":"paid",
-   "timestamp_utc":"2023-11-02 09:00:07"
+   "timestamp_utc":"2023-11-02 09:00:07",
+   "extra":{
+      "merchant_id":"your-merchant.ottu.net"
+   }
 }
 ```
+
+## The `extra.merchant_id` field {#extra-merchant-id}
+
+`extra` now always contains a `merchant_id` key holding your merchant domain, even when you sent no `extra` object when creating the session. Anything you did send in `extra` is preserved alongside it.
+
+`extra.merchant_id` is part of the [signed field set](/developers/webhooks/verify-signatures/#2-fields-for-signature), so it is covered by the `signature` and safe to trust once you have verified the payload. It is useful when one endpoint receives webhooks for several merchant accounts.
+
+## The `autopay` block {#autopay-block}
+
+Payments belonging to an [AutoPay](/developers/payments/autopay/) subscription may carry an additional `autopay` object. Note where it sits: at the **top level** of the payload, not inside `extra`.
+
+You receive it for the subscription's first payment only, the checkout session you created. Ottu charges renewals itself and sends no webhook to your `webhook_url` for them, so read renewal outcomes from the [subscription endpoints](/developers/payments/autopay/#api-reference).
+
+```json title="Payload excerpt — an AutoPay first payment"
+{
+   "amount":"49.990",
+   "result":"success",
+   "state":"paid",
+   "signature":"60bf40cf******",
+   "extra":{
+      "merchant_id":"your-merchant.ottu.net",
+      "autopay":{
+         "subscription_id":"sub_abc123"
+      }
+   },
+   "autopay":{
+      "subscription_id":"sub_abc123",
+      "subscription_status":"pending_setup",
+      "cycle_number":null,
+      "cycle_status":null,
+      "next_billing_date":null,
+      "event_type":null
+   }
+}
+```
+
+The webhook usually arrives before Ottu has confirmed the payment, so the subscription is still `pending_setup` and the cycle fields and `event_type` are `null`. See [First payment and activation](/developers/payments/autopay/#first-payment-and-activation).
+
+| Field | Description |
+|---|---|
+| `subscription_id` | The AutoPay subscription this payment belongs to. |
+| `subscription_status` | Subscription status at the moment the webhook was assembled, for example `active`, `past_due`, `canceled`. |
+| `cycle_number` | Sequential number of the billing cycle being charged. Nullable. |
+| `cycle_status` | Status of that billing cycle, for example `paid`, `retry_scheduled`, `failed`. Nullable. |
+| `next_billing_date` | Next scheduled billing date, or `null` when nothing further is scheduled. |
+| `event_type` | One of `cit_success`, `cit_failure`, `mit_success`, `mit_failure`, `card_updated`, or `null`. `null` means AutoPay could not yet tell whether the subscription's setup payment succeeded — it does **not** mean success. |
+
+:::danger The top-level `autopay` block is not signed — never trust it
+Two blocks carry a `subscription_id`, and only one of them is trustworthy.
+
+- **`extra.autopay.subscription_id` is signed.** It is inside the HMAC, so once you have [verified the signature](/developers/webhooks/verify-signatures/) you can rely on it. Use this one to identify the subscription.
+- **The top-level `autopay` block is not signed.** It is added *after* the signature is computed, so it is not covered by the HMAC at all. Treat it as a display convenience.
+
+The top-level block is also fetched live from the AutoPay service while the webhook is being assembled, with a **2 second timeout**, and is **silently omitted** if that call times out or fails.
+
+Two consequences worth designing for:
+
+- **Its absence proves nothing.** A payment with no `autopay` block may still be an AutoPay payment whose lookup did not complete in time. Do not infer "this is not a subscription payment" from a missing block.
+- **`event_type` is a best-guess hint, not an authoritative outcome.** AutoPay classifies it independently from the payment result you're reading it alongside. For what actually happened to this payment, read `result` and `state`; for authoritative subscription state, use the [subscription endpoints](/developers/payments/autopay/#api-reference).
+
+Never make a security or money-moving decision from the top-level `autopay` block.
+:::
 
 ## Acknowledging a Payment
 
@@ -195,3 +264,6 @@ For general webhook setup and configuration, see the [Webhooks Overview](./).
 - [**Operation Events**](/developers/webhooks/operation-events/) — Webhook notifications for refunds, captures, and voids
 - [**Verify Signatures**](/developers/webhooks/verify-signatures/) — Validate webhook authenticity with HMAC-SHA256
 - [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration
+- [**Webhook Events (v3)**](/developers/webhooks/event-catalogue/) — The format 3 envelope, with this payload as `data.payment`
+- [**Migrating to v3**](/developers/webhooks/migrate-to-v3/) — Move from format 1 or 2
+- [**Delivery and Retries**](/developers/webhooks/delivery-and-retries/) — Success rules, retry schedule, `Idempotency-Key`

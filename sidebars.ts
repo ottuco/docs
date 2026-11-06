@@ -261,8 +261,18 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
+                  label: "Live Demo",
+                  href: "/developers/payments/autopay#live-demo",
+                },
+                {
+                  type: "link",
                   label: "API Reference",
                   href: "/developers/payments/autopay#api-reference",
+                },
+                {
+                  type: "link",
+                  label: "Limits",
+                  href: "/developers/payments/autopay#limits",
                 },
                 {
                   type: "link",
@@ -619,13 +629,28 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "doc",
+              id: "developers/webhooks/event-catalogue",
+              label: "Events & Envelope (v3)",
+            },
+            {
+              type: "doc",
+              id: "developers/webhooks/delivery-and-retries",
+              label: "Delivery & Retries",
+            },
+            {
+              type: "doc",
+              id: "developers/webhooks/migrate-to-v3",
+              label: "Formats & Migration",
+            },
+            {
+              type: "doc",
               id: "developers/webhooks/payment-events",
-              label: "Payment Events",
+              label: "Payment Events (v1/v2)",
             },
             {
               type: "doc",
               id: "developers/webhooks/operation-events",
-              label: "Operation Events",
+              label: "Operation Events (v1/v2)",
             },
             {
               type: "doc",
@@ -737,6 +762,11 @@ const sidebars: SidebarsConfig = {
               type: "doc",
               id: "developers/reference/checkout-status-codes",
               label: "Checkout Status Codes",
+            },
+            {
+              type: "doc",
+              id: "developers/reference/api-key-permissions",
+              label: "API Key Permissions",
             },
           ],
         },
@@ -873,33 +903,28 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "link",
-              label: "Subscription lifecycle",
-              href: "/business/autopay#subscription-lifecycle",
+              label: "What your customer sees",
+              href: "/business/autopay#what-your-customer-sees",
             },
             {
               type: "link",
-              label: "Billing cycles",
-              href: "/business/autopay#billing-cycles",
+              label: "When a payment fails",
+              href: "/business/autopay#when-a-payment-fails",
             },
             {
               type: "link",
-              label: "Retries and dunning",
-              href: "/business/autopay#retries-and-dunning",
-            },
-            {
-              type: "link",
-              label: "Customer self-service page",
-              href: "/business/autopay#customer-self-service-page",
-            },
-            {
-              type: "link",
-              label: "Notifications",
-              href: "/business/autopay#notifications",
+              label: "Lifecycle and billing cycles",
+              href: "/business/autopay#lifecycle-and-billing-cycles",
             },
             {
               type: "link",
               label: "Setting up AutoPay",
               href: "/business/autopay#setting-up-autopay",
+            },
+            {
+              type: "link",
+              label: "Limits",
+              href: "/business/autopay#limits",
             },
             {
               type: "link",
@@ -910,6 +935,11 @@ const sidebars: SidebarsConfig = {
               type: "link",
               label: "FAQ",
               href: "/business/autopay#faq",
+            },
+            {
+              type: "link",
+              label: "What's Next?",
+              href: "/business/autopay#whats-next",
             },
           ],
         },
