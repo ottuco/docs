@@ -36,62 +36,6 @@ Your team starts it, your customer pays once, and Ottu runs everything after. Cl
 
 <AutoPayBusinessStory />
 
-## Lifecycle and billing cycles {#lifecycle-and-billing-cycles}
-
-A subscription moves through seven states. Canceled and Expired are final. Click a state to read what it means and what you do.
-
-<AutoPayStates audience="business" />
-
-### Pending setup {#state-pending-setup}
-
-Ottu created the subscription and waits for the first payment. Ottu activates it automatically after your customer pays. Your part: nothing.
-
-### Trialing {#state-trialing}
-
-The first payment was zero, so no money has moved. Ottu charges the saved card at the next billing cycle. Your part: nothing.
-
-:::tip A zero first charge starts a trial
-If the first charge is zero, the subscription starts as Trialing, not Active. The customer only saves a card. Canceling before the trial ends means no charge at all.
-:::
-
-### Active {#state-active}
-
-Billing normally. The latest cycle was paid. Your part: give your customer the service.
-
-### Past Due {#state-past-due}
-
-Every retry on a cycle failed. Ottu emails the customer a link to pay. When they pay, the subscription returns to Active. Your part: decide what to do if it stays Past Due.
-
-:::warning Ottu never cancels a Past Due subscription on its own
-It stays Past Due until the customer pays or your team cancels it. You decide how long a Past Due customer keeps access. Your developer can list Past Due subscriptions through the API. A Past Due customer cannot cancel until they pay the balance.
-:::
-
-### Canceled {#state-canceled}
-
-Billing has stopped. A cancellation set for the end of the period, by your customer or your team, lands here when that period ends. An immediate cancel by your team lands here at once. Your part: nothing.
-
-### Expired {#state-expired}
-
-The last cycle was paid and the next billing date would fall after the end date. Billing stopped. The history stays readable. To continue, create a new subscription.
-
-### Setup Failed {#state-setup-failed}
-
-The customer canceled the checkout, did not pay within 24 hours, or paid but the card could not be saved. Ottu does not retry it. Your part: create a new subscription.
-
-### Billing cycles {#billing-cycles}
-
-Ottu creates [billing cycles](/glossary/#term-billing-cycle) one at a time. The next cycle exists only once the current one is paid.
-
-:::note A cycle's amount is locked when it is generated
-Past cycles stay a reliable record of what Ottu charged.
-:::
-
-### Anchor days {#anchor-days}
-
-Every subscription bills on the same day, called its anchor day. The start date sets it. A subscription anchored on the 29th, 30th, or 31st moves to the last day of a shorter month, then returns to its anchor day.
-
-**Anchored on the 31st:** Jan 31 → Feb 28 (Feb 29 in a leap year) → Mar 31
-
 ## What your customer sees {#what-your-customer-sees}
 
 Your customer gets emails, text messages, and one private page. Ottu sends and hosts all of them.
@@ -112,7 +56,7 @@ Ottu sends 6 emails and 3 texts, in English or Arabic, chosen when the subscript
 - **Payment failed** (email). After each failed attempt while retries remain.
 - **Final failure** (email). About 15 seconds after the last attempt fails.
 
-The Final failure email asks the customer to pay "to avoid suspension". Ottu never suspends anything. Whether your customer keeps access is your decision. See [Past Due](#state-past-due).
+The Final failure email is covered in [When a payment fails](#when-a-payment-fails).
 
 
 <details>
@@ -258,7 +202,7 @@ And these are the actions a customer can take:
 :::note A customer's cancellation waits for the end of the paid period
 It never takes effect immediately. Only your team can cancel immediately, through the API. Undo is available while the subscription is Active or Trialing and the cancellation is pending.
 
-Ottu refuses a cancel request from a Past Due customer until they pay. See [Past Due](#state-past-due).
+A Past Due customer cannot cancel. See [When a payment fails](#when-a-payment-fails).
 :::
 
 Customers can hold several cards and switch the active one in a click. Old cards stay on file, so the history always shows which card paid each cycle.
@@ -272,9 +216,66 @@ The previous link stops working at once, and the page shows "This link has expir
 ## When a payment fails {#when-a-payment-fails}
 
 - **Four attempts by default.** That is one initial charge plus three retries, about an hour apart. Your developer can set from 1 to 10 retries when they create the subscription. Ottu fixes the interval.
-- **The customer is emailed** after each failed attempt while retries remain, so they can update their card.
-- **After the last attempt,** the subscription moves to [Past Due](#state-past-due). The customer gets the final email with a link to pay.
-- **Paying the balance** returns the subscription to Active.
+- **Your customer is emailed** after each failed attempt while retries remain, so they can update their card.
+- **After the last attempt,** the subscription becomes [Past Due](#state-past-due) and your customer gets the final email with a link to pay. That email asks them to pay "to avoid suspension". Ottu never suspends anything. Whether your customer keeps access is your decision.
+- **When they pay,** the subscription returns to Active.
+- **A Past Due customer cannot cancel.** Ottu refuses the request until they pay the balance.
+
+:::warning Ottu never cancels a Past Due subscription on its own
+It stays Past Due until the customer pays or your team cancels it. You decide how long a Past Due customer keeps access. Your developer can list Past Due subscriptions through the API.
+:::
+
+## Lifecycle and billing cycles {#lifecycle-and-billing-cycles}
+
+A subscription moves through seven states. Canceled and Expired are final. Click a state to read what it means and what you do.
+
+<AutoPayStates audience="business" />
+
+### Pending setup {#state-pending-setup}
+
+Ottu created the subscription and waits for the first payment. Ottu activates it automatically after your customer pays. Your part: nothing.
+
+### Trialing {#state-trialing}
+
+The first payment was zero, so no money has moved. Ottu charges the saved card at the next billing cycle. Your part: nothing.
+
+:::tip A zero first charge starts a trial
+If the first charge is zero, the subscription starts as Trialing, not Active. The customer only saves a card. Canceling before the trial ends means no charge at all.
+:::
+
+### Active {#state-active}
+
+Billing normally. The latest cycle was paid. Your part: give your customer the service.
+
+### Past Due {#state-past-due}
+
+Every retry on a cycle failed. The subscription waits for your customer to pay. Your part: decide what to do if it stays Past Due. See [When a payment fails](#when-a-payment-fails).
+
+### Canceled {#state-canceled}
+
+Billing has stopped. A cancellation set for the end of the period, by your customer or your team, lands here when that period ends. An immediate cancel by your team lands here at once. Your part: nothing.
+
+### Expired {#state-expired}
+
+The last cycle was paid and the next billing date would fall after the end date. Billing stopped. The history stays readable. To continue, create a new subscription.
+
+### Setup Failed {#state-setup-failed}
+
+The customer canceled the checkout, did not pay within 24 hours, or paid but the card could not be saved. Ottu does not retry it. Your part: create a new subscription.
+
+### Billing cycles {#billing-cycles}
+
+Ottu creates [billing cycles](/glossary/#term-billing-cycle) one at a time. The next cycle exists only once the current one is paid.
+
+:::note A cycle's amount is locked when it is generated
+Past cycles stay a reliable record of what Ottu charged.
+:::
+
+### Anchor days {#anchor-days}
+
+Every subscription bills on the same day, called its anchor day. The start date sets it. A subscription anchored on the 29th, 30th, or 31st moves to the last day of a shorter month, then returns to its anchor day.
+
+**Anchored on the 31st:** Jan 31 → Feb 28 (Feb 29 in a leap year) → Mar 31
 
 ## Setting up AutoPay {#setting-up-autopay}
 
@@ -306,7 +307,7 @@ This is the full list. Each limit comes with what to do instead.
 
 <FAQ>
   <FAQItem question="Can I cancel a customer's subscription immediately?">
-    Yes, but only your team can, through the API. A cancellation the customer starts always waits for the end of their paid period. See also [Past Due](#state-past-due).
+    Yes, but only your team can, through the API. A cancellation the customer starts always waits for the end of their paid period. See [When a payment fails](#when-a-payment-fails) for Past Due.
   </FAQItem>
   <FAQItem question="Can I change the price of a subscription that's already running?">
     No. Cancel it and create a new one. See [Limits](#limits).
@@ -324,7 +325,7 @@ This is the full list. Each limit comes with what to do instead.
     Find the cycle's transaction in [Payment Management](/business/payment-management/) and refund it, in full or in part. A refund doesn't cancel the subscription. Cancel it separately if the customer is leaving.
   </FAQItem>
   <FAQItem question="What happens when my customer's card expires?">
-    The charge fails like any other declined card. Ottu retries and emails the customer. If every attempt fails, the subscription moves to [Past Due](#state-past-due). The customer can add a new card and pay from their self-service page.
+    The charge fails like any other declined card. Ottu retries and emails the customer. If every attempt fails, the subscription becomes Past Due. The customer can add a new card and pay from their self-service page.
   </FAQItem>
   <FAQItem question="Can a customer have more than one card on file?">
     Yes. They can switch the active card from their self-service page at any time.
