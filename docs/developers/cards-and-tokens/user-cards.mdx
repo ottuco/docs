@@ -35,7 +35,7 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/
 When integrating the User Cards API, here are the key points:
 
 1. You will not receive the full card number (PAN). Instead, you'll get the last 4 digits and a [token](/glossary/#term-tokenization). This token is what you use for payments or authorizations.
-2. If you're using the [Checkout SDK](/developers/payments/checkout-sdk/), customers can delete their saved cards themselves, unless an [auto-debit agreement](#deleting-a-card-that-has-an-auto-debit-agreement) is still running on the card. This gives users control over their payment information.
+2. If you're using the [Checkout SDK](/developers/payments/checkout-sdk/), customers can delete their saved cards themselves, unless an [auto-debit agreement](/glossary/#term-auto-debit) is still running on the card ([see the rules](#deleting-a-card-that-has-an-auto-debit-agreement)). This gives users control over their payment information.
 3. When a customer saves their card during payment, the corresponding token is included in the payload sent to your [webhook_url](/developers/payments/checkout-api/).
 4. Ottu already handles displaying saved cards and card deletion. Use these APIs only if you need more granular control.
 
