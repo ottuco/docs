@@ -321,6 +321,26 @@ function arrowsFor(narrow: boolean): FlowArrow[] {
           kind: "plain",
           label: "cancel",
         },
+    // Same rule as Active -> Canceled: a cancel scheduled in the trial closes it at period end.
+    narrow
+      ? {
+          from: "trial",
+          to: "canceled",
+          fromSide: "right",
+          toSide: "left",
+          kind: "plain",
+          label: "cancel",
+          // Sit low on the vertical run, clear of the other labels on it.
+          dy: 80,
+        }
+      : {
+          from: "trial",
+          to: "canceled",
+          fromSide: "top",
+          toSide: "top",
+          kind: "plain",
+          label: "cancel",
+        },
     {
       from: "active",
       to: "expired",
