@@ -27,6 +27,7 @@ import {
   type CardData,
 } from "./parts";
 import {
+  PANEL_W,
   STORY_PANEL_GAP,
   STORY_ROW,
   STORY_TOP,
@@ -158,15 +159,28 @@ export default function Story(props: StoryProps): React.JSX.Element {
     });
   }, [maxHeight, journey, stop]);
 
+  // The caption goes beside the diagram only when diagram + caption fit the
+  // container; measured, not guessed from the viewport.
+  const wrap = useRef<HTMLDivElement>(null);
+  const [side, setSide] = useState(false);
+  const needed = storyMinWidth(props) + PANEL_W + STORY_PANEL_GAP;
+  useEffect(() => {
+    const el = wrap.current;
+    if (!el || !hasPanel) return;
+    const ro = new ResizeObserver(() => setSide(el.clientWidth >= needed));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [hasPanel, needed]);
+
   // On a narrow screen the panel sits below the diagram: bring it into view
   // after a click, only if it is off-screen.
   useEffect(() => {
-    if (!pin || window.innerWidth >= 1100) return;
+    if (!pin || side) return;
     document.getElementById(`${scope}-panel`)?.scrollIntoView({
       block: "nearest",
       behavior: reducedMotion() ? "auto" : "smooth",
     });
-  }, [scope, pin, stop]);
+  }, [scope, pin, stop, side]);
 
   // Clicking the pinned thing again unpins it. A click also drops the hover
   // preview: touch never sends mouseleave, and after unpinning the reader
@@ -300,7 +314,11 @@ export default function Story(props: StoryProps): React.JSX.Element {
   if (!hasPanel) return diagram;
 
   return (
-    <div className={styles.storyWrap} style={{ gap: STORY_PANEL_GAP }}>
+    <div
+      ref={wrap}
+      className={`${styles.storyWrap} ${side ? styles.storyWrapSide : ""}`}
+      style={{ gap: STORY_PANEL_GAP }}
+    >
       {diagram}
       <StoryPanel
         id={`${scope}-panel`}
