@@ -6,27 +6,33 @@ toc_max_heading_level: 3
 hide_table_of_contents: true
 ---
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
-import CodeBlock from "@theme/CodeBlock";
-import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
+import SchemaEmbed from "@site/src/components/SchemaEmbed";
+import StepGuide from "@site/src/components/StepGuide";
+import LoyaltyFlowDiagram from "@site/src/diagrams/LoyaltyFlowDiagram";
+import LoyaltyRefundDiagram from "@site/src/diagrams/LoyaltyRefundDiagram";
+import { developerLoyaltySteps } from "@site/src/data/loyalty-steps";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
 # Loyalty
 
-Loyalty lets your customers **earn** points on a payment. When you opt a transaction in, Ottu issues a reward to the customer's loyalty account as soon as the payment reaches the [`paid`](../reference/payment-states.md) state — and automatically reverses that reward if you later refund. When a customer paid with **redeemed** points, a refund also returns those points to their account — see [Refunding a points-funded order](#refund-points).
+Loyalty lets your customers **earn points** on a payment. You opt a transaction in when you create it, the customer pays as usual, and Ottu issues a reward to the customer's account at the loyalty provider as soon as the payment reaches the [`paid`](../reference/payment-states.md) state. If you later refund, Ottu reverses the reward automatically.
 
-Opting in takes two fields on the [Checkout API](./checkout-api.mdx) create call:
+## How it works {#overview}
 
-- [**`loyalty`**](#the-loyalty-object) — `{"enabled": true}` marks the transaction as rewardable. This field is identical for every provider.
-- The **provider identifier** — the customer field the loyalty provider uses to locate the account (never `customer_id`). Which field this is depends on the provider — see [Supported Providers](#supported-providers). For [STC Qitaf](#supported-providers) it is [**`customer_phone`**](#the-customer_phone-field), the customer's Saudi mobile number.
+Earning points is a **server-side opt-in** on the [Checkout API](./checkout-api.mdx) create call — the customer sees nothing different at checkout. Two fields make a transaction rewardable:
 
-You never name the provider in your payload: Ottu resolves the right loyalty backend from the gateway configuration on your [`pg_code`](./payment-methods.md), so adding future providers requires no change to your integration.
+- [**`loyalty`**](#request-fields) — `{"enabled": true}` marks the transaction as rewardable. It is identical for every provider.
+- **The provider identifier** — the customer field the loyalty provider uses to locate the account (never `customer_id`). For [STC Qitaf](/business/loyalty#supported-providers) it is [**`customer_phone`**](#request-fields), the customer's Saudi mobile number.
 
-:::warning Both fields are required, and neither is validated
-If `loyalty.enabled` is missing, or the provider identifier (for [STC Qitaf](#supported-providers), `customer_phone`) is absent or invalid, **no reward is issued and no error is returned**. The transaction still succeeds and still reports `paid`. A skipped reward is indistinguishable from a successful one in the API response — so send both fields on every transaction you intend to reward.
-:::
+You never name the provider in your payload. Ottu resolves the right loyalty backend from the gateway configuration on your [`pg_code`](./payment-methods.md), so adding future providers needs no change to your integration.
+
+Two flows exist and they are independent:
+
+- **Earning** — this page. A server-side opt-in, no customer interaction.
+- **Redeeming** — the customer spends existing points at checkout. That runs through the [Checkout SDK](./checkout-sdk/index.md) as a wallet-style payment method; see [Earning vs. redeeming](/business/loyalty#earning-vs-redeeming).
+
+For how the feature works from the merchant's side — supported providers, what a reward is calculated on, refunding a points-funded order — see [Loyalty for business](/business/loyalty).
 
 :::note Base URL
 Every API call in this guide targets <code>{OTTU_CONNECT_BASE_URL}</code>. Swap in your own merchant domain when you integrate.
@@ -36,24 +42,12 @@ Every API call in this guide targets <code>{OTTU_CONNECT_BASE_URL}</code>. Swap 
 Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
 :::
 
-## Supported Providers
-
-Loyalty is **provider-agnostic**. The `loyalty` flag, the reward lifecycle, and refund reversal work the same way regardless of provider — the only thing that differs per provider is the **identifier field** the reward is keyed on and the provider's own rules. Everything provider-specific lives in this one table:
-
-| Provider | Identifier field | Required fields | Currency | Provider rules |
-| --- | --- | --- | --- | --- |
-| **STC Qitaf** | [`customer_phone`](#the-customer_phone-field) — the customer's Saudi mobile number | `loyalty.enabled` + `customer_phone` | `SAR` only | Reward keyed on the Saudi mobile ([accepted formats](#the-customer_phone-field)), never on `customer_id`. Whole-currency-unit basis; sub-units do not earn. |
-
-As new providers are enabled, this table gains a row — the rest of this guide applies unchanged. When you integrate, use the **Identifier field** column to know which customer field to send: for STC Qitaf that is `customer_phone`.
-
 ## When to Use
 
-- **Rewarding purchases** — give customers loyalty points on every eligible payment, without building your own points ledger. Which loyalty program depends on the [provider](#supported-providers) linked to your gateway (STC Qitaf today).
+- **Rewarding purchases** — give customers loyalty points on every eligible payment, without building your own points ledger.
 - **Campaign-tagged rewards** — attach a campaign or program label to a reward for your own reporting.
-- **Refund-safe loyalty** — you need rewards to unwind automatically when an order is refunded, so points liability tracks real revenue.
-- **Refunding an order paid with points** — a customer redeemed Qitaf points at checkout and now wants a refund; the money goes back through the gateway and the points go back to their Qitaf account. See [Refunding a points-funded order](#refund-points).
-
-Loyalty here covers **earning** points. Letting a customer **spend** existing loyalty points at checkout is the separate redemption flow, handled by the [Checkout SDK](./checkout-sdk/index.md) — see [Earning vs. redeeming](#earning-vs-redeeming).
+- **Refund-safe loyalty** — rewards unwind automatically when an order is refunded, so points liability tracks real revenue.
+- **Reacting to a points return** — your backend needs to know when redeemed points go back to a customer. See [Refund and points return](#refund-points).
 
 ## Setup
 
@@ -67,178 +61,22 @@ Loyalty is configured by Ottu staff, not through the API. Before your first rewa
 
 ### Workflow
 
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
-graph LR
-    A([Merchant]) -->|loyalty.enabled + customer_phone| B[Checkout API]
-    B --> C([Customer pays])
-    C --> D{{Transaction PAID}}
-    D --> E[Reward issued]
-    E --> F([Points in Qitaf account])
-
-    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
-    class E accent
-```
+<LoyaltyFlowDiagram />
 
 1. **Merchant creates the session** with `loyalty: {"enabled": true}` and the customer's `customer_phone`.
 2. **Customer pays** through the [hosted checkout page](./checkout-api.mdx), the [Checkout SDK](./checkout-sdk/index.md), or any other route — the flow is identical.
 3. **Transaction reaches `paid`.** Ottu checks the opt-in flag and the gateway's loyalty configuration.
-4. **Reward is issued asynchronously** in a background job, just after the payment is acknowledged. The customer's points appear in their Qitaf account.
+4. **Reward is issued asynchronously** in a background job, just after the payment is acknowledged. The customer's points appear in their loyalty account.
 
 ### Step-by-Step
 
-#### 1. Create the payment transaction
+<StepGuide steps={developerLoyaltySteps} />
 
-Send `loyalty` and `customer_phone` on the standard [Checkout API](./checkout-api.mdx) create call. Everything else about the request is unchanged.
+### Use Cases
 
-<Tabs groupId="language">
-<TabItem value="curl" label="cURL">
+#### Request fields {#request-fields}
 
-<CodeBlock language="bash" title="Create a rewardable payment transaction">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/' \\
-  --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
-  --header 'Content-Type: application/json' \\
-  --data '{
-    "type": "e_commerce",
-    "amount": "50",
-    "currency_code": "SAR",
-    "pg_codes": ["<YOUR_QITAF_LINKED_PG_CODE>"],
-    "customer_id": "CUST-123",
-    "customer_phone": "+966566089459",
-    "loyalty": {"enabled": true}
-  }'`}</CodeBlock>
-
-</TabItem>
-<TabItem value="python" label="Python">
-
-<CodeBlock language="python" title="Create a rewardable payment transaction">{`import requests
-
-response = requests.post(
-    "${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/",
-    headers={
-        "Authorization": "Api-Key <YOUR_API_KEY>",
-        "Content-Type": "application/json",
-    },
-    json={
-        "type": "e_commerce",
-        "amount": "50",
-        "currency_code": "SAR",
-        "pg_codes": ["<YOUR_QITAF_LINKED_PG_CODE>"],
-        "customer_id": "CUST-123",
-        "customer_phone": "+966566089459",
-        "loyalty": {"enabled": True},
-    },
-)
-
-session = response.json()
-print(session["session_id"], session["checkout_url"])`}</CodeBlock>
-
-</TabItem>
-<TabItem value="node" label="Node.js">
-
-<CodeBlock language="javascript" title="Create a rewardable payment transaction">{`const response = await fetch(
-  "${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/",
-  {
-    method: "POST",
-    headers: {
-      Authorization: "Api-Key <YOUR_API_KEY>",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      type: "e_commerce",
-      amount: "50",
-      currency_code: "SAR",
-      pg_codes: ["<YOUR_QITAF_LINKED_PG_CODE>"],
-      customer_id: "CUST-123",
-      customer_phone: "+966566089459",
-      loyalty: { enabled: true },
-    }),
-  },
-);
-
-const session = await response.json();
-console.log(session.session_id, session.checkout_url);`}</CodeBlock>
-
-</TabItem>
-<TabItem value="php" label="PHP">
-
-<CodeBlock language="php" title="Create a rewardable payment transaction">{`<?php
-$ch = curl_init("${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/");
-
-curl_setopt_array($ch, [
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_POST => true,
-    CURLOPT_HTTPHEADER => [
-        "Authorization: Api-Key <YOUR_API_KEY>",
-        "Content-Type: application/json",
-    ],
-    CURLOPT_POSTFIELDS => json_encode([
-        "type" => "e_commerce",
-        "amount" => "50",
-        "currency_code" => "SAR",
-        "pg_codes" => ["<YOUR_QITAF_LINKED_PG_CODE>"],
-        "customer_id" => "CUST-123",
-        "customer_phone" => "+966566089459",
-        "loyalty" => ["enabled" => true],
-    ]),
-]);
-
-$session = json_decode(curl_exec($ch), true);
-echo $session["session_id"];`}</CodeBlock>
-
-</TabItem>
-</Tabs>
-
-The response is a standard checkout session. The `loyalty` object is echoed back exactly as you sent it — this confirms Ottu **stored your intent**, not that a reward was issued.
-
-```json title="Response (abridged)"
-{
-  "session_id": "8f2c1d5e9a7b4c3f6e0d2a8b1c4f7e9d",
-  "checkout_url": "https://sandbox.ottu.net/b/checkout/redirect/start/?session_id=8f2c1d5e9a7b4c3f6e0d2a8b1c4f7e9d",
-  "amount": "50.00",
-  "currency_code": "SAR",
-  "customer_phone": "+966566089459",
-  "loyalty": {"enabled": true},
-  "state": "created"
-}
-```
-
-#### 2. Let the customer pay
-
-Present the checkout however you normally do — redirect to `checkout_url`, or mount the [Checkout SDK](./checkout-sdk/index.md). Loyalty adds no step to the customer's experience; there is no extra screen and nothing for them to confirm.
-
-#### 3. The reward fires automatically
-
-Once the payment is acknowledged and the transaction reaches `paid`, Ottu issues the reward in a background job. No API call is needed from you.
-
-Rewards are **skipped silently** in each of these cases:
-
-| Condition | Result |
-| --- | --- |
-| `loyalty.enabled` missing, `false`, or misspelled | No reward |
-| `customer_phone` empty, or not a valid Saudi number | No reward |
-| Settling `pg_code` has no Qitaf service linked | No reward |
-| Transaction currency ≠ the Qitaf service currency | No reward |
-| Authorization-only transaction (not an immediate-capture purchase) | No reward |
-| Payment funded entirely by redeemed loyalty points | No reward |
-| A reward already exists for this transaction | No duplicate |
-
-#### 4. Reversal on refund
-
-When you [refund](../operations.md) a rewarded transaction, Ottu automatically reverses the reward. The reversal is **amount-matched** to the refund, not a flat percentage: refund 20 SAR of a 50 SAR order and 20 SAR of reward basis is reversed. Repeated partial refunds accumulate, and a reversal that would exceed the original reward is rejected rather than over-reversing.
-
-Only **money** refunds reduce the reward. If the order was also paid with redeemed points, returning those points to the customer leaves the reward untouched — the points never earned anything in the first place. How that return works is covered in [Refunding a points-funded order](#refund-points).
-
-### The `loyalty` object
-
-| Field | Type | Required | Description |
-| --- | --- | --- | --- |
-| `enabled` | boolean | **Yes** | `true` opts the transaction into loyalty rewards. `false` — or omitting the whole object — sends no reward request. |
-| `reference` | string (≤128) | No | Your own campaign or program label. Defaults to the transaction's `order_no`. |
-| `metadata` | object | No | Opaque key/value pairs stored on the transaction and echoed back in the response. |
-
-:::note `reference` and `metadata` stay inside Ottu
-Neither field reaches STC Qitaf. The Qitaf earn API has no general-purpose reference slot, and no provider reads `metadata`. Both are recorded against the transaction for **your** reconciliation — useful for correlating a reward back to a campaign in your own system, but invisible to the loyalty provider.
-:::
+The `loyalty` object has three fields: `enabled` (required), `reference` (your own campaign or program label, defaults to `order_no`) and `metadata` (opaque key/value pairs echoed back in the response). Neither `reference` nor `metadata` reaches the loyalty provider — they are recorded against the transaction for **your** reconciliation.
 
 ```json title="Full loyalty object"
 {
@@ -253,96 +91,54 @@ Neither field reaches STC Qitaf. The Qitaf earn API has no general-purpose refer
 }
 ```
 
-### The `customer_phone` field
+Field-by-field types, limits and behaviour — including every accepted `customer_phone` format — are in the [API Reference](#api-reference) below.
 
-Qitaf identifies a loyalty account by **mobile number**. It does not use `customer_id`, which is your own identifier and is routinely non-numeric — so `customer_phone` is what determines who gets the points.
+#### When no reward is issued {#when-no-reward-is-issued}
 
-Ottu normalizes the number before sending it, stripping an international Saudi prefix along with spaces, hyphens, and parentheses. All of these forms are accepted and resolve to the same account:
+A skipped reward never fails the payment: the transaction still reaches `paid` and the API returns no error. Each case below has its own link so you can point a teammate straight at it.
 
-| You send | Interpreted as | Valid |
-| --- | --- | --- |
-| `0566089459` | Saudi mobile, local form | ✅ |
-| `566089459` | Saudi mobile, no leading zero | ✅ |
-| `+966566089459` | International, `+966` prefix | ✅ |
-| `00966566089459` | International, `00966` prefix | ✅ |
-| `966566089459` | International, bare `966` prefix | ✅ |
-| `+966 56 608-9459` | Separators are stripped | ✅ |
-| `0766089459` | `07` is not a Saudi mobile prefix | ❌ |
-| `+40721234567` | Not a Saudi number | ❌ |
-| `056.608.9459` | Dots are **not** stripped | ❌ |
-| `CUST-123` | Not a phone number | ❌ |
+##### Flag missing, false, or misspelled {#skip-flag}
 
-A valid Saudi mobile is `05XXXXXXXX` or `5XXXXXXXX` — 9 digits after any prefix, starting with `5`. Saudi landlines (`01XXXXXXX` / `1XXXXXXX`) also pass validation, though loyalty accounts are mobile-based in practice.
+`loyalty.enabled` is absent, `false`, or the key is misspelled. No reward request is sent.
 
-:::tip Store phone numbers in a canonical form
-Because an invalid number fails silently, normalize on **your** side before you call the API. Storing customers' numbers in a single canonical form — `+9665XXXXXXXX` is a good choice — removes an entire class of "the reward never arrived" reports.
-:::
+##### Provider identifier empty or invalid {#skip-identifier}
 
-The `customer_phone` field caps at 16 characters, which comfortably fits every accepted format. Sending a heavily spaced number close to that limit is the only realistic way to hit it.
+For Qitaf, `customer_phone` is empty or not a valid Saudi number. No reward request is sent, and a wrong-but-valid number rewards whoever owns it — an invalid one is rejected rather than misdirected.
 
-### Use Cases
+##### Gateway not linked {#skip-gateway}
 
-#### What the reward is calculated on
+The `pg_code` that settles the payment has no Qitaf service linked. See [Setup](#setup).
 
-The reward is based on the **money actually paid** — the gateway portion plus any real-money wallet credit. Value funded by redeemed loyalty points is excluded, so points never earn more points.
+##### Currency mismatch {#skip-currency}
 
-Amounts are sent to Qitaf as whole currency units: a basis of `10.99 SAR` is transmitted as `10`. Sub-unit value does not earn. STC applies its own accrual rate to that figure, so the number of points a customer receives is determined by your Qitaf contract, not by anything in the API payload.
+The transaction currency differs from the Qitaf service currency (`SAR`).
 
-#### Earning vs. redeeming {#earning-vs-redeeming}
+##### Authorization-only transaction {#skip-authorization}
 
-These are two independent flows and are documented separately:
+Only immediate-capture purchases earn. An authorization that is captured later does not trigger a reward.
 
-- **Earning** (this page) — a server-side opt-in on the Checkout API. No customer interaction.
-- **Redeeming** — the customer spends existing Qitaf points at checkout, entering their mobile number and confirming a one-time password. This runs through the [Checkout SDK](./checkout-sdk/index.md) as a wallet-style payment method and is SAR-only.
+##### Funded entirely by redeemed points {#skip-points-only}
 
-A single transaction can do both: redeem points toward the balance, then earn on the money portion that remains.
+A payment paid completely with redeemed loyalty points earns nothing — points never earn more points.
 
-## Refunding a Points-Funded Order {#refund-points}
+##### Reward already exists {#skip-duplicate}
 
-When a customer **redeemed** Qitaf points at checkout, the payment is recorded as a parent transaction with a child transaction per funding source: one child for the points (the *points leg*) and, on a split payment, the gateway payment itself. Refunding such an order has two halves, and they run in a fixed order:
+A transaction is rewarded once. Ottu never issues a duplicate.
 
-1. **The money first.** The gateway portion is refunded exactly like any other refund — from the dashboard or through the [Operations API](../operations.md) with the parent's `session_id`. The refundable amount is capped at what the gateway actually settled; the points are never part of it.
-2. **Then the points — automatically, in the same request.** The gateway refund that leaves nothing owed through the gateway also returns the redeemed points: after the refund is recorded, and before the refund call answers, Ottu reverses the redemption at Qitaf and books it. By the time your refund call (dashboard or [Operations API](../operations.md)) gets its response, the points-return record already exists. The **whole** redeemed amount comes back in one step; there is no partial return.
+## Refund and Points Return {#refund-points}
 
-For an order paid with **points only** there is no gateway half: the parent's ordinary **Refund** returns the points, for exactly the redeemed amount. The points leg itself offers no action, and a refund aimed at the points leg is refused — points always come back through the parent.
+Refunding a transaction touches loyalty in two independent ways, and your integration only has to react to the second:
 
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
-sequenceDiagram
-    participant M as Merchant (dashboard or Operations API)
-    participant O as Ottu
-    participant PG as Payment gateway
-    participant Q as STC Qitaf
+- **Earned points are reversed automatically.** The reversal is amount-matched to the money you refund — see [step 4](#step-by-step) of the guide.
+- **Redeemed points come back automatically.** When a customer paid with redeemed points, the refund that leaves nothing owed through the gateway also returns those points to their account, in the same request. A points-only order is returned from the dashboard with **Refund** on the parent.
 
-    M->>O: Refund the gateway portion (parent session_id)
-    O->>PG: Refund 70 SAR
-    PG-->>O: Refunded
-    Note over O: refund recorded — nothing owed through the gateway any more
-    O->>Q: Reverse the redemption (30 SAR of points)
-    Q-->>O: Reversed
-    Note over O: points-return record booked
-    O-->>M: Refund response (both records already exist)
-    O-->>M: Operation webhook: refund 30 SAR (points), pg_response.code 0
-    O-->>M: Operation webhook: refund 70 SAR (gateway)
-    O->>Q: Reduce the earned reward (money basis)
-```
+<LoyaltyRefundDiagram />
+
+The order, trigger and amount rules (gateway money first, points second, always in full, only once) are operator-facing and are documented for the business side in [Refunding a points-funded order](/business/loyalty#refund-rules). The step-by-step dashboard workflow is in [Refunding Orders Paid with Qitaf Points](/business/operations/qitaf-points-refund).
 
 :::note The points come back on their own — the API does not return them directly
-The automatic return is triggered by the gateway refund itself, whichever way you made it (dashboard or Operations API), and follows the same refund permission and the same [maker-checker approval](/business/operations/two-step-authorization) as that refund. If Qitaf cannot confirm the return at that moment, the gateway refund still succeeds; Ottu retries the points in the background, and the dashboard's **Refund** on the parent offers the points value so an operator can return them by hand. The public [Operations API](../operations.md) has no call that returns loyalty points: a `refund` with `destination: "wallet"` is rejected on a points-funded order, exactly as before. What your integration *does* see is the outcome, through the webhooks below.
+The automatic return follows the same refund permission and the same [maker-checker approval](/business/operations/two-step-authorization) as the gateway refund that triggers it. The public [Operations API](../operations.md) has no call that returns loyalty points: a `refund` with `destination: "wallet"` is rejected on a points-funded order. What your integration *does* see is the outcome, through the webhooks below.
 :::
-
-### What the rules are
-
-| Rule | Behaviour |
-| --- | --- |
-| **Order** | Gateway money first, points second. Until the gateway portion is fully refunded nothing returns the points: the parent's Refund only offers the gateway money still owed. A refund that is still pending approval counts as outstanding. |
-| **Trigger** | The gateway refund that leaves nothing owed through the gateway returns the points in the same request. A points-only order is returned through the parent's Refund. |
-| **One door** | Points only come back through the parent. The points leg has no actions, and a refund sent to the points leg itself is refused with *Qitaf points are returned through Refund on the transaction, not from the points row.* |
-| **Amount** | Always the full redeemed amount. Nothing to enter, nothing partial. |
-| **Once** | A second return — by hand, by a retry, or by the automatic run landing after a manual one — is refused; two simultaneous requests book exactly one. |
-| **Recoverable** | If Qitaf times out or answers with a retryable error, nothing is booked and the gateway refund is not affected; Ottu retries on its own every few minutes (for a bounded number of attempts, then escalates to Ottu operations), and the parent's Refund offers the points value so they can be returned by hand meanwhile. If Qitaf answers that the redemption can no longer be reversed (for example the reversal window has passed, or the redemption is unknown to it), Refund no longer offers the points and the operator is told to refund the customer another way. |
-| **Reward** | Returning the points does **not** reduce the earned reward — the money refund already did that. |
-| **Records** | A successful return books a `refunded` child transaction for the points amount under the parent, so the parent's `refunded_amount` reaches the order total. |
 
 ### What your webhooks receive
 
@@ -407,32 +203,13 @@ On a points-funded order `paid_amount` reports what the gateway settled (`70.000
 
 Both webhooks are signed the usual way — verify them exactly as described in [Verify signatures](../webhooks/verify-signatures.md).
 
-### Outcomes the operator sees
-
-Every outcome comes back as one merchant-facing message, in the dashboard user's language. Your support team will quote these to you:
-
-| Outcome | Message (English) | Message (Arabic) |
-| --- | --- | --- |
-| Returned | `30.00 SAR in Qitaf points returned to the customer.` | `تمت إعادة 30.00 SAR من نقاط Qitaf إلى العميل.` |
-| Gateway money still refundable | `Refund the remaining 70.00 SAR paid through the payment gateway before returning the Qitaf points.` | `قم باسترداد المبلغ المتبقي 70.00 SAR المدفوع عبر بوابة الدفع قبل إعادة نقاط Qitaf.` |
-| Amount edited | `Qitaf points are always returned in full (30.00 SAR); a partial amount cannot be entered.` | `تتم إعادة نقاط Qitaf بالكامل دائمًا (30.00 SAR)؛ لا يمكن إدخال مبلغ جزئي.` |
-| Refund sent to the points leg | `Qitaf points are returned through Refund on the transaction, not from the points row.` | `تتم إعادة نقاط Qitaf من خلال الاسترداد على المعاملة، وليس من صف النقاط.` |
-| Already returned | `The Qitaf points for this transaction have already been returned to the customer.` | `تمت إعادة نقاط Qitaf لهذه المعاملة إلى العميل بالفعل.` |
-| Qitaf refused, retry possible | `Qitaf did not confirm the reversal ([2311] Technical error has occurred while processing this transaction, please try again). No points were returned; you can retry.` | `لم يؤكد Qitaf عملية الإلغاء (...). لم تتم إعادة أي نقاط؛ يمكنك المحاولة مرة أخرى.` |
-| Qitaf unreachable | `Qitaf could not be reached to confirm the reversal. No points were returned; you can retry.` | `تعذر الوصول إلى Qitaf لتأكيد عملية الإلغاء. لم تتم إعادة أي نقاط؛ يمكنك المحاولة مرة أخرى.` |
-| Qitaf can no longer reverse it | `Qitaf can no longer return these points ([1041] Refund period has expired). Refund the customer by another means.` | `لم يعد بإمكان Qitaf إعادة هذه النقاط (...). يرجى استرداد المبلغ للعميل بوسيلة أخرى.` |
-
-The bracketed code and text inside the Qitaf messages are STC's own error code and description, passed through unchanged so they can be quoted to STC support. The wallet name in every message is the name configured for your Qitaf service.
-
-### How a points-only order is listed
-
-A wallet is a payment service, not a payment gateway, so an order paid **entirely** with redeemed points has no gateway of its own. In the dashboard transaction listing and details its **Gateway Name** shows the wallet's name (for example `Qitaf`), in the dashboard user's language, instead of an internal placeholder. It keeps that name after the points are returned. A split order lists its card gateway. Webhook payloads are unchanged. The dashboard side of this workflow, with the exact steps, is in [Refunding Orders Paid with Qitaf Points](/business/operations/qitaf-points-refund).
-
 ## API Reference
 
-`loyalty` and `customer_phone` are fields on the standard Checkout API create call. The full request and response schema — with every field, type, and constraint — is below.
+Loyalty has no endpoint of its own — it is two fields on the standard [Checkout API](./checkout-api.mdx) create call, so the full Checkout API reference is deliberately not repeated here. The schema below is the `loyalty` object, with every field, type, and constraint. For the surrounding request, see [Create Payment Transaction](/developers/apis/create-payment-transaction-checkout).
 
-<ApiDocEmbed path="create-payment-transaction-checkout.api.mdx" />
+<SchemaEmbed path="Loyalty.json" schemaType="request" parentSchemaName="loyalty" />
+
+The provider identifier is the [`customer_phone`](/developers/apis/create-payment-transaction-checkout) request field (find it under the request body). Its description there lists every accepted and rejected Saudi mobile format.
 
 ## Best Practices
 
@@ -470,13 +247,10 @@ A wallet is a payment service, not a payment gateway, so an order paid **entirel
     No. Earning is entirely server-side. The customer sees a normal checkout and their points appear in their Qitaf account afterwards.
   </FAQItem>
   <FAQItem question="What happens to points when I refund?">
-    Two different things, depending on which points you mean. Points the customer **earned** on the order are reversed automatically, amount-matched to the money you refund — see [Reversal on refund](#4-reversal-on-refund). Points the customer **redeemed** to pay are returned to their Qitaf account automatically, in the same request as the refund that clears the gateway portion — or through the parent's Refund on a points-only order. See [Refunding a points-funded order](#refund-points).
+    Two different things, depending on which points you mean. Points the customer **earned** on the order are reversed automatically, amount-matched to the money you refund. Points the customer **redeemed** to pay are returned to their Qitaf account automatically, in the same request as the refund that clears the gateway portion — or through the parent's Refund on a points-only order. See [Refund and points return](#refund-points).
   </FAQItem>
   <FAQItem question="Can I return redeemed points through the API?">
     Not with a dedicated call. Refunding the gateway portion through the [Operations API](../operations.md) returns the points automatically once nothing is owed through the gateway. A points-only order is returned from the dashboard with Refund on the parent, under the same refund permission and maker-checker approval as a gateway refund. Your integration is told about every return through the same operation and payment webhooks a gateway refund emits. Sending `destination: "wallet"` to the Operations API on a points-funded order is rejected.
-  </FAQItem>
-  <FAQItem question="Why does Refund not offer the points on a refunded order?">
-    Either the gateway portion is not fully refunded yet (a refund waiting for approval still counts), the points were already returned, or Qitaf answered that the redemption can no longer be reversed — in which case the customer has to be refunded another way. The operator sees the exact reason as a message when they try.
   </FAQItem>
   <FAQItem question="Where did the Return Qitaf points action go?">
     It was removed. Points are returned only through the parent transaction: automatically with the last gateway refund, or through the parent's Refund. A refund sent to the points leg itself is refused.
@@ -485,10 +259,9 @@ A wallet is a payment service, not a payment gateway, so an order paid **entirel
 
 ## What's Next?
 
+- [Loyalty for business](/business/loyalty) — supported providers, what a reward is calculated on, and refunding a points-funded order.
 - [Checkout API](./checkout-api.mdx) — the create call that carries `loyalty` and `customer_phone`.
 - [Payment Methods API](./payment-methods.md) — discovering the `pg_codes` your loyalty service is linked to.
 - [Operations](../operations.md) — refunds, and how they trigger reward reversal.
-- [Refunding Orders Paid with Qitaf Points](/business/operations/qitaf-points-refund) — the dashboard workflow for returning redeemed points.
 - [Operation events](../webhooks/operation-events.md) — the webhook that reports a points return.
-- [Checkout SDK](./checkout-sdk/index.md) — where customers redeem existing Qitaf points.
 - [M-Wallet](./wallet/index.mdx) — the related wallet-credit flow, including multi-wallet stacking with Qitaf.

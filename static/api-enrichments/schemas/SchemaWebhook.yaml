@@ -1,0 +1,9 @@
+# Overrides for: components/schemas/SchemaWebhook
+# The raw spec still lists `recovery_success`, which Ottu no longer documents.
+
+properties:
+  autopay:
+    properties:
+      event_type:
+        description: |
+          What AutoPay classified this payment as. One of `cit_success`, `cit_failure`, `mit_success`, `mit_failure`, `card_updated`, or `null` when the setup outcome is still undecided. A hint only; read `result` and `state` for the payment outcome.

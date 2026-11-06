@@ -17,17 +17,36 @@ This key is a high-privilege access token used for server-side communication bet
 **Header:** `Authorization`\
 **Value:** `Api-Key {{api_key}}`
 
-Bear in mind, this key grants admin-level privileges across all public endpoints, and leaking it can lead to serious security implications.&#x20;
+:::warning Shown only once
+
+The private key is displayed **exactly once, at the moment it is created**. Ottu does not store it in a readable form, so it cannot be retrieved later — not even by an administrator. Copy it to your server’s secret storage immediately; if it is lost, create a new key and revoke the old one.
+
+:::
+
+An API key comes in one of two modes:
+
+- **Full access** — the key can call every endpoint that accepts private-key authentication. All keys created before permission scoping was introduced work this way, and continue to work unchanged.
+- **Scoped** — the key carries an explicit set of permissions and can only perform the operations those permissions allow. Every other request is rejected with `403`. See [API Key Permissions](../reference/api-key-permissions.md) for the full catalog.
 
 :::warning
 
-It should NEVER be embedded in SDKs or made public. Ensure it’s used on the server side and securely stored within the server environment, separate from your code.
+The private key should NEVER be embedded in SDKs or made public. Ensure it’s used on the server side and securely stored within the server environment, separate from your code. Prefer scoped keys for new integrations — a leaked refunds-only key is a far smaller incident than a leaked full-access key.
 
 :::
 
 ## Public Key
 
 The Public Key is used to initialize the [Checkout SDK](../payments/checkout-sdk/index.md) and can safely be shared with clients. This key doesn’t provide access to public API endpoints, making it secure for client-side use.
+
+Anyone who loads your checkout can read the public key, so it proves nothing about who is calling. Ottu therefore accepts it only where the checkout session itself decides what the call may touch — for example, the Checkout SDK deleting a saved card through the session-scoped [User Cards](../cards-and-tokens/user-cards.mdx#delete-a-card-from-a-checkout-session-checkout-sdk) route, where the customer is read from the session.
+
+Server APIs that name a customer or charge a card **refuse the public key** with `401 {"detail": "Authentication credentials were not provided."}`. Call them from your server with your [private key](#api-key-auth) instead:
+
+| API | Route |
+|---|---|
+| [User Cards](../cards-and-tokens/user-cards.mdx) — list and delete | `POST /b/pbl/v2/card/`, `DELETE /b/pbl/v2/card/{token}/` |
+| [Payment Methods](../payments/payment-methods.md) | `POST /b/pbl/v2/payment-methods/` |
+| [Auto-debit](../cards-and-tokens/recurring-payments.mdx#subsequent-payments-mit) | `POST /b/pbl/v2/payment/auto-debit/`, `POST /b/pbl/v2/auto-debit/` |
 
 :::info
 
@@ -45,7 +64,9 @@ Permissions control what actions an authenticated user or application can perfor
 
 ### API Key
 
-When using the [API Key](authentication.md#api-key-auth), **all permissions are granted by default**. The API Key has admin-level access to all endpoints, so no additional permission configuration is needed.
+A **full-access** [API Key](authentication.md#api-key-auth) is granted all permissions — no additional configuration is needed, and every key issued before permission scoping existed behaves this way.
+
+A **scoped** API Key holds an explicit permission set and is authorized per operation, using the same permission vocabulary as Basic Authentication users below. A scoped key without the required permission receives `403 Forbidden`. The complete operation-to-permission mapping lives in [API Key Permissions](../reference/api-key-permissions.md).
 
 ### Basic Authentication
 
@@ -87,11 +108,16 @@ For [post-payment operations](../operations.md) (refund, capture, void, etc.), e
 | Permission | Used By |
 |---|---|
 | `Can add Invoice` | [Invoice API](../invoices.mdx) |
-| `report.can_view_report` | [Reports API](../reports.mdx) |
+| `Can view Report` (`report.view_report`) | [Reports API](../reports.mdx) |
+| `Can view Card` (`card.view_card`) | [User Cards API](../cards-and-tokens/user-cards.mdx) — list saved cards |
+| `Can delete Card` (`card.delete_card`) | [User Cards API](../cards-and-tokens/user-cards.mdx) — delete a saved card, including the session-scoped route |
+| `Can view Settings` (`gateway.view_pgmid`) | [Payment Methods API](../payments/payment-methods.md) |
+| `Can perform auto-debits` (`user.do_autodebit`) | [Auto-debit](../cards-and-tokens/recurring-payments.mdx#subsequent-payments-mit) — charge a saved card |
 
 ### Best Practices
 
-- **Use Basic Auth for integrations** — assign only the permissions each integration needs, rather than using the API Key for everything.
+- **Scope your API keys** — give each server integration a key holding only the permissions it needs (for example, a refunds-only key for your back-office tool). See [API Key Permissions](../reference/api-key-permissions.md).
+- **Use Basic Auth for per-user access** — assign only the permissions each user needs, rather than sharing one key for everything.
 - **Don’t share users** — create a separate user for each person or system that needs API access. Each action is logged and traceable to the user.
 - **Rotate API Keys regularly** — if the API Key is compromised, rotate it immediately.
 - **Secure credentials** — never store passwords or API Keys in client-side code. Keep them in server environment variables.
