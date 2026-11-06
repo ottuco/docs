@@ -629,13 +629,28 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "doc",
+              id: "developers/webhooks/event-catalogue",
+              label: "Events & Envelope (v3)",
+            },
+            {
+              type: "doc",
+              id: "developers/webhooks/delivery-and-retries",
+              label: "Delivery & Retries",
+            },
+            {
+              type: "doc",
+              id: "developers/webhooks/migrate-to-v3",
+              label: "Formats & Migration",
+            },
+            {
+              type: "doc",
               id: "developers/webhooks/payment-events",
-              label: "Payment Events",
+              label: "Payment Events (v1/v2)",
             },
             {
               type: "doc",
               id: "developers/webhooks/operation-events",
-              label: "Operation Events",
+              label: "Operation Events (v1/v2)",
             },
             {
               type: "doc",
@@ -747,6 +762,11 @@ const sidebars: SidebarsConfig = {
               type: "doc",
               id: "developers/reference/checkout-status-codes",
               label: "Checkout Status Codes",
+            },
+            {
+              type: "doc",
+              id: "developers/reference/api-key-permissions",
+              label: "API Key Permissions",
             },
           ],
         },
