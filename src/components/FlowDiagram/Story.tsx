@@ -158,6 +158,16 @@ export default function Story(props: StoryProps): React.JSX.Element {
     });
   }, [maxHeight, journey, stop]);
 
+  // On a narrow screen the panel sits below the diagram: bring it into view
+  // after a click, only if it is off-screen.
+  useEffect(() => {
+    if (!pin || window.innerWidth >= 1100) return;
+    document.getElementById(`${scope}-panel`)?.scrollIntoView({
+      block: "nearest",
+      behavior: reducedMotion() ? "auto" : "smooth",
+    });
+  }, [scope, pin, stop]);
+
   // Clicking the pinned thing again unpins it. A click also drops the hover
   // preview: touch never sends mouseleave, and after unpinning the reader
   // should see the whole story.
@@ -293,6 +303,7 @@ export default function Story(props: StoryProps): React.JSX.Element {
     <div className={styles.storyWrap} style={{ gap: STORY_PANEL_GAP }}>
       {diagram}
       <StoryPanel
+        id={`${scope}-panel`}
         lanes={lanes}
         steps={steps}
         journey={journey}

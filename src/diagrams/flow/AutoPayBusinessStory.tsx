@@ -21,9 +21,33 @@ import {
 } from "@site/src/components/FlowDiagram";
 
 const lanes: StoryLane[] = [
-  { title: "Your customer", icon: mdiAccount, chip: "Customer's part" },
-  { title: "Ottu", icon: mdiShieldCheckOutline, chip: "Ottu's part" },
-  { title: "Your team", icon: mdiAccountGroupOutline, chip: "Your part" },
+  {
+    title: "Your customer",
+    icon: mdiAccount,
+    chip: "Customer's part",
+    about: {
+      does: "Pays the first charge once. After that they only act on the emails and their own page.",
+      relies: "Ottu for the charges and emails, and you for the service.",
+    },
+  },
+  {
+    title: "Ottu",
+    icon: mdiShieldCheckOutline,
+    chip: "Ottu's part",
+    about: {
+      does: "Saves the card, activates the subscription, charges every billing date, retries failed charges, and sends the emails and texts.",
+      relies: "The first payment, and a gateway with auto-debit.",
+    },
+  },
+  {
+    title: "Your team",
+    icon: mdiAccountGroupOutline,
+    chip: "Your part",
+    about: {
+      does: "Starts the subscription with one checkout call, gives the service, and decides what to do with a Past Due subscription.",
+      relies: "Ottu for the result of each charge.",
+    },
+  },
 ];
 
 const steps: StoryStep[] = [
@@ -32,7 +56,8 @@ const steps: StoryStep[] = [
     title: "Signs up",
     sub: "Chooses a subscription",
     icon: mdiCartOutline,
-    detail: "Your customer chooses what to subscribe to. Your part: nothing yet.",
+    detail:
+      "Your customer chooses what to subscribe to. Your part: nothing yet.",
   },
   {
     lane: 2,

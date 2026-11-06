@@ -408,9 +408,11 @@
   overflow-y: auto;
 }
 
-/* Sits under the diagram in normal flow: it must never cover diagram content. */
+/* Under the diagram on narrow screens, in its own column beside it on wide
+   ones. It never overlaps the diagram. */
 .panel {
   position: relative;
+  height: 128px;
   /* Height is fixed inline (STORY_PANEL_H): short content sits centred,
      long content scrolls. `safe` keeps the top reachable when it overflows. */
   display: flex;
@@ -564,4 +566,36 @@
 
 .cardLink:hover .node {
   border-color: var(--o-primary);
+}
+
+@media (min-width: 1100px) {
+  .storyWrap {
+    flex-direction: row !important;
+    align-items: flex-start;
+  }
+
+  .storyWrap > :first-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .storyWrap > .panel {
+    position: sticky;
+    top: calc(var(--ifm-navbar-height, 60px) + 16px);
+    flex: none;
+    width: 300px;
+    height: auto !important;
+    min-height: 128px;
+    max-height: calc(100vh - var(--ifm-navbar-height, 60px) - 40px);
+  }
+}
+
+/* React Flow's attribution badge: keep it, but theme it (it was a grey block in dark mode). */
+.canvas :global(.react-flow__attribution) {
+  background: transparent;
+  color: var(--o-text-2);
+}
+
+.canvas :global(.react-flow__attribution a) {
+  color: var(--o-text-2);
 }
