@@ -77,5 +77,4 @@ export const sampleCancelResponse = {
   ...sampleSubscription,
   cancel_at_period_end: true,
   cancellation_initiator: "merchant",
-  next_billing_date: null,
 };

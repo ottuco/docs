@@ -286,7 +286,7 @@ AutoPay has fixed limits on gateways, billing periods and edits. See the full li
     The list endpoint takes its filters in a request body, and it only reads. Keep `customer_id` in that body: a customer identifier in a URL ends up in access logs.
   </FAQItem>
   <FAQItem question="How do I know when the customer finishes the first payment?">
-    Poll [Retrieve a subscription](/developers/payments/autopay/?autopay-api=retrieve#api-reference) and check `status`. It leaves `pending_setup` when Ottu confirms the first payment: as soon as Ottu receives the payment result. If that result is missed, a backup check activates it within about 15 minutes of the payment, and never earlier than 20 minutes after creation. The checkout webhook for that session also fires if you set `webhook_url`, but it usually arrives while the subscription is still `pending_setup`, so use it as "payment received" only. See [First payment and activation](#first-payment-and-activation).
+    Poll [Retrieve a subscription](/developers/payments/autopay/?autopay-api=retrieve#api-reference) and check `status`. It leaves `pending_setup` when Ottu confirms the first payment. The checkout webhook is only "payment received". Timing and details: [First payment and activation](#first-payment-and-activation).
   </FAQItem>
   <FAQItem question="What happens when the customer's card expires?">
     Ottu doesn't track the card's expiry date, so there is no warning in advance. The next renewal fails and follows the normal path: retries, then `past_due` and the final email. The customer adds a new card and pays the balance on the [self-service page](#customer-self-service-page).

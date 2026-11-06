@@ -408,8 +408,9 @@ export default function AutoPayDemoInner() {
               <>
                 {sampleNote}
                 <ApiPanel label={`GET ${SUBSCRIPTIONS}/${state.subscriptionId}/`} data={state.sub} />
-                {state.webhook?.extra?.autopay?.subscription_id &&
-                  state.webhook.extra.autopay.subscription_id === state.sub.id && (
+                {(state.sample ||
+                  (state.webhook?.extra?.autopay?.subscription_id &&
+                    state.webhook.extra.autopay.subscription_id === state.sub.id)) && (
                   <p className={styles.cardDescription}>
                     The webhook's <code>extra.autopay.subscription_id</code> equals this subscription's <code>id</code>.
                   </p>
@@ -419,11 +420,10 @@ export default function AutoPayDemoInner() {
             <p className={styles.cardDescription}>
               {pending ? (
                 <>
-                  <strong><code>pending_setup</code> is normal right after payment.</strong> Ottu activates the
-                  subscription when it receives the payment result. If that result is missed, a backup check
-                  activates it within about 15 minutes of the payment, and never earlier than 20 minutes after
-                  you created the subscription. <strong>You do not have to wait.</strong> The next steps work while
-                  the subscription is <code>pending_setup</code>. {state.polls >= MAX_POLLS ? "Polling stopped; check again below." : "This page checks every 5 seconds."}
+                  <strong><code>pending_setup</code> is normal right after payment.</strong> You do not have to wait:
+                  the next steps work while the subscription is <code>pending_setup</code>. See{" "}
+                  <a href="#first-payment-and-activation">First payment and activation</a>.{" "}
+                  {state.polls >= MAX_POLLS ? "Polling stopped; check again below." : "This page checks every 5 seconds."}
                 </>
               ) : (
                 <>
@@ -481,7 +481,7 @@ export default function AutoPayDemoInner() {
           <>
             {state.step === 6 && !state.cancelRes && (
               <p className={styles.cardDescription}>
-                Your test subscription is created. Choose how to end the demo.
+                {state.sample ? "Choose how to end this walk-through." : "Your test subscription is created. Choose how to end the demo."}
                 {!state.sample && (
                   <>
                     <br />
@@ -505,11 +505,11 @@ export default function AutoPayDemoInner() {
                 )}
               </p>
             )}
+            {state.cancelRes && sampleNote}
             {state.cancelReq && (
               <ApiPanel label={`POST ${SUBSCRIPTIONS}/${state.subscriptionId}/cancel/`} data={state.cancelReq} />
             )}
             {state.cancelRes && <ApiPanel label="Response — 200 OK" data={state.cancelRes} />}
-            {state.cancelRes && sampleNote}
             {state.step === 6 && (
               <div className={styles.actions}>
                 {!state.cancelRes && (
@@ -615,7 +615,9 @@ export default function AutoPayDemoInner() {
         <div className={styles.completeCard} data-autopay-complete>
           <h3 className={styles.completeTitle}>Journey complete</h3>
           <p className={styles.completeSubtitle}>
-            You created a subscription, paid its first charge, and read its status and customer page link.
+            {state.sample
+              ? "This walk-through showed how you create a subscription, how your customer pays its first charge, and how you read its status and customer page link."
+              : "You created a subscription, paid its first charge, and read its status and customer page link."}{" "}
             From here Ottu bills each cycle, retries failed charges and emails the customer.
           </p>
           <button className={styles.secondaryBtn} onClick={restart}>
