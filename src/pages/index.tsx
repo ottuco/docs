@@ -125,7 +125,7 @@ function Hero() {
           <span className={styles.heroAccent}>Switch freely.</span>
         </Heading>
         <p className={styles.heroSub}>
-          Ottu connects your business to 50+ payment gateways through one
+          Ottu connects your business to 45+ payment gateways through one
           unified API. Configure routing, add providers, and change acquirers —
           without rebuilding your integration.
         </p>
@@ -316,7 +316,7 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title="Payment Processing Documentation"
-      description="Own your payment stack with Ottu. One API, 50+ gateways, smart routing, zero lock-in. PCI DSS Level 1 certified."
+      description="Own your payment stack with Ottu. One API, 45+ gateways, smart routing, zero lock-in. PCI DSS Level 1 certified."
     >
       <main>
         <Hero />

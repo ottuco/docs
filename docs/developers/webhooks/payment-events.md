@@ -248,7 +248,7 @@ Never process a payment webhook without verifying the signature. An unverified p
 
 #### **7. Using PG Params**
 
-The `pg_params` object contains normalized payment gateway response fields. Instead of parsing the raw `gateway_response` (which varies by gateway), use `pg_params` for consistent field access across all 60+ gateways.
+The `pg_params` object contains normalized payment gateway response fields. Instead of parsing the raw `gateway_response` (which varies by gateway), use `pg_params` for consistent field access across all 45+ gateways.
 
 For the complete searchable reference of all fields, see [**PG Params**](/developers/webhooks/pg-params/).
 
