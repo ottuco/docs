@@ -32,8 +32,8 @@ const STATES = {
 
 const DEV_PAGE = "/developers/payments/autopay/";
 
-// Edges both audiences see: the main moves (facts-autopay.md section 2).
-const common: FlowArrow[] = [
+// Edges: the main moves (facts-autopay.md section 2).
+const arrows: FlowArrow[] = [
   { from: "pending", to: "active", label: "paid" },
   {
     from: "pending",
@@ -93,40 +93,6 @@ const common: FlowArrow[] = [
   },
 ];
 
-// Developer extras: the rarer moves an integrator should expect.
-const developerOnly: FlowArrow[] = [
-  {
-    from: "trial",
-    to: "expired",
-    fromSide: "left",
-    toSide: "left",
-    kind: "plain",
-    label: "end date passed",
-  },
-  {
-    from: "trial",
-    to: "canceled",
-    fromSide: "top",
-    toSide: "top",
-    kind: "plain",
-  },
-  {
-    from: "pending",
-    to: "canceled",
-    fromSide: "top",
-    toSide: "top",
-    kind: "plain",
-  },
-  {
-    from: "failed",
-    to: "canceled",
-    fromSide: "bottom",
-    toSide: "bottom",
-    kind: "plain",
-    label: "cancel immediate",
-  },
-];
-
 const layout: Record<
   keyof typeof STATES,
   Pick<FlowCard, "x" | "y" | "icon" | "tone">
@@ -159,12 +125,20 @@ export default function AutoPayStates({
     };
   });
   return (
-    <FlowDiagram
-      title={dev ? "Subscription status values" : "Subscription states"}
-      sub="Click a state to read what it means · Canceled and Expired are final"
-      cards={cards}
-      arrows={dev ? [...common, ...developerOnly] : common}
-      height={dev ? 540 : 480}
-    />
+    <>
+      <FlowDiagram
+        title={dev ? "Subscription status values" : "Subscription states"}
+        sub="Click a state to read what it means · Canceled and Expired are final"
+        cards={cards}
+        arrows={arrows}
+        height={480}
+      />
+      {dev ? (
+        <p>
+          You can cancel with mode <code>immediate</code> from any state that is
+          not final.
+        </p>
+      ) : null}
+    </>
   );
 }
