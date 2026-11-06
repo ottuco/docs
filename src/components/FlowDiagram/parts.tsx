@@ -30,6 +30,7 @@ export type CardData = {
   width?: number;
   href?: string;
   mono?: boolean;
+  hidden?: boolean;
 };
 
 const allSides = [Position.Top, Position.Right, Position.Bottom, Position.Left];
@@ -66,6 +67,10 @@ export function Handles({
 
 export function CardNode({ data }: NodeProps): React.JSX.Element {
   const d = data as CardData;
+  if (d.hidden)
+    return (
+      <div aria-hidden="true" style={{ width: d.width ?? 190, height: 54 }} />
+    );
   const cls = [styles.node, d.tone ? styles[d.tone] : ""].join(" ");
   const body = (
     <div

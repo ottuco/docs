@@ -11,14 +11,7 @@
 //
 // Arrow shapes live in storyRoutes.ts, the focus CSS in storyFocus.ts, the
 // node ids in storyIds.ts and the panel in StoryPanel.tsx.
-import React, {
-  useEffect,
-  useId,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useColorMode } from "@docusaurus/theme-common";
 import { ReactFlow, type Edge, type Node, type NodeProps } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -49,6 +42,7 @@ import { routeLink } from "./storyRoutes";
 import { focusCss, type Hover, type Pin } from "./storyFocus";
 import { laneId, linkId, stepId, stepOf } from "./storyIds";
 import StoryPanel from "./StoryPanel";
+import { useWidthFlag } from "./useWidthFlag";
 import type { StoryLane, StoryProps } from "./types";
 import styles from "./styles.module.css";
 
@@ -169,25 +163,7 @@ export default function Story(props: StoryProps): React.JSX.Element {
   // The caption goes beside the diagram only when diagram + caption fit the
   // container; measured, not guessed from the viewport.
   const wrap = useRef<HTMLDivElement>(null);
-  const [side, setSide] = useState(false);
-  const needed = storySideAt(props);
-  useLayoutEffect(() => {
-    const el = wrap.current;
-    if (!el || !hasPanel) return;
-    setSide(el.clientWidth >= needed); // before first paint: no flash
-    // Measure in the next frame: changing layout inside the observer callback
-    // triggers "ResizeObserver loop" errors.
-    let raf = 0;
-    const ro = new ResizeObserver(() => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => setSide(el.clientWidth >= needed));
-    });
-    ro.observe(el);
-    return () => {
-      cancelAnimationFrame(raf);
-      ro.disconnect();
-    };
-  }, [hasPanel, needed]);
+  const side = useWidthFlag(wrap, storySideAt(props), hasPanel);
 
   // On a narrow screen the panel sits below the diagram. After a click, scroll
   // down just enough to show it, but never so far that the clicked step
