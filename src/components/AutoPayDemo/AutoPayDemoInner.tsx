@@ -391,10 +391,10 @@ export default function AutoPayDemoInner() {
             />
             )}
             <p className={styles.cardDescription} style={{ marginTop: 12 }}>
-              Read <code>extra.autopay.subscription_id</code> to find the subscription. As a fallback,
-              the webhook's <code>session_id</code> equals <code>setup_session_id</code> on the
-              subscription. The subscription can still be <code>pending_setup</code> when this
-              webhook arrives, so treat it as "payment received", not "subscription active". The <code>autopay</code> block in the webhook is not signed: confirm by retrieving the subscription.
+              This is "payment received", not "subscription active". The <code>autopay</code> block is not
+              signed: confirm by retrieving the subscription. See{" "}
+              <a href="#first-payment-and-activation">First payment and activation</a> for how to match this
+              webhook to your subscription.
             </p>
             {state.step === 3 && <div className={styles.actions}>{next(4)}</div>}
           </>
