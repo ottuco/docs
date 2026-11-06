@@ -66,15 +66,15 @@ graph LR
 
 ### What your customer sees
 
-When a customer taps delete on a saved card that is held by a running [auto-debit agreement](/developers/cards-and-tokens/recurring-payments/), the card is not deleted. The Checkout SDK (or your own card list) receives an explanation in the `detail` field, in the language of the `Accept-Language` header (English and Arabic are supported), and should show it to the customer as-is. The rules behind these messages are in [Deleting a card that has an auto-debit agreement](#deleting-a-card-that-has-an-auto-debit-agreement).
+When a customer taps delete on a saved card that is held by a running [auto-debit agreement](/glossary/#term-auto-debit) (see [Recurring Payments](/developers/cards-and-tokens/recurring-payments/)), the card is not deleted. The Checkout SDK (or your own card list) receives an explanation in the `detail` field, in the language of the `Accept-Language` header (English and Arabic are supported), and should show it to the customer as-is. The rules behind these messages are in [Deleting a card that has an auto-debit agreement](#deleting-a-card-that-has-an-auto-debit-agreement).
 
 <CodeBlock language="json" title="400 Bad Request: recurring agreement still running">{`{
   "detail": "This card is linked to an auto-debit agreement active until 2026-12-31. Contact the merchant to cancel the agreement before deleting this card.",
   "result": "failed"
 }`}</CodeBlock>
 
-<CodeBlock language="json" title="400 Bad Request: ongoing agreement">{`{
-  "detail": "This card is linked to an ongoing auto-debit agreement. Contact the merchant to cancel the agreement before deleting this card.",
+<CodeBlock language="json" title="409 Conflict: agreement on an Ottu PG card">{`{
+  "detail": "This card is linked to an active auto debit agreement and cannot be deleted. Pay once with another card to move the agreement, then delete this card.",
   "result": "failed"
 }`}</CodeBlock>
 
@@ -292,7 +292,7 @@ A refused cardholder delete leaves the card untouched and fully usable: Ottu che
 | `204` | The card was deleted | Remove it from your UI |
 | `400` | The card is held by a running or open-ended agreement (see the rules below), or `token` / `session_id` is longer than 128 characters | Show `detail` to the customer. Do not retry until the agreement has ended |
 | `401` | No API key, or an invalid, revoked or expired one | Send `Authorization: Api-Key <YOUR_PUBLIC_KEY>` |
-| `403` | A private key or dashboard user without the `card.delete_card` permission. It cannot happen with the public key, which is accepted without that permission check | Grant the permission to that key or user |
+| `403` | Merchant credentials only: a private key or dashboard user without the `card.delete_card` permission. It cannot happen with the public key, which is accepted without that permission check | Grant the permission to that key or user |
 | `404` | Unknown or expired session, a session with no `customer_id`, a token that does not belong to the session's customer, or the card could not be deleted at its payment gateway (the gateway refused it, or offers no way to delete tokens). The body is `Not found.` (<span dir="rtl">غير موجودة.</span> in Arabic) | Treat the card as not deletable. The answer is deliberately the same for all of these, so a caller cannot probe for other customers' cards |
 | `409` | The card was saved through Ottu PG and an auto-debit agreement is attached to it | Show `detail`. The customer can pay once with another card to move the agreement, then delete this card |
 | `429` | More than 30 delete requests in a minute from one client IP address (the default limit) | Wait, then retry |
@@ -305,7 +305,7 @@ A saved card can be linked to an [auto-debit agreement](/developers/cards-and-to
 
 Who is asking is decided only by the credential on the request, never by a parameter. A public key (the one embedded in the Checkout SDK) is always treated as the cardholder. A private key, or a signed-in dashboard user, is always treated as the merchant. The request carries no other way to claim a role.
 
-**Which cards.** The agreement rules apply to cards Ottu holds itself, saved through a [payment gateway](/developers/payments/payment-methods/) that supports deleting tokens: Checkout.com, KNET V3, MPGS, Al Rajhi or STC Pay. A card saved through Ottu's own payment gateway (Ottu PG) is checked by Ottu PG instead, and a refused delete there answers `409` with its own message (see [What your customer sees](#what-your-customer-sees)).
+**Which cards.** The agreement rules apply to cards Ottu holds itself, saved through a [payment gateway](/developers/payments/payment-methods/) that supports deleting tokens: Checkout.com, KNET V3, MPGS, Al Rajhi or STC Pay. A card saved through Ottu's own payment gateway (Ottu PG) is checked by Ottu PG instead, and a refused delete there answers `409` with its own message (see [What your customer sees](#what-your-customer-sees)). A card saved through any gateway not named here cannot be deleted at its gateway, so the cardholder route answers `404`.
 
 **What counts as running.** For a card Ottu holds, a cardholder's delete is decided by the agreement's `type`:
 
@@ -343,7 +343,7 @@ The agreement check is for the cardholder only. It does not apply on the merchan
 
 - Show the `detail` text to the customer instead of a generic "could not delete" message. It already says who to contact and, when known, until when.
 - Send `Accept-Language` so the message matches the customer's language.
-- Hide or disable the delete button for a card you know has a running agreement, and keep the API answer as the final authority.
+- Handle the `400` and `409` refusals in your UI by showing `detail` and keeping the card visible.
 - Never ship your private key in a browser or mobile app. Customer-facing delete calls use the public key only.
 
 ## FAQ
