@@ -498,7 +498,11 @@
 }
 
 .scrollHint {
-  margin-top: 4px;
+  /* Out of the layout flow (in the figure's bottom margin), so showing or
+     hiding it never resizes anything and cannot feed a ResizeObserver loop. */
+  position: absolute;
+  right: 0;
+  bottom: -1.5rem;
   font-size: 12px;
   color: var(--ifm-color-emphasis-700);
 }
@@ -509,6 +513,7 @@
 }
 
 .figure {
+  position: relative;
   margin: 1.75rem 0;
   /* The container the placeholder's @container rule measures. */
   container-type: inline-size;
