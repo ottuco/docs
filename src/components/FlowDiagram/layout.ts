@@ -23,6 +23,8 @@ export const STORY_JOURNEYS_H = 40;
  * text scrolls inside it. */
 export const STORY_PANEL_H = 128;
 export const STORY_PANEL_GAP = 12;
+/** Width of the caption column when it sits beside the diagram (keep in sync with `.storyWrapSide > .panel`). */
+export const PANEL_W = 300;
 
 export const hasJourneys = (p: StoryProps): boolean =>
   (p.journeys?.length ?? 0) > 0;
