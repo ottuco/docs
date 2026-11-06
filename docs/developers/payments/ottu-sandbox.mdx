@@ -59,7 +59,7 @@ This endpoint accepts a **private** API key (`Authorization: Api-Key <private_ke
 :::
 
 :::warning[Permission, availability and body format]
-The caller needs the `ottu_sandbox.add_ottusandboxmid` permission; a [**scoped** private API key](/developers/getting-started/authentication) must hold it too. The endpoint is also only available where the server has `SANDBOX_MID_API_ENABLED` turned on, and it is **off by default** (production keeps it off). Either way the answer is [`403`](/developers/reference/error-codes). The body must be `application/json`: form and multipart bodies are rejected with [`415`](/developers/reference/error-codes). A NUL byte (`\u0000`) in any field is rejected with [`400`](/developers/reference/error-codes).
+The caller needs the `ottu_sandbox.add_ottusandboxmid` permission; a [**scoped** private API key](/developers/getting-started/authentication) must hold it too. The endpoint is also only available in environments where it is enabled, and it is not available in production. Either way the answer is [`403`](/developers/reference/error-codes). The body must be `application/json`: form and multipart bodies are rejected with [`415`](/developers/reference/error-codes). A NUL byte (`\u0000`) in any field is rejected with [`400`](/developers/reference/error-codes).
 :::
 
 :::tip[Send OPTIONS first]

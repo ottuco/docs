@@ -1659,7 +1659,7 @@ paths:
       description: 'Provisions an Ottu Sandbox payment gateway MID with its full configuration, so a test environment can be set up without going through the admin.
 
 
-        The caller needs the `ottu_sandbox.add_ottusandboxmid` permission (a scoped private API key must hold it too). The endpoint is only available where `SANDBOX_MID_API_ENABLED` is on - production keeps it off. The body must be JSON.
+        The caller needs the `ottu_sandbox.add_ottusandboxmid` permission (a scoped private API key must hold it too). The endpoint is only available in environments where it is enabled. The body must be JSON.
 
 
         ### What it does
@@ -1708,7 +1708,7 @@ paths:
 
         - **401** - missing or invalid credentials.
 
-        - **403** - the caller lacks the `ottu_sandbox.add_ottusandboxmid` permission, or the endpoint is disabled (`SANDBOX_MID_API_ENABLED`).
+        - **403** - the caller lacks the `ottu_sandbox.add_ottusandboxmid` permission, or the endpoint is disabled in this environment.
 
         - **415** - the body is not JSON.
 
