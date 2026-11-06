@@ -593,3 +593,8 @@
 .canvas :global(.react-flow__attribution a) {
   color: var(--o-text-2);
 }
+
+.mono {
+  font-family: var(--ifm-font-family-monospace, ui-monospace, monospace);
+  font-size: 10.5px;
+}

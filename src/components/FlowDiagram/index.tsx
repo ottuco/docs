@@ -21,6 +21,15 @@ import type { FlowProps, SequenceProps, StoryProps } from "./types";
 import styles from "./styles.module.css";
 
 export type * from "./types";
+export { default as CaptionLayout } from "./CaptionLayout";
+/** Classes for the text inside a caption panel (same look as the story panel). */
+export const captionClass = {
+  eyebrow: styles.panelEyebrow,
+  sub: styles.panelSub,
+  chips: styles.chips,
+  chip: styles.chip,
+  chipOn: styles.chipOn,
+};
 
 // Shown only while the diagram really overflows its box (any viewport).
 function ScrollHint({

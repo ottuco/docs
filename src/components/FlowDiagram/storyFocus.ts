@@ -97,8 +97,12 @@ export function focusCss(focus: Focus): string {
       ? `${s} [data-id="${stepId(current)}"] > div { outline: 2px solid var(--o-primary); outline-offset: 2px; }`
       : "";
 
+  return dimCss(s, relit, outline);
+}
+
+/** Dim every card, arrow and label inside `s`, then bring `relit` back. Cards and labels keep 0.75 so their text stays AA-readable in both themes; only the lines fade harder. */
+export function dimCss(s: string, relit: string[], outline = ""): string {
   return [
-    // Cards and edge labels keep 0.75 so their text stays AA-readable in both themes; only the lines fade harder.
     `${s} .react-flow__node, ${s} [data-edge] { opacity: 0.75; }`,
     `${s} .react-flow__edge { opacity: 0.3; }`,
     `${relit.join(",\n")} { opacity: 1; }`,
