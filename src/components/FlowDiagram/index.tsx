@@ -58,7 +58,6 @@ function ScrollHint({
     };
     const mo = new MutationObserver(later);
     mo.observe(fig, { childList: true, subtree: true });
-    ro.observe(fig);
     check();
     return () => {
       cancelAnimationFrame(raf);
