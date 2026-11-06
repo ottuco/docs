@@ -1,0 +1,211 @@
+{
+  "operationId": "autopay_subscription_regenerate_page_token",
+  "method": "POST",
+  "path": "/b/pbl/v2/subscriptions/{subscription_id}/regenerate-page-token/",
+  "summary": "Regenerate an AutoPay hosted-page token",
+  "description": "Replaces the customer's page link. The existing link stops working the moment you call this endpoint, and Ottu does not tell the customer. Send the new `page_url` yourself, or the customer reaches a dead link. Use it to revoke a link that leaked or was lost, not to re-send a working one.\n\nAfter a timeout, read the current link with Retrieve an AutoPay hosted-page link and compare its `page_url` with the one you hold before you retry. A blind retry can revoke a link you have just delivered.\n",
+  "parameters": [
+    {
+      "in": "header",
+      "name": "Idempotency-Key",
+      "schema": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "description": "Required. A UUID v4. Ottu rejects the call with `400` when the header is missing. The header does not make this call safe to repeat: replaying the same key still issues a new token and revokes the previous one.\n",
+      "required": true
+    },
+    {
+      "in": "path",
+      "name": "subscription_id",
+      "schema": {
+        "type": "string"
+      },
+      "description": "AutoPay subscription identifier returned by subscription creation.",
+      "required": true
+    }
+  ],
+  "requestBody": null,
+  "responses": [
+    {
+      "status": "200",
+      "description": "",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "page_token": {
+            "type": "string",
+            "description": "The new signed token. It replaces the previous one, which is now rejected.\n"
+          },
+          "page_url": {
+            "type": "string",
+            "description": "The complete link to hand to the customer. Ottu builds it from your primary domain, the subscription's language and `page_token`.\n\nAnyone holding this link can act on the subscription, so treat it as a credential and deliver it only to the subscription's own customer. See [Customer Self-Service Page](/developers/payments/autopay/#customer-self-service-page).\n"
+          }
+        },
+        "required": [
+          "page_token",
+          "page_url"
+        ],
+        "description": "The newly issued self-service link. The previous link stopped working the moment it was replaced, and Ottu does not tell the customer, so you must deliver `page_url` yourself.\n"
+      },
+      "examples": [
+        {
+          "name": "NewLink",
+          "summary": "New link",
+          "value": {
+            "page_token": "tok_e7a90c3d5b2f4186",
+            "page_url": "https://sandbox.ottu.net/en/subscription/tok_e7a90c3d5b2f4186"
+          }
+        }
+      ]
+    },
+    {
+      "status": "400",
+      "description": "The `Idempotency-Key` header is missing.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ]
+      },
+      "examples": [
+        {
+          "name": "MissingIdempotency-Key",
+          "summary": "Missing Idempotency-Key",
+          "value": {
+            "Idempotency-Key": [
+              "This header is required."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "status": "401",
+      "description": "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ]
+      },
+      "examples": [
+        {
+          "name": "NotAuthenticated",
+          "summary": "Not authenticated",
+          "value": {
+            "detail": "Authentication credentials were not provided."
+          }
+        }
+      ]
+    },
+    {
+      "status": "404",
+      "description": "No subscription with this id exists on your account. Do not retry.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ]
+      },
+      "examples": [
+        {
+          "name": "UnknownSubscription",
+          "summary": "Unknown subscription",
+          "value": {
+            "detail": "Not found",
+            "code": "subscription_not_found"
+          }
+        }
+      ]
+    },
+    {
+      "status": "423",
+      "description": "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ]
+      },
+      "examples": [
+        {
+          "name": "PaymentsPaused",
+          "summary": "Payments paused",
+          "value": {
+            "detail": "Service is paused.",
+            "code": "service_paused"
+          }
+        }
+      ]
+    },
+    {
+      "status": "503",
+      "description": "The subscription service is unavailable. Retry with backoff.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ]
+      },
+      "examples": [
+        {
+          "name": "AutoPayUnavailable",
+          "summary": "AutoPay unavailable",
+          "value": {
+            "detail": "AutoPay bridge is unavailable."
+          }
+        }
+      ]
+    },
+    {
+      "status": "504",
+      "description": "The subscription service timed out, and a new link may already have been issued. Call page-link and compare `page_url` before retrying.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ]
+      },
+      "examples": [
+        {
+          "name": "AutoPayTimedOut",
+          "summary": "AutoPay timed out",
+          "value": {
+            "detail": "AutoPay bridge request timed out."
+          }
+        }
+      ]
+    }
+  ]
+}

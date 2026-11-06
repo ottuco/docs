@@ -1,0 +1,175 @@
+{
+  "operationId": "autopay_subscription_page_link",
+  "method": "GET",
+  "path": "/b/pbl/v2/subscriptions/{subscription_id}/page-link/",
+  "summary": "Retrieve an AutoPay hosted-page link",
+  "description": "Returns the subscription's current customer-facing page link without rotating it, so a link already in the customer's hands keeps working.\n\nThe create response has no `page_url`. Call this endpoint at any time after creation, with no need to wait for the first payment, and send the link to your customer yourself: Ottu sends the customer no email at signup and does not resend links. To re-send a link that should keep working, read it here instead of regenerating it.\n",
+  "parameters": [
+    {
+      "in": "path",
+      "name": "subscription_id",
+      "schema": {
+        "type": "string"
+      },
+      "description": "AutoPay subscription identifier returned by subscription creation.",
+      "required": true
+    }
+  ],
+  "requestBody": null,
+  "responses": [
+    {
+      "status": "200",
+      "description": "",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "page_token": {
+            "type": "string",
+            "description": "The signed token that identifies the subscription on the self-service page. Use it on its own only if you build the customer-facing URL yourself; otherwise hand out `page_url`.\n"
+          },
+          "page_url": {
+            "type": "string",
+            "description": "The complete link to hand to the customer. Ottu builds it from your primary domain, the subscription's language and `page_token`.\n\nAnyone holding this link can act on the subscription, so treat it as a credential and deliver it only to the subscription's own customer. See [Customer Self-Service Page](/developers/payments/autopay/#customer-self-service-page).\n"
+          }
+        },
+        "required": [
+          "page_token",
+          "page_url"
+        ],
+        "description": "The customer's current self-service link. Reading it never changes it, so a link the customer already has keeps working.\n"
+      },
+      "examples": [
+        {
+          "name": "CurrentLink",
+          "summary": "Current link",
+          "value": {
+            "page_token": "tok_5c1e8b2f0a9d4e7b",
+            "page_url": "https://sandbox.ottu.net/en/subscription/tok_5c1e8b2f0a9d4e7b"
+          }
+        }
+      ]
+    },
+    {
+      "status": "401",
+      "description": "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ]
+      },
+      "examples": [
+        {
+          "name": "NotAuthenticated",
+          "summary": "Not authenticated",
+          "value": {
+            "detail": "Authentication credentials were not provided."
+          }
+        }
+      ]
+    },
+    {
+      "status": "404",
+      "description": "No subscription with this id exists on your account. Do not retry.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ]
+      },
+      "examples": [
+        {
+          "name": "UnknownSubscription",
+          "summary": "Unknown subscription",
+          "value": {
+            "detail": "Not found",
+            "code": "subscription_not_found"
+          }
+        }
+      ]
+    },
+    {
+      "status": "423",
+      "description": "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ]
+      },
+      "examples": [
+        {
+          "name": "PaymentsPaused",
+          "summary": "Payments paused",
+          "value": {
+            "detail": "Service is paused.",
+            "code": "service_paused"
+          }
+        }
+      ]
+    },
+    {
+      "status": "503",
+      "description": "The subscription service is unavailable. Retry with backoff.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ]
+      },
+      "examples": [
+        {
+          "name": "AutoPayUnavailable",
+          "summary": "AutoPay unavailable",
+          "value": {
+            "detail": "AutoPay bridge is unavailable."
+          }
+        }
+      ]
+    },
+    {
+      "status": "504",
+      "description": "The subscription service timed out. Nothing was changed, so the request is safe to retry.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ]
+      },
+      "examples": [
+        {
+          "name": "AutoPayTimedOut",
+          "summary": "AutoPay timed out",
+          "value": {
+            "detail": "AutoPay bridge request timed out."
+          }
+        }
+      ]
+    }
+  ]
+}
