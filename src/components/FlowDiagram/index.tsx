@@ -40,6 +40,9 @@ function Shell({
       >
         {render}
       </BrowserOnly>
+      <div className={styles.scrollHint} aria-hidden="true">
+        Swipe sideways to see the whole diagram →
+      </div>
     </figure>
   );
 }
