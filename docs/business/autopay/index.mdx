@@ -27,10 +27,8 @@ Sell by subscription and let Ottu do the billing work. With AutoPay, your develo
 - **A free first period** if you want to offer a trial.
 
 :::info Before you start
-- **AutoPay is API-only.** There is no AutoPay screen in the dashboard.
-- **Renewals need a gateway with auto-debit.** See the [gateways with auto-debit](/business/payments/gateways/?features=autodebit).
-
-All limits, with their workarounds, are in [Limits](#limits).
+- **API-only and needs a gateway with auto-debit.** See [Limits](#limits) for what to do instead.
+- Check the [gateways with auto-debit](/business/payments/gateways/?features=autodebit).
 :::
 
 ## How it works {#how-it-works}
@@ -101,90 +99,75 @@ Your customer gets emails, text messages, and one private page. Ottu sends and h
 
 ### The emails and texts {#the-emails}
 
-Ottu sends 6 emails and 3 text messages. Each goes out in English or Arabic, chosen when the subscription is created. Text messages go to the customer's phone number, when one is on file. Only the three billing-cycle emails can be switched off, and only when the subscription is created.
+Ottu sends 6 emails and 3 texts, in English or Arabic, chosen when the subscription is created. Texts go to the customer's phone number when one is on file. Each message is below: when it goes out, and whether you can switch it off.
 
-#### Subscription created {#email-subscription-created}
+- **Subscription created** (email + text). At once, when Ottu creates the subscription. Carries the first-payment link. Switch off: no.
+- **Setup completed** (email + text). Once, when the subscription leaves Pending setup. Switch off: no.
+- **Upcoming charge** (email). Monthly: 3 days before the charge. Yearly: 31, 11, and 4 days before. Skipped if a cancellation is pending. Switch off: yes, at creation.
+- **Payment failed** (email). After each failed attempt while retries remain. Switch off: yes, at creation.
+- **Final failure** (email). About 15 seconds after the last attempt fails. Switch off: yes, at creation.
+- **Link replaced** (email + text). Each time your team regenerates the customer's page link. Switch off: no.
 
-- **Email and SMS.** Ottu sends both when it creates the subscription.
-- **What it says:** the link to the first payment, and a link to manage the subscription.
-- **Switch off:** no.
+The Final failure email may talk about suspended access. That describes your product, not Ottu. Any decision about your customer's access is yours. See [Past Due](#state-past-due).
 
-SMS (English): `"Hi {name}, please complete your {merchant} subscription setup here: {checkout_url}"`
 
-#### Setup completed {#email-setup-completed}
+<details>
+<summary>Text message wording (English)</summary>
 
-- **Email and SMS.** Ottu sends both once, when the subscription leaves Pending setup.
-- **What it says:** the subscription is active, with a link to manage it.
-- **Switch off:** no.
+- **Created:** `"Hi {name}, please complete your {merchant} subscription setup here: {checkout_url}"`
+- **Setup completed:** `"...your {merchant} subscription is now active. Manage it here: {hosted_page_url}"`
+- **Link replaced:** `"...your {merchant} subscription has a new link. The previous link no longer works: {hosted_page_url}"`
 
-SMS (English): `"...your {merchant} subscription is now active. Manage it here: {hosted_page_url}"`
+</details>
 
-#### Upcoming charge {#email-upcoming-charge}
-
-- **Email.** Monthly subscriptions get one reminder, 3 days before the charge. Yearly subscriptions get three, 31, 11, and 4 days before.
-- **Skipped** when the customer has no email on file or a cancellation is pending.
-- **Switch off:** yes, at creation.
+**Previews of the emails you can switch off:**
 
 <Tabs groupId="email-language" queryString>
 <TabItem value="en" label="English">
+
+<details>
+<summary>Upcoming charge</summary>
 
 ![Upcoming charge reminder email in English](/img/business/autopay/notifications-01-upcoming-charge-en.png)
 
-</TabItem>
-<TabItem value="ar" label="العربية">
-
-![Upcoming charge reminder email in Arabic](/img/business/autopay/notifications-02-upcoming-charge-ar.png)
-
-</TabItem>
-</Tabs>
-
-#### Payment failed {#email-payment-failed}
-
-- **Email.** Ottu sends it after each failed attempt while retries remain.
-- **What it says:** the reason, the time of the next retry, and a link to update the card.
-- **Switch off:** yes, at creation.
-
-<Tabs groupId="email-language" queryString>
-<TabItem value="en" label="English">
+</details>
+<details>
+<summary>Payment failed</summary>
 
 ![Payment failed email in English](/img/business/autopay/notifications-03-payment-failed-en.png)
 
-</TabItem>
-<TabItem value="ar" label="العربية">
-
-![Payment failed email in Arabic](/img/business/autopay/notifications-04-payment-failed-ar.png)
-
-</TabItem>
-</Tabs>
-
-#### Final failure {#email-final-failure}
-
-- **Email.** Ottu sends it about 15 seconds after the last attempt fails and the subscription becomes Past Due.
-- **What it says:** the outstanding balance, with a link to pay it.
-- **Switch off:** yes, at creation.
-
-<Tabs groupId="email-language" queryString>
-<TabItem value="en" label="English">
+</details>
+<details>
+<summary>Final failure</summary>
 
 ![Final failure email in English with outstanding balance and next steps](/img/business/autopay/notifications-05-final-failure-en.png)
 
+</details>
+
 </TabItem>
 <TabItem value="ar" label="العربية">
 
+<details>
+<summary>Upcoming charge</summary>
+
+![Upcoming charge reminder email in Arabic](/img/business/autopay/notifications-02-upcoming-charge-ar.png)
+
+</details>
+<details>
+<summary>Payment failed</summary>
+
+![Payment failed email in Arabic](/img/business/autopay/notifications-04-payment-failed-ar.png)
+
+</details>
+<details>
+<summary>Final failure</summary>
+
 ![Final failure email in Arabic with outstanding balance and next steps](/img/business/autopay/notifications-06-final-failure-ar.png)
+
+</details>
 
 </TabItem>
 </Tabs>
-
-The email may talk about suspended access. That describes your product, not Ottu. Any decision about your customer's access is yours. See [Past Due](#state-past-due).
-
-#### Link replaced {#email-link-replaced}
-
-- **Email and SMS.** Ottu sends both each time your team regenerates the customer's page link.
-- **What it says:** the new link, and that the previous link no longer works.
-- **Switch off:** no.
-
-SMS (English): `"...your {merchant} subscription has a new link. The previous link no longer works: {hosted_page_url}"`
 
 ### The self-service page {#the-self-service-page}
 
@@ -279,7 +262,7 @@ Customers can hold several cards and switch the active one in a click. Switching
 <a id="regenerate-link"></a>
 
 :::warning Regenerating a link revokes the old one
-The previous link stops working at once, and the page shows "This link has expired". Ottu emails and texts the customer the new link (see [Link replaced](#email-link-replaced)). Links never expire on their own, so only a regeneration revokes one.
+The previous link stops working at once, and the page shows "This link has expired". Ottu emails and texts the customer the new link (see [Link replaced](#the-emails)). Links never expire on their own, so only a regeneration revokes one.
 :::
 
 ## When a payment fails {#when-a-payment-fails}
@@ -291,14 +274,12 @@ The previous link stops working at once, and the page shows "This link has expir
 
 ## Setting up AutoPay {#setting-up-autopay}
 
-Your developers call the API to create, look up, and cancel subscriptions. See [Limits](#limits) for what AutoPay does not do.
-
-Before your first subscription, make sure you have:
+Your developers call the API to create, look up, and cancel subscriptions. Before your first subscription, make sure you have:
 
 1. **AutoPay enabled for your account.** Ask Ottu support to turn it on.
 2. **A support email.** It appears on the customer's page and in the footer of every email Ottu sends.
 3. **A privacy policy URL.** It is linked from the footer of every email Ottu sends.
-4. **A payment gateway with auto-debit,** in the currency you bill in. See the [gateways with auto-debit](/business/payments/gateways/?features=autodebit).
+4. **A payment gateway with auto-debit,** in the currency you bill in. See [Limits](#limits).
 5. **The email and text templates registered,** in English and Arabic: 6 emails and 3 text messages. Ottu support sets these up, the same way [notification templates](/business/notifications/) work for one-off payments.
 
 AutoPay subscriptions have no plan catalog. The plan name is a free-text label, and the price is the amount your team passes in the checkout call that creates the subscription. The [developer docs](/developers/payments/autopay/#api-reference) show the request shape.
