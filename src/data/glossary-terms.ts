@@ -84,6 +84,12 @@ const glossaryTerms: GlossaryTerm[] = [
       "The primary currency of your Ottu account, used for reporting and settlements.",
   },
   {
+    term: "Billing Cycle",
+    id: "billing-cycle",
+    definition:
+      "One billing period of a subscription — its scheduled charge date and the amount snapshotted for that charge. AutoPay generates cycles one at a time, creating the next only after the previous one is paid.",
+  },
+  {
     term: "Callback URL",
     id: "callback-url",
     definition:
@@ -136,6 +142,12 @@ const glossaryTerms: GlossaryTerm[] = [
     id: "digital-wallet",
     definition:
       "Electronic payment systems like Apple Pay, Google Pay, or PayPal that store payment information digitally.",
+  },
+  {
+    term: "Dunning",
+    id: "dunning",
+    definition:
+      "The process of retrying failed recurring charges and notifying the customer, aimed at recovering payment without canceling the subscription. AutoPay handles dunning automatically — retrying on a flat schedule and emailing the customer at each stage.",
   },
   {
     term: "E-commerce Payment",
@@ -402,6 +414,12 @@ const glossaryTerms: GlossaryTerm[] = [
     id: "split-payments",
     definition:
       "Dividing a single payment among multiple recipients, common in marketplace scenarios.",
+  },
+  {
+    term: "Subscription",
+    id: "subscription",
+    definition:
+      "An AutoPay object representing a customer's recurring billing arrangement — created with one Checkout API call and identified by a subscription_id. Moves through a fixed set of states (pending_setup, trialing, active, past_due, canceled, expired, setup_failed) as its billing cycles are charged.",
   },
   {
     term: "Subscription Billing",

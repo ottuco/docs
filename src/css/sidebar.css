@@ -188,17 +188,27 @@ html[data-theme="dark"] {
   padding-left: 0;
 }
 
-.theme-doc-sidebar-item-category-level-3 > .menu__list {
+.theme-doc-sidebar-item-category-level-3 > .menu__list,
+.theme-doc-sidebar-item-category-level-4 > .menu__list {
   margin: 2px 0 0 12px;
   padding-left: 0;
 }
 
-/* ── Tree rows: L3 leaves, L3 branches, L4 leaves ──────────── */
+/* ── Tree rows: L3/L4 leaves, L3/L4 branches, L5 leaves ─────── */
 
-/* One shared rule for every row that sits on the tree rail. */
+/* One shared rule for every row that sits on the tree rail.
+   L4 branches + L5 leaves exist where a feature page is nested one
+   level deeper than usual (Ottu Sandbox, under Sandbox & Test Cards).
+   Without them those rows fall back to Infima's defaults — larger
+   font, no rail, wrong padding — which is visibly out of step with
+   every sibling. Keep this list in sync when nesting gets deeper. */
 .theme-doc-sidebar-item-link-level-3 > .menu__link,
 .theme-doc-sidebar-item-link-level-4 > .menu__link,
+.theme-doc-sidebar-item-link-level-5 > .menu__link,
 .theme-doc-sidebar-item-category-level-3
+  > .menu__list-item-collapsible
+  > .menu__link,
+.theme-doc-sidebar-item-category-level-4
   > .menu__list-item-collapsible
   > .menu__link {
   min-height: 36px;
@@ -214,8 +224,10 @@ html[data-theme="dark"] {
   color: var(--ottu-sidebar-text-secondary);
 }
 
-/* L3 branch row (Checkout API, PSQ, Payment Methods, …) */
-.theme-doc-sidebar-item-category-level-3 > .menu__list-item-collapsible {
+/* L3 branch row (Checkout API, PSQ, Payment Methods, …) and the
+   L4 branch row (Ottu Sandbox). */
+.theme-doc-sidebar-item-category-level-3 > .menu__list-item-collapsible,
+.theme-doc-sidebar-item-category-level-4 > .menu__list-item-collapsible {
   display: flex;
   align-items: center;
   min-height: 36px;
@@ -225,6 +237,9 @@ html[data-theme="dark"] {
 
 /* Expanded parent branch — dark rail, primary text, no bg fill. */
 .theme-doc-sidebar-item-category-level-3
+  > .menu__list-item-collapsible--active
+  > .menu__link,
+.theme-doc-sidebar-item-category-level-4
   > .menu__list-item-collapsible--active
   > .menu__link {
   color: var(--ottu-sidebar-text-primary) !important;
@@ -236,7 +251,8 @@ html[data-theme="dark"] {
    L4 covers Checkout API children; L3 covers Operations/Invoices/
    Notifications/Reports whose children are direct hash links. */
 .theme-doc-sidebar-item-link-level-3 > .menu__link.menu__link--active,
-.theme-doc-sidebar-item-link-level-4 > .menu__link.menu__link--active {
+.theme-doc-sidebar-item-link-level-4 > .menu__link.menu__link--active,
+.theme-doc-sidebar-item-link-level-5 > .menu__link.menu__link--active {
   color: var(--ottu-sidebar-accent) !important;
   border-left: 2px solid var(--ottu-sidebar-accent);
   background: var(--ottu-sidebar-accent-bg) !important;
@@ -245,7 +261,11 @@ html[data-theme="dark"] {
 /* Tree-row hover — darken text, keep bg transparent. */
 .theme-doc-sidebar-item-link-level-3 > .menu__link:hover,
 .theme-doc-sidebar-item-link-level-4 > .menu__link:hover,
+.theme-doc-sidebar-item-link-level-5 > .menu__link:hover,
 .theme-doc-sidebar-item-category-level-3
+  > .menu__list-item-collapsible
+  > .menu__link:hover,
+.theme-doc-sidebar-item-category-level-4
   > .menu__list-item-collapsible
   > .menu__link:hover {
   background: transparent;
@@ -261,6 +281,9 @@ html[data-theme="dark"] {
   > .menu__list-item-collapsible
   > .menu__link.menu__link--active,
 .theme-doc-sidebar-item-category-level-3
+  > .menu__list-item-collapsible
+  > .menu__link.menu__link--active,
+.theme-doc-sidebar-item-category-level-4
   > .menu__list-item-collapsible
   > .menu__link.menu__link--active {
   color: var(--ottu-sidebar-text-primary) !important;

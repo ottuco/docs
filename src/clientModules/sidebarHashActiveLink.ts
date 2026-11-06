@@ -372,6 +372,37 @@ function onScroll(): void {
 const STABILITY_FRAMES = 6; // ~100ms @ 60fps
 const STABILITY_TIMEOUT_MS = 6000;
 
+// `requestAnimationFrame` is not merely throttled but fully SUSPENDED while
+// the document is hidden — background tabs, headless capture, link-preview
+// crawlers, print-to-PDF pipelines. Every stage of the hash gate below is
+// chained through rAF, so a suspended rAF strands the sequence at stage one:
+// `hideLoader()` never runs and the opaque full-screen loader set by the head
+// script covers the page indefinitely. The page renders as a blank sheet.
+//
+// Racing each frame against a timer keeps the sequence advancing. When the
+// document is visible rAF wins (~16ms vs 50ms) and behaviour is unchanged;
+// when it is hidden the timer drives the sequence to completion instead.
+const FRAME_FALLBACK_MS = 50;
+
+function nextFrame(callback: () => void): void {
+  let ran = false;
+  let rafId = 0;
+  let timerId = 0;
+  const run = () => {
+    if (ran) return;
+    ran = true;
+    // Cancel whichever scheduler lost the race. This matters most in the
+    // hidden case: the timer wins, but the rAF stays *registered and
+    // suspended*, so the tick loops below would pile up hundreds of stale
+    // callbacks that all fire in one burst when the document is shown.
+    cancelAnimationFrame(rafId);
+    window.clearTimeout(timerId);
+    callback();
+  };
+  rafId = requestAnimationFrame(run);
+  timerId = window.setTimeout(run, FRAME_FALLBACK_MS);
+}
+
 let initialLoadHandled = false;
 
 function getHashTargetId(): string | null {
@@ -437,7 +468,14 @@ function smoothScrollToHash(hashId: string): void {
   const topOffset = getNavbarHeight() + 16;
   const rect = target.getBoundingClientRect();
   const y = rect.top + window.scrollY - topOffset;
-  window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+  // Smooth scrolling is animation-driven, so it cannot progress while the
+  // document is hidden — the position would simply never be applied. Jump
+  // instantly in that case; there is no user watching an animation anyway.
+  // "auto" would not do: html has CSS `scroll-behavior: smooth`, so "auto"
+  // is smooth too.
+  const behavior: ScrollBehavior =
+    document.visibilityState === "visible" ? "smooth" : "instant";
+  window.scrollTo({ top: Math.max(0, y), behavior });
 }
 
 // After the gate's smooth scroll lands, content can still shift
@@ -544,9 +582,9 @@ function waitForScrollIdle(timeoutMs: number, onIdle: () => void): void {
       stableCount = 0;
       lastY = window.scrollY;
     }
-    requestAnimationFrame(tick);
+    nextFrame(tick);
   };
-  requestAnimationFrame(tick);
+  nextFrame(tick);
 }
 
 /**
@@ -584,10 +622,10 @@ function waitForLayoutStability(
       lastHeight = height;
     }
 
-    requestAnimationFrame(tick);
+    nextFrame(tick);
   };
 
-  requestAnimationFrame(tick);
+  nextFrame(tick);
 }
 
 /**
@@ -623,7 +661,7 @@ function runInitialHashGate(): void {
     // stable for several frames), otherwise the compensator would see
     // the in-progress scroll as drift and break the animation.
     snapToTop();
-    requestAnimationFrame(() => {
+    nextFrame(() => {
       hideLoader();
       smoothScrollToHash(hashId);
       waitForScrollIdle(4000, () => maintainTargetPosition(hashId));
@@ -679,6 +717,15 @@ function scheduleUpdate(): void {
   });
 }
 
+// Pages whose `queryString` tabs sit far below the hash target, so a tab
+// change must not scroll back to it.
+const QUERY_TABS_KEEP_SCROLL = [
+  "/developers/payments/autopay/",
+  "/business/autopay/",
+];
+let lastNavSearch = typeof window !== "undefined" ? window.location.search : "";
+let lastNavHash = typeof window !== "undefined" ? window.location.hash : "";
+
 export function onRouteDidUpdate(): void {
   // New route: drop stale state so the scroll listener doesn't act on
   // a previous page's cached sections. Re-mute scroll-spy on every
@@ -694,17 +741,20 @@ export function onRouteDidUpdate(): void {
   cancelMaintain?.();
   scheduleUpdate();
 
-  // Branch on initial-load vs cross-page SPA-nav. Same-page hash changes
-  // (click or back/forward to a hash on the current page) are NOT
-  // re-scrolled here — Docusaurus's own scroll handlers already do that
-  // synchronously, and adding our wait-for-stability + smooth-scroll on
-  // top makes them slower for no benefit. Captured BEFORE runInitialHashGate
-  // flips the flag, otherwise runSpaHashScroll would also fire on the
-  // very first route update and double-handle initial load.
+  // Branch on initial-load vs cross-page SPA-nav vs same-page hash change.
+  // Captured BEFORE runInitialHashGate flips the flag, otherwise
+  // runSpaHashScroll would also fire on the very first route update and
+  // double-handle initial load.
   const isFirstRouteUpdate = !initialLoadHandled;
   const prevPath = lastNavPathname;
   const currentPath = window.location.pathname;
+  const prevSearch = lastNavSearch;
+  const prevHash = lastNavHash;
+  const currentSearch = window.location.search;
+  const currentHash = window.location.hash;
   lastNavPathname = currentPath;
+  lastNavSearch = currentSearch;
+  lastNavHash = currentHash;
 
   if (isFirstRouteUpdate) {
     runInitialHashGate();
@@ -717,6 +767,20 @@ export function onRouteDidUpdate(): void {
     // previous page's position). We wait for hydration ourselves,
     // then smooth-scroll, then run the layout-shift compensator.
     runSpaHashScroll();
+  } else if (
+    QUERY_TABS_KEEP_SCROLL.includes(normalizePath(currentPath)) &&
+    currentSearch &&
+    currentSearch !== prevSearch &&
+    currentHash === prevHash
+  ) {
+    // A `queryString` tab changed the query only: stay on the tab.
+  } else {
+    // Same-page hash change (sidebar anchor click, back/forward). Nothing
+    // else scrolls here: Docusaurus only scrolls after a pathname change,
+    // and the router does not make the browser follow a pushState hash.
+    // The target already exists, so no hydration wait is needed.
+    const hashId = getHashTargetId();
+    if (hashId) smoothScrollToHash(hashId);
   }
 }
 

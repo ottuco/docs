@@ -1,0 +1,74 @@
+---
+id: autopay-subscription-regenerate-page-token
+title: "Regenerate an AutoPay hosted-page token"
+description: "Replaces the customer's page link. The existing link stops working the moment you call this endpoint, and Ottu does not tell the customer. Send the new `page_url` yourself, or the customer reaches a dead link. Use it to revoke a link that leaked or was lost, not to re-send a working one."
+sidebar_label: "Regenerate an AutoPay hosted-page token"
+hide_title: true
+hide_table_of_contents: true
+api: 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
+sidebar_class_name: "post api-method"
+info_path: developers/apis/ottu-api
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+import Translate from "@docusaurus/Translate";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Regenerate an AutoPay hosted-page token"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/b/pbl/v2/subscriptions/{subscription_id}/regenerate-page-token/"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Replaces the customer's page link. The existing link stops working the moment you call this endpoint, and Ottu does not tell the customer. Send the new `page_url` yourself, or the customer reaches a dead link. Use it to revoke a link that leaked or was lost, not to re-send a working one.
+
+After a timeout, read the current link with Retrieve an AutoPay hosted-page link and compare its `page_url` with the one you hold before you retry. A blind retry can revoke a link you have just delivered.
+
+
+<pre style={{display:"none"}}>{"curl --location --globoff --request POST 'https://sandbox.ottu.net/b/pbl/v2/subscriptions/{subscription_id}/regenerate-page-token/' \\\n--header 'Idempotency-Key: <uuid>' \\\n--header 'Accept: application/json' \\\n--header 'Authorization: Api-Key YOUR_API_KEY'"}</pre>
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+>
+  <Translate id="theme.openapi.request.title">Request</Translate>
+</Heading>
+
+<ParamsDetails
+  {...require("./autopay-subscription-regenerate-page-token.ParamsDetails.json")}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  {...require("./autopay-subscription-regenerate-page-token.RequestSchema.json")}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  {...require("./autopay-subscription-regenerate-page-token.StatusCodes.json")}
+>
+  
+</StatusCodes>
+
+
+      

@@ -38,12 +38,27 @@ export const KSA: ConnectEnv = {
 // WalletDemo seeds and charges in USD (see walletDemoConfig.ts).
 export const ACTIVE_CONNECT: ConnectEnv = SANDBOX;
 
+/**
+ * The Ottu plugin a payment belongs to.
+ *
+ * Same vocabulary on both sides of the flow: it is the `plugin` filter on the
+ * Payment Methods API and the `type` of the Checkout API session. A gateway
+ * enabled for one plugin is not necessarily enabled for the other, so the two
+ * calls in a single demo must always use the same value.
+ */
+export type PaymentPlugin = "e_commerce" | "payment_request";
+
 export interface CreateSessionOptions {
   pg_codes: string[];
   amount?: string;
   currency_code?: string;
   customer_id?: string;
-  type?: string;
+  /**
+   * Required for the same reason as `plugin` on `callPaymentMethods`: a session
+   * type that disagrees with the plugin the gateways were discovered for gets
+   * pg_codes the session cannot accept (#159191).
+   */
+  type: PaymentPlugin;
   /** Arbitrary extra fields merged into the request body (e.g., payment_type, agreement, payment_instrument, webhook_url) */
   extra?: Record<string, unknown>;
 }
@@ -79,7 +94,7 @@ export async function createSandboxSession(
   options: CreateSessionOptions
 ): Promise<SessionResult> {
   const body = {
-    type: options.type ?? "payment_request",
+    type: options.type,
     pg_codes: options.pg_codes,
     amount: options.amount ?? "20",
     currency_code: options.currency_code ?? "KWD",
@@ -151,7 +166,13 @@ export async function callAutoDebit(
  */
 export async function callPaymentMethods(options: {
   currencies: string[];
-  plugin?: string;
+  /**
+   * Required: gateways are enabled per plugin, so discovery must state which
+   * plugin the caller is about to create a session for. Defaulting this is what
+   * let CheckoutDemo discover `payment_request` gateways and then ask for an
+   * `e_commerce` session (#159191).
+   */
+  plugin: PaymentPlugin;
   operation?: string;
   type?: string;
   tags?: string[];
@@ -160,7 +181,7 @@ export async function callPaymentMethods(options: {
   payment_services?: string[];
 }): Promise<any> {
   const body: Record<string, unknown> = {
-    plugin: options.plugin ?? "payment_request",
+    plugin: options.plugin,
     operation: options.operation ?? "purchase",
     currencies: options.currencies,
   };

@@ -31,7 +31,7 @@ For most integrations, check the `state` field in [webhook payloads](/developers
 | `failed`          | Payment failed definitively. No retry possible (multi-attempt exhausted or disabled).                                                                               |    Yes    | —                                                                                |
 | `canceled`        | Administratively canceled by staff or via the [Operations API](/developers/operations#cancel).                                                                      |    Yes    | —                                                                                |
 | `expired`         | Not paid before expiration date, or customer canceled on gateway page.                                                                                              |    Yes    | —                                                                                |
-| `invalided`       | Configuration change made the payment transaction unprocessable (missing currency, disabled gateway).                                                               |    Yes    | —                                                                                |
+| `invalided`       | Configuration change made the payment transaction unprocessable (missing currency, disabled gateway). Displayed as **Unavailable**; the stored value is `invalided`. See [Checkout Status Codes](/developers/reference/checkout-status-codes). |    Yes    | —                                                                                |
 | `refunded`        | [Refund operation](/developers/operations#refund) completed. This is a child payment transaction state.                                                             |    Yes    | —                                                                                |
 | `refund_queued`   | Refund sent to the payment gateway, awaiting confirmation. The gateway will send a webhook when the refund is processed.                                            |    No     | Awaiting gateway confirmation                                                    |
 | `refund_rejected` | Gateway rejected the refund request.                                                                                                                                |    Yes    | —                                                                                |
@@ -185,6 +185,8 @@ Child payment transactions appear in the parent's webhook payload and can be ret
 
   <FAQItem question="What does `invalided` mean?">
     A configuration change made the payment transaction unprocessable after creation — for example, the currency was removed or the payment gateway was disabled. This is rare and indicates a backend configuration issue.
+
+    The English label shown to people reads **Unavailable**. The stored value is still `invalided`, so webhooks, the [Operations API](/developers/operations), exports and filters are unaffected — only the display label changed. A customer opening such a link sees the `unavailable` [checkout status code](/developers/reference/checkout-status-codes).
   </FAQItem>
 
   <FAQItem question="What does `refund_queued` mean?">

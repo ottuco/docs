@@ -12,5 +12,5 @@
     },
     "types": ["@docusaurus/theme-classic", "docusaurus-theme-openapi-docs"]
   },
-  "exclude": [".docusaurus", "build"]
+  "exclude": [".docusaurus", "build", "remotion"]
 }

@@ -39,3 +39,8 @@ yarn-error.log*
 .claude/local.*
 .claude/CLAUDE.md
 .claude/settings.local.json
+
+# Remotion (isolated workspace — renders are committed to static/video/, not built here)
+remotion/node_modules/
+remotion/out/
+remotion/public/

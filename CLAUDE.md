@@ -38,6 +38,8 @@ Link liberally throughout body text — not just in a "Related" section at the b
 ### Code-First for Developers
 Working code before explanation. Show a complete, runnable example first, then explain what it does and why.
 
+Developer pages follow `docs/developers/CLAUDE.md` (Live Demo, "What your customer sees" and Step-by-Step rules) where it differs from this.
+
 ### Feature-Benefit for Business Users
 Lead with what the feature does for their business. No code. Dashboard-focused with screenshots and step-by-step instructions.
 
@@ -297,6 +299,18 @@ Two patterns coexist in `sidebars.ts`. Pick deliberately; mixing them on a singl
 - Swizzled theme components in `src/theme/`
 - Utility functions in `src/utils/`
 
+## Diagrams
+
+Pick the tool by what the reader does with the diagram:
+
+| Need | Use | Skill |
+|---|---|---|
+| Interactive: focus an actor, click a step, walk a journey (story, sequence, architecture) | React Flow via `src/components/FlowDiagram/`, data files in `src/diagrams/flow/` | `react-flow-diagram` (`.claude/skills/react-flow-diagram/`) |
+| Static picture | Inline SVG via `src/components/Diagram/`, files in `src/diagrams/` | `svg-diagram` (`.claude/skills/svg-diagram/`) |
+| Quick draft only | Mermaid (rules below) | none |
+
+React Flow diagrams take their colours, fonts and dark mode from the tokens in `src/components/FlowDiagram/styles.module.css` (Ottu design system); a diagram file never sets styling. Their accent is Ottu orange (`#F77D1A`), with blue (`#0B82BE`) for replies and results; this differs on purpose from the Mermaid rule below (blue accent), so don't put a Mermaid and a React Flow diagram side by side on one page. Reference page: `/diagrams/react-flow/` (unlisted, excluded from the MCP server).
+
 ## Mermaid Diagrams
 
 **Monochrome + one accent.** Most nodes are neutral (no fill, gray border). Only the 1-2 key nodes get Ottu blue (`#0B82BE`). Do NOT color every node — a diagram with 7 nodes should have 1-2 colored, not 5-7.
@@ -328,6 +342,7 @@ Use the `/mermaid` skill (`~/.claude/commands/mermaid.md`, global) for the full 
 - **Customer** — the end user making a payment. Interacts only with the checkout UI (Checkout SDK, redirect to hosted page, or payment gateway page). **Never calls Ottu's API directly.** The customer enters card details, authenticates (3DS), and sees payment results.
 - **Ottu** — the payment platform. Provides APIs, SDKs, hosted checkout pages, and webhook notifications. Sits between the merchant and the payment gateway.
 - **Payment Gateway (PG)** — the bank or processor behind the scenes (e.g., KNET, MPGS, Cybersource). Configured by Ottu staff; the merchant receives `pg_codes` to reference gateways in API calls.
+- **Microservices (AutoPay, Wallet, …) are never actors.** Merchants and customers only see Ottu. Name a microservice only as the feature ("AutoPay subscriptions"); the system that charges, emails, or hosts is always Ottu. Diagrams never draw a microservice as its own lane or box.
 
 ### Key Flow Pattern
 

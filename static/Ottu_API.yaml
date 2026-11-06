@@ -1653,6 +1653,115 @@ paths:
               schema:
                 $ref: "#/components/schemas/GenericErrorMessage"
           description: ""
+  /b/pbl/v2/osb/create/:
+    post:
+      operationId: create_ottu_sandbox_mid
+      description: 'Provisions an Ottu Sandbox payment gateway MID with its full configuration, so a test
+        environment can be set up without going through the admin.
+
+
+        ### What it does
+
+        - Creates (or reuses) the `ottu_sandbox` gateway row.
+
+        - Resolves the currencies you pass into an exchange configuration, reusing an existing one when
+        it already covers them.
+
+        - Creates the MID itself. The MID is always a **sandbox** MID - a production MID cannot be minted
+        here.
+
+
+        ### Required fields
+
+        | field | description |
+
+        |---|---|
+
+        | `name_en` | Display name shown in the checkout SDK, dashboard and emails. |
+
+        | `currency_code` | ISO 4217 code of the MID''s default currency. Must already exist. |
+
+        | `tags` | One or more business-vertical tags (e.g. `demo`, `e_commerce`). |
+
+
+        ### Notable optional fields
+
+        - `code` - the identifier used in API calls and URLs. Derived from `name_en` when omitted; must
+        be unique across every gateway MID.
+
+        - `extra_currency_codes` - additional currencies the MID accepts.
+
+        - `operations` - post-payment operations. The sandbox supports `refund` and `void`; `void` requires
+        `operation` to be `authorize`.
+
+        - `is_tokenizable` / `auto_debit_enabled` - enable card saving and MIT charges.
+
+
+        ### Rate limit
+
+        5 MIDs per hour per caller (per user, or per API key). The 6th call returns **429**.
+
+
+        ### Common responses
+
+        - **201** - the MID was created; the body is its full configuration.
+
+        - **400** - validation error, keyed by field.
+
+        - **401** - missing or invalid credentials.
+
+        - **429** - hourly provisioning limit reached.'
+      summary: Create an Ottu Sandbox MID
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+          default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+        description: Private API key to be provided in the format `Api-Key <key>`.
+        required: true
+      tags:
+      - Ottu Sandbox
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OttuSandboxMIDCreate"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/OttuSandboxMIDCreate"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/OttuSandboxMIDCreate"
+        required: true
+      security:
+      - SSO_JWT_Auth: []
+      - tokenAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OttuSandboxMID"
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OttuSandboxMIDErrors"
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ''
   /b/pbl/v2/payment-methods/:
     post:
       operationId: get_payment_methods
@@ -2070,6 +2179,851 @@ paths:
               schema:
                 $ref: "#/components/schemas/GenericErrorMessage"
           description: ""
+  /b/pbl/v2/subscriptions/:
+    post:
+      operationId: autopay_subscription_list
+      description: |-
+        Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant.
+
+        Lists subscriptions using AutoPay's filter-body API. Pagination uses `limit` and `offset`, accepted in the request body or as query parameters (query wins). The returned `next` and `previous` URLs point at this endpoint and can be followed directly.
+      summary: List AutoPay subscriptions
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+          default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+        description: Private API key to be provided in the format `Api-Key <key>`.
+        required: true
+      tags:
+      - AutoPay Subscriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutoPaySubscriptionListRequest'
+            examples:
+              ListActiveSubscriptions:
+                value:
+                - status: active
+                  customer_id: cust_123
+                  created_after: '2026-01-01'
+                  created_before: '2026-12-31'
+                  limit: 20
+                  offset: 0
+                summary: List active subscriptions
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AutoPaySubscriptionListRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AutoPaySubscriptionListRequest'
+      security:
+      - SSO_BasicAuth: []
+      - basicAuth: []
+      - SSO_JWT_Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AutoPayPaginatedSubscriptions'
+              examples:
+                FirstPage:
+                  value:
+                  - count: 42
+                    next: https://sandbox.ottu.net/b/pbl/v2/subscriptions/?limit=20&offset=20
+                    previous: null
+                    results:
+                    - id: sub_9kq2w7xp4m
+                      customer_id: cust_10042
+                      customer_email: customer@example.com
+                      frequency: monthly
+                      recurring_amount: '9.990'
+                      currency: KWD
+                      status: active
+                      next_billing_date: '2026-12-01'
+                      created_at: '2026-11-01T08:15:42Z'
+                  summary: First page
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                LimitAbove100:
+                  value:
+                    limit:
+                    - Ensure this value is less than or equal to 100.
+                  summary: Limit above 100
+          description: "The request is malformed, for example a `limit` above 100. Fix it: retrying unchanged fails again."
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                NotAuthenticated:
+                  value:
+                    detail: Authentication credentials were not provided.
+                  summary: Not authenticated
+          description: "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`."
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                UnknownStatusFilter:
+                  value:
+                    detail:
+                    - type: enum
+                      loc:
+                      - body
+                      - payload
+                      - status
+                      msg: Input should be 'pending_setup', 'trialing', 'active', 'past_due', 'canceled', 'expired' or 'setup_failed'
+                  summary: Unknown status filter
+          description: "A filter value is invalid, and `detail` lists each one. Fix it: retrying unchanged fails again."
+        '423':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                PaymentsPaused:
+                  value:
+                    detail: Service is paused.
+                    code: service_paused
+                  summary: Payments paused
+          description: "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed."
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayUnavailable:
+                  value:
+                    detail: AutoPay bridge is unavailable.
+                  summary: AutoPay unavailable
+          description: "The subscription service is unavailable. Retry with backoff."
+        '504':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayTimedOut:
+                  value:
+                    detail: AutoPay bridge request timed out.
+                  summary: AutoPay timed out
+          description: "The subscription service timed out. Nothing was changed, so the request is safe to retry."
+  /b/pbl/v2/subscriptions/{subscription_id}/:
+    get:
+      operationId: autopay_subscription_detail
+      description: |-
+        Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant.
+
+        Returns the full subscription object from AutoPay for the authenticated merchant.
+      summary: Retrieve an AutoPay subscription
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+          default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+        description: Private API key to be provided in the format `Api-Key <key>`.
+        required: true
+      - in: path
+        name: subscription_id
+        schema:
+          type: string
+        description: AutoPay subscription identifier returned by subscription creation.
+        required: true
+      tags:
+      - AutoPay Subscriptions
+      security:
+      - SSO_BasicAuth: []
+      - basicAuth: []
+      - SSO_JWT_Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutoPaySubscription'
+              examples:
+                ActiveSubscription:
+                  value:
+                    id: sub_9kq2w7xp4m
+                    customer_id: cust_10042
+                    customer_email: customer@example.com
+                    customer_name: Sara Ahmad
+                    customer_phone: '50001234'
+                    frequency: monthly
+                    currency: KWD
+                    recurring_amount: '9.990'
+                    first_payment_amount: '9.990'
+                    start_date: '2026-11-01'
+                    end_date: '2027-11-01'
+                    billing_anchor_day: 1
+                    setup_session_id: 6b1f0c9e4d2a8f73e5c1b0a9d8e7f6a5b4c3d2e1
+                    agreement_id: AGR-10042
+                    amount_variability: fixed
+                    cycle_interval_days: 30
+                    total_cycles: 12
+                    notification_config: null
+                    status: active
+                    cancel_at_period_end: false
+                    cancels_on: null
+                    canceled_at: null
+                    cancellation_initiator: null
+                    cancellation_reason: null
+                    cancellation_note: null
+                    next_billing_date: '2026-12-01'
+                    description: Premium plan
+                    merchant_reference: PLAN-PREMIUM-10042
+                    plan_name: ''
+                    language: en
+                    retry_count: 3
+                    created_at: '2026-11-01T08:15:42Z'
+                    updated_at: '2026-11-01T08:19:07Z'
+                    card:
+                      masked_card: '**** 0008'
+                      card_brand: MASTERCARD
+                    current_cycle:
+                      cycle_number: 1
+                      scheduled_date: '2026-11-01'
+                      amount_due: '9.990'
+                      status: paid
+                      paid_at: '2026-11-01T08:18:51Z'
+                      failure_reason: null
+                      session_id: 6b1f0c9e4d2a8f73e5c1b0a9d8e7f6a5b4c3d2e1
+                      charge_type: cit
+                  summary: Active subscription
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                NotAuthenticated:
+                  value:
+                    detail: Authentication credentials were not provided.
+                  summary: Not authenticated
+          description: "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`."
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                UnknownSubscription:
+                  value:
+                    detail: Not found
+                    code: subscription_not_found
+                  summary: Unknown subscription
+          description: "No subscription with this id exists on your account. Do not retry."
+        '423':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                PaymentsPaused:
+                  value:
+                    detail: Service is paused.
+                    code: service_paused
+                  summary: Payments paused
+          description: "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed."
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayUnavailable:
+                  value:
+                    detail: AutoPay bridge is unavailable.
+                  summary: AutoPay unavailable
+          description: "The subscription service is unavailable. Retry with backoff."
+        '504':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayTimedOut:
+                  value:
+                    detail: AutoPay bridge request timed out.
+                  summary: AutoPay timed out
+          description: "The subscription service timed out. Nothing was changed, so the request is safe to retry."
+  /b/pbl/v2/subscriptions/{subscription_id}/cancel/:
+    post:
+      operationId: autopay_subscription_cancel
+      description: |-
+        Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant.
+
+        Cancels a subscription through AutoPay and records the merchant as the initiator upstream.
+      summary: Cancel an AutoPay subscription
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+          default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+        description: Private API key to be provided in the format `Api-Key <key>`.
+        required: true
+      - in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+          format: uuid
+        description: Unique UUID for idempotent AutoPay mutation requests. Required by AutoPay for cancel and regenerate-page-token.
+        required: true
+      - in: path
+        name: subscription_id
+        schema:
+          type: string
+        description: AutoPay subscription identifier returned by subscription creation.
+        required: true
+      tags:
+      - AutoPay Subscriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutoPayCancelSubscriptionRequest'
+            examples:
+              CancelImmediately:
+                value:
+                  mode: immediate
+                summary: Cancel immediately
+              CancelAtPeriodEnd:
+                value:
+                  mode: at_period_end
+                summary: Cancel at period end
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AutoPayCancelSubscriptionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AutoPayCancelSubscriptionRequest'
+        required: true
+      security:
+      - SSO_BasicAuth: []
+      - basicAuth: []
+      - SSO_JWT_Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutoPaySubscription'
+              examples:
+                ScheduledToEnd:
+                  value:
+                    id: sub_9kq2w7xp4m
+                    customer_id: cust_10042
+                    customer_email: customer@example.com
+                    customer_name: Sara Ahmad
+                    customer_phone: '50001234'
+                    frequency: monthly
+                    currency: KWD
+                    recurring_amount: '9.990'
+                    first_payment_amount: '9.990'
+                    start_date: '2026-11-01'
+                    end_date: '2027-11-01'
+                    billing_anchor_day: 1
+                    setup_session_id: 6b1f0c9e4d2a8f73e5c1b0a9d8e7f6a5b4c3d2e1
+                    agreement_id: AGR-10042
+                    amount_variability: fixed
+                    cycle_interval_days: 30
+                    total_cycles: 12
+                    notification_config: null
+                    status: active
+                    cancel_at_period_end: true
+                    cancels_on: '2026-11-30'
+                    canceled_at: null
+                    cancellation_initiator: merchant
+                    cancellation_reason: null
+                    cancellation_note: null
+                    next_billing_date: '2026-12-01'
+                    description: Premium plan
+                    merchant_reference: PLAN-PREMIUM-10042
+                    plan_name: ''
+                    language: en
+                    retry_count: 3
+                    created_at: '2026-11-01T08:15:42Z'
+                    updated_at: '2026-11-01T08:19:07Z'
+                    card:
+                      masked_card: '**** 0008'
+                      card_brand: MASTERCARD
+                    current_cycle:
+                      cycle_number: 1
+                      scheduled_date: '2026-11-01'
+                      amount_due: '9.990'
+                      status: paid
+                      paid_at: '2026-11-01T08:18:51Z'
+                      failure_reason: null
+                      session_id: 6b1f0c9e4d2a8f73e5c1b0a9d8e7f6a5b4c3d2e1
+                      charge_type: cit
+                  summary: Scheduled to end
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                MissingIdempotency-Key:
+                  value:
+                    Idempotency-Key:
+                    - This header is required.
+                  summary: Missing Idempotency-Key
+                UnknownMode:
+                  value:
+                    mode:
+                    - '"now" is not a valid choice.'
+                  summary: Unknown mode
+          description: "The `Idempotency-Key` header is missing, or `mode` is not `immediate` or `at_period_end`."
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                NotAuthenticated:
+                  value:
+                    detail: Authentication credentials were not provided.
+                  summary: Not authenticated
+          description: "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`."
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                UnknownSubscription:
+                  value:
+                    detail: Not found
+                    code: subscription_not_found
+                  summary: Unknown subscription
+          description: "No subscription with this id exists on your account. Do not retry."
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                Idempotency-KeyReused:
+                  value:
+                    detail: Idempotency key 3f6c2a9e-8b1d-4c7a-9e2f-5d4b6a1c0e93 was already used with a different request payload.
+                    code: idempotency_conflict
+                  summary: Idempotency-Key reused
+          description: "This `Idempotency-Key` was already used with a different body (`code: idempotency_conflict`). Send a new key for a new request, and reuse a key only to retry the same request."
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AlreadyCanceled:
+                  value:
+                    detail: 'Cancel is only allowed from pending_setup, setup_failed, trialing, active, past_due. Current status: canceled'
+                    code: invalid_transition
+                  summary: Already canceled
+          description: "The subscription's status does not allow a cancel, for example it has already ended (`code: invalid_transition`). Retrieve it to read its `status`."
+        '423':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                PaymentsPaused:
+                  value:
+                    detail: Service is paused.
+                    code: service_paused
+                  summary: Payments paused
+          description: "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed."
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayUnavailable:
+                  value:
+                    detail: AutoPay bridge is unavailable.
+                  summary: AutoPay unavailable
+          description: "The subscription service is unavailable. Retry with backoff."
+        '504':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayTimedOut:
+                  value:
+                    detail: AutoPay bridge request timed out.
+                  summary: AutoPay timed out
+          description: "The subscription service timed out, and the cancel may still have been applied. Retry with the same `Idempotency-Key`."
+  /b/pbl/v2/subscriptions/{subscription_id}/cycles/:
+    get:
+      operationId: autopay_subscription_cycles
+      description: |-
+        Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant.
+
+        Returns AutoPay billing-cycle history, including nested payment attempts and pagination.
+      summary: List AutoPay billing cycles
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+          default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+        description: Private API key to be provided in the format `Api-Key <key>`.
+        required: true
+      - in: query
+        name: limit
+        schema:
+          type: integer
+        description: Number of billing cycles to return. Defaults to 20; maximum is 100.
+      - in: query
+        name: offset
+        schema:
+          type: integer
+        description: Zero-based index of the first billing cycle to return. Defaults to 0.
+      - in: path
+        name: subscription_id
+        schema:
+          type: string
+        description: AutoPay subscription identifier returned by subscription creation.
+        required: true
+      tags:
+      - AutoPay Subscriptions
+      security:
+      - SSO_BasicAuth: []
+      - basicAuth: []
+      - SSO_JWT_Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutoPayPaginatedBillingCycles'
+              examples:
+                ARetryAfterADecline:
+                  value:
+                    count: 2
+                    next: null
+                    previous: null
+                    results:
+                    - cycle_number: 2
+                      scheduled_date: '2026-12-01'
+                      amount_due: '9.990'
+                      status: retry_scheduled
+                      paid_at: null
+                      failure_reason: Insufficient funds
+                      session_id: c8e1f2a94b7d3e6f0a1b2c3d4e5f6a7b8c9d0e1f
+                      charge_type: mit
+                      payment_attempts:
+                      - attempt_number: 1
+                        session_id: c8e1f2a94b7d3e6f0a1b2c3d4e5f6a7b8c9d0e1f
+                        result: failed
+                        created_at: '2026-12-01T06:00:04Z'
+                    - cycle_number: 1
+                      scheduled_date: '2026-11-01'
+                      amount_due: '9.990'
+                      status: paid
+                      paid_at: '2026-11-01T08:15:40Z'
+                      failure_reason: null
+                      session_id: a12f71075a834a34d692736ac43a212fcebfb6ec
+                      charge_type: cit
+                      payment_attempts:
+                      - attempt_number: 1
+                        session_id: a12f71075a834a34d692736ac43a212fcebfb6ec
+                        result: success
+                        created_at: '2026-11-01T08:15:12Z'
+                  summary: A retry after a decline
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                NotAuthenticated:
+                  value:
+                    detail: Authentication credentials were not provided.
+                  summary: Not authenticated
+          description: "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`."
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                UnknownSubscription:
+                  value:
+                    detail: Not found
+                    code: subscription_not_found
+                  summary: Unknown subscription
+          description: "No subscription with this id exists on your account. Do not retry."
+        '423':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                PaymentsPaused:
+                  value:
+                    detail: Service is paused.
+                    code: service_paused
+                  summary: Payments paused
+          description: "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed."
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayUnavailable:
+                  value:
+                    detail: AutoPay bridge is unavailable.
+                  summary: AutoPay unavailable
+          description: "The subscription service is unavailable. Retry with backoff."
+        '504':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayTimedOut:
+                  value:
+                    detail: AutoPay bridge request timed out.
+                  summary: AutoPay timed out
+          description: "The subscription service timed out. Nothing was changed, so the request is safe to retry."
+  /b/pbl/v2/subscriptions/{subscription_id}/page-link/:
+    get:
+      operationId: autopay_subscription_page_link
+      description: |-
+        Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant.
+
+        Returns the subscription's current customer-facing hosted-page link without rotating it, so a link already in the customer's hands keeps working. Use regenerate-page-token instead when the old link must be revoked.
+      summary: Retrieve an AutoPay hosted-page link
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+          default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+        description: Private API key to be provided in the format `Api-Key <key>`.
+        required: true
+      - in: path
+        name: subscription_id
+        schema:
+          type: string
+        description: AutoPay subscription identifier returned by subscription creation.
+        required: true
+      tags:
+      - AutoPay Subscriptions
+      security:
+      - SSO_BasicAuth: []
+      - basicAuth: []
+      - SSO_JWT_Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutoPayPageLinkResponse'
+              examples:
+                CurrentLink:
+                  value:
+                    page_token: tok_5c1e8b2f0a9d4e7b
+                    page_url: https://sandbox.ottu.net/en/subscription/tok_5c1e8b2f0a9d4e7b
+                  summary: Current link
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                NotAuthenticated:
+                  value:
+                    detail: Authentication credentials were not provided.
+                  summary: Not authenticated
+          description: "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`."
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                UnknownSubscription:
+                  value:
+                    detail: Not found
+                    code: subscription_not_found
+                  summary: Unknown subscription
+          description: "No subscription with this id exists on your account. Do not retry."
+        '423':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                PaymentsPaused:
+                  value:
+                    detail: Service is paused.
+                    code: service_paused
+                  summary: Payments paused
+          description: "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed."
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayUnavailable:
+                  value:
+                    detail: AutoPay bridge is unavailable.
+                  summary: AutoPay unavailable
+          description: "The subscription service is unavailable. Retry with backoff."
+        '504':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayTimedOut:
+                  value:
+                    detail: AutoPay bridge request timed out.
+                  summary: AutoPay timed out
+          description: "The subscription service timed out. Nothing was changed, so the request is safe to retry."
+  /b/pbl/v2/subscriptions/{subscription_id}/regenerate-page-token/:
+    post:
+      operationId: autopay_subscription_regenerate_page_token
+      description: |-
+        Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant.
+
+        Invalidates the existing customer-facing hosted-page token and returns AutoPay's regenerated token payload.
+      summary: Regenerate an AutoPay hosted-page token
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+          default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+        description: Private API key to be provided in the format `Api-Key <key>`.
+        required: true
+      - in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+          format: uuid
+        description: Unique UUID for idempotent AutoPay mutation requests. Required by AutoPay for cancel and regenerate-page-token.
+        required: true
+      - in: path
+        name: subscription_id
+        schema:
+          type: string
+        description: AutoPay subscription identifier returned by subscription creation.
+        required: true
+      tags:
+      - AutoPay Subscriptions
+      security:
+      - SSO_BasicAuth: []
+      - basicAuth: []
+      - SSO_JWT_Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutoPayRegeneratePageTokenResponse'
+              examples:
+                NewLink:
+                  value:
+                    page_token: tok_e7a90c3d5b2f4186
+                    page_url: https://sandbox.ottu.net/en/subscription/tok_e7a90c3d5b2f4186
+                  summary: New link
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                MissingIdempotency-Key:
+                  value:
+                    Idempotency-Key:
+                    - This header is required.
+                  summary: Missing Idempotency-Key
+          description: "The `Idempotency-Key` header is missing."
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                NotAuthenticated:
+                  value:
+                    detail: Authentication credentials were not provided.
+                  summary: Not authenticated
+          description: "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`."
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                UnknownSubscription:
+                  value:
+                    detail: Not found
+                    code: subscription_not_found
+                  summary: Unknown subscription
+          description: "No subscription with this id exists on your account. Do not retry."
+        '423':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                PaymentsPaused:
+                  value:
+                    detail: Service is paused.
+                    code: service_paused
+                  summary: Payments paused
+          description: "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed."
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayUnavailable:
+                  value:
+                    detail: AutoPay bridge is unavailable.
+                  summary: AutoPay unavailable
+          description: "The subscription service is unavailable. Retry with backoff."
+        '504':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericErrorMessage'
+              examples:
+                AutoPayTimedOut:
+                  value:
+                    detail: AutoPay bridge request timed out.
+                  summary: AutoPay timed out
+          description: "The subscription service timed out, and a new link may already have been issued. Call page-link and compare `page_url` before retrying."
 components:
   schemas:
     Address:
@@ -3058,6 +4012,578 @@ components:
       oneOf:
         - $ref: "#/components/schemas/OperationErrorResponse"
         - $ref: "#/components/schemas/FieldErrors"
+    AutoPayBillingAttempt:
+      type: object
+      properties:
+        attempt_number:
+          type: integer
+          description: Attempt index starting at 1. Increments on each retry.
+        session_id:
+          type: string
+          description: Connect session ID for this attempt.
+        result:
+          type:
+          - string
+          - 'null'
+          description: 'Outcome of this attempt: success, failed, pending, or null
+            before outcome is known.'
+        created_at:
+          type: string
+          format: date-time
+          description: UTC timestamp when AutoPay initiated this payment attempt.
+      required:
+      - attempt_number
+      - created_at
+      - result
+      - session_id
+    AutoPayBillingCycle:
+      type: object
+      properties:
+        cycle_number:
+          type: integer
+          description: Sequential billing cycle number.
+        scheduled_date:
+          type: string
+          format: date
+          description: Date this billing period is or was scheduled to charge.
+        amount_due:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+          description: Amount charged or attempted for this cycle.
+        status:
+          type: string
+          description: Current billing cycle status, such as scheduled, processing,
+            paid, retry_scheduled, failed, or canceled.
+        paid_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Timestamp when this cycle was paid, or null if unpaid.
+        failure_reason:
+          type:
+          - string
+          - 'null'
+          description: Gateway failure message from the last failed attempt, or null
+            if not failed.
+        session_id:
+          type:
+          - string
+          - 'null'
+          description: Connect session ID for the latest charge attempt, or null before
+            any attempt.
+        charge_type:
+          type:
+          - string
+          - 'null'
+          description: 'Charge type: cit, mit, or null before any attempt.'
+        payment_attempts:
+          type: array
+          items:
+            $ref: '#/components/schemas/AutoPayBillingAttempt'
+          description: All payment attempts for this billing cycle, oldest first.
+      required:
+      - amount_due
+      - cycle_number
+      - payment_attempts
+      - scheduled_date
+      - status
+    AutoPayBlock:
+      type: object
+      properties:
+        frequency:
+          enum:
+          - monthly
+          - yearly
+          type: string
+          description: |-
+            * `monthly` - Monthly
+            * `yearly` - Yearly
+          x-spec-enum-id: dce8a17df881b61d
+        recurring_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        description:
+          type:
+          - string
+          - 'null'
+          maxLength: 255
+        retry_count:
+          type: integer
+          maximum: 10
+          minimum: 1
+        notification_preferences:
+          oneOf:
+          - {}
+          - type: 'null'
+      required:
+      - frequency
+      - recurring_amount
+      - start_date
+    AutoPayCancelSubscriptionRequest:
+      type: object
+      properties:
+        mode:
+          enum:
+          - immediate
+          - at_period_end
+          type: string
+          x-spec-enum-id: 3b2c15f8fa0ee0ec
+          description: |-
+            Cancellation mode. immediate cancels now; at_period_end cancels after the current paid period.
+
+            * `immediate` - immediate
+            * `at_period_end` - at_period_end
+      required:
+      - mode
+    AutoPayCycleSummary:
+      type: object
+      properties:
+        cycle_number:
+          type: integer
+          description: Sequential billing cycle number.
+        scheduled_date:
+          type: string
+          format: date
+          description: Date this billing period is or was scheduled to charge.
+        amount_due:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+          description: Amount charged or attempted for this cycle.
+        status:
+          type: string
+          description: Current billing cycle status, such as scheduled, processing, paid, retry_scheduled, failed, or canceled.
+        paid_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Timestamp when this cycle was paid, or null if unpaid.
+        failure_reason:
+          type:
+          - string
+          - 'null'
+          description: Gateway failure message from the last failed attempt, or null if not failed.
+        session_id:
+          type:
+          - string
+          - 'null'
+          description: Connect session ID for the latest charge attempt, or null before any attempt.
+        charge_type:
+          type:
+          - string
+          - 'null'
+          description: 'Charge type: cit, mit, or null before any attempt.'
+      required:
+      - amount_due
+      - cycle_number
+      - scheduled_date
+      - status
+    AutoPayPaginatedBillingCycles:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Total number of billing cycles.
+        next:
+          type:
+          - string
+          - 'null'
+          format: uri
+          description: URL or cursor for the next billing-cycle page returned by AutoPay.
+        previous:
+          type:
+          - string
+          - 'null'
+          format: uri
+          description: URL or cursor for the previous billing-cycle page returned
+            by AutoPay.
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AutoPayBillingCycle'
+          description: Billing cycles in the current page.
+      required:
+      - count
+      - results
+    AutoPayPaginatedSubscriptions:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Total number of matching subscriptions.
+        next:
+          type:
+          - string
+          - 'null'
+          format: uri
+          description: URL or cursor for the next page returned by AutoPay.
+        previous:
+          type:
+          - string
+          - 'null'
+          format: uri
+          description: URL or cursor for the previous page returned by AutoPay.
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AutoPaySubscriptionListItem'
+          description: Subscriptions in the current page.
+      required:
+      - count
+      - results
+    AutoPayPageLinkResponse:
+      type: object
+      properties:
+        page_token:
+          type: string
+          description: The subscription's current hosted-page token, unrotated.
+        page_url:
+          type: string
+          description: Customer-facing hosted-page URL built by AutoPay from the tenant's
+            primary domain and the subscription's language. Treat it as a credential
+            — deliver it only to the subscription's own customer.
+      required:
+      - page_token
+      - page_url
+    AutoPayRegeneratePageTokenResponse:
+      type: object
+      properties:
+        page_token:
+          type: string
+          description: New hosted-page token generated by AutoPay.
+        page_url:
+          type: string
+          description: Customer-facing hosted-page URL built by AutoPay from the tenant's
+            primary domain and the subscription's language. Treat it as a credential
+            — deliver it only to the subscription's own customer.
+      required:
+      - page_token
+      - page_url
+    AutoPaySubscription:
+      type: object
+      properties:
+        id:
+          type: string
+          description: AutoPay subscription identifier.
+        customer_id:
+          type: string
+          description: Merchant-side customer identifier.
+        customer_email:
+          type: string
+          format: email
+          description: Customer email address captured when the subscription was created.
+        customer_name:
+          type: string
+          description: Customer name captured when the subscription was created, or empty.
+        customer_phone:
+          type: string
+          description: Customer phone number captured when the subscription was created, or empty.
+        frequency:
+          type: string
+          description: Subscription billing frequency.
+        currency:
+          type: string
+          description: ISO currency code for recurring charges.
+        recurring_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+          description: Amount charged for each recurring billing cycle.
+        first_payment_amount:
+          type:
+          - string
+          - 'null'
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+          description: Initial customer-initiated payment amount, or null when not applicable.
+        start_date:
+          type: string
+          format: date
+          description: Date from which billing can start.
+        end_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Optional date after which AutoPay must stop billing.
+        billing_anchor_day:
+          type: integer
+          description: Day of the month billing is anchored to, taken from start_date.
+        setup_session_id:
+          type:
+          - string
+          - 'null'
+          description: Checkout session ID of the first payment.
+        agreement_id:
+          type:
+          - string
+          - 'null'
+          description: Agreement identifier supplied during Checkout subscription creation.
+        amount_variability:
+          enum:
+          - fixed
+          - variable
+          - null
+          type:
+          - string
+          - 'null'
+          x-spec-enum-id: 785209a99eed16de
+          description: 'Agreement amount variability, or null until the first payment is confirmed.
+    
+    
+            * `fixed` - fixed
+    
+            * `variable` - variable'
+        cycle_interval_days:
+          type:
+          - integer
+          - 'null'
+          description: Agreement cycle interval in days, or null until the first payment is confirmed.
+        total_cycles:
+          type:
+          - integer
+          - 'null'
+          description: Agreement total number of cycles, or null until the first payment is confirmed.
+        notification_config:
+          oneOf:
+          - {}
+          - type: 'null'
+          description: Notification preferences sent in the autopay block, or null for the defaults.
+        status:
+          type: string
+          description: Current AutoPay subscription status.
+        cancel_at_period_end:
+          type: boolean
+          description: Whether the subscription is scheduled to cancel at the current period end.
+        cancels_on:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Date a scheduled cancellation takes effect, or null.
+        canceled_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Timestamp when the subscription was canceled, or null if it is not canceled.
+        cancellation_initiator:
+          type:
+          - string
+          - 'null'
+          description: Actor that initiated cancellation, such as merchant or customer.
+        cancellation_reason:
+          enum:
+          - too_expensive
+          - not_using
+          - missing_feature
+          - switched
+          - temporary
+          - other
+          - null
+          type:
+          - string
+          - 'null'
+          x-spec-enum-id: 2e62b76d1de9b5aa
+          description: 'Reason the customer chose when canceling, or null.
+    
+    
+            * `too_expensive` - too_expensive
+    
+            * `not_using` - not_using
+    
+            * `missing_feature` - missing_feature
+    
+            * `switched` - switched
+    
+            * `temporary` - temporary
+    
+            * `other` - other'
+        cancellation_note:
+          type:
+          - string
+          - 'null'
+          description: Free-text note the customer left when canceling, or null.
+        next_billing_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Next scheduled billing date, or null when no future charge is scheduled.
+        description:
+          type:
+          - string
+          - 'null'
+          description: Merchant-facing subscription description.
+        merchant_reference:
+          type:
+          - string
+          - 'null'
+          description: Merchant reference attached to the subscription.
+        plan_name:
+          type: string
+          description: Plan name, or empty.
+        language:
+          enum:
+          - en
+          - ar
+          type: string
+          x-spec-enum-id: 5b7bbf1ef388f556
+          description: 'Language of the customer page and emails.
+    
+    
+            * `en` - en
+    
+            * `ar` - ar'
+        retry_count:
+          type: integer
+          description: Maximum retry attempts AutoPay may make for a failed billing cycle.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when AutoPay created the subscription record.
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp when AutoPay last changed the subscription record.
+        card:
+          oneOf:
+          - $ref: '#/components/schemas/AutoPaySubscriptionCard'
+          - type: 'null'
+          description: The active card, or null until the first payment is confirmed.
+        current_cycle:
+          oneOf:
+          - $ref: '#/components/schemas/AutoPayCycleSummary'
+          - type: 'null'
+          description: The latest attempted billing cycle, or null.
+      required:
+      - amount_variability
+      - billing_anchor_day
+      - cancellation_note
+      - cancellation_reason
+      - cancels_on
+      - card
+      - currency
+      - current_cycle
+      - customer_id
+      - customer_name
+      - customer_phone
+      - cycle_interval_days
+      - frequency
+      - id
+      - language
+      - notification_config
+      - plan_name
+      - recurring_amount
+      - setup_session_id
+      - start_date
+      - status
+      - total_cycles
+      - updated_at
+    AutoPaySubscriptionCard:
+      type: object
+      properties:
+        masked_card:
+          type: string
+          description: Masked number of the active card.
+        card_brand:
+          type: string
+          description: Brand of the active card, such as VISA.
+      required:
+      - card_brand
+      - masked_card
+    AutoPaySubscriptionListItem:
+      type: object
+      properties:
+        id:
+          type: string
+          description: AutoPay subscription identifier.
+        customer_id:
+          type: string
+          description: Merchant-side customer identifier.
+        customer_email:
+          type: string
+          format: email
+          description: Customer email address.
+        frequency:
+          type: string
+          description: Subscription billing frequency.
+        recurring_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
+          description: Amount charged for each recurring billing cycle.
+        currency:
+          type: string
+          description: ISO currency code for recurring charges.
+        status:
+          type: string
+          description: Current AutoPay subscription status.
+        next_billing_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Next scheduled billing date, or null when no future charge
+            is scheduled.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when AutoPay created the subscription record.
+      required:
+      - created_at
+      - currency
+      - customer_email
+      - customer_id
+      - frequency
+      - id
+      - next_billing_date
+      - recurring_amount
+      - status
+    AutoPaySubscriptionListRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Filter subscriptions by AutoPay status, such as pending_setup,
+            trialing, active, past_due, canceled, expired, or setup_failed.
+        customer_id:
+          type: string
+          description: Merchant-side customer identifier used when the subscription
+            was created through Checkout.
+        created_after:
+          type: string
+          format: date
+          description: Return subscriptions created on or after this date, formatted
+            as YYYY-MM-DD.
+        created_before:
+          type: string
+          format: date
+          description: Return subscriptions created on or before this date, formatted
+            as YYYY-MM-DD.
+        limit:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Number of subscriptions AutoPay should return. Defaults to
+            20; maximum is 100.
+        offset:
+          type: integer
+          minimum: 0
+          description: Zero-based index of the first subscription to return. Defaults
+            to 0.
     BrandingItem:
       type: object
       properties:
@@ -3450,6 +4976,10 @@ components:
           type: string
           description: A writable field that accepts an attachment that has already been uploaded to the server.
           pattern: (?:pdf|jpeg|png|doc|docx|jpg|xls|xlsx|txt)$
+        autopay:
+          oneOf:
+          - $ref: '#/components/schemas/AutoPayBlock'
+          - type: 'null'
         billing:
           type: string
           readOnly: true
@@ -3572,32 +5102,33 @@ components:
           description: An array containing all the payment methods derived from the `pg_codes` input. Each object in the array contains information about a single payment gateway, including its icon and the `redirect_url` that will redirect the customer to the payment gateway's payment page.
         payment_type:
           enum:
-            - one_off
-            - auto_debit
-            - save_card
+          - one_off
+          - auto_debit
+          - save_card
+          - auto_pay
           type: string
-          x-spec-enum-id: b2ae60f7918918e7
+          x-spec-enum-id: a60fd8e05a86f0b5
           default: one_off
-          description: |-
-            Type of payment. Choose `one_off` for payments that occur only once without future commitments. Choose `auto_debit` for payments that are automatically deducted, such as recurring subscriptions, installments, or unscheduled auto-debits. 
-
-            Choose `save_card` if you want to perform a card tokenization operation.
-
-            NOTE: If `auto_debit` is selected: 
-            1. `agreement` and `customer_id` parameters will also be mandatory. 
-            2. Only PG codes supporting tokenization can be selected. 
-            As a side effect, the card used for the payment will be associated with the supplied `agreement.id`. This card will be locked, preventing the customer from deleting it from the system until an alternate card is chosen for auto-debit payments.
-
-            NOTE: If `save_card` is selected: 
-            1. The amount must be zero for the save card operation. 
-            2. The selected MID(pg_code) must support tokenization to enable the save card operation. 
-            3. Please note that the save card operation is considered successful without any funds being charged.
-            4. Once a card is created, Ottu will send a webhook containing the card details to the merchant's webhook URL.
-            5. When the transaction type is `save_card`, all previously saved cards returned in the sdk_preload_payload should be hidden since the user is saving a new card and does not need to select from existing ones.
-
-            * `one_off` - One Off
-            * `auto_debit` - Auto Debit
-            * `save_card` - Save Card
+          description: "Type of payment. Choose `one_off` for payments that occur
+            only once without future commitments. Choose `auto_debit` for payments
+            that are automatically deducted, such as recurring subscriptions, installments,
+            or unscheduled auto-debits. \n\nChoose `save_card` if you want to perform
+            a card tokenization operation.\n\nNOTE: If `auto_debit` is selected: \n1.
+            `agreement` and `customer_id` parameters will also be mandatory. \n2.
+            Only PG codes supporting tokenization can be selected. \nAs a side effect,
+            the card used for the payment will be associated with the supplied `agreement.id`.
+            This card will be locked, preventing the customer from deleting it from
+            the system until an alternate card is chosen for auto-debit payments.\n\nNOTE:
+            If `save_card` is selected: \n1. The amount must be zero for the save
+            card operation. \n2. The selected MID(pg_code) must support tokenization
+            to enable the save card operation. \n3. Please note that the save card
+            operation is considered successful without any funds being charged.\n4.
+            Once a card is created, Ottu will send a webhook containing the card details
+            to the merchant's webhook URL.\n5. When the transaction type is `save_card`,
+            all previously saved cards returned in the sdk_preload_payload should
+            be hidden since the user is saving a new card and does not need to select
+            from existing ones.\n\n* `one_off` - One Off\n* `auto_debit` - Auto Debit\n*
+            `save_card` - Save Card\n* `auto_pay` - Auto Pay"
         preload_checkout_page:
           type: boolean
           writeOnly: true
@@ -3781,6 +5312,10 @@ components:
           type: string
           description: A writable field that accepts an attachment that has already been uploaded to the server.
           pattern: (?:pdf|jpeg|png|doc|docx|jpg|xls|xlsx|txt)$
+        autopay:
+          oneOf:
+          - $ref: '#/components/schemas/AutoPayBlock'
+          - type: 'null'
         billing:
           type: string
           readOnly: true
@@ -3903,32 +5438,33 @@ components:
           description: An array containing all the payment methods derived from the `pg_codes` input. Each object in the array contains information about a single payment gateway, including its icon and the `redirect_url` that will redirect the customer to the payment gateway's payment page.
         payment_type:
           enum:
-            - one_off
-            - auto_debit
-            - save_card
+          - one_off
+          - auto_debit
+          - save_card
+          - auto_pay
           type: string
-          x-spec-enum-id: b2ae60f7918918e7
+          x-spec-enum-id: a60fd8e05a86f0b5
           default: one_off
-          description: |-
-            Type of payment. Choose `one_off` for payments that occur only once without future commitments. Choose `auto_debit` for payments that are automatically deducted, such as recurring subscriptions, installments, or unscheduled auto-debits. 
-
-            Choose `save_card` if you want to perform a card tokenization operation.
-
-            NOTE: If `auto_debit` is selected: 
-            1. `agreement` and `customer_id` parameters will also be mandatory. 
-            2. Only PG codes supporting tokenization can be selected. 
-            As a side effect, the card used for the payment will be associated with the supplied `agreement.id`. This card will be locked, preventing the customer from deleting it from the system until an alternate card is chosen for auto-debit payments.
-
-            NOTE: If `save_card` is selected: 
-            1. The amount must be zero for the save card operation. 
-            2. The selected MID(pg_code) must support tokenization to enable the save card operation. 
-            3. Please note that the save card operation is considered successful without any funds being charged.
-            4. Once a card is created, Ottu will send a webhook containing the card details to the merchant's webhook URL.
-            5. When the transaction type is `save_card`, all previously saved cards returned in the sdk_preload_payload should be hidden since the user is saving a new card and does not need to select from existing ones.
-
-            * `one_off` - One Off
-            * `auto_debit` - Auto Debit
-            * `save_card` - Save Card
+          description: "Type of payment. Choose `one_off` for payments that occur
+            only once without future commitments. Choose `auto_debit` for payments
+            that are automatically deducted, such as recurring subscriptions, installments,
+            or unscheduled auto-debits. \n\nChoose `save_card` if you want to perform
+            a card tokenization operation.\n\nNOTE: If `auto_debit` is selected: \n1.
+            `agreement` and `customer_id` parameters will also be mandatory. \n2.
+            Only PG codes supporting tokenization can be selected. \nAs a side effect,
+            the card used for the payment will be associated with the supplied `agreement.id`.
+            This card will be locked, preventing the customer from deleting it from
+            the system until an alternate card is chosen for auto-debit payments.\n\nNOTE:
+            If `save_card` is selected: \n1. The amount must be zero for the save
+            card operation. \n2. The selected MID(pg_code) must support tokenization
+            to enable the save card operation. \n3. Please note that the save card
+            operation is considered successful without any funds being charged.\n4.
+            Once a card is created, Ottu will send a webhook containing the card details
+            to the merchant's webhook URL.\n5. When the transaction type is `save_card`,
+            all previously saved cards returned in the sdk_preload_payload should
+            be hidden since the user is saving a new card and does not need to select
+            from existing ones.\n\n* `one_off` - One Off\n* `auto_debit` - Auto Debit\n*
+            `save_card` - Save Card\n* `auto_pay` - Auto Pay"
         preload_checkout_page:
           type: boolean
           writeOnly: true
@@ -4112,6 +5648,10 @@ components:
           type: string
           description: A writable field that accepts an attachment that has already been uploaded to the server.
           pattern: (?:pdf|jpeg|png|doc|docx|jpg|xls|xlsx|txt)$
+        autopay:
+          oneOf:
+          - $ref: '#/components/schemas/AutoPayBlock'
+          - type: 'null'
         billing:
           type: string
           readOnly: true
@@ -4234,32 +5774,33 @@ components:
           description: An array containing all the payment methods derived from the `pg_codes` input. Each object in the array contains information about a single payment gateway, including its icon and the `redirect_url` that will redirect the customer to the payment gateway's payment page.
         payment_type:
           enum:
-            - one_off
-            - auto_debit
-            - save_card
+          - one_off
+          - auto_debit
+          - save_card
+          - auto_pay
           type: string
-          x-spec-enum-id: b2ae60f7918918e7
+          x-spec-enum-id: a60fd8e05a86f0b5
           default: one_off
-          description: |-
-            Type of payment. Choose `one_off` for payments that occur only once without future commitments. Choose `auto_debit` for payments that are automatically deducted, such as recurring subscriptions, installments, or unscheduled auto-debits. 
-
-            Choose `save_card` if you want to perform a card tokenization operation.
-
-            NOTE: If `auto_debit` is selected: 
-            1. `agreement` and `customer_id` parameters will also be mandatory. 
-            2. Only PG codes supporting tokenization can be selected. 
-            As a side effect, the card used for the payment will be associated with the supplied `agreement.id`. This card will be locked, preventing the customer from deleting it from the system until an alternate card is chosen for auto-debit payments.
-
-            NOTE: If `save_card` is selected: 
-            1. The amount must be zero for the save card operation. 
-            2. The selected MID(pg_code) must support tokenization to enable the save card operation. 
-            3. Please note that the save card operation is considered successful without any funds being charged.
-            4. Once a card is created, Ottu will send a webhook containing the card details to the merchant's webhook URL.
-            5. When the transaction type is `save_card`, all previously saved cards returned in the sdk_preload_payload should be hidden since the user is saving a new card and does not need to select from existing ones.
-
-            * `one_off` - One Off
-            * `auto_debit` - Auto Debit
-            * `save_card` - Save Card
+          description: "Type of payment. Choose `one_off` for payments that occur
+            only once without future commitments. Choose `auto_debit` for payments
+            that are automatically deducted, such as recurring subscriptions, installments,
+            or unscheduled auto-debits. \n\nChoose `save_card` if you want to perform
+            a card tokenization operation.\n\nNOTE: If `auto_debit` is selected: \n1.
+            `agreement` and `customer_id` parameters will also be mandatory. \n2.
+            Only PG codes supporting tokenization can be selected. \nAs a side effect,
+            the card used for the payment will be associated with the supplied `agreement.id`.
+            This card will be locked, preventing the customer from deleting it from
+            the system until an alternate card is chosen for auto-debit payments.\n\nNOTE:
+            If `save_card` is selected: \n1. The amount must be zero for the save
+            card operation. \n2. The selected MID(pg_code) must support tokenization
+            to enable the save card operation. \n3. Please note that the save card
+            operation is considered successful without any funds being charged.\n4.
+            Once a card is created, Ottu will send a webhook containing the card details
+            to the merchant's webhook URL.\n5. When the transaction type is `save_card`,
+            all previously saved cards returned in the sdk_preload_payload should
+            be hidden since the user is saving a new card and does not need to select
+            from existing ones.\n\n* `one_off` - One Off\n* `auto_debit` - Auto Debit\n*
+            `save_card` - Save Card\n* `auto_pay` - Auto Pay"
         preload_checkout_page:
           type: boolean
           writeOnly: true
@@ -4443,6 +5984,10 @@ components:
           type: string
           description: A writable field that accepts an attachment that has already been uploaded to the server.
           pattern: (?:pdf|jpeg|png|doc|docx|jpg|xls|xlsx|txt)$
+        autopay:
+          oneOf:
+          - $ref: '#/components/schemas/AutoPayBlock'
+          - type: 'null'
         billing:
           type: string
           readOnly: true
@@ -4565,32 +6110,33 @@ components:
           description: An array containing all the payment methods derived from the `pg_codes` input. Each object in the array contains information about a single payment gateway, including its icon and the `redirect_url` that will redirect the customer to the payment gateway's payment page.
         payment_type:
           enum:
-            - one_off
-            - auto_debit
-            - save_card
+          - one_off
+          - auto_debit
+          - save_card
+          - auto_pay
           type: string
-          x-spec-enum-id: b2ae60f7918918e7
+          x-spec-enum-id: a60fd8e05a86f0b5
           default: one_off
-          description: |-
-            Type of payment. Choose `one_off` for payments that occur only once without future commitments. Choose `auto_debit` for payments that are automatically deducted, such as recurring subscriptions, installments, or unscheduled auto-debits. 
-
-            Choose `save_card` if you want to perform a card tokenization operation.
-
-            NOTE: If `auto_debit` is selected: 
-            1. `agreement` and `customer_id` parameters will also be mandatory. 
-            2. Only PG codes supporting tokenization can be selected. 
-            As a side effect, the card used for the payment will be associated with the supplied `agreement.id`. This card will be locked, preventing the customer from deleting it from the system until an alternate card is chosen for auto-debit payments.
-
-            NOTE: If `save_card` is selected: 
-            1. The amount must be zero for the save card operation. 
-            2. The selected MID(pg_code) must support tokenization to enable the save card operation. 
-            3. Please note that the save card operation is considered successful without any funds being charged.
-            4. Once a card is created, Ottu will send a webhook containing the card details to the merchant's webhook URL.
-            5. When the transaction type is `save_card`, all previously saved cards returned in the sdk_preload_payload should be hidden since the user is saving a new card and does not need to select from existing ones.
-
-            * `one_off` - One Off
-            * `auto_debit` - Auto Debit
-            * `save_card` - Save Card
+          description: "Type of payment. Choose `one_off` for payments that occur
+            only once without future commitments. Choose `auto_debit` for payments
+            that are automatically deducted, such as recurring subscriptions, installments,
+            or unscheduled auto-debits. \n\nChoose `save_card` if you want to perform
+            a card tokenization operation.\n\nNOTE: If `auto_debit` is selected: \n1.
+            `agreement` and `customer_id` parameters will also be mandatory. \n2.
+            Only PG codes supporting tokenization can be selected. \nAs a side effect,
+            the card used for the payment will be associated with the supplied `agreement.id`.
+            This card will be locked, preventing the customer from deleting it from
+            the system until an alternate card is chosen for auto-debit payments.\n\nNOTE:
+            If `save_card` is selected: \n1. The amount must be zero for the save
+            card operation. \n2. The selected MID(pg_code) must support tokenization
+            to enable the save card operation. \n3. Please note that the save card
+            operation is considered successful without any funds being charged.\n4.
+            Once a card is created, Ottu will send a webhook containing the card details
+            to the merchant's webhook URL.\n5. When the transaction type is `save_card`,
+            all previously saved cards returned in the sdk_preload_payload should
+            be hidden since the user is saving a new card and does not need to select
+            from existing ones.\n\n* `one_off` - One Off\n* `auto_debit` - Auto Debit\n*
+            `save_card` - Save Card\n* `auto_pay` - Auto Pay"
         preload_checkout_page:
           type: boolean
           writeOnly: true
@@ -4774,6 +6320,10 @@ components:
           type: string
           description: A writable field that accepts an attachment that has already been uploaded to the server.
           pattern: (?:pdf|jpeg|png|doc|docx|jpg|xls|xlsx|txt)$
+        autopay:
+          oneOf:
+          - $ref: '#/components/schemas/AutoPayBlock'
+          - type: 'null'
         billing:
           type: string
           readOnly: true
@@ -4896,32 +6446,33 @@ components:
           description: An array containing all the payment methods derived from the `pg_codes` input. Each object in the array contains information about a single payment gateway, including its icon and the `redirect_url` that will redirect the customer to the payment gateway's payment page.
         payment_type:
           enum:
-            - one_off
-            - auto_debit
-            - save_card
+          - one_off
+          - auto_debit
+          - save_card
+          - auto_pay
           type: string
-          x-spec-enum-id: b2ae60f7918918e7
+          x-spec-enum-id: a60fd8e05a86f0b5
           default: one_off
-          description: |-
-            Type of payment. Choose `one_off` for payments that occur only once without future commitments. Choose `auto_debit` for payments that are automatically deducted, such as recurring subscriptions, installments, or unscheduled auto-debits. 
-
-            Choose `save_card` if you want to perform a card tokenization operation.
-
-            NOTE: If `auto_debit` is selected: 
-            1. `agreement` and `customer_id` parameters will also be mandatory. 
-            2. Only PG codes supporting tokenization can be selected. 
-            As a side effect, the card used for the payment will be associated with the supplied `agreement.id`. This card will be locked, preventing the customer from deleting it from the system until an alternate card is chosen for auto-debit payments.
-
-            NOTE: If `save_card` is selected: 
-            1. The amount must be zero for the save card operation. 
-            2. The selected MID(pg_code) must support tokenization to enable the save card operation. 
-            3. Please note that the save card operation is considered successful without any funds being charged.
-            4. Once a card is created, Ottu will send a webhook containing the card details to the merchant's webhook URL.
-            5. When the transaction type is `save_card`, all previously saved cards returned in the sdk_preload_payload should be hidden since the user is saving a new card and does not need to select from existing ones.
-
-            * `one_off` - One Off
-            * `auto_debit` - Auto Debit
-            * `save_card` - Save Card
+          description: "Type of payment. Choose `one_off` for payments that occur
+            only once without future commitments. Choose `auto_debit` for payments
+            that are automatically deducted, such as recurring subscriptions, installments,
+            or unscheduled auto-debits. \n\nChoose `save_card` if you want to perform
+            a card tokenization operation.\n\nNOTE: If `auto_debit` is selected: \n1.
+            `agreement` and `customer_id` parameters will also be mandatory. \n2.
+            Only PG codes supporting tokenization can be selected. \nAs a side effect,
+            the card used for the payment will be associated with the supplied `agreement.id`.
+            This card will be locked, preventing the customer from deleting it from
+            the system until an alternate card is chosen for auto-debit payments.\n\nNOTE:
+            If `save_card` is selected: \n1. The amount must be zero for the save
+            card operation. \n2. The selected MID(pg_code) must support tokenization
+            to enable the save card operation. \n3. Please note that the save card
+            operation is considered successful without any funds being charged.\n4.
+            Once a card is created, Ottu will send a webhook containing the card details
+            to the merchant's webhook URL.\n5. When the transaction type is `save_card`,
+            all previously saved cards returned in the sdk_preload_payload should
+            be hidden since the user is saving a new card and does not need to select
+            from existing ones.\n\n* `one_off` - One Off\n* `auto_debit` - Auto Debit\n*
+            `save_card` - Save Card\n* `auto_pay` - Auto Pay"
         preload_checkout_page:
           type: boolean
           writeOnly: true
@@ -5082,32 +6633,33 @@ components:
           description: Specifies the type of operation to be performed by the payment gateway. If set to `purchase`, the payment source will be directly charged. If set to `authorize`, the payment source will only be authorized and the actual charge will be made at a later time.
         payment_type:
           enum:
-            - one_off
-            - auto_debit
-            - save_card
+          - one_off
+          - auto_debit
+          - save_card
+          - auto_pay
           type: string
-          x-spec-enum-id: b2ae60f7918918e7
+          x-spec-enum-id: a60fd8e05a86f0b5
           default: one_off
-          description: |-
-            Type of payment. Choose `one_off` for payments that occur only once without future commitments. Choose `auto_debit` for payments that are automatically deducted, such as recurring subscriptions, installments, or unscheduled auto-debits. 
-
-            Choose `save_card` if you want to perform a card tokenization operation.
-
-            NOTE: If `auto_debit` is selected: 
-            1. `agreement` and `customer_id` parameters will also be mandatory. 
-            2. Only PG codes supporting tokenization can be selected. 
-            As a side effect, the card used for the payment will be associated with the supplied `agreement.id`. This card will be locked, preventing the customer from deleting it from the system until an alternate card is chosen for auto-debit payments.
-
-            NOTE: If `save_card` is selected: 
-            1. The amount must be zero for the save card operation. 
-            2. The selected MID(pg_code) must support tokenization to enable the save card operation. 
-            3. Please note that the save card operation is considered successful without any funds being charged.
-            4. Once a card is created, Ottu will send a webhook containing the card details to the merchant's webhook URL.
-            5. When the transaction type is `save_card`, all previously saved cards returned in the sdk_preload_payload should be hidden since the user is saving a new card and does not need to select from existing ones.
-
-            * `one_off` - One Off
-            * `auto_debit` - Auto Debit
-            * `save_card` - Save Card
+          description: "Type of payment. Choose `one_off` for payments that occur
+            only once without future commitments. Choose `auto_debit` for payments
+            that are automatically deducted, such as recurring subscriptions, installments,
+            or unscheduled auto-debits. \n\nChoose `save_card` if you want to perform
+            a card tokenization operation.\n\nNOTE: If `auto_debit` is selected: \n1.
+            `agreement` and `customer_id` parameters will also be mandatory. \n2.
+            Only PG codes supporting tokenization can be selected. \nAs a side effect,
+            the card used for the payment will be associated with the supplied `agreement.id`.
+            This card will be locked, preventing the customer from deleting it from
+            the system until an alternate card is chosen for auto-debit payments.\n\nNOTE:
+            If `save_card` is selected: \n1. The amount must be zero for the save
+            card operation. \n2. The selected MID(pg_code) must support tokenization
+            to enable the save card operation. \n3. Please note that the save card
+            operation is considered successful without any funds being charged.\n4.
+            Once a card is created, Ottu will send a webhook containing the card details
+            to the merchant's webhook URL.\n5. When the transaction type is `save_card`,
+            all previously saved cards returned in the sdk_preload_payload should
+            be hidden since the user is saving a new card and does not need to select
+            from existing ones.\n\n* `one_off` - One Off\n* `auto_debit` - Auto Debit\n*
+            `save_card` - Save Card\n* `auto_pay` - Auto Pay"
         payment_methods:
           type: array
           items: {}
@@ -5560,31 +7112,32 @@ components:
           readOnly: true
         payment_type:
           enum:
-            - one_off
-            - auto_debit
-            - save_card
+          - one_off
+          - auto_debit
+          - save_card
+          - auto_pay
           type: string
-          x-spec-enum-id: b2ae60f7918918e7
-          description: |-
-            Type of payment. Choose `one_off` for payments that occur only once without future commitments. Choose `auto_debit` for payments that are automatically deducted, such as recurring subscriptions, installments, or unscheduled auto-debits. 
-
-            Choose `save_card` if you want to perform a card tokenization operation.
-
-            NOTE: If `auto_debit` is selected: 
-            1. `agreement` and `customer_id` parameters will also be mandatory. 
-            2. Only PG codes supporting tokenization can be selected. 
-            As a side effect, the card used for the payment will be associated with the supplied `agreement.id`. This card will be locked, preventing the customer from deleting it from the system until an alternate card is chosen for auto-debit payments.
-
-            NOTE: If `save_card` is selected: 
-            1. The amount must be zero for the save card operation. 
-            2. The selected MID(pg_code) must support tokenization to enable the save card operation. 
-            3. Please note that the save card operation is considered successful without any funds being charged.
-            4. Once a card is created, Ottu will send a webhook containing the card details to the merchant's webhook URL.
-            5. When the transaction type is `save_card`, all previously saved cards returned in the sdk_preload_payload should be hidden since the user is saving a new card and does not need to select from existing ones.
-
-            * `one_off` - One Off
-            * `auto_debit` - Auto Debit
-            * `save_card` - Save Card
+          x-spec-enum-id: a60fd8e05a86f0b5
+          description: "Type of payment. Choose `one_off` for payments that occur
+            only once without future commitments. Choose `auto_debit` for payments
+            that are automatically deducted, such as recurring subscriptions, installments,
+            or unscheduled auto-debits. \n\nChoose `save_card` if you want to perform
+            a card tokenization operation.\n\nNOTE: If `auto_debit` is selected: \n1.
+            `agreement` and `customer_id` parameters will also be mandatory. \n2.
+            Only PG codes supporting tokenization can be selected. \nAs a side effect,
+            the card used for the payment will be associated with the supplied `agreement.id`.
+            This card will be locked, preventing the customer from deleting it from
+            the system until an alternate card is chosen for auto-debit payments.\n\nNOTE:
+            If `save_card` is selected: \n1. The amount must be zero for the save
+            card operation. \n2. The selected MID(pg_code) must support tokenization
+            to enable the save card operation. \n3. Please note that the save card
+            operation is considered successful without any funds being charged.\n4.
+            Once a card is created, Ottu will send a webhook containing the card details
+            to the merchant's webhook URL.\n5. When the transaction type is `save_card`,
+            all previously saved cards returned in the sdk_preload_payload should
+            be hidden since the user is saving a new card and does not need to select
+            from existing ones.\n\n* `one_off` - One Off\n* `auto_debit` - Auto Debit\n*
+            `save_card` - Save Card\n* `auto_pay` - Auto Pay"
         reference_number:
           type: string
           readOnly: true
@@ -6336,6 +7889,10 @@ components:
           type: string
           description: A writable field that accepts an attachment that has already been uploaded to the server.
           pattern: (?:pdf|jpeg|png|doc|docx|jpg|xls|xlsx|txt)$
+        autopay:
+          oneOf:
+          - $ref: '#/components/schemas/AutoPayBlock'
+          - type: 'null'
         billing:
           type: string
           readOnly: true
@@ -6473,32 +8030,33 @@ components:
           description: An array containing all the payment methods derived from the `pg_codes` input. Each object in the array contains information about a single payment gateway, including its icon and the `redirect_url` that will redirect the customer to the payment gateway's payment page.
         payment_type:
           enum:
-            - one_off
-            - auto_debit
-            - save_card
+          - one_off
+          - auto_debit
+          - save_card
+          - auto_pay
           type: string
-          x-spec-enum-id: b2ae60f7918918e7
+          x-spec-enum-id: a60fd8e05a86f0b5
           default: one_off
-          description: |-
-            Type of payment. Choose `one_off` for payments that occur only once without future commitments. Choose `auto_debit` for payments that are automatically deducted, such as recurring subscriptions, installments, or unscheduled auto-debits. 
-
-            Choose `save_card` if you want to perform a card tokenization operation.
-
-            NOTE: If `auto_debit` is selected: 
-            1. `agreement` and `customer_id` parameters will also be mandatory. 
-            2. Only PG codes supporting tokenization can be selected. 
-            As a side effect, the card used for the payment will be associated with the supplied `agreement.id`. This card will be locked, preventing the customer from deleting it from the system until an alternate card is chosen for auto-debit payments.
-
-            NOTE: If `save_card` is selected: 
-            1. The amount must be zero for the save card operation. 
-            2. The selected MID(pg_code) must support tokenization to enable the save card operation. 
-            3. Please note that the save card operation is considered successful without any funds being charged.
-            4. Once a card is created, Ottu will send a webhook containing the card details to the merchant's webhook URL.
-            5. When the transaction type is `save_card`, all previously saved cards returned in the sdk_preload_payload should be hidden since the user is saving a new card and does not need to select from existing ones.
-
-            * `one_off` - One Off
-            * `auto_debit` - Auto Debit
-            * `save_card` - Save Card
+          description: "Type of payment. Choose `one_off` for payments that occur
+            only once without future commitments. Choose `auto_debit` for payments
+            that are automatically deducted, such as recurring subscriptions, installments,
+            or unscheduled auto-debits. \n\nChoose `save_card` if you want to perform
+            a card tokenization operation.\n\nNOTE: If `auto_debit` is selected: \n1.
+            `agreement` and `customer_id` parameters will also be mandatory. \n2.
+            Only PG codes supporting tokenization can be selected. \nAs a side effect,
+            the card used for the payment will be associated with the supplied `agreement.id`.
+            This card will be locked, preventing the customer from deleting it from
+            the system until an alternate card is chosen for auto-debit payments.\n\nNOTE:
+            If `save_card` is selected: \n1. The amount must be zero for the save
+            card operation. \n2. The selected MID(pg_code) must support tokenization
+            to enable the save card operation. \n3. Please note that the save card
+            operation is considered successful without any funds being charged.\n4.
+            Once a card is created, Ottu will send a webhook containing the card details
+            to the merchant's webhook URL.\n5. When the transaction type is `save_card`,
+            all previously saved cards returned in the sdk_preload_payload should
+            be hidden since the user is saving a new card and does not need to select
+            from existing ones.\n\n* `one_off` - One Off\n* `auto_debit` - Auto Debit\n*
+            `save_card` - Save Card\n* `auto_pay` - Auto Pay"
         preload_checkout_page:
           type: boolean
           writeOnly: true
@@ -6754,6 +8312,10 @@ components:
           type: string
           description: A writable field that accepts an attachment that has already been uploaded to the server.
           pattern: (?:pdf|jpeg|png|doc|docx|jpg|xls|xlsx|txt)$
+        autopay:
+          oneOf:
+          - $ref: '#/components/schemas/AutoPayBlock'
+          - type: 'null'
         billing:
           type: string
           readOnly: true
@@ -6891,32 +8453,33 @@ components:
           description: An array containing all the payment methods derived from the `pg_codes` input. Each object in the array contains information about a single payment gateway, including its icon and the `redirect_url` that will redirect the customer to the payment gateway's payment page.
         payment_type:
           enum:
-            - one_off
-            - auto_debit
-            - save_card
+          - one_off
+          - auto_debit
+          - save_card
+          - auto_pay
           type: string
-          x-spec-enum-id: b2ae60f7918918e7
+          x-spec-enum-id: a60fd8e05a86f0b5
           default: one_off
-          description: |-
-            Type of payment. Choose `one_off` for payments that occur only once without future commitments. Choose `auto_debit` for payments that are automatically deducted, such as recurring subscriptions, installments, or unscheduled auto-debits. 
-
-            Choose `save_card` if you want to perform a card tokenization operation.
-
-            NOTE: If `auto_debit` is selected: 
-            1. `agreement` and `customer_id` parameters will also be mandatory. 
-            2. Only PG codes supporting tokenization can be selected. 
-            As a side effect, the card used for the payment will be associated with the supplied `agreement.id`. This card will be locked, preventing the customer from deleting it from the system until an alternate card is chosen for auto-debit payments.
-
-            NOTE: If `save_card` is selected: 
-            1. The amount must be zero for the save card operation. 
-            2. The selected MID(pg_code) must support tokenization to enable the save card operation. 
-            3. Please note that the save card operation is considered successful without any funds being charged.
-            4. Once a card is created, Ottu will send a webhook containing the card details to the merchant's webhook URL.
-            5. When the transaction type is `save_card`, all previously saved cards returned in the sdk_preload_payload should be hidden since the user is saving a new card and does not need to select from existing ones.
-
-            * `one_off` - One Off
-            * `auto_debit` - Auto Debit
-            * `save_card` - Save Card
+          description: "Type of payment. Choose `one_off` for payments that occur
+            only once without future commitments. Choose `auto_debit` for payments
+            that are automatically deducted, such as recurring subscriptions, installments,
+            or unscheduled auto-debits. \n\nChoose `save_card` if you want to perform
+            a card tokenization operation.\n\nNOTE: If `auto_debit` is selected: \n1.
+            `agreement` and `customer_id` parameters will also be mandatory. \n2.
+            Only PG codes supporting tokenization can be selected. \nAs a side effect,
+            the card used for the payment will be associated with the supplied `agreement.id`.
+            This card will be locked, preventing the customer from deleting it from
+            the system until an alternate card is chosen for auto-debit payments.\n\nNOTE:
+            If `save_card` is selected: \n1. The amount must be zero for the save
+            card operation. \n2. The selected MID(pg_code) must support tokenization
+            to enable the save card operation. \n3. Please note that the save card
+            operation is considered successful without any funds being charged.\n4.
+            Once a card is created, Ottu will send a webhook containing the card details
+            to the merchant's webhook URL.\n5. When the transaction type is `save_card`,
+            all previously saved cards returned in the sdk_preload_payload should
+            be hidden since the user is saving a new card and does not need to select
+            from existing ones.\n\n* `one_off` - One Off\n* `auto_debit` - Auto Debit\n*
+            `save_card` - Save Card\n* `auto_pay` - Auto Pay"
         preload_checkout_page:
           type: boolean
           writeOnly: true
@@ -7492,6 +9055,9 @@ components:
           type: string
           default: failed
           description: Indicates the outcome of the operation. Typically set to 'failed' for error responses.
+        error_code:
+          type: string
+          description: "A stable machine-readable failure code, present on auto-debit failures. Branch on it rather than on `detail`, which is English text and may change. Values: `multiple_pg_codes` (the transaction has more than one `pg_codes` entry), `auto_debit_unsupported` (the gateway does not support auto-debit), `cit_not_found` (no successful customer-initiated payment has bound this `agreement.id` to a saved card), `invalid_token` (the card token does not exist for this customer), `txn_state_invalid` (the transaction cannot be paid in its current state), `charge_failed` (the charge could not be sent to the gateway), `gateway_declined` (the gateway declined the charge). Absent when no specific code applies."
         failed_provider:
           type: string
           description: Wallet cohort errors only. The `provider_code` of the wallet leg whose commit/release failed and triggered the saga rollback.
@@ -7534,6 +9100,1521 @@ components:
         - detail
         - operation
         - result
+    OttuSandboxMID:
+      type: object
+      description: Read representation of a sandbox MID, returned once it is provisioned.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        gateway_name:
+          type: string
+          readOnly: true
+        code:
+          type: string
+          description: Code to identify the settings in the API/URLs/etc
+          maxLength: 16
+          pattern: ^[-a-zA-Z0-9_]+$
+        name_en:
+          type:
+          - string
+          - 'null'
+          title: Name [en]
+          description: 'Name to be displayed in dropdown or anywhere else the settings are being shown.
+            IE: ''Knet'' or ''Knet demo'''
+          maxLength: 50
+        name_ar:
+          type:
+          - string
+          - 'null'
+          title: Name [ar]
+          description: 'Name to be displayed in dropdown or anywhere else the settings are being shown.
+            IE: ''Knet'' or ''Knet demo'''
+          maxLength: 50
+        description:
+          type: string
+          description: Optional description text that will be displayed alongside the payment method in
+            the checkout SDK. Use this to provide additional context messages, or instructions to customers
+            about this payment option.
+        is_active:
+          type: boolean
+          title: Is active?
+          description: Designates if this object is active, can be used and displayed on site.
+        type:
+          enum:
+          - sandbox
+          - production
+          type: string
+          description: '* `sandbox` - Sandbox
+
+            * `production` - Production'
+          x-spec-enum-id: df081db980375d31
+        operation:
+          enum:
+          - purchase
+          - authorize
+          type: string
+          description: '* `purchase` - Purchase
+
+            * `authorize` - Authorize'
+          x-spec-enum-id: fef9cc64394d1c3e
+        operations:
+          oneOf:
+          - {}
+          - type: 'null'
+          description: Add operations that are available for this payment gateway.
+        currency_code:
+          type: string
+          readOnly: true
+        extra_currency_codes:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        payment_method_type:
+          enum:
+          - bnpl
+          - ottu_pg
+          - pg
+          - aggregator
+          - click_to_pay
+          - aba_payway
+          - ''
+          - null
+          type:
+          - string
+          - 'null'
+          x-spec-enum-id: c8d44ec258bd0e6c
+          description: "\n            Designates the type of payment method. Options include:\n\n\n  \
+            \          - 'Flex': Indicates a flexible payment method such as 'Buy Now, Pay Later' (BNPL).\n\
+            \n\n            - 'Redirect PG': Indicates a payment method that redirects to a payment gateway,\
+            \ such as a KNET payment URL.\n\n\n            - 'OttuPG': Indicates a specific type of payment\
+            \ method.\n\n\n            - 'Aggregator': Indicates a payment method that aggregates multiple\
+            \ payment options.\n\n\n            - 'Click To Pay': Indicates a payment method that allows\
+            \ users to pay with a single click, typically used for saved payment methods or wallets.\n\
+            \n\n            - 'ABA PayWay': Indicates a payment method that offers additional sub-options\
+            \ for customization, and their options will appear on the payment page.\n\n\n            Note:\
+            \ If this field is left blank, the payment method will be considered as OttuPG or Redirect\
+            \ PG, depending on other factors.\n\n\n            \n\n* `bnpl` - BNPL\n* `ottu_pg` - OttuPG\n\
+            * `pg` - Redirect PG\n* `aggregator` - Aggregator\n* `click_to_pay` - Click To Pay\n* `aba_payway`\
+            \ - ABA PayWay"
+        bank_code:
+          type: string
+          description: Issuing bank/provider for this MID.
+          maxLength: 50
+        plugins:
+          description: Define plugins where this gateway settings will be available
+        tags:
+          description: Business vertical tags for categorizing this payment method (e.g. e_commerce, pos,
+            invoicing).
+        displayable:
+          type: boolean
+          description: Disabling this flag will hide the PG payment method from the customer.To be used
+            solely for payment services (Apple Pay, Samsung Pay, etc), when the payment service is under
+            a different MID.
+        can_have_multiple_attempts:
+          type: boolean
+          title: Allow Multiple Attempts
+          description: If disabled, the transaction will reach a final state upon receiving a callback
+            and will not be re-attempted again.
+        is_tokenizable:
+          type: boolean
+          title: Is Tokenizable?
+          description: Enable this flag to allow tokenization for this payment gateway.
+        auto_debit_enabled:
+          type: boolean
+          title: Is Auto Debit Enabled?
+          description: Enable this flag to allow mid to perform auto debit operation.
+        form_fields:
+          title: Form Fields Configuration
+          description: 'Configure form field visibility and requirements for Jazz SDK and OttuPG hosted
+            payment page. Example: {''name'': {''display'': true, ''required'': true}}'
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - code
+      - created
+      - currency_code
+      - extra_currency_codes
+      - gateway_name
+      - id
+    OttuSandboxMIDCreate:
+      type: object
+      description: 'Write representation: every option a sandbox MID exposes.
+
+
+        `type` is deliberately absent - a MID minted here is always a sandbox one.'
+      properties:
+        gateway_name:
+          enum:
+          - ottu_sandbox
+          type: string
+          x-spec-enum-id: 5ace108db8bd2318
+          writeOnly: true
+          default: ottu_sandbox
+          description: 'Gateway is addressed by its constant name, never by id.
+
+
+            * `ottu_sandbox` - Ottu Sandbox'
+        name_en:
+          type: string
+          maxLength: 50
+        name_ar:
+          type: string
+          default: ''
+          maxLength: 50
+        code:
+          oneOf:
+          - type: string
+            default: ''
+            maxLength: 16
+            pattern: ^[-a-zA-Z0-9_]+$
+          - type: string
+            maxLength: 0
+        description:
+          type: string
+          description: Optional description text that will be displayed alongside the payment method in
+            the checkout SDK. Use this to provide additional context messages, or instructions to customers
+            about this payment option.
+        is_active:
+          type: boolean
+          title: Is active?
+          description: Designates if this object is active, can be used and displayed on site.
+        operation:
+          enum:
+          - purchase
+          - authorize
+          type: string
+          description: '* `purchase` - Purchase
+
+            * `authorize` - Authorize'
+          x-spec-enum-id: fef9cc64394d1c3e
+        operations:
+          type: array
+          items:
+            enum:
+            - refund
+            - void
+            type: string
+            description: '* `refund` - refund
+
+              * `void` - void'
+            x-spec-enum-id: fa10dba4538451d9
+        currency_code:
+          enum:
+          - AED
+          - AFN
+          - ALL
+          - AMD
+          - ANG
+          - AOA
+          - ARS
+          - AUD
+          - AWG
+          - AZN
+          - BAM
+          - BBD
+          - BDT
+          - BGN
+          - BHD
+          - BIF
+          - BMD
+          - BND
+          - BOB
+          - BOV
+          - BRL
+          - BSD
+          - BTN
+          - BWP
+          - BYN
+          - BZD
+          - CAD
+          - CDF
+          - CHE
+          - CHF
+          - CHW
+          - CLF
+          - CLP
+          - CNY
+          - COP
+          - COU
+          - CRC
+          - CUC
+          - CUP
+          - CVE
+          - CZK
+          - DJF
+          - DKK
+          - DOP
+          - DZD
+          - EGP
+          - ERN
+          - ETB
+          - EUR
+          - FJD
+          - FKP
+          - GBP
+          - GEL
+          - GHS
+          - GIP
+          - GMD
+          - GNF
+          - GTQ
+          - GYD
+          - HKD
+          - HNL
+          - HRK
+          - HTG
+          - HUF
+          - IDR
+          - ILS
+          - INR
+          - IQD
+          - IRR
+          - ISK
+          - JMD
+          - JOD
+          - JPY
+          - KES
+          - KGS
+          - KHR
+          - KMF
+          - KPW
+          - KRW
+          - KWD
+          - KYD
+          - KZT
+          - LAK
+          - LBP
+          - LKR
+          - LRD
+          - LSL
+          - LYD
+          - MAD
+          - MDL
+          - MGA
+          - MKD
+          - MMK
+          - MNT
+          - MOP
+          - MRU
+          - MUR
+          - MVR
+          - MWK
+          - MXN
+          - MXV
+          - MYR
+          - MZN
+          - NAD
+          - NGN
+          - NIO
+          - NOK
+          - NPR
+          - NZD
+          - OMR
+          - PAB
+          - PEN
+          - PGK
+          - PHP
+          - PKR
+          - PLN
+          - PYG
+          - QAR
+          - RON
+          - RSD
+          - RUB
+          - RWF
+          - SAR
+          - SBD
+          - SCR
+          - SDG
+          - SEK
+          - SGD
+          - SHP
+          - SLE
+          - SLL
+          - SOS
+          - SRD
+          - SSP
+          - STN
+          - SVC
+          - SYP
+          - SZL
+          - THB
+          - TJS
+          - TMT
+          - TND
+          - TOP
+          - TRY
+          - TTD
+          - TWD
+          - TZS
+          - UAH
+          - UGX
+          - USD
+          - USN
+          - UYI
+          - UYU
+          - UYW
+          - UZS
+          - VED
+          - VES
+          - VND
+          - VUV
+          - WST
+          - XAF
+          - XAG
+          - XAU
+          - XBA
+          - XBB
+          - XBC
+          - XBD
+          - XCD
+          - XDR
+          - XOF
+          - XPD
+          - XPF
+          - XPT
+          - XSU
+          - XTS
+          - XUA
+          - XXX
+          - YER
+          - ZAR
+          - ZMW
+          - ZWL
+          type: string
+          description: '* `AED` - AED
+
+            * `AFN` - AFN
+
+            * `ALL` - ALL
+
+            * `AMD` - AMD
+
+            * `ANG` - ANG
+
+            * `AOA` - AOA
+
+            * `ARS` - ARS
+
+            * `AUD` - AUD
+
+            * `AWG` - AWG
+
+            * `AZN` - AZN
+
+            * `BAM` - BAM
+
+            * `BBD` - BBD
+
+            * `BDT` - BDT
+
+            * `BGN` - BGN
+
+            * `BHD` - BHD
+
+            * `BIF` - BIF
+
+            * `BMD` - BMD
+
+            * `BND` - BND
+
+            * `BOB` - BOB
+
+            * `BOV` - BOV
+
+            * `BRL` - BRL
+
+            * `BSD` - BSD
+
+            * `BTN` - BTN
+
+            * `BWP` - BWP
+
+            * `BYN` - BYN
+
+            * `BZD` - BZD
+
+            * `CAD` - CAD
+
+            * `CDF` - CDF
+
+            * `CHE` - CHE
+
+            * `CHF` - CHF
+
+            * `CHW` - CHW
+
+            * `CLF` - CLF
+
+            * `CLP` - CLP
+
+            * `CNY` - CNY
+
+            * `COP` - COP
+
+            * `COU` - COU
+
+            * `CRC` - CRC
+
+            * `CUC` - CUC
+
+            * `CUP` - CUP
+
+            * `CVE` - CVE
+
+            * `CZK` - CZK
+
+            * `DJF` - DJF
+
+            * `DKK` - DKK
+
+            * `DOP` - DOP
+
+            * `DZD` - DZD
+
+            * `EGP` - EGP
+
+            * `ERN` - ERN
+
+            * `ETB` - ETB
+
+            * `EUR` - EUR
+
+            * `FJD` - FJD
+
+            * `FKP` - FKP
+
+            * `GBP` - GBP
+
+            * `GEL` - GEL
+
+            * `GHS` - GHS
+
+            * `GIP` - GIP
+
+            * `GMD` - GMD
+
+            * `GNF` - GNF
+
+            * `GTQ` - GTQ
+
+            * `GYD` - GYD
+
+            * `HKD` - HKD
+
+            * `HNL` - HNL
+
+            * `HRK` - HRK
+
+            * `HTG` - HTG
+
+            * `HUF` - HUF
+
+            * `IDR` - IDR
+
+            * `ILS` - ILS
+
+            * `INR` - INR
+
+            * `IQD` - IQD
+
+            * `IRR` - IRR
+
+            * `ISK` - ISK
+
+            * `JMD` - JMD
+
+            * `JOD` - JOD
+
+            * `JPY` - JPY
+
+            * `KES` - KES
+
+            * `KGS` - KGS
+
+            * `KHR` - KHR
+
+            * `KMF` - KMF
+
+            * `KPW` - KPW
+
+            * `KRW` - KRW
+
+            * `KWD` - KWD
+
+            * `KYD` - KYD
+
+            * `KZT` - KZT
+
+            * `LAK` - LAK
+
+            * `LBP` - LBP
+
+            * `LKR` - LKR
+
+            * `LRD` - LRD
+
+            * `LSL` - LSL
+
+            * `LYD` - LYD
+
+            * `MAD` - MAD
+
+            * `MDL` - MDL
+
+            * `MGA` - MGA
+
+            * `MKD` - MKD
+
+            * `MMK` - MMK
+
+            * `MNT` - MNT
+
+            * `MOP` - MOP
+
+            * `MRU` - MRU
+
+            * `MUR` - MUR
+
+            * `MVR` - MVR
+
+            * `MWK` - MWK
+
+            * `MXN` - MXN
+
+            * `MXV` - MXV
+
+            * `MYR` - MYR
+
+            * `MZN` - MZN
+
+            * `NAD` - NAD
+
+            * `NGN` - NGN
+
+            * `NIO` - NIO
+
+            * `NOK` - NOK
+
+            * `NPR` - NPR
+
+            * `NZD` - NZD
+
+            * `OMR` - OMR
+
+            * `PAB` - PAB
+
+            * `PEN` - PEN
+
+            * `PGK` - PGK
+
+            * `PHP` - PHP
+
+            * `PKR` - PKR
+
+            * `PLN` - PLN
+
+            * `PYG` - PYG
+
+            * `QAR` - QAR
+
+            * `RON` - RON
+
+            * `RSD` - RSD
+
+            * `RUB` - RUB
+
+            * `RWF` - RWF
+
+            * `SAR` - SAR
+
+            * `SBD` - SBD
+
+            * `SCR` - SCR
+
+            * `SDG` - SDG
+
+            * `SEK` - SEK
+
+            * `SGD` - SGD
+
+            * `SHP` - SHP
+
+            * `SLE` - SLE
+
+            * `SLL` - SLL
+
+            * `SOS` - SOS
+
+            * `SRD` - SRD
+
+            * `SSP` - SSP
+
+            * `STN` - STN
+
+            * `SVC` - SVC
+
+            * `SYP` - SYP
+
+            * `SZL` - SZL
+
+            * `THB` - THB
+
+            * `TJS` - TJS
+
+            * `TMT` - TMT
+
+            * `TND` - TND
+
+            * `TOP` - TOP
+
+            * `TRY` - TRY
+
+            * `TTD` - TTD
+
+            * `TWD` - TWD
+
+            * `TZS` - TZS
+
+            * `UAH` - UAH
+
+            * `UGX` - UGX
+
+            * `USD` - USD
+
+            * `USN` - USN
+
+            * `UYI` - UYI
+
+            * `UYU` - UYU
+
+            * `UYW` - UYW
+
+            * `UZS` - UZS
+
+            * `VED` - VED
+
+            * `VES` - VES
+
+            * `VND` - VND
+
+            * `VUV` - VUV
+
+            * `WST` - WST
+
+            * `XAF` - XAF
+
+            * `XAG` - XAG
+
+            * `XAU` - XAU
+
+            * `XBA` - XBA
+
+            * `XBB` - XBB
+
+            * `XBC` - XBC
+
+            * `XBD` - XBD
+
+            * `XCD` - XCD
+
+            * `XDR` - XDR
+
+            * `XOF` - XOF
+
+            * `XPD` - XPD
+
+            * `XPF` - XPF
+
+            * `XPT` - XPT
+
+            * `XSU` - XSU
+
+            * `XTS` - XTS
+
+            * `XUA` - XUA
+
+            * `XXX` - XXX
+
+            * `YER` - YER
+
+            * `ZAR` - ZAR
+
+            * `ZMW` - ZMW
+
+            * `ZWL` - ZWL'
+          x-spec-enum-id: 1314c690acf1c093
+          writeOnly: true
+        extra_currency_codes:
+          type: array
+          items:
+            enum:
+            - AED
+            - AFN
+            - ALL
+            - AMD
+            - ANG
+            - AOA
+            - ARS
+            - AUD
+            - AWG
+            - AZN
+            - BAM
+            - BBD
+            - BDT
+            - BGN
+            - BHD
+            - BIF
+            - BMD
+            - BND
+            - BOB
+            - BOV
+            - BRL
+            - BSD
+            - BTN
+            - BWP
+            - BYN
+            - BZD
+            - CAD
+            - CDF
+            - CHE
+            - CHF
+            - CHW
+            - CLF
+            - CLP
+            - CNY
+            - COP
+            - COU
+            - CRC
+            - CUC
+            - CUP
+            - CVE
+            - CZK
+            - DJF
+            - DKK
+            - DOP
+            - DZD
+            - EGP
+            - ERN
+            - ETB
+            - EUR
+            - FJD
+            - FKP
+            - GBP
+            - GEL
+            - GHS
+            - GIP
+            - GMD
+            - GNF
+            - GTQ
+            - GYD
+            - HKD
+            - HNL
+            - HRK
+            - HTG
+            - HUF
+            - IDR
+            - ILS
+            - INR
+            - IQD
+            - IRR
+            - ISK
+            - JMD
+            - JOD
+            - JPY
+            - KES
+            - KGS
+            - KHR
+            - KMF
+            - KPW
+            - KRW
+            - KWD
+            - KYD
+            - KZT
+            - LAK
+            - LBP
+            - LKR
+            - LRD
+            - LSL
+            - LYD
+            - MAD
+            - MDL
+            - MGA
+            - MKD
+            - MMK
+            - MNT
+            - MOP
+            - MRU
+            - MUR
+            - MVR
+            - MWK
+            - MXN
+            - MXV
+            - MYR
+            - MZN
+            - NAD
+            - NGN
+            - NIO
+            - NOK
+            - NPR
+            - NZD
+            - OMR
+            - PAB
+            - PEN
+            - PGK
+            - PHP
+            - PKR
+            - PLN
+            - PYG
+            - QAR
+            - RON
+            - RSD
+            - RUB
+            - RWF
+            - SAR
+            - SBD
+            - SCR
+            - SDG
+            - SEK
+            - SGD
+            - SHP
+            - SLE
+            - SLL
+            - SOS
+            - SRD
+            - SSP
+            - STN
+            - SVC
+            - SYP
+            - SZL
+            - THB
+            - TJS
+            - TMT
+            - TND
+            - TOP
+            - TRY
+            - TTD
+            - TWD
+            - TZS
+            - UAH
+            - UGX
+            - USD
+            - USN
+            - UYI
+            - UYU
+            - UYW
+            - UZS
+            - VED
+            - VES
+            - VND
+            - VUV
+            - WST
+            - XAF
+            - XAG
+            - XAU
+            - XBA
+            - XBB
+            - XBC
+            - XBD
+            - XCD
+            - XDR
+            - XOF
+            - XPD
+            - XPF
+            - XPT
+            - XSU
+            - XTS
+            - XUA
+            - XXX
+            - YER
+            - ZAR
+            - ZMW
+            - ZWL
+            type: string
+            description: '* `AED` - AED
+
+              * `AFN` - AFN
+
+              * `ALL` - ALL
+
+              * `AMD` - AMD
+
+              * `ANG` - ANG
+
+              * `AOA` - AOA
+
+              * `ARS` - ARS
+
+              * `AUD` - AUD
+
+              * `AWG` - AWG
+
+              * `AZN` - AZN
+
+              * `BAM` - BAM
+
+              * `BBD` - BBD
+
+              * `BDT` - BDT
+
+              * `BGN` - BGN
+
+              * `BHD` - BHD
+
+              * `BIF` - BIF
+
+              * `BMD` - BMD
+
+              * `BND` - BND
+
+              * `BOB` - BOB
+
+              * `BOV` - BOV
+
+              * `BRL` - BRL
+
+              * `BSD` - BSD
+
+              * `BTN` - BTN
+
+              * `BWP` - BWP
+
+              * `BYN` - BYN
+
+              * `BZD` - BZD
+
+              * `CAD` - CAD
+
+              * `CDF` - CDF
+
+              * `CHE` - CHE
+
+              * `CHF` - CHF
+
+              * `CHW` - CHW
+
+              * `CLF` - CLF
+
+              * `CLP` - CLP
+
+              * `CNY` - CNY
+
+              * `COP` - COP
+
+              * `COU` - COU
+
+              * `CRC` - CRC
+
+              * `CUC` - CUC
+
+              * `CUP` - CUP
+
+              * `CVE` - CVE
+
+              * `CZK` - CZK
+
+              * `DJF` - DJF
+
+              * `DKK` - DKK
+
+              * `DOP` - DOP
+
+              * `DZD` - DZD
+
+              * `EGP` - EGP
+
+              * `ERN` - ERN
+
+              * `ETB` - ETB
+
+              * `EUR` - EUR
+
+              * `FJD` - FJD
+
+              * `FKP` - FKP
+
+              * `GBP` - GBP
+
+              * `GEL` - GEL
+
+              * `GHS` - GHS
+
+              * `GIP` - GIP
+
+              * `GMD` - GMD
+
+              * `GNF` - GNF
+
+              * `GTQ` - GTQ
+
+              * `GYD` - GYD
+
+              * `HKD` - HKD
+
+              * `HNL` - HNL
+
+              * `HRK` - HRK
+
+              * `HTG` - HTG
+
+              * `HUF` - HUF
+
+              * `IDR` - IDR
+
+              * `ILS` - ILS
+
+              * `INR` - INR
+
+              * `IQD` - IQD
+
+              * `IRR` - IRR
+
+              * `ISK` - ISK
+
+              * `JMD` - JMD
+
+              * `JOD` - JOD
+
+              * `JPY` - JPY
+
+              * `KES` - KES
+
+              * `KGS` - KGS
+
+              * `KHR` - KHR
+
+              * `KMF` - KMF
+
+              * `KPW` - KPW
+
+              * `KRW` - KRW
+
+              * `KWD` - KWD
+
+              * `KYD` - KYD
+
+              * `KZT` - KZT
+
+              * `LAK` - LAK
+
+              * `LBP` - LBP
+
+              * `LKR` - LKR
+
+              * `LRD` - LRD
+
+              * `LSL` - LSL
+
+              * `LYD` - LYD
+
+              * `MAD` - MAD
+
+              * `MDL` - MDL
+
+              * `MGA` - MGA
+
+              * `MKD` - MKD
+
+              * `MMK` - MMK
+
+              * `MNT` - MNT
+
+              * `MOP` - MOP
+
+              * `MRU` - MRU
+
+              * `MUR` - MUR
+
+              * `MVR` - MVR
+
+              * `MWK` - MWK
+
+              * `MXN` - MXN
+
+              * `MXV` - MXV
+
+              * `MYR` - MYR
+
+              * `MZN` - MZN
+
+              * `NAD` - NAD
+
+              * `NGN` - NGN
+
+              * `NIO` - NIO
+
+              * `NOK` - NOK
+
+              * `NPR` - NPR
+
+              * `NZD` - NZD
+
+              * `OMR` - OMR
+
+              * `PAB` - PAB
+
+              * `PEN` - PEN
+
+              * `PGK` - PGK
+
+              * `PHP` - PHP
+
+              * `PKR` - PKR
+
+              * `PLN` - PLN
+
+              * `PYG` - PYG
+
+              * `QAR` - QAR
+
+              * `RON` - RON
+
+              * `RSD` - RSD
+
+              * `RUB` - RUB
+
+              * `RWF` - RWF
+
+              * `SAR` - SAR
+
+              * `SBD` - SBD
+
+              * `SCR` - SCR
+
+              * `SDG` - SDG
+
+              * `SEK` - SEK
+
+              * `SGD` - SGD
+
+              * `SHP` - SHP
+
+              * `SLE` - SLE
+
+              * `SLL` - SLL
+
+              * `SOS` - SOS
+
+              * `SRD` - SRD
+
+              * `SSP` - SSP
+
+              * `STN` - STN
+
+              * `SVC` - SVC
+
+              * `SYP` - SYP
+
+              * `SZL` - SZL
+
+              * `THB` - THB
+
+              * `TJS` - TJS
+
+              * `TMT` - TMT
+
+              * `TND` - TND
+
+              * `TOP` - TOP
+
+              * `TRY` - TRY
+
+              * `TTD` - TTD
+
+              * `TWD` - TWD
+
+              * `TZS` - TZS
+
+              * `UAH` - UAH
+
+              * `UGX` - UGX
+
+              * `USD` - USD
+
+              * `USN` - USN
+
+              * `UYI` - UYI
+
+              * `UYU` - UYU
+
+              * `UYW` - UYW
+
+              * `UZS` - UZS
+
+              * `VED` - VED
+
+              * `VES` - VES
+
+              * `VND` - VND
+
+              * `VUV` - VUV
+
+              * `WST` - WST
+
+              * `XAF` - XAF
+
+              * `XAG` - XAG
+
+              * `XAU` - XAU
+
+              * `XBA` - XBA
+
+              * `XBB` - XBB
+
+              * `XBC` - XBC
+
+              * `XBD` - XBD
+
+              * `XCD` - XCD
+
+              * `XDR` - XDR
+
+              * `XOF` - XOF
+
+              * `XPD` - XPD
+
+              * `XPF` - XPF
+
+              * `XPT` - XPT
+
+              * `XSU` - XSU
+
+              * `XTS` - XTS
+
+              * `XUA` - XUA
+
+              * `XXX` - XXX
+
+              * `YER` - YER
+
+              * `ZAR` - ZAR
+
+              * `ZMW` - ZMW
+
+              * `ZWL` - ZWL'
+            x-spec-enum-id: 1314c690acf1c093
+            writeOnly: true
+          writeOnly: true
+        payment_method_type:
+          enum:
+          - bnpl
+          - ottu_pg
+          - pg
+          - aggregator
+          - click_to_pay
+          - aba_payway
+          - ''
+          type: string
+          description: '* `bnpl` - BNPL
+
+            * `ottu_pg` - OttuPG
+
+            * `pg` - Redirect PG
+
+            * `aggregator` - Aggregator
+
+            * `click_to_pay` - Click To Pay
+
+            * `aba_payway` - ABA PayWay'
+          x-spec-enum-id: c8d44ec258bd0e6c
+          default: ''
+        bank_code:
+          enum:
+          - ''
+          - nbk
+          - abk
+          - gulf_bank
+          - kfh
+          - kib
+          - boubyan
+          - burgan
+          - warba
+          - cbk
+          - anb
+          - bsf
+          - snb
+          - jazbank
+          - nbo
+          - bank_muscat
+          - alsohar
+          - afs
+          type: string
+          description: '* `` - ---------
+
+            * `nbk` - National Bank of Kuwait
+
+            * `abk` - Ahly Bank of Kuwait
+
+            * `gulf_bank` - Gulf Bank
+
+            * `kfh` - Kuwait Finance House
+
+            * `kib` - Kuwait International Bank
+
+            * `boubyan` - Boubyan Bank
+
+            * `burgan` - Burgan Bank
+
+            * `warba` - Warba Bank
+
+            * `cbk` - Commercial Bank of Kuwait
+
+            * `anb` - Arab National Bank
+
+            * `bsf` - Banque Saudi Fransi
+
+            * `snb` - Saudi National Bank
+
+            * `jazbank` - Al Jazira Bank
+
+            * `nbo` - National Bank of Oman
+
+            * `bank_muscat` - Bank Muscat
+
+            * `alsohar` - Alsohar Bank
+
+            * `afs` - Arab Financial Services'
+          x-spec-enum-id: ee22420088430570
+          default: ''
+        plugins:
+          type: array
+          items:
+            enum:
+            - payment_request
+            - bulk
+            - customer_payment
+            - e_commerce
+            - catalogue
+            - legacy
+            - event
+            - food_ordering
+            - iata
+            - real_estate
+            - payout
+            type: string
+            description: '* `payment_request` - Payment request
+
+              * `bulk` - Bulk
+
+              * `customer_payment` - Customer payment
+
+              * `e_commerce` - E-Commerce
+
+              * `catalogue` - Catalogue
+
+              * `legacy` - Legacy API
+
+              * `event` - Event
+
+              * `food_ordering` - Food ordering
+
+              * `iata` - IATA
+
+              * `real_estate` - Real Estate
+
+              * `payout` - Payout'
+            x-spec-enum-id: 306ad5290fad8d6c
+        tags:
+          type: array
+          items:
+            enum:
+            - e_commerce
+            - crm
+            - pos
+            - invoicing
+            - subscriptions
+            - marketplace
+            - mobile_app
+            - ticket_booking
+            - donations
+            - government
+            - education
+            - healthcare
+            - insurance
+            - logistics
+            - hospitality
+            - real_estate
+            - retail
+            - telecom
+            - utilities
+            - demo
+            - test
+            type: string
+            description: '* `e_commerce` - E-Commerce
+
+              * `crm` - CRM
+
+              * `pos` - Point of Sale
+
+              * `invoicing` - Invoicing
+
+              * `subscriptions` - Subscriptions
+
+              * `marketplace` - Marketplace
+
+              * `mobile_app` - Mobile App
+
+              * `ticket_booking` - Ticket Booking
+
+              * `donations` - Donations
+
+              * `government` - Government
+
+              * `education` - Education
+
+              * `healthcare` - Healthcare
+
+              * `insurance` - Insurance
+
+              * `logistics` - Logistics
+
+              * `hospitality` - Hospitality
+
+              * `real_estate` - Real Estate
+
+              * `retail` - Retail
+
+              * `telecom` - Telecom
+
+              * `utilities` - Utilities
+
+              * `demo` - Demo
+
+              * `test` - Test'
+            x-spec-enum-id: 51968db8c9e71b0f
+        displayable:
+          type: boolean
+          description: Disabling this flag will hide the PG payment method from the customer.To be used
+            solely for payment services (Apple Pay, Samsung Pay, etc), when the payment service is under
+            a different MID.
+        can_have_multiple_attempts:
+          type: boolean
+          title: Allow Multiple Attempts
+          description: If disabled, the transaction will reach a final state upon receiving a callback
+            and will not be re-attempted again.
+        is_tokenizable:
+          type: boolean
+          title: Is Tokenizable?
+          description: Enable this flag to allow tokenization for this payment gateway.
+        auto_debit_enabled:
+          type: boolean
+          title: Is Auto Debit Enabled?
+          description: Enable this flag to allow mid to perform auto debit operation.
+        form_fields:
+          type: object
+          additionalProperties: {}
+      required:
+      - currency_code
+      - name_en
+      - tags
+    OttuSandboxMIDErrors:
+      oneOf:
+      - $ref: "#/components/schemas/FieldErrors"
+      - $ref: "#/components/schemas/GenericErrorMessage"
     PGCodeValidation:
       type: object
       properties:
@@ -7805,6 +10886,10 @@ components:
           type: string
           description: A writable field that accepts an attachment that has already been uploaded to the server.
           pattern: (?:pdf|jpeg|png|doc|docx|jpg|xls|xlsx|txt)$
+        autopay:
+          oneOf:
+          - $ref: '#/components/schemas/AutoPayBlock'
+          - type: 'null'
         billing:
           type: string
           readOnly: true
@@ -7927,32 +11012,33 @@ components:
           description: An array containing all the payment methods derived from the `pg_codes` input. Each object in the array contains information about a single payment gateway, including its icon and the `redirect_url` that will redirect the customer to the payment gateway's payment page.
         payment_type:
           enum:
-            - one_off
-            - auto_debit
-            - save_card
+          - one_off
+          - auto_debit
+          - save_card
+          - auto_pay
           type: string
-          x-spec-enum-id: b2ae60f7918918e7
+          x-spec-enum-id: a60fd8e05a86f0b5
           default: one_off
-          description: |-
-            Type of payment. Choose `one_off` for payments that occur only once without future commitments. Choose `auto_debit` for payments that are automatically deducted, such as recurring subscriptions, installments, or unscheduled auto-debits. 
-
-            Choose `save_card` if you want to perform a card tokenization operation.
-
-            NOTE: If `auto_debit` is selected: 
-            1. `agreement` and `customer_id` parameters will also be mandatory. 
-            2. Only PG codes supporting tokenization can be selected. 
-            As a side effect, the card used for the payment will be associated with the supplied `agreement.id`. This card will be locked, preventing the customer from deleting it from the system until an alternate card is chosen for auto-debit payments.
-
-            NOTE: If `save_card` is selected: 
-            1. The amount must be zero for the save card operation. 
-            2. The selected MID(pg_code) must support tokenization to enable the save card operation. 
-            3. Please note that the save card operation is considered successful without any funds being charged.
-            4. Once a card is created, Ottu will send a webhook containing the card details to the merchant's webhook URL.
-            5. When the transaction type is `save_card`, all previously saved cards returned in the sdk_preload_payload should be hidden since the user is saving a new card and does not need to select from existing ones.
-
-            * `one_off` - One Off
-            * `auto_debit` - Auto Debit
-            * `save_card` - Save Card
+          description: "Type of payment. Choose `one_off` for payments that occur
+            only once without future commitments. Choose `auto_debit` for payments
+            that are automatically deducted, such as recurring subscriptions, installments,
+            or unscheduled auto-debits. \n\nChoose `save_card` if you want to perform
+            a card tokenization operation.\n\nNOTE: If `auto_debit` is selected: \n1.
+            `agreement` and `customer_id` parameters will also be mandatory. \n2.
+            Only PG codes supporting tokenization can be selected. \nAs a side effect,
+            the card used for the payment will be associated with the supplied `agreement.id`.
+            This card will be locked, preventing the customer from deleting it from
+            the system until an alternate card is chosen for auto-debit payments.\n\nNOTE:
+            If `save_card` is selected: \n1. The amount must be zero for the save
+            card operation. \n2. The selected MID(pg_code) must support tokenization
+            to enable the save card operation. \n3. Please note that the save card
+            operation is considered successful without any funds being charged.\n4.
+            Once a card is created, Ottu will send a webhook containing the card details
+            to the merchant's webhook URL.\n5. When the transaction type is `save_card`,
+            all previously saved cards returned in the sdk_preload_payload should
+            be hidden since the user is saving a new card and does not need to select
+            from existing ones.\n\n* `one_off` - One Off\n* `auto_debit` - Auto Debit\n*
+            `save_card` - Save Card\n* `auto_pay` - Auto Pay"
         preload_checkout_page:
           type: boolean
           writeOnly: true
@@ -8552,6 +11638,34 @@ components:
             - $ref: "#/components/schemas/AmountDetails"
           readOnly: true
           description: "A comprehensive set of amount details includes: Currency Code, Amount, Total, Fee."
+        autopay:
+          type: object
+          description: AutoPay subscription context, added to the webhook after signing
+            (informational, not covered by the HMAC).
+          properties:
+            subscription_id:
+              type: string
+              description: "The AutoPay subscription this payment belongs to. Not signed; for a value you can trust, read `extra.autopay.subscription_id`."
+            subscription_status:
+              type: string
+              description: "The subscription's status at the moment the webhook was assembled, for example `active` or `past_due`."
+            cycle_number:
+              type: integer
+              nullable: true
+              description: "The sequential number of the billing cycle this payment belongs to, starting at 1."
+            cycle_status:
+              type: string
+              nullable: true
+              description: "The status of that billing cycle, for example `paid` or `retry_scheduled`."
+            next_billing_date:
+              type: string
+              format: date
+              nullable: true
+              description: "The date of the next scheduled charge, in `YYYY-MM-DD` format."
+            event_type:
+              type: string
+              nullable: true
+              description: "What AutoPay classified this payment as. One of `cit_success`, `cit_failure`, `mit_success`, `mit_failure`, `card_updated`, `recovery_success`, or `null` when the setup outcome is still undecided. A hint only; read `result` and `state` for the payment outcome."
         capture_delivery_address:
           type: boolean
           description: By enabling this, you will ask for user's address. If enabled, capture delivery coordinates should also be active.
@@ -8632,7 +11746,27 @@ components:
           readOnly: true
           description: List of wallet legs that contributed to this payment — one entry per wallet provider (Ottu, Qitaf, …). Multi-wallet stacking emits multiple entries; full or single-wallet payments emit a one-element list. Omitted entirely (key absent) when no wallet was involved.
         extra:
-          description: The extra information for the payment details, which the merchant has sent it in key value form.
+          type: object
+          additionalProperties: true
+          description: The extra information for the payment details, which the merchant
+            has sent it in key value form. Ottu always adds `merchant_id`, and adds
+            `autopay.subscription_id` on payments that belong to an AutoPay subscription.
+            Both are covered by the signature.
+          properties:
+            merchant_id:
+              type: string
+              description: Your merchant domain, for example `your-merchant.ottu.net`.
+                Always present, even when you sent no `extra` object. It is part of
+                the signed field set, so it can be trusted once the signature is verified.
+            autopay:
+              type: object
+              description: Present only on payments that belong to an AutoPay subscription.
+              properties:
+                subscription_id:
+                  type: string
+                  description: The AutoPay subscription this payment belongs to. It
+                    is part of the signed field set. Use this value, not the top-level
+                    `autopay.subscription_id`, to identify the subscription.
         fee:
           type: string
           description: The fee denotes the sum the customer pays in their chosen payment currency. This may vary from the transaction's designated currency. The fee is computed once to maintain precision and uniformity throughout the payment procedure.
@@ -8677,31 +11811,32 @@ components:
           readOnly: true
         payment_type:
           enum:
-            - one_off
-            - auto_debit
-            - save_card
+          - one_off
+          - auto_debit
+          - save_card
+          - auto_pay
           type: string
-          x-spec-enum-id: b2ae60f7918918e7
-          description: |-
-            Type of payment. Choose `one_off` for payments that occur only once without future commitments. Choose `auto_debit` for payments that are automatically deducted, such as recurring subscriptions, installments, or unscheduled auto-debits. 
-
-            Choose `save_card` if you want to perform a card tokenization operation.
-
-            NOTE: If `auto_debit` is selected: 
-            1. `agreement` and `customer_id` parameters will also be mandatory. 
-            2. Only PG codes supporting tokenization can be selected. 
-            As a side effect, the card used for the payment will be associated with the supplied `agreement.id`. This card will be locked, preventing the customer from deleting it from the system until an alternate card is chosen for auto-debit payments.
-
-            NOTE: If `save_card` is selected: 
-            1. The amount must be zero for the save card operation. 
-            2. The selected MID(pg_code) must support tokenization to enable the save card operation. 
-            3. Please note that the save card operation is considered successful without any funds being charged.
-            4. Once a card is created, Ottu will send a webhook containing the card details to the merchant's webhook URL.
-            5. When the transaction type is `save_card`, all previously saved cards returned in the sdk_preload_payload should be hidden since the user is saving a new card and does not need to select from existing ones.
-
-            * `one_off` - One Off
-            * `auto_debit` - Auto Debit
-            * `save_card` - Save Card
+          x-spec-enum-id: a60fd8e05a86f0b5
+          description: "Type of payment. Choose `one_off` for payments that occur
+            only once without future commitments. Choose `auto_debit` for payments
+            that are automatically deducted, such as recurring subscriptions, installments,
+            or unscheduled auto-debits. \n\nChoose `save_card` if you want to perform
+            a card tokenization operation.\n\nNOTE: If `auto_debit` is selected: \n1.
+            `agreement` and `customer_id` parameters will also be mandatory. \n2.
+            Only PG codes supporting tokenization can be selected. \nAs a side effect,
+            the card used for the payment will be associated with the supplied `agreement.id`.
+            This card will be locked, preventing the customer from deleting it from
+            the system until an alternate card is chosen for auto-debit payments.\n\nNOTE:
+            If `save_card` is selected: \n1. The amount must be zero for the save
+            card operation. \n2. The selected MID(pg_code) must support tokenization
+            to enable the save card operation. \n3. Please note that the save card
+            operation is considered successful without any funds being charged.\n4.
+            Once a card is created, Ottu will send a webhook containing the card details
+            to the merchant's webhook URL.\n5. When the transaction type is `save_card`,
+            all previously saved cards returned in the sdk_preload_payload should
+            be hidden since the user is saving a new card and does not need to select
+            from existing ones.\n\n* `one_off` - One Off\n* `auto_debit` - Auto Debit\n*
+            `save_card` - Save Card\n* `auto_pay` - Auto Pay"
         reference_number:
           type: string
           readOnly: true

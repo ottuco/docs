@@ -26,6 +26,10 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/
 - **On-demand billing** — charge customers when events occur (e.g., account top-ups, usage-based billing)
 - **Recurring invoices** — automatically collect payment on invoice due dates
 
+:::tip Want Ottu to run the billing schedule instead?
+Auto-debit puts you in charge of the schedule — your system decides when each CIT/MIT charge happens, and you build the retry and dunning logic. If you'd rather hand all of that to Ottu after a single checkout call, see [AutoPay](/developers/payments/autopay/) — it owns the schedule, retries, dunning, and gives customers a self-service page.
+:::
+
 ## Setup
 
 Before implementing auto-debit, ensure you have:
@@ -175,6 +179,10 @@ Once you have the token, you can charge the customer automatically using either 
 
 :::info
 Use the **same** `pg_code`, `agreement.id`, and `customer_id` as the first payment. The amount may vary if the agreement's `amount_variability` is set to `"variable"`.
+:::
+
+:::warning[Charge from your server, never with the public key]
+`POST /b/pbl/v2/payment/auto-debit/` (and its legacy alias `POST /b/pbl/v2/auto-debit/`) charges a card without the customer present. Send it from your server with your [private API key](/developers/getting-started/authentication/#api-key-auth); a scoped key or [Basic Auth](/developers/getting-started/authentication/#basic-auth) user needs `Can perform auto-debits` (`user.do_autodebit`) or gets `403`. The [public key](/developers/getting-started/authentication/#public-key) is refused with `401 {"detail": "Authentication credentials were not provided."}`.
 :::
 
 **One-Step (Checkout API with `payment_instrument`):**

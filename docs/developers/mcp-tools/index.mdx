@@ -1,0 +1,62 @@
+---
+title: MCP Tools
+sidebar_label: Overview
+description: The Ottu Core MCP server exposes permission-gated tools that let AI agents automate merchant operations — starting with payment-gateway capability discovery for Agentic onboarding.
+---
+
+import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
+import CodeBlock from "@theme/CodeBlock";
+
+# MCP Tools
+
+Ottu Core ships a built-in **MCP (Model Context Protocol) server** — a single connection that exposes a curated set of tools to AI agents and MCP-compatible clients (Claude, Cursor, Google ADK, and others). Instead of stitching REST calls together by hand, an agent connects once, discovers the available tools, and calls them by name. Every tool is permission-gated and returns clean, JSON-native results.
+
+The first tool documented here powers **Agentic merchant onboarding**. Before an agent can configure a merchant's payment gateways, it needs to know which gateways and banks are actually available in the merchant's country. The **[PG Capabilities](./pg-capabilities)** tool answers exactly that — it lists every payment gateway ([PG](/glossary/)) per country, the banks and providers behind each one, and what each gateway can do.
+
+:::note What is MCP?
+The [Model Context Protocol](https://modelcontextprotocol.io) is an open standard that lets an AI application discover and call tools over one connection. Ottu implements the server side; your agent framework provides the client. You describe the goal in natural language and the client decides which tool to call.
+:::
+
+## Connecting
+
+The Ottu Core MCP server is served over **Streamable HTTP** at the `/mcp/` path of your Ottu instance:
+
+<CodeBlock language="bash">{`${OTTU_CONNECT_BASE_URL}/mcp/`}</CodeBlock>
+
+Swap in your own merchant domain when you integrate. Point any Streamable-HTTP MCP client at that URL and it will negotiate the session and list the available tools for you.
+
+## Authentication
+
+Every request must be authenticated as an Ottu user with a **Bearer token**:
+
+```http
+Authorization: Bearer <your-token>
+```
+
+The token identifies the user making the call, and each tool runs with **that user's permissions** — the same permissions that govern the equivalent action in the dashboard. For how to obtain and manage credentials, see [Authentication](/developers/getting-started/authentication).
+
+## Permissions
+
+Each tool enforces its own permission at the boundary. A caller that lacks the required permission gets a clean permission-denied result rather than partial data or a misleading error. For example, [PG Capabilities](./pg-capabilities) requires the `gateway.view_pgmid` permission.
+
+## Error responses
+
+Tools never surface raw exceptions to the agent. When something is wrong — a missing permission, an unknown argument, or a not-found lookup — the tool returns a small JSON object with a single `error` key and a human-readable message:
+
+```json title="Error result"
+{ "error": "You do not have permission to view gateway capabilities." }
+```
+
+A successful call returns the tool's structured result, documented per tool. Your MCP client surfaces this as the tool's return value.
+
+## Available tools
+
+| Tool | Purpose | Permission |
+|------|---------|------------|
+| [`get_pg_capabilities`](./pg-capabilities) | List payment gateways and the banks/providers that support them, per country, with each gateway's funding sources, integration types, capabilities, supported wallets, and SSL requirement. | `gateway.view_pgmid` |
+
+## What's Next?
+
+- [**PG Capabilities**](./pg-capabilities) — discover gateways, banks, and capabilities per country
+- [**Payment Methods**](/developers/payments/payment-methods) — the runtime REST equivalent for a live checkout session
+- [**Authentication**](/developers/getting-started/authentication) — obtain a token for the MCP server

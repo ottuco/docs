@@ -6,13 +6,15 @@
  * The merchant host / Api-Key / SDK key all come from `ACTIVE_CONNECT`
  * in `./sandbox` — flip that one global to retarget every demo on the site.
  */
+import type { PaymentPlugin } from "./sandbox";
+
 export const WALLET_DEMO = {
   // Wallet on sandbox.ottu.net is enabled for USD only (PG `ottu-sandbox-usd`).
   currency: "USD",
   seedAmount: "10.00",
   sessionAmount: "8.00",
   pgFilter: {
-    plugin: "e_commerce",
+    plugin: "e_commerce" as PaymentPlugin,
     type: "sandbox",
     tags: ["demo"],
     payment_services: ["wallet"],

@@ -1,0 +1,349 @@
+{
+  "operationId": "autopay_subscription_list",
+  "method": "POST",
+  "path": "/b/pbl/v2/subscriptions/",
+  "summary": "List AutoPay subscriptions",
+  "description": "Lists your AutoPay subscriptions. Filters travel in the request body, so keep `customer_id` there and out of the URL. The endpoint is a `POST` that only reads.\n\n**Paging.** `limit` and `offset` are accepted in the request body or in the query string, and the query string wins. `next` and `previous` are absolute URLs on your own Ottu domain, and they carry `limit` and `offset` in the **query string**, even though you sent them in the body.\n\n1. Follow them with `POST`, not `GET`. A `GET` returns `405 {\"detail\": \"Method \\\"GET\\\" not allowed.\"}`. Reuse the same headers and API key.\n2. The body is optional when you follow a link, because `limit` and `offset` are already in the query string. Resend your filters in the body if you want them applied to that page too.\n3. Query parameters win over body parameters. `{\"offset\": 1}` posted to a URL that ends `?offset=5` returns the page at offset 5.\n\nEach item in `results` is a short summary. For the active card and the latest cycle, call Retrieve with the item's `id`.\n",
+  "parameters": [],
+  "requestBody": {
+    "required": false,
+    "schema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "Return only subscriptions in this state. Enum: `pending_setup`, `trialing`, `active`, `past_due`, `canceled`, `expired`, `setup_failed`. Omit it to return every state.\n"
+        },
+        "customer_id": {
+          "type": "string",
+          "description": "Return only the subscriptions of one customer. Exact match on the `customer_id` you sent at checkout.\n"
+        },
+        "created_after": {
+          "type": "string",
+          "format": "date",
+          "description": "Return subscriptions created on or after this date, in `YYYY-MM-DD` format.\n"
+        },
+        "created_before": {
+          "type": "string",
+          "format": "date",
+          "description": "Return subscriptions created on or before this date, in `YYYY-MM-DD` format. Combine it with `created_after` for a date range.\n"
+        },
+        "limit": {
+          "type": "integer",
+          "maximum": 100,
+          "minimum": 1,
+          "description": "How many subscriptions to return, from 1 to 100. Defaults to 20.\n"
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many subscriptions to skip before the first one returned. Defaults to 0. When you follow a `next` link, its query string wins over this value.\n"
+        }
+      },
+      "description": "Filters and paging for the subscription list. They are sent in the request body, not the query string, so that customer identifiers stay out of URL logs. Every field is optional; an empty JSON object returns the 20 newest subscriptions.\n"
+    },
+    "examples": [
+      {
+        "name": "ListActiveSubscriptions",
+        "summary": "List active subscriptions",
+        "value": [
+          {
+            "status": "active",
+            "customer_id": "cust_123",
+            "created_after": "2026-01-01",
+            "created_before": "2026-12-31",
+            "limit": 20,
+            "offset": 0
+          }
+        ]
+      }
+    ]
+  },
+  "responses": [
+    {
+      "status": "200",
+      "description": "",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "description": "The total number of subscriptions that match, across all pages, not only the ones in `results`.\n"
+            },
+            "next": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "uri",
+              "description": "URL of the next page, on your Ottu domain. Follow it with `POST`, the same verb as the first page; a `GET` returns `405`. `null` on the last page.\n"
+            },
+            "previous": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "uri",
+              "description": "URL of the previous page, on your Ottu domain. Follow it with `POST`, the same verb as the first page; a `GET` returns `405`. `null` on the first page.\n"
+            },
+            "results": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "The subscription's unique identifier. Pass it as `subscription_id` to retrieve, cancel, or list the cycles of this subscription.\n"
+                  },
+                  "customer_id": {
+                    "type": "string",
+                    "description": "Your own identifier for the customer, as sent in `customer_id` at checkout.\n"
+                  },
+                  "customer_email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The customer's email address, captured when the subscription was created.\n"
+                  },
+                  "frequency": {
+                    "type": "string",
+                    "description": "How often the customer is charged. Enum: `monthly`, `yearly`.\n"
+                  },
+                  "recurring_amount": {
+                    "type": "string",
+                    "format": "decimal",
+                    "pattern": "^-?\\d{0,11}(?:\\.\\d{0,3})?$",
+                    "description": "The amount charged on each billing cycle, as a decimal string in `currency`.\n"
+                  },
+                  "currency": {
+                    "type": "string",
+                    "description": "Three-letter ISO 4217 currency code of the recurring charge, for example `KWD`.\n"
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "The subscription's lifecycle state. One of `pending_setup` (created, first payment not completed yet), `trialing` (set up with a `0` first charge, waiting for its first billing date), `active` (billing normally), `past_due` (a billing cycle used up every retry), `canceled`, `expired` (the `end_date` passed), or `setup_failed` (the first payment never completed).\n\nA `past_due` subscription is never canceled automatically. See [Subscription States](/developers/payments/autopay/#subscription-states).\n"
+                  },
+                  "next_billing_date": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date",
+                    "description": "The date of the next scheduled charge, in `YYYY-MM-DD` format. `null` when no charge is scheduled.\n"
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "UTC timestamp of when the subscription was created. The list is ordered by this field, newest first.\n"
+                  }
+                },
+                "required": [
+                  "created_at",
+                  "currency",
+                  "customer_email",
+                  "customer_id",
+                  "frequency",
+                  "id",
+                  "next_billing_date",
+                  "recurring_amount",
+                  "status"
+                ],
+                "description": "A lighter view of a subscription, returned for each row of the subscription list. It carries enough to show a table and to decide which subscriptions to open; call Retrieve a subscription for the full object.\n"
+              },
+              "description": "The subscriptions on this page, newest first. An empty array when nothing matches.\n"
+            }
+          },
+          "required": [
+            "count",
+            "results"
+          ],
+          "description": "One page of subscriptions. To walk the pages, follow `next` with `POST`, the same verb as the first page. You can send an empty body `{}`, because the link already carries `limit` and `offset`. Query parameters win over body parameters.\n"
+        }
+      },
+      "examples": [
+        {
+          "name": "FirstPage",
+          "summary": "First page",
+          "value": [
+            {
+              "count": 42,
+              "next": "https://sandbox.ottu.net/b/pbl/v2/subscriptions/?limit=20&offset=20",
+              "previous": null,
+              "results": [
+                {
+                  "id": "sub_9kq2w7xp4m",
+                  "customer_id": "cust_10042",
+                  "customer_email": "customer@example.com",
+                  "frequency": "monthly",
+                  "recurring_amount": "9.990",
+                  "currency": "KWD",
+                  "status": "active",
+                  "next_billing_date": "2026-12-01",
+                  "created_at": "2026-11-01T08:15:42Z"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "status": "400",
+      "description": "The request is malformed, for example a `limit` above 100. Fix it: retrying unchanged fails again.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ]
+      },
+      "examples": [
+        {
+          "name": "LimitAbove100",
+          "summary": "Limit above 100",
+          "value": {
+            "limit": [
+              "Ensure this value is less than or equal to 100."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "status": "401",
+      "description": "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ]
+      },
+      "examples": [
+        {
+          "name": "NotAuthenticated",
+          "summary": "Not authenticated",
+          "value": {
+            "detail": "Authentication credentials were not provided."
+          }
+        }
+      ]
+    },
+    {
+      "status": "422",
+      "description": "A filter value is invalid, and `detail` lists each one. Fix it: retrying unchanged fails again.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ]
+      },
+      "examples": [
+        {
+          "name": "UnknownStatusFilter",
+          "summary": "Unknown status filter",
+          "value": {
+            "detail": [
+              {
+                "type": "enum",
+                "loc": [
+                  "body",
+                  "payload",
+                  "status"
+                ],
+                "msg": "Input should be 'pending_setup', 'trialing', 'active', 'past_due', 'canceled', 'expired' or 'setup_failed'"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "status": "423",
+      "description": "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ]
+      },
+      "examples": [
+        {
+          "name": "PaymentsPaused",
+          "summary": "Payments paused",
+          "value": {
+            "detail": "Service is paused.",
+            "code": "service_paused"
+          }
+        }
+      ]
+    },
+    {
+      "status": "503",
+      "description": "The subscription service is unavailable. Retry with backoff.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ]
+      },
+      "examples": [
+        {
+          "name": "AutoPayUnavailable",
+          "summary": "AutoPay unavailable",
+          "value": {
+            "detail": "AutoPay bridge is unavailable."
+          }
+        }
+      ]
+    },
+    {
+      "status": "504",
+      "description": "The subscription service timed out. Nothing was changed, so the request is safe to retry.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ]
+      },
+      "examples": [
+        {
+          "name": "AutoPayTimedOut",
+          "summary": "AutoPay timed out",
+          "value": {
+            "detail": "AutoPay bridge request timed out."
+          }
+        }
+      ]
+    }
+  ]
+}

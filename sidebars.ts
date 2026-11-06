@@ -224,6 +224,11 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
+                  label: "Live Demo",
+                  href: "/developers/payments/wallet#live-demo",
+                },
+                {
+                  type: "link",
                   label: "API Reference",
                   href: "/developers/payments/wallet#api-reference",
                 },
@@ -241,6 +246,132 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "category",
+              label: "AutoPay",
+              link: { type: "doc", id: "developers/payments/autopay/index" },
+              items: [
+                {
+                  type: "link",
+                  label: "When to Use",
+                  href: "/developers/payments/autopay#when-to-use",
+                },
+                {
+                  type: "link",
+                  label: "Guide",
+                  href: "/developers/payments/autopay#guide",
+                },
+                {
+                  type: "link",
+                  label: "Live Demo",
+                  href: "/developers/payments/autopay#live-demo",
+                },
+                {
+                  type: "link",
+                  label: "API Reference",
+                  href: "/developers/payments/autopay#api-reference",
+                },
+                {
+                  type: "link",
+                  label: "Limits",
+                  href: "/developers/payments/autopay#limits",
+                },
+                {
+                  type: "link",
+                  label: "Best Practices",
+                  href: "/developers/payments/autopay#best-practices",
+                },
+                {
+                  type: "link",
+                  label: "FAQ",
+                  href: "/developers/payments/autopay#faq",
+                },
+              ],
+            },
+            {
+              type: "category",
+              label: "Loyalty",
+              link: { type: "doc", id: "developers/payments/loyalty" },
+              items: [
+                {
+                  type: "link",
+                  label: "How it works",
+                  href: "/developers/payments/loyalty#overview",
+                },
+                {
+                  type: "link",
+                  label: "When to Use",
+                  href: "/developers/payments/loyalty#when-to-use",
+                },
+                {
+                  type: "link",
+                  label: "Setup",
+                  href: "/developers/payments/loyalty#setup",
+                },
+                {
+                  type: "link",
+                  label: "Guide",
+                  href: "/developers/payments/loyalty#guide",
+                },
+                {
+                  type: "link",
+                  label: "Refund and Points Return",
+                  href: "/developers/payments/loyalty#refund-points",
+                },
+                {
+                  type: "link",
+                  label: "API Reference",
+                  href: "/developers/payments/loyalty#api-reference",
+                },
+                {
+                  type: "link",
+                  label: "Best Practices",
+                  href: "/developers/payments/loyalty#best-practices",
+                },
+                {
+                  type: "link",
+                  label: "FAQ",
+                  href: "/developers/payments/loyalty#faq",
+                },
+              ],
+            },
+            {
+              type: "category",
+              label: "Partner Onboarding",
+              link: { type: "doc", id: "developers/payments/onboarding" },
+              items: [
+                {
+                  type: "link",
+                  label: "When to Use",
+                  href: "/developers/payments/onboarding#when-to-use",
+                },
+                {
+                  type: "link",
+                  label: "Setup",
+                  href: "/developers/payments/onboarding#setup",
+                },
+                {
+                  type: "link",
+                  label: "Guide",
+                  href: "/developers/payments/onboarding#guide",
+                },
+                {
+                  type: "link",
+                  label: "API Reference",
+                  href: "/developers/payments/onboarding#api-reference",
+                },
+                {
+                  type: "link",
+                  label: "Best Practices",
+                  href: "/developers/payments/onboarding#best-practices",
+                },
+                {
+                  type: "link",
+                  label: "FAQ",
+                  href: "/developers/payments/onboarding#faq",
+                },
+              ],
+            },
+            {
+              type: "category",
               label: "Checkout SDK",
               link: {
                 type: "doc",
@@ -248,9 +379,19 @@ const sidebars: SidebarsConfig = {
               },
               items: [
                 {
-                  type: "doc",
-                  id: "developers/payments/checkout-sdk/web",
+                  type: "category",
                   label: "Web",
+                  link: {
+                    type: "doc",
+                    id: "developers/payments/checkout-sdk/web",
+                  },
+                  items: [
+                    {
+                      type: "link",
+                      label: "Live Demo",
+                      href: "/developers/payments/checkout-sdk/web#live-demo",
+                    },
+                  ],
                 },
                 {
                   type: "doc",
@@ -275,9 +416,44 @@ const sidebars: SidebarsConfig = {
               link: { type: "doc", id: "developers/payments/sandbox" },
               items: [
                 {
-                  type: "doc",
-                  id: "developers/payments/ottu-sandbox",
+                  type: "category",
                   label: "Ottu Sandbox",
+                  link: {
+                    type: "doc",
+                    id: "developers/payments/ottu-sandbox",
+                  },
+                  items: [
+                    {
+                      type: "link",
+                      label: "When to Use",
+                      href: "/developers/payments/ottu-sandbox#when-to-use",
+                    },
+                    {
+                      type: "link",
+                      label: "Setup",
+                      href: "/developers/payments/ottu-sandbox#setup",
+                    },
+                    {
+                      type: "link",
+                      label: "Guide",
+                      href: "/developers/payments/ottu-sandbox#guide",
+                    },
+                    {
+                      type: "link",
+                      label: "API Reference",
+                      href: "/developers/payments/ottu-sandbox#api-reference",
+                    },
+                    {
+                      type: "link",
+                      label: "Best Practices",
+                      href: "/developers/payments/ottu-sandbox#best-practices",
+                    },
+                    {
+                      type: "link",
+                      label: "FAQ",
+                      href: "/developers/payments/ottu-sandbox#faq",
+                    },
+                  ],
                 },
               ],
             },
@@ -386,6 +562,11 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
+                  label: "Live Demo",
+                  href: "/developers/cards-and-tokens/recurring-payments#live-demo",
+                },
+                {
+                  type: "link",
                   label: "API Reference",
                   href: "/developers/cards-and-tokens/recurring-payments#api-reference",
                 },
@@ -448,13 +629,28 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "doc",
+              id: "developers/webhooks/event-catalogue",
+              label: "Events & Envelope (v3)",
+            },
+            {
+              type: "doc",
+              id: "developers/webhooks/delivery-and-retries",
+              label: "Delivery & Retries",
+            },
+            {
+              type: "doc",
+              id: "developers/webhooks/migrate-to-v3",
+              label: "Formats & Migration",
+            },
+            {
+              type: "doc",
               id: "developers/webhooks/payment-events",
-              label: "Payment Events",
+              label: "Payment Events (v1/v2)",
             },
             {
               type: "doc",
               id: "developers/webhooks/operation-events",
-              label: "Operation Events",
+              label: "Operation Events (v1/v2)",
             },
             {
               type: "doc",
@@ -532,6 +728,23 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: "category",
+          label: "MCP Tools",
+          link: { type: "doc", id: "developers/mcp-tools/index" },
+          items: [
+            {
+              type: "doc",
+              id: "developers/mcp-tools/index",
+              label: "Overview",
+            },
+            {
+              type: "doc",
+              id: "developers/mcp-tools/pg-capabilities",
+              label: "PG Capabilities",
+            },
+          ],
+        },
+        {
+          type: "category",
           label: "Reference",
           link: { type: "doc", id: "developers/reference/error-codes" },
           items: [
@@ -544,6 +757,16 @@ const sidebars: SidebarsConfig = {
               type: "doc",
               id: "developers/reference/payment-states",
               label: "Payment States",
+            },
+            {
+              type: "doc",
+              id: "developers/reference/checkout-status-codes",
+              label: "Checkout Status Codes",
+            },
+            {
+              type: "doc",
+              id: "developers/reference/api-key-permissions",
+              label: "API Key Permissions",
             },
           ],
         },
@@ -665,6 +888,120 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: "category",
+          label: "AutoPay",
+          link: { type: "doc", id: "business/autopay/index" },
+          items: [
+            {
+              type: "link",
+              label: "Why use AutoPay",
+              href: "/business/autopay#why-use-autopay",
+            },
+            {
+              type: "link",
+              label: "How it works",
+              href: "/business/autopay#how-it-works",
+            },
+            {
+              type: "link",
+              label: "What your customer sees",
+              href: "/business/autopay#what-your-customer-sees",
+            },
+            {
+              type: "link",
+              label: "When a payment fails",
+              href: "/business/autopay#when-a-payment-fails",
+            },
+            {
+              type: "link",
+              label: "Lifecycle and billing cycles",
+              href: "/business/autopay#lifecycle-and-billing-cycles",
+            },
+            {
+              type: "link",
+              label: "Setting up AutoPay",
+              href: "/business/autopay#setting-up-autopay",
+            },
+            {
+              type: "link",
+              label: "Limits",
+              href: "/business/autopay#limits",
+            },
+            {
+              type: "link",
+              label: "Things to know",
+              href: "/business/autopay#things-to-know",
+            },
+            {
+              type: "link",
+              label: "FAQ",
+              href: "/business/autopay#faq",
+            },
+            {
+              type: "link",
+              label: "What's Next?",
+              href: "/business/autopay#whats-next",
+            },
+          ],
+        },
+        {
+          type: "category",
+          label: "Loyalty",
+          link: { type: "doc", id: "business/loyalty/index" },
+          items: [
+            {
+              type: "link",
+              label: "Why use Loyalty",
+              href: "/business/loyalty#why-use-loyalty",
+            },
+            {
+              type: "link",
+              label: "How it works",
+              href: "/business/loyalty#how-it-works",
+            },
+            {
+              type: "link",
+              label: "Supported providers",
+              href: "/business/loyalty#supported-providers",
+            },
+            {
+              type: "link",
+              label: "What the reward is calculated on",
+              href: "/business/loyalty#what-the-reward-is-calculated-on",
+            },
+            {
+              type: "link",
+              label: "Earning vs. redeeming",
+              href: "/business/loyalty#earning-vs-redeeming",
+            },
+            {
+              type: "link",
+              label: "When a payment earns no reward",
+              href: "/business/loyalty#when-no-reward",
+            },
+            {
+              type: "link",
+              label: "Refunding an order paid with points",
+              href: "/business/loyalty#refund-rules",
+            },
+            {
+              type: "link",
+              label: "Setting up Loyalty",
+              href: "/business/loyalty#setting-up-loyalty",
+            },
+            {
+              type: "link",
+              label: "Things to know",
+              href: "/business/loyalty#things-to-know",
+            },
+            {
+              type: "link",
+              label: "FAQ",
+              href: "/business/loyalty#faq",
+            },
+          ],
+        },
+        {
+          type: "category",
           label: "Plugins",
           link: { type: "doc", id: "business/plugins/index" },
           items: [
@@ -680,6 +1017,7 @@ const sidebars: SidebarsConfig = {
           items: [
             "business/operations/refund-void-access-control",
             "business/operations/two-step-authorization",
+            "business/operations/qitaf-points-refund",
           ],
         },
         "business/integrations",

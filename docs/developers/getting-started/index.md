@@ -64,8 +64,10 @@ curl -X POST https://<your-merchant>.ottu.dev/b/checkout/v1/pymt-txn/ \
 
 The response includes a `session_id` and `payment_url`. Open the `payment_url` to see Ottu's checkout page.
 
-:::tip
-Use the [Sandbox & Test Cards](../payments/sandbox.mdx) to simulate payments without processing real transactions.
+:::tip[Test without a real gateway]
+Once you have credentials you can run the whole flow end to end against the [Ottu Sandbox](../payments/ottu-sandbox.mdx) — a built-in simulated gateway where you pick the outcome (success, decline, error, refund, recurring charge) in advance, with no live gateway and no real money. Provision one with a single API call, then pass its `pg_code` like any other gateway.
+
+For test card numbers to use against *real* gateways' own sandboxes (KNET, MPGS, and others), see [Sandbox & Test Cards](../payments/sandbox.mdx).
 :::
 
 ## 5. Boost Your Integration {#boost-your-integration}

@@ -2,12 +2,20 @@ import type { ChangelogEntry } from "@site/src/components/Changelog";
 
 export const changelogEntries: ChangelogEntry[] = [
   {
+    date: "2026-09-15",
+    category: "api",
+    title: "Public key no longer accepted on User Cards, Payment Methods and auto-debit",
+    link: "/developers/getting-started/authentication/#public-key",
+    description:
+      "POST /b/pbl/v2/card/, DELETE /b/pbl/v2/card/{token}/, POST /b/pbl/v2/payment-methods/ and the auto-debit endpoints answer 401 to the public key; call them from your server with the private key. The Checkout SDK now deletes saved cards through a session-scoped route.",
+  },
+  {
     date: "2026-07-13",
     category: "payments",
     title: "OmanNet now supports Refund operations",
-    link: "/business/payments/gateways",
+    link: "/developers/operations",
     description:
-      "Merchants using the OmanNet gateway can now issue full or partial refunds on paid transactions — from the dashboard or via the Operations API.",
+      "Paid OmanNet transactions can now be refunded in full or in part through the Operations API.",
   },
   {
     date: "2026-03-16",
