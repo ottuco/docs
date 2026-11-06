@@ -532,3 +532,14 @@
     stroke-dasharray: none;
   }
 }
+
+/* A card that links somewhere (Flow cards with `href`). */
+.cardLink {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.cardLink:hover .node {
+  border-color: var(--o-primary);
+}

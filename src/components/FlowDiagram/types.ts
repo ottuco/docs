@@ -86,6 +86,8 @@ export type FlowCard = {
   tone?: Tone;
   /** Card width in px. Default 190. */
   width?: number;
+  /** Makes the card a link (internal path or #anchor). */
+  href?: string;
   /** Id of a FlowGroup this card sits inside. */
   parent?: string;
 };

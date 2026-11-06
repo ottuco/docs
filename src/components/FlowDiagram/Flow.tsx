@@ -63,6 +63,7 @@ export default function Flow(props: FlowProps): React.JSX.Element {
           icon: c.icon,
           tone: c.tone,
           width: c.width,
+          href: c.href,
         },
         // An unknown `parent` is ignored: the card is placed on its own, the
         // same way flowMinWidth and the arrow sides treat it.
