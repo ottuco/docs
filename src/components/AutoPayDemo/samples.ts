@@ -35,11 +35,11 @@ export const sampleWebhook = {
   },
   autopay: {
     subscription_id: SUB_ID,
-    subscription_status: "active",
-    cycle_number: 1,
-    cycle_status: "paid",
-    next_billing_date: "2026-12-06",
-    event_type: "cit_success",
+    subscription_status: "pending_setup",
+    cycle_number: null,
+    cycle_status: null,
+    next_billing_date: null,
+    event_type: null,
   },
 };
 

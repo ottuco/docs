@@ -145,7 +145,7 @@ flowchart TD
 
 Payments belonging to an [AutoPay](/developers/payments/autopay/) subscription may carry an additional `autopay` object. Note where it sits: at the **top level** of the payload, not inside `extra`.
 
-You receive it for the subscription's first payment only, the checkout session you created. Ottu charges renewals itself and sends no webhook to your `webhook_url` for them, so read renewal outcomes from the [subscription endpoints](/developers/payments/autopay/#api-reference).
+You receive it with the result of the subscription's first payment, the checkout session you created. For renewals, read the status from the API instead, in the [subscription endpoints](/developers/payments/autopay/#api-reference).
 
 ```json title="Payload excerpt — an AutoPay first payment"
 {
