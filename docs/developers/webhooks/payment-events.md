@@ -139,7 +139,7 @@ flowchart TD
 
 `extra` now always contains a `merchant_id` key holding your merchant domain, even when you sent no `extra` object when creating the session. Anything you did send in `extra` is preserved alongside it.
 
-`extra.merchant_id` is part of the [signed field set](/developers/webhooks/verify-signatures/#2-fields-for-signature), so it is covered by the `signature` and safe to trust once you have verified the payload. It is useful when one endpoint receives webhooks for several merchant accounts.
+`extra.merchant_id` is covered by the [`Ottu-Signature` header](/developers/webhooks/verify-signatures/#every-byte-is-signed), which signs every byte of the body, so it is safe to trust once you have verified that header. It is not one of the 18 fields of the legacy body `signature`. It is useful when one endpoint receives webhooks for several merchant accounts.
 
 ## The `autopay` block {#autopay-block}
 
@@ -181,11 +181,11 @@ The webhook usually arrives before Ottu has confirmed the payment, so the subscr
 | `next_billing_date` | Next scheduled billing date, or `null` when nothing further is scheduled. |
 | `event_type` | One of `cit_success`, `cit_failure`, `mit_success`, `mit_failure`, `card_updated`, or `null`. `null` means AutoPay could not yet tell whether the subscription's setup payment succeeded — it does **not** mean success. |
 
-:::danger The top-level `autopay` block is not signed — never trust it
+:::danger The top-level `autopay` block is informational — never trust it
 Two blocks carry a `subscription_id`, and only one of them is trustworthy.
 
-- **`extra.autopay.subscription_id` is signed.** It is inside the HMAC, so once you have [verified the signature](/developers/webhooks/verify-signatures/) you can rely on it. Use this one to identify the subscription.
-- **The top-level `autopay` block is not signed.** It is added *after* the signature is computed, so it is not covered by the HMAC at all. Treat it as a display convenience.
+- **`extra.autopay.subscription_id` is part of the payment record.** It is covered by the [`Ottu-Signature` header](/developers/webhooks/verify-signatures/#every-byte-is-signed), so once you have verified that header you can rely on it. Use this one to identify the subscription. (It is not one of the 18 fields of the legacy body `signature`.)
+- **The top-level `autopay` block is a best-effort lookup.** It is added *after* the legacy body `signature` is computed, so that signature does not cover it. The `Ottu-Signature` header signs the whole body, including this block, but that only proves Ottu sent it, not that the lookup was complete or current. Treat it as a display convenience.
 
 The top-level block is also fetched live from the AutoPay service while the webhook is being assembled, with a **2 second timeout**, and is **silently omitted** if that call times out or fails.
 
@@ -238,7 +238,7 @@ By understanding and interpreting these fields correctly, you can ensure accurat
 
 #### **6. Verifying the Signature**
 
-Every webhook payload includes a `signature` field — an HMAC-SHA256 hash that proves the payload came from Ottu and hasn’t been tampered with. **Always verify this signature before processing the payment.**
+Every webhook carries an `Ottu-Signature` header — an HMAC-SHA256 over a timestamp and the raw request body that proves the payload came from Ottu and hasn’t been tampered with. **Always verify this signature before processing the payment.** The `signature` field in the body is the legacy scheme, kept for existing integrations.
 
 For implementation details and code examples in Python, PHP, Node.js, Java, C#, Ruby, and Go, see [Verify Signatures](/developers/webhooks/verify-signatures/).
 

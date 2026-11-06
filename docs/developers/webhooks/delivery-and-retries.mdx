@@ -31,7 +31,7 @@ It applies to all three webhook formats, and says where [format 3](/developers/w
 A receiver that is safe against duplicates does four things, in this order: verify the signature, check the `Idempotency-Key`, process once, answer `2xx`.
 
 :::note These samples receive format 3
-They verify the `v2` signature and de-duplicate on the envelope's `id`, which a format 3 body carries. A format 1 or 2 body has no `id`: verify its `v1` as shown in [Verify Signatures](/developers/webhooks/verify-signatures#header-v1) and de-duplicate on the `Idempotency-Key` header instead (see [Idempotency-Key](#idempotency-key)).
+They verify the `v2` signature and de-duplicate on the envelope's `id`, which a format 3 body carries. A format 1 or 2 body has no `id`: verify its `Ottu-Signature` `v2` in exactly the same way (the header is the same on every format) and de-duplicate on the `Idempotency-Key` header instead (see [Idempotency-Key](#idempotency-key)).
 
 In the samples, `verify_ottu_signature` / `verifyOttuSignature` is the helper defined in [Verify Signatures](/developers/webhooks/verify-signatures#verify-v2), `HMAC_KEY` is your webhook's HMAC key, and `handle_event` / `handleEvent` is your own business logic.
 :::
@@ -187,7 +187,7 @@ For the payment's own `webhook_url` (the one the payer waits on), formats 1 and 
 | Header | Value |
 |---|---|
 | `Content-Type` | `application/json` (format 3 is always JSON; XML is a format 1 and 2 option) |
-| `Ottu-Signature` | `t=<unix seconds>,v2=<hex>` on format 3. Formats 1 and 2 send `v1` by default. See [Verify Signatures](/developers/webhooks/verify-signatures#ottu-signature-header). `t` is read fresh for every attempt. |
+| `Ottu-Signature` | `t=<unix seconds>,v2=<hex>` on every format. See [Verify Signatures](/developers/webhooks/verify-signatures#ottu-signature-header). `t` is read fresh for every attempt. |
 | `Idempotency-Key` | The event id, `evt_...`. See [below](#idempotency-key). |
 
 ### Same URL on a legacy route {#same-url}
@@ -226,7 +226,7 @@ Every delivery carries `Idempotency-Key: <event id>`, for example `Idempotency-K
 | A new state, a new attempt, or a second partial refund | No: it is a **new event** with a new id, so a new key |
 
 - **Format 3:** the header equals the envelope's `id`. Because the body is signed, the `id` inside it is authenticated; the header lets you check for a duplicate *before* parsing the body.
-- **Formats 1 and 2:** the body bytes are unchanged, so the event id is only available in the header. The header is **not covered by the `v1` signature**: treat it as a de-duplication hint. Replay of a captured request is limited by checking the `t` tolerance of `Ottu-Signature`.
+- **Formats 1 and 2:** the body bytes are unchanged, so the event id is only available in the header. The header is **not covered by the `Ottu-Signature` `v2` signature**, which signs the body only: treat it as a de-duplication hint. Replay of a captured request is limited by checking the `t` tolerance of `Ottu-Signature`.
 - A delivery whose event could not be recorded on formats 1 and 2 is sent **without** the header. It is never sent with an invented id, so make a missing header a case you handle (fall back to your business reference).
 
 **Receiver guidance:**

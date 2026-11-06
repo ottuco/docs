@@ -114,7 +114,7 @@ By accurately interpreting these fields and states, you can ensure precise ackno
 
 7. **Verifying the Signature**
 
-Every operation webhook payload includes a `signature` field — an HMAC-SHA256 hash that proves the payload came from Ottu. **Always verify this signature before processing the operation result.**
+Every operation webhook carries an `Ottu-Signature` header — an HMAC-SHA256 over a timestamp and the raw request body that proves the payload came from Ottu. **Always verify this signature before processing the operation result.** The `signature` field in the body is the legacy scheme, kept for existing integrations.
 
 For implementation details and code examples, see [Verify Signatures](/developers/webhooks/verify-signatures/).
 

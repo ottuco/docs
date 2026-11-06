@@ -121,7 +121,7 @@ All the fields mentioned below come with default values to ensure a smooth integ
     4. If you’re still facing issues, reach out to our support team for assistance.
   </FAQItem>
   <FAQItem question="How can I ensure the webhook notifications I receive are genuinely from Ottu?">
-    Ottu signs every webhook with the `Ottu-Signature` header: `v2` (HMAC-SHA256 over the raw body) on format 3, `v1` by default on formats 1 and 2, plus the `signature` field in the body of formats 1 and 2. See the [signing mechanism](/developers/webhooks/verify-signatures#ottu-signature-header). By verifying the signature attached to each payload, you can ensure its authenticity and integrity. Detailed steps on how to verify the signature can be found [here](/developers/webhooks/verify-signatures#4-verification-by-merchant).
+    Ottu signs every webhook, on every format, with the `Ottu-Signature` header: `v2`, an HMAC-SHA256 over a timestamp and the raw request body. Formats 1 and 2 also still carry the legacy `signature` field in the body, which new integrations should not rely on. See the [signing mechanism](/developers/webhooks/verify-signatures#ottu-signature-header). By verifying the signature attached to each payload, you can ensure its authenticity and integrity. Detailed steps on how to verify the signature can be found [here](/developers/webhooks/verify-signatures#verify-v2).
   </FAQItem>
   <FAQItem question="What should I do if I receive the same webhook notification multiple times?">
     Webhooks can be retried, especially in cases of timeouts. It’s essential to make your webhook processing idempotent, meaning processing the same webhook notification more than once should not have a different effect. Always check the event ID (the [`Idempotency-Key`](./delivery-and-retries.mdx#idempotency-key) header) and the transaction `reference_number` to ensure you’re not processing duplicates.
@@ -138,4 +138,4 @@ All the fields mentioned below come with default values to ensure a smooth integ
 - [**Webhook Events (v3)**](./event-catalogue.mdx): the envelope and every event type
 - [**Delivery and Retries**](./delivery-and-retries.mdx): success rules, retry schedule, `Idempotency-Key`
 - [**Migrating to v3**](./migrate-to-v3.md): move from format 1 or 2
-- [**Verify Signatures**](./verify-signatures.md): `Ottu-Signature` v1 and v2
+- [**Verify Signatures**](./verify-signatures.md): the `Ottu-Signature` header (`v2`) and the legacy body signature
