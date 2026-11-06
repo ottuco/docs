@@ -23,6 +23,8 @@ export const STORY_JOURNEYS_H = 40;
  * text scrolls inside it. */
 export const STORY_PANEL_H = 128;
 export const STORY_PANEL_GAP = 12;
+/** Width of the caption column when it sits beside the diagram (keep in sync with `.storyWrapSide > .panel`). */
+export const PANEL_W = 300;
 
 export const hasJourneys = (p: StoryProps): boolean =>
   (p.journeys?.length ?? 0) > 0;
@@ -45,6 +47,13 @@ export const storyFigureHeight = (p: StoryProps): number =>
   STORY_HEADER_H +
   storyBodyHeight(p) +
   (hasJourneys(p) ? STORY_JOURNEYS_H + STORY_PANEL_GAP + STORY_PANEL_H : 0);
+/** The figure without the caption panel under it (what a placeholder shows
+ * before the browser knows whether the panel sits beside or below). */
+export const storyDiagramHeight = (p: StoryProps): number =>
+  storyFigureHeight(p) - (hasJourneys(p) ? STORY_PANEL_GAP + STORY_PANEL_H : 0);
+/** Container width from which the caption sits beside the diagram. */
+export const storySideAt = (p: StoryProps): number =>
+  storyMinWidth(p) + PANEL_W + STORY_PANEL_GAP;
 export const storyMinWidth = (p: StoryProps): number =>
   Math.round(p.lanes.length * storyGap(p.lanes.length) * 0.95);
 

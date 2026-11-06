@@ -47,7 +47,7 @@ export default function StoryPanel(p: Props): React.JSX.Element {
         {step.detail ? <p>{step.detail}</p> : null}
       </>
     );
-  } else if (actor) {
+  } else if (actor && (actor.about?.does || actor.about?.relies)) {
     text = (
       <>
         <div className={styles.panelEyebrow}>{actor.title}</div>

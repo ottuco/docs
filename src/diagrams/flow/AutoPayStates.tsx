@@ -40,7 +40,7 @@ const arrows: FlowArrow[] = [
     to: "trial",
     fromSide: "top",
     toSide: "left",
-    label: "paid 0",
+    label: "free trial",
   },
   {
     from: "trial",
