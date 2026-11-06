@@ -138,7 +138,7 @@ const TEXT: Record<Audience, Record<Id, Info>> = {
     failed: {
       text: "The customer canceled the checkout, did not pay within 24 hours, or paid but the card could not be saved. Ottu does not retry it.",
       label: "Your part",
-      todo: "create a new subscription.",
+      todo: "create a new subscription. If the customer paid, refund that payment in Payment Management. Ottu does not refund it automatically.",
     },
   },
   developer: {
@@ -176,9 +176,9 @@ const TEXT: Record<Audience, Record<Id, Info>> = {
       todo: "end access, or create a new subscription to continue.",
     },
     failed: {
-      text: "The first payment did not complete: the customer canceled the checkout, the card was not saved, or 24 hours passed without payment.",
+      text: "The customer canceled the checkout, 24 hours passed without payment, or the first payment succeeded but the card was not saved.",
       label: "What to do",
-      todo: "create a new subscription. Ottu does not retry it.",
+      todo: "create a new subscription. Ottu does not retry it. If the first payment succeeded, refund it. Ottu does not refund it automatically.",
     },
   },
 };

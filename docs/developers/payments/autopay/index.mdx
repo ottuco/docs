@@ -118,7 +118,7 @@ Terminal. The last billing cycle was paid and the next one would fall after the 
 
 ##### `setup_failed` {#state-setup-failed}
 
-The first payment did not complete: the customer canceled the checkout, the card was not saved, or 24 hours passed without payment. **What to do:** create a new subscription. Ottu does not retry it.
+The customer canceled the checkout, 24 hours passed without payment, or the first payment succeeded but the card was not saved. **What to do:** create a new subscription. Ottu does not retry it. If the first payment succeeded, refund it. Ottu does not refund it automatically.
 
 See [Lifecycle and billing cycles](/business/autopay/#lifecycle-and-billing-cycles) for the business view.
 
