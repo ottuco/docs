@@ -298,15 +298,6 @@ function enrichOperations(
       const { operation } = found;
       let description = operation.description || "";
 
-      // Generate and append permissions table
-      if (enrichment.permissions && enrichment.permissions.length > 0) {
-        const table = generatePermissionsTable(
-          enrichment.permissions,
-          permissionsMap
-        );
-        description += table;
-      }
-
       // Apply description modifications
       if (enrichment.description_replace !== undefined) {
         description = enrichment.description_replace;
@@ -316,6 +307,14 @@ function enrichOperations(
       }
       if (enrichment.description_append) {
         description += "\n" + enrichment.description_append;
+      }
+
+      // Append the permissions table last, so a description_replace keeps it
+      if (enrichment.permissions && enrichment.permissions.length > 0) {
+        description += generatePermissionsTable(
+          enrichment.permissions,
+          permissionsMap
+        );
       }
 
       operation.description = description;
