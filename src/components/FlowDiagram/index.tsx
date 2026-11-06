@@ -40,7 +40,7 @@ function ScrollHint({
       if (!box) return setOverflow(false);
       ro.observe(box);
       if (box.firstElementChild) ro.observe(box.firstElementChild);
-      setOverflow(box.scrollWidth > box.clientWidth + 1);
+      setOverflow(box.scrollWidth > box.clientWidth + 16);
     };
     const mo = new MutationObserver(check);
     mo.observe(fig, { childList: true, subtree: true });

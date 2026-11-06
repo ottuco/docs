@@ -481,6 +481,11 @@
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
+  scrollbar-color: var(--ifm-color-emphasis-400) transparent;
+}
+
+:global(html[data-theme="dark"]) .scroller {
+  color-scheme: dark;
 }
 
 /* A visible scrollbar (not the hidden overlay kind), so a cut-off diagram
