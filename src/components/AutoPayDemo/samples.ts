@@ -10,10 +10,37 @@ export const sampleCreateResponse = {
   extra: { autopay: { subscription_id: SUB_ID } },
 };
 
+// Shape from docs/developers/webhooks/payment-events.md (formats 1 and 2; that page is the one for the flat payload,
+// format 3 wraps it as data.payment). The top-level `autopay` block is the webhook-context from that page. Values are samples.
 export const sampleWebhook = {
+  amount: "9.900",
+  currency_code: "KWD",
+  customer_email: "demo@example.com",
+  customer_first_name: "Demo",
+  customer_id: "cust_sample",
+  gateway_account: "Credit-Card",
+  is_sandbox: true,
+  order_no: "demo-order-1001",
+  paid_amount: "9.900",
+  payment_type: "auto_pay",
+  reference_number: "sample-ref-0001",
+  result: "success",
   session_id: SESSION_ID,
   state: "paid",
-  extra: { autopay: { subscription_id: SUB_ID } },
+  signature: "60bf40cf******",
+  timestamp_utc: "2026-11-06 10:02:07",
+  extra: {
+    merchant_id: "ksa.ottu.dev",
+    autopay: { subscription_id: SUB_ID },
+  },
+  autopay: {
+    subscription_id: SUB_ID,
+    subscription_status: "active",
+    cycle_number: 1,
+    cycle_status: "paid",
+    next_billing_date: "2026-12-06",
+    event_type: "cit_success",
+  },
 };
 
 export const sampleSubscription = {
