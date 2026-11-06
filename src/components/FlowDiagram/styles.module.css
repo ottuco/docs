@@ -412,13 +412,11 @@
    ones. It never overlaps the diagram. */
 .panel {
   position: relative;
-  height: 128px;
-  /* Height is fixed (128px, see .panel): short content sits centred,
-     long content scrolls. `safe` keeps the top reachable when it overflows. */
+  min-height: 128px;
+  /* At least 128px (no page jump for short text); longer text grows the panel. */
   display: flex;
   flex-direction: column;
-  justify-content: safe center;
-  overflow-y: auto;
+  justify-content: center;
   padding: 10px 14px;
   border: 1px solid var(--ifm-color-emphasis-200);
   border-radius: 10px;
@@ -584,9 +582,6 @@
   top: calc(var(--ifm-navbar-height, 60px) + 16px);
   flex: none;
   width: 300px;
-  height: auto !important;
-  min-height: 128px;
-  max-height: calc(100vh - var(--ifm-navbar-height, 60px) - 40px);
 }
 
 /* React Flow's attribution badge: keep it, but theme it (it was a grey block in dark mode). */

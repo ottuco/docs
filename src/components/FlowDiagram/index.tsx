@@ -34,7 +34,12 @@ function ScrollHint({
     if (!fig) return;
     // The diagram mounts after hydration, so look again whenever the figure
     // changes or resizes.
-    const ro = new ResizeObserver(() => check());
+    let raf = 0;
+    const later = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(check);
+    };
+    const ro = new ResizeObserver(later);
     const check = () => {
       const box = fig.querySelector<HTMLElement>(`.${styles.scroller}`);
       if (!box) return setOverflow(false);
@@ -42,11 +47,12 @@ function ScrollHint({
       if (box.firstElementChild) ro.observe(box.firstElementChild);
       setOverflow(box.scrollWidth > box.clientWidth + 16);
     };
-    const mo = new MutationObserver(check);
+    const mo = new MutationObserver(later);
     mo.observe(fig, { childList: true, subtree: true });
     ro.observe(fig);
     check();
     return () => {
+      cancelAnimationFrame(raf);
       ro.disconnect();
       mo.disconnect();
     };
