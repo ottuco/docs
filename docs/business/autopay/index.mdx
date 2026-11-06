@@ -287,13 +287,15 @@ This is the full list. Each limit comes with what to do instead.
 
 - **API-only.** There is no AutoPay screen in the dashboard. *Instead:* ask your developer to integrate it, and try the [live demo](/developers/payments/autopay/#live-demo).
 - **Renewals need a gateway with auto-debit.** *Instead:* pick a gateway from the [filtered catalog](/business/payments/gateways/?features=autodebit).
-- **Monthly or yearly only.** *Instead:* pick the closer of the two.
-- **A running subscription cannot be edited.** Amount, frequency, billing day, retry count, and customer email are fixed. *Instead:* cancel it and create a new one.
-- **No pause.** *Instead:* cancel at the end of the paid period, then create a new subscription when the customer returns.
-- **Emails switch off only at creation,** and only the three billing-cycle emails. *Instead:* decide when your developer creates the subscription.
+- **Monthly or yearly only.** There is no weekly or custom period. *Instead:* pick the closer of the two.
+- **A running subscription cannot be edited.** Amount, frequency, billing day, retry count, language, email settings, plan name, end date, and customer email are fixed. There is no proration. *Instead:* cancel it and create a new one.
+- **Retries are set once.** Your developer picks 1 to 10 retries when the subscription is created (3 by default). Ottu runs them about an hour apart. *Instead:* choose the retry count up front.
+- **No pause.** *Instead:* cancel at the end of the paid period, then create a new subscription when the customer returns. This works while the subscription is Active or Trialing and no charge is in progress.
+- **Some messages cannot be switched off.** The subscription created, setup completed, and link replaced messages always go out. Only the three billing-cycle emails can be switched off, and only at creation. *Instead:* decide on them when your developer creates the subscription.
 - **You cannot pick the exact charge time.** *Instead:* choose the start date. It sets the billing day.
+- **Canceling does not refund.** A cancellation stops future charges only. *Instead:* refund the cycle's transaction in [Payment Management](/business/payment-management/).
 - **No dashboard list of subscriptions.** *Instead:* your developer [lists them through the API](/developers/payments/autopay/#api-reference), filtered by status, for example Past Due.
-- **Your team cannot undo a pending cancellation.** *Instead:* send your customer their page link. They can undo it there.
+- **Your team cannot undo a pending cancellation.** *Instead:* send your customer their page link. They can undo it there until the paid period ends.
 
 ## FAQ {#faq}
 
