@@ -145,7 +145,7 @@ flowchart TD
 
 Payments belonging to an [AutoPay](/developers/payments/autopay/) subscription may carry an additional `autopay` object. Note where it sits: at the **top level** of the payload, not inside `extra`.
 
-You receive it with the result of the subscription's first payment, the checkout session you created. For renewals, read the status from the API instead, in the [subscription endpoints](/developers/payments/autopay/#api-reference).
+You receive it for the subscription's first payment only, the checkout session you created. Ottu charges renewals itself and sends no webhook to your `webhook_url` for them, so read renewal outcomes from the [subscription endpoints](/developers/payments/autopay/#api-reference).
 
 ```json title="Payload excerpt — an AutoPay first payment"
 {
@@ -248,7 +248,7 @@ Never process a payment webhook without verifying the signature. An unverified p
 
 #### **7. Using PG Params**
 
-The `pg_params` object contains normalized payment gateway response fields. Instead of parsing the raw `gateway_response` (which varies by gateway), use `pg_params` for consistent field access across all 60+ gateways.
+The `pg_params` object contains normalized payment gateway response fields. Instead of parsing the raw `gateway_response` (which varies by gateway), use `pg_params` for consistent field access across all 45+ gateways.
 
 For the complete searchable reference of all fields, see [**PG Params**](/developers/webhooks/pg-params/).
 
