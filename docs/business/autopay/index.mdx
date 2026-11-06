@@ -15,9 +15,9 @@ import AutoPayStates from "@site/src/diagrams/flow/AutoPayStates";
 
 # AutoPay
 
-Sell by subscription and let Ottu do the billing work. With AutoPay, your developer makes one checkout call. After that, Ottu generates every [billing cycle](/glossary/#term-billing-cycle), charges the saved card, retries failed charges, emails your customer, and hosts a page where they manage their own [subscription](/glossary/#term-subscription).
+Sell by subscription and let Ottu do the billing work. Your developer makes one checkout call. Ottu then generates every [billing cycle](/glossary/#term-billing-cycle), charges the saved card, retries failed charges, emails your customer, and hosts a page where they manage their own [subscription](/glossary/#term-subscription).
 
-[**See it live**](/developers/payments/autopay/#live-demo): the live demo creates a test subscription and takes its first payment on Ottu's sandbox.
+[**See it live**](/developers/payments/autopay/#live-demo): try the demo. It creates a test subscription on Ottu's sandbox.
 
 ## Why use AutoPay {#why-use-autopay}
 
@@ -27,13 +27,12 @@ Sell by subscription and let Ottu do the billing work. With AutoPay, your develo
 - **A free first period** if you want to offer a trial.
 
 :::info Before you start
-- **API-only and needs a gateway with auto-debit.** See [Limits](#limits) for what to do instead.
-- Check the [gateways with auto-debit](/business/payments/gateways/?features=autodebit).
+Your developer connects AutoPay through the API, on a [gateway with auto-debit](/business/payments/gateways/?features=autodebit). The full list is in [Limits](#limits).
 :::
 
 ## How it works {#how-it-works}
 
-Ottu does the middle of the story. Click a step to see your part. Building the integration? See [AutoPay for developers](/developers/payments/autopay/).
+Your team starts it, your customer pays once, and Ottu runs everything after. Click a step to see who does what. Building the integration? See [AutoPay for developers](/developers/payments/autopay/).
 
 <AutoPayBusinessStory />
 
@@ -64,12 +63,12 @@ Billing normally. The latest cycle was paid. Your part: give your customer the s
 Every retry on a cycle failed. Ottu emails the customer a link to pay. When they pay, the subscription returns to Active. Your part: decide what to do if it stays Past Due.
 
 :::warning Ottu never cancels a Past Due subscription on its own
-It stays Past Due until the customer pays or your team cancels it. Build your own process for subscriptions that stay Past Due longer than you are comfortable with. A Past Due customer cannot cancel until they pay the balance.
+It stays Past Due until the customer pays or your team cancels it. You decide how long a Past Due customer keeps access. Your developer can list Past Due subscriptions through the API. A Past Due customer cannot cancel until they pay the balance.
 :::
 
 ### Canceled {#state-canceled}
 
-Billing has stopped. A cancellation from your customer lands here at the end of the paid period. Your team's immediate cancel lands here at once. Your part: nothing.
+Billing has stopped. A cancellation set for the end of the period, by your customer or your team, lands here when that period ends. An immediate cancel by your team lands here at once. Your part: nothing.
 
 ### Expired {#state-expired}
 
@@ -77,7 +76,7 @@ The last cycle was paid and the next billing date would fall after the end date.
 
 ### Setup Failed {#state-setup-failed}
 
-The customer canceled the checkout, or did not pay within 24 hours. Ottu does not retry it. Your part: create a new subscription.
+The customer canceled the checkout, did not pay within 24 hours, or paid but the card could not be saved. Ottu does not retry it. Your part: create a new subscription.
 
 ### Billing cycles {#billing-cycles}
 
@@ -89,7 +88,7 @@ Past cycles stay a reliable record of what Ottu charged.
 
 ### Anchor days {#anchor-days}
 
-Every subscription bills on the same day of the month, called its anchor day. The start date sets it. A subscription anchored on the 29th, 30th, or 31st moves to the last day of a shorter month, then returns to its anchor day.
+Every subscription bills on the same day, called its anchor day. The start date sets it. A subscription anchored on the 29th, 30th, or 31st moves to the last day of a shorter month, then returns to its anchor day.
 
 **Anchored on the 31st:** Jan 31 → Feb 28 (Feb 29 in a leap year) → Mar 31
 
@@ -99,16 +98,21 @@ Your customer gets emails, text messages, and one private page. Ottu sends and h
 
 ### The emails and texts {#the-emails}
 
-Ottu sends 6 emails and 3 texts, in English or Arabic, chosen when the subscription is created. Texts go to the customer's phone number when one is on file. Each message is below: when it goes out, and whether you can switch it off.
+Ottu sends 6 emails and 3 texts, in English or Arabic, chosen when the subscription is created. Texts go to the customer's phone number when one is on file. Each message is below, with when it goes out.
 
-- **Subscription created** (email + text). At once, when Ottu creates the subscription. Carries the first-payment link. Switch off: no.
-- **Setup completed** (email + text). Once, when the subscription leaves Pending setup. Switch off: no.
-- **Upcoming charge** (email). Monthly: 3 days before the charge. Yearly: 31, 11, and 4 days before. Skipped if a cancellation is pending. Switch off: yes, at creation.
-- **Payment failed** (email). After each failed attempt while retries remain. Switch off: yes, at creation.
-- **Final failure** (email). About 15 seconds after the last attempt fails. Switch off: yes, at creation.
-- **Link replaced** (email + text). Each time your team regenerates the customer's page link. Switch off: no.
+**Always sent.** You cannot switch these off:
 
-The Final failure email may talk about suspended access. That describes your product, not Ottu. Any decision about your customer's access is yours. See [Past Due](#state-past-due).
+- **Subscription created** (email + text). At once, when Ottu creates the subscription. Carries the first-payment link.
+- **Setup completed** (email + text). Once, when the subscription leaves Pending setup.
+- **Link replaced** (email + text). Each time your team regenerates the customer's page link.
+
+**On by default.** You can switch these off, but only when the subscription is created:
+
+- **Upcoming charge** (email). Monthly: 3 days before the charge. Yearly: 31, 11, and 4 days before. Skipped if a cancellation is pending.
+- **Payment failed** (email). After each failed attempt while retries remain.
+- **Final failure** (email). About 15 seconds after the last attempt fails.
+
+The Final failure email asks the customer to pay "to avoid suspension". Ottu never suspends anything. Whether your customer keeps access is your decision. See [Past Due](#state-past-due).
 
 
 <details>
@@ -171,7 +175,7 @@ The Final failure email may talk about suspended access. That describes your pro
 
 ### The self-service page {#the-self-service-page}
 
-Every subscription gets its own private page, reached through a private link. Treat it like a password: anyone holding the link can open the page. The link is in every email Ottu sends. Ottu hosts the page, keeps it in sync with the subscription, and shows it in English and Arabic.
+Every subscription gets its own private page, hosted by Ottu and shown in English and Arabic. Ottu keeps it in sync with the subscription. The link is in every email Ottu sends. Treat it like a password: anyone holding the link can open the page.
 
 From this page, a customer can:
 
@@ -254,10 +258,10 @@ And these are the actions a customer can take:
 :::note A customer's cancellation waits for the end of the paid period
 It never takes effect immediately. Only your team can cancel immediately, through the API. Undo is available while the subscription is Active or Trialing and the cancellation is pending.
 
-A Past Due customer cannot cancel. Ottu refuses the request until they pay the balance.
+Ottu refuses a cancel request from a Past Due customer until they pay. See [Past Due](#state-past-due).
 :::
 
-Customers can hold several cards and switch the active one in a click. Switching to a new card keeps the old card, so an old card still explains what paid an earlier cycle.
+Customers can hold several cards and switch the active one in a click. Old cards stay on file, so the history always shows which card paid each cycle.
 
 <a id="regenerate-link"></a>
 
@@ -279,17 +283,17 @@ Your developers call the API to create, look up, and cancel subscriptions. Befor
 1. **AutoPay enabled for your account.** Ask Ottu support to turn it on.
 2. **A support email.** It appears on the customer's page and in the footer of every email Ottu sends.
 3. **A privacy policy URL.** It is linked from the footer of every email Ottu sends.
-4. **A payment gateway with auto-debit,** in the currency you bill in. See [Limits](#limits).
+4. **A payment gateway with auto-debit,** in the currency you bill in.
 5. **The email and text templates registered,** in English and Arabic: 6 emails and 3 text messages. Ottu support sets these up, the same way [notification templates](/business/notifications/) work for one-off payments.
 
-AutoPay subscriptions have no plan catalog. The plan name is a free-text label, and the price is the amount your team passes in the checkout call that creates the subscription. The [developer docs](/developers/payments/autopay/#api-reference) show the request shape.
+There is no catalog to maintain. Your team sets the plan name and price in each checkout call. The [developer docs](/developers/payments/autopay/#api-reference) show the request shape.
 
 ## Limits {#limits}
 
 This is the full list. Each limit comes with what to do instead.
 
 - **API-only.** There is no AutoPay screen in the dashboard. *Instead:* ask your developer to integrate it, and try the [live demo](/developers/payments/autopay/#live-demo).
-- **Renewals need a gateway with auto-debit.** The limit is on the payment gateway, not on the card. *Instead:* pick a gateway from the [filtered catalog](/business/payments/gateways/?features=autodebit).
+- **Renewals need a gateway with auto-debit.** *Instead:* pick a gateway from the [filtered catalog](/business/payments/gateways/?features=autodebit).
 - **Monthly or yearly only.** *Instead:* pick the closer of the two.
 - **A running subscription cannot be edited.** Amount, frequency, billing day, retry count, and customer email are fixed. *Instead:* cancel it and create a new one.
 - **No pause.** *Instead:* cancel at the end of the paid period, then create a new subscription when the customer returns.
@@ -302,7 +306,7 @@ This is the full list. Each limit comes with what to do instead.
 
 <FAQ>
   <FAQItem question="Can I cancel a customer's subscription immediately?">
-    Yes, but only your team can, through the API. A cancellation the customer starts always waits for the end of their paid period. A Past Due customer cannot cancel until they pay. See [Past Due](#state-past-due).
+    Yes, but only your team can, through the API. A cancellation the customer starts always waits for the end of their paid period. See also [Past Due](#state-past-due).
   </FAQItem>
   <FAQItem question="Can I change the price of a subscription that's already running?">
     No. Cancel it and create a new one. See [Limits](#limits).
@@ -311,7 +315,7 @@ This is the full list. Each limit comes with what to do instead.
     No. See [Limits](#limits) for what to do instead.
   </FAQItem>
   <FAQItem question="Which payment gateways and currencies does AutoPay support?">
-    Ottu charges the saved card through a gateway with auto-debit, in the currency of the subscription. The [gateway catalog, filtered to auto-debit](/business/payments/gateways/?features=autodebit), lists the gateways and the currencies of each.
+    See the [gateway catalog, filtered to auto-debit](/business/payments/gateways/?features=autodebit). It lists the gateways and the currencies of each.
   </FAQItem>
   <FAQItem question="Where do I see AutoPay payments?">
     Each billing cycle is one Ottu transaction in [Payment Management](/business/payment-management/), and all retries of that cycle are on it. The first payment is the transaction from your own checkout.
@@ -320,7 +324,7 @@ This is the full list. Each limit comes with what to do instead.
     Find the cycle's transaction in [Payment Management](/business/payment-management/) and refund it, in full or in part. A refund doesn't cancel the subscription. Cancel it separately if the customer is leaving.
   </FAQItem>
   <FAQItem question="What happens when my customer's card expires?">
-    The charge fails like any other declined card. Ottu retries and emails the customer. If every attempt fails, the subscription moves to Past Due. The customer can add a new card and pay from their self-service page.
+    The charge fails like any other declined card. Ottu retries and emails the customer. If every attempt fails, the subscription moves to [Past Due](#state-past-due). The customer can add a new card and pay from their self-service page.
   </FAQItem>
   <FAQItem question="Can a customer have more than one card on file?">
     Yes. They can switch the active card from their self-service page at any time.

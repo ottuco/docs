@@ -6,9 +6,17 @@
 // browser. The server build renders a box of the same height (no layout jump)
 // plus a visually hidden text version of the diagram, so search, the MCP
 // server and screen readers still get the content.
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import BrowserOnly from "@docusaurus/BrowserOnly";
-import { flowHeight, sequenceHeight, storyFigureHeight } from "./layout";
+import {
+  STORY_PANEL_GAP,
+  STORY_PANEL_H,
+  flowHeight,
+  hasJourneys,
+  sequenceHeight,
+  storyDiagramHeight,
+  storySideAt,
+} from "./layout";
 import type { FlowProps, SequenceProps, StoryProps } from "./types";
 import styles from "./styles.module.css";
 
@@ -55,12 +63,18 @@ function Shell({
   height,
   text,
   render,
+  reserve,
 }: {
   title: string;
   height: number;
   text: React.ReactNode;
   render: () => React.ReactNode;
+  /** Room for the caption panel under the diagram, until the container is
+   * `sideAt` wide (then it sits beside it). Pure CSS, so the server render and
+   * the first client render agree with the final layout. */
+  reserve?: { height: number; sideAt: number };
 }): React.JSX.Element {
+  const id = `fdr${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   const figure = useRef<HTMLElement>(null);
   return (
     <figure className={styles.figure} ref={figure}>
@@ -73,7 +87,17 @@ function Shell({
         {text}
       </figcaption>
       <BrowserOnly
-        fallback={<div className={styles.placeholder} style={{ height }} />}
+        fallback={
+          <>
+            <div className={styles.placeholder} style={{ height }} />
+            {reserve ? (
+              <>
+                <style>{`@container (min-width: ${reserve.sideAt}px) { #${id} { display: none; } }`}</style>
+                <div id={id} style={{ height: reserve.height }} />
+              </>
+            ) : null}
+          </>
+        }
       >
         {render}
       </BrowserOnly>
@@ -113,7 +137,15 @@ export function StoryDiagram(input: StoryProps): React.JSX.Element {
   return (
     <Shell
       title={props.title}
-      height={storyFigureHeight(props)}
+      height={storyDiagramHeight(props)}
+      reserve={
+        hasJourneys(props)
+          ? {
+              height: STORY_PANEL_GAP + STORY_PANEL_H,
+              sideAt: storySideAt(props),
+            }
+          : undefined
+      }
       text={
         <>
           <ol>
