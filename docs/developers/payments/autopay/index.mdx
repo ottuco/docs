@@ -57,11 +57,7 @@ Create the subscription with one [Checkout API](../checkout-api) call. Ottu send
 
 ### Live Demo {#live-demo}
 
-Run the whole journey against the sandbox: create a subscription, pay its first charge with a test card, receive the webhook, and read the subscription and the customer's page link. Each step shows the real request and response. No real money moves.
-
-:::note Sandbox timing
-You cannot trigger a renewal early on the sandbox. The first renewal is charged one billing period after `start_date`, so the demo ends after the first charge.
-:::
+Run the whole journey against the sandbox: create a subscription, pay its first charge with a test card, receive the webhook, and read the subscription and the customer's page link. Each step shows the real request and response. No real money moves. You cannot trigger a renewal early on the sandbox: the first renewal is charged one billing period after `start_date`, so the demo ends after the first charge.
 
 <AutoPayDemo />
 
@@ -73,7 +69,7 @@ Your customer meets AutoPay in three places. See [What your customer sees](/busi
 
 ### Use Cases
 
-Here is what you build on, and what Ottu does for you, after the first payment. The business page covers the same ground without the API detail.
+After the first payment, Ottu runs the subscription. These are the behaviours you can rely on.
 
 #### First payment and activation {#first-payment-and-activation}
 
@@ -81,10 +77,9 @@ The first payment is a **CIT** (customer-initiated transaction): your customer p
 
 **Activation can lag the payment.** Your customer can pay while the subscription still shows `pending_setup`. Ottu activates the subscription when the payment event arrives. If that event is missed, a check starts 20 minutes after you create the subscription and repeats every 15 minutes. So activation takes up to about 35 minutes after creation. Until then:
 
-- `status` is `pending_setup`.
-- Your checkout webhook arrives in that state. Treat it as "payment received, activation pending", not as a failure.
-- Do not hard-code a wait. [Retrieve](/developers/payments/autopay/?autopay-api=retrieve#api-reference) the subscription and poll until `status` leaves `pending_setup`. Do not grant access from the webhook's `autopay` block alone: read `status` from the API.
-- If a subscription is still `pending_setup` well after a successful payment, contact Ottu support with the subscription ID.
+- `status` is `pending_setup`, and your checkout webhook arrives in that state. Treat it as "payment received, activation pending", not as a failure.
+- Do not hard-code a wait. [Retrieve](/developers/payments/autopay/?autopay-api=retrieve#api-reference) the subscription and poll until `status` leaves `pending_setup`. Do not grant access from the webhook's `autopay` block alone.
+- If it is still `pending_setup` well after a successful payment, contact Ottu support with the subscription ID.
 
 :::warning The first charge amount decides the start state
 A first charge above `0` makes the subscription `active`. A first charge of `0.000` makes it `trialing`. See [Free trials](#free-trials).
@@ -96,7 +91,9 @@ If the first payment succeeds but Ottu has no saved card for it, the subscriptio
 
 #### Subscription States {#subscription-states}
 
-A subscription is always in exactly one of seven states. Each state has its own link.
+A subscription is always in one of seven states. Click a state in the diagram, or read the list below it.
+
+<AutoPayStates audience="developer" />
 
 ##### `pending_setup` {#state-pending-setup}
 
@@ -108,7 +105,7 @@ The first payment settled with a `0.000` amount. No money moved, but the schedul
 
 ##### `active` {#state-active}
 
-Billing normally. A nonzero first charge makes a subscription `active`. **What to do:** grant access. Nothing else is needed.
+Billing normally. **What to do:** grant access. Nothing else is needed.
 
 ##### `past_due` {#state-past-due}
 
@@ -126,13 +123,11 @@ Terminal. The last billing cycle was paid and the next one would fall after the 
 
 The first payment did not complete: the customer canceled the checkout, the card was not saved, or 24 hours passed without payment. **What to do:** create a new subscription. Ottu does not retry it.
 
-<AutoPayStates audience="developer" />
-
 See [Lifecycle and billing cycles](/business/autopay/#lifecycle-and-billing-cycles) for the business view.
 
 #### Free trials {#free-trials}
 
-Send a checkout `amount` of `0.000` to start with a free period. Ottu starts the subscription in `trialing`, not `active`. Your customer pays nothing, Ottu only saves the card, and the subscription starts in `trialing`. The first real charge comes one period after `start_date`.
+Send a checkout `amount` of `0.000` to start with a free period. Your customer pays nothing, Ottu only saves the card, and the subscription starts in `trialing`, not `active`. The first real charge comes one period after `start_date`.
 
 #### Billing Cycles {#billing-cycles}
 

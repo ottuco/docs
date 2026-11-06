@@ -354,9 +354,8 @@ export default function AutoPayDemoInner() {
         if (state.sample) {
           return (
             <>
-              {sampleNote}
               <p className={styles.cardDescription}>
-                Your customer opens Ottu's checkout page, enters a card and pays the first charge. See{" "}
+                <strong>What happens here.</strong> Your customer opens Ottu's checkout page, enters a card and pays the first charge. Ottu then sends the webhook in the next step. See{" "}
                 <a href="#what-your-customer-sees">what your customer sees</a>.
               </p>
               {state.step === 2 && <div className={styles.actions}>{next(3)}</div>}
@@ -501,7 +500,7 @@ export default function AutoPayDemoInner() {
                 )}
               </p>
             )}
-            {state.cancelRes && sampleNote}
+            {sampleNote}
             {state.cancelReq && (
               <ApiPanel label={`POST ${SUBSCRIPTIONS}/${state.subscriptionId}/cancel/`} data={state.cancelReq} />
             )}
