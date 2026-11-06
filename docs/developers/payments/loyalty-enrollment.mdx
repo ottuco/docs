@@ -3,6 +3,7 @@ title: Loyalty Enrollment
 description: A server-to-server endpoint for a partner bank to push a loyalty-program cardholder enrollment event to Ottu — received and acknowledged, never charged.
 toc_min_heading_level: 2
 toc_max_heading_level: 3
+hide_table_of_contents: true
 ---
 
 import Tabs from "@theme/Tabs";
@@ -14,9 +15,38 @@ import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
 The **Loyalty Enrollment API** lets an issuing bank push a cardholder enrollment event to Ottu — for example, when a customer is enrolled in a co-branded card programme and granted a welcome reward. Ottu **records the event and returns a reference**. Nothing is charged, no wallet is credited, and no message is sent to the cardholder: the endpoint is a receipt, and what happens next (reward issuance, redemption) is handled by the programme it feeds — see [Loyalty](/developers/payments/loyalty).
 
-The endpoint is program-specific: today's is `pwp` — Mastercard Pay-with-Points, bank-agnostic across every issuer that uses it. A future program (for example Visa) gets its own path alongside it, `/b/partners/loyalty/<program>/enrollments/`, documented separately when it ships.
+The endpoint is program-specific: today's is `pwp` — Mastercard Pay-with-Points (PWP), bank-agnostic across every issuer that uses it. A future program (for example Visa) gets its own path alongside it, `/b/partners/loyalty/<program>/enrollments/`, documented separately when it ships.
 
 It is a **server-to-server** call, authenticated with a [private API key](/developers/getting-started/authentication#api-key-auth). The customer never calls it, and it must never be called from a browser.
+
+:::tip Boost Your Integration
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
+:::
+
+## When to Use
+
+Use this endpoint when a partner — typically a bank — needs Ottu to know that a customer has been enrolled, so that a downstream programme can act on it. The canonical case is a co-branded card with a welcome voucher: the bank enrols the cardholder, then tells Ottu who was enrolled and which reward they were granted.
+
+Do **not** use it to:
+
+- Take a payment or hold funds — use the [Checkout API](/developers/payments/checkout-api).
+- Credit a customer wallet — see [M-Wallet](/developers/payments/wallet/).
+- Store a card for later charging — see [Tokenization](/developers/cards-and-tokens/).
+- Send the customer a notification — the endpoint does not message anyone.
+
+## Setup
+
+1. **Get a private API key** for the Ottu installation the partner will call. Keys are created in the Ottu admin (**API keys → Add**) and shown once; see [Authentication](/developers/getting-started/authentication#api-key-auth) for how to create and store them. Share the key with the partner over a secure channel — never in a ticket, an email, or a chat.
+2. **Give the partner the endpoint** — `POST /b/partners/loyalty/pwp/enrollments/` on your installation host, over HTTPS only.
+3. **Agree the `reward_type` codes.** The endpoint accepts any well-formed code the partner sends (letters, digits, `.`, `_`, `-`; lowercase by convention); the codes Ottu already recognises get a display name in the dashboard. Today that is `welcome_voucher` → **Welcome Voucher** / **قسيمة ترحيبية**.
+
+:::note Private key only
+This endpoint accepts nothing but a private API key. The public (SDK) key, HTTP Basic and dashboard sessions are all refused with `401`. See [Authentication](/developers/getting-started/authentication) for credential handling.
+:::
+
+## Guide
+
+### Workflow
 
 ```mermaid
 sequenceDiagram
@@ -33,30 +63,14 @@ sequenceDiagram
     Ottu-->>Bank: 200 — the original reference, nothing recorded twice
 ```
 
-## When to Use
+1. **Send the event.** The partner's server calls the endpoint with its private key and, ideally, an `Idempotency-Key`.
+2. **Ottu validates.** The body is checked field by field, the card number is checked for masking, and the per-key rate limit is applied.
+3. **Ottu records it.** The event is stored and Ottu answers `201` with a `reference`.
+4. **Retry safely.** If the response is lost, resend the same request with the same key: Ottu answers `200` with the original `reference` and records nothing twice.
 
-Use this endpoint when a partner — typically a bank — needs Ottu to know that a customer has been onboarded, so that a downstream programme can act on it. The canonical case is a co-branded card with a welcome voucher: the bank enrols the cardholder, then tells Ottu who was enrolled and which reward they were granted.
+### Step-by-Step
 
-Do **not** use it to:
-
-- Take a payment or hold funds — use the [Checkout API](/developers/payments/checkout-api).
-- Credit a customer wallet — see [M-Wallet](/developers/payments/wallet/).
-- Store a card for later charging — see [Tokenization](/developers/cards-and-tokens/).
-- Send the customer a notification — the endpoint does not message anyone.
-
-## Setup
-
-1. **Get a private API key** for the Ottu installation the partner will call. Keys are created in the Ottu admin (**API keys → Add**) and shown once. Share the key with the partner over a secure channel — never in a ticket, an email, or a chat.
-2. **Give the partner the endpoint** — `POST /b/partners/loyalty/pwp/enrollments/` on your installation host, over HTTPS only.
-3. **Agree the `reward_type` codes.** The endpoint accepts any well-formed code the partner sends (lowercase letters, digits, `.`, `_`, `-`); the codes Ottu already recognises get a display name in the dashboard. Today that is `welcome_voucher` → **Welcome Voucher** / **قسيمة ترحيبية**.
-
-:::danger The private key is the only credential that opens this endpoint
-The **public** (SDK) key, HTTP Basic credentials and dashboard sessions are all refused with `401`. Treat the private key as a secret: it authorises writes to your installation.
-:::
-
-## Guide
-
-### Record an enrollment event
+#### 1. Record an enrollment event
 
 The minimal call. Replace `<PRIVATE_API_KEY>` and the body with the partner's data.
 
@@ -173,7 +187,7 @@ A successful first call answers **`201 Created`**:
 The response carries only the reference and the status. `cardholder_masked_pan` — even masked — is not echoed back, and it is redacted from Ottu's logs.
 :::
 
-### Make the call safe to retry
+#### 2. Make the call safe to retry
 
 Networks drop responses. If the partner resends a request after a timeout without any protection, Ottu would record the same customer twice. Send an **`Idempotency-Key`** header — an opaque id you generate, such as a UUID — and the endpoint behaves like this:
 
@@ -203,7 +217,7 @@ curl -s -X POST '${OTTU_CONNECT_BASE_URL}/b/partners/loyalty/pwp/enrollments/' \
 The `Idempotency-Key` is stored and searchable, so a value that contains a 13–19 digit card number is refused with `400` — `Must not contain a card number. Use an opaque id such as a UUID.` Generate the key; never derive it from the PAN.
 :::
 
-### Send only a masked card number
+#### 3. Send only a masked card number
 
 `cardholder_masked_pan` is optional. When you send it, it must be the card number **masked to its first six and last four digits** — the [PCI DSS](/glossary/#term-pci-dss) display form. The mask character can be `x`, `X`, `*` or `#`:
 
@@ -274,7 +288,7 @@ Unknown fields in the body are ignored.
 
 ### Error messages
 
-Validation errors are keyed by the field (or header) that failed, in the standard Ottu shape:
+Validation errors are keyed by the field (or header) that failed, in the standard Ottu shape (see also the platform-wide [error codes](/developers/reference/error-codes)):
 
 ```json
 { "cardholder_masked_pan": ["Must be a masked card number showing at most the first six and last four digits."] }
@@ -288,7 +302,7 @@ Validation errors are keyed by the field (or header) that failed, in the standar
 | `customer_phone` | `The phone number entered is not valid.` | Not a valid international number — include the country code. |
 | `cardholder_masked_pan` | `Only digits and the mask characters x * # are allowed.` | Spaces, dashes or letters other than `x`/`X` in the value. |
 | `cardholder_masked_pan` | `Must be a masked card number showing at most the first six and last four digits.` | A full or under-masked card number. |
-| `reward_type` | `Only letters, digits and the characters . _ - are allowed.` | A display name (`Welcome Voucher`) or other non-code value; send the lowercase code. |
+| `reward_type` | `Only letters, digits and the characters . _ - are allowed.` | A display name (`Welcome Voucher`) or other non-code value; send the code itself. |
 | `Idempotency-Key` | `Only letters, digits and the characters . _ : - are allowed.` | Spaces or other characters in the key. |
 | `Idempotency-Key` | `Must not contain a card number. Use an opaque id such as a UUID.` | The key contains a 13–19 digit card number. |
 | `detail` | `This Idempotency-Key was already used for a different enrollment. Send a new key, or resend the original data unchanged.` | `409` — key reuse with different data. |
@@ -314,7 +328,7 @@ No. It is server-to-server only and requires the private API key, which must nev
 **What if the bank does not have an idempotency key?**
 The header is optional. Without it, each call records a new event — the partner is then responsible for not resending.
 
-**Can the same card be onboarded more than once?**
+**Can the same card be enrolled more than once?**
 Yes. A masked card number is not an identity (a re-issued card, or two cards sharing the first six and last four digits, produce the same value), so it is stored as data, not used to deduplicate. Use `Idempotency-Key` for that.
 
 **Why was my numeric reference id refused as the `Idempotency-Key`?**
