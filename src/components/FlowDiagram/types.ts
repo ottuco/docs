@@ -88,6 +88,8 @@ export type FlowCard = {
   width?: number;
   /** Makes the card a link (internal path or #anchor). */
   href?: string;
+  /** Show `sub` in a monospace font (a code value). */
+  mono?: boolean;
   /** Id of a FlowGroup this card sits inside. */
   parent?: string;
 };
@@ -129,4 +131,9 @@ export type FlowProps = {
   height: number;
   /** Request and reply arrows flow (moving dashes). Set false for a still diagram. Default true. */
   animate?: boolean;
+  /** Selectable cards: a click, Enter or Space calls `onSelect(id)` (empty canvas or Escape: `null`). */
+  selected?: string | null;
+  onSelect?: (id: string | null) => void;
+  /** While something is selected: the cards and arrows (by index) kept bright. The rest is dimmed. */
+  lit?: { cards: string[]; arrows: number[] };
 };

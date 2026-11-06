@@ -29,6 +29,7 @@ export type CardData = {
   num?: number;
   width?: number;
   href?: string;
+  mono?: boolean;
 };
 
 const allSides = [Position.Top, Position.Right, Position.Bottom, Position.Left];
@@ -70,7 +71,9 @@ export function CardNode({ data }: NodeProps): React.JSX.Element {
     <div
       className={cls}
       style={d.width ? { width: d.width } : undefined}
-      title={d.sub ? `${d.title}: ${d.sub}` : d.title}
+      // Story cards cut long text, so they keep the full text as a tooltip.
+      // Others show it all: a native tooltip would only float over the diagram.
+      title={d.num ? (d.sub ? `${d.title}: ${d.sub}` : d.title) : undefined}
     >
       <Handles />
       {d.icon ? (
@@ -83,7 +86,11 @@ export function CardNode({ data }: NodeProps): React.JSX.Element {
           {d.num ? <span className={styles.nodeNum}>{d.num}</span> : null}
           {d.title}
         </div>
-        {d.sub ? <div className={styles.nodeSub}>{d.sub}</div> : null}
+        {d.sub ? (
+          <div className={`${styles.nodeSub} ${d.mono ? styles.mono : ""}`}>
+            {d.sub}
+          </div>
+        ) : null}
       </span>
     </div>
   );
