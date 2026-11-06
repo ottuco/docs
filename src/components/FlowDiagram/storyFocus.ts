@@ -98,7 +98,9 @@ export function focusCss(focus: Focus): string {
       : "";
 
   return [
-    `${s} .react-flow__node, ${s} .react-flow__edge, ${s} [data-edge] { opacity: 0.15; }`,
+    // Cards and edge labels keep 0.75 so their text stays AA-readable in both themes; only the lines fade harder.
+    `${s} .react-flow__node, ${s} [data-edge] { opacity: 0.75; }`,
+    `${s} .react-flow__edge { opacity: 0.3; }`,
     `${relit.join(",\n")} { opacity: 1; }`,
     outline,
   ].join("\n");

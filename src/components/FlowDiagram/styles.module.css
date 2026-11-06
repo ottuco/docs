@@ -408,12 +408,9 @@
   overflow-y: auto;
 }
 
-/* Sticks to the bottom of the screen while the story is in view, so the text
-   for a clicked step is always visible. */
+/* Sits under the diagram in normal flow: it must never cover diagram content. */
 .panel {
-  position: sticky;
-  bottom: 12px;
-  z-index: 2;
+  position: relative;
   /* Height is fixed inline (STORY_PANEL_H): short content sits centred,
      long content scrolls. `safe` keeps the top reachable when it overflows. */
   display: flex;
@@ -481,6 +478,31 @@
 .scroller {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+/* A visible scrollbar (not the hidden overlay kind), so a cut-off diagram
+   looks scrollable. */
+.scroller::-webkit-scrollbar {
+  height: 8px;
+}
+
+.scroller::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: var(--ifm-color-emphasis-400);
+}
+
+.scrollHint {
+  display: none;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--ifm-color-emphasis-700);
+}
+
+@media (max-width: 700px) {
+  .scrollHint {
+    display: block;
+  }
 }
 
 .scroller > .canvas {
