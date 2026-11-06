@@ -203,14 +203,14 @@ const ICONS = {
 } as const;
 
 // Wide: left to right, about 840px. Used when the container fits it.
-const WIDE_W = 920;
+const WIDE_W = 850;
 const wideAt: Record<Id, [number, number]> = {
   pending: [0, 150],
-  trial: [260, 20],
-  active: [260, 150],
-  pastDue: [520, 150],
-  canceled: [750, 150],
-  expired: [260, 340],
+  trial: [240, 20],
+  active: [240, 150],
+  pastDue: [480, 150],
+  canceled: [690, 150],
+  expired: [240, 340],
   failed: [0, 340],
 };
 // Narrow: top to bottom in two columns, about 430px, so it fits a phone or a
@@ -311,6 +311,7 @@ function arrowsFor(narrow: boolean): FlowArrow[] {
           fromSide: "bottom",
           toSide: "left",
           kind: "plain",
+          label: "cancel",
         }
       : {
           from: "active",
@@ -327,6 +328,8 @@ function arrowsFor(narrow: boolean): FlowArrow[] {
       toSide: "top",
       label: "last cycle paid",
       dx: narrow ? 0 : 55,
+      // Narrow: sit on the straight segment above the cancel arrow's turn.
+      dy: narrow ? -50 : 0,
     },
   ];
 }
@@ -339,7 +342,7 @@ export default function AutoPayStates({
   const dev = audience === "developer";
   const box = useRef<HTMLDivElement>(null);
   // Wide layout from the container's width alone (with hysteresis, see useWidthFlag).
-  const wide = useWidthFlag(box, WIDE_W * 0.95 + 24);
+  const wide = useWidthFlag(box, WIDE_W * 0.95 + 8);
   const narrow = !wide;
   const [selected, setSelected] = useState<Id | null>(null);
   // false when the selection came from the URL: no scrolling then.
@@ -376,7 +379,7 @@ export default function AutoPayStates({
         title: dev ? STATES[id].devLabel : STATES[id].label,
         sub: dev ? STATES[id].code : undefined,
         mono: dev,
-        width: 170,
+        width: narrow ? 170 : 160,
         x: at[id][0],
         y: at[id][1],
         ...ICONS[id],
@@ -442,25 +445,25 @@ export default function AutoPayStates({
           ) : null}
         </p>
         <div className={captionClass.chips} style={{ padding: 0 }}>
-          <span>
-            <strong>Next possible states:</strong>
-          </span>
-          {next.length === 0 ? (
-            <span>
-              {STATES[selected].final ? "none, this state is final" : "none"}
-            </span>
-          ) : (
-            next.map((n) => (
-              <button
-                key={n}
-                type="button"
-                className={captionClass.chip}
-                onClick={() => pick(n)}
-              >
-                {dev ? STATES[n].devLabel : STATES[n].label}
-              </button>
-            ))
-          )}
+          {next.length > 0 ? (
+            <>
+              <span>
+                <strong>Next possible states:</strong>
+              </span>
+              {next.map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  className={captionClass.chip}
+                  onClick={() => pick(n)}
+                >
+                  {dev ? STATES[n].devLabel : STATES[n].label}
+                </button>
+              ))}
+            </>
+          ) : STATES[selected].final ? (
+            <span>This state is final.</span>
+          ) : null}
           <button type="button" className={captionClass.chip} onClick={copy}>
             {copied ? "Link copied" : "Copy link"}
           </button>
