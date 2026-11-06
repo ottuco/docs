@@ -11,6 +11,7 @@ import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import CodeBlock from "@theme/CodeBlock";
 import AutoPayStory from "@site/src/diagrams/flow/AutoPayStory";
+import AutoPayStates from "@site/src/diagrams/flow/AutoPayStates";
 import AutoPayDemo from "@site/src/components/AutoPayDemo";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
@@ -125,7 +126,7 @@ Terminal. The last billing cycle was paid and the next one would fall after the 
 
 The first payment did not complete: the customer canceled the checkout, the card was not saved, or 24 hours passed without payment. **What to do:** create a new subscription. Ottu does not retry it.
 
-{/* AutoPayStates diagram: added after docs/158912 merges */}
+<AutoPayStates audience="developer" />
 
 See [Lifecycle and billing cycles](/business/autopay/#lifecycle-and-billing-cycles) for the business view.
 
