@@ -94,7 +94,7 @@ const STATES: Record<
 };
 
 // KEEP IN SYNC: this text must match the per-state headings on both pages (docs/business/autopay/index.mdx, docs/developers/payments/autopay/index.mdx). Edit all together.
-// Facts: facts-autopay.md section 2. The text matches the headings under the diagram on each page.
+// Text and next states follow the AutoPay subscription state machine.
 const TEXT: Record<Audience, Record<Id, Info>> = {
   business: {
     pending: {
@@ -206,7 +206,7 @@ const narrowAt: Record<Id, [number, number]> = {
   expired: [0, 520],
 };
 
-// Edges: the main moves (facts-autopay.md section 2).
+// Edges: the main moves of the AutoPay subscription state machine.
 function arrowsFor(narrow: boolean): FlowArrow[] {
   const toActive: FlowArrow = narrow
     ? {
