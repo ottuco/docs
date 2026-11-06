@@ -1686,7 +1686,7 @@ paths:
 
         ### Notable optional fields
 
-        - `code` - the identifier used in API calls and URLs. Derived from `name_en` when omitted (a name with no latin letters or digits needs an explicit code); must contain a letter or digit and be unique across every gateway MID, ignoring case.
+        - `code` - the identifier used in API calls and URLs. Derived from `name_en` when omitted (a name with no Latin letters or digits needs an explicit code); must contain at least one Latin letter or digit (`---` or `___` is rejected) and be unique across every gateway MID, ignoring case.
 
         - `extra_currency_codes` - additional currencies the MID accepts. Each one needs an exchange rate into `currency_code` (from the extra currency to the default one); currencies without one are rejected with a **400** that names them.
 
@@ -1704,7 +1704,7 @@ paths:
 
         - **201** - the MID was created; the body is its full configuration.
 
-        - **400** - validation error, keyed by field.
+        - **400** - validation error, keyed by field. A NUL byte (`\u0000`) in any field is rejected with a **400** too.
 
         - **401** - missing or invalid credentials.
 
@@ -9045,6 +9045,10 @@ components:
           default: ''
           maxLength: 50
         code:
+          description: 'Identifier used in API calls and URLs (the `pg_code`). Leave it empty to derive
+            it from `name_en`. A non-empty code must contain at least one Latin letter or digit: `---`
+            or `___` is rejected with a **400**. It must also be unique across every gateway MID, ignoring
+            case.'
           oneOf:
           - type: string
             default: ''
