@@ -52,7 +52,7 @@ const autopayLanes: StoryLane[] = [
     about: {
       does: "Makes one Checkout API call, sends the customer to pay, and starts the service once the subscription is active.",
       relies:
-        "Ottu for the result of the first charge. Renewals send you no webhook, so you poll for past-due subscriptions.",
+        "Ottu for the result of the first charge. For renewals, you read the status from the API and list subscriptions with status past_due.",
     },
   },
   {
@@ -169,7 +169,7 @@ const autopayJourneys: StoryJourney[] = [
       },
       {
         step: 8,
-        text: "Your customer gets the reminder with a link to their page. Renewals send you no webhook.",
+        text: "Your customer gets the reminder with a link to their page.",
       },
     ],
   },
@@ -186,7 +186,7 @@ const autopayJourneys: StoryJourney[] = [
       },
       {
         step: 9,
-        text: "Your customer pays the balance on their page, or you cancel. Ottu doesn't notify you, so poll for past_due.",
+        text: "Your customer pays the balance on their page, or you cancel. Read the status from the API: list subscriptions with status past_due.",
       },
     ],
   },

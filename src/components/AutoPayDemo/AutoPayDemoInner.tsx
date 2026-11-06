@@ -28,7 +28,7 @@ const STEPS = [
   { num: 3, title: "The webhook arrives", subtitle: "Your webhook_url" },
   { num: 4, title: "Retrieve the subscription", subtitle: "GET /b/pbl/v2/subscriptions/{id}/" },
   { num: 5, title: "Open the customer's page", subtitle: "GET …/page-link/" },
-  { num: 6, title: "Cancel at period end (optional)", subtitle: "POST …/cancel/" },
+  { num: 6, title: "Finish, or see how cancellation works", subtitle: "POST …/cancel/ · optional" },
 ];
 
 const COMPLETE = STEPS.length + 1;
@@ -37,6 +37,7 @@ interface State {
   step: number; // 0 = idle, 1..6 = active step, 7 = complete
   busy: boolean;
   error?: string;
+  rawError?: string;
   orderId: string;
   customerId: string;
   pgCodes: string[];
@@ -218,9 +219,16 @@ export default function AutoPayDemoInner() {
       liveSubscription.current = subscriptionId;
       set({ busy: false, pgCodes, createReq, createRes, subscriptionId });
     } catch (err) {
-      fail(err);
+      // Any create failure ends here with a plain message; the raw response stays visible below it.
+      if (mounted.current) {
+        set({
+          busy: false,
+          error: "The sandbox can't create a test subscription right now. Try again later.",
+          rawError: err instanceof Error ? err.message : String(err),
+        });
+      }
     }
-  }, [set, fail]);
+  }, [set]);
 
   const sdkCallbacks = useMemo(() => createDemoCallbacks(() => set({ step: 3 })), [set]);
 
@@ -255,20 +263,21 @@ export default function AutoPayDemoInner() {
     }
   }, [state.subscriptionId, set, fail]);
 
-  // Step 6: schedule the cancellation for the end of the period.
-  const cancelAtPeriodEnd = useCallback(async () => {
-    const cancelReq = { mode: "at_period_end" };
+  // Step 6: at_period_end needs an active or trialing subscription. A pending_setup one only accepts immediate.
+  const cancelDemo = useCallback(async () => {
+    const cancelReq = { mode: state.sub?.status === "active" || state.sub?.status === "trialing" ? "at_period_end" : "immediate" };
     set({ busy: true, cancelReq });
     try {
       const cancelRes = await connectCall("POST", `${SUBSCRIPTIONS}/${state.subscriptionId}/cancel/`, {
         body: cancelReq,
         headers: { "Idempotency-Key": crypto.randomUUID() },
       });
+      if (cancelReq.mode === "immediate") liveSubscription.current = undefined;
       set({ busy: false, cancelRes });
     } catch (err) {
       fail(err);
     }
-  }, [state.subscriptionId, set, fail]);
+  }, [state.subscriptionId, state.sub?.status, set, fail]);
 
   const next = (step: number) => <button className={styles.primaryBtn} onClick={() => set({ step })}>Continue</button>;
 
@@ -323,7 +332,7 @@ export default function AutoPayDemoInner() {
             <p className={styles.cardDescription} style={{ marginTop: 12 }}>
               Read <code>extra.autopay.subscription_id</code> to find the subscription. As a fallback,
               the webhook's <code>session_id</code> equals <code>setup_session_id</code> on the
-              subscription. The subscription is usually still <code>pending_setup</code> when this
+              subscription. The subscription can still be <code>pending_setup</code> when this
               webhook arrives, so treat it as "payment received", not "subscription active".
             </p>
             {state.step === 3 && <div className={styles.actions}>{next(4)}</div>}
@@ -347,9 +356,11 @@ export default function AutoPayDemoInner() {
             <p className={styles.cardDescription}>
               {pending ? (
                 <>
-                  <strong><code>pending_setup</code> is expected right after payment.</strong> Ottu confirms
-                  the first payment on a recurring check (usually a minute or two on the sandbox, up to about 15 minutes in production), so the status
-                  lags the payment. {state.polls >= MAX_POLLS ? "Polling stopped; check again below." : "Checking every 5 seconds..."}
+                  <strong><code>pending_setup</code> is normal right after payment.</strong> Ottu activates the
+                  subscription when the payment event arrives. If that event is missed, a check that starts
+                  20 minutes after you created the subscription, and repeats every 15 minutes, activates it:
+                  up to about 35 minutes. <strong>You do not have to wait.</strong> The next steps work while
+                  the subscription is <code>pending_setup</code>. {state.polls >= MAX_POLLS ? "Polling stopped; check again below." : "This page checks every 5 seconds."}
                 </>
               ) : (
                 <>
@@ -378,8 +389,8 @@ export default function AutoPayDemoInner() {
               <>
                 <ApiPanel label={`GET ${SUBSCRIPTIONS}/${state.subscriptionId}/page-link/`} data={state.link} />
                 <p className={styles.cardDescription}>
-                  Send <code>page_url</code> to your customer. It is their private self-service page: the
-                  link itself is the credential.
+                  <code>page_url</code> is your customer's private self-service page. The link is the
+                  credential, so you deliver it to your customer yourself. Ottu's emails also link to this page.
                 </p>
                 <div className={styles.actions}>
                   <a
@@ -398,14 +409,32 @@ export default function AutoPayDemoInner() {
           </>
         );
 
-      case 6:
+      case 6: {
+        const canSchedule = status === "active" || status === "trialing";
         return (
           <>
-            <p className={styles.cardDescription}>
-              <code>at_period_end</code> schedules the cancellation. The status does not change and
-              <code>cancel_at_period_end</code> becomes <code>true</code>. When the next billing date
-              arrives, Ottu cancels the subscription and does not charge.
-            </p>
+            {state.step === 6 && !state.cancelRes && (
+              <p className={styles.cardDescription}>
+                Your subscription is working. Choose how to end the demo.
+                <br />
+                <strong>Finish here:</strong> the demo cancels its own test subscription when you leave the page or restart.
+                <br />
+                <strong>See how cancellation works:</strong>{" "}
+                {canSchedule ? (
+                  <>
+                    the demo sends <code>mode: "at_period_end"</code>. The status stays <code>{status}</code>,
+                    the customer keeps access until the period ends, and <code>cancellation.at_period_end</code> becomes{" "}
+                    <code>true</code>. Then Ottu cancels the subscription and charges nothing more.
+                  </>
+                ) : (
+                  <>
+                    <code>at_period_end</code> is refused while the status is <code>{status ?? "pending_setup"}</code>{" "}
+                    (<code>422 invalid_transition</code>), so the demo sends <code>mode: "immediate"</code>. The
+                    subscription becomes <code>canceled</code> at once.
+                  </>
+                )}
+              </p>
+            )}
             {state.cancelReq && (
               <ApiPanel label={`POST ${SUBSCRIPTIONS}/${state.subscriptionId}/cancel/`} data={state.cancelReq} />
             )}
@@ -413,17 +442,18 @@ export default function AutoPayDemoInner() {
             {state.step === 6 && (
               <div className={styles.actions}>
                 {!state.cancelRes && (
-                  <button className={styles.secondaryBtn} onClick={cancelAtPeriodEnd} disabled={state.busy}>
-                    {state.busy ? "Cancelling..." : "Cancel at period end"}
+                  <button className={styles.secondaryBtn} onClick={cancelDemo} disabled={state.busy}>
+                    {state.busy ? "Cancelling..." : "See how cancellation works"}
                   </button>
                 )}
-                <button className={styles.primaryBtn} onClick={() => set({ step: COMPLETE })}>
-                  {state.cancelRes ? "Finish" : "Skip and finish"}
+                <button className={styles.primaryBtn} onClick={() => set({ step: COMPLETE })} disabled={state.busy}>
+                  {state.cancelRes ? "Finish" : "Finish here"}
                 </button>
               </div>
             )}
           </>
         );
+      }
 
       default:
         return null;
@@ -435,7 +465,7 @@ export default function AutoPayDemoInner() {
       <div className={styles.hero}>
         <h2 className={styles.heroTitle}>Try an AutoPay subscription</h2>
         <p className={styles.heroSubtitle}>
-          Create a subscription, pay the first charge with a test card, then watch it activate
+          Create a subscription, pay the first charge with a test card, then read its status
           — all in the sandbox. No real money moves.
         </p>
         <button className={styles.primaryBtn} onClick={start}>
@@ -450,6 +480,11 @@ export default function AutoPayDemoInner() {
       <div className={styles.errorCard}>
         <Icon path={mdiAlertCircleOutline} size={1.5} className={styles.errorIcon} />
         <p className={styles.errorMessage}>{state.error}</p>
+        {state.rawError && (
+          <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", textAlign: "left", fontSize: 12 }}>
+            {state.rawError}
+          </pre>
+        )}
         <button className={styles.secondaryBtn} onClick={restart}>
           Restart
         </button>

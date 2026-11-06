@@ -9,7 +9,7 @@ export default function AutoPayDemo(): React.JSX.Element {
         <div className={styles.hero}>
           <h2 className={styles.heroTitle}>Try an AutoPay subscription</h2>
           <p className={styles.heroSubtitle}>
-            Create a subscription, pay the first charge with a test card, then watch it activate
+            Create a subscription, pay the first charge with a test card, then read its status
             — all in the sandbox.
           </p>
           <button className={styles.primaryBtn} disabled>
