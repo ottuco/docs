@@ -1656,19 +1656,19 @@ paths:
   /b/pbl/v2/osb/create/:
     post:
       operationId: create_ottu_sandbox_mid
-      description: 'Provisions an Ottu Sandbox payment gateway MID with its full configuration, so a test
-        environment can be set up without going through the admin.
+      description: 'Provisions an Ottu Sandbox payment gateway MID with its full configuration, so a test environment can be set up without going through the admin.
+
+
+        The caller needs the `ottu_sandbox.add_ottusandboxmid` permission (a scoped private API key must hold it too). The endpoint is only available where `SANDBOX_MID_API_ENABLED` is on - production keeps it off. The body must be JSON.
 
 
         ### What it does
 
         - Creates (or reuses) the `ottu_sandbox` gateway row.
 
-        - Resolves the currencies you pass into an exchange configuration, reusing an existing one when
-        it already covers them.
+        - Resolves the currencies you pass into an exchange configuration. An existing one is reused only when its currency set matches yours exactly; otherwise a new one is created.
 
-        - Creates the MID itself. The MID is always a **sandbox** MID - a production MID cannot be minted
-        here.
+        - Creates the MID itself. The MID is always a **sandbox** MID - a production MID cannot be minted here.
 
 
         ### Required fields
@@ -1686,13 +1686,11 @@ paths:
 
         ### Notable optional fields
 
-        - `code` - the identifier used in API calls and URLs. Derived from `name_en` when omitted; must
-        be unique across every gateway MID.
+        - `code` - the identifier used in API calls and URLs. Derived from `name_en` when omitted (a name with no Latin letters or digits needs an explicit code); must contain at least one Latin letter or digit (`---` or `___` is rejected) and be unique across every gateway MID, ignoring case.
 
-        - `extra_currency_codes` - additional currencies the MID accepts.
+        - `extra_currency_codes` - additional currencies the MID accepts. Each one needs an exchange rate into `currency_code` (from the extra currency to the default one); currencies without one are rejected with a **400** that names them.
 
-        - `operations` - post-payment operations. The sandbox supports `refund` and `void`; `void` requires
-        `operation` to be `authorize`.
+        - `operations` - post-payment operations. The sandbox supports `refund` and `void`; `void` requires `operation` to be `authorize`.
 
         - `is_tokenizable` / `auto_debit_enabled` - enable card saving and MIT charges.
 
@@ -1706,9 +1704,13 @@ paths:
 
         - **201** - the MID was created; the body is its full configuration.
 
-        - **400** - validation error, keyed by field.
+        - **400** - validation error, keyed by field. A NUL byte (`\u0000`) in any field is rejected with a **400** too.
 
         - **401** - missing or invalid credentials.
+
+        - **403** - the caller lacks the `ottu_sandbox.add_ottusandboxmid` permission, or the endpoint is disabled (`SANDBOX_MID_API_ENABLED`).
+
+        - **415** - the body is not JSON.
 
         - **429** - hourly provisioning limit reached.'
       summary: Create an Ottu Sandbox MID
@@ -1725,12 +1727,6 @@ paths:
       requestBody:
         content:
           application/json:
-            schema:
-              $ref: "#/components/schemas/OttuSandboxMIDCreate"
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: "#/components/schemas/OttuSandboxMIDCreate"
-          multipart/form-data:
             schema:
               $ref: "#/components/schemas/OttuSandboxMIDCreate"
         required: true
@@ -1751,6 +1747,18 @@ paths:
                 $ref: "#/components/schemas/OttuSandboxMIDErrors"
           description: ''
         '401':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorMessage"
+          description: ''
+        '415':
           content:
             application/json:
               schema:
@@ -9037,6 +9045,10 @@ components:
           default: ''
           maxLength: 50
         code:
+          description: 'Identifier used in API calls and URLs (the `pg_code`). Leave it empty to derive
+            it from `name_en`. A non-empty code must contain at least one Latin letter or digit: `---`
+            or `___` is rejected with a **400**. It must also be unique across every gateway MID, ignoring
+            case.'
           oneOf:
           - type: string
             default: ''
