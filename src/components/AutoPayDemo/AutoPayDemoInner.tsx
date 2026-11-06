@@ -250,7 +250,7 @@ export default function AutoPayDemoInner() {
       orderId,
       createReq,
       createRes: sampleCreateResponse,
-      subscriptionId: sampleSubscription.subscription_id,
+      subscriptionId: sampleSubscription.id,
     });
   }, [set]);
 
@@ -408,7 +408,8 @@ export default function AutoPayDemoInner() {
               <>
                 {sampleNote}
                 <ApiPanel label={`GET ${SUBSCRIPTIONS}/${state.subscriptionId}/`} data={state.sub} />
-                {state.webhook?.extra?.autopay?.subscription_id === state.sub.id && (
+                {state.webhook?.extra?.autopay?.subscription_id &&
+                  state.webhook.extra.autopay.subscription_id === state.sub.id && (
                   <p className={styles.cardDescription}>
                     The webhook's <code>extra.autopay.subscription_id</code> equals this subscription's <code>id</code>.
                   </p>
@@ -419,9 +420,9 @@ export default function AutoPayDemoInner() {
               {pending ? (
                 <>
                   <strong><code>pending_setup</code> is normal right after payment.</strong> Ottu activates the
-                  subscription when the payment event arrives. If that event is missed, a check that starts
-                  20 minutes after you created the subscription, and repeats every 15 minutes, activates it:
-                  up to about 35 minutes. <strong>You do not have to wait.</strong> The next steps work while
+                  subscription when it receives the payment result. If that result is missed, a backup check
+                  activates it within about 15 minutes of the payment, and never earlier than 20 minutes after
+                  you created the subscription. <strong>You do not have to wait.</strong> The next steps work while
                   the subscription is <code>pending_setup</code>. {state.polls >= MAX_POLLS ? "Polling stopped; check again below." : "This page checks every 5 seconds."}
                 </>
               ) : (
@@ -480,15 +481,19 @@ export default function AutoPayDemoInner() {
           <>
             {state.step === 6 && !state.cancelRes && (
               <p className={styles.cardDescription}>
-                Your subscription is working. Choose how to end the demo.
-                <br />
-                <strong>Finish here:</strong> the demo cancels its own test subscription when you leave the page or restart.
+                Your test subscription is created. Choose how to end the demo.
+                {!state.sample && (
+                  <>
+                    <br />
+                    <strong>Finish here:</strong> the demo cancels its own test subscription when you leave the page or restart.
+                  </>
+                )}
                 <br />
                 <strong>See how cancellation works:</strong>{" "}
                 {canSchedule ? (
                   <>
                     the demo sends <code>mode: "at_period_end"</code>. The status stays <code>{status}</code>,
-                    the customer keeps access until the period ends, and <code>cancellation.at_period_end</code> becomes{" "}
+                    the customer keeps access until the period ends, and <code>cancel_at_period_end</code> becomes{" "}
                     <code>true</code>. Then Ottu cancels the subscription and charges nothing more.
                   </>
                 ) : (
@@ -500,11 +505,11 @@ export default function AutoPayDemoInner() {
                 )}
               </p>
             )}
-            {sampleNote}
             {state.cancelReq && (
               <ApiPanel label={`POST ${SUBSCRIPTIONS}/${state.subscriptionId}/cancel/`} data={state.cancelReq} />
             )}
             {state.cancelRes && <ApiPanel label="Response — 200 OK" data={state.cancelRes} />}
+            {state.cancelRes && sampleNote}
             {state.step === 6 && (
               <div className={styles.actions}>
                 {!state.cancelRes && (
@@ -560,7 +565,7 @@ export default function AutoPayDemoInner() {
         )}
         <div className={styles.actions}>
           {state.rawError && (
-            <button className={styles.primaryBtn} onClick={() => { set({ error: undefined }); startSample(); }}>
+            <button className={styles.primaryBtn} onClick={startSample}>
               Walk through with sample responses
             </button>
           )}

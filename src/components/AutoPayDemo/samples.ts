@@ -1,6 +1,8 @@
 // Sample responses for the Live Demo walk-through, shown only when the sandbox cannot create a
-// subscription. Field names and shapes follow the AutoPay v3 subscription object. Not from a live call.
+// subscription. Not from a live call.
 const SUB_ID = "sub_sample0001";
+const ORDER_NO = "demo-order-1001";
+const CUSTOMER_EMAIL = `demo.${ORDER_NO}@example.com`;
 const SESSION_ID = "sample-session-0001";
 
 export const sampleCreateResponse = {
@@ -15,12 +17,12 @@ export const sampleCreateResponse = {
 export const sampleWebhook = {
   amount: "9.900",
   currency_code: "KWD",
-  customer_email: "demo@example.com",
+  customer_email: CUSTOMER_EMAIL,
   customer_first_name: "Demo",
   customer_id: "cust_sample",
   gateway_account: "Credit-Card",
   is_sandbox: true,
-  order_no: "demo-order-1001",
+  order_no: ORDER_NO,
   paid_amount: "9.900",
   payment_type: "auto_pay",
   reference_number: "sample-ref-0001",
@@ -43,28 +45,27 @@ export const sampleWebhook = {
   },
 };
 
+// Same field names as the API Reference on the AutoPay page (the published OpenAPI spec), so one page shows one shape.
 export const sampleSubscription = {
-  subscription_id: SUB_ID,
-  status: "active",
-  order_no: "demo-order-1001",
-  plan_name: "",
-  description: "Demo plan - monthly",
-  language: "en",
-  amount: "9.900",
-  first_payment_amount: "9.900",
+  id: SUB_ID,
+  customer_id: "cust_sample",
+  customer_email: CUSTOMER_EMAIL,
+  frequency: "monthly",
   currency: "KWD",
-  billing_anchor_day: 6,
-  retry_count: 3,
+  recurring_amount: "9.900",
+  first_payment_amount: "9.900",
   start_date: "2026-11-06",
   end_date: null,
+  status: "active",
+  cancel_at_period_end: false,
+  canceled_at: null,
+  cancellation_initiator: null,
+  agreement_id: "AGR-demo-order-1001",
   next_billing_date: "2026-12-06",
-  customer: { id: "cust_sample", email: "demo@example.com", first_name: "Demo", last_name: null },
-  card: { brand: "VISA", number: "411111******1111", token: null },
-  cancellation: { at_period_end: false, cancel_date: null, canceled_at: null, reason: null },
-  setup_session_id: SESSION_ID,
-  latest_session_id: SESSION_ID,
-  status_changed_at: "2026-11-06T10:02:11Z",
-  current_cycle: { cycle_number: 2, scheduled_date: "2026-12-06", amount_due: "9.900", status: "scheduled" },
+  description: "Demo plan - monthly",
+  merchant_reference: ORDER_NO,
+  retry_count: 3,
+  created_at: "2026-11-06T10:00:00Z",
 };
 
 export const samplePageLink = {
@@ -74,6 +75,7 @@ export const samplePageLink = {
 
 export const sampleCancelResponse = {
   ...sampleSubscription,
+  cancel_at_period_end: true,
+  cancellation_initiator: "merchant",
   next_billing_date: null,
-  cancellation: { at_period_end: true, cancel_date: "2026-12-05", canceled_at: null, reason: null },
 };
