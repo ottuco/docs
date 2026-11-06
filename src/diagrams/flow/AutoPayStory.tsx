@@ -67,9 +67,9 @@ const autopaySteps: StoryStep[] = [
   {
     lane: 0,
     title: "Subscribes on your site",
-    sub: "Picks a plan",
+    sub: "Chooses a subscription",
     icon: mdiShoppingOutline,
-    detail: "Your customer picks a plan on your website or app.",
+    detail: "Your customer chooses a subscription on your website or app.",
   },
   {
     lane: 1,
@@ -77,7 +77,7 @@ const autopaySteps: StoryStep[] = [
     sub: "One Checkout API call",
     icon: mdiServer,
     detail:
-      "Send one Checkout API call with the plan and its schedule, and store the subscription ID it returns.",
+      "Send one Checkout API call with the amount and its schedule, and store the subscription ID it returns.",
   },
   {
     lane: 2,
@@ -143,7 +143,7 @@ const autopayJourneys: StoryJourney[] = [
   {
     name: "First charge",
     stops: [
-      { step: 1, text: "Your customer picks a plan on your site." },
+      { step: 1, text: "Your customer chooses a subscription on your site." },
       {
         step: 2,
         text: "You make one Checkout API call and store the subscription ID.",

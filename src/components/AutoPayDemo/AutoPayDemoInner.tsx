@@ -15,6 +15,13 @@ import CheckoutSDKEmbed from "@site/src/components/CheckoutSDKEmbed";
 import TestCardCallout from "@site/src/components/TestCardCallout";
 import WebhookViewer from "@site/src/components/RecurringDemo/WebhookViewer";
 import styles from "@site/src/components/RecurringDemo/styles.module.css";
+import {
+  sampleCancelResponse,
+  sampleCreateResponse,
+  samplePageLink,
+  sampleSubscription,
+  sampleWebhook,
+} from "./samples";
 
 // Gateway discovery and session creation must name the same plugin (#159191).
 const PLUGIN: PaymentPlugin = "e_commerce";
@@ -38,6 +45,8 @@ interface State {
   busy: boolean;
   error?: string;
   rawError?: string;
+  showRaw?: boolean;
+  sample?: boolean; // walk-through with sample responses, no live calls
   orderId: string;
   customerId: string;
   pgCodes: string[];
@@ -230,12 +239,31 @@ export default function AutoPayDemoInner() {
     }
   }, [set]);
 
+  // Fallback when the sandbox cannot create a subscription: walk through with labeled sample responses.
+  const startSample = useCallback(() => {
+    const orderId = "demo-order-1001";
+    const createReq = buildAutoPayRequest(orderId, "cust_sample", ["<TOKENIZABLE_PG_CODE>"]);
+    dispatch({ type: "RESET" });
+    set({
+      sample: true,
+      step: 1,
+      orderId,
+      createReq,
+      createRes: sampleCreateResponse,
+      subscriptionId: sampleSubscription.subscription_id,
+    });
+  }, [set]);
+
   const sdkCallbacks = useMemo(() => createDemoCallbacks(() => set({ step: 3 })), [set]);
 
   // Step 4: retrieve now, then poll while the subscription is still pending_setup.
   const status: string | undefined = state.sub?.status;
   useEffect(() => {
     if (state.step !== 4 || !state.subscriptionId) return;
+    if (state.sample) {
+      if (!state.sub) set({ sub: sampleSubscription });
+      return;
+    }
     if (status && status !== "pending_setup") return;
     if (state.polls >= MAX_POLLS) return;
     const timer = setTimeout(
@@ -250,10 +278,14 @@ export default function AutoPayDemoInner() {
       state.polls === 0 ? 0 : POLL_MS,
     );
     return () => clearTimeout(timer);
-  }, [state.step, state.subscriptionId, state.polls, status, set, fail]);
+  }, [state.step, state.subscriptionId, state.polls, state.sample, state.sub, status, set, fail]);
 
   // Step 5: read the customer's page link (does not rotate it).
   const getPageLink = useCallback(async () => {
+    if (state.sample) {
+      set({ step: 5, link: samplePageLink });
+      return;
+    }
     set({ step: 5, busy: true });
     try {
       const link = await connectCall("GET", `${SUBSCRIPTIONS}/${state.subscriptionId}/page-link/`);
@@ -261,11 +293,15 @@ export default function AutoPayDemoInner() {
     } catch (err) {
       fail(err);
     }
-  }, [state.subscriptionId, set, fail]);
+  }, [state.subscriptionId, state.sample, set, fail]);
 
   // Step 6: at_period_end needs an active or trialing subscription. A pending_setup one only accepts immediate.
   const cancelDemo = useCallback(async () => {
     const cancelReq = { mode: state.sub?.status === "active" || state.sub?.status === "trialing" ? "at_period_end" : "immediate" };
+    if (state.sample) {
+      set({ cancelReq: { mode: "at_period_end" }, cancelRes: sampleCancelResponse });
+      return;
+    }
     set({ busy: true, cancelReq });
     try {
       const cancelRes = await connectCall("POST", `${SUBSCRIPTIONS}/${state.subscriptionId}/cancel/`, {
@@ -277,7 +313,13 @@ export default function AutoPayDemoInner() {
     } catch (err) {
       fail(err);
     }
-  }, [state.subscriptionId, state.sub?.status, set, fail]);
+  }, [state.subscriptionId, state.sample, state.sub?.status, set, fail]);
+
+  const sampleNote = state.sample ? (
+    <p className={styles.cardDescription}>
+      <strong>Sample response — not from a live call.</strong>
+    </p>
+  ) : null;
 
   const next = (step: number) => <button className={styles.primaryBtn} onClick={() => set({ step })}>Continue</button>;
 
@@ -295,6 +337,7 @@ export default function AutoPayDemoInner() {
             )}
             {state.createReq && (
               <>
+                {sampleNote}
                 <ApiPanel label="POST /b/checkout/v1/pymt-txn/" data={state.createReq} />
                 <ApiPanel label="Response — 201 Created" data={state.createRes} />
                 <p className={styles.cardDescription}>
@@ -308,6 +351,18 @@ export default function AutoPayDemoInner() {
         );
 
       case 2:
+        if (state.sample) {
+          return (
+            <>
+              {sampleNote}
+              <p className={styles.cardDescription}>
+                Your customer opens Ottu's checkout page, enters a card and pays the first charge. See{" "}
+                <a href="#what-your-customer-sees">what your customer sees</a>.
+              </p>
+              {state.step === 2 && <div className={styles.actions}>{next(3)}</div>}
+            </>
+          );
+        }
         return state.step === 2 ? (
           <>
             <TestCardCallout />
@@ -324,11 +379,18 @@ export default function AutoPayDemoInner() {
       case 3:
         return (
           <>
+            {state.sample ? (
+              <>
+                {sampleNote}
+                <ApiPanel label="Payment webhook (to your webhook_url)" data={sampleWebhook} />
+              </>
+            ) : (
             <WebhookViewer
               orderId={state.orderId}
               label="Payment webhook"
               onEvent={(event) => set({ webhook: event.payload })}
             />
+            )}
             <p className={styles.cardDescription} style={{ marginTop: 12 }}>
               Read <code>extra.autopay.subscription_id</code> to find the subscription. As a fallback,
               the webhook's <code>session_id</code> equals <code>setup_session_id</code> on the
@@ -345,6 +407,7 @@ export default function AutoPayDemoInner() {
           <>
             {state.sub && (
               <>
+                {sampleNote}
                 <ApiPanel label={`GET ${SUBSCRIPTIONS}/${state.subscriptionId}/`} data={state.sub} />
                 {state.webhook?.extra?.autopay?.subscription_id === state.sub.id && (
                   <p className={styles.cardDescription}>
@@ -387,12 +450,14 @@ export default function AutoPayDemoInner() {
           <>
             {state.link && (
               <>
+                {sampleNote}
                 <ApiPanel label={`GET ${SUBSCRIPTIONS}/${state.subscriptionId}/page-link/`} data={state.link} />
                 <p className={styles.cardDescription}>
                   <code>page_url</code> is your customer's private self-service page. The link is the
                   credential, so you deliver it to your customer yourself. Ottu's emails also link to this page.
                 </p>
                 <div className={styles.actions}>
+                  {!state.sample && (
                   <a
                     className={styles.secondaryBtn}
                     href={state.link.page_url}
@@ -402,6 +467,7 @@ export default function AutoPayDemoInner() {
                   >
                     Open the customer page <Icon path={mdiOpenInNew} size={0.6} />
                   </a>
+                  )}
                   {state.step === 5 && next(6)}
                 </div>
               </>
@@ -435,6 +501,7 @@ export default function AutoPayDemoInner() {
                 )}
               </p>
             )}
+            {state.cancelRes && sampleNote}
             {state.cancelReq && (
               <ApiPanel label={`POST ${SUBSCRIPTIONS}/${state.subscriptionId}/cancel/`} data={state.cancelReq} />
             )}
@@ -481,13 +548,27 @@ export default function AutoPayDemoInner() {
         <Icon path={mdiAlertCircleOutline} size={1.5} className={styles.errorIcon} />
         <p className={styles.errorMessage}>{state.error}</p>
         {state.rawError && (
-          <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", textAlign: "left", fontSize: 12 }}>
-            {state.rawError}
-          </pre>
+          <>
+            <button className={styles.secondaryBtn} onClick={() => set({ showRaw: !state.showRaw })}>
+              {state.showRaw ? "Hide response" : "Show response"}
+            </button>
+            {state.showRaw && (
+              <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", textAlign: "left", fontSize: 12 }}>
+                {state.rawError}
+              </pre>
+            )}
+          </>
         )}
-        <button className={styles.secondaryBtn} onClick={restart}>
-          Restart
-        </button>
+        <div className={styles.actions}>
+          {state.rawError && (
+            <button className={styles.primaryBtn} onClick={() => { set({ error: undefined }); startSample(); }}>
+              Walk through with sample responses
+            </button>
+          )}
+          <button className={styles.secondaryBtn} onClick={restart}>
+            Restart
+          </button>
+        </div>
       </div>
     );
   }
