@@ -22,7 +22,7 @@ Sell by subscription and let Ottu do the billing work. Your developer makes one 
 ## Why use AutoPay {#why-use-autopay}
 
 - **Get paid on time without chasing.** Ottu charges the saved card every month or year. It retries failed payments on its own.
-- **Keep customers informed without writing a word.** Ottu emails them reminders and failure notices, and texts them their page link, in English or Arabic.
+- **Keep customers informed without writing a word.** Ottu emails them reminders and failure notices, and texts them their links, in English or Arabic.
 - **Cut your support load.** Customers change their card, pay an overdue balance, see their history, or cancel on their own page.
 - **Offer free trials without extra work.** Your customer saves a card and pays nothing today. Ottu charges the first real cycle on its own.
 
@@ -290,7 +290,7 @@ This is the full list. Each limit comes with what to do instead.
 - **Monthly or yearly only.** There is no weekly or custom period. *Instead:* pick the closer of the two.
 - **A running subscription cannot be edited.** Amount, frequency, billing day, retry count, language, email settings, plan name, end date, and customer email are fixed. There is no proration. *Instead:* cancel it and create a new one.
 - **Retries are set once.** Your developer picks 1 to 10 retries when the subscription is created (3 by default). Ottu runs them about an hour apart. *Instead:* choose the retry count up front.
-- **No pause.** *Instead:* cancel at the end of the paid period, then create a new subscription when the customer returns. This works while the subscription is Active or Trialing and no charge is in progress.
+- **No pause.** *Instead:* cancel at the end of the paid period, then create a new subscription when the customer returns. This works while the subscription is Active or Trialing and no payment is due or in progress.
 - **Some messages cannot be switched off.** The subscription created, setup completed, and link replaced messages always go out. Only the three billing-cycle emails can be switched off, and only at creation. *Instead:* decide on them when your developer creates the subscription.
 - **You cannot pick the exact charge time.** *Instead:* choose the start date. It sets the billing day.
 - **Canceling does not refund.** A cancellation stops future charges only. *Instead:* refund the cycle's transaction in [Payment Management](/business/payment-management/).
