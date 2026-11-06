@@ -2,6 +2,7 @@
 // group box, the numbered edge label, the title, and the edge colours.
 import React, { useEffect } from "react";
 import Icon from "@mdi/react";
+import Link from "@docusaurus/Link";
 import {
   BaseEdge,
   EdgeLabelRenderer,
@@ -27,6 +28,7 @@ export type CardData = {
   tone?: Tone;
   num?: number;
   width?: number;
+  href?: string;
 };
 
 const allSides = [Position.Top, Position.Right, Position.Bottom, Position.Left];
@@ -64,7 +66,7 @@ export function Handles({
 export function CardNode({ data }: NodeProps): React.JSX.Element {
   const d = data as CardData;
   const cls = [styles.node, d.tone ? styles[d.tone] : ""].join(" ");
-  return (
+  const body = (
     <div
       className={cls}
       style={d.width ? { width: d.width } : undefined}
@@ -84,6 +86,13 @@ export function CardNode({ data }: NodeProps): React.JSX.Element {
         {d.sub ? <div className={styles.nodeSub}>{d.sub}</div> : null}
       </span>
     </div>
+  );
+  return d.href ? (
+    <Link to={d.href} className={`${styles.cardLink} nodrag nopan`}>
+      {body}
+    </Link>
+  ) : (
+    body
   );
 }
 

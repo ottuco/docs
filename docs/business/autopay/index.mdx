@@ -1,0 +1,360 @@
+---
+title: AutoPay
+sidebar_label: AutoPay
+description: "With AutoPay, Ottu runs subscriptions for you: it charges the saved card on schedule, retries failed payments, emails your customer, and gives them a page to manage it."
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import StepGuide from "@site/src/components/StepGuide";
+import FAQ, { FAQItem } from "@site/src/components/FAQ";
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import AutoPayBusinessStory from "@site/src/diagrams/flow/AutoPayBusinessStory";
+import AutoPayStates from "@site/src/diagrams/flow/AutoPayStates";
+
+# AutoPay
+
+Sell by subscription and let Ottu do the billing work. With AutoPay, your developer makes one checkout call. After that, Ottu generates every [billing cycle](/glossary/#term-billing-cycle), charges the saved card, retries failed charges, emails your customer, and hosts a page where they manage their own [subscription](/glossary/#term-subscription).
+
+[**See it live**](/developers/payments/autopay/#live-demo): the live demo creates a test subscription and takes its first payment on Ottu's sandbox.
+
+## Why use AutoPay {#why-use-autopay}
+
+- **Charges on a schedule**, monthly or yearly, with automatic retries when a payment fails.
+- **Emails and texts your customer** in English or Arabic: reminders, failures, and the link to their page.
+- **A page your customer manages themselves.** They change their card, pay an overdue balance, see their history, or cancel.
+- **A free first period** if you want to offer a trial.
+
+:::info Before you start
+- **AutoPay is API-only.** There is no AutoPay screen in the dashboard.
+- **Renewals need a gateway with auto-debit.** See the [gateways with auto-debit](/business/payments/gateways/?features=autodebit).
+
+All limits, with their workarounds, are in [Limits](#limits).
+:::
+
+## How it works {#how-it-works}
+
+Ottu does the middle of the story. Click a step to see your part. Building the integration? See [AutoPay for developers](/developers/payments/autopay/).
+
+<AutoPayBusinessStory />
+
+## Lifecycle and billing cycles {#lifecycle-and-billing-cycles}
+
+A subscription moves through seven states. Canceled and Expired are final. Click a state to read what it means and what you do.
+
+<AutoPayStates audience="business" />
+
+### Pending setup {#state-pending-setup}
+
+Ottu created the subscription and waits for the first payment. Ottu activates it automatically after your customer pays. Your part: nothing.
+
+### Trialing {#state-trialing}
+
+The first payment was zero, so no money has moved. Ottu charges the saved card at the next billing cycle. Your part: nothing.
+
+:::tip A zero first charge starts a trial
+If the first charge is zero, the subscription starts as Trialing, not Active. The customer only saves a card. Canceling before the trial ends means no charge at all.
+:::
+
+### Active {#state-active}
+
+Billing normally. The latest cycle was paid. Your part: give your customer the service.
+
+### Past Due {#state-past-due}
+
+Every retry on a cycle failed. Ottu emails the customer a link to pay. When they pay, the subscription returns to Active. Your part: decide what to do if it stays Past Due.
+
+:::warning Ottu never cancels a Past Due subscription on its own
+It stays Past Due until the customer pays or your team cancels it. Build your own process for subscriptions that stay Past Due longer than you are comfortable with. A Past Due customer cannot cancel until they pay the balance.
+:::
+
+### Canceled {#state-canceled}
+
+Billing has stopped. A cancellation from your customer lands here at the end of the paid period. Your team's immediate cancel lands here at once. Your part: nothing.
+
+### Expired {#state-expired}
+
+The last cycle was paid and the next billing date would fall after the end date. Billing stopped. The history stays readable. To continue, create a new subscription.
+
+### Setup Failed {#state-setup-failed}
+
+The customer canceled the checkout, or did not pay within 24 hours. Ottu does not retry it. Your part: create a new subscription.
+
+### Billing cycles {#billing-cycles}
+
+Ottu creates [billing cycles](/glossary/#term-billing-cycle) one at a time. The next cycle exists only once the current one is paid.
+
+:::note A cycle's amount is locked when it is generated
+Past cycles stay a reliable record of what Ottu charged.
+:::
+
+### Anchor days {#anchor-days}
+
+Every subscription bills on the same day of the month, called its anchor day. The start date sets it. A subscription anchored on the 29th, 30th, or 31st moves to the last day of a shorter month, then returns to its anchor day.
+
+**Anchored on the 31st:** Jan 31 → Feb 28 (Feb 29 in a leap year) → Mar 31
+
+## What your customer sees {#what-your-customer-sees}
+
+Your customer gets emails, text messages, and one private page. Ottu sends and hosts all of them.
+
+### The emails and texts {#the-emails}
+
+Ottu sends 6 emails and 3 text messages. Each goes out in English or Arabic, chosen when the subscription is created. Text messages go to the customer's phone number, when one is on file. Only the three billing-cycle emails can be switched off, and only when the subscription is created.
+
+#### Subscription created {#email-subscription-created}
+
+- **Email and SMS.** Ottu sends both when it creates the subscription.
+- **What it says:** the link to the first payment, and a link to manage the subscription.
+- **Switch off:** no.
+
+SMS (English): "Hi {name}, please complete your {merchant} subscription setup here: {checkout_url}"
+
+#### Setup completed {#email-setup-completed}
+
+- **Email and SMS.** Ottu sends both once, when the subscription leaves Pending setup.
+- **What it says:** the subscription is active, with a link to manage it.
+- **Switch off:** no.
+
+SMS (English): "...your {merchant} subscription is now active. Manage it here: {hosted_page_url}"
+
+#### Upcoming charge {#email-upcoming-charge}
+
+- **Email.** Monthly subscriptions get one reminder, 3 days before the charge. Yearly subscriptions get three, 31, 11, and 4 days before.
+- **Skipped** when the customer has no email on file or a cancellation is pending.
+- **Switch off:** yes, at creation.
+
+<Tabs groupId="email-language" queryString>
+<TabItem value="en" label="English">
+
+![Upcoming charge reminder email in English](/img/business/autopay/notifications-01-upcoming-charge-en.png)
+
+</TabItem>
+<TabItem value="ar" label="العربية">
+
+![Upcoming charge reminder email in Arabic](/img/business/autopay/notifications-02-upcoming-charge-ar.png)
+
+</TabItem>
+</Tabs>
+
+#### Payment failed {#email-payment-failed}
+
+- **Email.** Ottu sends it after each failed attempt while retries remain.
+- **What it says:** the reason, the time of the next retry, and a link to update the card.
+- **Switch off:** yes, at creation.
+
+<Tabs groupId="email-language" queryString>
+<TabItem value="en" label="English">
+
+![Payment failed email in English](/img/business/autopay/notifications-03-payment-failed-en.png)
+
+</TabItem>
+<TabItem value="ar" label="العربية">
+
+![Payment failed email in Arabic](/img/business/autopay/notifications-04-payment-failed-ar.png)
+
+</TabItem>
+</Tabs>
+
+#### Final failure {#email-final-failure}
+
+- **Email.** Ottu sends it about 15 seconds after the last attempt fails and the subscription becomes Past Due.
+- **What it says:** the outstanding balance, with a link to pay it.
+- **Switch off:** yes, at creation.
+
+<Tabs groupId="email-language" queryString>
+<TabItem value="en" label="English">
+
+![Final failure email in English with outstanding balance and next steps](/img/business/autopay/notifications-05-final-failure-en.png)
+
+</TabItem>
+<TabItem value="ar" label="العربية">
+
+![Final failure email in Arabic with outstanding balance and next steps](/img/business/autopay/notifications-06-final-failure-ar.png)
+
+</TabItem>
+</Tabs>
+
+The email may talk about suspended access. That describes your product, not Ottu. Any decision about your customer's access is yours. See [Past Due](#state-past-due).
+
+#### Link replaced {#email-link-replaced}
+
+- **Email and SMS.** Ottu sends both each time your team regenerates the customer's page link.
+- **What it says:** the new link, and that the previous link no longer works.
+- **Switch off:** no.
+
+SMS (English): "...your {merchant} subscription has a new link. The previous link no longer works: {hosted_page_url}"
+
+### The self-service page {#the-self-service-page}
+
+Every subscription gets its own private page, reached through a private link. Treat it like a password: anyone holding the link can open the page. The link is in every email Ottu sends. Ottu hosts the page, keeps it in sync with the subscription, and shows it in English and Arabic.
+
+From this page, a customer can:
+
+- **See** their plan, status, and next charge date.
+- **Review billing history**, including the next cycle, listed as **Scheduled** until it is charged.
+- **Add a card**, or switch which saved card is active.
+- **Pay** an outstanding balance.
+- **Cancel**, or undo a pending cancellation.
+
+What the page shows depends on the subscription's state:
+
+<StepGuide steps={[
+  {
+    title: "Active",
+    description: <>Plan, status, next payment date, saved cards, and payment history on one page. Nothing is outstanding.</>,
+    image: "/img/business/autopay/portal-01-summary-active.png",
+    imageAlt: "Active subscription: customer details, subscription summary, payment methods, and payment history all on one page",
+  },
+  {
+    title: "Trialing",
+    description: <>A banner counts down to the trial's end, when the saved card is charged. Canceling first means no charge at all.</>,
+    image: "/img/business/autopay/portal-02-trialing.png",
+    imageAlt: "Trialing subscription with a banner counting down to the trial's end date",
+  },
+  {
+    title: "Cancellation pending",
+    description: <>Access runs to the end of the paid period, with <strong>Reactivate subscription</strong> available until then.</>,
+    image: "/img/business/autopay/portal-03-canceled-pending-reactivation.png",
+    imageAlt: "Canceled subscription pending the end of its period, with a Reactivate subscription option",
+  },
+  {
+    title: "Past due",
+    description: <>The page shows the overdue date and the failed card, with <strong>Pay Now</strong> to clear the balance.</>,
+    image: "/img/business/autopay/recovery-01-past-due.png",
+    imageAlt: "The past-due self-service page: overdue-since date, the failed card flagged, and a Failed row in the payment history",
+  },
+  {
+    title: "Expired",
+    description: <>Billing stopped at the end date. History stays readable and every action is gone. Continuing means a new subscription.</>,
+    image: "/img/business/autopay/portal-04-expired.png",
+    imageAlt: "Expired subscription: billing stopped at the end date, actions removed, history still readable",
+  },
+]} />
+
+And these are the actions a customer can take:
+
+<StepGuide steps={[
+  {
+    title: "Add a card",
+    description: <>A secure card form opens on the page. The new card can become active immediately, and the next charge uses it.</>,
+    image: "/img/business/autopay/cards-02-add-card.png",
+    imageAlt: "Adding a card: a secure checkout where the customer enters and saves a new card to the subscription",
+  },
+  {
+    title: "Give a reason",
+    description: <>A short reason list, clearly marked optional.</>,
+    image: "/img/business/autopay/cancellation-02-reason-options.png",
+    imageAlt: "Optional cancellation reason selection dialog",
+  },
+  {
+    title: "Confirm a cancellation",
+    description: <>The dialog states when access ends and that no further charges follow.</>,
+    image: "/img/business/autopay/cancellation-01-confirm.png",
+    imageAlt: "Cancellation confirmation dialog stating access continues until the end of the paid period",
+  },
+  {
+    title: "Undo the cancellation",
+    description: <>One click, no new checkout. The dialog previews the plan, amount, and next renewal date.</>,
+    image: "/img/business/autopay/reactivation-01-confirm.png",
+    imageAlt: "Reactivation confirmation previewing the plan, amount, and next renewal date before the customer confirms",
+  },
+  {
+    title: "Payment confirmed",
+    description: <>The balance clears and the subscription returns to Active.</>,
+    image: "/img/business/autopay/recovery-02-payment-confirmed.png",
+    imageAlt: "Payment confirmed screen after clearing an outstanding balance",
+  },
+]} />
+
+:::note A customer's cancellation waits for the end of the paid period
+It never takes effect immediately. Only your team can cancel immediately, through the API. Undo is available while the subscription is Active or Trialing and the cancellation is pending.
+
+A Past Due customer cannot cancel. Ottu refuses the request until they pay the balance.
+:::
+
+Customers can hold several cards and switch the active one in a click. Switching to a new card keeps the old card, so an old card still explains what paid an earlier cycle.
+
+<a id="regenerate-link"></a>
+
+:::warning Regenerating a link revokes the old one
+The previous link stops working at once, and the page shows "This link has expired". Ottu emails and texts the customer the new link (see [Link replaced](#email-link-replaced)). Links never expire on their own, so only a regeneration revokes one.
+:::
+
+## When a payment fails {#when-a-payment-fails}
+
+- **Four attempts by default.** That is one initial charge plus three retries, about an hour apart. Your developer can set from 1 to 10 retries when they create the subscription. Ottu fixes the interval.
+- **The customer is emailed** after each failed attempt while retries remain, so they can update their card.
+- **After the last attempt,** the subscription moves to [Past Due](#state-past-due). The customer gets the final email with a link to pay.
+- **Paying the balance** returns the subscription to Active.
+
+## Setting up AutoPay {#setting-up-autopay}
+
+Your developers call the API to create, look up, and cancel subscriptions. See [Limits](#limits) for what AutoPay does not do.
+
+Before your first subscription, make sure you have:
+
+1. **AutoPay enabled for your account.** Ask Ottu support to turn it on.
+2. **A support email.** It appears on the customer's page and in the footer of every email Ottu sends.
+3. **A privacy policy URL.** It is linked from the footer of every email Ottu sends.
+4. **A payment gateway with auto-debit,** in the currency you bill in. See the [gateways with auto-debit](/business/payments/gateways/?features=autodebit).
+5. **The email and text templates registered,** in English and Arabic: 6 emails and 3 text messages. Ottu support sets these up, the same way [notification templates](/business/notifications/) work for one-off payments.
+
+AutoPay subscriptions have no plan catalog. The plan name is a free-text label, and the price is the amount your team passes in the checkout call that creates the subscription. The [developer docs](/developers/payments/autopay/#api-reference) show the request shape.
+
+## Limits {#limits}
+
+This is the full list. Each limit comes with what to do instead.
+
+- **API-only.** There is no AutoPay screen in the dashboard. *Instead:* ask your developer to integrate it, and try the [live demo](/developers/payments/autopay/#live-demo).
+- **Renewals need a gateway with auto-debit.** The limit is on the payment gateway, not on the card. *Instead:* pick a gateway from the [filtered catalog](/business/payments/gateways/?features=autodebit).
+- **Monthly or yearly only.** *Instead:* pick the closer of the two.
+- **A running subscription cannot be edited.** Amount, frequency, billing day, retry count, and customer email are fixed. *Instead:* cancel it and create a new one.
+- **No pause.** *Instead:* cancel at the end of the paid period, then create a new subscription when the customer returns.
+- **Emails switch off only at creation,** and only the three billing-cycle emails. *Instead:* decide when your developer creates the subscription.
+- **You cannot pick the exact charge time.** *Instead:* choose the start date. It sets the billing day.
+- **No dashboard list of subscriptions.** *Instead:* your developer [lists them through the API](/developers/payments/autopay/#api-reference), filtered by status, for example Past Due.
+- **Your team cannot undo a pending cancellation.** *Instead:* send your customer their page link. They can undo it there.
+
+## FAQ {#faq}
+
+<FAQ>
+  <FAQItem question="Can I cancel a customer's subscription immediately?">
+    Yes, but only your team can, through the API. A cancellation the customer starts always waits for the end of their paid period. A Past Due customer cannot cancel until they pay. See [Past Due](#state-past-due).
+  </FAQItem>
+  <FAQItem question="Can I change the price of a subscription that's already running?">
+    No. Cancel it and create a new one. See [Limits](#limits).
+  </FAQItem>
+  <FAQItem question="Can I pause a subscription?">
+    No. See [Limits](#limits) for what to do instead.
+  </FAQItem>
+  <FAQItem question="Which payment gateways and currencies does AutoPay support?">
+    Ottu charges the saved card through a gateway with auto-debit, in the currency of the subscription. The [gateway catalog, filtered to auto-debit](/business/payments/gateways/?features=autodebit), lists the gateways and the currencies of each.
+  </FAQItem>
+  <FAQItem question="Where do I see AutoPay payments?">
+    Each billing cycle is one Ottu transaction in [Payment Management](/business/payment-management/), and all retries of that cycle are on it. The first payment is the transaction from your own checkout.
+  </FAQItem>
+  <FAQItem question="How do I refund a billing cycle?">
+    Find the cycle's transaction in [Payment Management](/business/payment-management/) and refund it, in full or in part. A refund doesn't cancel the subscription. Cancel it separately if the customer is leaving.
+  </FAQItem>
+  <FAQItem question="What happens when my customer's card expires?">
+    The charge fails like any other declined card. Ottu retries and emails the customer. If every attempt fails, the subscription moves to Past Due. The customer can add a new card and pay from their self-service page.
+  </FAQItem>
+  <FAQItem question="Can a customer have more than one card on file?">
+    Yes. They can switch the active card from their self-service page at any time.
+  </FAQItem>
+  <FAQItem question="Does AutoPay support Arabic?">
+    Yes. Each subscription's emails and texts go out in English or Arabic, chosen when it is created, and the self-service page offers both languages.
+  </FAQItem>
+  <FAQItem question="What if a customer opens a link that was replaced?">
+    The page shows "This link has expired". The customer already received the new link by email and text. You can also send it yourself. See [Regenerating a link revokes the old one](#regenerate-link).
+  </FAQItem>
+</FAQ>
+
+## What's Next? {#whats-next}
+
+- [AutoPay for developers](/developers/payments/autopay/): API integration and the full request/response contract.
+- [Notifications](/business/notifications/): configuring email, SMS, and WhatsApp templates generally.
+- [Payment Management](/business/payment-management/): find and manage your transactions.
+- [Settings → API Keys](/business/settings/api-keys): the credentials your developers need to call Ottu's API.
