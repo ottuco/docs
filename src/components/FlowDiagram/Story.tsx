@@ -11,7 +11,14 @@
 //
 // Arrow shapes live in storyRoutes.ts, the focus CSS in storyFocus.ts, the
 // node ids in storyIds.ts and the panel in StoryPanel.tsx.
-import React, { useEffect, useId, useMemo, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useColorMode } from "@docusaurus/theme-common";
 import { ReactFlow, type Edge, type Node, type NodeProps } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -27,7 +34,6 @@ import {
   type CardData,
 } from "./parts";
 import {
-  PANEL_W,
   STORY_PANEL_GAP,
   STORY_ROW,
   STORY_TOP,
@@ -37,6 +43,7 @@ import {
   storyGap,
   storyLanesHeight,
   storyMinWidth,
+  storySideAt,
 } from "./layout";
 import { routeLink } from "./storyRoutes";
 import { focusCss, type Hover, type Pin } from "./storyFocus";
@@ -163,10 +170,11 @@ export default function Story(props: StoryProps): React.JSX.Element {
   // container; measured, not guessed from the viewport.
   const wrap = useRef<HTMLDivElement>(null);
   const [side, setSide] = useState(false);
-  const needed = storyMinWidth(props) + PANEL_W + STORY_PANEL_GAP;
-  useEffect(() => {
+  const needed = storySideAt(props);
+  useLayoutEffect(() => {
     const el = wrap.current;
     if (!el || !hasPanel) return;
+    setSide(el.clientWidth >= needed); // before first paint: no flash
     const ro = new ResizeObserver(() => setSide(el.clientWidth >= needed));
     ro.observe(el);
     return () => ro.disconnect();

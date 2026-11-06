@@ -47,6 +47,13 @@ export const storyFigureHeight = (p: StoryProps): number =>
   STORY_HEADER_H +
   storyBodyHeight(p) +
   (hasJourneys(p) ? STORY_JOURNEYS_H + STORY_PANEL_GAP + STORY_PANEL_H : 0);
+/** The figure without the caption panel under it (what a placeholder shows
+ * before the browser knows whether the panel sits beside or below). */
+export const storyDiagramHeight = (p: StoryProps): number =>
+  storyFigureHeight(p) - (hasJourneys(p) ? STORY_PANEL_GAP + STORY_PANEL_H : 0);
+/** Container width from which the caption sits beside the diagram. */
+export const storySideAt = (p: StoryProps): number =>
+  storyMinWidth(p) + PANEL_W + STORY_PANEL_GAP;
 export const storyMinWidth = (p: StoryProps): number =>
   Math.round(p.lanes.length * storyGap(p.lanes.length) * 0.95);
 

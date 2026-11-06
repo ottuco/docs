@@ -903,6 +903,11 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "link",
+              label: "Lifecycle and billing cycles",
+              href: "/business/autopay#lifecycle-and-billing-cycles",
+            },
+            {
+              type: "link",
               label: "What your customer sees",
               href: "/business/autopay#what-your-customer-sees",
             },
@@ -910,11 +915,6 @@ const sidebars: SidebarsConfig = {
               type: "link",
               label: "When a payment fails",
               href: "/business/autopay#when-a-payment-fails",
-            },
-            {
-              type: "link",
-              label: "Lifecycle and billing cycles",
-              href: "/business/autopay#lifecycle-and-billing-cycles",
             },
             {
               type: "link",

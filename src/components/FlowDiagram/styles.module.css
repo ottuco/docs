@@ -413,7 +413,7 @@
 .panel {
   position: relative;
   height: 128px;
-  /* Height is fixed inline (STORY_PANEL_H): short content sits centred,
+  /* Height is fixed (128px, see .panel): short content sits centred,
      long content scrolls. `safe` keeps the top reachable when it overflows. */
   display: flex;
   flex-direction: column;
@@ -507,6 +507,8 @@
 
 .figure {
   margin: 1.75rem 0;
+  /* The container the placeholder's @container rule measures. */
+  container-type: inline-size;
 }
 
 .srOnly {
