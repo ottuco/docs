@@ -15,6 +15,13 @@ import CheckoutSDKEmbed from "@site/src/components/CheckoutSDKEmbed";
 import TestCardCallout from "@site/src/components/TestCardCallout";
 import WebhookViewer from "@site/src/components/RecurringDemo/WebhookViewer";
 import styles from "@site/src/components/RecurringDemo/styles.module.css";
+import {
+  sampleCancelResponse,
+  sampleCreateResponse,
+  samplePageLink,
+  sampleSubscription,
+  sampleWebhook,
+} from "./samples";
 
 // Gateway discovery and session creation must name the same plugin (#159191).
 const PLUGIN: PaymentPlugin = "e_commerce";
@@ -28,7 +35,7 @@ const STEPS = [
   { num: 3, title: "The webhook arrives", subtitle: "Your webhook_url" },
   { num: 4, title: "Retrieve the subscription", subtitle: "GET /b/pbl/v2/subscriptions/{id}/" },
   { num: 5, title: "Open the customer's page", subtitle: "GET …/page-link/" },
-  { num: 6, title: "Cancel at period end (optional)", subtitle: "POST …/cancel/" },
+  { num: 6, title: "Finish, or see how cancellation works", subtitle: "POST …/cancel/ · optional" },
 ];
 
 const COMPLETE = STEPS.length + 1;
@@ -37,6 +44,9 @@ interface State {
   step: number; // 0 = idle, 1..6 = active step, 7 = complete
   busy: boolean;
   error?: string;
+  rawError?: string;
+  showRaw?: boolean;
+  sample?: boolean; // walk-through with sample responses, no live calls
   orderId: string;
   customerId: string;
   pgCodes: string[];
@@ -218,9 +228,31 @@ export default function AutoPayDemoInner() {
       liveSubscription.current = subscriptionId;
       set({ busy: false, pgCodes, createReq, createRes, subscriptionId });
     } catch (err) {
-      fail(err);
+      // Any create failure ends here with a plain message; the raw response stays visible below it.
+      if (mounted.current) {
+        set({
+          busy: false,
+          error: "The sandbox can't create a test subscription right now. Try again later.",
+          rawError: err instanceof Error ? err.message : String(err),
+        });
+      }
     }
-  }, [set, fail]);
+  }, [set]);
+
+  // Fallback when the sandbox cannot create a subscription: walk through with labeled sample responses.
+  const startSample = useCallback(() => {
+    const orderId = "demo-order-1001";
+    const createReq = buildAutoPayRequest(orderId, "cust_sample", ["<TOKENIZABLE_PG_CODE>"]);
+    dispatch({ type: "RESET" });
+    set({
+      sample: true,
+      step: 1,
+      orderId,
+      createReq,
+      createRes: sampleCreateResponse,
+      subscriptionId: sampleSubscription.id,
+    });
+  }, [set]);
 
   const sdkCallbacks = useMemo(() => createDemoCallbacks(() => set({ step: 3 })), [set]);
 
@@ -228,6 +260,10 @@ export default function AutoPayDemoInner() {
   const status: string | undefined = state.sub?.status;
   useEffect(() => {
     if (state.step !== 4 || !state.subscriptionId) return;
+    if (state.sample) {
+      if (!state.sub) set({ sub: sampleSubscription });
+      return;
+    }
     if (status && status !== "pending_setup") return;
     if (state.polls >= MAX_POLLS) return;
     const timer = setTimeout(
@@ -242,10 +278,14 @@ export default function AutoPayDemoInner() {
       state.polls === 0 ? 0 : POLL_MS,
     );
     return () => clearTimeout(timer);
-  }, [state.step, state.subscriptionId, state.polls, status, set, fail]);
+  }, [state.step, state.subscriptionId, state.polls, state.sample, state.sub, status, set, fail]);
 
   // Step 5: read the customer's page link (does not rotate it).
   const getPageLink = useCallback(async () => {
+    if (state.sample) {
+      set({ step: 5, link: samplePageLink });
+      return;
+    }
     set({ step: 5, busy: true });
     try {
       const link = await connectCall("GET", `${SUBSCRIPTIONS}/${state.subscriptionId}/page-link/`);
@@ -253,22 +293,33 @@ export default function AutoPayDemoInner() {
     } catch (err) {
       fail(err);
     }
-  }, [state.subscriptionId, set, fail]);
+  }, [state.subscriptionId, state.sample, set, fail]);
 
-  // Step 6: schedule the cancellation for the end of the period.
-  const cancelAtPeriodEnd = useCallback(async () => {
-    const cancelReq = { mode: "at_period_end" };
+  // Step 6: at_period_end needs an active or trialing subscription. A pending_setup one only accepts immediate.
+  const cancelDemo = useCallback(async () => {
+    const cancelReq = { mode: state.sub?.status === "active" || state.sub?.status === "trialing" ? "at_period_end" : "immediate" };
+    if (state.sample) {
+      set({ cancelReq: { mode: "at_period_end" }, cancelRes: sampleCancelResponse });
+      return;
+    }
     set({ busy: true, cancelReq });
     try {
       const cancelRes = await connectCall("POST", `${SUBSCRIPTIONS}/${state.subscriptionId}/cancel/`, {
         body: cancelReq,
         headers: { "Idempotency-Key": crypto.randomUUID() },
       });
+      if (cancelReq.mode === "immediate") liveSubscription.current = undefined;
       set({ busy: false, cancelRes });
     } catch (err) {
       fail(err);
     }
-  }, [state.subscriptionId, set, fail]);
+  }, [state.subscriptionId, state.sample, state.sub?.status, set, fail]);
+
+  const sampleNote = state.sample ? (
+    <p className={styles.cardDescription}>
+      <strong>Sample response — not from a live call.</strong>
+    </p>
+  ) : null;
 
   const next = (step: number) => <button className={styles.primaryBtn} onClick={() => set({ step })}>Continue</button>;
 
@@ -286,6 +337,7 @@ export default function AutoPayDemoInner() {
             )}
             {state.createReq && (
               <>
+                {sampleNote}
                 <ApiPanel label="POST /b/checkout/v1/pymt-txn/" data={state.createReq} />
                 <ApiPanel label="Response — 201 Created" data={state.createRes} />
                 <p className={styles.cardDescription}>
@@ -299,6 +351,17 @@ export default function AutoPayDemoInner() {
         );
 
       case 2:
+        if (state.sample) {
+          return (
+            <>
+              <p className={styles.cardDescription}>
+                <strong>What happens here.</strong> Your customer opens Ottu's checkout page, enters a card and pays the first charge. Ottu then sends the webhook in the next step. See{" "}
+                <a href="#what-your-customer-sees">what your customer sees</a>.
+              </p>
+              {state.step === 2 && <div className={styles.actions}>{next(3)}</div>}
+            </>
+          );
+        }
         return state.step === 2 ? (
           <>
             <TestCardCallout />
@@ -315,16 +378,23 @@ export default function AutoPayDemoInner() {
       case 3:
         return (
           <>
+            {state.sample ? (
+              <>
+                {sampleNote}
+                <ApiPanel label="Payment webhook (to your webhook_url)" data={sampleWebhook} />
+              </>
+            ) : (
             <WebhookViewer
               orderId={state.orderId}
               label="Payment webhook"
               onEvent={(event) => set({ webhook: event.payload })}
             />
+            )}
             <p className={styles.cardDescription} style={{ marginTop: 12 }}>
-              Read <code>extra.autopay.subscription_id</code> to find the subscription. As a fallback,
-              the webhook's <code>session_id</code> equals <code>setup_session_id</code> on the
-              subscription. The subscription is usually still <code>pending_setup</code> when this
-              webhook arrives, so treat it as "payment received", not "subscription active".
+              This is "payment received", not "subscription active". The <code>autopay</code> block is not
+              signed: confirm by retrieving the subscription. See{" "}
+              <a href="#first-payment-and-activation">First payment and activation</a> for how to match this
+              webhook to your subscription.
             </p>
             {state.step === 3 && <div className={styles.actions}>{next(4)}</div>}
           </>
@@ -336,8 +406,11 @@ export default function AutoPayDemoInner() {
           <>
             {state.sub && (
               <>
+                {sampleNote}
                 <ApiPanel label={`GET ${SUBSCRIPTIONS}/${state.subscriptionId}/`} data={state.sub} />
-                {state.webhook?.extra?.autopay?.subscription_id === state.sub.id && (
+                {(state.sample ||
+                  (state.webhook?.extra?.autopay?.subscription_id &&
+                    state.webhook.extra.autopay.subscription_id === state.sub.id)) && (
                   <p className={styles.cardDescription}>
                     The webhook's <code>extra.autopay.subscription_id</code> equals this subscription's <code>id</code>.
                   </p>
@@ -347,9 +420,10 @@ export default function AutoPayDemoInner() {
             <p className={styles.cardDescription}>
               {pending ? (
                 <>
-                  <strong><code>pending_setup</code> is expected right after payment.</strong> Ottu confirms
-                  the first payment on a recurring check (usually a minute or two on the sandbox, up to about 15 minutes in production), so the status
-                  lags the payment. {state.polls >= MAX_POLLS ? "Polling stopped; check again below." : "Checking every 5 seconds..."}
+                  <strong><code>pending_setup</code> is normal right after payment.</strong> You do not have to wait:
+                  the next steps work while the subscription is <code>pending_setup</code>. See{" "}
+                  <a href="#first-payment-and-activation">First payment and activation</a>.{" "}
+                  {state.polls >= MAX_POLLS ? "Polling stopped; check again below." : "This page checks every 5 seconds."}
                 </>
               ) : (
                 <>
@@ -376,12 +450,14 @@ export default function AutoPayDemoInner() {
           <>
             {state.link && (
               <>
+                {sampleNote}
                 <ApiPanel label={`GET ${SUBSCRIPTIONS}/${state.subscriptionId}/page-link/`} data={state.link} />
                 <p className={styles.cardDescription}>
-                  Send <code>page_url</code> to your customer. It is their private self-service page: the
-                  link itself is the credential.
+                  <code>page_url</code> is your customer's private self-service page. The link is the
+                  credential, so you deliver it to your customer yourself. Ottu's emails also link to this page.
                 </p>
                 <div className={styles.actions}>
+                  {!state.sample && (
                   <a
                     className={styles.secondaryBtn}
                     href={state.link.page_url}
@@ -391,6 +467,7 @@ export default function AutoPayDemoInner() {
                   >
                     Open the customer page <Icon path={mdiOpenInNew} size={0.6} />
                   </a>
+                  )}
                   {state.step === 5 && next(6)}
                 </div>
               </>
@@ -398,14 +475,37 @@ export default function AutoPayDemoInner() {
           </>
         );
 
-      case 6:
+      case 6: {
+        const canSchedule = status === "active" || status === "trialing";
         return (
           <>
-            <p className={styles.cardDescription}>
-              <code>at_period_end</code> schedules the cancellation. The status does not change and
-              <code>cancel_at_period_end</code> becomes <code>true</code>. When the next billing date
-              arrives, Ottu cancels the subscription and does not charge.
-            </p>
+            {state.step === 6 && !state.cancelRes && (
+              <p className={styles.cardDescription}>
+                {state.sample ? "Choose how to end this walk-through." : "Your test subscription is created. Choose how to end the demo."}
+                {!state.sample && (
+                  <>
+                    <br />
+                    <strong>Finish here:</strong> the demo cancels its own test subscription when you leave the page or restart.
+                  </>
+                )}
+                <br />
+                <strong>See how cancellation works:</strong>{" "}
+                {canSchedule ? (
+                  <>
+                    the demo sends <code>mode: "at_period_end"</code>. The status stays <code>{status}</code>,
+                    the customer keeps access until the period ends, and <code>cancel_at_period_end</code> becomes{" "}
+                    <code>true</code>. Then Ottu cancels the subscription and charges nothing more.
+                  </>
+                ) : (
+                  <>
+                    <code>at_period_end</code> is refused while the status is <code>{status ?? "pending_setup"}</code>{" "}
+                    (<code>422 invalid_transition</code>), so the demo sends <code>mode: "immediate"</code>. The
+                    subscription becomes <code>canceled</code> at once.
+                  </>
+                )}
+              </p>
+            )}
+            {state.cancelRes && sampleNote}
             {state.cancelReq && (
               <ApiPanel label={`POST ${SUBSCRIPTIONS}/${state.subscriptionId}/cancel/`} data={state.cancelReq} />
             )}
@@ -413,17 +513,18 @@ export default function AutoPayDemoInner() {
             {state.step === 6 && (
               <div className={styles.actions}>
                 {!state.cancelRes && (
-                  <button className={styles.secondaryBtn} onClick={cancelAtPeriodEnd} disabled={state.busy}>
-                    {state.busy ? "Cancelling..." : "Cancel at period end"}
+                  <button className={styles.secondaryBtn} onClick={cancelDemo} disabled={state.busy}>
+                    {state.busy ? "Cancelling..." : "See how cancellation works"}
                   </button>
                 )}
-                <button className={styles.primaryBtn} onClick={() => set({ step: COMPLETE })}>
-                  {state.cancelRes ? "Finish" : "Skip and finish"}
+                <button className={styles.primaryBtn} onClick={() => set({ step: COMPLETE })} disabled={state.busy}>
+                  {state.cancelRes ? "Finish" : "Finish here"}
                 </button>
               </div>
             )}
           </>
         );
+      }
 
       default:
         return null;
@@ -435,7 +536,7 @@ export default function AutoPayDemoInner() {
       <div className={styles.hero}>
         <h2 className={styles.heroTitle}>Try an AutoPay subscription</h2>
         <p className={styles.heroSubtitle}>
-          Create a subscription, pay the first charge with a test card, then watch it activate
+          Create a subscription, pay the first charge with a test card, then read its status
           — all in the sandbox. No real money moves.
         </p>
         <button className={styles.primaryBtn} onClick={start}>
@@ -450,9 +551,28 @@ export default function AutoPayDemoInner() {
       <div className={styles.errorCard}>
         <Icon path={mdiAlertCircleOutline} size={1.5} className={styles.errorIcon} />
         <p className={styles.errorMessage}>{state.error}</p>
-        <button className={styles.secondaryBtn} onClick={restart}>
-          Restart
-        </button>
+        {state.rawError && (
+          <>
+            <button className={styles.secondaryBtn} onClick={() => set({ showRaw: !state.showRaw })}>
+              {state.showRaw ? "Hide response" : "Show response"}
+            </button>
+            {state.showRaw && (
+              <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", textAlign: "left", fontSize: 12 }}>
+                {state.rawError}
+              </pre>
+            )}
+          </>
+        )}
+        <div className={styles.actions}>
+          {state.rawError && (
+            <button className={styles.primaryBtn} onClick={startSample}>
+              Walk through with sample responses
+            </button>
+          )}
+          <button className={styles.secondaryBtn} onClick={restart}>
+            Restart
+          </button>
+        </div>
       </div>
     );
   }
@@ -495,7 +615,9 @@ export default function AutoPayDemoInner() {
         <div className={styles.completeCard} data-autopay-complete>
           <h3 className={styles.completeTitle}>Journey complete</h3>
           <p className={styles.completeSubtitle}>
-            You created a subscription, paid its first charge, and read its status and customer page link.
+            {state.sample
+              ? "This walk-through showed how you create a subscription, how your customer pays its first charge, and how you read its status and customer page link."
+              : "You created a subscription, paid its first charge, and read its status and customer page link."}{" "}
             From here Ottu bills each cycle, retries failed charges and emails the customer.
           </p>
           <button className={styles.secondaryBtn} onClick={restart}>

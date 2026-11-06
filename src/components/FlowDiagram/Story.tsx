@@ -36,11 +36,13 @@ import {
   storyGap,
   storyLanesHeight,
   storyMinWidth,
+  storySideAt,
 } from "./layout";
 import { routeLink } from "./storyRoutes";
 import { focusCss, type Hover, type Pin } from "./storyFocus";
 import { laneId, linkId, stepId, stepOf } from "./storyIds";
 import StoryPanel from "./StoryPanel";
+import { useWidthFlag } from "./useWidthFlag";
 import type { StoryLane, StoryProps } from "./types";
 import styles from "./styles.module.css";
 
@@ -157,6 +159,45 @@ export default function Story(props: StoryProps): React.JSX.Element {
       behavior: reducedMotion() ? "auto" : "smooth",
     });
   }, [maxHeight, journey, stop]);
+
+  // The caption goes beside the diagram only when diagram + caption fit the
+  // container; measured, not guessed from the viewport.
+  const wrap = useRef<HTMLDivElement>(null);
+  const side = useWidthFlag(wrap, storySideAt(props), hasPanel);
+
+  // On a narrow screen the panel sits below the diagram. After a click, scroll
+  // down just enough to show it, but never so far that the clicked step
+  // leaves the screen.
+  useEffect(() => {
+    if (!pin || side) return;
+    const panel = document.getElementById(`${scope}-panel`);
+    if (!panel) return;
+    let delta =
+      panel.getBoundingClientRect().bottom - (window.innerHeight - 12);
+    if (delta <= 0) return;
+    const stepNo =
+      pin.kind === "step"
+        ? pin.i
+        : pin.kind === "journey"
+          ? walked[walked.length - 1]
+          : null;
+    const node = stepNo
+      ? document.querySelector(`#${scope} [data-id="${stepId(stepNo)}"]`)
+      : null;
+    if (node) {
+      const NAVBAR = 72; // navbar plus a little air
+      delta = Math.min(
+        delta,
+        Math.max(0, node.getBoundingClientRect().top - NAVBAR),
+      );
+    }
+    if (delta > 0)
+      window.scrollBy({
+        top: delta,
+        behavior: reducedMotion() ? "auto" : "smooth",
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `walked` follows `stop`
+  }, [scope, pin, stop, side]);
 
   // Clicking the pinned thing again unpins it. A click also drops the hover
   // preview: touch never sends mouseleave, and after unpinning the reader
@@ -290,9 +331,14 @@ export default function Story(props: StoryProps): React.JSX.Element {
   if (!hasPanel) return diagram;
 
   return (
-    <div className={styles.storyWrap} style={{ gap: STORY_PANEL_GAP }}>
+    <div
+      ref={wrap}
+      className={`${styles.storyWrap} ${side ? styles.storyWrapSide : ""}`}
+      style={{ gap: STORY_PANEL_GAP }}
+    >
       {diagram}
       <StoryPanel
+        id={`${scope}-panel`}
         lanes={lanes}
         steps={steps}
         journey={journey}
