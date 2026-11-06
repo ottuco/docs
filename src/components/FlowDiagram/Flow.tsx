@@ -78,6 +78,7 @@ export default function Flow(props: FlowProps): React.JSX.Element {
           width: c.width,
           href: onSelect ? undefined : c.href,
           mono: c.mono,
+          hidden: c.hidden,
         },
         // An unknown `parent` is ignored: the card is placed on its own, the
         // same way flowMinWidth and the arrow sides treat it.
@@ -154,6 +155,12 @@ export default function Flow(props: FlowProps): React.JSX.Element {
         if (id) {
           e.preventDefault();
           onSelect(id === selected ? null : id);
+          // The re-render must not take keyboard focus away from the card.
+          requestAnimationFrame(() =>
+            document
+              .querySelector<HTMLElement>(`#${scope} [data-id="${id}"]`)
+              ?.focus(),
+          );
         }
       }
     : undefined;

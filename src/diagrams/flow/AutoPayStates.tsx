@@ -1,7 +1,13 @@
 // AutoPay subscription states and the main moves between them.
 // Usage in MDX:  import AutoPayStates from "@site/src/diagrams/flow/AutoPayStates";
 //   <AutoPayStates audience="business" />   or   <AutoPayStates audience="developer" />
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   mdiAlertCircleOutline,
   mdiCalendarCheck,
@@ -12,6 +18,7 @@ import {
   mdiTimerSandEmpty,
 } from "@mdi/js";
 import { flowMinWidth } from "@site/src/components/FlowDiagram/layout";
+import { useWidthFlag } from "@site/src/components/FlowDiagram/useWidthFlag";
 import {
   CaptionLayout,
   FlowDiagram,
@@ -30,147 +37,160 @@ type Id =
   | "expired"
   | "failed";
 
-type Info = {
-  /** Same words as the state headings on each page. */
-  means: string;
-  todo: string;
-  more?: [label: string, href: string];
-};
-
 // slug = the heading anchor on both pages (#state-<slug>); code = the API value.
 const STATES: Record<
   Id,
-  { slug: string; label: string; devLabel: string; code: string; next: Id[] }
+  {
+    slug: string;
+    label: string;
+    devLabel: string;
+    code: string;
+    final?: boolean;
+  }
 > = {
   pending: {
     slug: "pending-setup",
     label: "Pending setup",
     devLabel: "Pending setup",
     code: "pending_setup",
-    next: ["active", "trial", "failed", "canceled"],
   },
   trial: {
     slug: "trialing",
     label: "Trialing",
     devLabel: "Trialing",
     code: "trialing",
-    next: ["active", "pastDue", "canceled", "expired"],
   },
   active: {
     slug: "active",
     label: "Active",
     devLabel: "Active",
     code: "active",
-    next: ["pastDue", "canceled", "expired"],
   },
   pastDue: {
     slug: "past-due",
     label: "Past Due",
     devLabel: "Past due",
     code: "past_due",
-    next: ["active", "canceled"],
   },
   canceled: {
     slug: "canceled",
     label: "Canceled",
     devLabel: "Canceled",
     code: "canceled",
-    next: [],
+    final: true,
   },
   expired: {
     slug: "expired",
     label: "Expired",
     devLabel: "Expired",
     code: "expired",
-    next: [],
+    final: true,
   },
   failed: {
     slug: "setup-failed",
     label: "Setup Failed",
     devLabel: "Setup failed",
     code: "setup_failed",
-    next: ["canceled"],
   },
 };
 
-// Facts: facts-autopay.md section 2. The text matches the headings under the diagram on each page.
+// The panel paragraph is: text, then "<strong>label:</strong> todo", then "See <more>.".
+// KEEP IN SYNC: word for word with the per-state headings on both pages
+// (docs/business/autopay/index.mdx, docs/developers/payments/autopay/index.mdx).
+// Backticks mark inline code. Edit all three together.
+type Info = {
+  text: string;
+  label?: string;
+  todo?: string;
+  more?: [label: string, href: string];
+};
 const TEXT: Record<Audience, Record<Id, Info>> = {
   business: {
     pending: {
-      means:
-        "Ottu created the subscription and waits for the first payment. Ottu activates it automatically after your customer pays.",
-      todo: "Nothing.",
+      text: "Ottu created the subscription and waits for the first payment. Ottu activates it automatically after your customer pays.",
+      label: "Your part",
+      todo: "nothing.",
     },
     trial: {
-      means:
-        "The first payment was zero, so no money has moved. Ottu charges the saved card at the next billing cycle.",
-      todo: "Nothing.",
+      text: "The first payment was zero, so no money has moved. Ottu charges the saved card at the next billing cycle.",
+      label: "Your part",
+      todo: "nothing.",
     },
     active: {
-      means: "Billing normally. The latest cycle was paid.",
-      todo: "Give your customer the service.",
+      text: "Billing normally. The latest cycle was paid.",
+      label: "Your part",
+      todo: "give your customer the service.",
     },
     pastDue: {
-      means:
-        "Every retry on a cycle failed. The subscription waits for your customer to pay.",
-      todo: "Decide what to do if it stays Past Due.",
+      text: "Every retry on a cycle failed. The subscription waits for your customer to pay.",
+      label: "Your part",
+      todo: "decide what to do if it stays Past Due.",
       more: ["When a payment fails", "#when-a-payment-fails"],
     },
     canceled: {
-      means:
-        "Billing has stopped. A cancellation set for the end of the period, by your customer or your team, lands here when that period ends. An immediate cancel by your team lands here at once.",
-      todo: "Nothing.",
+      text: "Billing has stopped. A cancellation set for the end of the period, by your customer or your team, lands here when that period ends. An immediate cancel by your team lands here at once.",
+      label: "Your part",
+      todo: "nothing.",
     },
     expired: {
-      means:
-        "The last cycle was paid and the next billing date would fall after the end date. Billing stopped. The history stays readable.",
-      todo: "To continue, create a new subscription.",
+      text: "The last cycle was paid and the next billing date would fall after the end date. Billing stopped. The history stays readable. To continue, create a new subscription.",
     },
     failed: {
-      means:
-        "The customer canceled the checkout, did not pay within 24 hours, or paid but the card could not be saved. Ottu does not retry it.",
-      todo: "Create a new subscription.",
+      text: "The customer canceled the checkout, did not pay within 24 hours, or paid but the card could not be saved. Ottu does not retry it.",
+      label: "Your part",
+      todo: "create a new subscription.",
     },
   },
   developer: {
     pending: {
-      means:
-        "Created by the checkout call; waiting for the customer to complete the first payment.",
-      todo: "Wait for activation. Do not grant access yet.",
+      text: "Created by the checkout call; waiting for the first payment.",
+      label: "What to do",
+      todo: "do not grant access yet.",
       more: ["First payment and activation", "#first-payment-and-activation"],
     },
     trial: {
-      means:
-        "The first payment settled with a 0.000 amount. No money moved, but the schedule is live.",
-      todo: "Grant access.",
+      text: "The first payment settled with a `0.000` amount. No money moved, but the schedule is live.",
+      label: "What to do",
+      todo: "grant access.",
       more: ["Free trials", "#free-trials"],
     },
     active: {
-      means: "Billing normally.",
-      todo: "Grant access. Nothing else is needed.",
+      text: "Billing normally.",
+      label: "What to do",
+      todo: "grant access. Nothing else is needed.",
     },
     pastDue: {
-      means: "A billing cycle used up every retry.",
-      todo: 'Ask the customer to pay on their page, or cancel with mode "immediate".',
+      text: "A billing cycle used up every retry.",
+      label: "What to do",
+      todo: 'ask the customer to pay on their page, or cancel with `mode: "immediate"`.',
       more: ["Retries & Dunning", "#retries-and-dunning"],
     },
-    canceled: { means: "Terminal. No more charges.", todo: "End access." },
+    canceled: {
+      text: "Terminal. No more charges.",
+      label: "What to do",
+      todo: "end access.",
+    },
     expired: {
-      means:
-        "Terminal. The last billing cycle was paid and the next one would fall after the subscription's end_date.",
-      todo: "End access, or create a new subscription to continue.",
+      text: "Terminal. The last billing cycle was paid and the next one would fall after the subscription's `end_date`.",
+      label: "What to do",
+      todo: "end access, or create a new subscription to continue.",
     },
     failed: {
-      means:
-        "The first payment did not complete: the customer canceled the checkout, the card was not saved, or 24 hours passed without payment.",
-      todo: "Create a new subscription. Ottu does not retry it.",
+      text: "The first payment did not complete: the customer canceled the checkout, the card was not saved, or 24 hours passed without payment.",
+      label: "What to do",
+      todo: "create a new subscription. Ottu does not retry it.",
     },
   },
 };
 
+/** Text with `code` spans. */
+const rich = (t: string): React.ReactNode =>
+  t.split("`").map((part, i) => (i % 2 ? <code key={i}>{part}</code> : part));
+
+const ids = Object.keys(STATES) as Id[];
+
 const DEV_PAGE = "/developers/payments/autopay/";
 const BIZ_PAGE = "/business/autopay/";
-const ids = Object.keys(STATES) as Id[];
 
 const ICONS = {
   pending: { icon: mdiTimerSandEmpty },
@@ -205,7 +225,7 @@ const narrowAt: Record<Id, [number, number]> = {
   expired: [0, 520],
 };
 
-// Edges: the main moves (facts-autopay.md section 2).
+// Edges: the main moves of the AutoPay subscription state machine.
 function arrowsFor(narrow: boolean): FlowArrow[] {
   const toActive: FlowArrow = narrow
     ? {
@@ -318,37 +338,21 @@ export default function AutoPayStates({
 }): React.JSX.Element {
   const dev = audience === "developer";
   const box = useRef<HTMLDivElement>(null);
-  const [narrow, setNarrow] = useState(false);
+  // Wide layout from the container's width alone (with hysteresis, see useWidthFlag).
+  const wide = useWidthFlag(box, WIDE_W * 0.95 + 24);
+  const narrow = !wide;
   const [selected, setSelected] = useState<Id | null>(null);
   // false when the selection came from the URL: no scrolling then.
   const [picked, setPicked] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Pick the layout from the container's width, one frame after it changes.
-  useLayoutEffect(() => {
-    const el = box.current;
-    if (!el) return;
-    setNarrow(el.clientWidth < WIDE_W * 0.95 + 24);
-    let raf = 0;
-    const ro = new ResizeObserver(() => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() =>
-        setNarrow(el.clientWidth < WIDE_W * 0.95 + 24),
-      );
-    });
-    ro.observe(el);
-    return () => {
-      cancelAnimationFrame(raf);
-      ro.disconnect();
-    };
-  }, []);
-
   // A link with #state-<slug> preselects that state (the browser scrolls to the heading).
   useEffect(() => {
     const fromHash = () => {
+      if (!window.location.hash.startsWith("#state-")) return;
       const slug = window.location.hash.replace(/^#state-/, "");
       const id = ids.find((i) => STATES[i].slug === slug);
-      if (id && window.location.hash.startsWith("#state-")) {
+      if (id) {
         setPicked(false);
         setSelected(id);
       }
@@ -358,37 +362,48 @@ export default function AutoPayStates({
     return () => window.removeEventListener("hashchange", fromHash);
   }, []);
 
-  const pick = (id: string | null) => {
+  const pick = useCallback((id: string | null) => {
     setPicked(true);
     setCopied(false);
     setSelected(id as Id | null);
-  };
+  }, []);
 
-  const at = narrow ? narrowAt : wideAt;
-  const cards: FlowCard[] = ids.map((id) => ({
-    id,
-    title: dev ? STATES[id].devLabel : STATES[id].label,
-    sub: dev ? STATES[id].code : undefined,
-    mono: dev,
-    width: 170,
-    x: at[id][0],
-    y: at[id][1],
-    ...ICONS[id],
-  }));
-  const arrows = arrowsFor(narrow);
+  const cards: FlowCard[] = useMemo(() => {
+    const at = narrow ? narrowAt : wideAt;
+    return [
+      ...ids.map((id) => ({
+        id,
+        title: dev ? STATES[id].devLabel : STATES[id].label,
+        sub: dev ? STATES[id].code : undefined,
+        mono: dev,
+        width: 170,
+        x: at[id][0],
+        y: at[id][1],
+        ...ICONS[id],
+      })),
+      // Room for the "paid" arrow that loops left of the narrow layout.
+      ...(narrow
+        ? [{ id: "spacer", x: -70, y: 130, width: 40, title: "", hidden: true }]
+        : []),
+    ];
+  }, [narrow, dev]);
+  const arrows = useMemo(() => arrowsFor(narrow), [narrow]);
 
-  const next = selected ? STATES[selected].next : [];
+  // Only transitions that are drawn: the chips, the lit arrows and the lit
+  // cards all come from the same arrows.
+  const drawn = selected
+    ? arrows.flatMap((a, i) =>
+        a.from === selected ? [[a.to as Id, i] as const] : [],
+      )
+    : [];
+  const next = [...new Set(drawn.map(([to]) => to))];
   const lit = selected
-    ? {
-        cards: [selected, ...next],
-        arrows: arrows.flatMap((a, i) => (a.from === selected ? [i] : [])),
-      }
+    ? { cards: [selected, ...next], arrows: drawn.map(([, i]) => i) }
     : undefined;
 
   const copy = async () => {
     if (!selected) return;
-    const path = dev ? DEV_PAGE : BIZ_PAGE;
-    const url = `${window.location.origin}${path}#state-${STATES[selected].slug}`;
+    const url = `${window.location.origin}${dev ? DEV_PAGE : BIZ_PAGE}#state-${STATES[selected].slug}`;
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
@@ -406,29 +421,34 @@ export default function AutoPayStates({
           {dev ? STATES[selected].devLabel : STATES[selected].label}
           {dev ? (
             <>
-              {" "}
-              · <code>{STATES[selected].code}</code>
+              {" · "}
+              <code>{STATES[selected].code}</code>
             </>
           ) : null}
         </div>
         <p>
-          {info.means}
-          {info.more ? (
+          {rich(info.text)}
+          {info.label ? (
             <>
               {" "}
+              <strong>{info.label}:</strong> {rich(info.todo ?? "")}
+            </>
+          ) : null}
+          {info.more ? (
+            <>
+              {" See "}
               <a href={info.more[1]}>{info.more[0]}</a>.
             </>
           ) : null}
-        </p>
-        <p>
-          <strong>What to do:</strong> {info.todo}
         </p>
         <div className={captionClass.chips} style={{ padding: 0 }}>
           <span>
             <strong>Next possible states:</strong>
           </span>
           {next.length === 0 ? (
-            <span>none, this state is final</span>
+            <span>
+              {STATES[selected].final ? "none, this state is final" : "none"}
+            </span>
           ) : (
             next.map((n) => (
               <button
@@ -445,6 +465,12 @@ export default function AutoPayStates({
             {copied ? "Link copied" : "Copy link"}
           </button>
         </div>
+        {dev && !STATES[selected].final ? (
+          <p>
+            You can also cancel with mode <code>immediate</code> from any state
+            that isn't final.
+          </p>
+        ) : null}
       </>
     ) : (
       <p>
@@ -456,12 +482,7 @@ export default function AutoPayStates({
   return (
     <div ref={box}>
       <CaptionLayout
-        diagramMinWidth={flowMinWidth({
-          title: "",
-          cards,
-          arrows,
-          height: 0,
-        })}
+        diagramMinWidth={flowMinWidth({ title: "", cards, arrows, height: 0 })}
         panel={panel}
         selected={selected}
         scrollToPanel={picked}
@@ -477,12 +498,6 @@ export default function AutoPayStates({
           lit={lit}
         />
       </CaptionLayout>
-      {dev ? (
-        <p>
-          You can cancel with mode <code>immediate</code> from any state that is
-          not final.
-        </p>
-      ) : null}
     </div>
   );
 }
