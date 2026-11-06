@@ -21,10 +21,10 @@ Sell by subscription and let Ottu do the billing work. Your developer makes one 
 
 ## Why use AutoPay {#why-use-autopay}
 
-- **Charges on a schedule**, monthly or yearly, with automatic retries when a payment fails.
-- **Emails and texts your customer** in English or Arabic: reminders, failures, and the link to their page.
-- **A page your customer manages themselves.** They change their card, pay an overdue balance, see their history, or cancel.
-- **A free first period** if you want to offer a trial.
+- **Get paid on time without chasing.** Ottu charges the saved card every month or year. It retries failed payments on its own.
+- **Keep customers informed without writing a word.** Ottu emails and texts them in English or Arabic: reminders, failures, and their page link.
+- **Cut your support load.** Customers change their card, pay an overdue balance, see their history, or cancel on their own page.
+- **Offer free trials without extra work.** Your customer saves a card and pays nothing today. Ottu charges the first real cycle on its own.
 
 :::info Before you start
 Your developer connects AutoPay through the API, on a [gateway with auto-debit](/business/payments/gateways/?features=autodebit). The full list is in [Limits](#limits).
@@ -42,11 +42,11 @@ Your customer gets emails, text messages, and one private page. Ottu sends and h
 
 ### The emails and texts {#the-emails}
 
-Ottu sends 6 emails and 3 texts, in English or Arabic, chosen when the subscription is created. Texts go to the customer's phone number when one is on file. Each message is below, with when it goes out.
+Ottu sends 6 emails and 3 texts, in English or Arabic, chosen when the subscription is created. Texts go to the customer's phone number when one is on file.
 
 **Always sent.** You cannot switch these off:
 
-- **Subscription created** (email + text). At once, when Ottu creates the subscription. Carries the first-payment link.
+- **Subscription created** (email + text). At once. Carries the first-payment link.
 - **Setup completed** (email + text). Once, when the subscription leaves Pending setup.
 - **Link replaced** (email + text). Each time your team regenerates the customer's page link.
 
@@ -54,65 +54,57 @@ Ottu sends 6 emails and 3 texts, in English or Arabic, chosen when the subscript
 
 - **Upcoming charge** (email). Monthly: 3 days before the charge. Yearly: 31, 11, and 4 days before. Skipped if a cancellation is pending.
 - **Payment failed** (email). After each failed attempt while retries remain.
-- **Final failure** (email). About 15 seconds after the last attempt fails.
+- **Final failure** (email). About 15 seconds after the last attempt fails. See [When a payment fails](#when-a-payment-fails).
 
-The Final failure email is covered in [When a payment fails](#when-a-payment-fails).
-
-
-<details>
-<summary>Text message wording (English)</summary>
-
-- **Created:** `"Hi {name}, please complete your {merchant} subscription setup here: {checkout_url}"`
-- **Setup completed:** `"...your {merchant} subscription is now active. Manage it here: {hosted_page_url}"`
-- **Link replaced:** `"...your {merchant} subscription has a new link. The previous link no longer works: {hosted_page_url}"`
-
-</details>
-
-**Previews of the emails you can switch off:**
+Here are the three emails you can switch off:
 
 <Tabs groupId="email-language" queryString>
 <TabItem value="en" label="English">
 
-<details>
-<summary>Upcoming charge</summary>
-
-![Upcoming charge reminder email in English](/img/business/autopay/notifications-01-upcoming-charge-en.png)
-
-</details>
-<details>
-<summary>Payment failed</summary>
-
-![Payment failed email in English](/img/business/autopay/notifications-03-payment-failed-en.png)
-
-</details>
-<details>
-<summary>Final failure</summary>
-
-![Final failure email in English with outstanding balance and next steps](/img/business/autopay/notifications-05-final-failure-en.png)
-
-</details>
+<StepGuide steps={[
+  {
+    title: "Upcoming charge",
+    description: <>Goes out before money moves. Shows the amount, billing date, and card on file, with a link to manage the subscription.</>,
+    image: "/img/business/autopay/notifications-01-upcoming-charge-en.png",
+    imageAlt: "Upcoming charge reminder email in English",
+  },
+  {
+    title: "Payment failed",
+    description: <>Goes out after a failed attempt while retries remain. Shows the reason, when the next retry runs, and a link to update the card.</>,
+    image: "/img/business/autopay/notifications-03-payment-failed-en.png",
+    imageAlt: "Payment failed email in English",
+  },
+  {
+    title: "Final failure",
+    description: <>Goes out when every retry is used up. Shows the outstanding balance and links the customer straight to paying it.</>,
+    image: "/img/business/autopay/notifications-05-final-failure-en.png",
+    imageAlt: "Final failure email in English with outstanding balance and next steps",
+  },
+]} />
 
 </TabItem>
 <TabItem value="ar" label="العربية">
 
-<details>
-<summary>Upcoming charge</summary>
-
-![Upcoming charge reminder email in Arabic](/img/business/autopay/notifications-02-upcoming-charge-ar.png)
-
-</details>
-<details>
-<summary>Payment failed</summary>
-
-![Payment failed email in Arabic](/img/business/autopay/notifications-04-payment-failed-ar.png)
-
-</details>
-<details>
-<summary>Final failure</summary>
-
-![Final failure email in Arabic with outstanding balance and next steps](/img/business/autopay/notifications-06-final-failure-ar.png)
-
-</details>
+<StepGuide steps={[
+  {
+    title: "Upcoming charge",
+    description: <>Goes out before money moves. Shows the amount, billing date, and card on file, with a link to manage the subscription.</>,
+    image: "/img/business/autopay/notifications-02-upcoming-charge-ar.png",
+    imageAlt: "Upcoming charge reminder email in Arabic",
+  },
+  {
+    title: "Payment failed",
+    description: <>Goes out after a failed attempt while retries remain. Shows the reason, when the next retry runs, and a link to update the card.</>,
+    image: "/img/business/autopay/notifications-04-payment-failed-ar.png",
+    imageAlt: "Payment failed email in Arabic",
+  },
+  {
+    title: "Final failure",
+    description: <>Goes out when every retry is used up. Shows the outstanding balance and links the customer straight to paying it.</>,
+    image: "/img/business/autopay/notifications-06-final-failure-ar.png",
+    imageAlt: "Final failure email in Arabic with outstanding balance and next steps",
+  },
+]} />
 
 </TabItem>
 </Tabs>
