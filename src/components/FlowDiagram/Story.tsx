@@ -175,19 +175,52 @@ export default function Story(props: StoryProps): React.JSX.Element {
     const el = wrap.current;
     if (!el || !hasPanel) return;
     setSide(el.clientWidth >= needed); // before first paint: no flash
-    const ro = new ResizeObserver(() => setSide(el.clientWidth >= needed));
+    // Measure in the next frame: changing layout inside the observer callback
+    // triggers "ResizeObserver loop" errors.
+    let raf = 0;
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => setSide(el.clientWidth >= needed));
+    });
     ro.observe(el);
-    return () => ro.disconnect();
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
   }, [hasPanel, needed]);
 
-  // On a narrow screen the panel sits below the diagram: bring it into view
-  // after a click, only if it is off-screen.
+  // On a narrow screen the panel sits below the diagram. After a click, scroll
+  // down just enough to show it, but never so far that the clicked step
+  // leaves the screen.
   useEffect(() => {
     if (!pin || side) return;
-    document.getElementById(`${scope}-panel`)?.scrollIntoView({
-      block: "nearest",
-      behavior: reducedMotion() ? "auto" : "smooth",
-    });
+    const panel = document.getElementById(`${scope}-panel`);
+    if (!panel) return;
+    let delta =
+      panel.getBoundingClientRect().bottom - (window.innerHeight - 12);
+    if (delta <= 0) return;
+    const stepNo =
+      pin.kind === "step"
+        ? pin.i
+        : pin.kind === "journey"
+          ? walked[walked.length - 1]
+          : null;
+    const node = stepNo
+      ? document.querySelector(`#${scope} [data-id="${stepId(stepNo)}"]`)
+      : null;
+    if (node) {
+      const NAVBAR = 72; // navbar plus a little air
+      delta = Math.min(
+        delta,
+        Math.max(0, node.getBoundingClientRect().top - NAVBAR),
+      );
+    }
+    if (delta > 0)
+      window.scrollBy({
+        top: delta,
+        behavior: reducedMotion() ? "auto" : "smooth",
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `walked` follows `stop`
   }, [scope, pin, stop, side]);
 
   // Clicking the pinned thing again unpins it. A click also drops the hover
