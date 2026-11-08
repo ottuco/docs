@@ -58,7 +58,7 @@ The SDK is compatible with devices running Android 8 or higher (API version 26 o
     </div>
 
     ```swift
-    implementation("com.github.ottuco:ottu-android-checkout:2.2.6")
+    implementation("com.github.ottuco:ottu-android-checkout:2.3.0")
     ```
   </li>
 </ol>
@@ -376,6 +376,120 @@ See [Prepayment Hook](#prepayment-hook) for details.
 
 See [Full Example](#full-example) for the reference.
 
+#### **isSplitPayButton** _`boolean`_ _`optional`_
+
+Separates the SDK's **Pay** button from the checkout fragment. Place the SDK's `PaymentButton` where it fits your checkout screen: after your order summary, beneath merchant content, or in a fixed footer. The checkout fragment still displays the payment methods and collects the payment details.
+
+- `false` (default): the checkout fragment includes the **Pay** button. Keep your existing integration; no separate button is needed.
+- `true`: the checkout fragment hides its **Pay** button. Add the SDK's `PaymentButton` to your own layout.
+
+:::note
+"Split" refers to the button's placement only. It does not split the payment amount or enable installment payments.
+:::
+
+:::info
+Available in Android SDK **2.3.0**.
+:::
+
+<ol className="stepper">
+  <li className="stepper-item">
+    <strong>Add the Pay Button to the Layout</strong>
+    <div>
+      Add the SDK's `PaymentButton` view where the button should appear in
+      your Activity or Fragment layout:
+    </div>
+
+    ```xml
+    <?xml version="1.0" encoding="utf-8"?>
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <FrameLayout
+                android:id="@+id/ottuPaymentView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Your order summary and delivery information" />
+
+            <!-- Define the PaymentButton -->
+            <com.ottu.checkout.ui.payment.view.PaymentButton
+                android:id="@+id/paymentButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:visibility="gone" />
+        </LinearLayout>
+    </ScrollView>
+    ```
+
+    <div>
+      For a fixed footer, put the `PaymentButton` outside the scrolling
+      content, constrain it to the bottom of your screen, and constrain the
+      scrolling content above it.
+    </div>
+
+    <div>
+      With Jetpack Compose, place the `PaymentButton` in a `Scaffold` as the
+      `bottomBar`, or in a `Column`:
+    </div>
+
+    ```kotlin
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        bottomBar = {
+            AndroidView(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .imePadding()
+                    .padding(horizontal = 16.dp),
+                factory = { context -> PaymentButton(context) },
+            )
+        },
+    ) {
+        // your content here
+    }
+    ```
+  </li>
+  <li className="stepper-item">
+    <strong>Enable the Split Pay Button</strong>
+    <div>Pass `isSplitPayButton = true` when you call `Checkout.init`:</div>
+
+    ```kotlin
+    lifecycleScope.launch {
+      runCatching {
+        Checkout.init(
+          context = this@MainActivity,
+          builder = builder,
+          successCallback = { Log.d("TAG", "successCallback: $it") },
+          cancelCallback = { Log.d("TAG", "cancelCallback: $it") },
+          errorCallback = { errorData, throwable -> Log.e("TAG", "errorCallback: $errorData", throwable) },
+          isSplitPayButton = true,
+        )
+      }.onSuccess {
+        supportFragmentManager
+          .beginTransaction()
+          .replace(R.id.ottuPaymentView, it)
+          .commit()
+      }
+    }
+    ```
+  </li>
+</ol>
+
+The SDK controls the button's appearance, visibility, enabled state, and payment action. Payment results still come through the [callbacks](#callbacks) passed to `Checkout.init`.
 
 ### Preloading
 
