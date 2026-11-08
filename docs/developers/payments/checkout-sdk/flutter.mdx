@@ -87,7 +87,7 @@ The SDK can be used on devices running **iOS 15** or higher.
     ottu_flutter_checkout:
       git:
         url: https://github.com/ottuco/ottu-flutter.git
-        ref: 2.2.7
+        ref: 2.3.0
     ```
   </li>
   <li className="stepper-item">
@@ -397,6 +397,80 @@ displaySettings:paymentOptionsDisplaySettings
 ```
 
 To see the full function call, please refer the code snippet in the [Full Example](#full-example) section.
+
+#### **isSplitPayButton** _`boolean`_ _**`optional`**_
+
+Controls where the native **Pay** button is shown, on Android and iOS.
+
+- `false` (default): the native SDK displays checkout with its integrated **Pay** button.
+- `true`: the checkout content and the native **Pay** button are displayed separately. `OttuCheckoutWidget` shows the checkout content, and you place a `PayButtonWidget` anywhere on the same screen, for example as a fixed footer.
+
+:::note
+This parameter controls the button's placement only. It does not split the payment amount or create another payment session.
+:::
+
+:::info
+Available in the Flutter SDK **2.3.0**.
+:::
+
+Create the `CheckoutArguments` with `isSplitPayButton: true`, keep your existing payment and verification [callbacks](#callbacks) on `OttuCheckoutWidget`, and add `PayButtonWidget` where the button should appear. This example sticks the button to the bottom of the screen:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:ottu_flutter_checkout/ottu_flutter_checkout.dart';
+
+class SplitCheckoutScreen extends StatelessWidget {
+  const SplitCheckoutScreen({
+    super.key,
+    required this.arguments,
+    required this.verifyPayment,
+    this.onSuccess,
+    this.onError,
+    this.onCancel,
+  });
+
+  final CheckoutArguments arguments; // Created with isSplitPayButton: true.
+  final VerifyPaymentDelegate verifyPayment;
+  final ValueChanged<String>? onSuccess;
+  final ValueChanged<String>? onError;
+  final ValueChanged<String>? onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Checkout')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text('Your order summary'),
+            const SizedBox(height: 16),
+            OttuCheckoutWidget(
+              arguments: arguments,
+              verifyPayment: verifyPayment,
+              successCallback: onSuccess,
+              errorCallback: onError,
+              cancelCallback: onCancel,
+            ),
+          ],
+        ),
+      ),
+      // Stick the PayButtonWidget to the bottom
+      bottomNavigationBar: const SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: PayButtonWidget(),
+        ),
+      ),
+    );
+  }
+}
+```
+
+- The native SDK controls the button's appearance, visibility, enabled state, and payment action.
+- `PayButtonWidget` updates its height automatically on Android and iOS.
 
 ### Preloading
 
