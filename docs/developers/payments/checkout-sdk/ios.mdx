@@ -404,6 +404,7 @@ final class MerchantCheckoutViewController: UIViewController {
         addChild(payButton)
         payButton.view.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(payButton.view)
+        payButton.didMove(toParent: self)
 
         let safeArea = view.safeAreaLayoutGuide
         NSLayoutConstraint.activate([
@@ -431,7 +432,6 @@ final class MerchantCheckoutViewController: UIViewController {
             stack.widthAnchor.constraint(
                 equalTo: scrollView.frameLayoutGuide.widthAnchor, constant: -32),
         ])
-        payButton.didMove(toParent: self)
     }
 }
 ```

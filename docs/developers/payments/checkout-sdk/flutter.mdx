@@ -413,7 +413,25 @@ This parameter controls the button's placement only. It does not split the payme
 Available in the Flutter SDK **2.3.0**.
 :::
 
-Create the `CheckoutArguments` with `isSplitPayButton: true`, keep your existing payment and verification [callbacks](#callbacks) on `OttuCheckoutWidget`, and add `PayButtonWidget` where the button should appear. This example sticks the button to the bottom of the screen:
+Set `isSplitPayButton: true` when you create the `CheckoutArguments`:
+
+```dart
+final arguments = CheckoutArguments(
+  merchantId: 'ksa.ottu.dev',
+  apiKey: 'your Api key',
+  sessionId: 'your session id',
+  amount: 20.0,
+  showPaymentDetails: true,
+  paymentOptionsDisplaySettings: PaymentOptionsDisplaySettings(
+    mode: PaymentOptionsDisplayMode.BOTTOM_SHEET,
+    visibleItemsCount: 5,
+    defaultSelectedPgCode: "",
+  ),
+  isSplitPayButton: true,
+);
+```
+
+Pass these arguments to `OttuCheckoutWidget`, keep your existing payment and verification [callbacks](#callbacks), and add `PayButtonWidget` where the button should appear. This example sticks the button to the bottom of the screen:
 
 ```dart
 import 'package:flutter/material.dart';
