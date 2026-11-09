@@ -438,7 +438,11 @@ export default function ApiExecuteInner({
         console.warn("ApiExecute: could not update the test subscription", err);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      // Start over during the call: the failure belongs to the old session.
+      if (sessionEpoch() !== startedIn)
+        console.warn("ApiExecute: a call of the old session failed", err);
+      else
+        setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setBusy(false);
       if (endpoint === "create") setFresh((n) => n + 1);

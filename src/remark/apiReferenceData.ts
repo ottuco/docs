@@ -86,7 +86,7 @@ export default function apiReferenceData({ apisDir }: { apisDir: string }) {
       )?.value;
       if (typeof api !== "string" || !/^[a-z0-9-]+$/.test(api))
         throw new Error(
-          `${file.path}: <${COMPONENT}> needs api="<slug>": a plain string naming a page in ${apisDir}.`,
+          `${file.path}: <${COMPONENT}> needs api="<slug>": a plain string of lowercase letters, digits and dashes, naming a page in ${apisDir}.`,
         );
       if (attributes.some((attribute) => attribute.name === "source"))
         throw new Error(
