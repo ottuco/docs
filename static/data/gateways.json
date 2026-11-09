@@ -167,45 +167,6 @@
     ]
   },
   {
-    "slug": "bambora",
-    "name": "Worldline",
-    "countries": [
-      "Canada",
-      "Global"
-    ],
-    "currencies": [
-      "CAD"
-    ],
-    "inquiryMinutes": 0,
-    "operations": [
-      "purchase"
-    ],
-    "integrationType": "redirect",
-    "category": "processor",
-    "operationMode": "purchase",
-    "logo": "bambora_icon.svg",
-    "acceptedAt": [],
-    "cardBrands": [
-      "Visa",
-      "Mastercard"
-    ],
-    "digitalWallets": [
-      "Apple Pay",
-      "Google Pay",
-      "PayPal"
-    ],
-    "testCards": [
-      {
-        "cardNumber": "4030 0000 1000 1234",
-        "expiry": "05/30",
-        "cvv": "123",
-        "brand": "Visa",
-        "status": "success",
-        "statusLabel": "Success"
-      }
-    ]
-  },
-  {
     "slug": "bede",
     "name": "Bede",
     "countries": [
