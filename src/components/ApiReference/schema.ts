@@ -77,7 +77,10 @@ export function normalize(schema: Schema = {}): {
       (merged, part) => ({
         ...part,
         ...merged,
-        // Schema order (outer, then each part in turn); a name already seen keeps its first definition.
+        // Schema order (outer, then each part in turn); a name already seen
+        // keeps its first definition. For example, `{properties: {amount:
+        // {description: "A"}}, allOf: [{properties: {amount: {description:
+        // "B"}, currency: {…}}}]}` shows `amount` with "A", plus `currency`.
         properties: {
           ...merged.properties,
           ...Object.fromEntries(
