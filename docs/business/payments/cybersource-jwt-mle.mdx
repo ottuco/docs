@@ -49,11 +49,12 @@ Do this in the CyberSource Business Center for the account the MID belongs to. U
 
 1. Log in and open **Payment Configuration**, then **Key Management**.
 2. Click **+ Generate Key** and generate a **REST - API Response MLE** key.
-3. Download the **.p12** file. Note down the **password** you set and, if shown, the **key ID**. Keep both somewhere safe.
-4. Download the **request-encryption certificate** (a public certificate in `.pem`, `.crt` or `.cer` format). Ottu uses it to encrypt requests.
-5. Check which signing key you will use:
+3. Download the **.p12** file. Note down the **password** you set and, if shown, the **key ID**. Keep both somewhere safe. A .p12 generated in the Business Center already contains the CyberSource certificate that Ottu uses to encrypt requests, so the .p12 is all you need.
+4. Check which signing key you will use:
    - **Your existing REST - Shared Secret key** (API key ID and API secret key). Ottu reuses it to sign the JWT. You do not need to do anything new.
    - Or a **JWT signing .p12**, if you prefer to sign with a key file. This is optional.
+
+If you created the key by uploading your own public certificate, CyberSource gives you a `.pem` file instead of a `.p12`. The **Response MLE key (.p12)** field accepts only `.p12` or `.pfx`, so generate the key in the Business Center as described above.
 
 :::warning
 The .p12 files and their passwords are private keys. Never email them or paste them into a ticket. Upload them only in the Ottu MID settings.
@@ -66,7 +67,7 @@ If you have not yet generated a shared-secret key, follow [Generating a Cybersou
 1. Log in to the **Ottu Dashboard** and open the **Administration Panel**.
 2. Go to the **Gateway** tab, then **Settings**.
 3. Open the **CyberSource** or **Cybersource Unified Checkout** setting for the MID. Start with a **sandbox** MID.
-4. Fill in the fields in the table below.
+4. Fill in the fields in the table below. You do not need to fill in **Request MLE certificate**. After you save, a certificate appears there, taken from the Response MLE key.
 5. Set **REST authentication** to **JWT with Message-Level Encryption**.
 6. Click **Save**. Ottu checks the files and passwords when you save. If it shows an error, use the [troubleshooting table](#troubleshooting) below.
 
@@ -83,11 +84,15 @@ Labels appear in English or Arabic according to the dashboard language.
 | Response MLE key (.p12) | مفتاح MLE للاستجابة (.p12) | Yes | The **REST - API Response MLE** .p12 file from the Business Center. Ottu uses it to decrypt CyberSource replies. Accepted file types: `.p12`, `.pfx`. |
 | Response MLE key password | كلمة مرور مفتاح MLE للاستجابة | Yes | The password of that .p12 file. |
 | Response MLE key ID | معرّف مفتاح MLE للاستجابة | Optional | Leave empty to let Ottu read it from the .p12 that CyberSource generated. |
-| Request MLE certificate | شهادة MLE للطلب | Yes, unless you upload a JWT signing .p12 that contains it | The public CyberSource certificate (`.pem`, `.crt` or `.cer`) Ottu uses to encrypt requests. |
+| Request MLE certificate | شهادة MLE للطلب | No, filled in automatically when you save. You must upload one only if your Response MLE key has no certificate and you have no JWT signing .p12. | The public CyberSource certificate (`.pem`, `.crt` or `.cer`) Ottu uses to encrypt requests. Ottu fills it in from the CyberSource certificate inside the Response MLE .p12 when you save. A new Response MLE .p12 replaces it. Upload a certificate yourself only if your key file does not contain one. |
 | JWT signing key (.p12) | مفتاح توقيع JWT (.p12) | Optional | A .p12 key to sign the JWT with. Leave empty to sign with the API key ID and API secret key. |
 | JWT signing key password | كلمة مرور مفتاح توقيع JWT | Only if you upload a JWT signing .p12 | The password of the JWT signing .p12. |
 | API key ID | Not translated yet, shown in English | Yes, unless you upload a JWT signing .p12 | Your existing REST - Shared Secret key ID. It is reused to sign the JWT. |
 | API secret key | Not translated yet, shown in English | Yes, unless you upload a JWT signing .p12 | Your existing REST - Shared Secret key. It is reused to sign the JWT. |
+
+:::note
+**When to upload the Request MLE certificate yourself.** Do it only if the Response MLE .p12 has no CyberSource certificate and you have no JWT signing .p12. When you upload a new Response MLE .p12, Ottu replaces the stored certificate with the one in the new file, unless you upload a certificate in the same save. If a certificate is already stored and the .p12 is unchanged, nothing changes. To regenerate the certificate from the stored .p12, clear the field and save.
+:::
 
 :::tip
 Password boxes show empty after you save. Leave a password box empty when you edit the MID to keep the stored password. Type a value only to replace it.
@@ -150,8 +155,8 @@ Messages are shown in English or Arabic according to the dashboard language.
 | Upload the 'REST - API Response MLE' .p12 from CyberSource. | JWT is selected and no Response MLE key is uploaded. | Upload the .p12 you generated in the Business Center. |
 | Enter the password of the Response MLE .p12. | JWT is selected and the Response MLE key password is empty. | Enter the password you set when you generated the key. |
 | The Response MLE .p12 could not be opened. Upload the .p12 file from CyberSource and check its password. | The file is not the .p12 from CyberSource, is damaged, or the password is wrong. | Upload the original file and re-enter its password. |
-| Upload the CyberSource request MLE certificate, or upload a JWT signing .p12 that contains it. | JWT is selected and there is neither a request certificate nor a JWT signing .p12. | Upload the request-encryption certificate from the Business Center. |
-| The request MLE certificate could not be read. Upload the PEM certificate file from CyberSource. | The certificate file is not a PEM certificate. | Download the certificate again from the Business Center and upload it unchanged. |
+| Upload the CyberSource request MLE certificate, or upload a JWT signing .p12 that contains it. | JWT is selected, the Response MLE .p12 has no CyberSource certificate, and there is no stored request certificate or JWT signing .p12. | Generate a new **REST - API Response MLE** key in the Business Center and upload its .p12, or upload a JWT signing .p12 that contains the certificate. |
+| The request MLE certificate could not be read. Upload the PEM certificate file from CyberSource. | The certificate file is not a PEM certificate, for example a private key file. | Download the public certificate again and upload it unchanged. |
 | Enter the password of the JWT signing .p12. | A JWT signing .p12 is uploaded but its password is empty. | Enter the password, or remove the file to sign with the API key instead. |
 | The JWT signing .p12 could not be opened. Upload the .p12 file from CyberSource and check its password. | The signing file is wrong or damaged, or its password is wrong. | Upload the original file and re-enter its password. |
 | Required for JWT unless a JWT signing .p12 is uploaded. | **API key ID** or **API secret key** is empty and no JWT signing .p12 is uploaded. | Fill in both, or upload a JWT signing .p12 and its password. |

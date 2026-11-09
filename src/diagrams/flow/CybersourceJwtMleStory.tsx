@@ -47,7 +47,7 @@ const lanes: StoryLane[] = [
     chip: "CyberSource's part",
     about: {
       does: "Checks the JWT, decrypts the request, processes it and encrypts the reply.",
-      relies: "The request certificate and Response MLE key you generated in the Business Center.",
+      relies: "The Response MLE key you generated in the Business Center.",
     },
   },
 ];
