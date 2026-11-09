@@ -822,6 +822,23 @@ let lastNavSearch = typeof window !== "undefined" ? window.location.search : "";
 let linkClickedAt = -Infinity;
 let lastNavHash = typeof window !== "undefined" ? window.location.hash : "";
 
+/**
+ * The reader picked a tab. Right after a link click it is their own choice,
+ * not part of the link: the tab's query change must not count as the link
+ * (or it would scroll back), and the link's scroll, which may have started
+ * in the tab the link opened, stops where it is.
+ */
+function tabPicked(tab: Element): void {
+  // The tab already showing changes nothing: the link's scroll goes on.
+  if (tab.getAttribute("aria-selected") === "true") return;
+  if (performance.now() - linkClickedAt < 1000) {
+    scrollTicket += 1;
+    cancelMaintain?.();
+    window.scrollTo({ top: window.scrollY, behavior: "instant" });
+  }
+  linkClickedAt = -Infinity;
+}
+
 export function onRouteDidUpdate(): void {
   // New route: drop stale state so the scroll listener doesn't act on
   // a previous page's cached sections. Re-mute scroll-spy on every
@@ -902,8 +919,20 @@ if (typeof window !== "undefined") {
   document.addEventListener(
     "click",
     (e) => {
-      if ((e.target as Element | null)?.closest?.("a[href]"))
-        linkClickedAt = performance.now();
+      const target = e.target as Element | null;
+      const tab = target?.closest?.('[role="tab"]');
+      if (tab) tabPicked(tab);
+      else if (target?.closest?.("a[href]")) linkClickedAt = performance.now();
+    },
+    { capture: true, passive: true },
+  );
+  // Docusaurus tabs also switch on Enter, in their keydown handler.
+  document.addEventListener(
+    "keydown",
+    (e) => {
+      const target = e.target as Element | null;
+      const tab = target?.closest?.('[role="tab"]');
+      if (e.key === "Enter" && tab) tabPicked(tab);
     },
     { capture: true, passive: true },
   );

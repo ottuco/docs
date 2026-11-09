@@ -118,9 +118,9 @@ export function Children({
   );
 }
 
-// Memoized: every Children box follows the router location (for deep links),
-// so a URL change re-renders them all. The field lists below must not
-// re-render with them, or every description is parsed as Markdown again.
+// Memoized: every Children box re-renders when the reader follows a link (to
+// open on a deep link). The field lists below must not re-render with them,
+// or every description is parsed as Markdown again.
 const FieldRow = React.memo(function FieldRow({
   field,
   prefix,

@@ -111,13 +111,49 @@ let epoch = 0;
 /** The current session epoch; pass it to rememberSubscription after an await. */
 export const sessionEpoch = () => epoch;
 
+/**
+ * The fields read from a response body: the Checkout API (with AutoPay) and
+ * the subscription endpoints.
+ */
+export type ResponseFields = {
+  id?: string;
+  status?: string;
+  pageUrl?: string;
+  checkoutUrl?: string;
+  subscriptionId?: string;
+};
+
+type Json = Record<string, unknown>;
+const objectOf = (value: unknown): Json =>
+  value !== null && typeof value === "object" && !Array.isArray(value) ? (value as Json) : {};
+const textOf = (value: unknown) => (typeof value === "string" ? value : undefined);
+const idOf = (value: unknown) =>
+  typeof value === "number" ? String(value) : textOf(value);
+
+/** The fields this file reads, as text: a body that is not JSON (an error page), a list or an odd shape gives none. */
+function readResponse(body: unknown): ResponseFields {
+  const data = objectOf(body);
+  return {
+    id: idOf(data.id),
+    status: textOf(data.status),
+    pageUrl: textOf(data.page_url),
+    checkoutUrl: textOf(data.checkout_url),
+    subscriptionId: idOf(objectOf(objectOf(data.extra).autopay).subscription_id),
+  };
+}
+
+/** readResponse for a call's result: an error response (not 2xx) gives none. */
+export function readResult({ status, body }: ExecuteResult): ResponseFields {
+  return status >= 200 && status < 300 ? readResponse(body) : {};
+}
+
 export function rememberSubscription(
   request: { customer_id: string },
-  response: any,
+  response: ResponseFields,
   /** sessionEpoch() from before the call: a subscription created across Start over is canceled. */
   startedIn: number,
 ): void {
-  const subscriptionId = response?.extra?.autopay?.subscription_id;
+  const { subscriptionId } = response;
   if (!subscriptionId) return;
   if (startedIn !== epoch) {
     // The reader pressed Start over while this was being created: drop it.
@@ -130,7 +166,7 @@ export function rememberSubscription(
     customerId: request.customer_id,
     subscriptionId,
     subscriptionStatus: "pending_setup",
-    checkoutUrl: response.checkout_url,
+    checkoutUrl: response.checkoutUrl,
     pageUrl: undefined,
     watchingPayment: false,
     live: true,
@@ -141,8 +177,8 @@ export function rememberSubscription(
     return;
   }
   send("GET", `${SUBSCRIPTIONS}/${subscriptionId}/page-link/`)
-    .then(({ body }) => {
-      const pageUrl = (body as any)?.page_url;
+    .then((result) => {
+      const { pageUrl } = readResult(result);
       if (pageUrl && session.subscriptionId === subscriptionId) patchSession({ pageUrl });
     })
     .catch((err) => console.warn("ApiExecute: could not read the page link", err));
@@ -157,7 +193,7 @@ export function watchPayment(): void {
     await new Promise((resolve) => setTimeout(resolve, POLL_MS));
     if (session.subscriptionId !== subscriptionId || !session.watchingPayment) return;
     try {
-      const status = ((await send("GET", `${SUBSCRIPTIONS}/${subscriptionId}/`)).body as any)?.status;
+      const { status } = readResult(await send("GET", `${SUBSCRIPTIONS}/${subscriptionId}/`));
       if (session.subscriptionId !== subscriptionId) return;
       if (status && status !== "pending_setup") {
         patchSession({ subscriptionStatus: status, watchingPayment: false });
@@ -190,16 +226,17 @@ async function newSubscription(pgCodes: string[]): Promise<unknown> {
   const startedIn = epoch;
   const request = newAutoPayRequest(pgCodes);
   const { type, pg_codes, ...extra } = request;
-  const response: any = await createSandboxSession({ type, pg_codes, extra });
+  const created = await createSandboxSession({ type, pg_codes, extra });
+  const response = readResponse(created);
   // A checkout without the autopay block created no subscription: fail the
   // step, or the next call would run against <SUBSCRIPTION_ID>.
-  if (!response?.extra?.autopay?.subscription_id) {
+  if (!response.subscriptionId) {
     throw new Error("The sandbox created no subscription for this checkout.");
   }
   rememberSubscription(request, response, startedIn); // cancels it if stale
   // Tell the dialog this step did not give it a subscription to use.
   if (startedIn !== epoch) throw new Error("Started over while this was being created.");
-  return response;
+  return created;
 }
 
 // Each run leaves a monthly subscription on the sandbox merchant. Cancel it immediately, best effort.
@@ -211,9 +248,10 @@ function cancelSubscription(subscriptionId: string): void {
   }).catch((err) => console.warn("ApiExecute: could not cancel the test subscription", err));
 }
 
-export function cancelLiveSubscription(): void {
+/** Cancels the live test subscription, if there is one; tells whether it did. */
+export function cancelLiveSubscription(): boolean {
   const { live, subscriptionId } = session;
-  if (!live || !subscriptionId) return;
+  if (!live || !subscriptionId) return false;
   // Forget it too: the bar and the next calls must not use a canceled one.
   patchSession({
     live: false,
@@ -225,16 +263,28 @@ export function cancelLiveSubscription(): void {
     watchingPayment: false,
   });
   cancelSubscription(subscriptionId);
+  return true;
 }
 
 // Each run leaves a subscription on the shared sandbox merchant, so it is
 // canceled when the reader leaves: on pagehide (tab closed, link to another
 // site), and when the last run panel unmounts (moving to another docs page).
+// pagehide also fires when the page goes into the back/forward cache, and
+// the page may never come back, so it cancels then too. If it does come back
+// (pageshow, persisted) after that cancel, the panels would show responses
+// about a subscription that is gone, so the session starts over.
 let leaveListener = false;
+let canceledOnHide = false;
 function listenForLeave(): void {
   if (leaveListener) return;
   leaveListener = true;
-  window.addEventListener("pagehide", cancelLiveSubscription);
+  window.addEventListener("pagehide", () => {
+    canceledOnHide = cancelLiveSubscription();
+  });
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted && canceledOnHide) resetSession();
+    canceledOnHide = false;
+  });
 }
 
 let panels = 0;

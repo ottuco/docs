@@ -27,6 +27,7 @@ import {
   getSession,
   newAutoPayRequest,
   patchSession,
+  readResult,
   rememberSubscription,
   sessionEpoch,
   resetSession,
@@ -401,7 +402,7 @@ export default function ApiExecuteInner({
         if (endpoint === "create")
           rememberSubscription(
             call.body as { customer_id: string },
-            response.body,
+            readResult(response),
             startedIn,
           ); // cancels the subscription it created
         return;
@@ -410,19 +411,28 @@ export default function ApiExecuteInner({
       // Keeping the test subscription up to date is bookkeeping: if it fails,
       // the reader still sees the response they asked for.
       try {
-        const data = response.body as any;
-        if (data?.page_url) patchSession({ pageUrl: data.page_url });
+        const data = readResult(response);
+        // Only about the subscription the call was for, and only while the
+        // session still holds it: a Create elsewhere may have replaced it.
+        const { subscriptionId } = current;
+        const stillCurrent =
+          Boolean(subscriptionId) &&
+          getSession().subscriptionId === subscriptionId;
         if (endpoint === "create") {
           rememberSubscription(
             call.body as { customer_id: string },
             data,
             startedIn,
           );
-        } else if (data?.id === current.subscriptionId && data?.status) {
-          patchSession({
-            subscriptionStatus: data.status,
-            live: current.live && !FINAL_STATES.has(data.status),
-          });
+        } else if (stillCurrent) {
+          const patch: Partial<Session> = {};
+          if (data.pageUrl) patch.pageUrl = data.pageUrl;
+          // A status in the body is the subscription's only when it is.
+          if (data.id === subscriptionId && data.status) {
+            patch.subscriptionStatus = data.status;
+            patch.live = getSession().live && !FINAL_STATES.has(data.status);
+          }
+          if (Object.keys(patch).length > 0) patchSession(patch);
         }
       } catch (err) {
         console.warn("ApiExecute: could not update the test subscription", err);
