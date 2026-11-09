@@ -303,142 +303,7 @@ See [Full Example](#full-example) for the reference.
 
 #### **isSplitPayButton** _`bool`_ _`optional`_
 
-Use this option when your checkout design needs the **Pay** button outside the SDK's payment content: for example, in a fixed footer, below your order summary, or after terms and delivery information.
-
-- `false` (default): `paymentViewController()` shows the payment content with its **Pay** button.
-- `true`: the payment content and the **Pay** button come as two separate view controllers. Use `paymentContentViewController()` for the content and `payButtonViewController()` for the button, and place each one in your own layout.
-
-:::note
-"Split" refers to the button's placement only. It does not split the payment amount or enable installment payments.
-:::
-
-:::info
-Available in iOS SDK **2.3.0**.
-:::
-
-```swift
-do {
-    self.checkout = try Checkout(
-        sessionId: sessionId,
-        merchantId: merchantId,
-        apiKey: apiKey,
-        delegate: self,
-        isSplitPayButton: true
-    )
-} catch {
-    print("Unexpected error: \(error)")
-    return
-}
-
-guard let content = checkout?.paymentContentViewController(),
-      let payButton = checkout?.payButtonViewController() else {
-    return
-}
-```
-
-Add each view controller as a child (`addChild`) and add its view to your layout. Then constrain the **Pay** button view to its parent container. The example below keeps the **Pay** button at the bottom of the safe area, outside the scroll view.
-
-<details>
-<summary>Example: payment content with a fixed Pay button footer</summary>
-
-This host controller places scrollable payment content and merchant text above the SDK button. The button stays outside the scroll view at the safe-area bottom. Replace the terms label with your own summary, delivery options, or other views.
-
-```swift
-import UIKit
-import ottu_checkout_sdk
-
-final class MerchantCheckoutViewController: UIViewController {
-    private var checkout: Checkout?
-
-    private enum IntegrationError: Error {
-        case alreadyInstalled
-        case missingSplitControllers
-    }
-
-    func installCheckout(
-        sessionId: String,
-        merchantId: String,
-        publicAPIKey: String,
-        delegate: OttuDelegate
-    ) throws {
-        guard checkout == nil else {
-            throw IntegrationError.alreadyInstalled
-        }
-
-        loadViewIfNeeded()
-        view.backgroundColor = .systemBackground
-
-        let checkout = try Checkout(
-            sessionId: sessionId,
-            merchantId: merchantId,
-            apiKey: publicAPIKey,
-            delegate: delegate,
-            isSplitPayButton: true
-        )
-
-        guard let content = checkout.paymentContentViewController(),
-              let payButton = checkout.payButtonViewController() else {
-            throw IntegrationError.missingSplitControllers
-        }
-        self.checkout = checkout
-
-        let scrollView = UIScrollView()
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(scrollView)
-
-        let stack = UIStackView()
-        stack.axis = .vertical
-        stack.spacing = 20
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.addSubview(stack)
-
-        addChild(content)
-        stack.addArrangedSubview(content.view)
-        content.didMove(toParent: self)
-
-        let terms = UILabel()
-        terms.numberOfLines = 0
-        terms.text = "Review your order and terms before paying."
-        stack.addArrangedSubview(terms)
-
-        addChild(payButton)
-        payButton.view.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(payButton.view)
-        payButton.didMove(toParent: self)
-
-        let safeArea = view.safeAreaLayoutGuide
-        NSLayoutConstraint.activate([
-            payButton.view.leadingAnchor.constraint(
-                equalTo: safeArea.leadingAnchor, constant: 16),
-            payButton.view.trailingAnchor.constraint(
-                equalTo: safeArea.trailingAnchor, constant: -16),
-            payButton.view.bottomAnchor.constraint(
-                equalTo: safeArea.bottomAnchor, constant: -12),
-
-            scrollView.topAnchor.constraint(equalTo: safeArea.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor),
-            scrollView.bottomAnchor.constraint(
-                equalTo: payButton.view.topAnchor, constant: -12),
-
-            stack.topAnchor.constraint(
-                equalTo: scrollView.contentLayoutGuide.topAnchor, constant: 16),
-            stack.bottomAnchor.constraint(
-                equalTo: scrollView.contentLayoutGuide.bottomAnchor, constant: -16),
-            stack.leadingAnchor.constraint(
-                equalTo: scrollView.contentLayoutGuide.leadingAnchor, constant: 16),
-            stack.trailingAnchor.constraint(
-                equalTo: scrollView.contentLayoutGuide.trailingAnchor, constant: -16),
-            stack.widthAnchor.constraint(
-                equalTo: scrollView.frameLayoutGuide.widthAnchor, constant: -32),
-        ])
-    }
-}
-```
-
-</details>
-
-The SDK controls the button's appearance, visibility, enabled state, and payment action. Payment results still come through the [delegate](#delegate-object-required) callbacks.
+Use this option when your checkout design needs the Pay button outside the SDK's payment content: for example, in a fixed footer, below your order summary, or after terms and delivery information. [Ottu SDK - iOS | PayButton](#example-payment-content-with-a-fixed-pay-button-footer)
 
 #### Payment Options Display Mode
 
@@ -1132,6 +997,104 @@ extension OttuPaymentsViewController: OttuDelegate {
   }
 }
 
+```
+
+## Example: payment content with a fixed Pay button footer
+
+This host controller places scrollable payment content and merchant text above the SDK button. The button stays outside the scroll view at the safe-area bottom. Replace the terms label with your own summary, delivery options, or other views.<br />
+In this Sample, the `payButton`member gets from `checkout.payButtonViewController()` and then adds to a required view: `addChild(payButton)`. Next, constaraint this `payButtot` view to parent container like showed at line 62.
+
+```swift showLineNumbers
+import UIKit
+import ottu_checkout_sdk
+
+final class MerchantCheckoutViewController: UIViewController {
+    private var checkout: Checkout?
+
+    private enum IntegrationError: Error {
+        case alreadyInstalled
+        case missingSplitControllers
+    }
+
+    func installCheckout(
+        sessionId: String,
+        merchantId: String,
+        publicAPIKey: String,
+        delegate: OttuDelegate
+    ) throws {
+        guard checkout == nil else {
+            throw IntegrationError.alreadyInstalled
+        }
+        loadViewIfNeeded()
+        view.backgroundColor = .systemBackground
+
+        let checkout = try Checkout(
+            sessionId: sessionId,
+            merchantId: merchantId,
+            apiKey: publicAPIKey,
+            delegate: delegate,
+            isSplitPayButton: true
+        )
+
+        guard let content = checkout.paymentContentViewController(),
+              let payButton = checkout.payButtonViewController() else {
+            throw IntegrationError.missingSplitControllers
+        }
+        self.checkout = checkout
+
+        let scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(scrollView)
+
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = 20
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.addSubview(stack)
+
+        addChild(content)
+        stack.addArrangedSubview(content.view)
+        content.didMove(toParent: self)
+
+        let terms = UILabel()
+        terms.numberOfLines = 0
+        terms.text = "Review your order and terms before paying."
+        stack.addArrangedSubview(terms)
+
+        addChild(payButton)
+        payButton.view.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(payButton.view)
+
+        let safeArea = view.safeAreaLayoutGuide
+        NSLayoutConstraint.activate([
+            payButton.view.leadingAnchor.constraint(
+                equalTo: safeArea.leadingAnchor, constant: 16),
+            payButton.view.trailingAnchor.constraint(
+                equalTo: safeArea.trailingAnchor, constant: -16),
+            payButton.view.bottomAnchor.constraint(
+                equalTo: safeArea.bottomAnchor, constant: -12),
+
+            scrollView.topAnchor.constraint(equalTo: safeArea.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor),
+            scrollView.bottomAnchor.constraint(
+                equalTo: payButton.view.topAnchor, constant: -12),
+
+            stack.topAnchor.constraint(
+                equalTo: scrollView.contentLayoutGuide.topAnchor, constant: 16),
+            stack.bottomAnchor.constraint(
+                equalTo: scrollView.contentLayoutGuide.bottomAnchor, constant: -16),
+            stack.leadingAnchor.constraint(
+                equalTo: scrollView.contentLayoutGuide.leadingAnchor, constant: 16),
+            stack.trailingAnchor.constraint(
+                equalTo: scrollView.contentLayoutGuide.trailingAnchor, constant: -16),
+            stack.widthAnchor.constraint(
+                equalTo: scrollView.frameLayoutGuide.widthAnchor, constant: -32),
+        ])
+      
+        payButton.didMove(toParent: self)
+    }
+}
 ```
 
 ## Error Reporting & Security
