@@ -3,8 +3,9 @@
 //
 // Usage in MDX:
 //   <ApiReference api="autopay-subscription-detail" run="retrieve" tabGroup="autopay-api" />
-// `api` is the slug of a generated page in docs/developers/apis/ (listed in
-// sources.ts); `run` is the ApiExecute endpoint that runs it on the sandbox.
+// `api` is the slug of a generated page in docs/developers/apis/ (any of them:
+// src/remark/apiReferenceData.ts passes its operation in at build time);
+// `run` is the ApiExecute endpoint that runs it on the sandbox.
 //
 // The left column renders on the server, so search and the MCP server see the
 // fields. Only the run panel is browser-only.
@@ -35,7 +36,7 @@ import {
   type Response,
   type Variant,
 } from "./schema";
-import { endpointOf, type ApiSlug } from "./sources";
+import { endpointOf, type ApiSlug, type GeneratedPage } from "./sources";
 import { useHashNavigation } from "./useHash";
 import styles from "./styles.module.css";
 // The GET / POST badge looks the same in both columns: one definition.
@@ -149,10 +150,11 @@ function OtherResponses({
 
 /** Everything one endpoint shows, built once per page load (stable for React.memo). */
 type View = ReturnType<typeof buildView>;
-const views = new Map<ApiSlug, View>();
+// Keyed by the generated page's data: a regenerated page is a new object.
+const views = new WeakMap<GeneratedPage, View>();
 
-function buildView(api: ApiSlug) {
-  const { operation, params, bodySchema, responses } = endpointOf(api);
+function buildView(source: GeneratedPage) {
+  const { operation, params, bodySchema, responses } = endpointOf(source);
   const ok = successCode(responses);
   const okSchema = jsonOf(responses[ok ?? ""])?.schema;
   const responseFields = fieldsOf(okSchema, "response");
@@ -192,11 +194,15 @@ function buildView(api: ApiSlug) {
   };
 }
 
-function viewOf(api: ApiSlug): View {
-  let view = views.get(api);
+function viewOf(api: ApiSlug, source?: GeneratedPage): View {
+  if (!source)
+    throw new Error(
+      `ApiReference api="${api}" has no operation: src/remark/apiReferenceData.ts passes it in when a docs page builds.`,
+    );
+  let view = views.get(source);
   if (!view) {
-    view = buildView(api);
-    views.set(api, view);
+    view = buildView(source);
+    views.set(source, view);
   }
   return view;
 }
@@ -236,10 +242,13 @@ function useShowTabForHash(id: string, run: string, tabGroup?: string) {
 
 export default function ApiReference({
   api,
+  source,
   run,
   tabGroup,
 }: {
   api: ApiSlug;
+  /** The generated page's data: added by src/remark/apiReferenceData.ts, not written by hand. */
+  source?: GeneratedPage;
   run: EndpointKey;
   /**
    * The `groupId` of the query-string `<Tabs>` this sits in, so a deep link to
@@ -261,7 +270,8 @@ export default function ApiReference({
     responseVariants,
     others,
     examples,
-  } = viewOf(api);
+  } = viewOf(api, source);
+  const heading = source?.title ?? api;
   const id = `${run}-api`;
   useShowTabForHash(id, run, tabGroup);
   // The shape anchors of the body and the response, for the broken-anchor check.
@@ -277,7 +287,7 @@ export default function ApiReference({
     <div className={styles.reference}>
       <div className={styles.left}>
         <Heading as="h3" id={id} className={styles.title}>
-          {operation.title}
+          {heading}
         </Heading>
         <div className={styles.endpoint}>
           <span
@@ -362,7 +372,7 @@ export default function ApiReference({
         <OtherResponses id={`${id}-errors`} others={others} />
         <p className={styles.muted}>
           Full generated reference:{" "}
-          <Link to={`/developers/apis/${api}`}>{operation.title}</Link>.
+          <Link to={`/developers/apis/${api}`}>{heading}</Link>.
         </p>
       </div>
 
