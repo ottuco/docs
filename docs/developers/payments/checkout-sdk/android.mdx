@@ -57,7 +57,7 @@ The SDK is compatible with devices running Android 8 or higher (API version 26 o
       Include the Ottu Checkout SDK in your app-level `build.gradle.kts` file:
     </div>
 
-    ```swift
+    ```kotlin
     implementation("com.github.ottuco:ottu-android-checkout:2.3.0")
     ```
   </li>
@@ -386,7 +386,7 @@ separates the SDK payment button from the checkout fragment. Place the SDK's `Pa
 
 **true** - Hides the embedded Pay button. Add the SDK PaymentButton to your own layout.
 
-Omit this parameter or pass null to display checkout without a custom widget. See this sample of [Ottu SDK - Android | Split Payment Button](#split-payment-button)
+See this sample of [Ottu SDK - Android | Split Payment Button](#split-payment-button)
 
 ### Preloading
 
@@ -876,39 +876,49 @@ checkoutFragment = Checkout.init(
 For a fixed footer, put the PaymentButton outside the scrolling content, constrain it to the bottom of your screen, and constrain the scrolling content above it.
 
 ```xml
- <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:layout_height="match_parent">
 
-    <LinearLayout
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/paymentButton">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <FrameLayout
+                android:id="@+id/ottuPaymentView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Your order summary and delivery information" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Define the PaymentButton -->
+    <com.ottu.checkout.ui.payment.view.PaymentButton
+        android:id="@+id/paymentButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_marginTop="20dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
-        <FrameLayout
-            android:id="@+id/ottuPaymentView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Your order summary and delivery information" />
-      
-        <!-- Define the PaymentButton -->
-        <com.ottu.checkout.ui.payment.view.PaymentButton
-            android:id="@+id/paymentButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:visibility="gone" />
-
-    </LinearLayout>
-</ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
 ```
 
 #### Define the Jetpack Compose layout
