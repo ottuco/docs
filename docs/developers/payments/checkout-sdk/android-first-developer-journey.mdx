@@ -124,6 +124,8 @@ $sessionId = $session["session_id"];`}</CodeBlock>
 </TabItem>
 </Tabs>
 
+If the call fails, the response has no `session_id`. A `401` means the key is missing or wrong, for example the public key was sent instead of the private key. A `400` means a required field such as `amount`, `currency_code` or `pg_codes` is missing or invalid. See [Error Codes](../../reference/error-codes.md) for the error response format.
+
 ## Integrate the Checkout SDK
 
 <ol className="stepper">
