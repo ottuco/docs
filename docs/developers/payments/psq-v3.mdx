@@ -1,0 +1,302 @@
+---
+title: Payment Status Query v3
+sidebar_label: Payment Status Query v3
+description: Ask Ottu for a payment and every attempt made on it with the v3 status query - the payment object, attempts oldest first, and the v3 error format.
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import CodeBlock from "@theme/CodeBlock";
+import FAQ, { FAQItem } from "@site/src/components/FAQ";
+import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
+
+# Payment Status Query v3
+
+The v3 status query answers one question: **what is the state of this payment, and what happened on every try?** You send a `session_id` or an `order_no`, and Ottu answers with the **payment object**: the payment's own `status`, its money `totals`, and a list of **every attempt** made on it, oldest first, including refunds and captures.
+
+It behaves like the [Payment Status Query v2](/developers/payments/psq): the same permission, the same states, and Ottu asks the gateway for the latest status when v2 does. What changes is the shape of the answer and of the errors. Use it as the fallback when a [webhook](/developers/webhooks/event-catalogue) is missing, and to find out what really happened after a [`502` or `504` from Operations v3](/developers/operations-v3#idempotency).
+
+:::note Base URL
+Every API call on this page targets <code>{OTTU_CONNECT_BASE_URL}</code>. Swap in your own merchant domain when you integrate. Authentication is the same as for every Ottu API: see [Authentication](/developers/getting-started/authentication).
+:::
+
+:::tip[Boost Your Integration]
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
+:::
+
+## When to Use
+
+- A webhook did not arrive and you need the payment's current state.
+- You got `504 gateway_timeout` or `502 gateway_error` from [Operations v3](/developers/operations-v3) and must know whether the operation happened before you retry with a new key.
+- You reconcile your records with Ottu: `totals` and `attempts` rebuild the whole history of a payment.
+- You want one object that shows every try, instead of the single "current" attempt that the v2 answer shows.
+
+## Guide
+
+### Quick start
+
+Identify the payment with `session_id` (preferred) or `order_no`:
+
+<Tabs groupId="language">
+<TabItem value="curl" label="cURL">
+
+<CodeBlock language="bash" title="Ask for a payment">{`curl -X POST "${OTTU_CONNECT_BASE_URL}/b/pbl/v3/inquiry/" \\
+  -H "Authorization: Api-Key your_private_api_key" \\
+  -H "Content-Type: application/json" \\
+  -d '{"session_id": "4f6c1e0b9a2d"}'`}</CodeBlock>
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+<CodeBlock language="python" title="Ask for a payment">{`import requests
+
+response = requests.post(
+    "${OTTU_CONNECT_BASE_URL}/b/pbl/v3/inquiry/",
+    headers={"Authorization": "Api-Key your_private_api_key"},
+    json={"session_id": "4f6c1e0b9a2d"},
+    timeout=60,
+)
+body = response.json()
+
+if response.status_code == 200:
+    print(body["status"], body["totals"]["refunded"])
+    for attempt in body["attempts"]:
+        print(attempt["operation"], attempt["result"], attempt["connector"]["amount"])
+else:
+    print(response.status_code, body["errors"][0]["code"])`}</CodeBlock>
+
+</TabItem>
+<TabItem value="node" label="Node.js">
+
+<CodeBlock language="javascript" title="Ask for a payment">{`const response = await fetch("${OTTU_CONNECT_BASE_URL}/b/pbl/v3/inquiry/", {
+  method: "POST",
+  headers: {
+    Authorization: "Api-Key your_private_api_key",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ session_id: "4f6c1e0b9a2d" }),
+});
+const body = await response.json();
+
+if (response.ok) {
+  console.log(body.status, body.totals.refunded);
+  for (const attempt of body.attempts) {
+    console.log(attempt.operation, attempt.result, attempt.connector.amount);
+  }
+} else {
+  console.log(response.status, body.errors[0].code);
+}`}</CodeBlock>
+
+</TabItem>
+<TabItem value="php" label="PHP">
+
+<CodeBlock language="php" title="Ask for a payment">{`<?php
+$ch = curl_init("${OTTU_CONNECT_BASE_URL}/b/pbl/v3/inquiry/");
+curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_HTTPHEADER => [
+        "Authorization: Api-Key your_private_api_key",
+        "Content-Type: application/json",
+    ],
+    CURLOPT_POSTFIELDS => json_encode(["session_id" => "4f6c1e0b9a2d"]),
+]);
+$body = json_decode(curl_exec($ch), true);
+$status = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+
+if ($status === 200) {
+    echo $body["status"] . " " . $body["totals"]["refunded"] . "\\n";
+    foreach ($body["attempts"] as $attempt) {
+        echo $attempt["operation"] . " " . $attempt["result"] . " " . $attempt["connector"]["amount"] . "\\n";
+    }
+} else {
+    echo $status . " " . $body["errors"][0]["code"];
+}`}</CodeBlock>
+
+</TabItem>
+</Tabs>
+
+A payment that was paid and then refunded twice answers:
+
+```json title="200 OK (trimmed)"
+{
+  "session_id": "4f6c1e0b9a2d",
+  "order_no": "INV-1042",
+  "payment_type": "one_off",
+  "language": "en",
+  "amount": "10.000",
+  "currency": "KWD",
+  "status": "paid",
+  "status_changed_at": "2026-11-04T10:12:40Z",
+  "totals": {
+    "paid": "10.000",
+    "settled": "10.000",
+    "refunded": "6.000",
+    "refund_pending": "0.000",
+    "voided": "0.000",
+    "remaining": "0.000"
+  },
+  "created_at": "2026-11-04T10:11:12Z",
+  "updated_at": "2026-11-05T08:00:02Z",
+  "attempts": [
+    {
+      "operation": "purchase",
+      "processed_at": "2026-11-04T10:11:40Z",
+      "result": "failed",
+      "message": "Declined by issuer",
+      "channel": "hosted",
+      "form_of_payment": "redirect",
+      "connector": { "code": "kpay-live", "reference_number": "7HD2KQ", "currency": "KWD", "amount": "10.000" }
+    },
+    {
+      "operation": "purchase",
+      "processed_at": "2026-11-04T10:12:40Z",
+      "result": "success",
+      "message": "Payment processed successfully",
+      "channel": "web_sdk",
+      "form_of_payment": "card",
+      "connector": { "code": "ottu-pg-live", "reference_number": "8KQ2M7", "currency": "KWD", "amount": "10.000" }
+    },
+    {
+      "operation": "refund",
+      "processed_at": "2026-11-04T15:00:01Z",
+      "result": "success",
+      "message": "Refund processed successfully",
+      "connector": { "code": "ottu-pg-live", "reference_number": "Q2LM8A", "currency": "KWD", "amount": "3.000" }
+    },
+    {
+      "operation": "refund",
+      "processed_at": "2026-11-05T08:00:02Z",
+      "result": "success",
+      "message": "Refund processed successfully",
+      "connector": { "code": "ottu-pg-live", "reference_number": "R7TQ1X", "currency": "KWD", "amount": "3.000" }
+    }
+  ]
+}
+```
+
+:::note Trimmed example
+A real answer also carries `customer`, `billing_address`, `shipping_address`, `agreement`, `wallets`, `extra` and `created_by`, and each attempt carries the full `card` and `connector` objects (with `exchange_rate`, `fee`, `total`, `params` and `responses`). Every key is always present: an empty scalar is `null`, an empty list is `[]`, and the keys of an empty object stay with `null` values.
+:::
+
+### The payment object {#payment-object}
+
+The root is the payment itself, with the same keys as a [payment event](/developers/operations-v3#the-answer) of [Webhook Events (v3)](/developers/webhooks/event-catalogue), except:
+
+- It has **no** `operation`, `processed_at`, `result`, `message`, `channel`, `form_of_payment`, `card` or `connector` at the root. Those belong to attempts, and there is no single "current" attempt.
+- It has `status` (the payment's own status) and `status_changed_at` (when it reached that status, or `null`).
+- It has `attempts`.
+
+| Key | Meaning |
+|---|---|
+| `session_id`, `order_no` | Your identifiers for the payment |
+| `payment_type`, `language`, `amount`, `currency` | The payment as created |
+| `status` | The payment's own [state](/developers/reference/payment-states). Two states have a v3 name: `refund_pending` (v2 and webhooks 1 and 2: `refund_queued`) and `invalidated` (`invalided`) |
+| `totals` | `paid`, `settled`, `refunded`, `refund_pending`, `voided`, `remaining`, in the payment's currency |
+| `customer`, `billing_address`, `shipping_address`, `agreement`, `wallets`, `extra`, `created_by` | As on the payment events |
+| `created_at`, `updated_at` | ISO 8601 UTC |
+| `attempts` | Every attempt, oldest first |
+
+If you send the identifier of a refund or capture, Ottu answers with the payment it belongs to.
+
+### Attempts {#attempts}
+
+`attempts` lists **every attempt made on the payment**: the customer's tries (failed ones included) and the operations you or Ottu ran later (captures, voids, refunds), **oldest first**. Each entry has:
+
+| Key | Meaning |
+|---|---|
+| `operation` | `purchase` or `authorize` for a customer's try; `capture`, `refund` or `void` for an operation |
+| `processed_at` | When the attempt reached its result |
+| `result` | `pending`, `success`, `failed`, `canceled`, `error` or `cod` |
+| `message` | The result text |
+| `channel`, `form_of_payment` | How the customer paid (customer tries only; `null` on operations) |
+| `card` | The card used |
+| `connector` | Everything at the gateway: `code`, `identifier`, `processor`, `reference_number`, `currency`, `amount`, `exchange_rate`, `fee`, `total`, `params`, `responses` |
+
+A refund the gateway accepted but has not confirmed is an attempt with `operation: refund` and `result: pending`, and it counts in `totals.refund_pending`. If the gateway then rejects it, the same attempt becomes `result: failed` and leaves the totals.
+
+**Not listed:**
+
+- Attempts Ottu records for its own bookkeeping, where no gateway ran (for example cash on delivery acknowledgements).
+- The wallet leg of a split payment. It is in `wallets` instead.
+
+An attempt whose payment gateway was later removed is still listed, with an empty `connector`.
+
+### How it works
+
+1. You send `session_id` or `order_no`.
+2. For a payment that is `pending`, `attempted`, `failed` or `expired`, Ottu asks the gateways that support a status check for the latest status first. For `paid` and `authorized` it answers straight away, as in [v2](/developers/payments/psq).
+3. Ottu answers the payment object.
+
+Two options are the same as in v2: `notify_webhook_url` (send the result to your webhook as well) and `webhook_url` (a different address for that notification). See [Payment Status Query v2](/developers/payments/psq#step-by-step).
+
+## API Reference
+
+### Request
+
+`POST /b/pbl/v3/inquiry/` with a JSON body (the trailing slash is optional).
+
+| Field | Type | Notes |
+|---|---|---|
+| `session_id` | string, max 128 | The payment. One of `session_id` or `order_no` is required. |
+| `order_no` | string, max 128 | The payment, when you have no `session_id`. |
+| `notify_webhook_url` | boolean, default `false` | Also send the result to the payment's webhook URL. |
+| `webhook_url` | URL | Send that notification here instead. |
+
+### Responses
+
+| Status | When |
+|:---:|---|
+| `200` | The payment object |
+| `400` | `type: validation_error`: no identifier, a field is invalid, the payment is in a state a status query does not apply to (for example `canceled`) or has no attempts yet. These answers have `attr: null` |
+| `401` | Not authenticated |
+| `403` | Missing `payment.inquiry` permission, or the IP allowlist refused the call |
+| `404` | [`payment_not_found`](/errors#payment_not_found): unknown identifier, or a payment of another unit when your API user is limited to units |
+| `500` | [`server_error`](/errors#server_error) |
+
+Errors use the [v3 error format](/errors#format). The [IP allowlist](/developers/operations-v3#rules-every-call-follows) and unit restrictions work as on Operations v3.
+
+## Differences from v2
+
+| | [PSQ v2](/developers/payments/psq) | PSQ v3 |
+|---|---|---|
+| Endpoint | `POST /b/pbl/v2/inquiry/` | `POST /b/pbl/v3/inquiry/` |
+| Answer | The payment webhook body, with one current attempt | The payment object with `totals` and every attempt, oldest first |
+| Unknown payment | `400` | `404 payment_not_found` |
+| Errors | Free text | The [v3 error format](/errors) |
+| Pending refund | `refund_queued` | `refund_pending` |
+| IP allowlist | Not checked | Checked, as on the operations |
+
+## Best Practices
+
+- **Use it to settle doubt, not to poll.** Prefer [webhooks](/developers/webhooks/event-catalogue); call the status query when one is missing or after a `502`/`504`.
+- **Reconcile on `totals`**: `paid` minus `refunded` and `voided` is what you kept. `refund_pending` is money still in flight.
+- **Match refunds on `connector.reference_number`**, the id Ottu sent to the gateway, to find the line in the gateway's settlement report.
+- **Ignore unknown keys and unknown `operation` and `result` values**; new ones can be added.
+
+## FAQ
+
+<FAQ>
+  <FAQItem question="How do I find out if my refund happened after a 504?">
+    Call this endpoint and look for an `attempts` entry with `operation: refund`, and check `totals.refunded` and `totals.refund_pending`. If the refund is there, do not send it again. If it is not, retry with a **new** `Idempotency-Key`. See [Operations v3](/developers/operations-v3#idempotency).
+  </FAQItem>
+  <FAQItem question="Why is there no result at the root of the answer?">
+    A payment can have many attempts, so there is no single current one. Read the `status` of the payment and walk `attempts` for the details.
+  </FAQItem>
+  <FAQItem question="Is the answer the same as a webhook v3 event?">
+    The payment keys are the same. A webhook describes one moment with one attempt's keys at the root; this answer describes the whole payment and lists all attempts.
+  </FAQItem>
+  <FAQItem question="Does it ask the gateway?">
+    Yes, when v2 does: for payments that are `pending`, `attempted`, `failed` or `expired`. See [Payment Status Query v2](/developers/payments/psq).
+  </FAQItem>
+</FAQ>
+
+## What's Next?
+
+- [**Operations v3**](/developers/operations-v3): refund, capture, void, cancel, expire and delete
+- [**Error reference**](/errors): every error code and what to do
+- [**Webhook Events (v3)**](/developers/webhooks/event-catalogue): the events that carry the same payment keys
+- [**Payment Status Query v2**](/developers/payments/psq): the previous version
+- [**Payment States**](/developers/reference/payment-states): what each `status` means

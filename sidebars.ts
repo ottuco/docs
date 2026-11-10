@@ -141,6 +141,11 @@ const sidebars: SidebarsConfig = {
                   label: "FAQ",
                   href: "/developers/payments/psq#faq",
                 },
+                {
+                  type: "doc",
+                  id: "developers/payments/psq-v3",
+                  label: "Payment Status Query v3",
+                },
               ],
             },
             {
@@ -485,6 +490,11 @@ const sidebars: SidebarsConfig = {
               href: "/developers/operations#api-reference",
             },
             { type: "link", label: "FAQ", href: "/developers/operations#faq" },
+            {
+              type: "doc",
+              id: "developers/operations-v3",
+              label: "Operations v3",
+            },
           ],
         },
         {
@@ -752,6 +762,11 @@ const sidebars: SidebarsConfig = {
               type: "doc",
               id: "developers/reference/error-codes",
               label: "Error Codes",
+            },
+            {
+              type: "doc",
+              id: "developers/reference/v3-errors",
+              label: "Error Reference (v3)",
             },
             {
               type: "doc",

@@ -1,0 +1,419 @@
+---
+title: Error Reference (v3)
+sidebar_label: Error Reference (v3)
+slug: /errors
+description: Every error code the v3 Operations and Payment Status Query APIs return, with its HTTP status, what it means and what to do about it.
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import FAQ, { FAQItem } from "@site/src/components/FAQ";
+
+# Error Reference (v3)
+
+The v3 APIs ([Operations v3](/developers/operations-v3) and [Payment Status Query v3](/developers/payments/psq-v3)) answer every failure in **one format**. Every error carries a `code`, and its `doc_url` points to the heading of that code on this page, for example `https://docs.ottu.com/errors#amount_exceeds_refundable`. Branch your code on `code`, never on the `detail` text.
+
+This page covers the v3 format. For the older APIs, see [Error Codes](/developers/reference/error-codes).
+
+## When to Use
+
+- You received an error with a `doc_url` and want to know what to do.
+- You are writing the error handling of an Operations v3 or PSQ v3 integration.
+
+## Guide
+
+### The error format {#format}
+
+```json title="Error response"
+{
+  "type": "validation_error",
+  "status": 400,
+  "request_id": "b7ad6b7169203331b7ad6b7169203331",
+  "errors": [
+    {
+      "code": "amount_exceeds_refundable",
+      "detail": "Refund 150.000 exceeds the refundable 100.000 KWD.",
+      "attr": "amount",
+      "doc_url": "https://docs.ottu.com/errors#amount_exceeds_refundable"
+    }
+  ]
+}
+```
+
+| Key | Meaning |
+|---|---|
+| `type` | The category: `validation_error` (every `400`), `client_error` (other `4xx`), `gateway_error` (`502` and `504`), `server_error` (`500`) |
+| `status` | The HTTP status, repeated in the body |
+| `request_id` | Identifies this request. Quote it when you contact [support](mailto:support@ottu.com) |
+| `errors` | One or more errors. A validation failure can list several |
+| `errors[].code` | A stable, machine-readable code. **Branch on this** |
+| `errors[].detail` | A human-readable message, in English or Arabic following your `Accept-Language` header. It can change, so do not parse it |
+| `errors[].attr` | The request field the error is about (for example `amount`; a nested field is `parent.child`; a list item is `items.1`), or `null` when it is not about one field |
+| `errors[].doc_url` | The heading for the `code` on this page |
+
+### Handling errors {#handling}
+
+<details>
+<summary>Which errors can I retry?</summary>
+
+| Answer | Retry? |
+|---|---|
+| `400`, `401`, `403`, `404`, `405`, `406`, `415` | No: fix the request first. Nothing was stored, so a corrected request can use the same `Idempotency-Key` |
+| `409 operation_in_progress`, `409 request_in_progress` | Yes, the **same** request and key, after a short wait |
+| `409 payment_not_refundable`, `409 operation_not_allowed` | No: the payment's state does not allow it |
+| `422 idempotency_key_reused` | No: you changed the body under a used key. Use a new key for a new operation |
+| `422 operation_declined` | Only as a new operation with a new key, once the cause is fixed |
+| `429 throttled` | Yes, after the wait in `Retry-After` |
+| `500`, `502`, `504` | **Check the payment with [PSQ v3](/developers/payments/psq-v3) first.** Retry with a new key only if the operation did not happen |
+
+</details>
+
+## API Reference
+
+### Summary {#summary}
+
+| Code | HTTP | Meaning |
+|---|:---:|---|
+| [`operation_declined`](#operation_declined) | 422 | The payment gateway refused a capture or a void, or the wallet refused a refund to the wallet. |
+| [`gateway_timeout`](#gateway_timeout) | 504 | The payment gateway (or the wallet, for a refund to the wallet) did not answer in time. |
+| [`gateway_error`](#gateway_error) | 502 | The payment gateway answered something Ottu could not use as a result. |
+| [`amount_exceeds_refundable`](#amount_exceeds_refundable) | 400 | The refund `amount` is greater than what is still refundable. |
+| [`amount_exceeds_capturable`](#amount_exceeds_capturable) | 400 | The capture `amount` is greater than what is still available to capture. |
+| [`wallet_not_available`](#wallet_not_available) | 400 | `destination: wallet` cannot be served. |
+| [`payment_not_refundable`](#payment_not_refundable) | 409 | The payment cannot be refunded in its current state, for example it was never paid. |
+| [`operation_not_allowed`](#operation_not_allowed) | 409 | The operation is not allowed for the payment in its current state: for example capturing a payment that is not `authorized`, or cancelling one that is already paid. |
+| [`idempotency_key_required`](#idempotency_key_required) | 400 | Capture, refund and void need the `Idempotency-Key` header and the request did not send it. |
+| [`idempotency_key_invalid`](#idempotency_key_invalid) | 400 | The `Idempotency-Key` header is longer than 255 characters or contains a NUL character. |
+| [`idempotency_key_reused`](#idempotency_key_reused) | 422 | The key was already used (within 24 hours) with a **different** request body on this endpoint. |
+| [`request_in_progress`](#request_in_progress) | 409 | A request with this key is still being processed, or its answer could not be stored after a failure on Ottu's side. |
+| [`operation_in_progress`](#operation_in_progress) | 409 | Another capture, refund or void is already running on this payment, under any key. |
+| [`payment_not_found`](#payment_not_found) | 404 | No payment matches the `session_id` or `order_no`. |
+| [`server_error`](#server_error) | 500 | Something went wrong on Ottu's side. |
+
+The generic codes in [Request and framework errors](#generic) can appear on any v3 endpoint.
+
+### Operation and payment errors {#operation-errors}
+
+### `operation_declined` {#operation_declined}
+
+**HTTP 422** · `type`: `client_error`
+
+The payment gateway refused a capture or a void, or the wallet refused a refund to the wallet. `detail` holds the gateway's own message. (A declined card refund is not this error: it answers `200` with `status: refund_rejected`.)
+
+**What to do:** Read `detail`. Nothing was changed on the payment, so fix the cause (for example the amount or the payment's state at the gateway) and send a new request with a **new** `Idempotency-Key`. The answer is stored under the key you used.
+
+### `gateway_timeout` {#gateway_timeout}
+
+**HTTP 504** · `type`: `gateway_error`
+
+The payment gateway (or the wallet, for a refund to the wallet) did not answer in time. The result is **unknown**: the operation may or may not have happened.
+
+**What to do:** Do not retry blindly. Check the payment with [PSQ v3](/developers/payments/psq-v3). Only if the operation did not happen, retry with a **new** `Idempotency-Key`. The same key replays this answer.
+
+### `gateway_error` {#gateway_error}
+
+**HTTP 502** · `type`: `gateway_error`
+
+The payment gateway answered something Ottu could not use as a result. The result is **unknown**.
+
+**What to do:** Same as `gateway_timeout`: check the payment with [PSQ v3](/developers/payments/psq-v3) before you retry with a new key.
+
+### `amount_exceeds_refundable` {#amount_exceeds_refundable}
+
+**HTTP 400** · `type`: `validation_error`
+
+The refund `amount` is greater than what is still refundable. `attr` is `amount`; `detail` states both numbers.
+
+**What to do:** Send an amount up to the refundable amount in `detail`. Nothing was stored, so you can use the same key.
+
+### `amount_exceeds_capturable` {#amount_exceeds_capturable}
+
+**HTTP 400** · `type`: `validation_error`
+
+The capture `amount` is greater than what is still available to capture. `attr` is `amount`.
+
+**What to do:** Send an amount up to the capturable amount in `detail`. Nothing was stored, so you can use the same key.
+
+### `wallet_not_available` {#wallet_not_available}
+
+**HTTP 400** · `type`: `validation_error`
+
+`destination: wallet` cannot be served. `attr` is `destination`; `detail` says why: the operation is not a refund, the payment method has no wallet, or the payment has no `customer_id`.
+
+**What to do:** Refund with `destination: pg` (or omit it), or fix the cause named in `detail`. See [M-Wallet](/developers/payments/wallet/).
+
+### `payment_not_refundable` {#payment_not_refundable}
+
+**HTTP 409** · `type`: `client_error`
+
+The payment cannot be refunded in its current state, for example it was never paid.
+
+**What to do:** Check the payment's `status` and `totals` with [PSQ v3](/developers/payments/psq-v3). Nothing was stored.
+
+### `operation_not_allowed` {#operation_not_allowed}
+
+**HTTP 409** · `type`: `client_error`
+
+The operation is not allowed for the payment in its current state: for example capturing a payment that is not `authorized`, or cancelling one that is already paid. `detail` gives the reason.
+
+**What to do:** Check the payment's `status` and the states each operation accepts on [Operations](/developers/operations). Nothing was stored.
+
+### `idempotency_key_required` {#idempotency_key_required}
+
+**HTTP 400** · `type`: `validation_error`
+
+Capture, refund and void need the `Idempotency-Key` header and the request did not send it.
+
+**What to do:** Add the header with a unique value, such as a UUID. See [Idempotency](/developers/operations-v3#idempotency).
+
+### `idempotency_key_invalid` {#idempotency_key_invalid}
+
+**HTTP 400** · `type`: `validation_error`
+
+The `Idempotency-Key` header is longer than 255 characters or contains a NUL character.
+
+**What to do:** Use a shorter key, such as a UUID.
+
+### `idempotency_key_reused` {#idempotency_key_reused}
+
+**HTTP 422** · `type`: `client_error`
+
+The key was already used (within 24 hours) with a **different** request body on this endpoint.
+
+**What to do:** Use a new key for a new operation. Use the same key only to retry the **same** request, unchanged.
+
+### `request_in_progress` {#request_in_progress}
+
+**HTTP 409** · `type`: `client_error`
+
+A request with this key is still being processed, or its answer could not be stored after a failure on Ottu's side.
+
+**What to do:** Wait a moment and send the same request again. If it keeps answering `409` after a failure, check the payment with [PSQ v3](/developers/payments/psq-v3); the key frees itself 24 hours after its first use, and if the operation did not happen you can retry with a **new** key.
+
+### `operation_in_progress` {#operation_in_progress}
+
+**HTTP 409** · `type`: `client_error`
+
+Another capture, refund or void is already running on this payment, under any key.
+
+**What to do:** Nothing was stored under your key. Send the **same** request with the **same** key again once the other operation has finished.
+
+### `payment_not_found` {#payment_not_found}
+
+**HTTP 404** · `type`: `client_error`
+
+No payment matches the `session_id` or `order_no`. The same answer is given when your API user is limited to certain units and the payment belongs to another unit, so a payment you may not use looks exactly like one that does not exist.
+
+**What to do:** Check the identifier. If the payment exists, check that your API user or key is allowed to use the payment's unit in the Ottu dashboard.
+
+### `server_error` {#server_error}
+
+**HTTP 500** · `type`: `server_error`
+
+Something went wrong on Ottu's side. Nothing internal is shown.
+
+**What to do:** Check the payment with [PSQ v3](/developers/payments/psq-v3) before you retry a capture, refund or void: the operation may have been done. Quote `request_id` to [support](mailto:support@ottu.com) if it persists.
+
+### Request and framework errors {#generic}
+
+These codes come from checking the request itself. They can appear on every v3 endpoint, and on any field.
+
+### `required` {#required}
+
+**HTTP 400** · `type`: `validation_error`
+
+A required field is missing. `attr` names it (for example `amount` on a capture or refund).
+
+**What to do:** Send the field.
+
+### `null` {#null}
+
+**HTTP 400** · `type`: `validation_error`
+
+A field that cannot be `null` was sent as `null`.
+
+**What to do:** Send a value or omit the field.
+
+### `blank` {#blank}
+
+**HTTP 400** · `type`: `validation_error`
+
+A text field was sent empty.
+
+**What to do:** Send a value or omit the field.
+
+### `invalid` {#invalid}
+
+**HTTP 400** · `type`: `validation_error`
+
+A value has the wrong type or format, or the request breaks a rule that spans several fields (then `attr` is `null`). Examples: `amount` is not a number, no `session_id` or `order_no` was sent.
+
+**What to do:** Read `detail` and `attr`, and fix the request.
+
+### `invalid_choice` {#invalid_choice}
+
+**HTTP 400** · `type`: `validation_error`
+
+The value is not one of the allowed choices, for example `destination` other than `pg` or `wallet`.
+
+**What to do:** Send one of the allowed values.
+
+### `max_length` {#max_length}
+
+**HTTP 400** · `type`: `validation_error`
+
+A text value is too long, for example a `session_id` of more than 128 characters.
+
+**What to do:** Shorten the value.
+
+### `max_string_length` {#max_string_length}
+
+**HTTP 400** · `type`: `validation_error`
+
+The `amount` text is far too long.
+
+**What to do:** Send a normal decimal string such as `"3.000"`.
+
+### `min_value` {#min_value}
+
+**HTTP 400** · `type`: `validation_error`
+
+The `amount` is below `0.001`.
+
+**What to do:** Send an amount of at least `0.001`.
+
+### `max_value` {#max_value}
+
+**HTTP 400** · `type`: `validation_error`
+
+A number is above its allowed maximum.
+
+**What to do:** Send a smaller value.
+
+### `max_digits` {#max_digits}
+
+**HTTP 400** · `type`: `validation_error`
+
+The `amount` has too many digits in total (the limit is 16).
+
+**What to do:** Send a smaller amount.
+
+### `max_decimal_places` {#max_decimal_places}
+
+**HTTP 400** · `type`: `validation_error`
+
+The `amount` has more than 3 decimal places.
+
+**What to do:** Send at most 3 decimal places.
+
+### `max_whole_digits` {#max_whole_digits}
+
+**HTTP 400** · `type`: `validation_error`
+
+The `amount` has too many digits before the decimal point.
+
+**What to do:** Send a smaller amount.
+
+### `null_characters_not_allowed` {#null_characters_not_allowed}
+
+**HTTP 400** · `type`: `validation_error`
+
+A text value contains a NUL character.
+
+**What to do:** Remove it.
+
+### `parse_error` {#parse_error}
+
+**HTTP 400** · `type`: `validation_error`
+
+The body is not valid JSON, is not a JSON object, or is nested too deeply.
+
+**What to do:** Send a JSON object with `Content-Type: application/json`.
+
+### `authentication_failed` {#authentication_failed}
+
+**HTTP 401** · `type`: `client_error`
+
+The credentials were sent but are wrong or revoked.
+
+**What to do:** Check the `Authorization` header: see [Authentication](/developers/getting-started/authentication).
+
+### `not_authenticated` {#not_authenticated}
+
+**HTTP 401** · `type`: `client_error`
+
+No credentials were sent.
+
+**What to do:** Send the `Authorization` header: see [Authentication](/developers/getting-started/authentication).
+
+### `permission_denied` {#permission_denied}
+
+**HTTP 403** · `type`: `client_error`
+
+You are authenticated but may not do this: the user or key lacks the permission for the operation (`payment.capture`, `payment.refund`, `payment.void`, `payment.cancel`, `payment.expire`, `payment.delete`, `payment.inquiry`), or, for Payment Request and E-commerce payments, your IP address is not on the plugin's allowlist.
+
+**What to do:** Ask an administrator for the permission, or call from an allowed IP address. See [API Key Permissions](/developers/reference/api-key-permissions).
+
+### `not_found` {#not_found}
+
+**HTTP 404** · `type`: `client_error`
+
+The URL does not exist.
+
+**What to do:** Check the path: `/b/pbl/v3/operation/<operation>/` or `/b/pbl/v3/inquiry/`.
+
+### `method_not_allowed` {#method_not_allowed}
+
+**HTTP 405** · `type`: `client_error`
+
+The endpoint only accepts `POST`.
+
+**What to do:** Use `POST`.
+
+### `not_acceptable` {#not_acceptable}
+
+**HTTP 406** · `type`: `client_error`
+
+The `Accept` header asks for a format other than JSON.
+
+**What to do:** Accept `application/json`.
+
+### `unsupported_media_type` {#unsupported_media_type}
+
+**HTTP 415** · `type`: `client_error`
+
+The `Content-Type` is not supported.
+
+**What to do:** Send `Content-Type: application/json`.
+
+### `throttled` {#throttled}
+
+**HTTP 429** · `type`: `client_error`
+
+Too many requests: each endpoint allows 30 requests per minute by default.
+
+**What to do:** Wait for the time in `detail` and the `Retry-After` header, then retry with the same key. Spread requests out.
+
+## FAQ
+
+<FAQ>
+  <FAQItem question="Why do I get a code that is not in the summary table?">
+    Validation of a single field can return a generic code such as `required` or `invalid`. They are all listed under [Request and framework errors](#generic). If you see a code that is not on this page, send the `request_id` to [support](mailto:support@ottu.com).
+  </FAQItem>
+  <FAQItem question="Can an answer have more than one error?">
+    Yes, a `400` can list one error per invalid field in `errors`. Handle every entry.
+  </FAQItem>
+  <FAQItem question="Is the detail text translated?">
+    Yes, it follows your `Accept-Language` header (English and Arabic). The `code` never changes.
+  </FAQItem>
+  <FAQItem question="Do the older APIs use this format?">
+    No. Operations v2 and the other v1 and v2 APIs keep their own error bodies. See [Error Codes](/developers/reference/error-codes).
+  </FAQItem>
+</FAQ>
+
+## What's Next?
+
+- [**Operations v3**](/developers/operations-v3): refund, capture, void, cancel, expire and delete
+- [**Payment Status Query v3**](/developers/payments/psq-v3): check what happened after a `502` or `504`
+- [**Error Codes**](/developers/reference/error-codes): errors of the older APIs
+- [**Authentication**](/developers/getting-started/authentication): API keys and permissions
