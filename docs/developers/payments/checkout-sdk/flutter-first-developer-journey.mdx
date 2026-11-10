@@ -14,31 +14,61 @@ Follow these steps to go from a new Flutter project to your first test payment w
 
 ## Prerequisites
 
-- Android 8 (Android SDK 26) or higher, and iOS 15 or higher.
-- A Flutter project. To create one, see [Create a new Flutter app](https://docs.flutter.dev/reference/create-new-app). Android Studio with **New Flutter Project** and Kotlin as the Android language is recommended.
-- Your Ottu merchant domain, used as `merchantId`: the domain you send API requests to, without `https://` (for example `sandbox.ottu.net`).
-- Your [API public key](../../getting-started/authentication.md#public-key), used by the app.
-- Your [API private key](../../getting-started/authentication.md#api-key-auth), used only by your server. Never put it in the app.
+- **Android:** the SDK can be used on devices running **Android 8 (Android SDK 26)** or higher.
+- **iOS:** the SDK can be used on devices running **iOS 15** or higher.
+- `merchantId`: the root domain of the Ottu account, excluding the `https://` or `http://` prefix (for example `sandbox.ottu.net`).
+- Your [API public key](../../getting-started/authentication.md#public-key), used for authentication when communicating with Ottu's servers during the checkout process.
+- Your [API private key](../../getting-started/authentication.md#api-key-auth), used only by your server. It must remain confidential and must never be shared with any clients.
 - The [PG code](/glossary/#term-pg-code) (`pg_code`) of the payment gateway to pay with. See [Payment Methods](../payment-methods.md) to find yours.
+
+:::warning
+To prevent application crashes, it must be ensured that the correct parent theme is applied to the Android application. The theme configuration is defined in the `themes.xml` and/or `styles.xml` files located within the `res/values` directory. The `parent` attribute of the `style` tag should be set to `Theme.Material3.DayNight.NoActionBar`.
+
+For reference, the configuration file can be reviewed at the following link: [themes.xml on GitHub](https://github.com/ottuco/ottu-flutter/blob/main/Sample/android/app/src/main/res/values/themes.xml#L3C58-L3C94)
+:::
 
 ## Installation
 
-In `pubspec.yaml`, add the SDK under `dependencies`:
+<ol className="stepper">
+  <li className="stepper-item">
+    <strong>Create a New Flutter Project</strong>
+    <div>
+      Here are tutorials on how to create a new Flutter project from scratch
+      for different IDEs:
+      [Create a new Flutter app](https://docs.flutter.dev/reference/create-new-app)
+    </div>
+    <div>
+      You can use any IDE of your choice; however, it is recommended to use
+      Android Studio and select "New Flutter Project", ensuring the selected
+      programming language is Kotlin.
+    </div>
+  </li>
+  <li className="stepper-item">
+    <strong>Add the Ottu Checkout SDK Dependency</strong>
+    <div>
+      Open the `pubspec.yaml` file, navigate to the dependencies section, and
+      add the following block:
+    </div>
 
-```yaml
-ottu_flutter_checkout:
-  git:
-    url: https://github.com/ottuco/ottu-flutter.git
-    ref: 2.2.7
-```
+    ```yaml
+    ottu_flutter_checkout:
+      git:
+        url: https://github.com/ottuco/ottu-flutter.git
+        ref: 2.2.7
+    ```
 
-Then download it:
+  </li>
+  <li className="stepper-item">
+    <strong>Install Dependencies</strong>
+    <div>Run the following command to download the dependencies:</div>
 
-```bash
-flutter pub get
-```
+    ```bash
+    flutter pub get
+    ```
 
-If you use CocoaPods, use release version **2.2.7-cocoapods**.
+    <div>If you choose to use CocoaPods, please use release version **2.2.7-cocoapods**.</div>
+  </li>
+</ol>
 
 ## SDK Configuration
 
@@ -72,19 +102,6 @@ If you use CocoaPods, use release version **2.2.7-cocoapods**.
     import io.flutter.embedding.android.FlutterFragmentActivity
 
     class MainActivity : FlutterFragmentActivity()
-    ```
-
-  </li>
-  <li className="stepper-item">
-    <strong>Apply the Material theme</strong>
-    <div>
-      Set the `parent` of your app theme to `Theme.Material3.DayNight.NoActionBar` (in `themes.xml` and/or `styles.xml` under `res/values`), and update the night theme too if you have one. Without it, the app can crash.
-    </div>
-
-    ```xml
-    <style name="LaunchTheme" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:windowBackground">@drawable/launch_background</item>
-    </style>
     ```
 
   </li>
@@ -123,29 +140,33 @@ Your server calls the [Checkout API](../checkout-api.mdx) with your [private key
 <Tabs groupId="language">
 <TabItem value="curl" label="cURL">
 
-<CodeBlock language="bash" title="POST /b/checkout/v1/pymt-txn/">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/' \\
-  --header 'Authorization: Api-Key <YOUR_PRIVATE_KEY>' \\
+<CodeBlock language="bash" title="Create a session against your Sandbox gateway">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/' \\
+  --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
   --header 'Content-Type: application/json' \\
-  --data '{
+  --data-raw '{
     "type": "e_commerce",
-    "pg_codes": ["<YOUR_PG_CODE>"],
+    "pg_codes": ["<your-sandbox-pg_code>"],
     "amount": "10.000",
-    "currency_code": "KWD"
+    "currency_code": "KWD",
+    "order_no": "SANDBOX-0001",
+    "webhook_url": "https://yourwebsite.com/webhook"
   }'`}</CodeBlock>
 
 </TabItem>
 <TabItem value="python" label="Python">
 
-<CodeBlock language="python" title="POST /b/checkout/v1/pymt-txn/">{`import requests
+<CodeBlock language="python" title="Create a session against your Sandbox gateway">{`import requests
 
 response = requests.post(
     "${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/",
-    headers={"Authorization": "Api-Key <YOUR_PRIVATE_KEY>"},
+    headers={"Authorization": "Api-Key <YOUR_API_KEY>"},
     json={
         "type": "e_commerce",
-        "pg_codes": ["<YOUR_PG_CODE>"],
+        "pg_codes": ["<your-sandbox-pg_code>"],
         "amount": "10.000",
         "currency_code": "KWD",
+        "order_no": "SANDBOX-0001",
+        "webhook_url": "https://yourwebsite.com/webhook",
     },
     timeout=30,
 )
@@ -155,17 +176,19 @@ session_id = response.json()["session_id"]`}</CodeBlock>
 </TabItem>
 <TabItem value="nodejs" label="Node.js">
 
-<CodeBlock language="javascript" title="POST /b/checkout/v1/pymt-txn/">{`const response = await fetch("${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/", {
+<CodeBlock language="javascript" title="Create a session against your Sandbox gateway">{`const response = await fetch("${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/", {
   method: "POST",
   headers: {
-    Authorization: "Api-Key <YOUR_PRIVATE_KEY>",
+    Authorization: "Api-Key <YOUR_API_KEY>",
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
     type: "e_commerce",
-    pg_codes: ["<YOUR_PG_CODE>"],
+    pg_codes: ["<your-sandbox-pg_code>"],
     amount: "10.000",
     currency_code: "KWD",
+    order_no: "SANDBOX-0001",
+    webhook_url: "https://yourwebsite.com/webhook",
   }),
 });
 const { session_id } = await response.json();`}</CodeBlock>
@@ -173,20 +196,22 @@ const { session_id } = await response.json();`}</CodeBlock>
 </TabItem>
 <TabItem value="php" label="PHP">
 
-<CodeBlock language="php" title="POST /b/checkout/v1/pymt-txn/">{`<?php
+<CodeBlock language="php" title="Create a session against your Sandbox gateway">{`<?php
 $ch = curl_init("${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/");
 curl_setopt_array($ch, [
     CURLOPT_POST => true,
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_HTTPHEADER => [
-        "Authorization: Api-Key <YOUR_PRIVATE_KEY>",
+        "Authorization: Api-Key <YOUR_API_KEY>",
         "Content-Type: application/json",
     ],
     CURLOPT_POSTFIELDS => json_encode([
         "type" => "e_commerce",
-        "pg_codes" => ["<YOUR_PG_CODE>"],
+        "pg_codes" => ["<your-sandbox-pg_code>"],
         "amount" => "10.000",
         "currency_code" => "KWD",
+        "order_no" => "SANDBOX-0001",
+        "webhook_url" => "https://yourwebsite.com/webhook",
     ]),
 ]);
 $session = json_decode(curl_exec($ch), true);
@@ -199,7 +224,7 @@ If the call fails, the response has no `session_id`. A `401` means the key is mi
 
 ## Add OttuCheckoutWidget
 
-In the screen that shows the checkout, import the SDK and add `OttuCheckoutWidget` with its `CheckoutArguments`:
+Open the screen or widget where you plan to add the **Ottu SDK widget**, import the SDK and add the `OttuCheckoutWidget` to the desired location in your layout:
 
 ```dart
 import 'package:ottu_flutter_checkout/ottu_flutter_checkout.dart';
@@ -208,49 +233,44 @@ import 'package:ottu_flutter_checkout/ottu_flutter_checkout.dart';
 ```dart
 OttuCheckoutWidget(
   arguments: CheckoutArguments(
-    merchantId: "sandbox.ottu.net", // your Ottu merchant domain
-    apiKey: "your API public key",
-    sessionId: "the session_id from your server",
-    amount: 10.0, // the session amount
+    merchantId: "sandbox.ottu.net",
+    apiKey: 'your Api key',
+    sessionId: 'your session id',
+    amount: 20.0,
     showPaymentDetails: true,
     paymentOptionsDisplaySettings: PaymentOptionsDisplaySettings(
       mode: PaymentOptionsDisplayMode.BOTTOM_SHEET,
       visibleItemsCount: 5,
+      defaultSelectedPgCode: "",
     ),
   ),
 ),
 ```
 
-All the arguments above are required, and the widget sets its own height. To choose the payment methods shown, add [`formsOfPayment`](flutter.mdx#display-options). To start faster, pass the session details with [`setupPreload`](flutter.mdx#preloading).
+To choose the payment methods shown, add [`formsOfPayment`](flutter.mdx#display-options). To start faster, pass the session details with [`setupPreload`](flutter.mdx#preloading).
 
 ## Callbacks
 
-Pass `successCallback`, `cancelCallback` and `errorCallback` to the widget. Each one receives the result as a message string. This example shows it in a dialog:
+Callback functions are used to retrieve the payment status. These must be provided directly to the `OttuCheckoutWidget`. Add a section like below in a `*.dart` file of the app:
 
 ```dart
 OttuCheckoutWidget(
-  arguments: checkoutArguments, // the CheckoutArguments shown above
-  successCallback: (message) => _showResult("Success", message),
-  cancelCallback: (message) => _showResult("Cancel", message),
-  errorCallback: (message) => _showResult("Error", message),
+  arguments: widget.checkoutArguments,
+  successCallback: (message) => _handleSuccess(message),
+  cancelCallback: (message) => _handleCancel(message),
+  errorCallback: (message) => _handleError(message),
 ),
 
-void _showResult(String title, String message) {
-  showDialog<void>(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text(title),
-        content: SingleChildScrollView(child: Text(message)),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('Close'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      );
-    },
-  );
+void _handleSuccess(String message) {
+  _checkoutMessage.value = ("Success", message);
+}
+
+void _handleCancel(String message) {
+  _checkoutMessage.value = ("Cancel", message);
+}
+
+void _handleError(String message) {
+  _checkoutMessage.value = ("Error", message);
 }
 ```
 
@@ -258,7 +278,13 @@ See [Callbacks](flutter.mdx#callbacks) for how the callbacks work on Android and
 
 ## Test a Payment
 
-Run the app with `flutter run` (or the Run button in your IDE) and pay with a test card for the gateway in your session's `pg_codes`. When the payment succeeds, `successCallback` is called.
+Run your Flutter app using the following command or by pressing the Run/Launch icon in your IDE:
+
+```bash
+flutter run
+```
+
+If all configurations and dependencies are correctly set, the app should build successfully and display the Ottu Checkout Widget. Pay with a test card for the gateway in your session's `pg_codes`. When the payment succeeds, `successCallback` is called.
 
 - [Ottu Sandbox](../ottu-sandbox.mdx): a simulated gateway where the [test card](../ottu-sandbox.mdx#test-cards) decides the result.
 - [Test Cards](../sandbox.mdx): test cards for each payment gateway's own sandbox.
