@@ -112,6 +112,11 @@ const sidebars: SidebarsConfig = {
               link: { type: "doc", id: "developers/payments/psq" },
               items: [
                 {
+                  type: "doc",
+                  id: "developers/payments/psq-v3",
+                  label: "Payment Status Query v3",
+                },
+                {
                   type: "link",
                   label: "When to Use",
                   href: "/developers/payments/psq#when-to-use",
@@ -140,11 +145,6 @@ const sidebars: SidebarsConfig = {
                   type: "link",
                   label: "FAQ",
                   href: "/developers/payments/psq#faq",
-                },
-                {
-                  type: "doc",
-                  id: "developers/payments/psq-v3",
-                  label: "Payment Status Query v3",
                 },
               ],
             },
@@ -470,6 +470,11 @@ const sidebars: SidebarsConfig = {
           link: { type: "doc", id: "developers/operations" },
           items: [
             {
+              type: "doc",
+              id: "developers/operations-v3",
+              label: "Operations v3",
+            },
+            {
               type: "link",
               label: "When to Use",
               href: "/developers/operations#when-to-use",
@@ -490,11 +495,6 @@ const sidebars: SidebarsConfig = {
               href: "/developers/operations#api-reference",
             },
             { type: "link", label: "FAQ", href: "/developers/operations#faq" },
-            {
-              type: "doc",
-              id: "developers/operations-v3",
-              label: "Operations v3",
-            },
           ],
         },
         {

@@ -58,6 +58,8 @@ The trailing slash is optional. Identify the payment with `session_id` or `order
 
 <OperationsOutcomeStory />
 
+If a call ends in a `502` or `504`, query the payment with [PSQ v3](/developers/payments/psq-v3) to see what happened before you retry with a new key.
+
 ### Quick start: refund a payment
 
 Send the refund with a fresh `Idempotency-Key`. If the connection drops and you do not know whether it worked, send the **same request with the same key** again: Ottu never refunds twice.
@@ -429,6 +431,8 @@ Every code is explained, with what to do about it, on the [error reference](/err
   ]
 }
 ```
+
+The `doc_url` always points at the production docs (docs.ottu.com), whatever environment answered, so use it as given.
 
 Quote `request_id` when you contact [support](mailto:support@ottu.com). The format is described in full on the [error reference](/errors#format).
 
