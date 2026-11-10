@@ -305,6 +305,8 @@ See [Full Example](#full-example) for the reference.
 
 Use this option when your checkout design needs the Pay button outside the SDK's payment content: for example, in a fixed footer, below your order summary, or after terms and delivery information. [Ottu SDK - iOS | PayButton](#example-payment-content-with-a-fixed-pay-button-footer)
 
+The default value is `false`.
+
 #### Payment Options Display Mode
 
 The payment options display can be adjusted using the SDK with the following settings:
@@ -1002,7 +1004,7 @@ extension OttuPaymentsViewController: OttuDelegate {
 ## Example: payment content with a fixed Pay button footer
 
 This host controller places scrollable payment content and merchant text above the SDK button. The button stays outside the scroll view at the safe-area bottom. Replace the terms label with your own summary, delivery options, or other views.<br />
-In this Sample, the `payButton`member gets from `checkout.payButtonViewController()` and then adds to a required view: `addChild(payButton)`. Next, constaraint this `payButtot` view to parent container like showed at line 62.
+In this Sample, the `payButton` member gets from `checkout.payButtonViewController()` and then is added to a required view: `addChild(payButton)`. Next, constrain this `payButton` view to parent container as shown at line 62.
 
 ```swift showLineNumbers
 import UIKit
