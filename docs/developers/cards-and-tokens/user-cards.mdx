@@ -240,7 +240,7 @@ $deleted = curl_getinfo($ch, CURLINFO_HTTP_CODE) === 204;`}</CodeBlock>
 A successful delete answers `204 No Content`. `customer_id` and `type` are required query parameters: the card is looked up for that customer only, so a token that belongs to another customer is never deleted.
 
 :::warning Deleting a card ends the agreement's charging
-When you delete a card, its token is revoked at the gateway, so later [auto-debit](/developers/payments/native-payments/) charges with that token cannot succeed. Delete a card with a running agreement only when you intend to stop it, and tell the customer.
+When you delete a card, its token is revoked at the gateway, so later [auto-debit](/developers/cards-and-tokens/recurring-payments/#subsequent-payments-mit) charges with that token cannot succeed. Delete a card with a running agreement only when you intend to stop it, and tell the customer.
 :::
 
 ### Delete a Card from a Checkout Session (Checkout SDK)
