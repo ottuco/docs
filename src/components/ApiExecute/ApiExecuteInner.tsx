@@ -73,6 +73,13 @@ const STEPS: Record<StepId, { title: string; method: Method; path: string }> = {
 const subscriptionPath = (session: Session, suffix = "") =>
   `${SUBSCRIPTIONS}/${session.subscriptionId ?? "<SUBSCRIPTION_ID>"}/${suffix}`;
 
+// The request each tab's Run sends, and the cURL / Python / Node.js / PHP code
+// built from it (snippets.ts), are written here by hand: they chain live ids
+// (gateway, customer, subscription) that the OpenAPI examples don't have.
+// Unlike the fields on the left and the response examples, they do NOT follow
+// the schema: when a request field, a required field or a path changes, update
+// this map, Create's body in src/utils/autoPayRequest.ts and the Create cURL in
+// docs/developers/payments/autopay/index.mdx.
 const ENDPOINTS: Record<
   EndpointKey,
   { needs: StepId[]; request: (session: Session) => PreparedRequest }
