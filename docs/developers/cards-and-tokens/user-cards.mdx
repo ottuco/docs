@@ -268,12 +268,7 @@ What makes this route safe to call with a browser-exposed key:
 - **Refusals are opaque.** An unknown or expired `session_id`, a token that belongs to a different customer, a guest session with no customer, and a refusal by the card vault all answer the same `404`.
 - **Any session that has not expired works** — including one that is already paid or cancelled, because the SDK still shows saved cards on those sessions.
 
-Two refusals are explained to the customer: a card held by an active [auto-debit agreement](/developers/cards-and-tokens/recurring-payments/#agreement) answers `400` when Ottu holds the card, and `409` when the card was saved through Ottu's own payment gateway (Ottu PG). The message follows the request's `Accept-Language` header. Both messages are listed in [What your customer sees](#what-your-customer-sees). The `409` message, in the two supported languages:
-
-| `Accept-Language` | `detail` |
-|---|---|
-| `en` (default) | This card is linked to an active auto debit agreement and cannot be deleted. Pay once with another card to move the agreement, then delete this card. |
-| `ar` | هذه البطاقة مرتبطة باتفاقية خصم تلقائي نشطة ولا يمكن حذفها. ادفع مرة واحدة ببطاقة أخرى لنقل الاتفاقية، ثم احذف هذه البطاقة. |
+Two refusals are explained to the customer: a card held by an active [auto-debit agreement](/developers/cards-and-tokens/recurring-payments/#agreement) answers `400` when Ottu holds the card, and `409` when the card was saved through Ottu's own payment gateway (Ottu PG). The message follows the request's `Accept-Language` header. Both messages are listed in [What your customer sees](#what-your-customer-sees).
 
 :::note
 `delete_url` used to point at `DELETE /b/pbl/v2/card/{token}/?type=…&customer_id=…`. It now points at the session-scoped route and carries no query parameters. If you read `delete_url` from the SDK's card data, use it as-is.
@@ -353,7 +348,7 @@ The agreement check is for the cardholder only. It does not apply on the merchan
 |---|---|---|---|
 | `400` | ``{"customer_id": ["Customer ID `cust_999` does not exist."]}`` | No payment transaction exists for that `customer_id` | Check the ID you stored at checkout |
 | `400` | `{"type": ["This field is required."]}` | `type` missing | Send `sandbox` or `production` |
-| `400` | `{"detail": "<reason from the card vault>", "result": "failed"}` | The card vault refused the delete — for example, the card is held by an auto-debit agreement | Show the reason to your operator; for an agreement, charge the agreement with another card first |
+| `400` | `{"detail": "<reason from the card vault>", "result": "failed"}` | The card vault refused the delete | Show the reason to your operator |
 | `401` | `{"detail": "Authentication credentials were not provided."}` | No credentials, an invalid, revoked or expired key, or the **public key** | Call from your server with your private key |
 | `403` | `{"detail": "You do not have permission to perform this action."}` | A scoped key or user without `Can view Card` (list) or `Can delete Card` (delete) | Grant the permission, or use a key that holds it |
 | `503` | `{"detail": "The payment gateway is not available right now."}` | Ottu cannot reach its card vault because it is not configured on this deployment | Contact Ottu support |
