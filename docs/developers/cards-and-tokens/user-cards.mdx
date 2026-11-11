@@ -359,11 +359,11 @@ The agreement check is for the cardholder only. It does not apply on the merchan
 |---|---|---|
 | `204` | *(empty)* | The card was deleted |
 | `400` | `{"token": ["Ensure this field has no more than 128 characters."]}` | `token` or `session_id` longer than 128 characters |
-| `400` | `{"detail": "This card is linked to an auto-debit agreement active until 2026-12-31. …", "result": "failed"}` | The card is held by a running or open-ended agreement ([see the rules](#deleting-a-card-that-has-an-auto-debit-agreement)) |
+| `400` | `{"detail": "This card is linked to an auto-debit agreement active until 2026-12-31. …", "result": "failed"}` | A card Ottu holds is held by a running or open-ended agreement ([see the rules](#deleting-a-card-that-has-an-auto-debit-agreement)) |
 | `401` | `{"detail": "Authentication credentials were not provided."}` | No credentials, or an invalid or revoked key |
 | `403` | `{"detail": "You do not have permission to perform this action."}` | A private key or user without `Can delete Card` (the public key does not need a permission) |
 | `404` | `{"detail": "Not found.", "result": "failed"}` | Unknown or expired session, a token the session's customer does not hold, a guest session, or a refusal by the card vault |
-| `409` | `{"detail": "This card is linked to an active auto debit agreement…", "result": "failed"}` | The customer's own card is held by an active auto-debit agreement |
+| `409` | `{"detail": "This card is linked to an active auto debit agreement…", "result": "failed"}` | A card saved through Ottu PG is held by an active auto-debit agreement |
 | `503` | `{"detail": "The payment gateway is not available right now."}` | The card vault is not configured on this deployment |
 
 ## API Reference
