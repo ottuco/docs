@@ -1,0 +1,31 @@
+---
+title: React Flow diagrams
+unlisted: true
+description: Reference for the interactive React Flow diagrams used in the Ottu docs, in the Ottu design system.
+---
+
+import CardPaymentStory from "@site/src/diagrams/flow/CardPaymentStory";
+import CardPaymentSequence from "@site/src/diagrams/flow/CardPaymentSequence";
+import PlatformFlow from "@site/src/diagrams/flow/PlatformFlow";
+
+# React Flow diagrams
+
+Reference page for the interactive diagrams built with the `react-flow-diagram` skill (`.claude/skills/react-flow-diagram/`). Each diagram is a small file in `src/diagrams/flow/` that passes data to a component from `src/components/FlowDiagram/`. The colors, fonts and dark mode come from the component, so a diagram file has no styling.
+
+## Story
+
+One column per actor, read top to bottom. Hover a box or an actor chip to focus on it, click to read about it, or walk a journey one step at a time. Use it for "how it works" flows.
+
+<CardPaymentStory />
+
+## Sequence
+
+Messages between actors in time order. Orange is a request, blue is a reply. Use it when the order of calls matters more than what each actor does.
+
+<CardPaymentSequence />
+
+## Flow
+
+Cards placed freely, with optional groups. Use it for architecture views.
+
+<PlatformFlow />

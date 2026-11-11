@@ -7,6 +7,10 @@ import SchemaEmbed from "@site/src/components/SchemaEmbed";
 
 # Payment Notification
 
+:::note This page describes webhook formats 1 and 2
+If your account uses [format 3](/developers/webhooks/event-catalogue), your payments arrive inside an event envelope as `data.payment`; see [Webhook Events (v3)](/developers/webhooks/event-catalogue) and [Migrating to v3](/developers/webhooks/migrate-to-v3). Each delivery also carries an [`Idempotency-Key`](/developers/webhooks/delivery-and-retries#idempotency-key) header with the event id on every format.
+:::
+
 Payment webhooks are specific to payment events and are triggered on multiple occasions:
 
 1.  #### Post-Payment Completion
@@ -244,7 +248,7 @@ Never process a payment webhook without verifying the signature. An unverified p
 
 #### **7. Using PG Params**
 
-The `pg_params` object contains normalized payment gateway response fields. Instead of parsing the raw `gateway_response` (which varies by gateway), use `pg_params` for consistent field access across all 60+ gateways.
+The `pg_params` object contains normalized payment gateway response fields. Instead of parsing the raw `gateway_response` (which varies by gateway), use `pg_params` for consistent field access across all 45+ gateways.
 
 For the complete searchable reference of all fields, see [**PG Params**](/developers/webhooks/pg-params/).
 
@@ -260,3 +264,6 @@ For general webhook setup and configuration, see the [Webhooks Overview](./).
 - [**Operation Events**](/developers/webhooks/operation-events/) — Webhook notifications for refunds, captures, and voids
 - [**Verify Signatures**](/developers/webhooks/verify-signatures/) — Validate webhook authenticity with HMAC-SHA256
 - [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration
+- [**Webhook Events (v3)**](/developers/webhooks/event-catalogue/) — The format 3 envelope, with this payload as `data.payment`
+- [**Migrating to v3**](/developers/webhooks/migrate-to-v3/) — Move from format 1 or 2
+- [**Delivery and Retries**](/developers/webhooks/delivery-and-retries/) — Success rules, retry schedule, `Idempotency-Key`

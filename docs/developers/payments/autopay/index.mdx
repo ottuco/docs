@@ -7,14 +7,13 @@ hide_table_of_contents: true
 ---
 
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
-import CodeBlock from "@theme/CodeBlock";
-import AutoPayFlowDiagram from "@site/src/diagrams/AutoPayFlowDiagram";
+import AutoPayStory from "@site/src/diagrams/flow/AutoPayStory";
 import AutoPayDemo from "@site/src/components/AutoPayDemo";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
-import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
+import EndpointReference from "@site/src/components/EndpointReference";
+import StepGuide from "@site/src/components/StepGuide";
+import { autopayCustomerViewSteps } from "@site/src/data/autopay-customer-view";
 
 # AutoPay
 
@@ -38,27 +37,6 @@ Every API call in this guide targets <code>{OTTU_CONNECT_BASE_URL}</code>. Swap 
 Use AutoPay when you want Ottu to own the whole subscription lifecycle after one checkout call. If you'd rather run the billing schedule and retry logic yourself and just charge a saved card on demand, use [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments) instead. It is the closer fit for installments, on-demand billing, and cases where your own system needs to decide exactly when a charge happens.
 :::
 
-## Setup {#setup}
-
-By the end of this page your backend creates a subscription, sends the customer to pay, learns the result, and hands the customer a link to manage it.
-
-**Build**
-
-- [ ] [Create the subscription](/developers/payments/autopay/?autopay-api=create#api-reference) with the Checkout API and store the subscription ID it returns.
-- [ ] Send the customer to the `checkout_url` from the response to pay the first charge.
-- [ ] [Confirm activation](#first-payment-and-activation): read `extra.autopay.subscription_id` from the webhook, then retrieve the subscription until it leaves `pending_setup`.
-- [ ] [Get the customer's page link](/developers/payments/autopay/?autopay-api=page-link#api-reference) and send it to the customer.
-- [ ] Poll [List subscriptions](/developers/payments/autopay/?autopay-api=list#api-reference) with `status: "past_due"` to catch failed renewals.
-
-**Test**
-
-- [ ] Run one subscription end to end in the [Live Demo](#live-demo).
-
-**Go live**
-
-- [ ] Switch to your production [API key](/developers/getting-started/authentication) and base URL. No other request changes.
-
-
 :::tip Boost Your Integration
 Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../../getting-started/#boost-your-integration) for all available options.
 :::
@@ -68,14 +46,9 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 ### Workflow
 
-<AutoPayFlowDiagram />
+<AutoPayStory />
 
-1. **You create the subscription** with one [Checkout API](../checkout-api) call that describes the plan and its schedule.
-2. **Your customer pays the first charge** on the checkout page, and Ottu saves their card.
-3. **You get the result.** When your customer completes checkout, Ottu sends the result to your webhook URL, if you set one, as for any checkout. That is the only webhook you get: renewals don't send one, so you read their outcome from the subscription, which you can look up at any time.
-4. **Ottu bills each cycle**, retries failed charges and emails your customer.
-5. **Your customer manages the subscription** from their own page. You send them the link.
-
+Create the subscription with one [Checkout API](../checkout-api) call. Ottu sends the result of the first charge to your webhook URL, if you set one. Renewals send no webhook, so you read their outcome from the API.
 
 ### Live Demo {#live-demo}
 
@@ -85,17 +58,9 @@ Run the whole journey against the sandbox: create a subscription, pay its first 
 
 ### What your customer sees {#what-your-customer-sees}
 
-{/* TODO #158913: real sandbox screenshots from Junaid, planned at /img/developers/autopay/first-charge-checkout.png, self-service-page.png and reminder-email.png. Add them to src/data/autopay-customer-view.tsx, then replace the list below with:
-import StepGuide from "@site/src/components/StepGuide";
-import { autopayCustomerViewSteps } from "@site/src/data/autopay-customer-view";
-<StepGuide steps={autopayCustomerViewSteps} />
-(the two imports go next to the other imports at the top of this file) */}
-
 Your customer meets AutoPay in three places. See [What your customer sees](/business/autopay/#what-your-customer-sees) on the business page for the full tour.
 
-1. **The first-charge checkout.** Your customer pays the first charge on Ottu's checkout page. Ottu saves their card, so the later charges need no action from them.
-2. **The self-service page.** Your customer opens the private link you send them. They see their status and billing history, add or switch a card, pay an overdue balance, and cancel or undo a pending cancellation.
-3. **One email: the charge reminder.** Ottu emails your customer before each charge. The email carries your business name, your support email and a link to the self-service page.
+<StepGuide steps={autopayCustomerViewSteps} />
 
 ### Use Cases
 
@@ -118,19 +83,41 @@ If the customer never pays, the subscription becomes `setup_failed` after 24 hou
 
 #### Subscription States {#subscription-states}
 
-A subscription is always in exactly one of seven states:
+A subscription is always in exactly one of seven states. Each state has its own link.
 
-| State | Meaning |
-|---|---|
-| `pending_setup` | Created by the checkout call; waiting for the customer to complete the first payment. |
-| `trialing` | The first payment settled with a `0.000` amount. No money moved, but the schedule is live. |
-| `active` | Billing normally. |
-| `past_due` | A billing cycle used up every retry. See [Retries & Dunning](#retries-and-dunning). |
-| `canceled` | Terminal. No more charges. |
-| `expired` | Terminal. The subscription's `end_date` was reached. |
-| `setup_failed` | The customer never completed the first payment. Ottu does not retry it; create a new subscription. |
+##### `pending_setup` {#state-pending-setup}
 
-A nonzero first charge makes a subscription `active`; a `0.000` one starts it in `trialing`. See [Lifecycle and billing cycles](/business/autopay/#lifecycle-and-billing-cycles) for the business view.
+Created by the checkout call; waiting for the customer to complete the first payment.
+
+##### `trialing` {#state-trialing}
+
+The first payment settled with a `0.000` amount. No money moved, but the schedule is live. See [Free trials](#free-trials).
+
+##### `active` {#state-active}
+
+Billing normally. A nonzero first charge makes a subscription `active`.
+
+##### `past_due` {#state-past-due}
+
+A billing cycle used up every retry. See [Retries & Dunning](#retries-and-dunning).
+
+##### `canceled` {#state-canceled}
+
+Terminal. No more charges.
+
+##### `expired` {#state-expired}
+
+Terminal. The subscription's `end_date` was reached.
+
+##### `setup_failed` {#state-setup-failed}
+
+The customer never completed the first payment. Ottu does not retry it; create a new subscription.
+
+See [Lifecycle and billing cycles](/business/autopay/#lifecycle-and-billing-cycles) for the business view.
+
+#### Free trials {#free-trials}
+
+Send a checkout `amount` of `0.000` to start with a free period. Your customer pays nothing, Ottu only saves the card, and the subscription starts in `trialing`. The first real charge comes one period after `start_date`.
 
 #### Billing Cycles {#billing-cycles}
 
@@ -138,10 +125,13 @@ Cycles are generated one at a time, so the next one isn't created until the prev
 
 `start_date` does not delay the checkout charge. The customer pays it on the checkout page, whenever they complete checkout.
 
-| Checkout `amount` | What the customer pays at checkout | Cycle 1 | Cycle 2 |
-|---|---|---|---|
-| Greater than `0` | `amount`, charged at checkout | That charge, `charge_type: "cit"`, `scheduled_date` = `start_date`, already `paid` | One period (month or year) after `start_date` |
-| `0.000` (trial) | Nothing. The card is saved only. | First real charge, one period after `start_date` | The period after that |
+##### When `amount` is greater than `0` {#cycles-paid-first-charge}
+
+The customer pays `amount` at checkout. That charge is cycle 1, with `charge_type: "cit"`, `scheduled_date` set to `start_date`, and already `paid`. Cycle 2 comes one period (month or year) after `start_date`.
+
+##### When `amount` is `0.000` {#cycles-free-trial}
+
+The customer pays nothing and the card is saved only. Cycle 1 is the first real charge, one period after `start_date`. Cycle 2 is the period after that.
 
 #### Retries & Dunning {#retries-and-dunning}
 
@@ -167,106 +157,80 @@ A customer cancellation on a `past_due` subscription only schedules the cancella
 
 ## API Reference
 
-All six subscription-management endpoints, plus the Checkout API call that creates a subscription, are in the interactive reference below. Expand any field for its type, enum values, constraints and defaults.
+Every endpoint below shows its fields on the left and a request with its response on the right. Expand a field for its nested fields, type, enum values and constraints. Each endpoint ends with every error it can return and what to do about it.
 
 Every management endpoint authenticates with your [API key](/developers/getting-started/authentication) and applies to your own merchant account. You never send a `Merchant-Id` header yourself.
 
-Here is a complete `auto_pay` request. `agreement` is a full recurring agreement and the `autopay` block repeats the same schedule.
+### Create a subscription {#api-create}
+
+Create a subscription with the [Checkout API](/developers/payments/checkout-api/): set `payment_type` to `auto_pay` and send the `autopay` block. `agreement` is a full recurring agreement, and the `autopay` block repeats the same schedule. The fields below are the ones a subscription uses; the Checkout API lists the rest. Store `extra.autopay.subscription_id` from the response: it is the ID every endpoint below takes.
 
 Replace `<START_DATE>` with the date of the first billing cycle (today or later, `YYYY-MM-DD`). The checkout payment is cycle 1, so `total_cycles: 12` means 11 renewals. Set `<EXPIRY_DATE>` to the last day of the month of cycle 12, which is 11 months after `<START_DATE>` (for a start on `2026-11-01`, use `2027-10-31`).
 
-<CodeBlock language="bash" title="Create an AutoPay subscription — POST /b/checkout/v1/pymt-txn/">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/' \\
-  --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
-  --header 'Content-Type: application/json' \\
-  --data-raw '{
-    "type": "e_commerce",
-    "pg_codes": ["<TOKENIZABLE_PG_CODE>"],
-    "amount": "9.900",
-    "currency_code": "KWD",
-    "customer_id": "cust_1001",
-    "customer_email": "customer@example.com",
-    "payment_type": "auto_pay",
-    "order_no": "order-1001",
-    "webhook_url": "https://merchant.example.com/ottu/webhook",
-    "agreement": {
-      "id": "AGR-1001",
-      "type": "recurring",
-      "frequency": "monthly",
-      "amount_variability": "fixed",
-      "cycle_interval_days": 30,
-      "total_cycles": 12,
-      "expiry_date": "<EXPIRY_DATE>"
+<EndpointReference
+  operationId="create_payment_transaction_checkout"
+  hideDescription
+  requestFields={["type", "pg_codes", "amount", "currency_code", "customer_id", "customer_email", "payment_type", "order_no", "webhook_url", "agreement", "autopay"]}
+  responseFields={["session_id", "state", "checkout_url", "payment_type", "agreement", "autopay"]}
+  requestExample={{
+    type: "e_commerce",
+    pg_codes: ["<TOKENIZABLE_PG_CODE>"],
+    amount: "9.900",
+    currency_code: "KWD",
+    customer_id: "cust_1001",
+    customer_email: "customer@example.com",
+    payment_type: "auto_pay",
+    order_no: "order-1001",
+    webhook_url: "https://merchant.example.com/ottu/webhook",
+    agreement: {
+      id: "AGR-1001",
+      type: "recurring",
+      frequency: "monthly",
+      amount_variability: "fixed",
+      cycle_interval_days: 30,
+      total_cycles: 12,
+      expiry_date: "<EXPIRY_DATE>",
     },
-    "autopay": {
-      "frequency": "monthly",
-      "recurring_amount": "9.900",
-      "start_date": "<START_DATE>",
-      "description": "Pro Plan - monthly"
-    }
-  }'`}</CodeBlock>
+    autopay: {
+      frequency: "monthly",
+      recurring_amount: "9.900",
+      start_date: "<START_DATE>",
+      description: "Pro Plan - monthly",
+    },
+  }}
+/>
 
-<Tabs groupId="autopay-api" queryString>
-<TabItem value="create" label="Create">
+### List subscriptions {#api-list}
 
-Create a subscription with the Checkout API: set `payment_type` to `auto_pay` and send the `autopay` block.
+<EndpointReference operationId="autopay_subscription_list" />
 
-<ApiDocEmbed path="create-payment-transaction-checkout.api.mdx" />
+### Retrieve a subscription {#api-retrieve}
 
-</TabItem>
-<TabItem value="list" label="List">
+<EndpointReference operationId="autopay_subscription_detail" />
 
-<ApiDocEmbed path="autopay-subscription-list.api.mdx" />
+### Cancel a subscription {#api-cancel}
 
-</TabItem>
-<TabItem value="retrieve" label="Retrieve">
+<EndpointReference operationId="autopay_subscription_cancel" />
 
-<ApiDocEmbed path="autopay-subscription-detail.api.mdx" />
+### List billing cycles {#api-cycles}
 
-</TabItem>
-<TabItem value="cancel" label="Cancel">
+<EndpointReference operationId="autopay_subscription_cycles" />
 
-<ApiDocEmbed path="autopay-subscription-cancel.api.mdx" />
+### Get the page link {#api-page-link}
 
-</TabItem>
-<TabItem value="cycles" label="Billing cycles">
+<EndpointReference operationId="autopay_subscription_page_link" />
 
-<ApiDocEmbed path="autopay-subscription-cycles.api.mdx" />
+### Regenerate the page token {#api-regenerate-page-token}
 
-</TabItem>
-<TabItem value="page-link" label="Page link">
-
-<ApiDocEmbed path="autopay-subscription-page-link.api.mdx" />
-
-</TabItem>
-<TabItem value="regenerate-page-token" label="Regenerate page token">
-
-<ApiDocEmbed path="autopay-subscription-regenerate-page-token.api.mdx" />
-
-</TabItem>
-</Tabs>
-
-### Error contract {#error-contract}
-
-These are the statuses you will meet most often, so you can handle them without parsing message text. The full list of status codes for each endpoint, with examples, is in the [API Reference](#api-reference) tabs above.
-
-| Status | Meaning | What to do |
-|---|---|---|
-| `400` | Ottu rejected the request as malformed, for example a `limit` above 100 on list, an unknown cancel `mode`, or a missing `Idempotency-Key` on cancel or regenerate. | Fix the request. Retrying unchanged will fail again. |
-| `401` | Not authenticated. | Check your [API key](/developers/getting-started/authentication). |
-| `404` | No such subscription for your merchant. | Do not retry. |
-| `409` | `Idempotency-Key` was already used on `cancel` with a different request body (`code: idempotency_conflict`). | Send a new key for a new request. Reuse a key only to retry the exact same request. |
-| `422` | Ottu rejected the request. Either a value is invalid (for example an unknown `status` filter on list, where `detail` lists each invalid field), or the subscription is in a state that does not allow it, such as canceling one that has already ended (`code: invalid_transition`). | Fix the request, or re-read the subscription's `status`. Retrying unchanged will fail again. |
-| `423` | The Ottu installation is paused (`code: service_paused`). All six subscription endpoints return it. | Retry later. |
-| `503` | The subscription service is unavailable. | Retry with backoff. |
-| `504` | The subscription service timed out. The request may still have been applied. | Retry a cancel with the same `Idempotency-Key`. Before retrying anything else, retrieve the subscription to see whether it changed. |
+<EndpointReference operationId="autopay_subscription_regenerate_page_token" />
 
 ## Limits {#limits}
 
-- **Gateways.** KNET and other gateways that cannot save a card for auto-debit cannot renew a subscription. `pg_codes` must name a gateway that supports tokenization and auto-debit.
+- **Gateways.** A payment gateway without auto-debit cannot renew a subscription. `pg_codes` must name a gateway that supports tokenization and auto-debit. See the [gateways with auto-debit](/business/payments/gateways/?features=autodebit). To list the ones enabled on your account, call the [Payment Methods API](/developers/payments/payment-methods/) with `auto_debit: true`.
 - **Billing periods.** `autopay.frequency` is `monthly` or `yearly`. There is no weekly or custom interval.
-- **No edits.** A running subscription cannot be edited: amount, `autopay.frequency`, billing day, retry count, `language`, `notification_preferences` or customer email. [Cancel](/developers/payments/autopay/?autopay-api=cancel#api-reference) it and create a new one. There is no proration.
+- **No edits.** A running subscription cannot be edited: amount, `autopay.frequency`, billing day, retry count, `language`, `notification_preferences` or customer email. [Cancel](#api-cancel) it and create a new one. There is no proration.
 - **Retries.** You set only the retry count, and only when you create the subscription. Ottu sets the interval. See [Retries & Dunning](#retries-and-dunning).
-- **No `past_due` alert.** A `past_due` subscription is not billed again until the customer pays or you cancel it (see [Retries & Dunning](#retries-and-dunning)). Ottu does not notify you, so poll [List subscriptions](/developers/payments/autopay/?autopay-api=list#api-reference) with `status: "past_due"`.
+- **No `past_due` alert.** A `past_due` subscription is not billed again until the customer pays or you cancel it (see [Retries & Dunning](#retries-and-dunning)). Ottu does not notify you, so poll [List subscriptions](#api-list) with `status: "past_due"`.
 - **No dashboard screen.** AutoPay is API-only. Renewal charges appear in Payment Management as normal transactions.
 - **Sandbox.** You cannot trigger a renewal early.
 
@@ -288,19 +252,19 @@ These are the statuses you will meet most often, so you can handle them without 
     The list endpoint takes its filters in a request body, and it only reads. Keep `customer_id` in that body: a customer identifier in a URL ends up in access logs.
   </FAQItem>
   <FAQItem question="How do I know when the customer finishes the first payment?">
-    Poll [Retrieve a subscription](/developers/payments/autopay/?autopay-api=retrieve#api-reference) and check `status`. It leaves `pending_setup` when Ottu confirms the first payment: within about 15 minutes in production, and usually a minute or two on the sandbox. The checkout webhook for that session also fires if you set `webhook_url`, but it arrives while the subscription is still `pending_setup`, so use it as "payment received" only. See [First payment and activation](#first-payment-and-activation).
+    Poll [Retrieve a subscription](#api-retrieve) and check `status`. It leaves `pending_setup` when Ottu confirms the first payment: within about 15 minutes in production, and usually a minute or two on the sandbox. The checkout webhook for that session also fires if you set `webhook_url`, but it arrives while the subscription is still `pending_setup`, so use it as "payment received" only. See [First payment and activation](#first-payment-and-activation).
   </FAQItem>
   <FAQItem question="What happens when the customer's card expires?">
     Ottu doesn't track the card's expiry date, so there is no warning in advance. The next renewal fails and follows the normal path: retries, then `past_due` and the final email. The customer adds a new card and pays the balance on the [self-service page](#customer-self-service-page).
   </FAQItem>
   <FAQItem question="Can I change the amount of a running subscription?">
-    No. A running subscription cannot be edited (see [Limits](#limits)). [Cancel](/developers/payments/autopay/?autopay-api=cancel#api-reference) the subscription with `mode: "at_period_end"` so the paid period runs out, then have the customer start a new one through checkout with the new `recurring_amount`. There is no proration.
+    No. A running subscription cannot be edited (see [Limits](#limits)). [Cancel](#api-cancel) the subscription with `mode: "at_period_end"` so the paid period runs out, then have the customer start a new one through checkout with the new `recurring_amount`. There is no proration.
   </FAQItem>
   <FAQItem question="How do I test a failed renewal?">
-    The sandbox [test card set](/developers/payments/sandbox#standard-test-cards) includes three Visa cards that decline renewals: `4111 1111 1111 114`, `4111 1111 1111 115` and `4111 1111 1111 116`. They save normally on the first payment and decline on every later merchant-initiated charge. Create the subscription with `pg_codes: ["ottu-sandbox-kwd"]` (the Ottu Sandbox gateway, KWD) and pay the first charge with one of them. Other sandbox gateways don't recognise these cards. The sandbox has no way to trigger a renewal early: the first renewal is charged one billing period after `start_date`. When it declines, follow the cycle in [Billing cycles](/developers/payments/autopay/?autopay-api=cycles#api-reference): it moves through `retry_scheduled` to `failed`, and the subscription becomes `past_due`.
+    The sandbox [test card set](/developers/payments/sandbox#standard-test-cards) includes three Visa cards that decline renewals: `4111 1111 1111 114`, `4111 1111 1111 115` and `4111 1111 1111 116`. They save normally on the first payment and decline on every later merchant-initiated charge. Create the subscription with `pg_codes: ["ottu-sandbox-kwd"]` (the Ottu Sandbox gateway, KWD) and pay the first charge with one of them. Other sandbox gateways don't recognise these cards. The sandbox has no way to trigger a renewal early: the first renewal is charged one billing period after `start_date`. When it declines, follow the cycle in [Billing cycles](#api-cycles): it moves through `retry_scheduled` to `failed`, and the subscription becomes `past_due`.
   </FAQItem>
   <FAQItem question="Does Ottu send a webhook when a renewal is charged?">
-    No. Only the first payment, made through your checkout session, calls your `webhook_url`. Ottu charges renewals itself, and no webhook reaches you for a renewal or its retries. Read the outcome from [Retrieve a subscription](/developers/payments/autopay/?autopay-api=retrieve#api-reference) (`current_cycle`) or [Billing cycles](/developers/payments/autopay/?autopay-api=cycles#api-reference), and poll [List subscriptions](/developers/payments/autopay/?autopay-api=list#api-reference) with `status: "past_due"` to catch failed ones.
+    No. Only the first payment, made through your checkout session, calls your `webhook_url`. Ottu charges renewals itself, and no webhook reaches you for a renewal or its retries. Read the outcome from [Retrieve a subscription](#api-retrieve) (`current_cycle`) or [Billing cycles](#api-cycles), and poll [List subscriptions](#api-list) with `status: "past_due"` to catch failed ones.
   </FAQItem>
   <FAQItem question="How do I check that AutoPay is enabled on my account?">
     Call `GET /b/api/v1/config/`. The response includes `autopay_api_url` when AutoPay is enabled, and leaves the key out entirely when it is not. Test for the key, not its value.

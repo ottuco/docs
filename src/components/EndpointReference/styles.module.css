@@ -1,0 +1,98 @@
+/* Fields on the left, request + response on the right (Stripe layout); stacked on narrow screens. */
+.endpoint {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  margin: 1rem 0 3rem;
+}
+
+@media (min-width: 1200px) {
+  .endpoint {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 2rem;
+  }
+}
+
+.fields {
+  min-width: 0;
+}
+
+.fields :global(.openapi__method-endpoint) {
+  margin-bottom: 1rem;
+}
+
+.path {
+  margin-left: 0.5rem;
+  font-size: 0.95rem;
+  word-break: break-all;
+}
+
+.samples {
+  min-width: 0;
+}
+
+.sticky {
+  position: sticky;
+  top: calc(var(--ifm-navbar-height) + 1rem);
+}
+
+.sticky pre {
+  max-height: 32rem;
+}
+
+.section {
+  margin-top: 1.5rem;
+}
+
+.sectionTitle {
+  margin: 0 0 0.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  font-size: 1rem;
+}
+
+.params :global(details) {
+  margin-top: 1rem;
+}
+
+.errors {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.error {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.error:last-child {
+  border-bottom: none;
+}
+
+.status {
+  flex: none;
+  height: fit-content;
+  font-weight: 600;
+}
+
+.errorBody {
+  min-width: 0;
+  flex: 1;
+}
+
+.errorBody p {
+  margin-bottom: 0.4rem;
+}
+
+.errorExample summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.errorExample > :global(div) {
+  margin: 0.5rem 0 0;
+}

@@ -299,6 +299,18 @@ Two patterns coexist in `sidebars.ts`. Pick deliberately; mixing them on a singl
 - Swizzled theme components in `src/theme/`
 - Utility functions in `src/utils/`
 
+## Diagrams
+
+Pick the tool by what the reader does with the diagram:
+
+| Need | Use | Skill |
+|---|---|---|
+| Interactive: focus an actor, click a step, walk a journey (story, sequence, architecture) | React Flow via `src/components/FlowDiagram/`, data files in `src/diagrams/flow/` | `react-flow-diagram` (`.claude/skills/react-flow-diagram/`) |
+| Static picture | Inline SVG via `src/components/Diagram/`, files in `src/diagrams/` | `svg-diagram` (`.claude/skills/svg-diagram/`) |
+| Quick draft only | Mermaid (rules below) | none |
+
+React Flow diagrams take their colours, fonts and dark mode from the tokens in `src/components/FlowDiagram/styles.module.css` (Ottu design system); a diagram file never sets styling. Their accent is Ottu orange (`#F77D1A`), with blue (`#0B82BE`) for replies and results; this differs on purpose from the Mermaid rule below (blue accent), so don't put a Mermaid and a React Flow diagram side by side on one page. Reference page: `/diagrams/react-flow/` (unlisted, excluded from the MCP server).
+
 ## Mermaid Diagrams
 
 **Monochrome + one accent.** Most nodes are neutral (no fill, gray border). Only the 1-2 key nodes get Ottu blue (`#0B82BE`). Do NOT color every node — a diagram with 7 nodes should have 1-2 colored, not 5-7.
