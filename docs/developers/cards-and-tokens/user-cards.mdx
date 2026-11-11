@@ -60,7 +60,7 @@ If your front end called these routes directly, move the call to your server and
 When integrating the User Cards API, here are the key points:
 
 1. You will not receive the full card number (PAN). Instead, you'll get the last 4 digits and a [token](/glossary/#term-tokenization). This token is what you use for payments or authorizations.
-2. If you're using the [Checkout SDK](/developers/payments/checkout-sdk/), customers can delete their saved cards themselves, unless an auto-debit agreement is still running on the card ([see the rules](#deleting-a-card-that-has-an-auto-debit-agreement)). The SDK does this through the session-scoped route, so you do not need to expose any key other than the public key. This gives users control over their payment information.
+2. If you're using the [Checkout SDK](/developers/payments/checkout-sdk/), customers can delete their saved cards themselves, unless an auto-debit agreement is still running on the card ([see the rules](#deleting-a-card-that-has-an-auto-debit-agreement)). The SDK does this through the session-scoped route, so you do not need to expose any key other than the public key.
 3. When a customer saves their card during payment, the corresponding token is included in the payload sent to your [webhook_url](/developers/payments/checkout-api/).
 4. Ottu already handles displaying saved cards and card deletion inside the SDK. Use these APIs only if you need more granular control.
 
@@ -258,7 +258,7 @@ sequenceDiagram
     C->>K: Remove saved card
     K->>O: DELETE delete_url (public key)
     O->>O: Resolve the customer from session_id
-    O-->>K: 204, 404 or 409
+    O-->>K: 204, 400, 404 or 409
     K-->>C: Card removed, or the reason it was not
 ```
 
@@ -268,7 +268,7 @@ What makes this route safe to call with a browser-exposed key:
 - **Refusals are opaque.** An unknown or expired `session_id`, a token that belongs to a different customer, a guest session with no customer, and a refusal by the card vault all answer the same `404`.
 - **Any session that has not expired works** — including one that is already paid or cancelled, because the SDK still shows saved cards on those sessions.
 
-The one refusal that is explained is a card held by an active [auto-debit agreement](/developers/cards-and-tokens/recurring-payments/#agreement). The card belongs to the session's own customer, and they can release it, so Ottu answers `409` and says how. The message follows the request's `Accept-Language` header:
+Two refusals are explained to the customer: a card held by an active [auto-debit agreement](/developers/cards-and-tokens/recurring-payments/#agreement) answers `400` when Ottu holds the card, and `409` when the card was saved through Ottu's own payment gateway (Ottu PG). The message follows the request's `Accept-Language` header. Both messages are listed in [What your customer sees](#what-your-customer-sees). The `409` message, in the two supported languages:
 
 | `Accept-Language` | `detail` |
 |---|---|
@@ -311,35 +311,9 @@ When a customer taps delete on a saved card that is held by a running auto-debit
 
 `{expiry_date}` is the end date of the agreement, always written as `YYYY-MM-DD` (for example `2026-12-31`). It is the `expiry_date` you sent in the `agreement` object, shown in that fixed form whatever format you sent it in.
 
-## Error Handling
+### Use Cases
 
-### List and delete (server routes)
-
-| Status | Example body | Cause | What to do |
-|---|---|---|---|
-| `400` | ``{"customer_id": ["Customer ID `cust_999` does not exist."]}`` | No payment transaction exists for that `customer_id` | Check the ID you stored at checkout |
-| `400` | `{"type": ["This field is required."]}` | `type` missing | Send `sandbox` or `production` |
-| `400` | `{"detail": "<reason from the card vault>", "result": "failed"}` | The card vault refused the delete — for example, the card is held by an auto-debit agreement | Show the reason to your operator; for an agreement, charge the agreement with another card first |
-| `401` | `{"detail": "Authentication credentials were not provided."}` | No credentials, an invalid, revoked or expired key, or the **public key** | Call from your server with your private key |
-| `403` | `{"detail": "You do not have permission to perform this action."}` | A scoped key or user without `Can view Card` (list) or `Can delete Card` (delete) | Grant the permission, or use a key that holds it |
-| `503` | `{"detail": "The payment gateway is not available right now."}` | Ottu cannot reach its card vault because it is not configured on this deployment | Contact Ottu support |
-
-### Session-scoped delete (Checkout SDK)
-
-| Status | Example body | Cause |
-|---|---|---|
-| `204` | *(empty)* | The card was deleted |
-| `400` | `{"token": ["Ensure this field has no more than 128 characters."]}` | `token` or `session_id` longer than 128 characters |
-| `400` | `{"detail": "This card is linked to an auto-debit agreement active until 2026-12-31. …", "result": "failed"}` | The card is held by a running or open-ended agreement ([see the rules](#deleting-a-card-that-has-an-auto-debit-agreement)) |
-| `401` | `{"detail": "Authentication credentials were not provided."}` | No credentials, or an invalid or revoked key |
-| `403` | `{"detail": "You do not have permission to perform this action."}` | A private key or user without `Can delete Card` (the public key does not need a permission) |
-| `404` | `{"detail": "Not found.", "result": "failed"}` | Unknown or expired session, a token the session's customer does not hold, a guest session, or a refusal by the card vault |
-| `409` | `{"detail": "This card is linked to an active auto debit agreement…", "result": "failed"}` | The customer's own card is held by an active auto-debit agreement |
-| `503` | `{"detail": "The payment gateway is not available right now."}` | The card vault is not configured on this deployment |
-
-## Use Cases
-
-### Deleting a card that has an auto-debit agreement
+#### Deleting a card that has an auto-debit agreement
 
 A saved card can be linked to an [auto-debit agreement](/developers/cards-and-tokens/recurring-payments/): the customer's consent for you to charge the card again later. Deleting such a card would silently break that agreement, so Ottu does not let the **cardholder** delete it while the agreement is still running. **You** (the merchant) can always delete it.
 
@@ -371,6 +345,32 @@ If a card is linked to **several** agreements, the message shows the **latest** 
 The agreement check is for the cardholder only. It does not apply on the merchant route, or when you call the session route with your private key.
 :::
 
+## Error Handling
+
+### List and delete (server routes)
+
+| Status | Example body | Cause | What to do |
+|---|---|---|---|
+| `400` | ``{"customer_id": ["Customer ID `cust_999` does not exist."]}`` | No payment transaction exists for that `customer_id` | Check the ID you stored at checkout |
+| `400` | `{"type": ["This field is required."]}` | `type` missing | Send `sandbox` or `production` |
+| `400` | `{"detail": "<reason from the card vault>", "result": "failed"}` | The card vault refused the delete — for example, the card is held by an auto-debit agreement | Show the reason to your operator; for an agreement, charge the agreement with another card first |
+| `401` | `{"detail": "Authentication credentials were not provided."}` | No credentials, an invalid, revoked or expired key, or the **public key** | Call from your server with your private key |
+| `403` | `{"detail": "You do not have permission to perform this action."}` | A scoped key or user without `Can view Card` (list) or `Can delete Card` (delete) | Grant the permission, or use a key that holds it |
+| `503` | `{"detail": "The payment gateway is not available right now."}` | Ottu cannot reach its card vault because it is not configured on this deployment | Contact Ottu support |
+
+### Session-scoped delete (Checkout SDK)
+
+| Status | Example body | Cause |
+|---|---|---|
+| `204` | *(empty)* | The card was deleted |
+| `400` | `{"token": ["Ensure this field has no more than 128 characters."]}` | `token` or `session_id` longer than 128 characters |
+| `400` | `{"detail": "This card is linked to an auto-debit agreement active until 2026-12-31. …", "result": "failed"}` | The card is held by a running or open-ended agreement ([see the rules](#deleting-a-card-that-has-an-auto-debit-agreement)) |
+| `401` | `{"detail": "Authentication credentials were not provided."}` | No credentials, or an invalid or revoked key |
+| `403` | `{"detail": "You do not have permission to perform this action."}` | A private key or user without `Can delete Card` (the public key does not need a permission) |
+| `404` | `{"detail": "Not found.", "result": "failed"}` | Unknown or expired session, a token the session's customer does not hold, a guest session, or a refusal by the card vault |
+| `409` | `{"detail": "This card is linked to an active auto debit agreement…", "result": "failed"}` | The customer's own card is held by an active auto-debit agreement |
+| `503` | `{"detail": "The payment gateway is not available right now."}` | The card vault is not configured on this deployment |
+
 ## API Reference
 
 <ApiDocEmbed path="get-user-cards.api.mdx" />
@@ -385,9 +385,8 @@ The agreement check is for the cardholder only. It does not apply on the merchan
 - **Scope the key.** A key that only manages cards needs `Can view Card` and `Can delete Card` — nothing else. See [API Key Permissions](/developers/reference/api-key-permissions/).
 - **Store the `customer_id` you send at checkout.** Every server route is keyed on it.
 - **Treat `409` as actionable.** Tell the customer that paying once with another card moves the agreement; after that the delete succeeds.
-- Show the `detail` text to the customer instead of a generic "could not delete" message. It already says who to contact and, when known, until when.
-- Send `Accept-Language` so the message matches the customer's language.
-- Never ship your private key in a browser or mobile app.
+- **Show `detail` to the customer.** Use it instead of a generic "could not delete" message: it already says who to contact and, when known, until when.
+- **Send `Accept-Language`.** The message then matches the customer's language.
 
 ## FAQ
 
