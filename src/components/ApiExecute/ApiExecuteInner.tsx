@@ -339,9 +339,13 @@ export default function ApiExecuteInner({
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<ExecuteResult>();
   const [error, setError] = useState<string>();
+  // The reader looks at the documented examples after a run; the run's
+  // response stays, one click away.
+  const [browsingExamples, setBrowsingExamples] = useState(false);
   useEffect(() => {
     setResult(undefined);
     setError(undefined);
+    setBrowsingExamples(false);
   }, [epochNow]);
   // Which documented example the response box shows until the reader runs the call.
   const [shown, setShown] = useState(
@@ -388,6 +392,7 @@ export default function ApiExecuteInner({
       dayRef.current === utcDay() ? preparedRef.current : request(getSession());
     const startedIn = sessionEpoch();
     setBusy(true);
+    setBrowsingExamples(false);
     setError(undefined);
     setResult(undefined); // never show an older run's response next to this one
     try {
@@ -470,24 +475,22 @@ export default function ApiExecuteInner({
   );
   const example = options.find((option) => option.key === shown) ?? options[0];
 
-  // What the response box shows. The documented examples only show when
-  // nothing ran, so they are never mistaken for the sandbox's answer.
+  // What the response box shows. After a run the documented examples show
+  // only when the reader asks, so they are never mistaken for the sandbox's
+  // answer.
+  const ran = Boolean(error || result);
   const mode = busy
     ? "running"
-    : error
-      ? "error"
-      : result
-        ? "live"
-        : "examples";
+    : browsingExamples || !ran
+      ? "examples"
+      : error
+        ? "error"
+        : "live";
   // Ids that only exist once the prerequisites ran (not the API key, which
   // the reader always supplies).
   const needsIds = /<(?!YOUR_API_KEY>)[A-Z_]+>/.test(
     `${prepared.path} ${JSON.stringify(prepared.body ?? {})}`,
   );
-  const showExamples = () => {
-    setResult(undefined);
-    setError(undefined);
-  };
 
   return (
     <div className={styles.panel} data-api-execute={endpoint}>
@@ -561,16 +564,40 @@ export default function ApiExecuteInner({
           )}
           {mode === "live" && result && (
             <span className={styles.liveTag}>
-              Live · {result.status} · {result.ms} ms
-              <button className={styles.linkBtn} onClick={showExamples}>
-                Show examples
-              </button>
+              <span>
+                Live · {result.status} · {result.ms} ms
+              </span>
+              {options.length > 0 && (
+                <button
+                  className={styles.linkBtn}
+                  onClick={() => setBrowsingExamples(true)}
+                >
+                  Show examples
+                </button>
+              )}
             </span>
           )}
           {mode === "error" && (
             <span className={styles.liveTag}>
-              <button className={styles.linkBtn} onClick={showExamples}>
-                Show examples
+              {options.length > 0 && (
+                <button
+                  className={styles.linkBtn}
+                  onClick={() => setBrowsingExamples(true)}
+                >
+                  Show examples
+                </button>
+              )}
+            </span>
+          )}
+          {mode === "examples" && ran && (
+            <span className={styles.liveTag}>
+              <button
+                className={styles.linkBtn}
+                onClick={() => setBrowsingExamples(false)}
+              >
+                {result
+                  ? `Back to response (${result.status})`
+                  : "Back to error"}
               </button>
             </span>
           )}
