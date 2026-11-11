@@ -239,6 +239,10 @@ $deleted = curl_getinfo($ch, CURLINFO_HTTP_CODE) === 204;`}</CodeBlock>
 
 A successful delete answers `204 No Content`. `customer_id` and `type` are required query parameters: the card is looked up for that customer only, so a token that belongs to another customer is never deleted.
 
+:::warning Deleting a card ends the agreement's charging
+When you delete a card, its token is revoked at the gateway, so later [auto-debit](/developers/payments/native-payments/) charges with that token cannot succeed. Delete a card with a running agreement only when you intend to stop it, and tell the customer.
+:::
+
 ### Delete a Card from a Checkout Session (Checkout SDK)
 
 The [Checkout SDK](/developers/payments/checkout-sdk/) shows the customer their saved cards and lets them remove one. Each saved card the SDK receives carries a `delete_url`:
@@ -354,6 +358,8 @@ The agreement check is for the cardholder only. It does not apply on the merchan
 | `503` | `{"detail": "The payment gateway is not available right now."}` | Ottu cannot reach its card vault because it is not configured on this deployment | Contact Ottu support |
 
 ### Session-scoped delete (Checkout SDK)
+
+A refused cardholder delete leaves the card untouched and fully usable: Ottu checks the agreement **before** anything is revoked at the gateway.
 
 | Status | Example body | Cause |
 |---|---|---|
