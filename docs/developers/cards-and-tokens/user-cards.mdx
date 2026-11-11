@@ -28,7 +28,7 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/
 - **Display saved cards** — show customers their previously [tokenized](/developers/cards-and-tokens/tokenization/) cards at checkout for one-click payments.
 - **Delete saved cards** — let customers or your backend remove cards they no longer want stored.
 - **Build custom card management UI** — if the [Checkout SDK](/developers/payments/checkout-sdk/) doesn't fit your UX needs, call these APIs from your server.
-- **Pre-filter cards for auto-debit** — retrieve tokenized cards before initiating [recurring payments](/developers/cards-and-tokens/recurring-payments/).
+- **Pre-filter cards for [auto-debit](/glossary/#term-auto-debit)** — retrieve tokenized cards before initiating [recurring payments](/developers/cards-and-tokens/recurring-payments/).
 
 ## Authentication
 
@@ -60,7 +60,7 @@ If your front end called these routes directly, move the call to your server and
 When integrating the User Cards API, here are the key points:
 
 1. You will not receive the full card number (PAN). Instead, you'll get the last 4 digits and a [token](/glossary/#term-tokenization). This token is what you use for payments or authorizations.
-2. If you're using the [Checkout SDK](/developers/payments/checkout-sdk/), customers can delete their saved cards themselves, unless an [auto-debit agreement](/glossary/#term-auto-debit) is still running on the card ([see the rules](#deleting-a-card-that-has-an-auto-debit-agreement)). The SDK does this through the session-scoped route, so you do not need to expose any key other than the public key. This gives users control over their payment information.
+2. If you're using the [Checkout SDK](/developers/payments/checkout-sdk/), customers can delete their saved cards themselves, unless an auto-debit agreement is still running on the card ([see the rules](#deleting-a-card-that-has-an-auto-debit-agreement)). The SDK does this through the session-scoped route, so you do not need to expose any key other than the public key. This gives users control over their payment information.
 3. When a customer saves their card during payment, the corresponding token is included in the payload sent to your [webhook_url](/developers/payments/checkout-api/).
 4. Ottu already handles displaying saved cards and card deletion inside the SDK. Use these APIs only if you need more granular control.
 
@@ -281,7 +281,7 @@ The one refusal that is explained is a card held by an active [auto-debit agreem
 
 ### What your customer sees
 
-When a customer taps delete on a saved card that is held by a running [auto-debit agreement](/glossary/#term-auto-debit) (see [Recurring Payments](/developers/cards-and-tokens/recurring-payments/)), the session-scoped route refuses the delete and the card is kept. The Checkout SDK receives an explanation in the `detail` field, in the language of the `Accept-Language` header (English and Arabic are supported), and should show it to the customer as-is. The rules behind these messages are in [Deleting a card that has an auto-debit agreement](#deleting-a-card-that-has-an-auto-debit-agreement).
+When a customer taps delete on a saved card that is held by a running auto-debit agreement (see [Recurring Payments](/developers/cards-and-tokens/recurring-payments/)), the session-scoped route refuses the delete and the card is kept. The Checkout SDK receives an explanation in the `detail` field, in the language of the `Accept-Language` header (English and Arabic are supported), and should show it to the customer as-is. The rules behind these messages are in [Deleting a card that has an auto-debit agreement](#deleting-a-card-that-has-an-auto-debit-agreement).
 
 <CodeBlock language="json" title="400 Bad Request: recurring agreement still running">{`{
   "detail": "This card is linked to an auto-debit agreement active until 2026-12-31. Contact the merchant to cancel the agreement before deleting this card.",
