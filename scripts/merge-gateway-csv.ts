@@ -12,7 +12,6 @@ import { resolve } from "path";
 const CSV_NAME_TO_SLUG: Record<string, string> = {
   "ABA PayWay": "abapayway",
   "Amazon Payment Services": "amazon_pay",
-  "Worldline": "bambora",
   "Benefit": "benefit",
   "BenefitPay": "benefit_pay",
   "Beyon Money": "beyon_money",
