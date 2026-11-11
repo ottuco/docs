@@ -1,6 +1,10 @@
+import path from "node:path";
 import { themes as prismThemes } from "prism-react-renderer";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
+// Adds the `devServer` key to webpack's Configuration type (used by the plugin below).
+import type {} from "webpack-dev-server";
+import apiReferenceData from "./src/remark/apiReferenceData";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -70,6 +74,13 @@ const config: Config = {
           routeBasePath: "/",
           sidebarPath: "./sidebars.ts",
           docItemComponent: "@theme/ApiItem",
+          // <ApiReference> gets its endpoint's operation at build time.
+          remarkPlugins: [
+            [
+              apiReferenceData,
+              { apisDir: path.join(__dirname, "docs/developers/apis") },
+            ],
+          ],
           showLastUpdateTime: true,
           exclude: ["superpowers/**"],
         },
@@ -260,6 +271,23 @@ const config: Config = {
       },
     ],
     ["docusaurus-markdown-source-plugin", { docsPath: "/" }],
+    // React Flow's node ResizeObserver reports "ResizeObserver loop completed
+    // with undelivered notifications" when the page layout shifts (a tab or a
+    // dialog changes the page height). Browsers treat it as harmless; keep it
+    // off the dev server's full-screen error overlay. Real errors still show.
+    () => ({
+      name: "dev-overlay-ignore-resize-observer",
+      configureWebpack: () => ({
+        devServer: {
+          client: {
+            overlay: {
+              runtimeErrors: (error: Error) =>
+                !error?.message?.includes("ResizeObserver loop"),
+            },
+          },
+        },
+      }),
+    }),
   ],
 
   themes: [
