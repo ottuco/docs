@@ -203,45 +203,6 @@
     ]
   },
   {
-    "slug": "bambora",
-    "name": "Worldline",
-    "countries": [
-      "Canada",
-      "Global"
-    ],
-    "currencies": [
-      "CAD"
-    ],
-    "inquiryMinutes": 0,
-    "operations": [
-      "purchase"
-    ],
-    "integrationType": "redirect",
-    "category": "processor",
-    "operationMode": "purchase",
-    "logo": "bambora_icon.svg",
-    "acceptedAt": [],
-    "cardBrands": [
-      "Visa",
-      "Mastercard"
-    ],
-    "digitalWallets": [
-      "Apple Pay",
-      "Google Pay",
-      "PayPal"
-    ],
-    "testCards": [
-      {
-        "cardNumber": "4030 0000 1000 1234",
-        "expiry": "05/30",
-        "cvv": "123",
-        "brand": "Visa",
-        "status": "success",
-        "statusLabel": "Success"
-      }
-    ]
-  },
-  {
     "slug": "bede",
     "name": "Bede",
     "countries": [
@@ -282,8 +243,7 @@
     "inquiryMinutes": 8,
     "operations": [
       "purchase",
-      "refund",
-      "autodebit"
+      "refund"
     ],
     "integrationType": "redirect",
     "category": "local_debit",
@@ -1465,8 +1425,7 @@
     "inquiryMinutes": 8,
     "operations": [
       "purchase",
-      "refund",
-      "autodebit"
+      "refund"
     ],
     "integrationType": "redirect",
     "category": "local_debit",
@@ -1735,7 +1694,8 @@
       "refund",
       "auth",
       "capture",
-      "tokenization"
+      "tokenization",
+      "autodebit"
     ],
     "integrationType": "redirect",
     "category": "gateway",
@@ -2065,8 +2025,7 @@
       "refund",
       "auth",
       "capture",
-      "tokenization",
-      "autodebit"
+      "tokenization"
     ],
     "integrationType": "redirect/direct",
     "category": "acquirer",

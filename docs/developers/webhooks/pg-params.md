@@ -1,7 +1,7 @@
 ---
 title: PG Params
 sidebar_label: PG Params
-description: Unified payment gateway response fields — search and browse all pg_params fields that Ottu normalizes across 60+ gateways.
+description: Unified payment gateway response fields — search and browse all pg_params fields that Ottu normalizes across 45+ gateways.
 ---
 
 import Tabs from "@theme/Tabs";
@@ -11,7 +11,7 @@ import FAQ, { FAQItem } from '@site/src/components/FAQ';
 
 # PG Params
 
-Every payment gateway returns transaction results in its own format — different field names, different nesting structures, even different response shapes for the same gateway depending on the transaction type. Ottu sits in front of [60+ payment gateways](https://enc.ottu.me/business/payments/gateways/) and normalizes all of these varied responses into a consistent set of fields called **`pg_params`**.
+Every payment gateway returns transaction results in its own format — different field names, different nesting structures, even different response shapes for the same gateway depending on the transaction type. Ottu sits in front of [45+ payment gateways](/business/payments/gateways/) and normalizes all of these varied responses into a consistent set of fields called **`pg_params`**.
 
 When your webhook handler reads `pg_params.card_number`, you get the masked card number regardless of whether the transaction was processed by KNET, MPGS, Cybersource, Tap, or any other gateway. No gateway-specific parsing required.
 
