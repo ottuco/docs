@@ -1,0 +1,6 @@
+/* p.readingTime: beats the site's paragraph margin and size. */
+p.readingTime {
+  margin: -8px 0 var(--ifm-leading);
+  font-size: 13px;
+  color: var(--ifm-color-emphasis-700);
+}

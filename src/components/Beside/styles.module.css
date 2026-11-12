@@ -1,0 +1,23 @@
+.shot {
+  display: block;
+  overflow: hidden;
+  margin-bottom: var(--ifm-leading);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+  cursor: zoom-in;
+}
+
+/* Desktop: the right half, beside the half-width prose. */
+@media (min-width: 997px) {
+  .shot {
+    float: right;
+    width: calc(50% - 32px);
+    margin-left: 32px;
+  }
+}
+
+.shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}

@@ -10,6 +10,8 @@ import CodeBlock from "@theme/CodeBlock";
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import FAQ, { FAQItem } from '@site/src/components/FAQ';
 import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
+import NativePaymentResultFlow from "@site/src/diagrams/flow/NativePaymentResultFlow";
+import NativePaymentCallbackSequence from "@site/src/diagrams/flow/NativePaymentCallbackSequence";
 
 # Native Payments
 
@@ -128,18 +130,7 @@ If the call is made from the client side, the backend must be synchronized with 
 - The API response is forwarded to the backend, **or**
 - The [Payment Status Query API](/developers/payments/psq/) is called by the backend after the client confirms that the payment has been completed.
 
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
-graph LR
-    A[Client] --> B[Ottu]
-    B --> C{OK?}
-    C -- Yes --> D[Backend]
-    C -- No --> E[Log]
-    D --> F[Inquiry]
-
-    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
-    class B accent
-```
+<NativePaymentResultFlow />
 
 #### Client → Backend → Ottu (Recommended)
 
@@ -148,17 +139,7 @@ graph LR
 3. The backend receives the payment response callback.
 4. The backend processes the callback response and notifies the client side with the payment status.
 
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
-graph LR
-    A[Client] --> B[Backend]
-    B --> C[Ottu]
-    C --> B
-    B --> A
-
-    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
-    class C accent
-```
+<NativePaymentCallbackSequence />
 
 ### Step-by-Step
 
@@ -366,4 +347,4 @@ Select the payment provider to see its full interactive API schema:
 
 - [**Checkout API**](./checkout-api.mdx) — Create sessions with `payment_instrument` for one-step checkout
 - [**Recurring Payments**](../cards-and-tokens/recurring-payments.mdx) — Use tokens for auto-debit payments
-- [**Webhooks**](../webhooks/payment-events.md) — Receive payment result notifications
+- [**Webhooks**](../webhooks/payment-events.mdx) — Receive payment result notifications

@@ -78,9 +78,12 @@ function Shell({
   text,
   render,
   reserve,
+  narrowHeight,
 }: {
   title: string;
   height: number;
+  /** Height under 996px, when the diagram lays out differently there. */
+  narrowHeight?: number;
   text: React.ReactNode;
   render: () => React.ReactNode;
   /** Room for the caption panel under the diagram, until the container is
@@ -103,7 +106,16 @@ function Shell({
       <BrowserOnly
         fallback={
           <>
-            <div className={styles.placeholder} style={{ height }} />
+            <div
+              className={styles.placeholder}
+              // The server can't know the screen: CSS picks the height.
+              style={
+                {
+                  "--placeholder-h": `${height}px`,
+                  "--placeholder-narrow-h": `${narrowHeight ?? height}px`,
+                } as React.CSSProperties
+              }
+            />
             {reserve ? (
               <>
                 <style>{`@container (min-width: ${reserve.sideAt}px) { #${id} { display: none; } }`}</style>
@@ -151,7 +163,10 @@ export function StoryDiagram(input: StoryProps): React.JSX.Element {
   return (
     <Shell
       title={props.title}
+      // Without the caption panel: `reserve` adds it where it sits below.
       height={storyDiagramHeight(props)}
+      // A story with side buttons puts them back on top on narrow screens.
+      narrowHeight={storyDiagramHeight({ ...props, controls: "top" })}
       reserve={
         hasJourneys(props)
           ? {
