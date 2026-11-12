@@ -22,6 +22,10 @@ export const STORY_JOURNEYS_H = 40;
 export const STORY_TITLE_H = 56;
 export const STORY_CONTROLS_W = 168;
 export const STORY_CONTROLS_GAP = 16;
+/** React Flow fit padding around the story's lanes, % each side. */
+export const STORY_FIT_PCT = 3;
+/** Inset of the side layout (styles.module.css `.storySide` padding-left), kept on the right too. */
+const STORY_CANVAS_PAD = 18;
 const controlsBeside = (p: StoryProps): boolean => p.controls === "side";
 /** The panel under a story with journeys, and the gap above it. The panel
  * height is fixed so pinning or walking never moves the page below; longer
@@ -83,11 +87,12 @@ export const storyFigureHeight = (p: StoryProps): number =>
 export const storyMaxWidth = (p: StoryProps): number | undefined =>
   controlsBeside(p) && !p.fillWidth
     ? Math.round(
-        18 +
+        2 * STORY_CANVAS_PAD +
           STORY_CONTROLS_W +
           STORY_CONTROLS_GAP +
-          p.lanes.length * storyGap(p.lanes.length) * 1.06 +
-          18,
+          p.lanes.length *
+            storyGap(p.lanes.length) *
+            (1 + (2 * STORY_FIT_PCT) / 100),
       )
     : undefined;
 export const storyMinWidth = (p: StoryProps): number =>

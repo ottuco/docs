@@ -45,10 +45,11 @@ function PickedList({ picked }: { picked: Picked[] }) {
   if (picked.length === 0) return null;
   return (
     <ul className={styles.picked}>
-      {picked.map(({ label, value, href, note }) => (
-        <li key={label}>
+      {picked.map(({ label, value, href, note }, i) => (
+        <li key={`${i}-${label}`}>
           <span className={styles.pickedLabel}>{label}</span>{" "}
-          {href ? (
+          {/* Only a web link from the sandbox response, never another scheme. */}
+          {href?.startsWith("https://") ? (
             <a href={href} target="_blank" rel="noopener noreferrer">
               {value} <Icon path={mdiOpenInNew} size={0.5} />
             </a>
@@ -281,7 +282,9 @@ export default function ApiExecuteInner({
     // day for a date in it): send a request built from the current state.
     const shown = preparedRef.current;
     const call =
-      shown.inputs === definition.inputs(before) ? shown.request : request(before);
+      shown.inputs === definition.inputs(before)
+        ? shown.request
+        : request(before);
     // In development, catch a scenario whose `inputs` misses something its
     // `request` reads: Run would send a stale request. An endpoint with
     // `newEachRun` builds new ids each time, so it can't be compared.
@@ -393,8 +396,8 @@ export default function ApiExecuteInner({
         </div>
         {needsIds && (
           <p className={styles.note}>
-            Replace the <code>{"{…}"}</code> values with your own, or press
-            Run to create them on the sandbox first.
+            Replace the <code>{"{…}"}</code> values with your own, or press Run
+            to create them on the sandbox first.
           </p>
         )}
         <div className={styles.boxFoot}>

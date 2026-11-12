@@ -29,6 +29,7 @@ import {
 import {
   STORY_CONTROLS_GAP,
   STORY_CONTROLS_W,
+  STORY_FIT_PCT,
   STORY_PANEL_GAP,
   STORY_ROW,
   STORY_TOP,
@@ -100,9 +101,6 @@ function useWidth(ref: React.RefObject<HTMLElement | null>): number {
   return width;
 }
 
-/** Fit padding of the body, % each side. */
-const FIT_PCT = 3;
-
 export default function Story(input: StoryProps): React.JSX.Element {
   const narrow = useNarrow(NARROW);
   const props: StoryProps =
@@ -142,7 +140,7 @@ export default function Story(input: StoryProps): React.JSX.Element {
   const bodyWidth = useWidth(body);
   const filling = fillWidth && bodyWidth > 0;
   const gap = filling
-    ? storyFillGap(lanes.length, bodyWidth, FIT_PCT)
+    ? storyFillGap(lanes.length, bodyWidth, STORY_FIT_PCT)
     : storyGap(lanes.length);
   const cardW = filling ? storyFillCardW(gap) : storyCardW(lanes.length);
   const lanesHeight = storyLanesHeight(props);
@@ -314,7 +312,7 @@ export default function Story(input: StoryProps): React.JSX.Element {
           edgeTypes={edgeTypes}
           colorMode={colorMode}
           fitView
-          fitViewOptions={{ padding: fitPadding(FIT_PCT), maxZoom: 1 }}
+          fitViewOptions={{ padding: fitPadding(STORY_FIT_PCT), maxZoom: 1 }}
           {...readOnlyFlow}
           onNodeMouseEnter={(_, n) => {
             const step = stepOf(n.id);
@@ -325,7 +323,7 @@ export default function Story(input: StoryProps): React.JSX.Element {
           onPaneClick={showAll}
         >
           {/* Refit when the lanes widen, not only when the canvas resizes. */}
-          <FitOnResize pct={FIT_PCT} refit={gap} />
+          <FitOnResize pct={STORY_FIT_PCT} refit={gap} />
         </ReactFlow>
       </div>
     </div>

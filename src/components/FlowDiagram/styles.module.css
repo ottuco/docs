@@ -538,9 +538,17 @@
 }
 
 .placeholder {
+  height: var(--placeholder-h);
   border: 1px solid var(--ifm-color-emphasis-200);
   border-radius: 12px;
   background: var(--ifm-background-surface-color);
+}
+
+/* Story's NARROW (Story.tsx): side buttons move above the lanes. */
+@media (max-width: 996px) {
+  .placeholder {
+    height: var(--placeholder-narrow-h);
+  }
 }
 
 /* Flowing arrows: dashes move from source to target (edges with `animated`). */
