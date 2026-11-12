@@ -2,10 +2,14 @@
 // a request you can run and its response on the right.
 //
 // Usage in MDX:
-//   <ApiReference api="autopay-subscription-detail" run="retrieve" tabGroup="autopay-api" />
+//   <ApiReference api="autopay-subscription-detail" />
+//   <ApiReference api="autopay-subscription-detail" scenario="autopay" run="retrieve" tabGroup="autopay-api" />
 // `api` is the slug of a generated page in docs/developers/apis/ (any of them:
-// src/remark/apiReferenceData.ts passes its operation in at build time);
-// `run` is the ApiExecute endpoint that runs it on the sandbox.
+// src/remark/apiReferenceData.ts passes its operation in at build time).
+// Without `run` the right column shows the documented response examples; with
+// it, the request and Run: `scenario` and `run` name the ApiExecute scenario
+// and its endpoint that run it on the sandbox
+// (src/components/ApiExecute/scenarios/).
 //
 // The left column renders on the server, so search and the MCP server see the
 // fields. Only the run panel is browser-only.
@@ -15,10 +19,9 @@ import Heading from "@theme/Heading";
 import Link from "@docusaurus/Link";
 import useBrokenLinks from "@docusaurus/useBrokenLinks";
 import Markdown from "docusaurus-theme-openapi-docs/lib/theme/Markdown";
-import ApiExecute, {
-  type EndpointKey,
-  type ResponseExamples,
-} from "@site/src/components/ApiExecute";
+import ApiExecute, { type ResponseExamples } from "@site/src/components/ApiExecute";
+import ResponseExamplesBox from "@site/src/components/ApiExecute/ResponseExamples";
+import { runOf, type ScenarioKey } from "@site/src/components/ApiExecute/scenarios";
 import FieldList, { Children } from "./Fields";
 import {
   examplesOf,
@@ -212,7 +215,7 @@ function viewOf(api: ApiSlug, source?: GeneratedPage): View {
  * page's tabs to this one (the tab is kept in the query string, like Docusaurus
  * tabs do). sidebarHashActiveLink scrolls to the field once it is visible.
  */
-function useShowTabForHash(id: string, run: string, tabGroup?: string) {
+function useShowTabForHash(id: string, tab: string, tabGroup?: string) {
   const { hash, visit } = useHashNavigation();
   const location = useLocation();
   const history = useHistory();
@@ -230,32 +233,58 @@ function useShowTabForHash(id: string, run: string, tabGroup?: string) {
     handled.current = visit;
     if (!tabGroup || !targeted) return;
     const params = new URLSearchParams(window.location.search);
-    if (params.get(tabGroup) === run) return;
-    params.set(tabGroup, run);
+    if (params.get(tabGroup) === tab) return;
+    params.set(tabGroup, tab);
     history.replace({
       pathname: window.location.pathname,
       search: `?${params}`,
       hash: window.location.hash,
     });
-  }, [visit, targeted, run, tabGroup, location, history]);
+  }, [visit, targeted, tab, tabGroup, location, history]);
+}
+
+/**
+ * In development, report an endpoint shown twice on one page: both copies get
+ * the same anchors, so links to its fields reach only the first.
+ */
+function useWarnDuplicateAnchor(id: string) {
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    const copies = document.querySelectorAll(`[id="${CSS.escape(id)}"]`).length;
+    if (copies > 1)
+      console.error(
+        `ApiReference: the anchor "${id}" is on this page ${copies} times; show each endpoint once per page, or give it a different run name.`,
+      );
+  }, [id]);
 }
 
 export default function ApiReference({
   api,
   source,
+  scenario,
   run,
   tabGroup,
 }: {
   api: ApiSlug;
   /** The generated page's data: added by src/remark/apiReferenceData.ts, not written by hand. */
   source?: GeneratedPage;
-  run: EndpointKey;
+  /** The ApiExecute scenario that runs `run`; both or neither. */
+  scenario?: ScenarioKey;
+  /** The scenario's endpoint Run sends. Without it, no Run: the response examples only. */
+  run?: string;
   /**
    * The `groupId` of the query-string `<Tabs>` this sits in, so a deep link to
-   * one of its fields can open its tab. The `<TabItem value>` must equal `run`.
+   * one of its fields can open its tab. The `<TabItem value>` must equal `run`
+   * (or `api` when there is no `run`).
    */
   tabGroup?: string;
 }): React.JSX.Element {
+  if (Boolean(scenario) !== Boolean(run))
+    throw new Error(
+      `ApiReference api="${api}": give both scenario and run, or neither.`,
+    );
+  // Fails the build on an unknown scenario or endpoint, not only the browser.
+  if (scenario && run) runOf(scenario, run);
   const {
     operation,
     responses,
@@ -272,8 +301,11 @@ export default function ApiReference({
     examples,
   } = viewOf(api, source);
   const heading = source?.title ?? api;
-  const id = `${run}-api`;
-  useShowTabForHash(id, run, tabGroup);
+  // The anchor of the endpoint and the prefix of its fields' anchors.
+  const name = run ?? api;
+  const id = `${name}-api`;
+  useShowTabForHash(id, name, tabGroup);
+  useWarnDuplicateAnchor(id);
   // The shape anchors of the body and the response, for the broken-anchor check.
   const brokenLinks = useBrokenLinks();
   bodyVariants.forEach((variant) =>
@@ -283,8 +315,13 @@ export default function ApiReference({
     brokenLinks.collectAnchor(variantId(`${id}-response`, variant.label)),
   );
 
+  // Checked above: both or neither.
+  const runnable = scenario && run ? { scenario, run } : undefined;
+  // Nothing to show on the right: the fields take the whole width.
+  const single = !runnable && examples.length === 0;
+
   return (
-    <div className={styles.reference}>
+    <div className={single ? `${styles.reference} ${styles.single}` : styles.reference}>
       <div className={styles.left}>
         <Heading as="h3" id={id} className={styles.title}>
           {heading}
@@ -376,9 +413,19 @@ export default function ApiReference({
         </p>
       </div>
 
-      <div className={styles.right}>
-        <ApiExecute endpoint={run} examples={examples} />
-      </div>
+      {!single && (
+        <div className={styles.right}>
+          {runnable ? (
+            <ApiExecute
+              scenario={runnable.scenario}
+              endpoint={runnable.run}
+              examples={examples}
+            />
+          ) : (
+            <ResponseExamplesBox examples={examples} />
+          )}
+        </div>
+      )}
     </div>
   );
 }

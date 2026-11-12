@@ -8,6 +8,11 @@
   margin: 16px 0 32px;
 }
 
+/* No Run and no documented example: nothing for the right column. */
+.reference.single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .left {
   min-width: 0;
 }

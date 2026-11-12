@@ -15,154 +15,40 @@ import {
   mdiCheck,
   mdiClose,
   mdiLoading,
-  mdiOpenInNew,
   mdiPlay,
 } from "@mdi/js";
 import ApiPanel from "@site/src/components/ApiPanel";
+import type { AnyScenario } from "./scenario";
+import { runOf, type ScenarioKey } from "./scenarios";
+import { send, type ExecuteResult } from "./send";
+import { LANGUAGES, snippet } from "./snippets";
 import {
-  SUBSCRIPTIONS,
-  holdSession,
-  createSubscription,
-  findGateway,
-  getSession,
-  newAutoPayRequest,
-  patchSession,
-  readResult,
-  rememberSubscription,
-  sessionEpoch,
-  resetSession,
-  send,
-  subscribe,
-  watchPayment,
-  type ExecuteResult,
-  type Session,
-} from "./session";
-import { LANGUAGES, snippet, type SnippetRequest } from "./snippets";
-import { isoDate } from "@site/src/utils/autoPayRequest";
+  CODE_HEIGHT,
+  ExamplePanel,
+  useExample,
+  type ResponseExamples,
+} from "./ResponseExamples";
 import styles from "./styles.module.css";
 
-export type EndpointKey =
-  | "create"
-  | "list"
-  | "retrieve"
-  | "cancel"
-  | "cycles"
-  | "page-link"
-  | "regenerate-page-token";
-
-type Method = "GET" | "POST";
-
-/** One call, as built, shown (snippets.ts) and sent. */
-type PreparedRequest = SnippetRequest;
-
-type StepId = "gateway" | "subscription";
-
-const STEPS: Record<StepId, { title: string; method: Method; path: string }> = {
-  gateway: {
-    title: "Find an auto-debit gateway",
-    method: "POST",
-    path: "/b/pbl/v2/payment-methods/",
-  },
-  subscription: {
-    title: "Create a subscription",
-    method: "POST",
-    path: "/b/checkout/v1/pymt-txn/",
-  },
-};
-
-const subscriptionPath = (session: Session, suffix = "") =>
-  `${SUBSCRIPTIONS}/${session.subscriptionId ?? "<SUBSCRIPTION_ID>"}/${suffix}`;
-
-// The request each tab's Run sends, and the cURL / Python / Node.js / PHP code
-// built from it (snippets.ts), are written here by hand: they chain live ids
-// (gateway, customer, subscription) that the OpenAPI examples don't have.
-// Unlike the fields on the left and the response examples, they do NOT follow
-// the schema: when a request field, a required field or a path changes, update
-// this map, Create's body in src/utils/autoPayRequest.ts and the Create cURL in
-// docs/developers/payments/autopay/index.mdx.
-const ENDPOINTS: Record<
-  EndpointKey,
-  { needs: StepId[]; request: (session: Session) => PreparedRequest }
-> = {
-  create: {
-    needs: ["gateway"],
-    request: (session) => ({
-      method: "POST",
-      path: STEPS.subscription.path,
-      body: newAutoPayRequest(session.pgCodes ?? ["<AUTO_DEBIT_PG_CODE>"]),
-    }),
-  },
-  // Filtered to this visit's customer: the sandbox merchant is shared.
-  list: {
-    needs: ["gateway", "subscription"],
-    request: (session) => ({
-      method: "POST",
-      path: `${SUBSCRIPTIONS}/`,
-      body: { customer_id: session.customerId ?? "<CUSTOMER_ID>", limit: 10 },
-    }),
-  },
-  retrieve: {
-    needs: ["gateway", "subscription"],
-    request: (session) => ({ method: "GET", path: subscriptionPath(session) }),
-  },
-  cancel: {
-    needs: ["gateway", "subscription"],
-    request: (session) => ({
-      method: "POST",
-      path: subscriptionPath(session, "cancel/"),
-      body: { mode: "immediate" },
-      idempotent: true,
-    }),
-  },
-  cycles: {
-    needs: ["gateway", "subscription"],
-    request: (session) => ({
-      method: "GET",
-      path: subscriptionPath(session, "cycles/"),
-    }),
-  },
-  "page-link": {
-    needs: ["gateway", "subscription"],
-    request: (session) => ({
-      method: "GET",
-      path: subscriptionPath(session, "page-link/"),
-    }),
-  },
-  "regenerate-page-token": {
-    needs: ["gateway", "subscription"],
-    request: (session) => ({
-      method: "POST",
-      path: subscriptionPath(session, "regenerate-page-token/"),
-      idempotent: true,
-    }),
-  },
-};
-
-// A test subscription in a final state (canceled on the Cancel tab, setup
-// failed after an abandoned checkout, expired) no longer counts: the other
-// calls need a working one, so Run sets up a new one.
-const FINAL_STATES = new Set(["canceled", "setup_failed", "expired"]);
-const isDone = (step: StepId, session: Session) =>
-  step === "gateway"
-    ? Boolean(session.pgCodes)
-    : Boolean(session.subscriptionId) &&
-      !FINAL_STATES.has(session.subscriptionStatus ?? "");
+// The run panel, for any API: the calls, the live ids they chain and the
+// test objects they leave behind come from the endpoint's scenario
+// (scenarios/<name>/, see scenario.ts).
 
 type StepState = "pending" | "running" | "done" | "failed";
 
 function Prerequisites({
+  scenario,
   steps,
   onDone,
   onClose,
 }: {
-  steps: StepId[];
+  scenario: AnyScenario;
+  steps: string[];
   onDone: () => void;
   onClose: () => void;
 }) {
-  const [states, setStates] = useState<Partial<Record<StepId, StepState>>>({});
-  const [responses, setResponses] = useState<Partial<Record<StepId, unknown>>>(
-    {},
-  );
+  const [states, setStates] = useState<Record<string, StepState>>({});
+  const [responses, setResponses] = useState<Record<string, unknown>>({});
   const [finished, setFinished] = useState(false);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string>();
@@ -179,16 +65,13 @@ function Prerequisites({
     setRunning(true);
     setError(undefined);
     for (const step of steps) {
-      if (isDone(step, getSession())) {
+      if (scenario.steps[step].done(scenario.getState())) {
         setStates((prev) => ({ ...prev, [step]: "done" }));
         continue;
       }
       setStates((prev) => ({ ...prev, [step]: "running" }));
       try {
-        const response =
-          step === "gateway"
-            ? await findGateway()
-            : await createSubscription(getSession().pgCodes ?? []);
+        const response = await scenario.steps[step].run();
         setResponses((prev) => ({ ...prev, [step]: response }));
         setStates((prev) => ({ ...prev, [step]: "done" }));
       } catch (err) {
@@ -200,7 +83,7 @@ function Prerequisites({
     }
     setRunning(false);
     setFinished(true);
-  }, [steps]);
+  }, [scenario, steps]);
 
   return createPortal(
     <div className={styles.overlay} onClick={onClose}>
@@ -237,6 +120,7 @@ function Prerequisites({
         <ol className={styles.steps}>
           {steps.map((step) => {
             const state = states[step] ?? "pending";
+            const { title, method, path } = scenario.steps[step];
             return (
               <li key={step} className={styles.step}>
                 <span className={styles.stepIcon} data-state={state}>
@@ -249,9 +133,9 @@ function Prerequisites({
                   )}
                 </span>
                 <div className={styles.stepBody}>
-                  <div className={styles.stepTitle}>{STEPS[step].title}</div>
+                  <div className={styles.stepTitle}>{title}</div>
                   <code className={styles.stepPath}>
-                    {STEPS[step].method} {STEPS[step].path}
+                    {method} {path}
                   </code>
                   {responses[step] !== undefined && (
                     <details className={styles.details}>
@@ -278,71 +162,30 @@ function Prerequisites({
   );
 }
 
-export function SubscriptionBar() {
-  const session = useSyncExternalStore(subscribe, getSession, getSession);
-
-  if (!session.subscriptionId) return null;
-  return (
-    <div className={styles.subscription}>
-      <span>
-        Test subscription <code>{session.subscriptionId}</code>{" "}
-        <strong>{session.subscriptionStatus}</strong>
-        {session.watchingPayment && (
-          <span className={styles.note}> · waiting for the payment</span>
-        )}
-      </span>
-      <span className={styles.subscriptionActions}>
-        {session.checkoutUrl &&
-          session.subscriptionStatus === "pending_setup" && (
-            <a
-              href={session.checkoutUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={watchPayment}
-            >
-              Pay the first charge <Icon path={mdiOpenInNew} size={0.55} />
-            </a>
-          )}
-        {session.pageUrl && (
-          <a href={session.pageUrl} target="_blank" rel="noopener noreferrer">
-            Open customer page <Icon path={mdiOpenInNew} size={0.55} />
-          </a>
-        )}
-        <button className={styles.linkBtn} onClick={resetSession}>
-          Start over
-        </button>
-      </span>
-    </div>
-  );
-}
-
-const utcDay = () => isoDate(new Date());
-
-// The request and the response share the sticky column: each code box takes
-// at most half of what is left below the navbar once the box heads, language
-// tabs, hint and buttons (about 420px) are counted, so the column fits.
-const CODE_HEIGHT =
-  "max(140px, calc((100vh - var(--ifm-navbar-height) - 420px) / 2))";
-
-/** Documented examples per status code, from the endpoint's OpenAPI responses. */
-export type ResponseExamples = {
-  code: string;
-  examples: { name: string; summary: string; value: unknown }[];
-}[];
+// One empty list for every panel without examples: a stable default.
+const NO_EXAMPLES: ResponseExamples = [];
 
 export default function ApiExecuteInner({
+  scenario: scenarioKey,
   endpoint,
-  examples = [],
+  examples = NO_EXAMPLES,
 }: {
-  endpoint: EndpointKey;
+  scenario: ScenarioKey;
+  endpoint: string;
   examples?: ResponseExamples;
 }) {
-  const session = useSyncExternalStore(subscribe, getSession, getSession);
-  const { needs, request } = ENDPOINTS[endpoint];
-  useEffect(() => holdSession(), []);
+  const { scenario, endpoint: definition } = runOf(scenarioKey, endpoint);
+  const { needs, request } = definition;
+  const state = useSyncExternalStore(
+    scenario.subscribe,
+    scenario.getState,
+    scenario.getState,
+  );
+  useEffect(() => scenario.hold?.(), [scenario]);
+  const epochOf = useCallback(() => scenario.epoch?.() ?? 0, [scenario]);
   const [askPrerequisites, setAskPrerequisites] = useState(false);
-  // Start over (a new session epoch): drop the old run's response and error.
-  const epochNow = sessionEpoch();
+  // Start over (a new epoch): drop the old run's response and error.
+  const epochNow = epochOf();
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<ExecuteResult>();
   const [error, setError] = useState<string>();
@@ -355,32 +198,20 @@ export default function ApiExecuteInner({
     setBrowsingExamples(false);
   }, [epochNow]);
   // Which documented example the response box shows until the reader runs the call.
-  const [shown, setShown] = useState(
-    () => `${examples[0]?.code}:${examples[0]?.examples[0]?.name}`,
-  );
+  const { options, example, picker } = useExample(examples);
 
   // The next request: what the code box shows, what Copy copies and what Run
-  // sends. Rebuilt only when a value it uses changes, so it stays put while
-  // the reader reads it. After a Create run, `fresh` gives the next one new
-  // random ids (order_no and customer_id must not repeat).
+  // sends. Rebuilt only when what it is built from changes (the endpoint's
+  // `inputs`), so it stays put while the reader reads it; `fresh` gives an
+  // endpoint with ids that must not repeat a new request after each run.
   const [fresh, setFresh] = useState(0);
-  const { pgCodes, subscriptionId, customerId } = session;
-  // What this request is built from: Create only needs the gateway, so a
-  // subscription made on another tab does not change its code.
-  const inputs =
-    endpoint === "create"
-      ? String(pgCodes)
-      : `${pgCodes}|${subscriptionId}|${customerId}`;
-  // Create's start_date is relative to today: rebuild on a new (UTC) day.
-  const day = utcDay();
+  const inputs = definition.inputs(state);
   const prepared = useMemo(
-    () => request(getSession()),
-    [request, inputs, fresh, day],
+    () => request(scenario.getState()),
+    [scenario, request, inputs, fresh],
   );
-  const preparedRef = useRef(prepared);
-  preparedRef.current = prepared;
-  const dayRef = useRef(day);
-  dayRef.current = day;
+  const preparedRef = useRef({ request: prepared, inputs });
+  preparedRef.current = { request: prepared, inputs };
   // Built once per request, not on every render.
   const snippets = useMemo(
     () =>
@@ -390,14 +221,28 @@ export default function ApiExecuteInner({
       })),
     [prepared],
   );
-  const missing = needs.filter((step) => !isDone(step, session));
+  const missing = needs.filter((step) => !scenario.steps[step].done(state));
 
   const execute = useCallback(async () => {
-    const current = getSession();
-    // A new UTC day since the code was built: Create's start_date is stale.
+    const before = scenario.getState();
+    // What the code was built from changed since it was shown (say, a new
+    // day for a date in it): send a request built from the current state.
+    const shown = preparedRef.current;
     const call =
-      dayRef.current === utcDay() ? preparedRef.current : request(getSession());
-    const startedIn = sessionEpoch();
+      shown.inputs === definition.inputs(before) ? shown.request : request(before);
+    // In development, catch a scenario whose `inputs` misses something its
+    // `request` reads: Run would send a stale request. An endpoint with
+    // `newEachRun` builds new ids each time, so it can't be compared.
+    if (
+      process.env.NODE_ENV !== "production" &&
+      call === shown.request &&
+      !definition.newEachRun &&
+      JSON.stringify(request(before)) !== JSON.stringify(call)
+    )
+      console.warn(
+        `ApiExecute: the "${endpoint}" request changed but its inputs() did not; add what request() reads to inputs().`,
+      );
+    const startedIn = epochOf();
     setBusy(true);
     setBrowsingExamples(false);
     setError(undefined);
@@ -409,57 +254,31 @@ export default function ApiExecuteInner({
           ? { "Idempotency-Key": crypto.randomUUID() }
           : undefined,
       });
-      // Start over during the call: this response belongs to the old session.
-      if (sessionEpoch() !== startedIn) {
-        if (endpoint === "create")
-          rememberSubscription(
-            call.body as { customer_id: string },
-            readResult(response),
-            startedIn,
-          ); // cancels the subscription it created
-        return;
-      }
-      setResult(response);
-      // Keeping the test subscription up to date is bookkeeping: if it fails,
-      // the reader still sees the response they asked for.
+      // Started over during the call: the response belongs to the old
+      // session, but the scenario still hears of it (to clean up).
+      if (epochOf() === startedIn) setResult(response);
       try {
-        const data = readResult(response);
-        // Only about the subscription the call was for, and only while the
-        // session still holds it: a Create elsewhere may have replaced it.
-        const { subscriptionId } = current;
-        const stillCurrent =
-          Boolean(subscriptionId) &&
-          getSession().subscriptionId === subscriptionId;
-        if (endpoint === "create") {
-          rememberSubscription(
-            call.body as { customer_id: string },
-            data,
-            startedIn,
-          );
-        } else if (stillCurrent) {
-          const patch: Partial<Session> = {};
-          if (data.pageUrl) patch.pageUrl = data.pageUrl;
-          // A status in the body is the subscription's only when it is.
-          if (data.id === subscriptionId && data.status) {
-            patch.subscriptionStatus = data.status;
-            patch.live = getSession().live && !FINAL_STATES.has(data.status);
-          }
-          if (Object.keys(patch).length > 0) patchSession(patch);
-        }
+        scenario.afterRun?.({
+          endpoint,
+          request: call,
+          result: response,
+          before,
+          startedIn,
+        });
       } catch (err) {
-        console.warn("ApiExecute: could not update the test subscription", err);
+        console.warn("ApiExecute: could not update the scenario's state", err);
       }
     } catch (err) {
-      // Start over during the call: the failure belongs to the old session.
-      if (sessionEpoch() !== startedIn)
+      // Started over during the call: the failure belongs to the old session.
+      if (epochOf() !== startedIn)
         console.warn("ApiExecute: a call of the old session failed", err);
       else
         setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setBusy(false);
-      if (endpoint === "create") setFresh((n) => n + 1);
+      if (definition.newEachRun) setFresh((n) => n + 1);
     }
-  }, [endpoint, request]);
+  }, [scenario, definition, endpoint, request, epochOf]);
 
   const onExecute = () => {
     if (missing.length > 0) setAskPrerequisites(true);
@@ -472,15 +291,6 @@ export default function ApiExecuteInner({
   }, [execute]);
 
   const closePrerequisites = useCallback(() => setAskPrerequisites(false), []);
-
-  const options = examples.flatMap(({ code, examples: list }) =>
-    list.map((example) => ({
-      key: `${code}:${example.name}`,
-      code,
-      ...example,
-    })),
-  );
-  const example = options.find((option) => option.key === shown) ?? options[0];
 
   // What the response box shows. After a run the documented examples show
   // only when the reader asks, so they are never mistaken for the sandbox's
@@ -552,20 +362,7 @@ export default function ApiExecuteInner({
       <div className={styles.box}>
         <div className={styles.boxHead}>
           <span className={styles.boxTitle}>Response</span>
-          {mode === "examples" && options.length > 0 && (
-            <select
-              className={styles.select}
-              value={example?.key}
-              onChange={(event) => setShown(event.target.value)}
-              aria-label="Response example"
-            >
-              {options.map((option) => (
-                <option key={option.key} value={option.key}>
-                  {option.code} · {option.summary}
-                </option>
-              ))}
-            </select>
-          )}
+          {mode === "examples" && picker}
           {mode === "running" && (
             <span className={styles.liveTag}>Running…</span>
           )}
@@ -623,12 +420,7 @@ export default function ApiExecuteInner({
         )}
         {mode === "examples" &&
           (example ? (
-            <ApiPanel
-              label="JSON"
-              data={example.value}
-              maxHeight={CODE_HEIGHT}
-              className={styles.boxPanel}
-            />
+            <ExamplePanel example={example} />
           ) : (
             <p className={styles.note}>Run the request to see the response.</p>
           ))}
@@ -636,6 +428,7 @@ export default function ApiExecuteInner({
 
       {askPrerequisites && (
         <Prerequisites
+          scenario={scenario}
           steps={needs}
           onDone={onPrerequisitesDone}
           onClose={closePrerequisites}
