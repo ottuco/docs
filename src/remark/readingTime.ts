@@ -1,11 +1,9 @@
-// Puts "N min read" under each doc's title: counts the words a reader reads
-// (text, inline code, the text inside components such as FAQ answers; not
-// code blocks) and inserts <ReadingTime minutes={N} /> after the page's H1,
-// or at the top when the title comes from the front matter.
-//
-// Pages in `skipDir` (the generated API pages, mostly components with little
-// prose) and partials (`_name.mdx`) get none.
-import path from "node:path";
+// Puts "N min read" under the title of a doc that asks for it with
+// `reading_time: true` in its front matter (rolled out page by page; AutoPay
+// first). Counts the words a reader reads (text, inline code, the text inside
+// components such as FAQ answers; not code blocks) and inserts
+// <ReadingTime minutes={N} /> after the page's H1, or at the top when the
+// title comes from the front matter.
 
 type Estree = Record<string, unknown>;
 type Node = {
@@ -32,14 +30,13 @@ function words(node: Node): number {
 
 const identifier = (name: string): Estree => ({ type: "Identifier", name });
 
-export default function readingTime({ skipDir }: { skipDir: string }) {
-  return (tree: Node, file: { path?: string }) => {
-    const filePath = file.path ?? "";
-    if (
-      filePath.startsWith(skipDir + path.sep) ||
-      path.basename(filePath).startsWith("_")
-    )
-      return;
+export default function readingTime() {
+  return (
+    tree: Node,
+    file: { data: { frontMatter?: Record<string, unknown> } },
+  ) => {
+    // Docusaurus's MDX loader puts the parsed front matter on the file.
+    if (file.data.frontMatter?.reading_time !== true) return;
     const children = tree.children ?? [];
     const minutes = Math.max(1, Math.round(words(tree) / WORDS_PER_MINUTE));
     const element: Node = {

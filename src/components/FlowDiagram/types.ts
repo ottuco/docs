@@ -61,6 +61,12 @@ export type StoryProps = {
    * separator, so a wide page has no empty band beside the lanes.
    */
   controls?: "top" | "side";
+  /**
+   * The lanes widen to fill the figure's width (the cards too, up to a
+   * limit), so the diagram runs the full width of the page. Default false:
+   * the lanes keep their size and sit in the middle.
+   */
+  fillWidth?: boolean;
 };
 
 // ---------- Sequence ----------

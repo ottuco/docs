@@ -4,6 +4,7 @@ description: Recurring subscriptions. Ottu owns the billing schedule, retries, d
 toc_min_heading_level: 2
 toc_max_heading_level: 3
 hide_table_of_contents: true
+reading_time: true
 ---
 
 
@@ -22,6 +23,10 @@ import StepGuide from "@site/src/components/StepGuide";
 import Beside from "@site/src/components/Beside";
 import { autopayCustomerViewSteps } from "@site/src/data/autopay-customer-view";
 import "./autopay.css";
+
+{/* autopay.css scopes its rules by this page's doc id
+    (developers/payments/autopay/index): moving or renaming the page needs
+    the selectors there updated. */}
 
 # AutoPay
 
@@ -68,7 +73,7 @@ Run the whole journey against the sandbox: create a subscription, pay its first 
 
 Your customer meets AutoPay in three places. See [What your customer sees](/business/autopay/#what-your-customer-sees) on the business page for the full tour.
 
-<StepGuide steps={autopayCustomerViewSteps} />
+<StepGuide steps={autopayCustomerViewSteps} fitImages />
 
 ### Use Cases
 

@@ -35,6 +35,8 @@ import {
   STORY_BODY_PAD,
   storyBodyHeight,
   storyCardW,
+  storyFillCardW,
+  storyFillGap,
   storyGap,
   storyLanesHeight,
   storyMaxWidth,
@@ -83,6 +85,24 @@ function useNarrow(query: string): boolean {
   return narrow;
 }
 
+/** Width of `ref`'s element, kept up to date; 0 before it is measured. */
+function useWidth(ref: React.RefObject<HTMLElement | null>): number {
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) =>
+      setWidth(Math.round(entry.contentRect.width)),
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [ref]);
+  return width;
+}
+
+/** Fit padding of the body, % each side. */
+const FIT_PCT = 3;
+
 export default function Story(input: StoryProps): React.JSX.Element {
   const narrow = useNarrow(NARROW);
   const props: StoryProps =
@@ -96,6 +116,7 @@ export default function Story(input: StoryProps): React.JSX.Element {
     animate = true,
     maxHeight,
     controls = "top",
+    fillWidth = false,
   } = props;
   const journeys = props.journeys ?? [];
   const hasPanel = journeys.length > 0;
@@ -116,8 +137,14 @@ export default function Story(input: StoryProps): React.JSX.Element {
     ? journey.stops.slice(0, stop + 1).map((x) => x.step)
     : [];
 
-  const gap = storyGap(lanes.length);
-  const cardW = storyCardW(lanes.length);
+  // The body (lanes and cards). With `fillWidth` the lanes share its width.
+  const body = useRef<HTMLDivElement>(null);
+  const bodyWidth = useWidth(body);
+  const filling = fillWidth && bodyWidth > 0;
+  const gap = filling
+    ? storyFillGap(lanes.length, bodyWidth, FIT_PCT)
+    : storyGap(lanes.length);
+  const cardW = filling ? storyFillCardW(gap) : storyCardW(lanes.length);
   const lanesHeight = storyLanesHeight(props);
 
   const nodes: Node[] = useMemo(() => {
@@ -171,7 +198,6 @@ export default function Story(input: StoryProps): React.JSX.Element {
   // With `maxHeight` the body scrolls: keep the journey's current card in
   // view. Scroll the body ourselves; scrollIntoView would also scroll React
   // Flow's own pane.
-  const body = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = body.current;
     if (!maxHeight || !el || !journey) return;
@@ -235,11 +261,7 @@ export default function Story(input: StoryProps): React.JSX.Element {
   // above one another, or with `controls="side"` the buttons in a column on
   // the left of the body.
   const sideChips = (
-    <div
-      className={styles.chips}
-      role="group"
-      aria-label="Show one side only"
-    >
+    <div className={styles.chips} role="group" aria-label="Show one side only">
       {lanes.map((l, i) => (
         <button
           key={i}
@@ -259,11 +281,7 @@ export default function Story(input: StoryProps): React.JSX.Element {
     </div>
   );
   const journeyChips = hasPanel ? (
-    <div
-      className={styles.chips}
-      role="group"
-      aria-label="Walk a journey"
-    >
+    <div className={styles.chips} role="group" aria-label="Walk a journey">
       {journeys.map((j, i) => (
         <button
           key={i}
@@ -296,7 +314,7 @@ export default function Story(input: StoryProps): React.JSX.Element {
           edgeTypes={edgeTypes}
           colorMode={colorMode}
           fitView
-          fitViewOptions={{ padding: fitPadding(3), maxZoom: 1 }}
+          fitViewOptions={{ padding: fitPadding(FIT_PCT), maxZoom: 1 }}
           {...readOnlyFlow}
           onNodeMouseEnter={(_, n) => {
             const step = stepOf(n.id);
@@ -306,7 +324,8 @@ export default function Story(input: StoryProps): React.JSX.Element {
           onNodeClick={(_, n) => pickNode(n.id)}
           onPaneClick={showAll}
         >
-          <FitOnResize pct={3} />
+          {/* Refit when the lanes widen, not only when the canvas resizes. */}
+          <FitOnResize pct={FIT_PCT} refit={gap} />
         </ReactFlow>
       </div>
     </div>
@@ -357,7 +376,10 @@ export default function Story(input: StoryProps): React.JSX.Element {
   if (!hasPanel) return diagram;
 
   return (
-    <div className={styles.storyWrap} style={{ gap: STORY_PANEL_GAP, maxWidth }}>
+    <div
+      className={styles.storyWrap}
+      style={{ gap: STORY_PANEL_GAP, maxWidth }}
+    >
       {diagram}
       <StoryPanel
         lanes={lanes}

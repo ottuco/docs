@@ -162,9 +162,17 @@ export default function apiReferenceData({ apisDir }: { apisDir: string }) {
       const tab = [...ancestors]
         .reverse()
         .find((ancestor) => isElement(ancestor, "TabItem"));
+      const run = stringAttribute(node, "run");
+      // The section's anchor (ApiReference's `${run ?? api}-api`) and the
+      // shortcut's key: two references with the same one would share an id.
+      const anchor = run ?? api;
+      if (shortcuts.some((shortcut) => (shortcut.run ?? shortcut.api) === anchor))
+        throw new Error(
+          `${file.path}: two <${COMPONENT}>s are "${anchor}"; give the second a different run="…" so each section has its own anchor.`,
+        );
       shortcuts.push({
         api,
-        run: stringAttribute(node, "run"),
+        run,
         label: tab && stringAttribute(tab, "label"),
         source: name,
       });

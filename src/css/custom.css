@@ -970,15 +970,3 @@ article .markdown header h1 {
     padding-bottom: 0.75rem;
   }
 }
-
-/* A screenshot or box floated to the right (.float-beside: Beside,
-   ApiShortcuts) lets the section's prose run beside it; headings and wide
-   blocks (code, tables, diagrams) start below it. Docs rendered through the
-   OpenAPI theme's ApiItem (the docItemComponent) nest their content in
-   .row > .col.markdown. */
-@media (min-width: 997px) {
-  :is(.theme-doc-markdown, .theme-doc-markdown > .row > .col.markdown)
-    > :not(p, ul, ol, blockquote, .theme-admonition, .float-beside) {
-    clear: both;
-  }
-}

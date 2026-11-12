@@ -35,6 +35,29 @@ export const storyGap = (lanes: number): number =>
   Math.max(180, Math.floor(660 / Math.max(1, lanes)));
 export const storyCardW = (lanes: number): number =>
   Math.min(196, storyGap(lanes) - 20);
+/** Widest card with `fillWidth`, and the room it leaves either side in its lane. */
+const FILL_CARD_MAX = 240;
+const FILL_CARD_MARGIN = 24;
+/** Extra room (%) for rounding, so the lanes never overflow the body. */
+const FILL_SLACK_PCT = 1;
+/**
+ * Lane width with `fillWidth`: the body's width shared by the lanes (less the
+ * fit padding, `padPct` % each side), never under the usual width.
+ */
+export const storyFillGap = (
+  lanes: number,
+  bodyWidth: number,
+  padPct: number,
+): number =>
+  Math.max(
+    storyGap(lanes),
+    Math.floor(
+      (bodyWidth * (1 - (2 * padPct + FILL_SLACK_PCT) / 100)) /
+        Math.max(1, lanes),
+    ),
+  );
+export const storyFillCardW = (gap: number): number =>
+  Math.min(FILL_CARD_MAX, gap - 2 * FILL_CARD_MARGIN);
 /** Height the lanes and cards need. */
 export const storyLanesHeight = (p: StoryProps): number =>
   STORY_TOP + p.steps.length * STORY_ROW;
@@ -54,10 +77,11 @@ export const storyFigureHeight = (p: StoryProps): number =>
 /**
  * With `controls="side"`, the widest the figure needs to be: the buttons, the
  * gap, and the lanes at full size (plus the fit padding and the canvas
- * padding). Wider, React Flow would centre the lanes in an empty band.
+ * padding). Wider, React Flow would centre the lanes in an empty band. With
+ * `fillWidth` there is no limit: the lanes widen instead.
  */
 export const storyMaxWidth = (p: StoryProps): number | undefined =>
-  controlsBeside(p)
+  controlsBeside(p) && !p.fillWidth
     ? Math.round(
         18 +
           STORY_CONTROLS_W +

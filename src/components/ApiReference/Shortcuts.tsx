@@ -62,13 +62,13 @@ export default function ApiShortcuts({
         className={`${styles.shortcutsBox} float-beside`}
         aria-label="API shortcuts"
       >
-        <div className={styles.shortcutsTabs} role="tablist">
+        {/* Toggle buttons, not ARIA tabs: no tabpanel or arrow keys here. */}
+        <div className={styles.shortcutsTabs} role="group" aria-label="Show">
           {tabs.map(([value, label]) => (
             <button
               key={value}
               type="button"
-              role="tab"
-              aria-selected={tab === value}
+              aria-pressed={tab === value}
               className={styles.shortcutsTab}
               onClick={() => setTab(value)}
             >

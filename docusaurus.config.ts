@@ -81,11 +81,8 @@ const config: Config = {
               apiReferenceData,
               { apisDir: path.join(__dirname, "docs/developers/apis") },
             ],
-            // "N min read" under each doc's title (not the generated API pages).
-            [
-              readingTime,
-              { skipDir: path.join(__dirname, "docs/developers/apis") },
-            ],
+            // "N min read" under the title of docs with `reading_time: true`.
+            readingTime,
           ],
           showLastUpdateTime: true,
           exclude: ["superpowers/**"],

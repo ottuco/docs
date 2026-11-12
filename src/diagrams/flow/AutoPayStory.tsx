@@ -222,6 +222,7 @@ export default function AutoPayStory(): React.JSX.Element {
       links={autopayLinks}
       journeys={autopayJourneys}
       controls="side"
+      fillWidth
     />
   );
 }

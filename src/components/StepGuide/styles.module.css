@@ -106,13 +106,8 @@
   position: relative;
 }
 
-/* The frame hugs the image: a shot narrower than the area (or capped by
-   max-height) is centred, with no bars beside it. */
 .imageFrame {
   position: relative;
-  width: fit-content;
-  max-width: 100%;
-  margin: 0 auto;
   border-radius: 8px;
   border: 1px solid var(--ifm-color-emphasis-200);
   overflow: hidden;
@@ -128,10 +123,24 @@
 
 .imageFrame img {
   display: block;
+  width: 100%;
+  max-height: 500px;
+  object-fit: contain;
+  transition: opacity 0.25s ease;
+}
+
+/* fitImages: the frame hugs the image; a shot narrower than the area (or
+   capped by max-height) is centred, with no bars beside it. */
+.fitImages .imageFrame {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.fitImages .imageFrame img {
   width: auto;
   max-width: 100%;
-  max-height: 500px;
-  transition: opacity 0.25s ease;
+  object-fit: initial;
 }
 
 .zoomHint {

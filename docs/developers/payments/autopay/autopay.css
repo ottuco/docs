@@ -16,4 +16,18 @@
     > :is(p, ul, ol, blockquote, .theme-admonition) {
     max-width: 50%;
   }
+  /* A screenshot or box floated into the right half (.float-beside: Beside,
+     ApiShortcuts) lets the section's prose run down the left; headings and
+     wide blocks (code, tables, diagrams) start below it. */
+  html[class~="docs-doc-id-developers/payments/autopay/index"]
+    :is(.theme-doc-markdown, .theme-doc-markdown > .row > .col.markdown)
+    > :not(p, ul, ol, blockquote, .theme-admonition, .float-beside) {
+    clear: both;
+  }
+}
+
+/* Code and response panel headers in Ottu's dark (the heading colour), not
+   a blue: brand colours only (#161111 R4). */
+html[class~="docs-doc-id-developers/payments/autopay/index"] {
+  --api-panel-head-bg: #302f37;
 }
