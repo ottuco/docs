@@ -8,6 +8,7 @@ import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import FAQ, { FAQItem } from '@site/src/components/FAQ';
 import StepGuide from "@site/src/components/StepGuide";
 import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
+import InvoiceWorkflow from "@site/src/diagrams/flow/InvoiceWorkflow";
 
 # Invoice API
 
@@ -36,18 +37,7 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/
 
 ### Workflow
 
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
-graph LR
-    A([Merchant]) -->|Creates invoice| B[Invoice API]
-    B -->|Returns checkout_url| A
-    A -->|Sends link| C([Customer])
-    C -->|Views & pays| D[Checkout Page]
-    D -->|Webhook| A
-
-    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
-    class B accent
-```
+<InvoiceWorkflow />
 
 1. **Merchant creates an invoice** via the Invoice API with line items, taxes, discounts, and shipping.
 2. **Ottu returns a `checkout_url`** and `invoice_pdf_url` — the payment link and downloadable PDF.
@@ -244,5 +234,5 @@ The invoice calculation uses `ROUND_HALF_UP` at both item and invoice levels:
 ## What's Next?
 
 - [**Checkout API**](./payments/checkout-api.mdx) — The underlying API that Invoice API builds upon
-- [**Webhooks**](./webhooks/payment-events.md) — Receive payment status notifications for invoices
+- [**Webhooks**](./webhooks/payment-events.mdx) — Receive payment status notifications for invoices
 - [**Operations**](./operations.md) — Refund, capture, or void invoice payments
