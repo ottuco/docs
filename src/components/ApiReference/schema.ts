@@ -293,10 +293,32 @@ const STATUS_TEXT: Record<string, string> = {
 
 export const statusText = (code: string) => STATUS_TEXT[code] ?? "";
 
+// A run of `<li>` items, with or without `<br>` between them; an item ends
+// at its own `</li>`, never past the next `<li>`.
+const ITEM = /<li>((?:(?!<li>)[\s\S])*?)<\/li>/g;
+const LIST_ITEMS =
+  /(?:<br\s*\/?>\s*)*((?:<li>(?:(?!<li>)[\s\S])*?<\/li>\s*(?:<br\s*\/?>\s*)*)+)/g;
+// A description with a real list keeps its HTML as written.
+const HAS_LIST = /<(?:ul|ol)\b/i;
+
 /**
- * Descriptions can put an admonition (`:::info`) straight under a line of
- * text. The Markdown renderer only sees one when its `:::` lines are
- * paragraphs of their own, so give every `:::` line blank lines around it.
+ * Makes a description render as intended:
+ * - An admonition (`:::info`) can sit straight under a line of text. The
+ *   Markdown renderer only sees one when its `:::` lines are paragraphs of
+ *   their own, so every `:::` line gets blank lines around it.
+ * - The spec lists enum values as bare `<li>` items ("Available Values:<br>
+ *   <li>…</li><br><li>…</li>"). Without a list around them they end up inside
+ *   a paragraph, which is invalid HTML (a hydration error), so they become a
+ *   Markdown list (which keeps their `code`).
  */
-export const forMarkdown = (text: string) =>
-  text.replace(/^(:::.*)$/gm, "\n$1\n");
+export function forMarkdown(text: string): string {
+  const spaced = text.replace(/^(:::.*)$/gm, "\n$1\n");
+  if (HAS_LIST.test(spaced)) return spaced;
+  return spaced.replace(
+    LIST_ITEMS,
+    (_, items: string) =>
+      `\n\n${[...items.matchAll(ITEM)]
+        .map(([, item]) => `- ${item.trim()}`)
+        .join("\n")}\n\n`,
+  );
+}

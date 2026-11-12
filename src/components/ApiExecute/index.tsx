@@ -1,21 +1,31 @@
 import React from "react";
 import BrowserOnly from "@docusaurus/BrowserOnly";
-import type { EndpointKey, ResponseExamples } from "./ApiExecuteInner";
+import type { ResponseExamples } from "./ResponseExamples";
+import type { ScenarioKey } from "./scenarios";
 
-export type { EndpointKey, ResponseExamples };
+export type { ResponseExamples };
 
+/** Run one endpoint of a scenario (scenarios/index.ts) on the sandbox. */
 export default function ApiExecute({
+  scenario,
   endpoint,
   examples,
 }: {
-  endpoint: EndpointKey;
+  scenario: ScenarioKey;
+  endpoint: string;
   examples?: ResponseExamples;
 }): React.JSX.Element {
   return (
     <BrowserOnly>
       {() => {
         const ApiExecuteInner = require("./ApiExecuteInner").default;
-        return <ApiExecuteInner endpoint={endpoint} examples={examples} />;
+        return (
+          <ApiExecuteInner
+            scenario={scenario}
+            endpoint={endpoint}
+            examples={examples}
+          />
+        );
       }}
     </BrowserOnly>
   );

@@ -199,44 +199,44 @@ Replace `<START_DATE>` with the date of the first billing cycle (today or later,
     }
   }'`}</CodeBlock>
 
-<ApiExecuteGroup>
+<ApiExecuteGroup scenario="autopay">
 
 <Tabs groupId="autopay-api" queryString>
 <TabItem value="create" label="Create">
 
 Create a subscription with the Checkout API: set `payment_type` to `auto_pay` and send the `autopay` block.
 
-<ApiReference api="create-payment-transaction-checkout" run="create" tabGroup="autopay-api" />
+<ApiReference api="create-payment-transaction-checkout" scenario="autopay" run="create" tabGroup="autopay-api" />
 
 </TabItem>
 <TabItem value="list" label="List">
 
-<ApiReference api="autopay-subscription-list" run="list" tabGroup="autopay-api" />
+<ApiReference api="autopay-subscription-list" scenario="autopay" run="list" tabGroup="autopay-api" />
 
 </TabItem>
 <TabItem value="retrieve" label="Retrieve">
 
-<ApiReference api="autopay-subscription-detail" run="retrieve" tabGroup="autopay-api" />
+<ApiReference api="autopay-subscription-detail" scenario="autopay" run="retrieve" tabGroup="autopay-api" />
 
 </TabItem>
 <TabItem value="cancel" label="Cancel">
 
-<ApiReference api="autopay-subscription-cancel" run="cancel" tabGroup="autopay-api" />
+<ApiReference api="autopay-subscription-cancel" scenario="autopay" run="cancel" tabGroup="autopay-api" />
 
 </TabItem>
 <TabItem value="cycles" label="Billing cycles">
 
-<ApiReference api="autopay-subscription-cycles" run="cycles" tabGroup="autopay-api" />
+<ApiReference api="autopay-subscription-cycles" scenario="autopay" run="cycles" tabGroup="autopay-api" />
 
 </TabItem>
 <TabItem value="page-link" label="Page link">
 
-<ApiReference api="autopay-subscription-page-link" run="page-link" tabGroup="autopay-api" />
+<ApiReference api="autopay-subscription-page-link" scenario="autopay" run="page-link" tabGroup="autopay-api" />
 
 </TabItem>
 <TabItem value="regenerate-page-token" label="Regenerate page token">
 
-<ApiReference api="autopay-subscription-regenerate-page-token" run="regenerate-page-token" tabGroup="autopay-api" />
+<ApiReference api="autopay-subscription-regenerate-page-token" scenario="autopay" run="regenerate-page-token" tabGroup="autopay-api" />
 
 </TabItem>
 </Tabs>

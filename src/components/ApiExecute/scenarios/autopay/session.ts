@@ -1,20 +1,14 @@
 import {
-  ACTIVE_CONNECT,
   callPaymentMethods,
   createSandboxSession,
   extractPgCodes,
 } from "@site/src/utils/sandbox";
 import { AUTOPAY_PLUGIN, buildAutoPayRequest } from "@site/src/utils/autoPayRequest";
+import { send, type ExecuteResult } from "../../send";
 
 export const SUBSCRIPTIONS = "/b/pbl/v2/subscriptions";
 const POLL_MS = 5000;
 const MAX_POLLS = 60;
-
-export interface ExecuteResult {
-  status: number;
-  ms: number;
-  body: unknown;
-}
 
 export interface Session {
   pgCodes?: string[];
@@ -42,32 +36,6 @@ export function subscribe(listener: () => void): () => void {
 export function patchSession(patch: Partial<Session>): void {
   session = { ...session, ...patch };
   listeners.forEach((listener) => listener());
-}
-
-export async function send(
-  method: "GET" | "POST",
-  path: string,
-  options: { body?: unknown; headers?: Record<string, string>; keepalive?: boolean } = {},
-): Promise<ExecuteResult> {
-  const started = performance.now();
-  const response = await fetch(`${ACTIVE_CONNECT.connectBaseUrl}${path}`, {
-    method,
-    headers: {
-      Authorization: `Api-Key ${ACTIVE_CONNECT.connectApiKey}`,
-      ...(options.body ? { "Content-Type": "application/json" } : {}),
-      ...options.headers,
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined,
-    keepalive: options.keepalive,
-  });
-  const text = await response.text();
-  let body: unknown = text;
-  try {
-    body = JSON.parse(text);
-  } catch {
-    // Not JSON: show the raw text.
-  }
-  return { status: response.status, ms: Math.round(performance.now() - started), body };
 }
 
 // One in-flight call per step: a second Run (or a reopened dialog) waits for
@@ -134,7 +102,9 @@ const idOf = (value: unknown) =>
 function readResponse(body: unknown): ResponseFields {
   const data = objectOf(body);
   return {
-    id: idOf(data.id),
+    // The spec names a subscription's id `id`; the sandbox sends
+    // `subscription_id`. Prefer it: an `id` next to it would be another key.
+    id: idOf(data.subscription_id ?? data.id),
     status: textOf(data.status),
     pageUrl: textOf(data.page_url),
     checkoutUrl: textOf(data.checkout_url),
