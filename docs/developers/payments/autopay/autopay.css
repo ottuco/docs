@@ -1,0 +1,19 @@
+/* AutoPay developer page only.
+   Docusaurus bundles every imported stylesheet into the site-wide CSS, so
+   each rule here is scoped to this page by the doc-id class Docusaurus puts
+   on <html>. */
+
+/* Reading width (#161111 R7): on desktop, prose takes half the content
+   column, like Stripe's; diagrams, tables, code and the API reference keep
+   the full width, and the screenshots (Beside) and the shortcut box
+   (ApiShortcuts) float in the other half. Narrower than that (the site's
+   phone and tablet layout), half would be too narrow: prose runs full width.
+   The page renders through the OpenAPI theme's ApiItem (the
+   docItemComponent), which nests the content in .row > .col.markdown. */
+@media (min-width: 997px) {
+  html[class~="docs-doc-id-developers/payments/autopay/index"]
+    :is(.theme-doc-markdown, .theme-doc-markdown > .row > .col.markdown)
+    > :is(p, ul, ol, blockquote, .theme-admonition) {
+    max-width: 50%;
+  }
+}

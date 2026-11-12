@@ -18,6 +18,11 @@ export const STORY_MIN_BODY_H = 160;
  * used to size the placeholder before the browser renders the real thing. */
 export const STORY_HEADER_H = 92;
 export const STORY_JOURNEYS_H = 40;
+/** With `controls="side"`: the title alone above, the buttons in a column left of the body. */
+export const STORY_TITLE_H = 56;
+export const STORY_CONTROLS_W = 168;
+export const STORY_CONTROLS_GAP = 16;
+const controlsBeside = (p: StoryProps): boolean => p.controls === "side";
 /** The panel under a story with journeys, and the gap above it. The panel
  * height is fixed so pinning or walking never moves the page below; longer
  * text scrolls inside it. */
@@ -42,11 +47,28 @@ export const storyBodyHeight = (p: StoryProps): number => {
 /** The whole figure, for the placeholder: header, journey chips, body and
  * the panel under it. */
 export const storyFigureHeight = (p: StoryProps): number =>
-  STORY_HEADER_H +
+  (controlsBeside(p) ? STORY_TITLE_H : STORY_HEADER_H) +
   storyBodyHeight(p) +
-  (hasJourneys(p) ? STORY_JOURNEYS_H + STORY_PANEL_GAP + STORY_PANEL_H : 0);
+  (hasJourneys(p) && !controlsBeside(p) ? STORY_JOURNEYS_H : 0) +
+  (hasJourneys(p) ? STORY_PANEL_GAP + STORY_PANEL_H : 0);
+/**
+ * With `controls="side"`, the widest the figure needs to be: the buttons, the
+ * gap, and the lanes at full size (plus the fit padding and the canvas
+ * padding). Wider, React Flow would centre the lanes in an empty band.
+ */
+export const storyMaxWidth = (p: StoryProps): number | undefined =>
+  controlsBeside(p)
+    ? Math.round(
+        18 +
+          STORY_CONTROLS_W +
+          STORY_CONTROLS_GAP +
+          p.lanes.length * storyGap(p.lanes.length) * 1.06 +
+          18,
+      )
+    : undefined;
 export const storyMinWidth = (p: StoryProps): number =>
-  Math.round(p.lanes.length * storyGap(p.lanes.length) * 0.95);
+  Math.round(p.lanes.length * storyGap(p.lanes.length) * 0.95) +
+  (controlsBeside(p) ? STORY_CONTROLS_W + STORY_CONTROLS_GAP : 0);
 
 // Sequence
 export const SEQ_LANE_GAP = 185;

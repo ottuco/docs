@@ -2,9 +2,13 @@ import {
   callPaymentMethods,
   createSandboxSession,
   extractPgCodes,
+  paymentMethodsBody,
+  sandboxSessionBody,
+  type PaymentMethodsOptions,
 } from "@site/src/utils/sandbox";
 import { AUTOPAY_PLUGIN, buildAutoPayRequest } from "@site/src/utils/autoPayRequest";
 import { send, type ExecuteResult } from "../../send";
+import type { StepRun } from "../../scenario";
 
 export const SUBSCRIPTIONS = "/b/pbl/v2/subscriptions";
 const POLL_MS = 5000;
@@ -40,12 +44,12 @@ export function patchSession(patch: Partial<Session>): void {
 
 // One in-flight call per step: a second Run (or a reopened dialog) waits for
 // the first instead of creating a second gateway lookup or subscription.
-let findingGateway: Promise<unknown> | null = null;
-let creatingSubscription: Promise<unknown> | null = null;
+let findingGateway: Promise<StepRun> | null = null;
+let creatingSubscription: Promise<StepRun> | null = null;
 
-export function findGateway(): Promise<unknown> {
+export function findGateway(): Promise<StepRun> {
   if (!findingGateway) {
-    const call: Promise<unknown> = lookUpGateway().finally(() => {
+    const call: Promise<StepRun> = lookUpGateway().finally(() => {
       if (findingGateway === call) findingGateway = null; // not a newer one
     });
     findingGateway = call;
@@ -53,20 +57,23 @@ export function findGateway(): Promise<unknown> {
   return findingGateway;
 }
 
-async function lookUpGateway(): Promise<unknown> {
-  const methods = await callPaymentMethods({
-    plugin: AUTOPAY_PLUGIN,
-    currencies: ["KWD"],
-    auto_debit: true,
-    type: "sandbox",
-    tags: ["demo"],
-  });
+// The demo merchant's auto-debit gateways for the AutoPay plugin.
+const GATEWAY_QUERY: PaymentMethodsOptions = {
+  plugin: AUTOPAY_PLUGIN,
+  currencies: ["KWD"],
+  auto_debit: true,
+  type: "sandbox",
+  tags: ["demo"],
+};
+
+async function lookUpGateway(): Promise<StepRun> {
+  const methods = await callPaymentMethods(GATEWAY_QUERY);
   const pgCodes = extractPgCodes(methods);
   if (pgCodes.length === 0) {
     throw new Error("No auto-debit gateway is enabled for the demo merchant.");
   }
   patchSession({ pgCodes });
-  return methods;
+  return { body: paymentMethodsBody(GATEWAY_QUERY), response: methods };
 }
 
 export function newAutoPayRequest(pgCodes: string[]) {
@@ -182,9 +189,9 @@ export function watchPayment(): void {
   poll(0);
 }
 
-export function createSubscription(pgCodes: string[]): Promise<unknown> {
+export function createSubscription(pgCodes: string[]): Promise<StepRun> {
   if (!creatingSubscription) {
-    const call: Promise<unknown> = newSubscription(pgCodes).finally(() => {
+    const call: Promise<StepRun> = newSubscription(pgCodes).finally(() => {
       if (creatingSubscription === call) creatingSubscription = null;
     });
     creatingSubscription = call;
@@ -192,21 +199,24 @@ export function createSubscription(pgCodes: string[]): Promise<unknown> {
   return creatingSubscription;
 }
 
-async function newSubscription(pgCodes: string[]): Promise<unknown> {
+async function newSubscription(pgCodes: string[]): Promise<StepRun> {
   const startedIn = epoch;
   const request = newAutoPayRequest(pgCodes);
   const { type, pg_codes, ...extra } = request;
-  const created = await createSandboxSession({ type, pg_codes, extra });
+  const options = { type, pg_codes, extra };
+  // Built here so the dialog shows the body that was sent (it has a random customer).
+  const body = sandboxSessionBody(options);
+  const created = await createSandboxSession(options, body);
   const response = readResponse(created);
   // A checkout without the autopay block created no subscription: fail the
-  // step, or the next call would run against <SUBSCRIPTION_ID>.
+  // step, or the next call would run against {subscription_id}.
   if (!response.subscriptionId) {
     throw new Error("The sandbox created no subscription for this checkout.");
   }
   rememberSubscription(request, response, startedIn); // cancels it if stale
   // Tell the dialog this step did not give it a subscription to use.
   if (startedIn !== epoch) throw new Error("Started over while this was being created.");
-  return created;
+  return { body, response: created };
 }
 
 // Each run leaves a monthly subscription on the sandbox merchant. Cancel it immediately, best effort.

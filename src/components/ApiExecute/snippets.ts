@@ -23,7 +23,7 @@ export type SnippetRequest = {
 /** The fixed headers; an idempotent call also gets a fresh key (per language). */
 function headersOf({ body }: SnippetRequest): [string, string][] {
   const headers: [string, string][] = [
-    ["Authorization", "Api-Key <YOUR_API_KEY>"],
+    ["Authorization", "Api-Key {your_api_key}"],
   ];
   if (body) headers.push(["Content-Type", "application/json"]);
   return headers;

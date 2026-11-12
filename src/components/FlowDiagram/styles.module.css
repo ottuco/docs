@@ -395,6 +395,40 @@
   color: var(--o-primary);
 }
 
+/* controls="side": the side and journey buttons in a column left of the
+   body (columns and gap set inline from layout.ts). */
+.storySide {
+  display: grid;
+  align-items: start;
+  padding-left: 18px;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 12px;
+}
+
+.controls .chips {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 0;
+}
+
+.controls .chip {
+  justify-content: flex-start;
+}
+
+/* Between the sides and the journeys. */
+.controlsSep {
+  width: 100%;
+  margin: 8px 0;
+  border: 0;
+  border-top: 1px solid var(--o-border);
+}
+
 .storyWrap {
   display: flex;
   flex-direction: column;

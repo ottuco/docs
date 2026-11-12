@@ -16,16 +16,14 @@
 import React, { useEffect, useRef } from "react";
 import { useHistory, useLocation } from "@docusaurus/router";
 import Heading from "@theme/Heading";
-import Link from "@docusaurus/Link";
 import useBrokenLinks from "@docusaurus/useBrokenLinks";
 import Markdown from "docusaurus-theme-openapi-docs/lib/theme/Markdown";
 import ApiExecute, { type ResponseExamples } from "@site/src/components/ApiExecute";
 import ResponseExamplesBox from "@site/src/components/ApiExecute/ResponseExamples";
 import { runOf, type ScenarioKey } from "@site/src/components/ApiExecute/scenarios";
-import FieldList, { Children } from "./Fields";
+import FieldList from "./Fields";
 import {
   examplesOf,
-  fieldId,
   fieldsOf,
   forMarkdown,
   jsonOf,
@@ -50,7 +48,7 @@ const AUTHORIZATION: Field = {
   schema: {
     type: "string",
     description:
-      "`Api-Key <your API key>`. Find or create your key in the dashboard; see [Authentication](/developers/getting-started/authentication).",
+      "`Api-Key {your_api_key}`. Find or create your key in the dashboard; see [Authentication](/developers/getting-started/authentication).",
   },
   required: true,
   nullable: false,
@@ -96,61 +94,6 @@ function Section({
   );
 }
 
-type OtherResponse = {
-  code: string;
-  summaries: string[];
-  fields: Field[];
-  /** When the body is one of several shapes (oneOf). */
-  variants: Variant[];
-};
-
-function OtherResponses({
-  id,
-  others,
-}: {
-  id: string;
-  others: OtherResponse[];
-}) {
-  const brokenLinks = useBrokenLinks();
-  others.forEach(({ code }) => brokenLinks.collectAnchor(fieldId(id, code)));
-  if (others.length === 0) return null;
-  return (
-    <Section id={id} title="Other responses">
-      <ul className={styles.codes}>
-        {others.map(({ code, summaries, fields, variants }) => (
-          <li key={code} id={fieldId(id, code)}>
-            <div className={styles.codeHead}>
-              <span className={styles.code} data-code={code[0]}>
-                {code}
-              </span>
-              <span className={styles.codeText}>
-                {statusText(code)}
-                {summaries.length > 0 && ": " + summaries.join(", ")}
-              </span>
-            </div>
-            {fields.length > 0 && (
-              <Children
-                id={fieldId(id, code)}
-                fields={fields}
-                label="response fields"
-              />
-            )}
-            {variants.map((variant) => (
-              <Children
-                key={variant.label}
-                id={variantId(fieldId(id, code), variant.label)}
-                anchored
-                fields={variant.children}
-                label={`response fields when ${variant.label}`}
-              />
-            ))}
-          </li>
-        ))}
-      </ul>
-    </Section>
-  );
-}
-
 /** Everything one endpoint shows, built once per page load (stable for React.memo). */
 type View = ReturnType<typeof buildView>;
 // Keyed by the generated page's data: a regenerated page is a new object.
@@ -181,16 +124,6 @@ function buildView(source: GeneratedPage) {
     responseFields,
     // Shared fields and alternative shapes can both be there: show both.
     responseVariants: variantsOf(okSchema, "response"),
-    others: Object.keys(responses)
-      .filter((code) => code !== ok)
-      .map((code) => ({
-        code,
-        summaries: examplesOf(responses[code]).map(
-          (example) => example.summary,
-        ),
-        fields: fieldsOf(jsonOf(responses[code])?.schema, "response"),
-        variants: variantsOf(jsonOf(responses[code])?.schema, "response"),
-      })) as OtherResponse[],
     examples: Object.keys(responses)
       .map((code) => ({ code, examples: examplesOf(responses[code]) }))
       .filter((entry) => entry.examples.length > 0) as ResponseExamples,
@@ -297,7 +230,6 @@ export default function ApiReference({
     bodyVariants,
     responseFields,
     responseVariants,
-    others,
     examples,
   } = viewOf(api, source);
   const heading = source?.title ?? api;
@@ -406,11 +338,6 @@ export default function ApiReference({
             )}
           </Section>
         )}
-        <OtherResponses id={`${id}-errors`} others={others} />
-        <p className={styles.muted}>
-          Full generated reference:{" "}
-          <Link to={`/developers/apis/${api}`}>{heading}</Link>.
-        </p>
       </div>
 
       {!single && (

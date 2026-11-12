@@ -15,9 +15,13 @@ import AutoPayDemo from "@site/src/components/AutoPayDemo";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 import ApiReference from "@site/src/components/ApiReference";
+import ApiShortcuts from "@site/src/components/ApiReference/Shortcuts";
+import { autopayEvents, AUTOPAY_EVENTS_NOTE } from "@site/src/data/autopay-webhook-events";
 import ApiExecuteGroup from "@site/src/components/ApiExecute/Group";
 import StepGuide from "@site/src/components/StepGuide";
+import Beside from "@site/src/components/Beside";
 import { autopayCustomerViewSteps } from "@site/src/data/autopay-customer-view";
+import "./autopay.css";
 
 # AutoPay
 
@@ -72,7 +76,11 @@ After the first payment Ottu runs the subscription. These are the behaviours you
 
 #### First payment and activation {#first-payment-and-activation}
 
+<Beside image="/img/developers/autopay/first-charge-checkout.png" alt="Ottu's checkout page for the first AutoPay charge, with the card form and the amount due">
+
 The first payment is a **CIT** (customer-initiated transaction): your customer pays on the checkout page, and Ottu saves their card so it can charge the later cycles without them. See [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments) for the CIT/MIT background.
+
+</Beside>
 
 **Activation lags the payment.** Your customer can pay while the subscription still shows `pending_setup`. Ottu confirms the first payment on a recurring check. In production that takes up to about 15 minutes. On the sandbox it usually takes a minute or two. Until then:
 
@@ -151,7 +159,11 @@ Ottu emails your customer an upcoming-charge reminder, a payment-failed notice a
 
 #### Customer Self-Service Page {#customer-self-service-page}
 
+<Beside image="/img/developers/autopay/self-service-page.png" alt="The customer's self-service page: subscription summary, saved card and payment history">
+
 The `page_url` you read from the page-link endpoint is a credential: anyone holding it can act on the subscription. Your customer can view status and billing history, add or switch a card, pay an outstanding balance, and cancel or undo a pending cancellation. See [The self-service page](/business/autopay/#the-self-service-page).
+
+</Beside>
 
 :::note Customer cancellation is end-of-period
 A cancellation from the self-service page takes effect at the end of the current billing period. Only the merchant cancel call with `mode: "immediate"` stops a subscription right away. The customer can undo a pending cancellation while the subscription is `active`.
@@ -161,9 +173,13 @@ A customer cancellation on a `past_due` subscription only schedules the cancella
 
 ## API Reference
 
+<ApiShortcuts events={autopayEvents} eventsNote={AUTOPAY_EVENTS_NOTE}>
+
 All six subscription-management endpoints, plus the Checkout API call that creates a subscription, are in the reference below. Each tab lists the fields you send and the fields you get back, with their types, values and defaults; open "Show child attributes" for nested fields. Press **Run** to call the endpoint on the Ottu sandbox.
 
 Every management endpoint authenticates with your [API key](/developers/getting-started/authentication) and applies to your own merchant account. You never send a `Merchant-Id` header yourself.
+
+</ApiShortcuts>
 
 Here is a complete `auto_pay` request. `agreement` is a full recurring agreement and the `autopay` block repeats the same schedule.
 
@@ -201,40 +217,40 @@ Replace `<START_DATE>` with the date of the first billing cycle (today or later,
 
 <ApiExecuteGroup scenario="autopay">
 
-<Tabs groupId="autopay-api" queryString>
-<TabItem value="create" label="Create">
+<Tabs groupId="autopay-api" queryString className="api-chips">
+<TabItem value="create" label="Create a subscription" attributes={{"data-method": "POST"}}>
 
 Create a subscription with the Checkout API: set `payment_type` to `auto_pay` and send the `autopay` block.
 
 <ApiReference api="create-payment-transaction-checkout" scenario="autopay" run="create" tabGroup="autopay-api" />
 
 </TabItem>
-<TabItem value="list" label="List">
+<TabItem value="list" label="List subscriptions" attributes={{"data-method": "POST"}}>
 
 <ApiReference api="autopay-subscription-list" scenario="autopay" run="list" tabGroup="autopay-api" />
 
 </TabItem>
-<TabItem value="retrieve" label="Retrieve">
+<TabItem value="retrieve" label="Retrieve a subscription" attributes={{"data-method": "GET"}}>
 
 <ApiReference api="autopay-subscription-detail" scenario="autopay" run="retrieve" tabGroup="autopay-api" />
 
 </TabItem>
-<TabItem value="cancel" label="Cancel">
+<TabItem value="cancel" label="Cancel a subscription" attributes={{"data-method": "POST"}}>
 
 <ApiReference api="autopay-subscription-cancel" scenario="autopay" run="cancel" tabGroup="autopay-api" />
 
 </TabItem>
-<TabItem value="cycles" label="Billing cycles">
+<TabItem value="cycles" label="List billing cycles" attributes={{"data-method": "GET"}}>
 
 <ApiReference api="autopay-subscription-cycles" scenario="autopay" run="cycles" tabGroup="autopay-api" />
 
 </TabItem>
-<TabItem value="page-link" label="Page link">
+<TabItem value="page-link" label="Get the customer page link" attributes={{"data-method": "GET"}}>
 
 <ApiReference api="autopay-subscription-page-link" scenario="autopay" run="page-link" tabGroup="autopay-api" />
 
 </TabItem>
-<TabItem value="regenerate-page-token" label="Regenerate page token">
+<TabItem value="regenerate-page-token" label="Regenerate the page token" attributes={{"data-method": "POST"}}>
 
 <ApiReference api="autopay-subscription-regenerate-page-token" scenario="autopay" run="regenerate-page-token" tabGroup="autopay-api" />
 

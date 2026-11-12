@@ -55,6 +55,12 @@ export type StoryProps = {
   maxHeight?: number;
   /** Request and reply arrows flow (moving dashes). Set false for a still diagram. Default true. */
   animate?: boolean;
+  /**
+   * Where the side and journey buttons go: "top" (default), in rows above the
+   * lanes; "side", in a column left of the lanes, the journeys under a
+   * separator, so a wide page has no empty band beside the lanes.
+   */
+  controls?: "top" | "side";
 };
 
 // ---------- Sequence ----------

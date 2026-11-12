@@ -74,7 +74,7 @@ function Facts({ schema }: { schema: Schema }) {
 }
 
 /** A folded box of fields under a row (or under an error code). */
-export function Children({
+function Children({
   id,
   fields,
   label,
