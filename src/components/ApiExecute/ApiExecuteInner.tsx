@@ -230,6 +230,18 @@ export default function ApiExecuteInner({
     const shown = preparedRef.current;
     const call =
       shown.inputs === definition.inputs(before) ? shown.request : request(before);
+    // In development, catch a scenario whose `inputs` misses something its
+    // `request` reads: Run would send a stale request. An endpoint with
+    // `newEachRun` builds new ids each time, so it can't be compared.
+    if (
+      process.env.NODE_ENV !== "production" &&
+      call === shown.request &&
+      !definition.newEachRun &&
+      JSON.stringify(request(before)) !== JSON.stringify(call)
+    )
+      console.warn(
+        `ApiExecute: the "${endpoint}" request changed but its inputs() did not; add what request() reads to inputs().`,
+      );
     const startedIn = epochOf();
     setBusy(true);
     setBrowsingExamples(false);

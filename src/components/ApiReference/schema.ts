@@ -298,7 +298,9 @@ export const statusText = (code: string) => STATUS_TEXT[code] ?? "";
 const ITEM = /<li>((?:(?!<li>)[\s\S])*?)<\/li>/g;
 const LIST_ITEMS =
   /(?:<br\s*\/?>\s*)*((?:<li>(?:(?!<li>)[\s\S])*?<\/li>\s*(?:<br\s*\/?>\s*)*)+)/g;
-// A description with a real list keeps its HTML as written.
+// A description with a real list keeps its HTML as written. Bare `<li>` runs
+// next to a real list are left too (none in the spec today): they would still
+// be invalid HTML.
 const HAS_LIST = /<(?:ul|ol)\b/i;
 
 /**
@@ -318,7 +320,8 @@ export function forMarkdown(text: string): string {
     LIST_ITEMS,
     (_, items: string) =>
       `\n\n${[...items.matchAll(ITEM)]
-        .map(([, item]) => `- ${item.trim()}`)
+        // One line each: a line break inside an item would end the list item.
+        .map(([, item]) => `- ${item.trim().replace(/\s*\n\s*/g, " ")}`)
         .join("\n")}\n\n`,
   );
 }

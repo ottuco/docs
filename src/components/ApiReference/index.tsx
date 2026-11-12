@@ -243,6 +243,21 @@ function useShowTabForHash(id: string, tab: string, tabGroup?: string) {
   }, [visit, targeted, tab, tabGroup, location, history]);
 }
 
+/**
+ * In development, report an endpoint shown twice on one page: both copies get
+ * the same anchors, so links to its fields reach only the first.
+ */
+function useWarnDuplicateAnchor(id: string) {
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    const copies = document.querySelectorAll(`[id="${CSS.escape(id)}"]`).length;
+    if (copies > 1)
+      console.error(
+        `ApiReference: the anchor "${id}" is on this page ${copies} times; show each endpoint once per page, or give it a different run name.`,
+      );
+  }, [id]);
+}
+
 export default function ApiReference({
   api,
   source,
@@ -290,6 +305,7 @@ export default function ApiReference({
   const name = run ?? api;
   const id = `${name}-api`;
   useShowTabForHash(id, name, tabGroup);
+  useWarnDuplicateAnchor(id);
   // The shape anchors of the body and the response, for the broken-anchor check.
   const brokenLinks = useBrokenLinks();
   bodyVariants.forEach((variant) =>
