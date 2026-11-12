@@ -272,7 +272,7 @@ What makes this route safe to call with a browser-exposed key:
 - **Refusals are opaque.** An unknown or expired `session_id`, a token that belongs to a different customer, a guest session with no customer, and a refusal by the card vault all answer the same `404`.
 - **Any session that has not expired works** — including one that is already paid or cancelled, because the SDK still shows saved cards on those sessions.
 
-Two refusals are explained to the customer: a card held by an active [auto-debit agreement](/developers/cards-and-tokens/recurring-payments/#agreement) answers `400` when Ottu holds the card, and `409` when the card was saved through Ottu's own payment gateway (Ottu PG). The message follows the request's `Accept-Language` header. Both messages are listed in [What your customer sees](#what-your-customer-sees).
+Two refusals are explained to the customer: a card held by an active [auto-debit agreement](/developers/cards-and-tokens/recurring-payments/#agreement) answers `400` when Ottu holds the card, and `409` when the card was saved through Ottu's own payment gateway (Ottu PG). For a `409`, the message is Ottu PG's own. Both follow the request's `Accept-Language` header and are described in [What your customer sees](#what-your-customer-sees).
 
 :::note
 `delete_url` used to point at `DELETE /b/pbl/v2/card/{token}/?type=…&customer_id=…`. It now points at the session-scoped route and carries no query parameters. If you read `delete_url` from the SDK's card data, use it as-is.
@@ -288,7 +288,7 @@ When a customer taps delete on a saved card that is held by a running auto-debit
 }`}</CodeBlock>
 
 <CodeBlock language="json" title="409 Conflict: agreement on an Ottu PG card">{`{
-  "detail": "This card is linked to an active auto debit agreement and cannot be deleted. Pay once with another card to move the agreement, then delete this card.",
+  "detail": "Card cannot be deleted as it has active auto debit payments.",
   "result": "failed"
 }`}</CodeBlock>
 
@@ -302,6 +302,15 @@ When a customer taps delete on a saved card that is held by a running auto-debit
 | Ongoing | العربية | <span dir="rtl">هذه البطاقة مرتبطة باتفاقية خصم تلقائي مستمرة. تواصل مع التاجر لإلغاء الاتفاقية قبل حذف هذه البطاقة.</span> |
 
 **`409 Conflict`: the card was saved through Ottu's own payment gateway (Ottu PG).**
+
+`detail` is Ottu PG's own message about the refusal, in the language of the `Accept-Language` header. Its wording belongs to Ottu PG and can change, so show it as-is rather than matching on it. Today it reads:
+
+| Language | Message |
+| --- | --- |
+| English | Card cannot be deleted as it has active auto debit payments. |
+| العربية | <span dir="rtl">لا يمكن حذف البطاقة لأنها مرتبطة بمدفوعات خصم تلقائي نشطة.</span> |
+
+If Ottu PG's answer cannot be shown as a message (for example, it is not text), the `409` carries Ottu's own sentence instead:
 
 | Language | Message |
 | --- | --- |
@@ -369,7 +378,7 @@ A refused cardholder delete leaves the card untouched and fully usable: Ottu che
 | `401` | `{"detail": "Authentication credentials were not provided."}` | No credentials, or an invalid or revoked key |
 | `403` | `{"detail": "You do not have permission to perform this action."}` | A private key or user without `Can delete Card` (the public key does not need a permission) |
 | `404` | `{"detail": "Not found.", "result": "failed"}` | Unknown or expired session, a token the session's customer does not hold, a guest session, or a refusal by the card vault |
-| `409` | `{"detail": "This card is linked to an active auto debit agreement…", "result": "failed"}` | A card saved through Ottu PG is held by an active auto-debit agreement |
+| `409` | `{"detail": "Card cannot be deleted as it has active auto debit payments.", "result": "failed"}` | A card saved through Ottu PG is held by an active auto-debit agreement; `detail` is Ottu PG's own message |
 | `503` | `{"detail": "The payment gateway is not available right now."}` | The card vault is not configured on this deployment |
 
 ## API Reference
@@ -385,7 +394,7 @@ A refused cardholder delete leaves the card untouched and fully usable: Ottu che
 - **Keep card management on your server.** List and delete with your private key; let the Checkout SDK handle deletes in the browser.
 - **Scope the key.** A key that only manages cards needs `Can view Card` and `Can delete Card` — nothing else. See [API Key Permissions](/developers/reference/api-key-permissions/).
 - **Store the `customer_id` you send at checkout.** Every server route is keyed on it.
-- **Treat `409` as actionable.** Tell the customer that paying once with another card moves the agreement; after that the delete succeeds.
+- **Show the `409` message as-is.** It is Ottu PG's own explanation and its wording can change, so do not match on the text: the status code is what tells you the card is held by an agreement.
 - **Show `detail` to the customer.** Use it instead of a generic "could not delete" message: it already says who to contact and, when known, until when.
 - **Send `Accept-Language`.** The message then matches the customer's language.
 
