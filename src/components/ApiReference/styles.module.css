@@ -1,0 +1,341 @@
+/* Two columns, Stripe style: fields on the left, a sticky request / response
+   panel on the right. One column below 997px (Docusaurus' mobile breakpoint). */
+.reference {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  gap: 32px;
+  align-items: start;
+  margin: 16px 0 32px;
+}
+
+/* No Run and no documented example: nothing for the right column. */
+.reference.single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.left {
+  min-width: 0;
+}
+
+.right {
+  position: sticky;
+  top: calc(var(--ifm-navbar-height) + 16px);
+  min-width: 0;
+  max-height: calc(100vh - var(--ifm-navbar-height) - 32px);
+  overflow-y: auto;
+}
+
+@media (max-width: 996px) {
+  .reference {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .right {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+/* Beats the site's heading margins (`.markdown h3`). */
+.left .title {
+  margin: 0 0 8px;
+}
+
+.endpoint {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.endpoint code {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.description {
+  font-size: 15px;
+}
+
+.muted {
+  font-size: 13px;
+  color: var(--ifm-color-emphasis-700);
+}
+
+/* Sections: Path parameters, Headers, Request body, Response, Other responses */
+.section {
+  margin-top: 32px;
+}
+
+.section .sectionTitle {
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ifm-color-emphasis-300);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ifm-color-emphasis-700);
+}
+
+/* Field rows */
+.fields {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.field {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  scroll-margin-top: calc(var(--ifm-navbar-height) + 16px);
+}
+
+.field:last-child {
+  border-bottom: 0;
+}
+
+.fieldHead {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+.fieldHead .fieldName {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ifm-heading-color);
+  overflow-wrap: anywhere;
+}
+
+.fieldHead .fieldName:hover {
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+.fieldType {
+  font-size: 12px;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.required,
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.required {
+  color: var(--ifm-color-primary);
+}
+
+.badge {
+  color: var(--ifm-color-emphasis-600);
+}
+
+.fieldText {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--ifm-color-emphasis-800);
+}
+
+.fieldText p:last-child {
+  margin-bottom: 0;
+}
+
+.facts {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12.5px;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.facts code {
+  font-size: 11.5px;
+  overflow-wrap: anywhere;
+}
+
+/* Child attributes: a bordered, folded box under the field */
+.children {
+  margin-top: 8px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+}
+
+.children > summary {
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ifm-color-emphasis-800);
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.children[open] > summary {
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.children > .fields {
+  padding: 0 12px;
+}
+
+/* Shape anchors (`<field>--<label>`) land below the navbar, like field rows. */
+.children[id],
+.variant {
+  scroll-margin-top: calc(var(--ifm-navbar-height) + 16px);
+}
+
+.variant + .variant {
+  margin-top: 16px;
+}
+
+.variantTitle {
+  margin: 12px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ApiShortcuts: the intro on the left, the endpoint / event box on the right. */
+/* Desktop: floated into the right half, so the intro and the text after it
+   run down the left (see .float-beside in src/css/custom.css; the AutoPay
+   page caps its prose at half width in its autopay.css). Narrower, it sits
+   above the intro. */
+@media (min-width: 997px) {
+  .shortcutsBox {
+    float: right;
+    width: min(420px, calc(50% - 32px));
+    margin-left: 32px;
+  }
+}
+
+.shortcutsBox {
+  margin-bottom: 24px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 10px;
+  background: var(--ifm-background-surface-color);
+  overflow: hidden;
+}
+
+.shortcutsTabs {
+  display: flex;
+  gap: 16px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.shortcutsTab {
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-700);
+  background: none;
+  cursor: pointer;
+}
+
+.shortcutsTab[aria-pressed="true"] {
+  border-bottom-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary);
+}
+
+.shortcutsList {
+  max-height: 60vh;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  overflow-y: auto;
+}
+
+.shortcutsList > li {
+  margin: 0;
+}
+
+.shortcut {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 16px;
+  color: inherit;
+}
+
+.shortcut:hover {
+  color: inherit;
+  text-decoration: none;
+  background: var(--ifm-color-emphasis-100);
+}
+
+.shortcutText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.shortcutTitle {
+  font-size: 13.5px;
+  font-weight: 600;
+  /* A list of places, not inline links: the heading colour (the page's link
+     rule would make every title orange). */
+  color: var(--ifm-heading-color);
+}
+
+.shortcut:hover .shortcutTitle {
+  color: var(--ifm-color-primary);
+}
+
+.shortcutPath {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.shortcutPath > span {
+  padding: 0 5px;
+  font-size: 10px;
+}
+
+.shortcutPath code {
+  overflow: hidden;
+  padding: 0;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 0;
+  background: none;
+}
+
+.event {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 16px;
+}
+
+.eventName code {
+  font-size: 12.5px;
+}
+
+.eventMeaning {
+  font-size: 13px;
+  color: var(--ifm-color-emphasis-800);
+}
+
+.eventsNote {
+  padding: 8px 16px;
+  font-size: 12.5px;
+  color: var(--ifm-color-emphasis-700);
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}

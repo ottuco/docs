@@ -13,6 +13,11 @@ export interface StepGuideProps {
   steps: Step[];
   startIndex?: number;
   nextSectionId?: string;
+  /**
+   * The frame hugs each screenshot and centres it, with no bars beside a
+   * narrow or height-capped shot. Off by default (rolled out page by page).
+   */
+  fitImages?: boolean;
 }
 
 function CheckIcon({ size = 14 }: { size?: number }) {
@@ -53,7 +58,7 @@ function ArrowDownIcon() {
 }
 
 
-export default function StepGuide({ steps, startIndex = 1, nextSectionId }: StepGuideProps): React.ReactElement {
+export default function StepGuide({ steps, startIndex = 1, nextSectionId, fitImages = false }: StepGuideProps): React.ReactElement {
   const [active, setActive] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -97,7 +102,7 @@ export default function StepGuide({ steps, startIndex = 1, nextSectionId }: Step
 
   return (
     <>
-      <div className={styles.container} ref={containerRef} tabIndex={0} role="region" aria-label="Step-by-step guide">
+      <div className={`${styles.container} ${fitImages ? styles.fitImages : ""}`} ref={containerRef} tabIndex={0} role="region" aria-label="Step-by-step guide">
         {/* Desktop step indicator */}
         <div className={styles.stepBar}>
           {steps.map((_, i) => (
@@ -149,7 +154,9 @@ export default function StepGuide({ steps, startIndex = 1, nextSectionId }: Step
               <img
                 src={imageUrl}
                 alt={step.imageAlt || step.title}
-                loading="lazy"
+                // A frame that hugs the image has no size until it loads, and
+                // the browser never lazy-loads an image with no size.
+                loading={fitImages ? "eager" : "lazy"}
               />
               <div className={styles.zoomHint}>
                 <ZoomIcon />

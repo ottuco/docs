@@ -27,14 +27,20 @@ import {
   type CardData,
 } from "./parts";
 import {
+  STORY_CONTROLS_GAP,
+  STORY_CONTROLS_W,
+  STORY_FIT_PCT,
   STORY_PANEL_GAP,
   STORY_ROW,
   STORY_TOP,
   STORY_BODY_PAD,
   storyBodyHeight,
   storyCardW,
+  storyFillCardW,
+  storyFillGap,
   storyGap,
   storyLanesHeight,
+  storyMaxWidth,
   storyMinWidth,
   storySideAt,
 } from "./layout";
@@ -65,8 +71,53 @@ const reducedMotion = () =>
 
 // Data reaching here is already cleaned by StoryDiagram (index.tsx): lanes in
 // range, no links or journey stops pointing at missing steps.
-export default function Story(props: StoryProps): React.JSX.Element {
-  const { title, sub, lanes, steps, links, animate = true, maxHeight } = props;
+// Narrower than this (the site's phone layout), a button column would leave
+// the lanes too little room: the buttons go back above them.
+const NARROW = "(max-width: 996px)";
+
+/** True while the window is narrower than `query` says. */
+function useNarrow(query: string): boolean {
+  const [narrow, setNarrow] = useState(() => window.matchMedia(query).matches);
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    const update = () => setNarrow(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, [query]);
+  return narrow;
+}
+
+/** Width of `ref`'s element, kept up to date; 0 before it is measured. */
+function useWidth(ref: React.RefObject<HTMLElement | null>): number {
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) =>
+      setWidth(Math.round(entry.contentRect.width)),
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [ref]);
+  return width;
+}
+
+export default function Story(input: StoryProps): React.JSX.Element {
+  const narrow = useNarrow(NARROW);
+  const props: StoryProps =
+    narrow && input.controls === "side" ? { ...input, controls: "top" } : input;
+  const {
+    title,
+    sub,
+    lanes,
+    steps,
+    links,
+    animate = true,
+    maxHeight,
+    controls = "top",
+    fillWidth = false,
+  } = props;
   const journeys = props.journeys ?? [];
   const hasPanel = journeys.length > 0;
   const { colorMode } = useColorMode();
@@ -86,8 +137,14 @@ export default function Story(props: StoryProps): React.JSX.Element {
     ? journey.stops.slice(0, stop + 1).map((x) => x.step)
     : [];
 
-  const gap = storyGap(lanes.length);
-  const cardW = storyCardW(lanes.length);
+  // The body (lanes and cards). With `fillWidth` the lanes share its width.
+  const body = useRef<HTMLDivElement>(null);
+  const bodyWidth = useWidth(body);
+  const filling = fillWidth && bodyWidth > 0;
+  const gap = filling
+    ? storyFillGap(lanes.length, bodyWidth, STORY_FIT_PCT)
+    : storyGap(lanes.length);
+  const cardW = filling ? storyFillCardW(gap) : storyCardW(lanes.length);
   const lanesHeight = storyLanesHeight(props);
 
   const nodes: Node[] = useMemo(() => {
@@ -141,7 +198,6 @@ export default function Story(props: StoryProps): React.JSX.Element {
   // With `maxHeight` the body scrolls: keep the journey's current card in
   // view. Scroll the body ourselves; scrollIntoView would also scroll React
   // Flow's own pane.
-  const body = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = body.current;
     if (!maxHeight || !el || !journey) return;
@@ -240,8 +296,83 @@ export default function Story(props: StoryProps): React.JSX.Element {
     links,
   });
 
+  // The side buttons, the journey buttons, and the body (lanes and cards):
+  // above one another, or with `controls="side"` the buttons in a column on
+  // the left of the body.
+  const sideChips = (
+    <div className={styles.chips} role="group" aria-label="Show one side only">
+      {lanes.map((l, i) => (
+        <button
+          key={i}
+          type="button"
+          className={`${styles.chip} ${pinnedOf("lane") === i ? styles.chipOn : ""}`}
+          aria-pressed={pinnedOf("lane") === i}
+          onMouseEnter={() => setHover({ kind: "lane", i })}
+          onMouseLeave={() => setHover(null)}
+          onFocus={() => setHover({ kind: "lane", i })}
+          onBlur={() => setHover(null)}
+          onClick={() => toggle({ kind: "lane", i })}
+        >
+          <Icon path={l.icon} size={0.55} />
+          {l.chip}
+        </button>
+      ))}
+    </div>
+  );
+  const journeyChips = hasPanel ? (
+    <div className={styles.chips} role="group" aria-label="Walk a journey">
+      {journeys.map((j, i) => (
+        <button
+          key={i}
+          type="button"
+          className={`${styles.chip} ${pinnedOf("journey") === i ? styles.chipOn : ""}`}
+          aria-pressed={pinnedOf("journey") === i}
+          onClick={() => toggle({ kind: "journey", i })}
+        >
+          {j.name}
+        </button>
+      ))}
+    </div>
+  ) : null;
+  // The body: lanes and cards. With `maxHeight` it is shorter than the lanes
+  // and scrolls; the title and buttons stay in view.
+  const storyBody = (
+    <div
+      ref={body}
+      className={styles.storyBody}
+      style={{ height: storyBodyHeight(props) }}
+    >
+      <div
+        className={styles.frame}
+        style={{ height: lanesHeight + STORY_BODY_PAD }}
+      >
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
+          colorMode={colorMode}
+          fitView
+          fitViewOptions={{ padding: fitPadding(STORY_FIT_PCT), maxZoom: 1 }}
+          {...readOnlyFlow}
+          onNodeMouseEnter={(_, n) => {
+            const step = stepOf(n.id);
+            if (step !== null) setHover({ kind: "step", i: step });
+          }}
+          onNodeMouseLeave={() => setHover(null)}
+          onNodeClick={(_, n) => pickNode(n.id)}
+          onPaneClick={showAll}
+        >
+          {/* Refit when the lanes widen, not only when the canvas resizes. */}
+          <FitOnResize pct={STORY_FIT_PCT} refit={gap} />
+        </ReactFlow>
+      </div>
+    </div>
+  );
+
+  const maxWidth = storyMaxWidth(props);
   const diagram = (
-    <div className={styles.scroller}>
+    <div className={styles.scroller} style={{ maxWidth }}>
       <div
         id={scope}
         onKeyDown={onKeyDown}
@@ -251,79 +382,32 @@ export default function Story(props: StoryProps): React.JSX.Element {
       >
         {css ? <style>{css}</style> : null}
         <Title title={title} sub={sub} />
-        <div
-          className={styles.chips}
-          role="group"
-          aria-label="Show one side only"
-        >
-          {lanes.map((l, i) => (
-            <button
-              key={i}
-              type="button"
-              className={`${styles.chip} ${pinnedOf("lane") === i ? styles.chipOn : ""}`}
-              aria-pressed={pinnedOf("lane") === i}
-              onMouseEnter={() => setHover({ kind: "lane", i })}
-              onMouseLeave={() => setHover(null)}
-              onFocus={() => setHover({ kind: "lane", i })}
-              onBlur={() => setHover(null)}
-              onClick={() => toggle({ kind: "lane", i })}
-            >
-              <Icon path={l.icon} size={0.55} />
-              {l.chip}
-            </button>
-          ))}
-        </div>
-        {hasPanel ? (
+        {controls === "side" ? (
           <div
-            className={styles.chips}
-            role="group"
-            aria-label="Walk a journey"
+            className={styles.storySide}
+            style={{
+              gridTemplateColumns: `${STORY_CONTROLS_W}px minmax(0, 1fr)`,
+              gap: STORY_CONTROLS_GAP,
+            }}
           >
-            {journeys.map((j, i) => (
-              <button
-                key={i}
-                type="button"
-                className={`${styles.chip} ${pinnedOf("journey") === i ? styles.chipOn : ""}`}
-                aria-pressed={pinnedOf("journey") === i}
-                onClick={() => toggle({ kind: "journey", i })}
-              >
-                {j.name}
-              </button>
-            ))}
+            <div className={styles.controls}>
+              {sideChips}
+              {journeyChips && (
+                <>
+                  <hr className={styles.controlsSep} />
+                  {journeyChips}
+                </>
+              )}
+            </div>
+            {storyBody}
           </div>
-        ) : null}
-        {/* The body: lanes and cards. With `maxHeight` it is shorter than
-            the lanes and scrolls; the title and chips stay in view. */}
-        <div
-          ref={body}
-          className={styles.storyBody}
-          style={{ height: storyBodyHeight(props) }}
-        >
-          <div
-            className={styles.frame}
-            style={{ height: lanesHeight + STORY_BODY_PAD }}
-          >
-            <ReactFlow
-              nodes={nodes}
-              edges={edges}
-              nodeTypes={nodeTypes}
-              edgeTypes={edgeTypes}
-              colorMode={colorMode}
-              fitView
-              fitViewOptions={{ padding: fitPadding(3), maxZoom: 1 }}
-              {...readOnlyFlow}
-              onNodeMouseEnter={(_, n) => {
-                const step = stepOf(n.id);
-                if (step !== null) setHover({ kind: "step", i: step });
-              }}
-              onNodeMouseLeave={() => setHover(null)}
-              onNodeClick={(_, n) => pickNode(n.id)}
-              onPaneClick={showAll}
-            >
-              <FitOnResize pct={3} />
-            </ReactFlow>
-          </div>
-        </div>
+        ) : (
+          <>
+            {sideChips}
+            {journeyChips}
+            {storyBody}
+          </>
+        )}
       </div>
     </div>
   );
@@ -334,7 +418,7 @@ export default function Story(props: StoryProps): React.JSX.Element {
     <div
       ref={wrap}
       className={`${styles.storyWrap} ${side ? styles.storyWrapSide : ""}`}
-      style={{ gap: STORY_PANEL_GAP }}
+      style={{ gap: STORY_PANEL_GAP, maxWidth }}
     >
       {diagram}
       <StoryPanel
