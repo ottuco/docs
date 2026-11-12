@@ -11,6 +11,24 @@ import type { SnippetRequest } from "./snippets";
 /** One call, as built, shown (snippets.ts) and sent. */
 export type PreparedRequest = SnippetRequest;
 
+/** A step's call, shown in the dialog like Stripe shows a request: body, then response. */
+export interface StepRun {
+  /** The body it sent (none for a GET). */
+  body?: unknown;
+  response: unknown;
+}
+
+/** One thing a step took from its response, in the reader's words. */
+export interface Picked {
+  /** What it is, e.g. "Gateway (pg_code)". */
+  label: string;
+  /** The value, or a link's text when `href` is set. */
+  value: string;
+  href?: string;
+  /** Why it matters, e.g. "the customer pays the first charge here". */
+  note?: string;
+}
+
 /** Something a call needs on the sandbox first (a gateway, a subscription). */
 export interface Step<State> {
   /** Shown in the "Set up prerequisites" dialog. */
@@ -19,8 +37,13 @@ export interface Step<State> {
   path: string;
   /** True when the state already holds what this step makes. */
   done(state: State): boolean;
-  /** Makes it on the sandbox and stores it in the state; resolves to the response to show. */
-  run(): Promise<unknown>;
+  /** Makes it on the sandbox and stores it in the state. */
+  run(): Promise<StepRun>;
+  /**
+   * What the state holds from this step, once done: shown under the step,
+   * also when an earlier run made it.
+   */
+  picked(state: State): Picked[];
 }
 
 export interface Endpoint<State, StepKey extends string = string> {

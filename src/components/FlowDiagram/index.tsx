@@ -19,9 +19,12 @@ function Shell({
   height,
   text,
   render,
+  narrowHeight,
 }: {
   title: string;
   height: number;
+  /** Height under 996px, when the diagram lays out differently there. */
+  narrowHeight?: number;
   text: React.ReactNode;
   render: () => React.ReactNode;
 }): React.JSX.Element {
@@ -36,7 +39,18 @@ function Shell({
         {text}
       </figcaption>
       <BrowserOnly
-        fallback={<div className={styles.placeholder} style={{ height }} />}
+        fallback={
+          <div
+            className={styles.placeholder}
+            // The server can't know the screen: CSS picks the height.
+            style={
+              {
+                "--placeholder-h": `${height}px`,
+                "--placeholder-narrow-h": `${narrowHeight ?? height}px`,
+              } as React.CSSProperties
+            }
+          />
+        }
       >
         {render}
       </BrowserOnly>
@@ -76,6 +90,8 @@ export function StoryDiagram(input: StoryProps): React.JSX.Element {
     <Shell
       title={props.title}
       height={storyFigureHeight(props)}
+      // A story with side buttons puts them back on top on narrow screens.
+      narrowHeight={storyFigureHeight({ ...props, controls: "top" })}
       text={
         <>
           <ol>

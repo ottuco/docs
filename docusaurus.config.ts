@@ -5,6 +5,7 @@ import type * as Preset from "@docusaurus/preset-classic";
 // Adds the `devServer` key to webpack's Configuration type (used by the plugin below).
 import type {} from "webpack-dev-server";
 import apiReferenceData from "./src/remark/apiReferenceData";
+import readingTime from "./src/remark/readingTime";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -80,6 +81,8 @@ const config: Config = {
               apiReferenceData,
               { apisDir: path.join(__dirname, "docs/developers/apis") },
             ],
+            // "N min read" under the title of docs with `reading_time: true`.
+            readingTime,
           ],
           showLastUpdateTime: true,
           exclude: ["superpowers/**"],

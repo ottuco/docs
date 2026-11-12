@@ -24,7 +24,7 @@ import {
 const FINAL_STATES = new Set(["canceled", "setup_failed", "expired"]);
 
 const subscriptionPath = (session: Session, suffix = "") =>
-  `${SUBSCRIPTIONS}/${session.subscriptionId ?? "<SUBSCRIPTION_ID>"}/${suffix}`;
+  `${SUBSCRIPTIONS}/${session.subscriptionId ?? "{subscription_id}"}/${suffix}`;
 
 const CREATE_PATH = "/b/checkout/v1/pymt-txn/";
 
@@ -65,6 +65,13 @@ const autopay: Scenario<Session, StepKey> = {
       path: "/b/pbl/v2/payment-methods/",
       done: (session) => Boolean(session.pgCodes),
       run: findGateway,
+      picked: (session) => [
+        {
+          label: "Gateway (pg_codes)",
+          value: (session.pgCodes ?? []).join(", "),
+          note: "an auto-debit gateway of the sandbox merchant; Create sends it in pg_codes",
+        },
+      ],
     },
     subscription: {
       title: "Create a subscription",
@@ -74,6 +81,23 @@ const autopay: Scenario<Session, StepKey> = {
         Boolean(session.subscriptionId) &&
         !FINAL_STATES.has(session.subscriptionStatus ?? ""),
       run: () => createSubscription(getSession().pgCodes ?? []),
+      picked: (session) => [
+        {
+          label: "Subscription",
+          value: `${session.subscriptionId} (${session.subscriptionStatus})`,
+          note: "every other call works on it",
+        },
+        ...(session.checkoutUrl
+          ? [
+              {
+                label: "Checkout URL",
+                value: "Pay the first charge",
+                href: session.checkoutUrl,
+                note: "the customer pays the first charge here; the subscription turns active after it",
+              },
+            ]
+          : []),
+      ],
     },
   },
 
@@ -91,7 +115,7 @@ const autopay: Scenario<Session, StepKey> = {
       request: (session) => ({
         method: "POST",
         path: CREATE_PATH,
-        body: newAutoPayRequest(session.pgCodes ?? ["<AUTO_DEBIT_PG_CODE>"]),
+        body: newAutoPayRequest(session.pgCodes ?? ["{auto_debit_pg_code}"]),
       }),
       // Only the gateway: a subscription made on another tab does not change
       // its code. Its start_date is relative to today: rebuild on a new UTC day.
@@ -105,7 +129,7 @@ const autopay: Scenario<Session, StepKey> = {
       request: (session) => ({
         method: "POST",
         path: `${SUBSCRIPTIONS}/`,
-        body: { customer_id: session.customerId ?? "<CUSTOMER_ID>", limit: 10 },
+        body: { customer_id: session.customerId ?? "{customer_id}", limit: 10 },
       }),
       inputs: subscriptionInputs,
     },

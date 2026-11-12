@@ -18,6 +18,15 @@ export const STORY_MIN_BODY_H = 160;
  * used to size the placeholder before the browser renders the real thing. */
 export const STORY_HEADER_H = 92;
 export const STORY_JOURNEYS_H = 40;
+/** With `controls="side"`: the title alone above, the buttons in a column left of the body. */
+export const STORY_TITLE_H = 56;
+export const STORY_CONTROLS_W = 168;
+export const STORY_CONTROLS_GAP = 16;
+/** React Flow fit padding around the story's lanes, % each side. */
+export const STORY_FIT_PCT = 3;
+/** Inset of the side layout (styles.module.css `.storySide` padding-left), kept on the right too. */
+const STORY_CANVAS_PAD = 18;
+const controlsBeside = (p: StoryProps): boolean => p.controls === "side";
 /** The panel under a story with journeys, and the gap above it. The panel
  * height is fixed so pinning or walking never moves the page below; longer
  * text scrolls inside it. */
@@ -30,6 +39,29 @@ export const storyGap = (lanes: number): number =>
   Math.max(180, Math.floor(660 / Math.max(1, lanes)));
 export const storyCardW = (lanes: number): number =>
   Math.min(196, storyGap(lanes) - 20);
+/** Widest card with `fillWidth`, and the room it leaves either side in its lane. */
+const FILL_CARD_MAX = 240;
+const FILL_CARD_MARGIN = 24;
+/** Extra room (%) for rounding, so the lanes never overflow the body. */
+const FILL_SLACK_PCT = 1;
+/**
+ * Lane width with `fillWidth`: the body's width shared by the lanes (less the
+ * fit padding, `padPct` % each side), never under the usual width.
+ */
+export const storyFillGap = (
+  lanes: number,
+  bodyWidth: number,
+  padPct: number,
+): number =>
+  Math.max(
+    storyGap(lanes),
+    Math.floor(
+      (bodyWidth * (1 - (2 * padPct + FILL_SLACK_PCT) / 100)) /
+        Math.max(1, lanes),
+    ),
+  );
+export const storyFillCardW = (gap: number): number =>
+  Math.min(FILL_CARD_MAX, gap - 2 * FILL_CARD_MARGIN);
 /** Height the lanes and cards need. */
 export const storyLanesHeight = (p: StoryProps): number =>
   STORY_TOP + p.steps.length * STORY_ROW;
@@ -42,11 +74,30 @@ export const storyBodyHeight = (p: StoryProps): number => {
 /** The whole figure, for the placeholder: header, journey chips, body and
  * the panel under it. */
 export const storyFigureHeight = (p: StoryProps): number =>
-  STORY_HEADER_H +
+  (controlsBeside(p) ? STORY_TITLE_H : STORY_HEADER_H) +
   storyBodyHeight(p) +
-  (hasJourneys(p) ? STORY_JOURNEYS_H + STORY_PANEL_GAP + STORY_PANEL_H : 0);
+  (hasJourneys(p) && !controlsBeside(p) ? STORY_JOURNEYS_H : 0) +
+  (hasJourneys(p) ? STORY_PANEL_GAP + STORY_PANEL_H : 0);
+/**
+ * With `controls="side"`, the widest the figure needs to be: the buttons, the
+ * gap, and the lanes at full size (plus the fit padding and the canvas
+ * padding). Wider, React Flow would centre the lanes in an empty band. With
+ * `fillWidth` there is no limit: the lanes widen instead.
+ */
+export const storyMaxWidth = (p: StoryProps): number | undefined =>
+  controlsBeside(p) && !p.fillWidth
+    ? Math.round(
+        2 * STORY_CANVAS_PAD +
+          STORY_CONTROLS_W +
+          STORY_CONTROLS_GAP +
+          p.lanes.length *
+            storyGap(p.lanes.length) *
+            (1 + (2 * STORY_FIT_PCT) / 100),
+      )
+    : undefined;
 export const storyMinWidth = (p: StoryProps): number =>
-  Math.round(p.lanes.length * storyGap(p.lanes.length) * 0.95);
+  Math.round(p.lanes.length * storyGap(p.lanes.length) * 0.95) +
+  (controlsBeside(p) ? STORY_CONTROLS_W + STORY_CONTROLS_GAP : 0);
 
 // Sequence
 export const SEQ_LANE_GAP = 185;

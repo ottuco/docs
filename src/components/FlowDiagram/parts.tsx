@@ -257,14 +257,26 @@ export const fitPadding = (pct: number): Padding => ({
 /** Put inside <ReactFlow>: fits the diagram again whenever the canvas is
  * resized (window resize, phone rotation), since panning and zooming are off
  * and the reader could not bring a cut-off part back into view. */
-export function FitOnResize({ pct }: { pct: number }): null {
+export function FitOnResize({
+  pct,
+  refit,
+}: {
+  pct: number;
+  /** Also refit when this changes (e.g. the lanes' width). */
+  refit?: number;
+}): null {
   const { fitView } = useReactFlow();
   const width = useStore((s) => s.width);
   const height = useStore((s) => s.height);
-  // Depends on numbers only, so a hover re-render never refits.
+  // Depends on numbers only, so a hover re-render never refits. The next
+  // frame, so moved nodes are measured first.
   useEffect(() => {
-    if (width && height) void fitView({ padding: fitPadding(pct), maxZoom: 1 });
-  }, [width, height, pct, fitView]);
+    if (!width || !height) return;
+    const frame = requestAnimationFrame(
+      () => void fitView({ padding: fitPadding(pct), maxZoom: 1 }),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [width, height, pct, refit, fitView]);
   return null;
 }
 

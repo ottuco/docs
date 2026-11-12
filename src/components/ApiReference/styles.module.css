@@ -204,43 +204,138 @@
   font-weight: 600;
 }
 
-/* Other responses */
-.codes {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+/* ApiShortcuts: the intro on the left, the endpoint / event box on the right. */
+/* Desktop: floated into the right half, so the intro and the text after it
+   run down the left (see .float-beside in src/css/custom.css; the AutoPay
+   page caps its prose at half width in its autopay.css). Narrower, it sits
+   above the intro. */
+@media (min-width: 997px) {
+  .shortcutsBox {
+    float: right;
+    width: min(420px, calc(50% - 32px));
+    margin-left: 32px;
+  }
 }
 
-.codes li {
-  padding: 8px 0;
-  border-bottom: 1px solid var(--ifm-color-emphasis-200);
-  font-size: 13.5px;
+.shortcutsBox {
+  margin-bottom: 24px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 10px;
+  background: var(--ifm-background-surface-color);
+  overflow: hidden;
 }
 
-.codeHead {
+.shortcutsTabs {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
+  gap: 16px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
 }
 
-.code {
-  flex-shrink: 0;
-  font-family: var(--ifm-font-family-monospace);
+.shortcutsTab {
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  font: inherit;
+  font-size: 13px;
   font-weight: 600;
+  color: var(--ifm-color-emphasis-700);
+  background: none;
+  cursor: pointer;
 }
 
-.code[data-code="2"] {
-  color: var(--ifm-color-success-darker);
+.shortcutsTab[aria-pressed="true"] {
+  border-bottom-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary);
 }
 
-.code[data-code="4"] {
-  color: var(--ifm-color-warning-darker);
+.shortcutsList {
+  max-height: 60vh;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  overflow-y: auto;
 }
 
-.code[data-code="5"] {
-  color: var(--ifm-color-danger);
+.shortcutsList > li {
+  margin: 0;
 }
 
-.codeText {
+.shortcut {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 16px;
+  color: inherit;
+}
+
+.shortcut:hover {
+  color: inherit;
+  text-decoration: none;
+  background: var(--ifm-color-emphasis-100);
+}
+
+.shortcutText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.shortcutTitle {
+  font-size: 13.5px;
+  font-weight: 600;
+  /* A list of places, not inline links: the heading colour (the page's link
+     rule would make every title orange). */
+  color: var(--ifm-heading-color);
+}
+
+.shortcut:hover .shortcutTitle {
+  color: var(--ifm-color-primary);
+}
+
+.shortcutPath {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.shortcutPath > span {
+  padding: 0 5px;
+  font-size: 10px;
+}
+
+.shortcutPath code {
+  overflow: hidden;
+  padding: 0;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 0;
+  background: none;
+}
+
+.event {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 16px;
+}
+
+.eventName code {
+  font-size: 12.5px;
+}
+
+.eventMeaning {
+  font-size: 13px;
   color: var(--ifm-color-emphasis-800);
+}
+
+.eventsNote {
+  padding: 8px 16px;
+  font-size: 12.5px;
+  color: var(--ifm-color-emphasis-700);
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
 }

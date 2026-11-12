@@ -15,10 +15,11 @@ import {
   mdiCheck,
   mdiClose,
   mdiLoading,
+  mdiOpenInNew,
   mdiPlay,
 } from "@mdi/js";
 import ApiPanel from "@site/src/components/ApiPanel";
-import type { AnyScenario } from "./scenario";
+import type { AnyScenario, Picked, StepRun } from "./scenario";
 import { runOf, type ScenarioKey } from "./scenarios";
 import { send, type ExecuteResult } from "./send";
 import { LANGUAGES, snippet } from "./snippets";
@@ -36,6 +37,54 @@ import styles from "./styles.module.css";
 
 type StepState = "pending" | "running" | "done" | "failed";
 
+// A step's body and response sit side by side in the dialog: short boxes.
+const STEP_CODE_HEIGHT = "180px";
+
+/** What a done step took from its response: an id, a link to open. */
+function PickedList({ picked }: { picked: Picked[] }) {
+  if (picked.length === 0) return null;
+  return (
+    <ul className={styles.picked}>
+      {picked.map(({ label, value, href, note }, i) => (
+        <li key={`${i}-${label}`}>
+          <span className={styles.pickedLabel}>{label}</span>{" "}
+          {/* Only a web link from the sandbox response, never another scheme. */}
+          {href?.startsWith("https://") ? (
+            <a href={href} target="_blank" rel="noopener noreferrer">
+              {value} <Icon path={mdiOpenInNew} size={0.5} />
+            </a>
+          ) : (
+            <code>{value}</code>
+          )}
+          {note && <span className={styles.pickedNote}> · {note}</span>}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** The call a step made, as Stripe shows one: the body it sent, then the response. */
+function StepCall({ call }: { call: StepRun }) {
+  return (
+    <div className={styles.stepCall}>
+      {call.body !== undefined && (
+        <ApiPanel
+          label="Request body"
+          data={call.body}
+          maxHeight={STEP_CODE_HEIGHT}
+          className={styles.stepPanel}
+        />
+      )}
+      <ApiPanel
+        label="Response"
+        data={call.response}
+        maxHeight={STEP_CODE_HEIGHT}
+        className={styles.stepPanel}
+      />
+    </div>
+  );
+}
+
 function Prerequisites({
   scenario,
   steps,
@@ -48,7 +97,13 @@ function Prerequisites({
   onClose: () => void;
 }) {
   const [states, setStates] = useState<Record<string, StepState>>({});
-  const [responses, setResponses] = useState<Record<string, unknown>>({});
+  const [calls, setCalls] = useState<Record<string, StepRun>>({});
+  // A done step shows what the state holds from it, kept current.
+  const sessionState = useSyncExternalStore(
+    scenario.subscribe,
+    scenario.getState,
+    scenario.getState,
+  );
   const [finished, setFinished] = useState(false);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string>();
@@ -71,8 +126,8 @@ function Prerequisites({
       }
       setStates((prev) => ({ ...prev, [step]: "running" }));
       try {
-        const response = await scenario.steps[step].run();
-        setResponses((prev) => ({ ...prev, [step]: response }));
+        const call = await scenario.steps[step].run();
+        setCalls((prev) => ({ ...prev, [step]: call }));
         setStates((prev) => ({ ...prev, [step]: "done" }));
       } catch (err) {
         setStates((prev) => ({ ...prev, [step]: "failed" }));
@@ -120,7 +175,7 @@ function Prerequisites({
         <ol className={styles.steps}>
           {steps.map((step) => {
             const state = states[step] ?? "pending";
-            const { title, method, path } = scenario.steps[step];
+            const { title, method, path, done, picked } = scenario.steps[step];
             return (
               <li key={step} className={styles.step}>
                 <span className={styles.stepIcon} data-state={state}>
@@ -137,12 +192,10 @@ function Prerequisites({
                   <code className={styles.stepPath}>
                     {method} {path}
                   </code>
-                  {responses[step] !== undefined && (
-                    <details className={styles.details}>
-                      <summary>Response</summary>
-                      <ApiPanel label="Response" data={responses[step]} />
-                    </details>
+                  {state === "done" && done(sessionState) && (
+                    <PickedList picked={picked(sessionState)} />
                   )}
+                  {calls[step] && <StepCall call={calls[step]} />}
                 </div>
               </li>
             );
@@ -229,7 +282,9 @@ export default function ApiExecuteInner({
     // day for a date in it): send a request built from the current state.
     const shown = preparedRef.current;
     const call =
-      shown.inputs === definition.inputs(before) ? shown.request : request(before);
+      shown.inputs === definition.inputs(before)
+        ? shown.request
+        : request(before);
     // In development, catch a scenario whose `inputs` misses something its
     // `request` reads: Run would send a stale request. An endpoint with
     // `newEachRun` builds new ids each time, so it can't be compared.
@@ -303,9 +358,10 @@ export default function ApiExecuteInner({
       : error
         ? "error"
         : "live";
-  // Ids that only exist once the prerequisites ran (not the API key, which
-  // the reader always supplies).
-  const needsIds = /<(?!YOUR_API_KEY>)[A-Z_]+>/.test(
+  // Ids that only exist once the prerequisites ran, written `{name}` like the
+  // path parameters on the left (not the API key, which the reader always
+  // supplies). JSON never has a `{` right before a bare name.
+  const needsIds = /\{(?!your_api_key\})[a-z_]+\}/.test(
     `${prepared.path} ${JSON.stringify(prepared.body ?? {})}`,
   );
 
@@ -340,8 +396,8 @@ export default function ApiExecuteInner({
         </div>
         {needsIds && (
           <p className={styles.note}>
-            Replace the <code>&lt;…&gt;</code> values with your own, or press
-            Run to create them on the sandbox first.
+            Replace the <code>{"{…}"}</code> values with your own, or press Run
+            to create them on the sandbox first.
           </p>
         )}
         <div className={styles.boxFoot}>
