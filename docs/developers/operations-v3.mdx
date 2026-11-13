@@ -1,0 +1,498 @@
+---
+title: Operations v3
+sidebar_label: Operations v3
+description: Capture, refund, void, cancel, expire and delete payments with the v3 Operations API - one endpoint per operation, a required Idempotency-Key on money operations, the payment event as the answer, and one error format.
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import CodeBlock from "@theme/CodeBlock";
+import FAQ, { FAQItem } from "@site/src/components/FAQ";
+import OperationsOutcomeStory from "@site/src/diagrams/flow/OperationsOutcomeStory";
+import OperationsIdempotencySequence from "@site/src/diagrams/flow/OperationsIdempotencySequence";
+import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
+
+# Operations v3
+
+Operations v3 performs the same six post-payment actions as [Operations v2](/developers/operations) (refund, capture, void, cancel, expire and delete), with a cleaner contract. Each operation has **its own endpoint**. The three that move money (capture, refund, void) **require an `Idempotency-Key`**, so a retry can never act twice. Every successful call answers with **the payment event of that operation**, the same data the [webhook](/developers/webhooks/event-catalogue) carries. Every failure answers in **one [error format](/errors)**.
+
+:::note Base URL
+Every API call on this page targets <code>{OTTU_CONNECT_BASE_URL}</code>. Swap in your own merchant domain when you integrate. Authentication is the same as for every Ottu API: see [Authentication](/developers/getting-started/authentication).
+:::
+
+:::tip[Boost Your Integration]
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
+:::
+
+## When to Use
+
+- You are building a **new integration** and want retry-safe refunds, captures and voids.
+- You want the operation answer to match the [webhook v3](/developers/webhooks/event-catalogue) event, so one parser serves both.
+- You want machine-readable errors (`code`, `attr`, `doc_url`) instead of free text.
+- You are moving from [Operations v2](/developers/operations): see [Differences from v2](#differences-from-v2).
+
+## Setup
+
+- A payment with a `session_id` (preferred, always present) or an `order_no`, created through the [Checkout API](/developers/payments/checkout-api) or the dashboard.
+- An [API key or user](/developers/getting-started/authentication) allowed to run the operation (`payment.capture`, `payment.refund`, `payment.void`, `payment.cancel`, `payment.expire`, `payment.delete`). The permission is checked for the operation in the URL.
+- A way to generate a unique string per money operation, such as a UUID, for the `Idempotency-Key` header.
+
+## Guide
+
+### Workflow
+
+All six operations live under `/b/pbl/v3/operation/`:
+
+| Operation | Endpoint | Calls the gateway | `Idempotency-Key` |
+|---|---|:---:|:---:|
+| Capture | `POST /b/pbl/v3/operation/capture/` | Yes | Required |
+| Refund | `POST /b/pbl/v3/operation/refund/` | Yes | Required |
+| Void | `POST /b/pbl/v3/operation/void/` | Yes | Required |
+| Cancel | `POST /b/pbl/v3/operation/cancel/` | No | Not used |
+| Expire | `POST /b/pbl/v3/operation/expire/` | No | Not used |
+| Delete | `POST /b/pbl/v3/operation/delete/` | No | Not used |
+
+The trailing slash is optional. Identify the payment with `session_id` or `order_no` in the JSON body. The operation is the URL: there is no `operation` field.
+
+<OperationsOutcomeStory />
+
+If a call ends in a `502` or `504`, query the payment with [PSQ v3](/developers/payments/psq-v3) to see what happened before you retry with a new key.
+
+### Quick start: refund a payment
+
+Send the refund with a fresh `Idempotency-Key`. If the connection drops and you do not know whether it worked, send the **same request with the same key** again: Ottu never refunds twice.
+
+<Tabs groupId="language">
+<TabItem value="curl" label="cURL">
+
+<CodeBlock language="bash" title="Refund 3.000 of a payment">{`curl -X POST "${OTTU_CONNECT_BASE_URL}/b/pbl/v3/operation/refund/" \\
+  -H "Authorization: Api-Key your_private_api_key" \\
+  -H "Content-Type: application/json" \\
+  -H "Idempotency-Key: 6f1d2c3e-8a4b-4c1d-9e2f-0a1b2c3d4e5f" \\
+  -d '{"session_id": "4f6c1e0b9a2d", "amount": "3.000"}'`}</CodeBlock>
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+<CodeBlock language="python" title="Refund 3.000 of a payment">{`import uuid
+
+import requests
+
+BASE_URL = "${OTTU_CONNECT_BASE_URL}"
+API_KEY = "your_private_api_key"
+
+# Create the key once per refund and store it with your own refund record,
+# so a retry after a crash sends the same key.
+idempotency_key = str(uuid.uuid4())
+
+response = requests.post(
+    BASE_URL + "/b/pbl/v3/operation/refund/",
+    headers={
+        "Authorization": "Api-Key " + API_KEY,
+        "Idempotency-Key": idempotency_key,
+    },
+    json={"session_id": "4f6c1e0b9a2d", "amount": "3.000"},
+    timeout=60,
+)
+
+if response.status_code == 200:
+    payment = response.json()
+    print(payment["status"], payment["result"])  # refunded success
+    if response.headers.get("Idempotent-Replayed") == "true":
+        print("This is the stored answer of an earlier call")
+else:
+    error = response.json()["errors"][0]
+    print(response.status_code, error["code"], error["detail"])`}</CodeBlock>
+
+</TabItem>
+<TabItem value="node" label="Node.js">
+
+<CodeBlock language="javascript" title="Refund 3.000 of a payment">{`import { randomUUID } from "node:crypto";
+
+const BASE_URL = "${OTTU_CONNECT_BASE_URL}";
+const API_KEY = "your_private_api_key";
+
+// Create the key once per refund and store it with your own refund record,
+// so a retry after a crash sends the same key.
+const idempotencyKey = randomUUID();
+
+const response = await fetch(BASE_URL + "/b/pbl/v3/operation/refund/", {
+  method: "POST",
+  headers: {
+    Authorization: "Api-Key " + API_KEY,
+    "Content-Type": "application/json",
+    "Idempotency-Key": idempotencyKey,
+  },
+  body: JSON.stringify({ session_id: "4f6c1e0b9a2d", amount: "3.000" }),
+});
+
+const body = await response.json();
+if (response.ok) {
+  console.log(body.status, body.result); // refunded success
+  if (response.headers.get("Idempotent-Replayed") === "true") {
+    console.log("This is the stored answer of an earlier call");
+  }
+} else {
+  const { code, detail } = body.errors[0];
+  console.log(response.status, code, detail);
+}`}</CodeBlock>
+
+</TabItem>
+<TabItem value="php" label="PHP">
+
+<CodeBlock language="php" title="Refund 3.000 of a payment">{`<?php
+$baseUrl = "${OTTU_CONNECT_BASE_URL}";
+$apiKey = "your_private_api_key";
+
+// Create the key once per refund and store it with your own refund record,
+// so a retry after a crash sends the same key.
+$idempotencyKey = bin2hex(random_bytes(16));
+
+$replayed = false;
+$ch = curl_init($baseUrl . "/b/pbl/v3/operation/refund/");
+curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_HTTPHEADER => [
+        "Authorization: Api-Key " . $apiKey,
+        "Content-Type: application/json",
+        "Idempotency-Key: " . $idempotencyKey,
+    ],
+    CURLOPT_POSTFIELDS => json_encode(["session_id" => "4f6c1e0b9a2d", "amount" => "3.000"]),
+    CURLOPT_HEADERFUNCTION => function ($ch, $line) use (&$replayed) {
+        if (stripos($line, "Idempotent-Replayed: true") === 0) {
+            $replayed = true;
+        }
+        return strlen($line);
+    },
+]);
+$body = json_decode(curl_exec($ch), true);
+$status = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+
+if ($status === 200) {
+    echo $body["status"] . " " . $body["result"]; // refunded success
+} else {
+    echo $status . " " . $body["errors"][0]["code"] . " " . $body["errors"][0]["detail"];
+}`}</CodeBlock>
+
+</TabItem>
+</Tabs>
+
+The answer is the payment event of the refund:
+
+```json title="200 OK (trimmed)"
+{
+  "session_id": "4f6c1e0b9a2d",
+  "order_no": "INV-1042",
+  "payment_type": "one_off",
+  "language": "en",
+  "amount": "10.000",
+  "currency": "KWD",
+  "status": "refunded",
+  "operation": "refund",
+  "processed_at": "2026-11-04T15:00:01Z",
+  "result": "success",
+  "message": "Refund processed successfully",
+  "connector": {
+    "code": "kpay-live",
+    "reference_number": "Q2LM8A",
+    "currency": "KWD",
+    "amount": "3.000",
+    "fee": "0.000",
+    "total": "3.000"
+  },
+  "totals": {
+    "paid": "10.000",
+    "settled": "10.000",
+    "refunded": "3.000",
+    "refund_pending": "0.000",
+    "voided": "0.000",
+    "remaining": "0.000"
+  },
+  "created_at": "2026-11-04T10:11:12Z",
+  "updated_at": "2026-11-04T15:00:01Z"
+}
+```
+
+:::note Trimmed example
+A real answer also carries the full `card`, `connector` (with `exchange_rate`, `params` and `responses`), `customer`, `billing_address`, `shipping_address`, `agreement`, `wallets`, `extra` and `created_by` objects. Every key is always present; an empty scalar is `null`, an empty list is `[]`.
+:::
+
+### The answer is the payment event {#the-answer}
+
+The body is the `data` of the matching `payment.*` [webhook v3 event](/developers/webhooks/event-catalogue), not a new shape. Read `status` and `result` to know what happened; the money moved by this call is in `connector.amount`; the payment's running totals are in `totals`. Field meanings are on [Webhook Events (v3)](/developers/webhooks/event-catalogue), and the same object (with every attempt) is what [PSQ v3](/developers/payments/psq-v3) returns.
+
+| Operation | Event | `status` | `operation` | `result` |
+|---|---|---|---|---|
+| Capture | `payment.paid` | `paid` | `capture` | `success` |
+| Refund, confirmed | `payment.refunded` | `refunded` | `refund` | `success` |
+| Refund, accepted but not confirmed | `payment.refund_pending` | `refund_pending` | `refund` | `pending` |
+| Refund, declined by the gateway | `payment.refund_rejected` | `refund_rejected` | `refund` | `failed` |
+| Void | `payment.voided` | `voided` | `void` | `success` |
+| Cancel | `payment.canceled` | `canceled` | the payment's own | the payment's own |
+| Expire | `payment.expired` | `expired` | the payment's own | the payment's own |
+| Delete | `payment.deleted` | the status the payment had | the payment's own | `null` |
+
+Cancel, expire and delete call no gateway, so the `card` and `connector` keys are present with every value `null`.
+
+:::warning A pending refund is `refund_pending`, not `refund_queued`
+When a gateway accepts a refund but confirms it later, Operations v3 answers `status: refund_pending` and `result: pending`. [Operations v2](/developers/operations) and the format 1 and 2 webhooks call the same state `refund_queued`. Branch on `refund_pending` in v3 code. The refund later ends as `payment.refunded` or `payment.refund_rejected` webhook events.
+:::
+
+:::warning A declined refund is a `200`, not an error
+When the gateway declines a refund, Operations v3 answers **`200`** with `status: refund_rejected` and `result: failed`, and Ottu sends the `payment.refund_rejected` [webhook](/developers/webhooks/event-catalogue#catalogue) event. The payment's `totals.refunded` does not change, and you can refund again. Always check `status`, not only the HTTP status. A declined **capture or void** is different: it answers [`422 operation_declined`](/errors#operation_declined).
+:::
+
+### Idempotency {#idempotency}
+
+Capture, refund and void require the `Idempotency-Key` header. Ottu stores the answer under your key, so repeating the call returns that answer instead of acting again. This is what makes it safe to retry after a timeout or a dropped connection.
+
+<OperationsIdempotencySequence />
+
+**The key**
+
+- Any string you choose, at most **255 characters**, without a NUL character. A UUID is a good choice.
+- Missing header: [`400 idempotency_key_required`](/errors#idempotency_key_required). Longer than 255 characters or containing a NUL: [`400 idempotency_key_invalid`](/errors#idempotency_key_invalid).
+- A key is remembered for **24 hours** after its first use.
+- Keys belong to your account **and to the endpoint**: the same string used on `refund` and on `void` are two unrelated keys.
+- Use a **new key for every new operation**, and the **same key only to retry the same request**.
+
+**What a repeat does**
+
+| You send | Ottu answers |
+|---|---|
+| Same key, same body, answer is stored | The **exact stored status and body**, with the header `Idempotent-Replayed: true`. The gateway is not called. |
+| Same key, different body (for example another `amount`) | [`422 idempotency_key_reused`](/errors#idempotency_key_reused) |
+| Same key while the first call is still running | [`409 request_in_progress`](/errors#request_in_progress): wait a moment and send the same request again |
+
+Bodies are compared as JSON, so a different key order or spacing is still the same body. `Idempotent-Replayed: true` appears **only on a stored replay, never on the first answer**: use it to tell a fresh result from a repeated one. A replay does not check the payment again, so it answers what the first call answered even if the payment has changed since.
+
+**What is stored**
+
+| Answer | Stored under the key? |
+|---|:---:|
+| `200` (including `refund_pending` and `refund_rejected`) | Yes |
+| `422 operation_declined` | Yes |
+| `500 server_error`, `502 gateway_error`, `504 gateway_timeout` | Yes: the gateway may have been reached, so the call is never repeated for you |
+| `400` (missing or invalid key, validation) | No |
+| `401`, `403`, `404 payment_not_found` | No |
+| `409 payment_not_refundable`, `409 operation_not_allowed` | No |
+| `409 operation_in_progress` | No: send the **same** key again once the other operation finished |
+
+An answer that is not stored changes nothing, so you can fix the request and send it again with the same key.
+
+:::warning After a `504`, check the payment before you retry with a new key
+`504 gateway_timeout` and `502 gateway_error` mean the gateway may or may not have done the operation. The answer is stored, so the same key replays it. **Do not simply send a new key**: first ask [PSQ v3](/developers/payments/psq-v3) what happened (for a refund, look for a refund in `attempts` and in `totals.refunded`), and only retry with a **new** key if the operation did not happen.
+:::
+
+:::warning After a crash, the key can answer `409 request_in_progress` for 24 hours
+If Ottu itself fails while the gateway call is running, the key may stay marked as running. Retrying that key answers [`409 request_in_progress`](/errors#request_in_progress) until it expires, 24 hours after first use. Do not wait it out: check the payment with [PSQ v3](/developers/payments/psq-v3) and, if the operation did not happen, retry with a **new** key.
+:::
+
+**One operation at a time per payment**
+
+Capture, refund and void on the same payment never run together, **whatever their keys are**. While one is running, another one answers [`409 operation_in_progress`](/errors#operation_in_progress). It is not stored, so once the first finished you can send the same request with the same key again (and it will be validated against the payment as it is then).
+
+### Cancel, expire and delete
+
+These three change the payment inside Ottu and never call a gateway. They need no `Idempotency-Key` (it is ignored), and a repeat on a payment that has already moved answers `409 operation_not_allowed`.
+
+<Tabs groupId="language">
+<TabItem value="curl" label="cURL">
+
+<CodeBlock language="bash" title="Cancel an unpaid payment">{`curl -X POST "${OTTU_CONNECT_BASE_URL}/b/pbl/v3/operation/cancel/" \\
+  -H "Authorization: Api-Key your_private_api_key" \\
+  -H "Content-Type: application/json" \\
+  -d '{"order_no": "INV-1042"}'`}</CodeBlock>
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+<CodeBlock language="python" title="Cancel an unpaid payment">{`import requests
+
+response = requests.post(
+    "${OTTU_CONNECT_BASE_URL}/b/pbl/v3/operation/cancel/",
+    headers={"Authorization": "Api-Key your_private_api_key"},
+    json={"order_no": "INV-1042"},
+    timeout=30,
+)
+print(response.status_code, response.json()["status"])  # 200 canceled`}</CodeBlock>
+
+</TabItem>
+<TabItem value="node" label="Node.js">
+
+<CodeBlock language="javascript" title="Cancel an unpaid payment">{`const response = await fetch("${OTTU_CONNECT_BASE_URL}/b/pbl/v3/operation/cancel/", {
+  method: "POST",
+  headers: {
+    Authorization: "Api-Key your_private_api_key",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ order_no: "INV-1042" }),
+});
+const body = await response.json();
+console.log(response.status, body.status); // 200 canceled`}</CodeBlock>
+
+</TabItem>
+<TabItem value="php" label="PHP">
+
+<CodeBlock language="php" title="Cancel an unpaid payment">{`<?php
+$ch = curl_init("${OTTU_CONNECT_BASE_URL}/b/pbl/v3/operation/cancel/");
+curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_HTTPHEADER => [
+        "Authorization: Api-Key your_private_api_key",
+        "Content-Type: application/json",
+    ],
+    CURLOPT_POSTFIELDS => json_encode(["order_no" => "INV-1042"]),
+]);
+$body = json_decode(curl_exec($ch), true);
+echo curl_getinfo($ch, CURLINFO_RESPONSE_CODE) . " " . $body["status"]; // 200 canceled`}</CodeBlock>
+
+</TabItem>
+</Tabs>
+
+Which payments each one accepts is the same as in v2: [cancel](/developers/operations#cancel), [expire](/developers/operations#expire) and [delete](/developers/operations#delete). A delete answers the event with the status the payment had before it was removed.
+
+### Rules every call follows
+
+- **Unit-restricted users.** If your API user is limited to certain units, a payment that belongs to another unit answers exactly like a payment that does not exist: [`404 payment_not_found`](/errors#payment_not_found), with the same body. Users and API keys without unit restrictions see every payment. This also holds for replays and for [PSQ v3](/developers/payments/psq-v3).
+- **IP allowlist.** The IP allowlist works as on v2. For payments created by the Payment Request or E-commerce plugins, a call from an address that plugin does not allow is refused with [`403 permission_denied`](/errors#permission_denied). Other payment types are not restricted. It applies to all six operations and to PSQ v3.
+- **Rate limit.** Each endpoint has its own bucket of **30 requests per minute** by default. Beyond it you get [`429 throttled`](/errors#throttled) in the v3 error format, with a `Retry-After` header. Spread bulk refunds out, and never retry a `429` in a tight loop.
+- **Language.** The `detail` text follows your `Accept-Language` header (English or Arabic). Branch on `code`, never on `detail`.
+- **Gateway support.** Not every gateway supports every operation: see [supported operations by gateway](/developers/payments/payment-methods#activating-payment-gateway-codes).
+
+## API Reference
+
+### Request
+
+All six endpoints take a JSON body.
+
+| Field | Type | Capture | Refund | Void | Cancel, expire, delete | Notes |
+|---|---|:---:|:---:|:---:|:---:|---|
+| `session_id` | string, max 128 | one of the two | one of the two | one of the two | one of the two | The payment. Preferred. |
+| `order_no` | string, max 128 | one of the two | one of the two | one of the two | one of the two | The payment, when you have no `session_id`. |
+| `amount` | decimal string, up to 3 decimal places, at least `0.001` | **Required** | **Required** | Optional, **not read** | Not used | In the payment's currency. A void always covers the full amount, whatever you send. A partial capture or refund cannot exceed what is capturable or refundable. |
+| `destination` | `pg` or `wallet` | Not used | Optional | Not used | Not used | Default `pg`: refund through the gateway. `wallet` credits the customer's [M-Wallet](/developers/operations#refund-to-wallet) instead. |
+| `extra` | object | Optional | Optional | Optional | Not used | Gateway-specific parameters, as in v2. |
+
+Headers: `Authorization` ([Authentication](/developers/getting-started/authentication)), `Content-Type: application/json`, and for capture, refund and void `Idempotency-Key`.
+
+### Responses
+
+| Status | Body | When |
+|:---:|---|---|
+| `200` | The payment event of the operation | The operation was done, including `refund_pending` and `refund_rejected` |
+| `400` | Error, `type: validation_error` | A field is invalid, the key is missing or invalid, the amount is too high, `destination: wallet` is not available |
+| `401` | Error | Not authenticated |
+| `403` | Error | Missing permission, or the IP allowlist refused the call |
+| `404` | Error | [`payment_not_found`](/errors#payment_not_found) |
+| `409` | Error | [`payment_not_refundable`](/errors#payment_not_refundable), [`operation_not_allowed`](/errors#operation_not_allowed), [`request_in_progress`](/errors#request_in_progress), [`operation_in_progress`](/errors#operation_in_progress) |
+| `422` | Error | [`idempotency_key_reused`](/errors#idempotency_key_reused), [`operation_declined`](/errors#operation_declined) (capture, void, wallet refund) |
+| `429` | Error | [`throttled`](/errors#throttled) |
+| `500` | Error | [`server_error`](/errors#server_error) |
+| `502` | Error, `type: gateway_error` | [`gateway_error`](/errors#gateway_error) |
+| `504` | Error, `type: gateway_error` | [`gateway_timeout`](/errors#gateway_timeout) |
+
+Every code is explained, with what to do about it, on the [error reference](/errors).
+
+### Error format
+
+```json title="400 Bad Request: refund above the refundable amount"
+{
+  "type": "validation_error",
+  "status": 400,
+  "request_id": "b7ad6b7169203331b7ad6b7169203331",
+  "errors": [
+    {
+      "code": "amount_exceeds_refundable",
+      "detail": "Refund 150.000 exceeds the refundable 100.000 KWD.",
+      "attr": "amount",
+      "doc_url": "https://docs.ottu.com/errors#amount_exceeds_refundable"
+    }
+  ]
+}
+```
+
+```json title="504 Gateway Timeout"
+{
+  "type": "gateway_error",
+  "status": 504,
+  "request_id": "0af7651916cd43dd8448eb211c80319c",
+  "errors": [
+    {
+      "code": "gateway_timeout",
+      "detail": "The payment gateway did not answer in time.",
+      "attr": null,
+      "doc_url": "https://docs.ottu.com/errors#gateway_timeout"
+    }
+  ]
+}
+```
+
+The `doc_url` always points at the production docs (docs.ottu.com), whatever environment answered, so use it as given.
+
+Quote `request_id` when you contact [support](mailto:support@ottu.com). The format is described in full on the [error reference](/errors#format).
+
+## Differences from v2 {#differences-from-v2}
+
+| | [Operations v2](/developers/operations) | Operations v3 |
+|---|---|---|
+| Endpoint | One: `POST /b/pbl/v2/operation/` with an `operation` field | One per operation: `/b/pbl/v3/operation/<operation>/` |
+| Retry safety | Optional `Tracking-Key` header, returns the status of the earlier operation | **Required** `Idempotency-Key` on capture, refund and void; stored answers are replayed |
+| Success body | The child transaction of the operation | The payment event (same `data` as the webhook v3) |
+| Pending refund | `refund_queued` | `refund_pending` |
+| Declined refund | An error | `200` with `status: refund_rejected`, and a `payment.refund_rejected` event |
+| Gateway did not answer | A generic error | `504 gateway_timeout` (or `502 gateway_error`), with the result marked as unknown |
+| Errors | `detail`, `result`, `operation` | `type`, `status`, `request_id`, and `errors` with `code`, `detail`, `attr`, `doc_url` |
+| One operation per payment at a time | Not enforced | `409 operation_in_progress` |
+
+To move your webhook receiver to the matching event format, see [Formats & Migration](/developers/webhooks/migrate-to-v3).
+
+## Best Practices
+
+- **Store the key with your refund record** before you send the call, so a crash and restart retries with the same key.
+- **Never reuse a key for a different request**, and never change the body when you retry.
+- **Treat `502` and `504` as "unknown"**, not as "failed": check [PSQ v3](/developers/payments/psq-v3) first.
+- **Check `status`, not only the HTTP status.** A `200` can be `refund_pending` or `refund_rejected`.
+- **Use [webhooks](/developers/webhooks/event-catalogue) for refunds that finish later**, and PSQ v3 as the fallback when one is missing.
+- **Branch on `errors[].code`**, never on `detail`.
+
+## FAQ
+
+<FAQ>
+  <FAQItem question="Do I need an Idempotency-Key for cancel, expire and delete?">
+    No. They never call a gateway, so the header is ignored. Only [capture, refund and void](#idempotency) require it.
+  </FAQItem>
+  <FAQItem question="How do I know an answer was a replay?">
+    The response has the header `Idempotent-Replayed: true`. It is only present on a stored replay, never on the first answer.
+  </FAQItem>
+  <FAQItem question="Can I reuse an Idempotency-Key after 24 hours?">
+    Yes. A key is forgotten 24 hours after its first use, so the same string starts a new operation. Prefer a fresh UUID anyway.
+  </FAQItem>
+  <FAQItem question="Why do I get 409 request_in_progress and how long does it last?">
+    Another call with the same key is still running, or Ottu failed while the gateway call was in progress. Wait a moment and retry the same request. If it keeps answering `409` after a failure on our side, it lasts until the key expires after 24 hours: check the payment with [PSQ v3](/developers/payments/psq-v3) and retry with a new key if the operation did not happen.
+  </FAQItem>
+  <FAQItem question="Why do I get 409 operation_in_progress?">
+    Another capture, refund or void is running on the same payment, under any key. Nothing was stored for your key: send the same request again once the other finished.
+  </FAQItem>
+  <FAQItem question="Why does a payment I can see in the dashboard answer 404?">
+    If your API user is limited to certain units, payments of other units answer as if they did not exist. See [Rules every call follows](#rules-every-call-follows).
+  </FAQItem>
+  <FAQItem question="What is the difference between a declined refund and a declined capture?">
+    A declined refund answers `200` with `status: refund_rejected`. A declined capture or void answers `422 operation_declined`. A refund to the wallet that the wallet declines also answers `422`.
+  </FAQItem>
+  <FAQItem question="Does the void amount matter?">
+    No. A void always covers the full amount. `amount` is optional on a void and is not read.
+  </FAQItem>
+</FAQ>
+
+## What's Next?
+
+- [**Payment Status Query v3**](/developers/payments/psq-v3): the payment and every attempt, to check what happened after a `504`
+- [**Error reference**](/errors): every error code, what it means and what to do
+- [**Webhook Events (v3)**](/developers/webhooks/event-catalogue): the same payment events, delivered to you
+- [**Operations v2**](/developers/operations): the previous version, still available
+- [**Formats & Migration**](/developers/webhooks/migrate-to-v3): move your webhooks to format 3
