@@ -16,11 +16,11 @@ operations:
       2. The body is optional when you follow a link, because `limit` and `offset` are already in the query string. Resend your filters in the body if you want them applied to that page too.
       3. Query parameters win over body parameters. `{"offset": 1}` posted to a URL that ends `?offset=5` returns the page at offset 5.
 
-      Each item in `results` is a short summary. For the active card and the latest cycle, call Retrieve with the item's `id`.
+      Each item in `results` has the same attributes as the Subscription object, except `notification_config` and `current_cycle`. For those two, call Retrieve with the item's `id`.
 
   autopay_subscription_detail:
     description_replace: |
-      Returns the full subscription object for your merchant account.
+      Returns the [Subscription object](/developers/payments/autopay/#subscription-object) for your merchant account.
 
       Poll this endpoint to see activation. The checkout webhook usually arrives while the subscription is still `pending_setup`, because Ottu confirms the first payment on a recurring check, so the status lags the payment: within about 15 minutes in production, and usually a minute or two on the sandbox. Do not hard-code a wait: poll until `status` leaves `pending_setup`. If it is still `pending_setup` well after a successful payment, contact Ottu support with the subscription ID.
 
@@ -34,21 +34,23 @@ operations:
     parameters:
       Idempotency-Key:
         description: |
-          Required. A UUID v4 that identifies this cancel request. Send the same key with the same body to retry safely: Ottu replays the first response. Send the same key with a different body and the call fails with `409` (`code: idempotency_conflict`).
+          Required. A UUID v4 that identifies this cancel request. Send the same key with the same body to retry safely: Ottu replays the first response. Send the same key with a different body, or for a different subscription, and the call fails with `409` (`code: idempotency_conflict`). A cancel that failed with a `4xx` status is not stored, so retrying it with the same key runs it again.
     description_replace: |
       Cancels a subscription and records you, the merchant, as the initiator.
 
-      `mode: "immediate"` stops the subscription now, stops scheduled charges and retries, and refunds nothing. `mode: "at_period_end"` leaves `status` unchanged and schedules the cancellation. When the next billing date arrives, Ottu cancels the subscription and does not charge. Cancelling a `past_due` subscription at period end finalizes only if the customer pays the balance; otherwise cancel it immediately.
+      `mode: "immediate"` stops the subscription now, stops scheduled charges and retries, and refunds nothing. `mode: "at_period_end"` leaves `status` unchanged and schedules the cancellation. When the next billing date arrives, Ottu cancels the subscription and does not charge. Ottu cancels the next scheduled cycle at once, so `next_billing_date` is `null` while the cancellation is pending.
+
+      Ottu refuses `mode: "at_period_end"` with `422 invalid_transition` while a payment is due or in progress: on a `past_due` subscription, or while a cycle is `retry_scheduled`, `processing` or `needs_triage`. It also refuses it while the subscription is `pending_setup` or `setup_failed`. Use `mode: "immediate"` in those cases.
 
       Only you can cancel immediately. A cancellation from the customer's self-service page always takes effect at the end of the paid period.
 
-      `cancellation_initiator` records who last scheduled a cancellation, `merchant` or `customer`. It is not cleared when the customer undoes a pending cancellation from the self-service page, and Ottu does not notify you of a cancel or an undo. Read `cancel_at_period_end` and `status` from Retrieve to know whether a cancellation is pending.
+      `cancellation_initiator` records who requested the cancellation: `api_key` for you, `customer` for the customer. When the customer undoes a pending cancellation from the self-service page, Ottu clears it. Read `cancel_at_period_end` and `status` from Retrieve to know whether a cancellation is pending.
 
   autopay_subscription_page_link:
     description_replace: |
       Returns the subscription's current customer-facing page link without rotating it, so a link already in the customer's hands keeps working.
 
-      The create response has no `page_url`. Call this endpoint at any time after creation, with no need to wait for the first payment, and send the link to your customer yourself: Ottu sends the customer no email at signup and does not resend links. To re-send a link that should keep working, read it here instead of regenerating it.
+      The create response has no `page_url`. Call this endpoint at any time after creation, with no need to wait for the first payment. Ottu emails and texts the customer when the subscription is created, when the first payment completes, and when you regenerate the link; these messages carry the self-service link. To send the link at any other time, read it here instead of regenerating it.
 
   autopay_subscription_regenerate_page_token:
     parameters:
@@ -56,7 +58,7 @@ operations:
         description: |
           Required. A UUID v4. Ottu rejects the call with `400` when the header is missing. The header does not make this call safe to repeat: replaying the same key still issues a new token and revokes the previous one.
     description_replace: |
-      Replaces the customer's page link. The existing link stops working the moment you call this endpoint, and Ottu does not tell the customer. Send the new `page_url` yourself, or the customer reaches a dead link. Use it to revoke a link that leaked or was lost, not to re-send a working one.
+      Replaces the customer's page link. The existing link stops working the moment you call this endpoint. Ottu emails and texts the new link to the customer's email and phone on file. Use it to revoke a link that leaked or was lost, not to re-send a working one.
 
       After a timeout, read the current link with Retrieve an AutoPay hosted-page link and compare its `page_url` with the one you hold before you retry. A blind retry can revoke a link you have just delivered.
 

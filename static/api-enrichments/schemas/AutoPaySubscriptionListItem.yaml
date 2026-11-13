@@ -2,7 +2,7 @@
 # One row of the subscription list. Mirrors SubscriptionListItem in AutoPay.
 
 _description: |
-  A lighter view of a subscription, returned for each row of the subscription list. It carries enough to show a table and to decide which subscriptions to open; call Retrieve a subscription for the full object.
+  One subscription in the list. It has the same attributes as the Subscription object returned by Retrieve, except `notification_config` and `current_cycle`; call Retrieve a subscription for those two.
 
 properties:
   id:
@@ -15,17 +15,19 @@ properties:
     description: |
       The customer's email address, captured when the subscription was created.
   frequency:
+    enum: [monthly, yearly]
     description: |
-      How often the customer is charged. Enum: `monthly`, `yearly`.
+      How often the customer is charged: `monthly` or `yearly`.
   recurring_amount:
     description: |
-      The amount charged on each billing cycle, as a decimal string in `currency`.
+      The amount charged on each billing cycle, as a decimal string with the currency's decimal places: 3 for KWD, BHD, OMR, JOD, TND, LYD and IQD, 0 for JPY and KRW, 2 for every other currency.
   currency:
     description: |
       Three-letter ISO 4217 currency code of the recurring charge, for example `KWD`.
   status:
+    enum: [pending_setup, trialing, active, past_due, canceled, expired, setup_failed]
     description: |
-      The subscription's lifecycle state. One of `pending_setup` (created, first payment not completed yet), `trialing` (set up with a `0` first charge, waiting for its first billing date), `active` (billing normally), `past_due` (a billing cycle used up every retry), `canceled`, `expired` (the `end_date` passed), or `setup_failed` (the first payment never completed).
+      The subscription's lifecycle state. One of `pending_setup` (created, first payment not completed yet), `trialing` (set up with a `0` first charge, waiting for its first billing date), `active` (billing normally), `past_due` (a billing cycle used up every retry), `canceled`, `expired` (the last billing cycle before `end_date` was paid), or `setup_failed` (the first payment never completed).
 
       A `past_due` subscription is never canceled automatically. See [Subscription States]({{apiBaseUrl}}/payments/autopay/#subscription-states).
   next_billing_date:

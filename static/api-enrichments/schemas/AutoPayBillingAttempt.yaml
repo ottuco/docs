@@ -10,8 +10,9 @@ properties:
       The position of this attempt within its cycle, starting at 1. It increases by one on each retry.
   session_id:
     description: |
-      The Ottu `session_id` of the payment transaction created for this attempt.
+      The `session_id` of the cycle's payment transaction. Retries reuse the cycle's transaction, so the attempts of one cycle normally share the same `session_id`.
   result:
+    enum: [pending, success, failed]
     description: |
       The outcome of the attempt. `success` means the charge was collected. `failed` means it was declined or the gateway returned an error. `pending` means the charge was started and its outcome is not confirmed yet, which normally resolves within minutes. `null` before any outcome is recorded.
   created_at:

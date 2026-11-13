@@ -19,28 +19,29 @@ properties:
       The customer's email address, captured when the subscription was created. Ottu sends the pre-charge, payment-failed and final-failure emails to this address.
   customer_name:
     description: |
-      The customer's name from the checkout call that created the subscription. An empty string if the checkout call had none.
+      The customer's name from the checkout call that created the subscription. `null` if the checkout call had none.
   customer_phone:
     description: |
-      The customer's phone number from the checkout call that created the subscription. An empty string if the checkout call had none.
+      The customer's phone number from the checkout call that created the subscription. `null` if the checkout call had none.
   frequency:
+    enum: [monthly, yearly]
     description: |
-      How often the customer is charged. Enum: `monthly`, `yearly`.
+      How often the customer is charged: `monthly` or `yearly`.
   currency:
     description: |
       Three-letter ISO 4217 currency code that every recurring charge is made in, for example `KWD`. It is taken from the checkout transaction and cannot be changed afterwards.
   recurring_amount:
     description: |
-      The amount charged on each billing cycle, as a decimal string in `currency`. It is independent of `first_payment_amount`.
+      The amount charged on each billing cycle, as a decimal string with the currency's decimal places: 3 for KWD, BHD, OMR, JOD, TND, LYD and IQD, 0 for JPY and KRW, 2 for every other currency. It is independent of `first_payment_amount`.
   first_payment_amount:
     description: |
-      The amount of the first, customer-initiated payment made at checkout, as a decimal string. `0` means the subscription started without a first charge (a free trial). `null` when no first payment applies.
+      The amount of the first, customer-initiated payment made at checkout, as a decimal string with the currency's decimal places: 3 for KWD, BHD, OMR, JOD, TND, LYD and IQD, 0 for JPY and KRW, 2 for every other currency. `0` means the subscription started without a first charge (a free trial). `null` when no first payment applies.
   start_date:
     description: |
       The date billing starts from, in `YYYY-MM-DD` format. Its day of the month becomes the billing anchor: a subscription anchored on the 31st bills on the last day of shorter months.
   end_date:
     description: |
-      The date after which Ottu stops billing, in `YYYY-MM-DD` format. `null` for an open-ended subscription. When it passes, the subscription moves to `expired`.
+      The date after which Ottu stops billing, in `YYYY-MM-DD` format. `null` for an open-ended subscription. Ottu moves the subscription to `expired` when it pays the last cycle that falls on or before this date, because the next cycle would fall after it. So a subscription can become `expired` before `end_date` arrives.
   billing_anchor_day:
     description: |
       The day of the month every charge is due, taken from `start_date`. In a month without that day, the charge falls on the month's last day.
@@ -48,8 +49,11 @@ properties:
     description: |
       The checkout `session_id` of the first payment. The webhook for that payment carries the same `session_id`, so use it to match the webhook to this subscription.
   status:
+    # The AutoPay service types it as an enum (SubscriptionStatus); Connect's
+    # public schema drops the values. Remove this once the raw spec has them.
+    enum: [pending_setup, trialing, active, past_due, canceled, expired, setup_failed]
     description: |
-      The subscription's lifecycle state. One of `pending_setup` (created, first payment not completed yet), `trialing` (set up with a `0` first charge, waiting for its first billing date), `active` (billing normally), `past_due` (a billing cycle used up every retry), `canceled`, `expired` (the `end_date` passed), or `setup_failed` (the first payment never completed).
+      The subscription's lifecycle state. One of `pending_setup` (created, first payment not completed yet), `trialing` (set up with a `0` first charge, waiting for its first billing date), `active` (billing normally), `past_due` (a billing cycle used up every retry), `canceled`, `expired` (the last billing cycle before `end_date` was paid), or `setup_failed` (the first payment never completed).
 
       A `past_due` subscription is never canceled automatically. See [Subscription States]({{apiBaseUrl}}/payments/autopay/#subscription-states).
   cancel_at_period_end:
@@ -57,37 +61,38 @@ properties:
       `true` when a cancellation is scheduled for the end of the current paid period. The subscription keeps its current `status` until then. When the next billing date arrives, Ottu cancels the subscription and does not charge. `false` otherwise, including after an immediate cancellation.
   cancels_on:
     description: |
-      When a cancellation is scheduled, the last day the customer keeps access: the day before the next charge. Ottu cancels the subscription the day after. `null` when no cancellation is scheduled, including after an immediate cancellation or a reactivation.
+      When a cancellation is scheduled, the last day the customer keeps access: the day before the next charge, and never earlier than today. Ottu cancels the subscription the day after. A repeated cancel request keeps the first date. `null` when no cancellation is scheduled, including after an immediate cancellation or a reactivation. It is also `null`, with `cancel_at_period_end` set to `true`, when the subscription had no upcoming cycle at the time of the request.
   canceled_at:
     description: |
       UTC timestamp of when the subscription became `canceled`. `null` while it is not canceled, including while a cancellation is only scheduled through `cancel_at_period_end`.
   cancellation_initiator:
     description: |
-      Who most recently requested a cancellation: `merchant` when you called Cancel a subscription, `customer` when the customer used the self-service page. `null` if none was ever requested. It is set as soon as a cancellation is scheduled, and it is not cleared if the customer later reactivates the subscription, so read `status` and `cancel_at_period_end` to know whether the subscription is actually ending.
+      Who requested the cancellation. Ottu returns `api_key` when you called Cancel a subscription, `customer` when the customer used the self-service page, and `system` when Ottu ended the subscription itself. `null` when no cancellation is pending or done. When the customer undoes a pending cancellation, Ottu clears it, together with `cancellation_reason`, `cancellation_note` and `cancels_on`.
   cancellation_reason:
     description: |
-      The reason the customer picked when canceling from the self-service page: `too_expensive`, `not_using`, `missing_feature`, `switched`, `temporary` or `other`. `null` when you canceled through the API or no reason was given.
+      The reason the customer picked when canceling from the self-service page: `too_expensive`, `not_using`, `missing_feature`, `switched`, `temporary` or `other`. `null` when you canceled through the API, when no reason was given, or after the customer undid the cancellation.
   cancellation_note:
     description: |
-      The free-text note the customer left when canceling from the self-service page. `null` when there is none.
+      The free-text note the customer left when canceling from the self-service page. `null` when there is none, or after the customer undid the cancellation.
   agreement_id:
     description: |
       The `agreement.id` you supplied on the checkout call. It ties every charge in the subscription to the same card-on-file agreement with the customer.
   amount_variability:
     description: |
-      Taken from the agreement: `fixed` or `variable`. `null` until the first payment is confirmed.
+      Taken from the agreement: `fixed` or `variable`. Ottu uses `fixed` when the agreement has no value.
   cycle_interval_days:
     description: |
-      Taken from the agreement: the number of days between charges. `null` until the first payment is confirmed.
+      Taken from the agreement: the number of days between charges. When the agreement has no value, Ottu uses 30 for a monthly and 365 for a yearly subscription.
   total_cycles:
     description: |
-      Taken from the agreement: the total number of charges it allows. `null` until the first payment is confirmed.
+      Taken from the agreement: the total number of charges it allows. Before the agreement is stored, Ottu counts it from `start_date` and `end_date`. `null` only for a subscription without `end_date`.
   notification_config:
+    type: object
     description: |
       The `autopay.notification_preferences` you sent at creation: `pre_charge_enabled`, `failure_enabled` and `final_failure_enabled`. `null` if you sent none, which leaves all three emails on.
   next_billing_date:
     description: |
-      The date of the next scheduled charge, in `YYYY-MM-DD` format. `null` when no charge is scheduled.
+      The date of the next scheduled charge, in `YYYY-MM-DD` format. `null` when no charge is scheduled, including while a cancellation at period end is pending: Ottu cancels the next cycle as soon as you schedule it.
   description:
     description: |
       The free-text label you sent in `autopay.description`, shown to the customer on the self-service page. `null` if you did not send one.
@@ -96,7 +101,7 @@ properties:
       Your checkout `order_no`, copied onto the subscription. `null` if the checkout call had none.
   plan_name:
     description: |
-      Always an empty string for a subscription created through the Checkout API: the `autopay` block has no field for it.
+      Always `null` for a subscription created through the Checkout API: the `autopay` block has no field for it.
   language:
     description: |
       `en` or `ar`, taken from the checkout `language` field at creation (default `en`). It sets the language of the customer's self-service page and of every email Ottu sends them.
@@ -111,7 +116,7 @@ properties:
       UTC timestamp of the last change to the subscription, in ISO 8601 format.
   card:
     description: |
-      The card renewals are charged to: `masked_card` and `card_brand`. Never the card number or token. `null` until the first payment is confirmed. It changes when the customer updates their card on the self-service page.
+      The card renewals are charged to: the masked card number, the brand, and the expiry month and year. Never the full card number or the token. Ottu always returns this object; until the first payment saves a card, each of its fields is `null`. It changes when the customer updates their card on the self-service page.
   current_cycle:
     description: |
-      The latest attempted billing cycle, with the same fields as a cycle in Retrieve billing cycles except `payment_attempts`. `null` while `pending_setup`, and for a `past_due` subscription once its period has ended.
+      The latest attempted billing cycle, with the same fields as a cycle in Retrieve billing cycles except `payment_attempts`. `null` when no cycle has been attempted yet (while `pending_setup`, and while `trialing` before the first charge). Also `null` once the period of the latest attempted cycle has ended and no charge or retry is queued, for example on a `past_due`, `canceled` or `expired` subscription.
