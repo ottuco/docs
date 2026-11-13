@@ -8,6 +8,10 @@ import TabItem from "@theme/TabItem";
 
 # Checkout SDK
 
+:::tip Checkout v4 for the web
+The [Connect SDK](../connect-sdk/) is the next version of the web Checkout SDK. New web integrations can start with its [Quick Start](../connect-sdk/quick-start/); existing ones can follow [Migrating from v3](../connect-sdk/migration-from-v3/).
+:::
+
 If you are planning to use the Checkout SDK for your application, it is important to note that you will need to first implement the [Checkout API](../checkout-api) on your backend server. This is because the Checkout SDK requires a [session ID](../checkout-api) in order to function, and the [session ID](../checkout-api) is obtained through the [Checkout API](../checkout-api).
 
 The [Checkout API](../checkout-api) is responsible for generating a [session ID](../checkout-api), which is a unique identifier that is used to initiate the Checkout SDK. This [session ID](../checkout-api) is required to be passed to the Checkout SDK in order for it to work properly.

@@ -1,0 +1,280 @@
+---
+title: Connect SDK Quick Start
+description: Go from a Checkout API session to a working Connect SDK checkout on your page in four steps.
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import CodeBlock from "@theme/CodeBlock";
+import FAQ, { FAQItem } from "@site/src/components/FAQ";
+import { OTTU_CONNECT_BASE_URL, CONNECT_SDK_CDN_URL } from "@site/src/constants/api";
+
+The Connect SDK (Checkout v4) is Ottu's drop-in checkout for the web. Your server creates a payment session with the [Checkout API](../checkout-api.mdx), and the SDK renders the payment methods for that session on your page: cards, saved cards, Apple Pay, Google Pay, Samsung Pay, BNPL, Qitaf and more. It handles card entry, 3-D Secure and the wallet sheets, and reports the outcome to your page through callbacks.
+
+This guide takes you from nothing to a working checkout in four steps.
+
+:::warning Keep secret keys on your server
+Create the payment session from your **server**, with your private [API key](/developers/getting-started/authentication#api-key-auth). Never put the private key in browser code. The browser only ever receives the [public key](/developers/getting-started/authentication#public-key) and the `session_id`.
+:::
+
+:::tip Boost Your Integration
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
+:::
+
+## When to Use
+
+- You want customers to pay on **your own page** instead of being sent to a hosted payment page.
+- You want one integration that shows every payment method enabled on the session, without building each one.
+- You are moving from the Checkout SDK v3. Follow this guide, then check the [migration guide](./migration-from-v3.mdx) for the options that changed.
+
+## Setup
+
+Before you start, have these ready:
+
+1. **API keys.** A private key (`Api-Key`) for your server and a public key for the browser. See [Authentication](/developers/getting-started/authentication).
+2. **Payment gateway codes.** At least one [`pg_code`](../payment-methods.md) enabled on your account, such as a card gateway. The session only offers the methods behind the `pg_codes` you send.
+3. **A webhook URL.** An HTTPS endpoint on your server that receives the [payment webhook](/developers/webhooks/payment-events). This is how you confirm the result.
+4. **A page served over HTTPS.** Apple Pay and Google Pay only work on secure pages.
+
+## Guide
+
+### Workflow
+
+1. **Your server → Ottu.** Your server calls the Checkout API to create a payment session.
+2. **Ottu → your server.** Ottu returns a `session_id`.
+3. **Your server → your page.** You render the checkout page and pass it the `session_id`.
+4. **Your page → Connect SDK.** The page loads the SDK and calls `init()` with the `session_id`, your `merchant_id` and your public key.
+5. **Customer → Ottu.** The customer picks a method and pays. The SDK handles card entry, 3-D Secure and wallet sheets.
+6. **Ottu → your server.** Ottu sends the result to your `webhook_url`.
+7. **Ottu → your page.** The SDK calls [`onSuccess`](./reference.mdx#onsuccess), [`onError`](./reference.mdx#onerror) or [`onCancel`](./reference.mdx#oncancel). For flows that leave your page (such as a bank redirect), the customer returns to your `redirect_url` instead.
+
+### Step-by-Step
+
+#### 1. Create a payment session
+
+From your server, call the Checkout API with your private API key. `type`, `amount`, `currency_code` and `pg_codes` are required. Add `customer_id` if you want the customer to see and save cards.
+
+<Tabs groupId="language">
+<TabItem value="curl" label="cURL" default>
+
+<CodeBlock language="bash" title="Create a payment session">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/' \\
+  --header 'Authorization: Api-Key YOUR_PRIVATE_API_KEY' \\
+  --header 'Content-Type: application/json' \\
+  --data '{
+    "type": "e_commerce",
+    "amount": "10.000",
+    "currency_code": "KWD",
+    "pg_codes": ["credit-card"],
+    "customer_id": "customer-123",
+    "webhook_url": "https://example.com/ottu/webhook",
+    "redirect_url": "https://example.com/checkout/result"
+  }'`}</CodeBlock>
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+<CodeBlock language="python" title="create_session.py">{`import requests
+
+response = requests.post(
+    "${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/",
+    headers={"Authorization": "Api-Key YOUR_PRIVATE_API_KEY"},
+    json={
+        "type": "e_commerce",
+        "amount": "10.000",
+        "currency_code": "KWD",
+        "pg_codes": ["credit-card"],
+        "customer_id": "customer-123",
+        "webhook_url": "https://example.com/ottu/webhook",
+        "redirect_url": "https://example.com/checkout/result",
+    },
+    timeout=30,
+)
+response.raise_for_status()
+session_id = response.json()["session_id"]
+print(session_id)`}</CodeBlock>
+
+</TabItem>
+<TabItem value="node" label="Node.js">
+
+<CodeBlock language="javascript" title="createSession.mjs">{`// Node.js 18+ (built-in fetch); .mjs enables top-level await
+const response = await fetch("${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/", {
+  method: "POST",
+  headers: {
+    Authorization: "Api-Key YOUR_PRIVATE_API_KEY",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    type: "e_commerce",
+    amount: "10.000",
+    currency_code: "KWD",
+    pg_codes: ["credit-card"],
+    customer_id: "customer-123",
+    webhook_url: "https://example.com/ottu/webhook",
+    redirect_url: "https://example.com/checkout/result",
+  }),
+});
+
+if (!response.ok) {
+  throw new Error("Checkout API error: " + response.status);
+}
+const { session_id } = await response.json();
+console.log(session_id);`}</CodeBlock>
+
+</TabItem>
+<TabItem value="php" label="PHP">
+
+<CodeBlock language="php" title="create_session.php">{`<?php
+$ch = curl_init("${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/");
+curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_TIMEOUT => 30,
+    CURLOPT_HTTPHEADER => [
+        "Authorization: Api-Key YOUR_PRIVATE_API_KEY",
+        "Content-Type: application/json",
+    ],
+    CURLOPT_POSTFIELDS => json_encode([
+        "type" => "e_commerce",
+        "amount" => "10.000",
+        "currency_code" => "KWD",
+        "pg_codes" => ["credit-card"],
+        "customer_id" => "customer-123",
+        "webhook_url" => "https://example.com/ottu/webhook",
+        "redirect_url" => "https://example.com/checkout/result",
+    ]),
+]);
+
+$body = curl_exec($ch);
+$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+if ($status >= 400) {
+    throw new Exception("Checkout API error: " . $status);
+}
+$session_id = json_decode($body, true)["session_id"];
+echo $session_id;`}</CodeBlock>
+
+</TabItem>
+</Tabs>
+
+The response contains the `session_id` you pass to the SDK (other fields trimmed):
+
+```json title="Checkout API response (excerpt)"
+{
+  "session_id": "4a462681df6aab64e27cedc9bbf733cd6442578b",
+  "amount": "10.000",
+  "currency_code": "KWD",
+  "state": "created"
+}
+```
+
+Replace `credit-card` with a `pg_code` enabled on your account. See [Payment Methods](../payment-methods.md) to list them.
+
+#### 2. Add a container and load the SDK
+
+Add an empty element where the checkout should appear, and load the SDK bundle. The bundle defines one global, `OttuSDK`. It loads its own styles, so you don't add a stylesheet.
+
+<CodeBlock language="html" title="checkout.html">{`<div id="ottu-checkout"></div>
+
+<script src="${CONNECT_SDK_CDN_URL}"></script>`}</CodeBlock>
+
+#### 3. Initialise the checkout
+
+Create an SDK instance and call `init()` with the `session_id` from step 1. `init()` returns a promise: it rejects if the checkout can't load (for example, a missing option or an invalid session), so always add a `.catch()`.
+
+<CodeBlock language="html" title="checkout.html">{`<div id="ottu-checkout"></div>
+
+<script src="${CONNECT_SDK_CDN_URL}"></script>
+<script>
+  const sdk = new OttuSDK.ConnectSDK();
+
+  sdk
+    .init({
+      merchant_id: "sandbox.ottu.net",
+      session_id: "SESSION_ID_FROM_YOUR_SERVER",
+      apiKey: "your_public_api_key",
+      selector: "#ottu-checkout",
+
+      onSuccess: function (data) {
+        // Payment approved. Send the customer to your result page.
+        window.location.href = data.redirect_url;
+      },
+      onError: function (data) {
+        // The SDK already shows the customer a message.
+        console.error("Payment error:", data.message);
+      },
+      onCancel: function (data) {
+        // Declined or canceled. The customer can pick another method.
+        console.warn("Payment canceled:", data.message);
+      },
+    })
+    .catch(function (error) {
+      console.error("Checkout failed to load:", error);
+    });
+</script>`}</CodeBlock>
+
+| Option | Value |
+|---|---|
+| [`merchant_id`](./reference.mdx#merchant_id) | Your Ottu merchant domain, without `https://`. The sandbox is `sandbox.ottu.net`. |
+| [`session_id`](./reference.mdx#session_id) | The `session_id` your server got in step 1. |
+| [`apiKey`](./reference.mdx#apikey) | Your **public** key. Never the private key. |
+| [`selector`](./reference.mdx#selector) | A CSS selector (or element id) for the container. |
+
+That's a working checkout. Every other option, such as `formsOfPayment`, `theme` or `applePayInit`, is optional; see the [API Reference](./reference.mdx).
+
+#### 4. Confirm the result with the webhook
+
+Callbacks run in the customer's browser, so treat them as a signal for the UI, not as proof of payment. Before you fulfil the order, confirm the result on your server from the [payment webhook](/developers/webhooks/payment-events) Ottu sends to your `webhook_url`, and [verify its signature](/developers/webhooks/verify-signatures).
+
+:::warning Some flows never call `onSuccess`
+Payments that leave your page don't fire `onSuccess`: a hosted card page (redirect), 3-D Secure by redirect, and Buy Now Pay Later (Tamara, Tabby, Taly). The customer comes back to your `redirect_url`. [Friend Pay](./friend-pay.mdx) fires no callbacks at all, because a different person pays. For all of these, the webhook is the only reliable result.
+:::
+
+## Best Practices
+
+- **Create a new session per checkout.** A session that is already paid, canceled or expired shows a closed-session message instead of the payment methods.
+- **Handle the `init()` rejection.** A failure to load never reaches `onError`; it only rejects the `init()` promise. See [Error Handling](./errors.mdx).
+- **Don't build a second error dialog.** The SDK shows the customer its own message on errors and declines. Use `onError` and `onCancel` for logging and analytics, or to re-enable parts of your page.
+- **Check option names carefully.** The SDK ignores unknown option names without an error, so a typo silently has no effect.
+- **Fulfil orders from the webhook only**, never from a callback alone.
+
+## FAQ
+
+<FAQ>
+<FAQItem question="Which API key goes in `apiKey`?">
+
+The **public** key. The private key is only for server-to-server calls such as creating the session. See [Authentication](/developers/getting-started/authentication#public-key).
+
+</FAQItem>
+<FAQItem question="Why does the checkout show 'Payment Completed' instead of payment methods?">
+
+The session is no longer payable: it was already paid, canceled or expired. Create a new session for each checkout attempt.
+
+</FAQItem>
+<FAQItem question="Why don't I see Apple Pay or Google Pay?">
+
+The wallet must be enabled for one of the session's `pg_codes`, the page must be HTTPS, and the customer's device and browser must support it. See [Apple Pay, Google Pay & Samsung Pay](./wallets.mdx).
+
+</FAQItem>
+<FAQItem question="Can I limit which payment methods appear?">
+
+Yes. Send only the `pg_codes` you want when creating the session, or pass [`formsOfPayment`](./reference.mdx#formsofpayment) to `init()`.
+
+</FAQItem>
+<FAQItem question="Do I need to reload the checkout after changing the amount?">
+
+Yes. Update the session with the Checkout API on your server, then call [`sdk.reload()`](./reference.mdx#reload) on the page.
+
+</FAQItem>
+</FAQ>
+
+## What's Next?
+
+- [API Reference](./reference.mdx): every `init()` option, method and callback.
+- [Cards & Saved Cards](./cards.mdx): the card form, saved cards and 3-D Secure.
+- [Apple Pay, Google Pay & Samsung Pay](./wallets.mdx): wallet setup and button styling.
+- [Error Handling](./errors.mdx): what the customer sees and what your callbacks receive.
+- [Migrating from v3](./migration-from-v3.mdx): moving from the Checkout SDK v3.
+- [Payment Webhooks](/developers/webhooks/payment-events): confirm every payment on your server.
