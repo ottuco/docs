@@ -87,7 +87,7 @@ The SDK can be used on devices running **iOS 15** or higher.
     ottu_flutter_checkout:
       git:
         url: https://github.com/ottuco/ottu-flutter.git
-        ref: 2.2.7
+        ref: 2.3.0
     ```
   </li>
   <li className="stepper-item">
@@ -397,6 +397,14 @@ displaySettings:paymentOptionsDisplaySettings
 ```
 
 To see the full function call, please refer the code snippet in the [Full Example](#full-example) section.
+
+#### **isSplitPayButton** _`boolean`_ _**`optional`**_
+
+This parameter controls button placement. It does not split the payment amount or create another payment session.
+
+**false** (default) - The native SDK displays checkout with its integrated Pay button.
+
+**true** - Checkout content and the native Pay button are displayed separately. [Ottu SDK - Flutter | PayButtonWidget](#paybuttonwidget)
 
 ### Preloading
 
@@ -1043,6 +1051,65 @@ extension CheckoutPlatformView: OttuDelegate {
     }
 }
 
+```
+
+## PayButtonWidget
+
+The arguments passed to this example must have `isSplitPayButton: true`. Attach your existing payment and verification callbacks to `OttuCheckoutWidget` as shown in the footer example below.
+
+```dart
+//Import the package's public API:
+import 'package:flutter/material.dart';
+import 'package:ottu_flutter_checkout/ottu_flutter_checkout.dart';
+
+class SplitCheckoutScreen extends StatelessWidget {
+  const SplitCheckoutScreen({
+    super.key,
+    required this.arguments,
+    required this.verifyPayment,
+    this.onSuccess,
+    this.onError,
+    this.onCancel,
+  });
+
+  final CheckoutArguments arguments; // Created with isSplitPayButton: true.
+  final VerifyPaymentDelegate verifyPayment;
+  final ValueChanged<String>? onSuccess;
+  final ValueChanged<String>? onError;
+  final ValueChanged<String>? onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Checkout')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text('Your order summary'),
+            const SizedBox(height: 16),
+            OttuCheckoutWidget(
+              arguments: arguments,
+              verifyPayment: verifyPayment,
+              successCallback: onSuccess,
+              errorCallback: onError,
+              cancelCallback: onCancel,
+            ),
+          ],
+        ),
+      ),
+      //Stick the PayButtonWidget to the bottom
+      bottomNavigationBar: const SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: PayButtonWidget(),
+        ),
+      ),
+    );
+  }
+}
 ```
 
 ## Examples

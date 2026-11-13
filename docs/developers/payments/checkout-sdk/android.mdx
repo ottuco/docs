@@ -57,8 +57,8 @@ The SDK is compatible with devices running Android 8 or higher (API version 26 o
       Include the Ottu Checkout SDK in your app-level `build.gradle.kts` file:
     </div>
 
-    ```swift
-    implementation("com.github.ottuco:ottu-android-checkout:2.2.6")
+    ```kotlin
+    implementation("com.github.ottuco:ottu-android-checkout:2.3.0")
     ```
   </li>
 </ol>
@@ -376,6 +376,17 @@ See [Prepayment Hook](#prepayment-hook) for details.
 
 See [Full Example](#full-example) for the reference.
 
+#### **isSplitPayButton** _`boolean`_ _`optional`_
+
+Separates the SDK payment button from the checkout fragment. Place the SDK's `PaymentButton` where it fits your checkout screen: after your order summary, beneath merchant content, or in a fixed footer. The checkout fragment still displays payment methods and collects payment details.
+
+“Split” refers to separating the button's placement. It does not split a payment amount or enable installment payments.
+
+**false** (default) - Includes the embedded Pay button. Keep your existing integration; no separate button is needed.
+
+**true** - Hides the embedded Pay button. Add the SDK PaymentButton to your own layout.
+
+See this sample of [Ottu SDK - Android | Split Payment Button](#split-payment-button)
 
 ### Preloading
 
@@ -856,6 +867,82 @@ checkoutFragment = Checkout.init(
     }
   }
 )
+```
+
+## Split Payment Button
+
+#### Define the Activity/Fragment layout in XML
+
+For a fixed footer, put the PaymentButton outside the scrolling content, constrain it to the bottom of your screen, and constrain the scrolling content above it.
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/paymentButton">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <FrameLayout
+                android:id="@+id/ottuPaymentView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Your order summary and delivery information" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Define the PaymentButton -->
+    <com.ottu.checkout.ui.payment.view.PaymentButton
+        android:id="@+id/paymentButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+```
+
+#### Define the Jetpack Compose layout
+
+You may place **PaymentButton** either in Scaffold as a bottomBar or in a Column
+
+```kotlin
+Scaffold(
+        modifier = modifier.fillMaxSize(),
+        bottomBar = {
+            AndroidView(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .imePadding()
+                    .padding(horizontal = 16.dp),
+                factory = { context ->
+                    PaymentButton(context)
+                },
+            )
+        },
+    ){
+      // your content there
+    }
 ```
 
 ## Error Reporting & Security
