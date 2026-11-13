@@ -21,7 +21,7 @@ export const autopayCustomerViewSteps: Step[] = [
     title: "The self-service page",
     description: (
       <>
-        Your customer opens the private link you send them. They see their status and billing
+        Your customer opens the private link you deliver. Ottu's emails link to this page too. They see their status and billing
         history, add or switch a card, pay an overdue balance, and cancel or undo a pending
         cancellation. More in <Link to="#customer-self-service-page">Customer Self-Service Page</Link>.
       </>

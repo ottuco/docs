@@ -928,11 +928,6 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "link",
-              label: "Things to know",
-              href: "/business/autopay#things-to-know",
-            },
-            {
-              type: "link",
               label: "FAQ",
               href: "/business/autopay#faq",
             },

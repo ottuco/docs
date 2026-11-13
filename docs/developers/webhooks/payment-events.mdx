@@ -172,7 +172,7 @@ Two blocks carry a `subscription_id`, and only one of them is trustworthy.
 - **`extra.autopay.subscription_id` is signed.** It is inside the HMAC, so once you have [verified the signature](/developers/webhooks/verify-signatures/) you can rely on it. Use this one to identify the subscription.
 - **The top-level `autopay` block is not signed.** It is added *after* the signature is computed, so it is not covered by the HMAC at all. Treat it as a display convenience.
 
-The top-level block is also fetched live from the AutoPay service while the webhook is being assembled, with a **2 second timeout**, and is **silently omitted** if that call times out or fails.
+Ottu also fills the top-level block live while it assembles the webhook, with a **2 second timeout**. The block is **silently omitted** if that lookup times out or fails.
 
 Two consequences worth designing for:
 

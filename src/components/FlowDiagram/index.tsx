@@ -6,19 +6,78 @@
 // browser. The server build renders a box of the same height (no layout jump)
 // plus a visually hidden text version of the diagram, so search, the MCP
 // server and screen readers still get the content.
-import React from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import BrowserOnly from "@docusaurus/BrowserOnly";
-import { flowHeight, sequenceHeight, storyFigureHeight } from "./layout";
+import {
+  STORY_PANEL_GAP,
+  STORY_PANEL_H,
+  flowHeight,
+  hasJourneys,
+  sequenceHeight,
+  storyDiagramHeight,
+  storySideAt,
+} from "./layout";
 import type { FlowProps, SequenceProps, StoryProps } from "./types";
 import styles from "./styles.module.css";
 
 export type * from "./types";
+export { default as CaptionLayout } from "./CaptionLayout";
+/** Classes for the text inside a caption panel (same look as the story panel). */
+export const captionClass = {
+  eyebrow: styles.panelEyebrow,
+  sub: styles.panelSub,
+  chips: styles.chips,
+  chip: styles.chip,
+  chipOn: styles.chipOn,
+};
+
+// Shown only while the diagram really overflows its box (any viewport).
+function ScrollHint({
+  figure,
+}: {
+  figure: React.RefObject<HTMLElement | null>;
+}): React.JSX.Element | null {
+  const [overflow, setOverflow] = useState(false);
+  useEffect(() => {
+    const fig = figure.current;
+    if (!fig) return;
+    // The diagram mounts after hydration, so look again whenever the figure
+    // changes or resizes.
+    let raf = 0;
+    const later = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(check);
+    };
+    const ro = new ResizeObserver(later);
+    const check = () => {
+      const box = fig.querySelector<HTMLElement>(`.${styles.scroller}`);
+      if (!box) return setOverflow(false);
+      ro.observe(box);
+      if (box.firstElementChild) ro.observe(box.firstElementChild);
+      setOverflow(box.scrollWidth > box.clientWidth + 16);
+    };
+    const mo = new MutationObserver(later);
+    mo.observe(fig, { childList: true, subtree: true });
+    check();
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      mo.disconnect();
+    };
+  }, [figure]);
+  return overflow ? (
+    <div className={styles.scrollHint} aria-hidden="true">
+      Swipe sideways to see the whole diagram →
+    </div>
+  ) : null;
+}
 
 function Shell({
   title,
   height,
   text,
   render,
+  reserve,
   narrowHeight,
 }: {
   title: string;
@@ -27,9 +86,15 @@ function Shell({
   narrowHeight?: number;
   text: React.ReactNode;
   render: () => React.ReactNode;
+  /** Room for the caption panel under the diagram, until the container is
+   * `sideAt` wide (then it sits beside it). Pure CSS, so the server render and
+   * the first client render agree with the final layout. */
+  reserve?: { height: number; sideAt: number };
 }): React.JSX.Element {
+  const id = `fdr${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+  const figure = useRef<HTMLElement>(null);
   return (
-    <figure className={styles.figure}>
+    <figure className={styles.figure} ref={figure}>
       {/* The full text version (steps, details, actors, journeys). Kept on
           purpose after the live diagram loads: it is the one place a screen
           reader gets everything at once, it names the figure, and search and
@@ -40,20 +105,29 @@ function Shell({
       </figcaption>
       <BrowserOnly
         fallback={
-          <div
-            className={styles.placeholder}
-            // The server can't know the screen: CSS picks the height.
-            style={
-              {
-                "--placeholder-h": `${height}px`,
-                "--placeholder-narrow-h": `${narrowHeight ?? height}px`,
-              } as React.CSSProperties
-            }
-          />
+          <>
+            <div
+              className={styles.placeholder}
+              // The server can't know the screen: CSS picks the height.
+              style={
+                {
+                  "--placeholder-h": `${height}px`,
+                  "--placeholder-narrow-h": `${narrowHeight ?? height}px`,
+                } as React.CSSProperties
+              }
+            />
+            {reserve ? (
+              <>
+                <style>{`@container (min-width: ${reserve.sideAt}px) { #${id} { display: none; } }`}</style>
+                <div id={id} style={{ height: reserve.height }} />
+              </>
+            ) : null}
+          </>
         }
       >
         {render}
       </BrowserOnly>
+      <ScrollHint figure={figure} />
     </figure>
   );
 }
@@ -89,9 +163,18 @@ export function StoryDiagram(input: StoryProps): React.JSX.Element {
   return (
     <Shell
       title={props.title}
-      height={storyFigureHeight(props)}
+      // Without the caption panel: `reserve` adds it where it sits below.
+      height={storyDiagramHeight(props)}
       // A story with side buttons puts them back on top on narrow screens.
-      narrowHeight={storyFigureHeight({ ...props, controls: "top" })}
+      narrowHeight={storyDiagramHeight({ ...props, controls: "top" })}
+      reserve={
+        hasJourneys(props)
+          ? {
+              height: STORY_PANEL_GAP + STORY_PANEL_H,
+              sideAt: storySideAt(props),
+            }
+          : undefined
+      }
       text={
         <>
           <ol>

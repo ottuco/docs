@@ -2,6 +2,7 @@
 // group box, the numbered edge label, the title, and the edge colours.
 import React, { useEffect } from "react";
 import Icon from "@mdi/react";
+import Link from "@docusaurus/Link";
 import {
   BaseEdge,
   EdgeLabelRenderer,
@@ -27,6 +28,9 @@ export type CardData = {
   tone?: Tone;
   num?: number;
   width?: number;
+  href?: string;
+  mono?: boolean;
+  hidden?: boolean;
 };
 
 const allSides = [Position.Top, Position.Right, Position.Bottom, Position.Left];
@@ -63,12 +67,18 @@ export function Handles({
 
 export function CardNode({ data }: NodeProps): React.JSX.Element {
   const d = data as CardData;
+  if (d.hidden)
+    return (
+      <div aria-hidden="true" style={{ width: d.width ?? 190, height: 54 }} />
+    );
   const cls = [styles.node, d.tone ? styles[d.tone] : ""].join(" ");
-  return (
+  const body = (
     <div
       className={cls}
       style={d.width ? { width: d.width } : undefined}
-      title={d.sub ? `${d.title}: ${d.sub}` : d.title}
+      // Story cards cut long text, so they keep the full text as a tooltip.
+      // Others show it all: a native tooltip would only float over the diagram.
+      title={d.num ? (d.sub ? `${d.title}: ${d.sub}` : d.title) : undefined}
     >
       <Handles />
       {d.icon ? (
@@ -81,9 +91,20 @@ export function CardNode({ data }: NodeProps): React.JSX.Element {
           {d.num ? <span className={styles.nodeNum}>{d.num}</span> : null}
           {d.title}
         </div>
-        {d.sub ? <div className={styles.nodeSub}>{d.sub}</div> : null}
+        {d.sub ? (
+          <div className={`${styles.nodeSub} ${d.mono ? styles.mono : ""}`}>
+            {d.sub}
+          </div>
+        ) : null}
       </span>
     </div>
+  );
+  return d.href ? (
+    <Link to={d.href} className={`${styles.cardLink} nodrag nopan`}>
+      {body}
+    </Link>
+  ) : (
+    body
   );
 }
 
