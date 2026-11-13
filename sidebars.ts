@@ -394,19 +394,52 @@ const sidebars: SidebarsConfig = {
                   ],
                 },
                 {
-                  type: "doc",
-                  id: "developers/payments/checkout-sdk/ios",
+                  type: "category",
                   label: "iOS",
+                  items: [
+                    {
+                      type: "doc",
+                      id: "developers/payments/checkout-sdk/ios-first-developer-journey",
+                      label: "First Developer Journey",
+                    },
+                    {
+                      type: "doc",
+                      id: "developers/payments/checkout-sdk/ios",
+                      label: "Full Documentation",
+                    },
+                  ],
                 },
                 {
-                  type: "doc",
-                  id: "developers/payments/checkout-sdk/android",
+                  type: "category",
                   label: "Android",
+                  items: [
+                    {
+                      type: "doc",
+                      id: "developers/payments/checkout-sdk/android-first-developer-journey",
+                      label: "First Developer Journey",
+                    },
+                    {
+                      type: "doc",
+                      id: "developers/payments/checkout-sdk/android",
+                      label: "Full Documentation",
+                    },
+                  ],
                 },
                 {
-                  type: "doc",
-                  id: "developers/payments/checkout-sdk/flutter",
+                  type: "category",
                   label: "Flutter",
+                  items: [
+                    {
+                      type: "doc",
+                      id: "developers/payments/checkout-sdk/flutter-first-developer-journey",
+                      label: "First Developer Journey",
+                    },
+                    {
+                      type: "doc",
+                      id: "developers/payments/checkout-sdk/flutter",
+                      label: "Full Documentation",
+                    },
+                  ],
                 },
               ],
             },

@@ -1,0 +1,283 @@
+---
+title: iOS First Developer Journey
+sidebar_label: First Developer Journey
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import CodeBlock from "@theme/CodeBlock";
+import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
+
+Follow these steps to go from a new iOS project to your first test payment with the Checkout SDK. For all options, see the full [iOS Checkout SDK](ios.mdx) documentation.
+
+## Prerequisites
+
+- The minimum supported iOS version is **14**. See [iOS Supported Versions](ios.mdx#ios-supported-versions) for the UIKit and SwiftUI demo apps.
+- `merchantId`: same as the domain address in API requests (for example `sandbox.ottu.net`).
+- Your [API public key](../../getting-started/authentication.md#public-key), used by the app for authorization.
+- Your [API private key](../../getting-started/authentication.md#api-key-auth), used only by your server. It should never be used on the client side.
+- The [PG code](/glossary/#term-pg-code) (`pg_code`) of the payment gateway to pay with. See [Payment Methods](../payment-methods.md) to find yours.
+- If your app should support **Apple Pay**: enable **Apple Pay capability** in `Xcode > Targets > Signing & Capabilities` and add **Apple Pay Merchant IDs (MID)** in project settings. See [Apple Pay Project Settings](ios.mdx#apple-pay-project-settings).
+
+## Installation
+
+Add Ottu SDK as a dependency in `Package.swift`:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/ottuco/ottu-ios.git", from: "2.2.12")
+]
+```
+
+Or in Xcode:
+
+1. Open your project
+2. Go to **Project > Targets > Package Dependencies**
+3. Add `ottu-ios` as a dependency
+
+To install with CocoaPods instead, see [CocoaPods](ios.mdx#cocoapods).
+
+## Create a Payment Session
+
+Your server calls the [Checkout API](../checkout-api.mdx) with your [private key](../../getting-started/authentication.md#api-key-auth). The response contains the `session_id`; send it to the app.
+
+<Tabs groupId="language">
+<TabItem value="curl" label="cURL">
+
+<CodeBlock language="bash" title="Create a session against your Sandbox gateway">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/' \\
+  --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
+  --header 'Content-Type: application/json' \\
+  --data-raw '{
+    "type": "e_commerce",
+    "pg_codes": ["<your-sandbox-pg_code>"],
+    "amount": "10.000",
+    "currency_code": "KWD",
+    "order_no": "SANDBOX-0001",
+    "webhook_url": "https://yourwebsite.com/webhook"
+  }'`}</CodeBlock>
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+<CodeBlock language="python" title="Create a session against your Sandbox gateway">{`import requests
+
+response = requests.post(
+    "${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/",
+    headers={"Authorization": "Api-Key <YOUR_API_KEY>"},
+    json={
+        "type": "e_commerce",
+        "pg_codes": ["<your-sandbox-pg_code>"],
+        "amount": "10.000",
+        "currency_code": "KWD",
+        "order_no": "SANDBOX-0001",
+        "webhook_url": "https://yourwebsite.com/webhook",
+    },
+    timeout=30,
+)
+response.raise_for_status()
+session_id = response.json()["session_id"]`}</CodeBlock>
+
+</TabItem>
+<TabItem value="nodejs" label="Node.js">
+
+<CodeBlock language="javascript" title="Create a session against your Sandbox gateway">{`const response = await fetch("${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/", {
+  method: "POST",
+  headers: {
+    Authorization: "Api-Key <YOUR_API_KEY>",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    type: "e_commerce",
+    pg_codes: ["<your-sandbox-pg_code>"],
+    amount: "10.000",
+    currency_code: "KWD",
+    order_no: "SANDBOX-0001",
+    webhook_url: "https://yourwebsite.com/webhook",
+  }),
+});
+const { session_id } = await response.json();`}</CodeBlock>
+
+</TabItem>
+<TabItem value="php" label="PHP">
+
+<CodeBlock language="php" title="Create a session against your Sandbox gateway">{`<?php
+$ch = curl_init("${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/");
+curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_HTTPHEADER => [
+        "Authorization: Api-Key <YOUR_API_KEY>",
+        "Content-Type: application/json",
+    ],
+    CURLOPT_POSTFIELDS => json_encode([
+        "type" => "e_commerce",
+        "pg_codes" => ["<your-sandbox-pg_code>"],
+        "amount" => "10.000",
+        "currency_code" => "KWD",
+        "order_no" => "SANDBOX-0001",
+        "webhook_url" => "https://yourwebsite.com/webhook",
+    ]),
+]);
+$session = json_decode(curl_exec($ch), true);
+$sessionId = $session["session_id"];`}</CodeBlock>
+
+</TabItem>
+</Tabs>
+
+If the call fails, the response has no `session_id`. A `401` means the key is missing or wrong, for example the public key was sent instead of the private key. A `400` means a required field such as `amount`, `currency_code` or `pg_codes` is missing or invalid. See [Error Codes](../../reference/error-codes.md) for the error response format.
+
+## Integrate the Checkout SDK
+
+Once the SDK is installed (via Swift Package Manager or CocoaPods), follow these steps to integrate it into your app.
+
+<ol className="stepper">
+  <li className="stepper-item">
+    <strong>Import the SDK</strong>
+    <div>
+      In your `ViewController.swift` (or any file responsible for presenting the SDK):
+    </div>
+
+    ```swift
+    import ottu_checkout_sdk
+    ```
+
+  </li>
+  <li className="stepper-item">
+    <strong>Conform to `OttuDelegate`</strong>
+    <div>Your view controller must implement the `OttuDelegate` protocol:</div>
+
+    ```swift
+    class ViewController: UIViewController, OttuDelegate
+    ```
+
+  </li>
+  <li className="stepper-item">
+    <strong>Declare a Checkout Member</strong>
+    <div>Inside your `ViewController`:</div>
+
+    ```swift
+    private var checkout: Checkout?
+    ```
+
+  </li>
+  <li className="stepper-item">
+    <strong>Initialize Checkout</strong>
+    <div>Inside `viewDidLoad`, initialize the Checkout SDK:</div>
+
+    ```swift
+    do {
+        self.checkout =
+            try Checkout(
+                sessionId: sessionId,
+                merchantId: merchantId,
+                apiKey: apiKey,
+                delegate: self
+            )
+    } catch
+    let error as LocalizedError {
+        // display an error here
+        return
+    } catch {
+        print("Unexpected error: \(error)")
+        return
+    }
+    ```
+
+    <strong>Required parameters</strong>
+    <ul>
+      <li>`sessionId` → ID of the created transaction</li>
+      <li>`merchantId` → Same as the domain address in API requests</li>
+      <li>`apiKey` → Public API key for authorization</li>
+      <li>`delegate` → Callback listener (usually `self`)</li>
+    </ul>
+
+    <strong>Recommended parameters</strong>
+    <ul>
+      <li>[`formsOfPayment`](ios.mdx#display-options) → Defines available payment methods</li>
+      <li>[`setupPreload`](ios.mdx#preloading) → Preloads transaction details for faster initialization</li>
+    </ul>
+  </li>
+  <li className="stepper-item">
+    <strong>Add the Payment View</strong>
+    <div>Still inside `viewDidLoad`, embed the payment view into your container:</div>
+
+    ```swift
+    if let paymentVC = self.checkout?.paymentViewController(),
+        let paymentView = paymentVC.view {
+
+            self.addChild(paymentVC)
+            paymentVC.didMove(toParent: self)
+            view.addSubview(paymentView)
+        }
+    ```
+
+    <div>
+      This is a **basic example** that adds the Checkout view without handling dimensions. For proper layout with constraints, refer to the demo app: [OttuPaymentsViewController.swift](https://github.com/ottuco/ottu-ios/blob/main/Example/OttuApp/OttuPaymentsViewController.swift#L91).
+    </div>
+  </li>
+</ol>
+
+## Callbacks
+
+In order `ViewController` to be compliant to `OttuDelegate`, add the following functions to `ViewController` class:
+
+```swift
+func errorCallback(_ data: [String : Any]?) {
+    navigationController?.popViewController(animated: true)
+    let alert = UIAlertController(title: "Error", message: data?.debugDescription ?? "", preferredStyle: .alert)
+    alert.addAction(UIAlertAction(title: "OK", style: .cancel))
+    self.present(alert, animated: true)
+}
+
+func cancelCallback(_ data: [String : Any]?) {
+    var message = ""
+
+    if let paymentGatewayInfo = data?["payment_gateway_info"] as? [String : Any],
+       let pgName = paymentGatewayInfo["pg_name"] as? String,
+       pgName == "kpay" {
+           message = paymentGatewayInfo["pg_response"].debugDescription
+    } else {
+        message = data?.debugDescription ?? ""
+    }
+
+    navigationController?.popViewController(animated: true)
+    let alert = UIAlertController(title: "Cancel", message: message, preferredStyle: .alert)
+    alert.addAction(UIAlertAction(title: "OK", style: .cancel))
+    self.present(alert, animated: true)
+}
+
+func successCallback(_ data: [String : Any]?) {
+    navigationController?.popViewController(animated: true)
+    let alert = UIAlertController(title: "Success", message: data?.debugDescription ?? "", preferredStyle: .alert)
+    alert.addAction(UIAlertAction(title: "OK", style: .cancel))
+    present(alert, animated: true)
+}
+```
+
+Callback behavior:
+
+- **Error** → Displays an error alert and navigates back
+- **Cancel** → Displays cancel reason (custom handling for `kpay`)
+- **Success** → Displays success confirmation
+
+:::warning
+In both `cancelCallback` and `errorCallback`, the SDK must be reinitialized, either on the same session or on a new session.
+:::
+
+See [Callbacks](ios.mdx#callbacks) for the data each callback receives.
+
+## Test a Payment
+
+Run the app and pay with a test card for the gateway in your session's `pg_codes`. When the payment succeeds, `successCallback` is called.
+
+- [Ottu Sandbox](../ottu-sandbox.mdx): a simulated gateway where the [test card](../ottu-sandbox.mdx#test-cards) decides the result.
+- [Test Cards](../sandbox.mdx): test cards for each payment gateway's own sandbox.
+
+## What's Next?
+
+- [Forms of payment](ios.mdx#display-options): choose which payment methods the checkout shows.
+- [Theme](ios.mdx#theme): change how the checkout looks.
+- [Setup preload](ios.mdx#preloading): pass the session details to the SDK so it starts faster.
+- [iOS Checkout SDK](ios.mdx): the full documentation.
