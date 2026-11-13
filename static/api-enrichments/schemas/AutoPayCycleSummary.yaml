@@ -1,0 +1,18 @@
+# Overrides for: components/schemas/AutoPayCycleSummary
+# current_cycle on Retrieve and Cancel. Same meanings as AutoPayBillingCycle.yaml (keep them in step).
+
+properties:
+  amount_due:
+    description: |
+      The amount charged or to be charged for this period, as a decimal string with 3 decimal places in every currency, for example `9.990` for USD.
+  status:
+    enum: [scheduled, processing, paid, failed, retry_scheduled, canceled, needs_triage]
+    description: |
+      Where this cycle stands. One of `scheduled` (not attempted yet), `processing` (a charge is in flight), `paid`, `retry_scheduled` (an attempt failed and the next automatic retry is queued), `failed` (every retry was used up, and the subscription is now `past_due`), `canceled` (canceled together with the subscription), or `needs_triage` (contact Ottu support).
+  failure_reason:
+    description: |
+      The gateway's message from the most recent failed attempt, with any card number masked. `null` if no attempt has failed. Ottu does not clear it when a later retry succeeds, so a `paid` cycle can still carry it.
+  charge_type:
+    enum: [cit, mit]
+    description: |
+      How the cycle is charged. `cit` is the customer-initiated first payment at checkout. `mit` is a charge Ottu makes against the saved card; it is already set on a scheduled cycle that has not been attempted. A cycle that the customer pays from the self-service page after it failed keeps `mit`. To tell whether a cycle was attempted, check `status`, not `charge_type`.
