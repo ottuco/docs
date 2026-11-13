@@ -22,20 +22,25 @@ import {
   type StoryStep,
 } from "@site/src/components/FlowDiagram";
 
+// The lanes follow the flow (the customer starts it); the chips start with
+// the reader's own part: Merchant's part, Ottu's part, Customer's part.
 const customer = {
   title: "Customer",
   icon: mdiAccount,
   chip: "Customer's part",
+  chipOrder: 2,
 };
 const merchant = {
   title: "You (merchant)",
   icon: mdiServer,
-  chip: "Your part",
+  chip: "Merchant's part",
+  chipOrder: 0,
 };
 const ottu = {
   title: "Ottu",
   icon: mdiShieldCheckOutline,
   chip: "Ottu's part",
+  chipOrder: 1,
 };
 
 const autopayLanes: StoryLane[] = [
