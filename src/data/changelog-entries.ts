@@ -10,6 +10,14 @@ export const changelogEntries: ChangelogEntry[] = [
       "POST /b/pbl/v2/card/, DELETE /b/pbl/v2/card/{token}/, POST /b/pbl/v2/payment-methods/ and the auto-debit endpoints answer 401 to the public key; call them from your server with the private key. The Checkout SDK now deletes saved cards through a session-scoped route.",
   },
   {
+    date: "2026-07-13",
+    category: "payments",
+    title: "OmanNet now supports Refund operations",
+    link: "/developers/operations",
+    description:
+      "Paid OmanNet transactions can now be refunded in full or in part through the Operations API.",
+  },
+  {
     date: "2026-03-16",
     category: "dashboard",
     title: "Connect Frontend redesign with updated navigation",
