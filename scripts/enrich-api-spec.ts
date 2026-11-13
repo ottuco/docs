@@ -101,6 +101,8 @@ interface SchemaPropertyOverride {
   description?: string;
   properties?: Record<string, SchemaPropertyOverride | string>;
   remove_enum?: boolean;
+  /** Values for a property the raw spec types as a plain string, e.g. a status. */
+  enum?: string[];
   format?: string;
   type?: string;
 }
@@ -385,7 +387,7 @@ function enrichSchemaProperties(
 
     let propModified = false;
 
-    if (!schemaProps[propName] && (overrideObj.description || overrideObj.format || overrideObj.type)) {
+    if (!schemaProps[propName] && (overrideObj.description || overrideObj.format || overrideObj.type || overrideObj.enum)) {
       warn(`Property '${fullPath}' not found in schema '${schemaName}' — override skipped`);
     } else {
       // Direct description override
@@ -398,6 +400,13 @@ function enrichSchemaProperties(
       if (overrideObj.format || overrideObj.type) {
         if (overrideObj.format) schemaProps[propName].format = overrideObj.format;
         if (overrideObj.type) schemaProps[propName].type = overrideObj.type;
+        propModified = true;
+      }
+
+      // Enum values the raw spec drops (e.g. Connect's proxy schema types the
+      // AutoPay `status` as a plain string; the AutoPay service has the enum).
+      if (overrideObj.enum) {
+        schemaProps[propName].enum = overrideObj.enum;
         propModified = true;
       }
     }
