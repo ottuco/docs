@@ -3,10 +3,9 @@ import {
   createSandboxSession,
   extractPgCodes,
   paymentMethodsBody,
-  sandboxSessionBody,
   type PaymentMethodsOptions,
 } from "@site/src/utils/sandbox";
-import { AUTOPAY_PLUGIN, buildAutoPayRequest } from "@site/src/utils/autoPayRequest";
+import { AUTOPAY_PLUGIN, buildAutoPayCreateBody } from "@site/src/utils/autoPayRequest";
 import { send, type ExecuteResult } from "../../send";
 import type { StepRun } from "../../scenario";
 
@@ -78,7 +77,7 @@ async function lookUpGateway(): Promise<StepRun> {
 
 export function newAutoPayRequest(pgCodes: string[]) {
   const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  return buildAutoPayRequest(`docs-${suffix}`, `cust_docs_${suffix}`, pgCodes);
+  return buildAutoPayCreateBody(`docs-${suffix}`, `cust_docs_${suffix}`, pgCodes);
 }
 
 // Bumped by Start over: a create that was in flight then must not come back.
@@ -201,12 +200,10 @@ export function createSubscription(pgCodes: string[]): Promise<StepRun> {
 
 async function newSubscription(pgCodes: string[]): Promise<StepRun> {
   const startedIn = epoch;
+  // The same body the Create tab runs, so the dialog shows the call a reader would make.
   const request = newAutoPayRequest(pgCodes);
-  const { type, pg_codes, ...extra } = request;
-  const options = { type, pg_codes, extra };
-  // Built here so the dialog shows the body that was sent (it has a random customer).
-  const body = sandboxSessionBody(options);
-  const created = await createSandboxSession(options, body);
+  const { type, pg_codes } = request;
+  const created = await createSandboxSession({ type, pg_codes }, request);
   const response = readResponse(created);
   // A checkout without the autopay block created no subscription: fail the
   // step, or the next call would run against {subscription_id}.
@@ -216,7 +213,7 @@ async function newSubscription(pgCodes: string[]): Promise<StepRun> {
   rememberSubscription(request, response, startedIn); // cancels it if stale
   // Tell the dialog this step did not give it a subscription to use.
   if (startedIn !== epoch) throw new Error("Started over while this was being created.");
-  return { body, response: created };
+  return { body: request, response: created };
 }
 
 // Each run leaves a monthly subscription on the sandbox merchant. Cancel it immediately, best effort.
