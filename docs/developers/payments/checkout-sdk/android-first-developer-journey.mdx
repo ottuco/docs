@@ -5,22 +5,31 @@ toc_min_heading_level: 2
 toc_max_heading_level: 3
 ---
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
 import CodeBlock from "@theme/CodeBlock";
 import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
-Follow these steps to go from a new Android project to your first test payment with the Checkout SDK. For all options, see the full [Android Checkout SDK](android.mdx) documentation.
+The [Checkout SDK](../) from Ottu is a Kotlin-based library designed to streamline the integration of an Ottu-powered [checkout process](../) into Android applications. This SDK allows for complete customization of the checkout experience, including both appearance and functionality, as well as the selection of accepted payment methods.
 
-## Prerequisites
+To integrate the Checkout SDK, it must be incorporated into the Android application and initialized with the following parameters:
 
-- The SDK is compatible with devices running Android 8 or higher (API version 26 or later).
-- `merchantId`: same as the domain used in HTTP requests (for example `sandbox.ottu.net`).
-- Your [API public key](../../getting-started/authentication.md#public-key), used by the app for authorization.
-- Your [API private key](../../getting-started/authentication.md#api-key-auth), used only by your server. It should never be used on the client side.
-- The [PG code](/glossary/#term-pg-code) (`pg_code`) of the payment gateway to pay with. See [Payment Methods](../payment-methods.md) to find yours.
+- [merchant_id](https://app.gitbook.com/s/su3y9UFjvaXZBxug1JWQ/#merchant_id-string)
+- [session_id](android.mdx#sessionid-string-required)
+- [API public key](../../../getting-started/authentication#public-key)
 
-## SDK Installation
+Additionally, various configuration options, such as accepted [payment methods](android.mdx#formsofpayment-array-optional) and [theme ](android.mdx#theme)styling for the checkout interface, can be specified to enhance the user experience.
+
+:::warning
+
+The [API private key](../../../getting-started/authentication#api-key-auth) should never be utilized on the client side; instead, use the [API public key](../../../getting-started/authentication#public-key). This is essential for maintaining the security of your application and safeguarding sensitive data.
+:::
+
+## Installation
+
+### Prerequisites
+
+The SDK is compatible with devices running Android 8 or higher (API version 26 or later).
+
+### Gradle Setup
 
 <ol className="stepper">
   <li className="stepper-item">
@@ -30,10 +39,9 @@ Follow these steps to go from a new Android project to your first test payment w
       section under `dependencyResolutionManagement`:
     </div>
 
-    ```kotlin
+    ```swift
     maven { url = uri("https://jitpack.io") }
     ```
-
   </li>
   <li className="stepper-item">
     <strong>Add the SDK Dependency</strong>
@@ -41,19 +49,21 @@ Follow these steps to go from a new Android project to your first test payment w
       Include the Ottu Checkout SDK in your app-level `build.gradle.kts` file:
     </div>
 
-    ```kotlin
+    ```swift
     implementation("com.github.ottuco:ottu-android-checkout:2.2.6")
     ```
-
   </li>
 </ol>
 
-## Create a Payment Session
+## Initialization
 
-Your server calls the [Checkout API](../checkout-api.mdx) with your [private key](../../getting-started/authentication.md#api-key-auth). The response contains the `session_id`; send it to the app together with the amount, because the Android SDK needs both.
+### Activate Payment Gateway Codes
 
-<Tabs groupId="language">
-<TabItem value="curl" label="cURL">
+Activate the payment gateways (`pg_codes`) you intend to use. Ensure all desired `pg_codes` are set to **active** status in your configuration. These codes are passed to the [Checkout API](../checkout-api.mdx) to determine which payment methods the customer can choose from.
+
+### Workflow
+
+The single most important concept: **with the Ottu Sandbox you choose the result of a payment in advance.** Every test starts by creating a session against your Sandbox `pg_code`:
 
 <CodeBlock language="bash" title="Create a session against your Sandbox gateway">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/' \\
   --header 'Authorization: Api-Key <YOUR_API_KEY>' \\
@@ -67,77 +77,7 @@ Your server calls the [Checkout API](../checkout-api.mdx) with your [private key
     "webhook_url": "https://yourwebsite.com/webhook"
   }'`}</CodeBlock>
 
-</TabItem>
-<TabItem value="python" label="Python">
-
-<CodeBlock language="python" title="Create a session against your Sandbox gateway">{`import requests
-
-response = requests.post(
-    "${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/",
-    headers={"Authorization": "Api-Key <YOUR_API_KEY>"},
-    json={
-        "type": "e_commerce",
-        "pg_codes": ["<your-sandbox-pg_code>"],
-        "amount": "10.000",
-        "currency_code": "KWD",
-        "order_no": "SANDBOX-0001",
-        "webhook_url": "https://yourwebsite.com/webhook",
-    },
-    timeout=30,
-)
-response.raise_for_status()
-session_id = response.json()["session_id"]`}</CodeBlock>
-
-</TabItem>
-<TabItem value="nodejs" label="Node.js">
-
-<CodeBlock language="javascript" title="Create a session against your Sandbox gateway">{`const response = await fetch("${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/", {
-  method: "POST",
-  headers: {
-    Authorization: "Api-Key <YOUR_API_KEY>",
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    type: "e_commerce",
-    pg_codes: ["<your-sandbox-pg_code>"],
-    amount: "10.000",
-    currency_code: "KWD",
-    order_no: "SANDBOX-0001",
-    webhook_url: "https://yourwebsite.com/webhook",
-  }),
-});
-const { session_id } = await response.json();`}</CodeBlock>
-
-</TabItem>
-<TabItem value="php" label="PHP">
-
-<CodeBlock language="php" title="Create a session against your Sandbox gateway">{`<?php
-$ch = curl_init("${OTTU_CONNECT_BASE_URL}/b/checkout/v1/pymt-txn/");
-curl_setopt_array($ch, [
-    CURLOPT_POST => true,
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_HTTPHEADER => [
-        "Authorization: Api-Key <YOUR_API_KEY>",
-        "Content-Type: application/json",
-    ],
-    CURLOPT_POSTFIELDS => json_encode([
-        "type" => "e_commerce",
-        "pg_codes" => ["<your-sandbox-pg_code>"],
-        "amount" => "10.000",
-        "currency_code" => "KWD",
-        "order_no" => "SANDBOX-0001",
-        "webhook_url" => "https://yourwebsite.com/webhook",
-    ]),
-]);
-$session = json_decode(curl_exec($ch), true);
-$sessionId = $session["session_id"];`}</CodeBlock>
-
-</TabItem>
-</Tabs>
-
-If the call fails, the response has no `session_id`. A `401` means the key is missing or wrong, for example the public key was sent instead of the private key. A `400` means a required field such as `amount`, `currency_code` or `pg_codes` is missing or invalid. See [Error Codes](../../reference/error-codes.md) for the error response format.
-
-## Integrate the Checkout SDK
+### Integration Guide
 
 <ol className="stepper">
   <li className="stepper-item">
@@ -155,12 +95,11 @@ If the call fails, the response has no `session_id`. A `401` means the key is mi
       However, for reference, the Ottu SDK requires the following imports:
     </div>
 
-    ```kotlin
+    ```swift
     import com.ottu.checkout.Checkout
     import com.ottu.checkout.network.model.payment.ApiTransactionDetails
     import com.ottu.checkout.ui.base.CheckoutSdkFragment
     ```
-
   </li>
   <li className="stepper-item">
     <strong>Extend the Activity Class</strong>
@@ -169,34 +108,37 @@ If the call fails, the response has no `session_id`. A `401` means the key is mi
       `AppCompatActivity`:
     </div>
 
-    ```kotlin
+    ```swift
     class MainActivity : AppCompatActivity() {
     ```
-
   </li>
   <li className="stepper-item">
     <strong>Declare Checkout Fragment Variable</strong>
     <div>Add a member variable for the `CheckoutSdkFragment` object:</div>
 
-    ```kotlin
+    ```swift
     private var checkoutFragment: CheckoutSdkFragment? = null
     ```
-
   </li>
   <li className="stepper-item">
     <strong>Initialize Checkout SDK</strong>
     <div>Inside the `onCreate` function, add the SDK initialization code:</div>
 
-    ```kotlin
+    ```swift
     // populate the fields below with correct values
     val merchantId = "" // your merchant base URL
     val sessionId = "" // the transaction ID
     val apiKey = "" // merchant public API Key
     val amount = 10.0 // decimal number
 
+    // List mode just to look better
+    val paymentOptionsDisplaySettings = Checkout.PaymentOptionsDisplaySettings(
+                Checkout.PaymentOptionsDisplayMode.List(5))
+
     // Builder class is used to construct an object passed to the SDK initializing function
     val builder = Checkout
       .Builder(merchantId!!, sessionId, apiKey!!, amount!!)
+        .paymentOptionsDisplaySettings(paymentOptionsDisplaySettings)
         .logger(Checkout.Logger.INFO)
         .build()
 
@@ -233,7 +175,6 @@ If the call fails, the response has no `session_id`. A `401` means the key is mi
       }
     }
     ```
-
   </li>
   <li className="stepper-item">
     <strong>(Optional) Implement Result and Error Dialogs</strong>
@@ -242,7 +183,7 @@ If the call fails, the response has no `session_id`. A `401` means the key is mi
       add their implementations as methods inside the same `MainActivity`:
     </div>
 
-    ```kotlin
+    ```swift
     private fun showResultDialog(result: JSONObject?, throwable: Throwable? = null) {
         val sb = StringBuilder()
 
@@ -286,13 +227,12 @@ If the call fails, the response has no `session_id`. A `401` means the key is mi
         .show()
     }
     ```
-
   </li>
   <li className="stepper-item">
     <strong>Clean Up Memory</strong>
     <div>To ensure proper resource management, override the `onDestroy` method:</div>
 
-    ```kotlin
+    ```swift
     override fun onDestroy() {
       super.onDestroy()
       if (isFinishing) {
@@ -300,7 +240,6 @@ If the call fails, the response has no `session_id`. A `401` means the key is mi
       }
     }
     ```
-
   </li>
   <li className="stepper-item">
     <strong>Verify Imports</strong>
@@ -311,13 +250,22 @@ If the call fails, the response has no `session_id`. A `401` means the key is mi
   </li>
 </ol>
 
-Not all parameters in `Checkout.init` are mandatory. The **required** parameters are:
+##### **Notes on Initialization Parameters**
+
+Not all parameters in `Checkout.init` are mandatory.\
+The **required** parameters are:
 
 - `sessionId` – ID of the created transaction
 - `merchantId` – Same as the domain used in HTTP requests
 - `apiKey` – Public API key used for authorization
 
-**Recommended optional parameters:** [`formsOfPayment`](android.mdx#display-options) and [`setupPreload`](android.mdx#preloading) (to reduce initialization time).
+**Recommended optional parameters:**
+
+- `formsOfPayment`
+- `setupPreload` (to reduce initialization time)
+
+`setupPreload` is an object taken from the transaction creation response. When passed to the SDK, it prevents it from requesting the transaction details on its own and therefore speed-ups the initialization process by several seconds. This `setupPreload` is a decoded JSON object to a `TransactionDetails` \
+For reference, check the example: [here](https://github.com/ottuco/ottu-android/blob/main/Example/app/src/main/java/com/ottu/CheckoutSampleActivity.kt)&#x20;
 
 ## Callbacks
 
@@ -330,21 +278,31 @@ The SDK triggers three main callbacks:
 Developers should customize the logic within these callbacks to handle transaction results appropriately.
 
 :::warning
+
 In both `cancelCallback` and `errorCallback`, the SDK must be reinitialized, either on the same session or on a new session.
 :::
 
-See [Callbacks](android.mdx#callbacks) for the data each callback receives.
+## HTTP Status Codes
 
-## Test a Payment
+| Code | Name | Description |
+|:----:|------|-------------|
+| 400 | Bad Request | Invalid request — missing required fields, invalid values, or malformed JSON. |
+| 401 | Unauthorized | Authentication failed — missing, invalid, or expired API key or credentials. |
 
-Run the app and pay with a test card for the gateway in your session's `pg_codes`. When the payment succeeds, `successCallback` is called.
+## Sandbox & Testing
 
-- [Ottu Sandbox](../ottu-sandbox.mdx): a simulated gateway where the [test card](../ottu-sandbox.mdx#test-cards) decides the result.
-- [Test Cards](../sandbox.mdx): test cards for each payment gateway's own sandbox.
+| Option | URL | Best for |
+|--------|-----|----------|
+| **Shared sandbox** | `sandbox.ottu.net` | Quick tests — all gateways active, public credentials available |
+| **Your own instance** | `<your-domain>.ottu.net` | Integration testing — verify your specific MID and gateway configuration |
 
-## What's Next?
+**Recommended workflow:** Start with the shared sandbox for rapid prototyping, then switch to your own instance to test with your actual gateway configuration before going live.
 
-- [Forms of payment](android.mdx#display-options): choose which payment methods the checkout shows.
-- [Theme](android.mdx#theme): change how the checkout looks.
-- [Setup preload](android.mdx#preloading): pass the session details to the SDK so it starts faster.
-- [Android Checkout SDK](android.mdx): the full documentation.
+
+- [**Ottu Sandbox**](/developers/payments/ottu-sandbox) — Simulate full payment outcomes (success, failure, refunds, tokens, recurring, authorizations) end-to-end with Ottu's built-in simulated gateway
+
+
+
+- [Android](/developers/payments/checkout-sdk/android/)
+- [**Payment Journey**](/developers/payments/payment-journey/) — Interactive integration walkthrough
+- [**Checkout API**](/developers/payments/checkout-api/) — Create your first payment transaction
