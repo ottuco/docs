@@ -209,6 +209,7 @@ export default function ApiReference({
   response,
   fullReference,
   showDescription = true,
+  title,
 }: {
   api: ApiSlug;
   /** The generated page's data: added by src/remark/apiReferenceData.ts, not written by hand. */
@@ -235,6 +236,8 @@ export default function ApiReference({
   fullReference?: { href: string; label: string };
   /** False drops the operation's own description: the page explains this use itself. */
   showDescription?: boolean;
+  /** The heading, when this use of a shared endpoint has its own name (an AutoPay create is a Checkout API call). */
+  title?: string;
 }): React.JSX.Element {
   if (Boolean(scenario) !== Boolean(run))
     throw new Error(
@@ -267,7 +270,7 @@ export default function ApiReference({
       )
     : view.responseFields;
   const responseVariants = response ? [] : view.responseVariants;
-  const heading = source?.title ?? api;
+  const heading = title ?? source?.title ?? api;
   // The anchor of the endpoint and the prefix of its fields' anchors.
   const name = run ?? api;
   const id = `${name}-api`;
