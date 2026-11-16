@@ -1,6 +1,8 @@
 ---
 title: Payment Events
 sidebar_label: Payment Events
+description: The webhook body Ottu sends when a payment is processed on webhook formats 1 and 2 (deprecated; format 3 is the event catalogue).
+displayed_sidebar: developerSidebar
 ---
 
 import SchemaEmbed from "@site/src/components/SchemaEmbed";
@@ -8,8 +10,8 @@ import PaymentRedirectSequence from "@site/src/diagrams/flow/PaymentRedirectSequ
 
 # Payment Notification
 
-:::note This page describes webhook formats 1 and 2
-If your account uses [format 3](/developers/webhooks/event-catalogue), your payments arrive inside an event envelope, and `data` is the payment itself, flat; see [Webhook Events (v3)](/developers/webhooks/event-catalogue) and [Migrating to v3](/developers/webhooks/migrate-to-v3). Each delivery also carries an [`Idempotency-Key`](/developers/webhooks/delivery-and-retries#idempotency-key) header with the event id on every format.
+:::warning Webhook formats 1 and 2 are deprecated
+This page describes the older webhook formats. New integrations use [format 3](/developers/webhooks/event-catalogue): every payment arrives as an event with the payment itself in `data`. In v3, `refund_queued` is named `refund_pending` and `invalided` is `invalidated`. To move an existing integration, see [Migrating to v3](/developers/webhooks/migrate-to-v3).
 :::
 
 Payment webhooks are specific to payment events and are triggered on multiple occasions:
@@ -65,10 +67,11 @@ Ottu notifies the [webhook_url](/developers/payments/checkout-api/) for all paym
 
 To ensure a smooth redirection of the payer back to the designated [redirect_url](/developers/payments/checkout-api/), it is essential that the `redirect_url` is accurately provided during the payment setup. Additionally, the [webhook_url](/developers/payments/checkout-api/) must respond with a status code of 200. This specific status code serves as a confirmation of successful interaction between the involved systems, ultimately guaranteeing the seamless progression of the redirection process as originally intended.
 
-**Redirect behavior based on webhook_url response:**\
--[ status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) 200, the customer will be redirected to [redirect_url](/developers/payments/checkout-api/).\
--[ status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) 201, the customer will be redirected to Ottu payment summary page.\
--[ status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) any other code, the customer will be redirected to Ottu payment summary page. For this particular case, Ottu can notify on the email, when Enable webhook notifications? Activated
+**Redirect behavior based on the `webhook_url` [status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status):**
+
+- `200`: the customer is redirected to your [`redirect_url`](/developers/payments/checkout-api/).
+- `201`: the customer stays on the Ottu payment summary page.
+- Any other code: the customer stays on the Ottu payment summary page, and Ottu emails the addresses in your webhook configuration when [error notification](/developers/webhooks#error-notification) (`notify_on_error`) is on.
 
 <PaymentRedirectSequence />
 
@@ -93,7 +96,7 @@ To ensure a smooth redirection of the payer back to the designated [redirect_url
    "gateway_account":"Credit-Card",
    "gateway_name":"Gateway_Example",
    "gateway_response":{
-      "It will contain the raw pg response sent by the pg to Ottu"
+      "_comment":"The raw response the payment gateway sent to Ottu, as JSON"
    },
    "initiator":{
       "email":"initaitor@example.com",
@@ -124,7 +127,7 @@ To ensure a smooth redirection of the payer back to the designated [redirect_url
 
 `extra` now always contains a `merchant_id` key holding your merchant domain, even when you sent no `extra` object when creating the session. Anything you did send in `extra` is preserved alongside it.
 
-`extra.merchant_id` is part of the [signed field set](/developers/webhooks/verify-signatures/#2-fields-for-signature), so it is covered by the `signature` and safe to trust once you have verified the payload. It is useful when one endpoint receives webhooks for several merchant accounts.
+`extra.merchant_id` is covered by the [`v2` header signature](/developers/webhooks/verify-signatures#verify-v2), which signs the whole raw body, so it is safe to trust once you have verified the header. It is not one of the 18 fields of the body `signature`. It is useful when one endpoint receives webhooks for several merchant accounts.
 
 ## The `autopay` block {#autopay-block}
 
@@ -166,11 +169,11 @@ The webhook usually arrives before Ottu has confirmed the payment, so the subscr
 | `next_billing_date` | Next scheduled billing date, or `null` when nothing further is scheduled. |
 | `event_type` | One of `cit_success`, `cit_failure`, `mit_success`, `mit_failure`, `card_updated`, or `null`. `null` means AutoPay could not yet tell whether the subscription's setup payment succeeded — it does **not** mean success. |
 
-:::danger The top-level `autopay` block is not signed — never trust it
-Two blocks carry a `subscription_id`, and only one of them is trustworthy.
+:::danger Identify the subscription by `extra.autopay.subscription_id`, never by the top-level `autopay` block
+Two blocks carry a `subscription_id`, and only one of them is reliable.
 
-- **`extra.autopay.subscription_id` is signed.** It is inside the HMAC, so once you have [verified the signature](/developers/webhooks/verify-signatures/) you can rely on it. Use this one to identify the subscription.
-- **The top-level `autopay` block is not signed.** It is added *after* the signature is computed, so it is not covered by the HMAC at all. Treat it as a display convenience.
+- **`extra.autopay.subscription_id`** is part of your own payment data. Once you have [verified the signature](/developers/webhooks/verify-signatures/) you can rely on it. Use this one to identify the subscription.
+- **The top-level `autopay` block** is covered by the `Ottu-Signature` `v2` header (it signs the raw body as sent) but **not** by the 18-field body `signature`, because it is added after that one is computed. It can also be missing (see below). Treat it as a display convenience.
 
 Ottu also fills the top-level block live while it assembles the webhook, with a **2 second timeout**. The block is **silently omitted** if that lookup times out or fails.
 
@@ -223,7 +226,7 @@ By understanding and interpreting these fields correctly, you can ensure accurat
 
 #### **6. Verifying the Signature**
 
-Every webhook payload includes a `signature` field — an HMAC-SHA256 hash that proves the payload came from Ottu and hasn’t been tampered with. **Always verify this signature before processing the payment.**
+Every delivery carries the `Ottu-Signature` header, `t=…,v2=…`: an HMAC-SHA256 over the raw body that proves the payload came from Ottu and was not changed. **Always verify it before processing the payment.** Formats 1 and 2 also carry a body `signature` field (an 18-field HMAC), which you can check as well.
 
 For implementation details and code examples in Python, PHP, Node.js, Java, C#, Ruby, and Go, see [Verify Signatures](/developers/webhooks/verify-signatures/).
 

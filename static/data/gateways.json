@@ -1424,8 +1424,7 @@
     ],
     "inquiryMinutes": 8,
     "operations": [
-      "purchase",
-      "refund"
+      "purchase"
     ],
     "integrationType": "redirect",
     "category": "local_debit",

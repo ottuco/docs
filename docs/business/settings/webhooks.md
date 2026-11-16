@@ -28,12 +28,12 @@ For technical details on webhook payloads, signatures, and integration, see the 
 | **Notify on Error** | When checked, sends an email notification if an error occurs while delivering a webhook                                                                                                           |
 | **Email List**      | The email addresses that receive webhook error notifications                                                                                                                                      |
 | **Timeout**         | How long (in seconds) Ottu waits for a response from your server before considering the attempt failed                                                                                            |
-| **Retries**         | The number of retry attempts if the first webhook delivery fails. Requires **Enable retry webhook mechanism** to be checked                                                                       |
+| **Retries**         | The total number of delivery attempts (the first try included) when your server times out, on webhook formats 1 and 2. Requires **Enable retry webhook mechanism** to be checked. Format 3 has its own fixed [retry schedule](/developers/webhooks/delivery-and-retries#retry-schedule) |
 | **Backoff factor**  | The wait time (in seconds) between retry attempts                                                                                                                                                 |
 
 ### Retry Example
 
-Consider a scenario where your server is down for 30 seconds, with these settings: **timeout = 20s**, **retries = 3**, **backoff factor = 5s**.
+Consider a scenario where your server is down for 20 seconds, with these settings: **timeout = 20s**, **retries = 3**, **backoff factor = 5s**.
 
 **First attempt:**
 
@@ -46,7 +46,7 @@ _Total time elapsed: 25 seconds._
 **Second attempt:**
 
 1. Ottu sends the webhook request again.
-2. Your server is back online (30 seconds have passed) and responds successfully.
+2. Your server is back online (25 seconds have passed) and responds successfully.
 
 _The webhook is delivered on the second attempt._
 
@@ -54,7 +54,7 @@ _The webhook is delivered on the second attempt._
 
 | Field                                                              | Description                                                                                                                |
 | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| **Version**                                                        | The webhook API version                                                                                                    |
+| **Version** | The webhook format: 1, 2 or 3. Choose 3 for the current format; see [Dashboard setup](/developers/webhooks/setup) and [Migrating to v3](/developers/webhooks/migrate-to-v3) before you change it on a live account |
 | **Enable webhook notifications**                                   | Master switch to activate webhook notifications                                                                            |
 | **Enable retry webhook mechanism**                                 | Activates the retry logic described above                                                                                  |
 | **Operations webhook_url**                                         | A dedicated URL for receiving [operation notifications](/developers/webhooks/operation-events/) (refunds, voids, captures) |

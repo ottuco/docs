@@ -9,6 +9,10 @@ import FAQ, { FAQItem } from '@site/src/components/FAQ';
 
 Ottu's APIs return standard HTTP status codes and structured error responses. This page is the canonical reference for all error codes across the platform.
 
+:::note Operations v3 and Payment Status Query v3 use a different format
+The v3 APIs answer every error as `{type, status, request_id, errors: [{code, detail, attr, doc_url}]}`. Every code is documented, with what to do, on the [Error Reference (v3)](/errors).
+:::
+
 ## Error Response Format
 
 All error responses follow this JSON structure:

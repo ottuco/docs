@@ -1,0 +1,120 @@
+{
+  "id": "evt_01JABCDEFGHJKMNPQRSTVWXYZA",
+  "event": "payment.canceled",
+  "created": "2026-10-22T10:15:00Z",
+  "version": 3,
+  "is_sandbox": true,
+  "merchant_id": "merchant.ottu.net",
+  "initiator": {
+    "kind": "api_key",
+    "id": null,
+    "first_name": null,
+    "last_name": null,
+    "email": null
+  },
+  "data": {
+    "session_id": "golden-session-1",
+    "order_no": "ORDER-1",
+    "payment_type": "one_off",
+    "language": "en",
+    "amount": "100.000",
+    "currency": "KWD",
+    "status": "canceled",
+    "operation": "purchase",
+    "processed_at": "2026-10-22T10:15:00Z",
+    "result": "canceled",
+    "message": null,
+    "channel": null,
+    "form_of_payment": null,
+    "card": {
+      "number": null,
+      "brand": null,
+      "scheme": null,
+      "bin": null,
+      "expiry_month": null,
+      "expiry_year": null,
+      "name_on_card": null,
+      "token": null,
+      "cvv_required": null,
+      "is_preferred": null,
+      "agreements": []
+    },
+    "connector": {
+      "code": null,
+      "identifier": null,
+      "processor": null,
+      "reference_number": null,
+      "currency": null,
+      "amount": null,
+      "exchange_rate": null,
+      "fee": null,
+      "total": null,
+      "params": {},
+      "responses": []
+    },
+    "totals": {
+      "paid": "0.000",
+      "settled": "0.000",
+      "refunded": "0.000",
+      "refund_pending": "0.000",
+      "voided": "0.000",
+      "remaining": "100.000"
+    },
+    "customer": {
+      "id": "CUST-1",
+      "email": "customer1@example.com",
+      "first_name": "Casey",
+      "last_name": "Customer",
+      "phone": "+96550000000",
+      "phone_2": null,
+      "birthdate": null
+    },
+    "billing_address": {
+      "line1": "1 Golden Street",
+      "line2": "Floor 2",
+      "city": "Kuwait City",
+      "state": "Capital",
+      "country": "KW",
+      "postal_code": "12345"
+    },
+    "shipping_address": {
+      "first_name": null,
+      "last_name": null,
+      "email": null,
+      "phone": null,
+      "line1": null,
+      "line2": null,
+      "city": null,
+      "state": null,
+      "country": null,
+      "postal_code": null
+    },
+    "agreement": {
+      "id": null,
+      "type": null,
+      "frequency": null,
+      "amount_variability": null,
+      "cycle_interval_days": null,
+      "total_cycles": null,
+      "start_date": null,
+      "expiry_date": null,
+      "max_amount_per_cycle": null,
+      "seller": {
+        "name": null,
+        "short_name": null,
+        "category_code": null
+      }
+    },
+    "wallets": [],
+    "extra": {},
+    "created_by": {
+      "kind": "user",
+      "id": 1,
+      "first_name": "Golden",
+      "last_name": "User",
+      "email": "golden-user@example.com"
+    },
+    "created_at": "2026-10-22T09:50:00Z",
+    "updated_at": "2026-10-22T10:15:00Z"
+  }
+}

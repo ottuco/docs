@@ -2,6 +2,7 @@
 title: Operations
 sidebar_label: Operations
 hide_table_of_contents: true
+displayed_sidebar: developerSidebar
 ---
 
 import Tabs from '@theme/Tabs';
@@ -11,6 +12,10 @@ import FAQ, { FAQItem } from '@site/src/components/FAQ';
 import OperationsWorkflow from "@site/src/diagrams/flow/OperationsWorkflow";
 
 # Operations
+
+:::warning Operations v2 is deprecated
+Use [Operations v3](/developers/operations-v3): one endpoint per operation, a required `Idempotency-Key` on capture, refund and void, and one error format. In v3, `refund_queued` is named `refund_pending` and `invalided` is `invalidated`. See [Differences from v2](/developers/operations-v3#differences-from-v2).
+:::
 
 The Operations API lets you perform subsequent actions on existing payment transactions — refund a completed payment, cancel an unpaid link, capture an authorized amount, or void an authorization. Ottu provides a **unified API**: you send the same payload structure regardless of the payment gateway, and Ottu handles the gateway-specific communication.
 
@@ -275,7 +280,7 @@ Select the operation to see its example payload and the full interactive API sch
     [API-Key](/developers/getting-started/authentication#api-key-auth) grants superadmin privileges. [Basic Authentication](/developers/getting-started/authentication#basic-auth) allows granular permission control per operation. Use Basic Auth for production access control.
   </FAQItem>
   <FAQItem question="What permissions are required?">
-    Depends on the operation: `payment.capture` for capture, `payment.expire` for expire, etc. See [permission codes](#permission-codes-for-each-operation).
+    Depends on the operation: `payment.capture` for capture, `payment.expire` for expire, etc. Each endpoint in the [API Reference](#api-reference) lists its own under **Permissions**.
   </FAQItem>
   <FAQItem question="What happens when a refund is requested via the API?">
     The request goes directly to the payment gateway — the maker-checker approval flow is not activated for API refunds. The maker-checker flow only applies to refunds initiated via the Ottu dashboard.
