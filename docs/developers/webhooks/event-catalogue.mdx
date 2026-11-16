@@ -6,6 +6,7 @@ toc_min_heading_level: 2
 toc_max_heading_level: 3
 ---
 
+import EventObject from "@site/src/components/EventObject";
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
@@ -157,18 +158,9 @@ http_response_code(200);
 
 ### The envelope {#envelope}
 
-Every format 3 body is a JSON object with exactly these top-level keys:
+Every format 3 body is one JSON object: the envelope keys at the top, and the payment itself in `data`. Open a field to see its child attributes, and pick an event on the right to see a real body.
 
-| Key | Type | Meaning |
-|---|---|---|
-| `id` | string | The event id, `evt_` followed by 26 characters. Unique per event and **identical** on every retry and on every URL that receives the event. Also sent as the [`Idempotency-Key`](/developers/webhooks/delivery-and-retries#idempotency-key) header. |
-| `event` | string | The event name, such as `payment.paid`. See the [catalogue](#catalogue). |
-| `created` | string | When Ottu recorded the event, UTC, `YYYY-MM-DDTHH:MM:SSZ`. |
-| `version` | integer | Always `3` for this format. |
-| `is_sandbox` | boolean | `true` when the payment runs on a [sandbox](/glossary/#term-sandbox) [gateway](/glossary/#term-payment-gateway). See [`is_sandbox`](#is-sandbox). |
-| `merchant_id` | string | Your merchant domain, for example `merchant.ottu.net`. |
-| `initiator` | object | Who caused this event, as an [actor](#actor). |
-| `data` | object | The payment, flat. See [The `data` object](#data-keys). |
+<EventObject />
 
 `is_sandbox` and `merchant_id` live only in the envelope; `data` does not repeat them.
 
@@ -243,60 +235,15 @@ How to read the matrix:
 
 ### The `data` object {#data-keys}
 
-`data` is one flat object with the same keys in **every** `payment.*` event, in three groups that never share a name. Every key is always present; what is empty is `null`, an empty object (`{}`), or an empty list (`[]`), never a dropped key and never `""`.
+`data` is one flat object with the same keys in **every** `payment.*` event, each described in [the event object](#envelope) above. Its keys fall in three groups that never share a name:
 
-#### The payment (same in every event)
+- **The payment**, the same in every event: `session_id`, `order_no`, `amount`, `currency`, `totals`, `customer`, the addresses, `agreement`, `wallets`, `extra`, `created_by`, `created_at`, `updated_at`.
+- **What happened:** `status`, `operation`, `processed_at`.
+- **The attempt:** `result`, `message`, `channel`, `form_of_payment`, `card`, `connector`.
 
-| Key | Type | Meaning |
-|---|---|---|
-| `session_id` | string | The payment you created, on every event, including capture, refund and void events. |
-| `order_no` | string or null | Your order reference. |
-| `payment_type` | string or null | For example `one_off`, `auto_debit`, `save_card`. |
-| `language` | string or null | The payment's language. |
-| `amount` | string | The session's original amount, with the currency's decimals (`"10.000"` KWD, `"100.00"` QAR). |
-| `currency` | string | ISO 4217 code of the session. |
-| `totals` | object | `{paid, settled, refunded, refund_pending, voided, remaining}` as money strings in `currency`, fees excluded. `remaining` is what is still due. |
-| `customer` | object | `{id, email, first_name, last_name, phone, phone_2, birthdate}`; `birthdate` is `YYYY-MM-DD`. |
-| `billing_address` | object | `{line1, line2, city, state, country, postal_code}`. |
-| `shipping_address` | object | The billing keys plus `first_name`, `last_name`, `email`, `phone`. |
-| `agreement` | object | `{id, type, frequency, amount_variability, cycle_interval_days, total_cycles, start_date, expiry_date, max_amount_per_cycle, seller}`; `seller` is `{name, short_name, category_code}`. All `null` when the payment has no agreement. |
-| `wallets` | list | One entry per wallet leg of a split payment, each with the attempt keys plus `operation` and `processed_at`. `[]` when none. |
-| `extra` | object | Your own `extra` data, without `merchant_id`. A card number in it is cut. `{}` when none. |
-| `created_by` | object | The [actor](#actor) who created the payment. |
-| `created_at` | string | When the payment was created, ISO 8601 UTC. |
-| `updated_at` | string | When the payment was last modified, ISO 8601 UTC. |
-
-#### What happened
-
-| Key | Type | Meaning |
-|---|---|---|
-| `status` | string | The status of the transaction the event is about. See the [catalogue](#catalogue). |
-| `operation` | string | Never `null`. The payment's own (`purchase`, `authorize`), or `capture`, `refund`, `void` on a child's event. |
-| `processed_at` | string | When the transaction reached `status`, ISO 8601 UTC. |
-
-#### The attempt
-
-| Key | Type | Meaning |
-|---|---|---|
-| `result` | string or null | The attempt state the [catalogue](#catalogue) gives. |
-| `message` | string or null | Text of the attempt. A successful or rejected attempt carries one of the [texts below](#messages) in the payment's language; otherwise it is the attempt's own message. |
-| `channel` | string or null | `hosted`, `web_sdk`, `mobile_sdk`, `api`. Payer tries only. |
-| `form_of_payment` | string or null | `redirect`, `card`, `token`, `apple_pay`, `google_pay`, `samsung_pay`, `stc_pay`, `urpay`, `wallet`. Payer tries only. |
-| `card` | object | The card used in this attempt: `{number, brand, scheme, bin, expiry_month, expiry_year, name_on_card, token, cvv_required, is_preferred, agreements}`. `number` shows the first six and last four digits with the rest hidden; `token` is set when the card is saved. All `null` (and `agreements` `[]`) when there is no card. |
-| `connector` | object | Everything at the gateway, below. |
+Every key is always present; what is empty is `null`, an empty object (`{}`), or an empty list (`[]`), never a dropped key and never `""`.
 
 `channel`, `form_of_payment` and `card` come only from a real gateway attempt that changed the transaction; otherwise they are `null`. A bookkeeping action Ottu records without a gateway (an expiry, a cancel with no attempt, a cash acknowledgement) never shows as a gateway, and an event never looks up an earlier attempt.
-
-**`connector`** is `{code, identifier, processor, reference_number, currency, amount, exchange_rate, fee, total, params, responses}`:
-
-| Key | Meaning |
-|---|---|
-| `code` | Your gateway configuration code. |
-| `identifier`, `processor` | The gateway connector and the processor behind it. |
-| `reference_number` | The attempt id Ottu sends to the gateway. |
-| `currency`, `amount`, `fee`, `total`, `exchange_rate` | The event's money in the **gateway's** currency: `total` is `amount + fee`, and `exchange_rate` converts the session currency to the gateway currency. On a converted payment, `amount` and `totals` at the top level stay in the session currency. |
-| `params` | Normalised gateway attributes, each with a bilingual label: `{"rrn": {"label": {"en": "RRN", "ar": "الرقم المرجعي للاسترجاع (RRN)"}, "value": "530812345678"}}`. See [PG Params](/developers/webhooks/pg-params). `{}` when none. |
-| `responses` | Every gateway call of the attempt, oldest first, as `{step, at, body}`. `step` is `pay`, `capture`, `refund`, `void`, `queue`, `approve` or `reject` (a queued refund shows `queue` then `approve` or `reject`). A card number in `body` is cut. `[]` when none. |
 
 :::warning Card numbers are never sent in the clear
 In `responses`, `extra` and `params`, a card number is cut to its first six and last four digits wherever it sits, and a key that names a card number (such as `card_number` or `pan`) holding 13 to 19 digits is cut whatever its checksum, so sandbox test numbers are cut too. A bare last four digits is kept, and gateway transaction, payment and receipt ids are never touched.

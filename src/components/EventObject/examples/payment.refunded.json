@@ -1,0 +1,50 @@
+{
+  "id": "evt_01JABCDEFGHJKMNPQRSTVWXYZ1",
+  "event": "payment.refunded",
+  "created": "2026-10-22T11:30:00Z",
+  "version": 3,
+  "is_sandbox": true,
+  "merchant_id": "merchant.ottu.net",
+  "initiator": {
+    "kind": "user",
+    "id": 1,
+    "first_name": "Golden",
+    "last_name": "User",
+    "email": "golden-user@example.com"
+  },
+  "data": {
+    "session_id": "golden-session-1",
+    "order_no": "ORDER-1",
+    "amount": "100.000",
+    "currency": "KWD",
+    "status": "refunded",
+    "operation": "refund",
+    "processed_at": "2026-10-22T11:30:00Z",
+    "result": "success",
+    "message": "Refund successful",
+    "connector": {
+      "code": "mpgs",
+      "reference_number": "GOLDENATT2",
+      "currency": "KWD",
+      "amount": "30.000",
+      "total": "30.000",
+      "responses": [
+        {
+          "step": "refund",
+          "at": "2026-10-22T11:30:00Z",
+          "body": {
+            "refunded": "success"
+          }
+        }
+      ]
+    },
+    "totals": {
+      "paid": "100.000",
+      "settled": "100.000",
+      "refunded": "30.000",
+      "refund_pending": "0.000",
+      "voided": "0.000",
+      "remaining": "0.000"
+    }
+  }
+}

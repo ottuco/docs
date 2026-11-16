@@ -82,15 +82,18 @@ export function ExamplePanel({
 /** The documented response examples alone: an endpoint the docs can't run. */
 export default function ResponseExamplesBox({
   examples,
+  title = "Response",
 }: {
   examples: ResponseExamples;
+  /** The box head's label; an object page shows "Example" instead. */
+  title?: string;
 }): React.JSX.Element | null {
   const { example, picker } = useExample(examples);
   if (!example) return null;
   return (
     <div className={styles.box}>
       <div className={styles.boxHead}>
-        <span className={styles.boxTitle}>Response</span>
+        <span className={styles.boxTitle}>{title}</span>
         {picker}
       </div>
       <ExamplePanel example={example} maxHeight={ALONE_HEIGHT} />

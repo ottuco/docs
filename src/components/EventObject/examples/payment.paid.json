@@ -1,0 +1,136 @@
+{
+  "id": "evt_01JABCDEFGHJKMNPQRSTVWXYZ0",
+  "event": "payment.paid",
+  "created": "2026-10-22T10:00:00Z",
+  "version": 3,
+  "is_sandbox": true,
+  "merchant_id": "merchant.ottu.net",
+  "initiator": {
+    "kind": "customer",
+    "id": "CUST-1",
+    "first_name": null,
+    "last_name": null,
+    "email": null
+  },
+  "data": {
+    "session_id": "golden-session-1",
+    "order_no": "ORDER-1",
+    "payment_type": "one_off",
+    "language": "en",
+    "amount": "100.000",
+    "currency": "KWD",
+    "status": "paid",
+    "operation": "purchase",
+    "processed_at": "2026-10-22T10:00:00Z",
+    "result": "success",
+    "message": "Payment successful",
+    "channel": "hosted",
+    "form_of_payment": "card",
+    "card": {
+      "number": "4111 11** **** 1111",
+      "brand": "visa",
+      "scheme": "VISA",
+      "bin": "411111",
+      "expiry_month": "05",
+      "expiry_year": "2030",
+      "name_on_card": "CASEY CUSTOMER",
+      "token": null,
+      "cvv_required": true,
+      "is_preferred": false,
+      "agreements": []
+    },
+    "connector": {
+      "code": "mpgs",
+      "identifier": "mpgs",
+      "processor": "mpgs",
+      "reference_number": "GOLDENATT1",
+      "currency": "KWD",
+      "amount": "100.000",
+      "exchange_rate": "1",
+      "fee": "0.000",
+      "total": "100.000",
+      "params": {
+        "auth_code": {
+          "label": {
+            "en": "Auth Code",
+            "ar": "رمز التفويض"
+          },
+          "value": "A83921"
+        }
+      },
+      "responses": [
+        {
+          "step": "pay",
+          "at": "2026-10-22T10:00:00Z",
+          "body": {
+            "result": "SUCCESS"
+          }
+        }
+      ]
+    },
+    "totals": {
+      "paid": "100.000",
+      "settled": "100.000",
+      "refunded": "0.000",
+      "refund_pending": "0.000",
+      "voided": "0.000",
+      "remaining": "0.000"
+    },
+    "customer": {
+      "id": "CUST-1",
+      "email": "customer1@example.com",
+      "first_name": "Casey",
+      "last_name": "Customer",
+      "phone": "+96550000000",
+      "phone_2": null,
+      "birthdate": null
+    },
+    "billing_address": {
+      "line1": "1 Golden Street",
+      "line2": "Floor 2",
+      "city": "Kuwait City",
+      "state": "Capital",
+      "country": "KW",
+      "postal_code": "12345"
+    },
+    "shipping_address": {
+      "first_name": null,
+      "last_name": null,
+      "email": null,
+      "phone": null,
+      "line1": null,
+      "line2": null,
+      "city": null,
+      "state": null,
+      "country": null,
+      "postal_code": null
+    },
+    "agreement": {
+      "id": null,
+      "type": null,
+      "frequency": null,
+      "amount_variability": null,
+      "cycle_interval_days": null,
+      "total_cycles": null,
+      "start_date": null,
+      "expiry_date": null,
+      "max_amount_per_cycle": null,
+      "seller": {
+        "name": null,
+        "short_name": null,
+        "category_code": null
+      }
+    },
+    "wallets": [],
+    "extra": {},
+    "created_by": {
+      "kind": "user",
+      "id": 1,
+      "first_name": "Golden",
+      "last_name": "User",
+      "email": "golden-user@example.com"
+    },
+    "created_at": "2026-10-22T09:50:00Z",
+    "updated_at": "2026-10-22T10:00:00Z"
+  }
+}
