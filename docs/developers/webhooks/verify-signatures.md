@@ -515,9 +515,9 @@ Those five payment responses share the payment-webhook body shape, so they also 
 | `signature` | The [body signature](#body-signature) of the payload. |
 | `ottu_signature` | `t=<t>,v1=<hex>`: the [`v1` header value](#header-v1) for this payload and `t`. |
 
-<CodeBlock language="bash" title="Sign a payload with a fixed t">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/sign/?t=1792417440' \
-  --header 'Authorization: Api-Key YOUR_API_KEY' \
-  --header 'Content-Type: application/json' \
+<CodeBlock language="bash" title="Sign a payload with a fixed t">{`curl --location '${OTTU_CONNECT_BASE_URL}/b/pbl/v2/sign/?t=1792417440' \\
+  --header 'Authorization: Api-Key YOUR_API_KEY' \\
+  --header 'Content-Type: application/json' \\
   --data '{"amount": "86.000", "currency_code": "KWD", "customer_first_name": "example-customer"}'`}</CodeBlock>
 
 <CodeBlock language="json" title="Response">{`{

@@ -196,7 +196,8 @@ function templateLiteral(code: string): string {
     const ch = code[i];
     if (ch === "\\" && i + 1 < code.length) {
       const next = code[i + 1];
-      out += next === "n" ? "\n" : next === "t" ? "\t" : next;
+      // A backslash before a line break is a line continuation in JavaScript: both disappear.
+      if (next !== "\n") out += next === "n" ? "\n" : next === "t" ? "\t" : next;
       i += 1;
     } else if (ch === "$" && code[i + 1] === "{") {
       const end = code.indexOf("}", i);

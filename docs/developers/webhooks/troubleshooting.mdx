@@ -213,7 +213,7 @@ Route::post('/webhooks/ottu', function (Illuminate\Http\Request $request) {
 ```java title="OttuWebhookController.java"
 @PostMapping("/webhooks/ottu")
 public ResponseEntity<Void> receive(@RequestBody byte[] body,
-                                    @RequestHeader(value = "Ottu-Signature", defaultValue = "") String signature) {
+                                    @RequestHeader(value = "Ottu-Signature", defaultValue = "") String signature) throws Exception {
     // byte[] is the exact bytes. Avoid a DTO here: Jackson parses the body and the bytes are lost.
     boolean ok = OttuSignature.verifyOttuSignature(body, signature, hmacKey); // the Java sample on Verify Signatures
     return ResponseEntity.status(ok ? 200 : 401).build();
