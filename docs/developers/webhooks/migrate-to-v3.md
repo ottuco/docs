@@ -9,7 +9,7 @@ import FAQ, { FAQItem } from "@site/src/components/FAQ";
 
 # Webhook Formats and Migrating to v3
 
-Ottu has three webhook **formats**. Your account uses exactly one. **Ottu never switches a merchant to a new format on its own**: you keep receiving the format you have today until you ask for a change. This page explains what format 3 changes, maps every format 1 and 2 field to its place in format 3, and gives a step-by-step migration that you can test before anything changes for your customers.
+Ottu has three webhook **formats**. Your account uses exactly one. **Ottu never switches a merchant to a new format on its own**: you keep receiving the format you have today until **Version** is changed in [Webhook Config](/developers/webhooks/setup). This page explains what format 3 changes, maps every format 1 and 2 field to its place in format 3, and gives a step-by-step migration that you can test before anything changes for your customers.
 
 ## When to Use
 
@@ -41,7 +41,7 @@ The shortest safe path:
 
 1. **Update the receiver** using [Webhook Events (v3)](/developers/webhooks/event-catalogue#quick-implementation) and [Verify Signatures](/developers/webhooks/verify-signatures#verify-v2): parse the JSON envelope, read the flat `data`, branch on `event`, verify `Ottu-Signature` `v2` on the raw body, answer any `2xx`.
 2. **Test it with the published vector** in [Verify Signatures](/developers/webhooks/verify-signatures#test-vectors), then with a sandbox payment and a refund, comparing against the [field map](#field-map).
-3. **Ask Ottu to enable format 3 for your account:** contact [support@ottu.com](mailto:support@ottu.com) with the webhook configuration you want switched. Your existing `webhook_url` and operations URL then receive format 3 with the same moments. Deploy the new receiver before you ask.
+3. **Switch the account to format 3:** in [Webhook Config](/developers/webhooks/setup), set **Version** to 3 and save (or ask [support@ottu.com](mailto:support@ottu.com) to do it). Your existing `webhook_url` and operations URL then receive format 3 with the same moments. Deploy the new receiver first: the switch takes effect when you save.
 
 If a URL is also configured to receive the same event through another route, that URL gets one delivery, in the format of the existing route: see [Same URL on a legacy route](/developers/webhooks/delivery-and-retries#same-url).
 
@@ -94,7 +94,7 @@ Not carried over: `transactions`, `signature`, `transaction_log_id`, `capture_de
 
 ### New moments in format 3 {#new-moments}
 
-Format 3 sends events that formats 1 and 2 do not: `payment.created` (when a payment is created), `payment.attempted` (every failed try that leaves the payment payable), `payment.refund_pending` and `payment.refund_rejected` (a queued refund and its rejection). Events are selected on Ottu's side, so ask Ottu which events your account receives; handle the ones you need and answer `2xx` to the rest without acting on them.
+Format 3 sends events that formats 1 and 2 do not: `payment.created` (when a payment is created), `payment.attempted` (every failed try that leaves the payment payable), `payment.refund_pending` and `payment.refund_rejected` (a queued refund and its rejection). You cannot turn single events off, except that a [plugin URL](/developers/webhooks/setup#plugin-urls) can be limited to some payment states: handle the events you need and answer `2xx` to the rest without acting on them.
 
 :::warning Order is not guaranteed
 `payment.created` is delivered a few seconds after the payment is created, so it can arrive after a fast `payment.paid`. Order by `created` and de-duplicate on the event `id`. See [ordering](/developers/webhooks/event-catalogue#ordering).
@@ -149,7 +149,7 @@ Nothing to call to migrate. The related references are:
 
 <FAQ>
   <FAQItem question="Will Ottu switch my account to format 3 on its own?">
-    No. Ottu never switches a merchant to a new format on its own; you keep receiving the format you have today until you ask for a change.
+    No. Ottu never switches a merchant to a new format on its own; you keep receiving the format you have today until **Version** is changed in [Webhook Config](/developers/webhooks/setup).
   </FAQItem>
   <FAQItem question="How do I ask for format 3?">
     Contact [support@ottu.com](mailto:support@ottu.com) and name the webhook configuration you want switched. Deploy and test your new receiver first.

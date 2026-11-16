@@ -12,7 +12,7 @@ Fill these in, and ask me if they are not clear from the code:
 - Where the Ottu HMAC key is stored: <environment variable or secret manager entry>. The key comes from the Webhook configuration in the Ottu dashboard. Never hard-code it, commit it or log it.
 - Our order / payment model that a webhook updates: <model or table name>
 
-Build for webhook format 3 (an envelope with "version": 3). Ottu turns format 3 on for an account only when asked; if we still receive format 1 or 2, tell me before building.
+Build for webhook format 3 (an envelope with "version": 3). Format 3 is on when Version is 3 in the Ottu dashboard (Administration panel > Webhook > Webhook Config); if we still receive format 1 or 2, tell me before building.
 
 Docs to open when in doubt:
 - Events, fields and example bodies: ${DOCS}/event-catalogue

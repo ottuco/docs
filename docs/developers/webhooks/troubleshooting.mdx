@@ -36,7 +36,7 @@ Run these checks in order. Most problems stop at one of them.
 - [ ] **3. The URL does not redirect.** A `3xx` is a **failure**: Ottu does not follow redirects. Register the final address (watch `http` to `https` and a missing or extra trailing slash).
 - [ ] **4. It answers `2xx` within the timeout.** Format 3 accepts any `2xx`. Ottu waits up to the configured `timeout`, **15 seconds** by default. Store the event, answer, then do the heavy work in a queue.
 - [ ] **5. You verify the signature on the raw body.** `v2` signs the exact bytes Ottu sent, not your parsed JSON. See [The signature does not match](#signature-mismatch).
-- [ ] **6. Your account is on format 3.** Ottu enables format 3 only when you ask. A flat payment body with a `signature` field is format 1 or 2; a format 3 body has `"version": 3` and an `event` key. See [Migrating to v3](/developers/webhooks/migrate-to-v3#formats).
+- [ ] **6. Your account is on format 3.** **Version** is 3 in [Webhook Config](/developers/webhooks/setup). A flat payment body with a `signature` field is format 1 or 2; a format 3 body has `"version": 3` and an `event` key. See [Migrating to v3](/developers/webhooks/migrate-to-v3#formats).
 - [ ] **7. De-duplication is not swallowing new events.** De-duplicate on the event `id` (the `Idempotency-Key` header), never on `session_id` or `order_no`. A new state or a second partial refund is a **new event with a new id**.
 
 ## The signature does not match {#signature-mismatch}
@@ -270,7 +270,7 @@ Full rules: [Delivery and Retries](/developers/webhooks/delivery-and-retries#suc
 
 1. **Are webhooks enabled?** They are off by default. Turn them on in the Ottu dashboard, or send a `webhook_url` with the [Checkout API](/developers/payments/checkout-api).
 2. **Which URL is Ottu calling?** A `webhook_url` sent on the Checkout API call belongs to that payment; the URLs in your webhook configuration (for example the operations URL) are separate settings. Check that the URL on the payment you are testing is the one your server listens on. When several routes point at the **same** URL, that URL receives one delivery of the event, not one per route ([details](/developers/webhooks/delivery-and-retries#same-url)).
-3. **Which format is your account on?** If you expect format 3 but receive a flat body with a `signature` field, you are still on format 1 or 2. Ottu never switches formats on its own: ask for format 3 and follow [Migrating to v3](/developers/webhooks/migrate-to-v3).
+3. **Which format is your account on?** If you expect format 3 but receive a flat body with a `signature` field, you are still on format 1 or 2. Ottu never switches formats on its own: set **Version** to 3 in [Webhook Config](/developers/webhooks/setup) and follow [Migrating to v3](/developers/webhooks/migrate-to-v3).
 4. **Can the internet reach you?** A firewall, a VPN-only host or a private DNS name blocks Ottu. The URL must be public and always online.
 5. **Did a failure email arrive?** If yes, Ottu did call you and your server did not answer `2xx`: go to [Ottu says the delivery failed](#delivery-failed). If you have no failure email, check that `notify_on_error` is on and `emails` has a recipient.
 6. **Reconcile what you missed.** Ask Ottu for the payment's current state and every attempt with the [Payment Status Query v3](/developers/payments/psq-v3), and apply anything your system does not have yet.

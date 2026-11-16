@@ -23,7 +23,7 @@ See the [event catalogue](./event-catalogue.mdx#catalogue) for every event, when
 
 ## **Webhook formats** {#webhook-formats}
 
-Ottu sends webhooks in one of three **formats**, set per account. **Ottu never switches you to a new format on its own.**
+Ottu sends webhooks in one of three **formats**, set per account by **Version** in [Webhook Config](./setup.mdx). **Ottu never switches you to a new format on its own.**
 
 | Format | What you receive | Read |
 |---|---|---|

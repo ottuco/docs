@@ -681,6 +681,11 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "doc",
+              id: "developers/webhooks/setup",
+              label: "Dashboard setup",
+            },
+            {
+              type: "doc",
               id: "developers/webhooks/event-catalogue",
               label: "Events & Envelope",
             },
