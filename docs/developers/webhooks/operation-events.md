@@ -64,7 +64,7 @@ Operation webhooks are activated under the following scenarios:
    "order_no":"Y3ODg",
    "pg_code":"credit-card",
    "pg_response":{
-      "It will contain the raw pg response sent by the pg to Ottu"
+      "_comment":"The raw response the payment gateway sent to Ottu, as JSON"
    },
    "reference_number":"staging4AQ64A",
    "result":"success",

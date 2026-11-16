@@ -33,7 +33,7 @@ For technical details on webhook payloads, signatures, and integration, see the 
 
 ### Retry Example
 
-Consider a scenario where your server is down for 30 seconds, with these settings: **timeout = 20s**, **retries = 3**, **backoff factor = 5s**.
+Consider a scenario where your server is down for 20 seconds, with these settings: **timeout = 20s**, **retries = 3**, **backoff factor = 5s**.
 
 **First attempt:**
 
@@ -46,7 +46,7 @@ _Total time elapsed: 25 seconds._
 **Second attempt:**
 
 1. Ottu sends the webhook request again.
-2. Your server is back online (30 seconds have passed) and responds successfully.
+2. Your server is back online (25 seconds have passed) and responds successfully.
 
 _The webhook is delivered on the second attempt._
 

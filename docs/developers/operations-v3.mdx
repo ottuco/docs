@@ -173,6 +173,9 @@ $status = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 
 if ($status === 200) {
     echo $body["status"] . " " . $body["result"]; // refunded success
+    if ($replayed) {
+        echo PHP_EOL . "This is the stored answer of an earlier call";
+    }
 } else {
     echo $status . " " . $body["errors"][0]["code"] . " " . $body["errors"][0]["detail"];
 }`}</CodeBlock>
