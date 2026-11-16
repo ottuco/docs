@@ -32,7 +32,7 @@ import "./autopay.css";
 
 AutoPay is Ottu's managed subscriptions feature. You make one [Checkout API](../checkout-api) call with `payment_type: "auto_pay"`, and Ottu runs the rest: each [billing cycle](/glossary/#term-billing-cycle), the retries, the [dunning](/glossary/#term-dunning) emails and your customer's self-service page.
 
-Every call on this page uses the standard [Ottu API key](/developers/getting-started/authentication) and targets <code>{OTTU_CONNECT_BASE_URL}</code>. Swap in your own merchant domain when you integrate. Your integration is six steps: see [Workflow](#workflow). To start, [create a subscription](/developers/payments/autopay/?autopay-api=create#api-reference). The [Live Demo](#live-demo) runs the steps on the sandbox.
+Every call on this page uses the standard [Ottu API key](/developers/getting-started/authentication) and targets <code>{OTTU_CONNECT_BASE_URL}</code>. Swap in your own merchant domain when you integrate. Your integration is six steps: see [Workflow](#workflow). To start, [create a subscription](/developers/payments/autopay/?autopay-api=create#create-api). The [Live Demo](#live-demo) runs the steps on the sandbox.
 
 Related guide: [AutoPay for merchants](/business/autopay/), with what your customer sees and what it does for the business.
 
@@ -70,7 +70,7 @@ In the diagram and on this page, "you" is the merchant: your server makes the AP
 Your part, in order:
 
 1. **Before your first call.** Check the [Setup](#setup) list.
-2. **Create the subscription.** Call [Create a subscription](/developers/payments/autopay/?autopay-api=create#api-reference): `POST /b/checkout/v1/pymt-txn/` with `payment_type: "auto_pay"` and the `autopay` block. Store `extra.autopay.subscription_id` from the `201` response.
+2. **Create the subscription.** Call [Create a subscription](/developers/payments/autopay/?autopay-api=create#create-api): `POST /b/checkout/v1/pymt-txn/` with `payment_type: "auto_pay"` and the `autopay` block. Store `extra.autopay.subscription_id` from the `201` response.
 3. **Show the checkout.** Send your customer to `checkout_url` from the same response.
 4. **Receive the result.** If you set a `webhook_url`, Ottu calls it with the first-payment result. [Verify its signature](/developers/webhooks/verify-signatures#which-signature). Your account's [webhook format](/developers/webhooks/#webhook-formats) sets the payload: [Payment Events](/developers/webhooks/payment-events) for formats 1 and 2, the [event catalogue](/developers/webhooks/event-catalogue) for format 3. In Python, [`ottu-py`](https://github.com/ottuco/ottu-py#webhook-verification) verifies the signature and, on format 3, [reads the event](https://github.com/ottuco/ottu-py#reading-v3-events).
 5. **Start the service.** [Retrieve](/developers/payments/autopay/?autopay-api=retrieve#api-reference) the subscription until `status` is `active` or `trialing`, then give access. Timing: [First payment and activation](#first-payment-and-activation).
