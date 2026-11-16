@@ -15,9 +15,9 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  color: #9ca3af;
+  color: #99a1af;
   /* A page can set its own (AutoPay: Ottu dark, in its autopay.css). */
-  background: var(--api-panel-head-bg, #1e1e36);
+  background: var(--api-panel-head-bg, #302f37);
 }
 
 .apiPanelCopy {
@@ -25,7 +25,7 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 4px;
   background: transparent;
-  color: #9ca3af;
+  color: #99a1af;
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
