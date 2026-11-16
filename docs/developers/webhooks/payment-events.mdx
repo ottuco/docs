@@ -169,11 +169,11 @@ The webhook usually arrives before Ottu has confirmed the payment, so the subscr
 | `next_billing_date` | Next scheduled billing date, or `null` when nothing further is scheduled. |
 | `event_type` | One of `cit_success`, `cit_failure`, `mit_success`, `mit_failure`, `card_updated`, or `null`. `null` means AutoPay could not yet tell whether the subscription's setup payment succeeded — it does **not** mean success. |
 
-:::danger The top-level `autopay` block is not signed — never trust it
-Two blocks carry a `subscription_id`, and only one of them is trustworthy.
+:::danger Identify the subscription by `extra.autopay.subscription_id`, never by the top-level `autopay` block
+Two blocks carry a `subscription_id`, and only one of them is reliable.
 
-- **`extra.autopay.subscription_id` is signed.** It is inside the HMAC, so once you have [verified the signature](/developers/webhooks/verify-signatures/) you can rely on it. Use this one to identify the subscription.
-- **The top-level `autopay` block is not signed.** It is added *after* the signature is computed, so it is not covered by the HMAC at all. Treat it as a display convenience.
+- **`extra.autopay.subscription_id`** is part of your own payment data. Once you have [verified the signature](/developers/webhooks/verify-signatures/) you can rely on it. Use this one to identify the subscription.
+- **The top-level `autopay` block** is covered by the `Ottu-Signature` `v2` header (it signs the raw body as sent) but **not** by the 18-field body `signature`, because it is added after that one is computed. It can also be missing (see below). Treat it as a display convenience.
 
 Ottu also fills the top-level block live while it assembles the webhook, with a **2 second timeout**. The block is **silently omitted** if that lookup times out or fails.
 
@@ -226,7 +226,7 @@ By understanding and interpreting these fields correctly, you can ensure accurat
 
 #### **6. Verifying the Signature**
 
-Every webhook payload includes a `signature` field — an HMAC-SHA256 hash that proves the payload came from Ottu and hasn’t been tampered with. **Always verify this signature before processing the payment.**
+Every delivery carries the `Ottu-Signature` header, `t=…,v2=…`: an HMAC-SHA256 over the raw body that proves the payload came from Ottu and was not changed. **Always verify it before processing the payment.** Formats 1 and 2 also carry a body `signature` field (an 18-field HMAC), which you can check as well.
 
 For implementation details and code examples in Python, PHP, Node.js, Java, C#, Ruby, and Go, see [Verify Signatures](/developers/webhooks/verify-signatures/).
 
