@@ -204,6 +204,46 @@ function toField(
   };
 }
 
+/**
+ * Only the fields named in `paths`, in that order: `agreement` keeps the whole
+ * object, `agreement.id` keeps only that child. For a product page that shows
+ * one use of a shared endpoint (an AutoPay create is a Checkout API call):
+ * the fields that use needs (in a request, each marked required), and a link to the full
+ * reference for the rest. A path the schema doesn't have fails the build, so
+ * a renamed field can't silently drop out of the page.
+ */
+export function pickFields(
+  fields: Field[],
+  paths: string[],
+  /** Mark each kept field required: true for a request body, false for a response. */
+  markRequired: boolean,
+  where = "",
+): Field[] {
+  const wanted = new Map<string, string[]>();
+  for (const path of paths) {
+    const [head, ...rest] = path.split(".");
+    const children = wanted.get(head) ?? [];
+    if (rest.length > 0) children.push(rest.join("."));
+    wanted.set(head, children);
+  }
+  return [...wanted].map(([name, childPaths]) => {
+    const field = fields.find((candidate) => candidate.name === name);
+    if (!field)
+      throw new Error(
+        `ApiReference: no field "${where}${name}" in this endpoint's schema.`,
+      );
+    return {
+      ...field,
+      required: markRequired || field.required,
+      children:
+        childPaths.length > 0
+          ? pickFields(field.children, childPaths, markRequired, `${where}${name}.`)
+          : field.children,
+      variants: childPaths.length > 0 ? [] : field.variants,
+    };
+  });
+}
+
 /** "string", "integer", "array of objects", "enum"… */
 export function typeLabel(schema: Schema): string {
   if (schema.enum) return "enum";

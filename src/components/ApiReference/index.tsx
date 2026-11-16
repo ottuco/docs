@@ -16,6 +16,7 @@
 import React, { useEffect, useRef } from "react";
 import { useHistory, useLocation } from "@docusaurus/router";
 import Heading from "@theme/Heading";
+import Link from "@docusaurus/Link";
 import useBrokenLinks from "@docusaurus/useBrokenLinks";
 import Markdown from "docusaurus-theme-openapi-docs/lib/theme/Markdown";
 import ApiExecute, { type ResponseExamples } from "@site/src/components/ApiExecute";
@@ -28,6 +29,7 @@ import {
   forMarkdown,
   jsonOf,
   normalize,
+  pickFields,
   statusText,
   successCode,
   variantsOf,
@@ -48,13 +50,19 @@ const AUTHORIZATION: Field = {
   schema: {
     type: "string",
     description:
-      "`Api-Key {your_api_key}`. Find or create your key in the dashboard; see [Authentication](/developers/getting-started/authentication).",
+      "All authentication methods on the [Authentication](/developers/getting-started/authentication) page work here except the public key. The examples use the private [API key](/developers/getting-started/authentication#api-key-auth): `Api-Key {your_api_key}`.",
   },
   required: true,
   nullable: false,
   children: [],
   variants: [],
 };
+
+/** The first field of each name: two shapes of one response share some. */
+function uniqueByName(fields: Field[]): Field[] {
+  const seen = new Set<string>();
+  return fields.filter((field) => !seen.has(field.name) && Boolean(seen.add(field.name)));
+}
 
 function paramFields(params: Param[], where: Param["in"]): Field[] {
   return params
@@ -197,6 +205,11 @@ export default function ApiReference({
   scenario,
   run,
   tabGroup,
+  body,
+  response,
+  fullReference,
+  showDescription = true,
+  title,
 }: {
   api: ApiSlug;
   /** The generated page's data: added by src/remark/apiReferenceData.ts, not written by hand. */
@@ -211,6 +224,20 @@ export default function ApiReference({
    * (or `api` when there is no `run`).
    */
   tabGroup?: string;
+  /**
+   * Show only these request body fields, each marked required (`agreement.id`
+   * keeps one child of `agreement`). For one use of a shared endpoint, with
+   * `fullReference` linking to the rest.
+   */
+  body?: string[];
+  /** Show only these response fields (and none of the alternative shapes). */
+  response?: string[];
+  /** Where every field of the endpoint is listed, when `body` or `response` hides some. */
+  fullReference?: { href: string; label: string };
+  /** False drops the operation's own description: the page explains this use itself. */
+  showDescription?: boolean;
+  /** The heading, when this use of a shared endpoint has its own name (an AutoPay create is a Checkout API call). */
+  title?: string;
 }): React.JSX.Element {
   if (Boolean(scenario) !== Boolean(run))
     throw new Error(
@@ -218,6 +245,7 @@ export default function ApiReference({
     );
   // Fails the build on an unknown scenario or endpoint, not only the browser.
   if (scenario && run) runOf(scenario, run);
+  const view = viewOf(api, source);
   const {
     operation,
     responses,
@@ -226,13 +254,23 @@ export default function ApiReference({
     pathFields,
     queryFields,
     headerFields,
-    bodyFields,
-    bodyVariants,
-    responseFields,
-    responseVariants,
     examples,
-  } = viewOf(api, source);
-  const heading = source?.title ?? api;
+  } = view;
+  // A picked list replaces the alternative shapes: their fields are offered
+  // to the pick too (the Checkout response is one of two shapes).
+  const bodyFields = body
+    ? pickFields([...view.bodyFields, ...view.bodyVariants.flatMap((v) => v.children)], body, true)
+    : view.bodyFields;
+  const bodyVariants = body ? [] : view.bodyVariants;
+  const responseFields = response
+    ? pickFields(
+        uniqueByName([...view.responseFields, ...(view.responseVariants[0]?.children ?? [])]),
+        response,
+        false,
+      )
+    : view.responseFields;
+  const responseVariants = response ? [] : view.responseVariants;
+  const heading = title ?? source?.title ?? api;
   // The anchor of the endpoint and the prefix of its fields' anchors.
   const name = run ?? api;
   const id = `${name}-api`;
@@ -267,7 +305,7 @@ export default function ApiReference({
           </span>
           <code>{operation.path}</code>
         </div>
-        {operation.description && (
+        {showDescription && operation.description && (
           <div className={styles.description}>
             <Markdown>{forMarkdown(operation.description)}</Markdown>
           </div>
@@ -289,6 +327,12 @@ export default function ApiReference({
         {(bodyFields.length > 0 || bodyVariants.length > 0) && (
           <Section id={`${id}-body`} title="Request body">
             <FieldList fields={bodyFields} prefix={`${id}-body`} />
+            {body && fullReference && (
+              <p className={styles.muted}>
+                Only the fields this call needs. Every other field is in the{" "}
+                <Link to={fullReference.href}>{fullReference.label}</Link>.
+              </p>
+            )}
             {bodyVariants.map((variant) => (
               <div
                 key={variant.label}

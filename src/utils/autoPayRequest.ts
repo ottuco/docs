@@ -6,7 +6,13 @@ export const AUTOPAY_PLUGIN: PaymentPlugin = "e_commerce";
 // YYYY-MM-DD of a date in UTC.
 export const isoDate = (date: Date) => date.toISOString().slice(0, 10);
 
-export function buildAutoPayRequest(
+/**
+ * The AutoPay create call as the API Reference shows and runs it: the fields
+ * the Create tab lists as required, plus the customer's name and an order_no,
+ * which the customer page and the subscription show. Keep it in step with the
+ * `body` list of the Create tab in docs/developers/payments/autopay/index.mdx.
+ */
+export function buildAutoPayCreateBody(
   orderId: string,
   customerId: string,
   pgCodes: string[],
@@ -26,14 +32,12 @@ export function buildAutoPayRequest(
     pg_codes: pgCodes,
     amount: "9.900",
     currency_code: "KWD",
-    customer_id: customerId,
-    customer_first_name: "Demo",
-    customer_phone: "50000000",
-    customer_email: `demo.${orderId}@example.com`,
     payment_type: "auto_pay",
-    include_sdk_setup_preload: true,
+    customer_id: customerId,
+    customer_email: `demo.${orderId}@example.com`,
+    customer_first_name: "Demo",
+    customer_last_name: "Customer",
     order_no: orderId,
-    webhook_url: `${getWebhookBaseUrl()}/webhook/${orderId}`,
     // AutoPay needs the full recurring agreement; the autopay block repeats the schedule.
     agreement: {
       id: `AGR-${orderId}`,
@@ -50,5 +54,19 @@ export function buildAutoPayRequest(
       start_date: isoDate(start),
       description: "Demo plan - monthly",
     },
+  };
+}
+
+/** The Live Demo's create call: the same body, plus what its embedded checkout and webhook view use. */
+export function buildAutoPayRequest(
+  orderId: string,
+  customerId: string,
+  pgCodes: string[],
+) {
+  return {
+    ...buildAutoPayCreateBody(orderId, customerId, pgCodes),
+    customer_phone: "50000000",
+    include_sdk_setup_preload: true,
+    webhook_url: `${getWebhookBaseUrl()}/webhook/${orderId}`,
   };
 }
