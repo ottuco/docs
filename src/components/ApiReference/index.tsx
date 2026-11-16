@@ -50,7 +50,7 @@ const AUTHORIZATION: Field = {
   schema: {
     type: "string",
     description:
-      "Every method on the [Authentication](/developers/getting-started/authentication) page works here: [Basic Authentication](/developers/getting-started/authentication#basic-auth) and the private [API key](/developers/getting-started/authentication#api-key-auth). The examples use the API key: `Api-Key {your_api_key}`.",
+      "All authentication methods on the [Authentication](/developers/getting-started/authentication) page work here except the public key. The examples use the private [API key](/developers/getting-started/authentication#api-key-auth): `Api-Key {your_api_key}`.",
   },
   required: true,
   nullable: false,
