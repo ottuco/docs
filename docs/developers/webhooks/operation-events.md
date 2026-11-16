@@ -1,6 +1,7 @@
 ---
 title: Operation Events
 sidebar_label: Operation Events
+description: The webhook body Ottu sends after a refund, capture or void on webhook formats 1 and 2 (deprecated; format 3 sends these as payment.* events).
 displayed_sidebar: developerSidebar
 ---
 

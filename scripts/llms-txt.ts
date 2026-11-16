@@ -49,9 +49,16 @@ function pageOf(outDir: string, file: string): Page {
   return { route, title, description: short, markdown };
 }
 
+// Front-matter titles and descriptions written by scripts/md-export.ts: a page's own summary beats its first paragraph.
+const META_FILE = path.join(OUT, ".md-meta.json");
+const meta: Record<string, { title: string; description: string }> = fs.existsSync(META_FILE)
+  ? JSON.parse(fs.readFileSync(META_FILE, "utf8"))
+  : {};
+
 const pages = walk(OUT)
   .map((file) => pageOf(OUT, file))
   .filter((page) => !SKIP.some((skip) => skip.test(page.route)))
+  .map((page) => (meta[page.route]?.description ? { ...page, description: meta[page.route].description } : page))
   .sort((a, b) => a.route.localeCompare(b.route));
 
 const lines = [

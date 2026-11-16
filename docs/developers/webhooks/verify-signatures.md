@@ -1,6 +1,7 @@
 ---
 title: Verify Signatures
 sidebar_label: Verify Signatures
+description: Verify the Ottu-Signature header on every webhook - v2 (HMAC-SHA256 over t and the raw body) for format 3, v1 and the body signature for formats 1 and 2 - with code in eight languages, published test vectors and an in-browser lab.
 ---
 
 import SignatureLab from "@site/src/components/SignatureLab";
@@ -11,9 +12,11 @@ import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
 # Verify Signatures
 
-To ensure the integrity and authenticity of the [webhook notifications](/developers/webhooks/event-catalogue) sent to the merchant, Ottu employs a signing mechanism based on HMAC (Hash-based Message Authentication Code). By leveraging HMAC, Ottu can guarantee that the webhook's content remains untampered during transmission.
+Every [webhook](/developers/webhooks/event-catalogue) Ottu sends is signed with HMAC-SHA256 and your HMAC key, so you can prove it came from Ottu and was not changed on the way. Which signature you check depends on your [webhook format](/developers/webhooks/migrate-to-v3#formats); this page gives the exact recipe, published test vectors and working code for each.
 
-Two proofs of origin exist, and which one you verify depends on your [webhook format](/developers/webhooks/migrate-to-v3#formats). This page is self-contained: it gives the exact recipe, a published test vector and working code for each.
+:::tip On format 3? Read three sections
+[Verify v2](#verify-v2) (the recipe and code in eight languages), [Test vectors](#test-vectors) (prove your code), and [Try it in your browser](#signature-lab). Everything from [Header v1](#header-v1) down is for formats 1 and 2.
+:::
 
 ## Which signature do I verify? {#which-signature}
 
@@ -337,6 +340,12 @@ Sign a body and see the exact header Ottu would send, check a header you receive
 
 <SignatureLab />
 
+---
+
+:::note Formats 1 and 2 from here
+The rest of this page covers the older formats: the `v1` header, the body `signature` field, the Sign API and their samples. A format 3 receiver needs none of it.
+:::
+
 ### Header v1 {#header-v1}
 
 On formats 1 and 2 the `v1=` part signs the payload's fields rather than its bytes. It is the same 26-field recipe described in [Important components](#important-components) below with one addition: the string starts with a first line `t=<t>`, taking `t` from the same header, so a captured header cannot be reused later. The test vector for `v1`:
@@ -609,7 +618,7 @@ Note what is missing from it, and why:
 
 - `customer_last_name` is present in the payload but empty, so it is skipped.
 - `token.brand` and `token.number` are present but are not in the signed set.
-- The eight address and phone paths are absent from the payload, so they are skipped.
+- The seven address and phone paths are absent from the payload, so they are skipped.
 
 Applying HMAC-SHA256 with the key above gives:
 

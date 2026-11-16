@@ -285,7 +285,7 @@ Both are **expected**, not a fault.
 
 | What you see | Why | What to do |
 |---|---|---|
-| The same `id` twice | A retry, a manual re-disclose from the dashboard, or the same event sent to two different URLs | Store each processed `id`. When it comes again, answer `2xx` and skip processing |
+| The same `id` twice | A retry, a manual re-disclose (the **Disclose** action on a transaction in the Ottu dashboard), or the same event sent to two different URLs | Store each processed `id`. When it comes again, answer `2xx` and skip processing |
 | `payment.created` after `payment.paid` | `payment.created` is delivered a few seconds after creation; a fast payment can beat it | Order events of one payment by the envelope's `created`, not by arrival |
 | An old `payment.paid` after `payment.refunded` | The paid event was retried for a while; the refund succeeded first time | Same: order by `created` |
 | Two events with the same `created` | `created` has one-second resolution | Treat the tie as unordered and fetch the current state |

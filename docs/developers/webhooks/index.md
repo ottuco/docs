@@ -63,7 +63,7 @@ On format 3 both URLs receive the same [envelope](./event-catalogue.mdx#envelope
 
 Your webhook endpoint must:
 
-- **Use HTTPS.** Ottu's format 3 docs, the [quickstart](./quickstart.mdx) and the AI agent prompt above all assume an HTTPS URL. Ottu verifies your certificate by default (`ignore_ssl` is `false`), so use a certificate from a public authority (see [SSL verification](#ssl-verification)).
+- **Use an HTTPS URL.** A webhook carries payment and customer data; do not receive it over plain HTTP. Ottu verifies your certificate by default (`ignore_ssl` is `false`), so use a certificate from a public authority (see [SSL verification](#ssl-verification)).
 - **Be public and online.** Ottu must reach it from the internet.
 - **Answer within the configured `timeout`** (**15 seconds** by default; see [Webhook Notification Mechanism](#webhook-notification-mechanism)), or the delivery is treated as failed.
 - **Return a success status:** any `2xx` on format 3, `200` or `201` on formats 1 and 2. Any other status marks the notification as failed. Redirects (`3xx`) are not followed.

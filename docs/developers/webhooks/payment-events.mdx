@@ -1,6 +1,7 @@
 ---
 title: Payment Events
 sidebar_label: Payment Events
+description: The webhook body Ottu sends when a payment is processed on webhook formats 1 and 2 (deprecated; format 3 is the event catalogue).
 displayed_sidebar: developerSidebar
 ---
 
@@ -66,10 +67,11 @@ Ottu notifies the [webhook_url](/developers/payments/checkout-api/) for all paym
 
 To ensure a smooth redirection of the payer back to the designated [redirect_url](/developers/payments/checkout-api/), it is essential that the `redirect_url` is accurately provided during the payment setup. Additionally, the [webhook_url](/developers/payments/checkout-api/) must respond with a status code of 200. This specific status code serves as a confirmation of successful interaction between the involved systems, ultimately guaranteeing the seamless progression of the redirection process as originally intended.
 
-**Redirect behavior based on webhook_url response:**\
--[ status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) 200, the customer will be redirected to [redirect_url](/developers/payments/checkout-api/).\
--[ status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) 201, the customer will be redirected to Ottu payment summary page.\
--[ status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) any other code, the customer will be redirected to Ottu payment summary page. For this particular case, Ottu can notify on the email, when Enable webhook notifications? Activated
+**Redirect behavior based on the `webhook_url` [status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status):**
+
+- `200`: the customer is redirected to your [`redirect_url`](/developers/payments/checkout-api/).
+- `201`: the customer stays on the Ottu payment summary page.
+- Any other code: the customer stays on the Ottu payment summary page, and Ottu emails the addresses in your webhook configuration when [error notification](/developers/webhooks#error-notification) (`notify_on_error`) is on.
 
 <PaymentRedirectSequence />
 

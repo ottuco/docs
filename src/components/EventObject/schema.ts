@@ -131,7 +131,11 @@ export const EVENT_SCHEMA: Schema = {
       properties: {
         session_id: S("The payment you created, on every event, including capture, refund and void events."),
         order_no: SN("Your order reference."),
-        payment_type: SN("Such as `one_off`, `auto_debit`, `save_card`."),
+        payment_type: {
+          type: ["string", "null"],
+          enum: ["one_off", "auto_debit", "save_card", "auto_pay", null],
+          description: "How the payment was set up.",
+        },
         language: SN("The payment's language."),
         amount: S("The session's original amount, with the currency's decimals (`\"10.000\"` KWD, `\"100.00\"` QAR)."),
         currency: S("ISO 4217 code of the session."),
@@ -185,9 +189,21 @@ export const EVENT_SCHEMA: Schema = {
           description: "The recurring-payment agreement. All `null` when the payment has none.",
           properties: {
             id: SN("Agreement id."),
-            type: SN("Agreement type."),
-            frequency: SN("How often it charges."),
-            amount_variability: SN("Whether the amount can change between cycles."),
+            type: {
+              type: ["string", "null"],
+              enum: ["event_based", "installment", "recurring", "unscheduled", "other", null],
+              description: "Agreement type.",
+            },
+            frequency: {
+              type: ["string", "null"],
+              enum: ["irregular", "daily", "weekly", "semi_monthly", "monthly", "quarterly", "semi_annually", "yearly", "other", null],
+              description: "How often it charges.",
+            },
+            amount_variability: {
+              type: ["string", "null"],
+              enum: ["fixed", "variable", null],
+              description: "Whether the amount can change between cycles.",
+            },
             cycle_interval_days: { type: ["integer", "null"], description: "Days between cycles." },
             total_cycles: { type: ["integer", "null"], description: "Number of cycles." },
             start_date: SN("First day."),

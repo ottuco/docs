@@ -233,7 +233,7 @@ Every delivery carries `Idempotency-Key: <event id>`, for example `Idempotency-K
 | Situation | Same key? |
 |---|---|
 | The first attempt and every retry of a delivery | Yes |
-| A manual re-disclose of a payment from the Ottu dashboard whose state did not change | Yes |
+| A manual re-disclose of a payment (the **Disclose** action on a transaction in the Ottu dashboard) whose state did not change | Yes |
 | The same event delivered to several URLs (for example the payment's `webhook_url` and the operations URL, when you configured the same URL) | Yes, identical on each |
 | A new state, a new attempt, or a second partial refund | No: it is a **new event** with a new id, so a new key |
 

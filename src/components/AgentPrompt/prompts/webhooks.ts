@@ -61,7 +61,7 @@ Unit test it with Ottu's published vector:
 - Our database or queue is temporarily down, so we cannot store the event: 503. Ottu retries.
 - Stored successfully: 200 (any 2xx is success).
 - Never let an exception in our business logic turn into a 500 for an event we already stored: the job retries on our side, not Ottu's.
-- Ottu retries failures (3xx, 4xx, 5xx, timeouts, connection errors) 8 times over about 42 hours, with the same id and the same body bytes. After the last failure Ottu emails the addresses in the webhook configuration once.
+- Ottu treats 3xx, 4xx, 5xx, timeouts and connection errors as failures and tries 8 times in total (the first try plus 7 retries) over about 42 hours, with the same id and the same body bytes. After the last failure Ottu emails the addresses in the webhook configuration once.
 - Log every rejection with its reason (bad signature, stale t, bad JSON) and the event id when known, so failures can be traced. Alert on a burst of 401s: it usually means the key changed.
 
 ## 6. De-duplicate

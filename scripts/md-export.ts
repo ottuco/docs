@@ -97,8 +97,39 @@ function eventObject(part: string | undefined): string {
   return `${table}\n\n### Example bodies, one per event\n\n${examples.join("\n\n")}`;
 }
 
+type PGParam = { name: string; category: string; description: string; example?: string; notes?: string };
+const PG_CATEGORIES: Record<string, string> = {
+  card: "Card Information",
+  identifier: "Transaction Identifiers",
+  status: "Transaction Status",
+  dcc: "Currency Conversion",
+};
+
+function pgParams(): string {
+  const params = JSON.parse(fs.readFileSync(path.resolve("static/data/pg-params.json"), "utf8")) as PGParam[];
+  const cell = (text = "") => text.replace(/\|/g, "\\|").replace(/\n/g, " ");
+  const rows = params.map(
+    (p) => `| \`${p.name}\` | ${PG_CATEGORIES[p.category] ?? p.category} | ${cell(p.description)}${p.notes ? ` ${cell(p.notes)}` : ""} | ${p.example ? `\`${cell(p.example)}\`` : ""} |`,
+  );
+  return ["| Field | Category | Description | Example |", "|---|---|---|---|", ...rows].join("\n");
+}
+
+/** A schema the page renders with SchemaEmbed (static/schemas/<path>): its fields as a table. */
+function schemaTable(file: string): string {
+  const schema = JSON.parse(fs.readFileSync(path.resolve("static/schemas", file), "utf8")) as Schema & { allOf?: Schema[] };
+  const merged: Schema = schema.allOf ? { properties: Object.assign({}, ...schema.allOf.map((s) => s.properties ?? {})) } : schema;
+  return ["| Field | Type | Description |", "|---|---|---|", ...fieldRows(merged)].join("\n");
+}
+
 function render(name: string, attrs: Record<string, string>, route: string): string | null {
+  if (diagramNames.has(name)) {
+    return `_Interactive diagram "${name.replace(/([a-z])([A-Z])/g, "$1 $2")}": open ${SITE}${route} to step through it._`;
+  }
   switch (name) {
+    case "PGParamsReference":
+      return pgParams();
+    case "SchemaEmbed":
+      return attrs.path ? schemaTable(attrs.path) : null;
     case "EventObject":
       return eventObject(attrs.part);
     case "AgentPrompt":
@@ -134,6 +165,9 @@ function readTag(text: string, at: number) {
   return { end: i + 1, name: match[2], closing: match[1] === "/", selfClosing: raw.endsWith("/>"), attrs };
 }
 
+/** Components imported from src/diagrams on the page being converted (set per page in toMarkdown). */
+let diagramNames = new Set<string>();
+
 const CODE_BLOCK = /<CodeBlock([^>]*)>\s*\{`([\s\S]*?)`\}\s*<\/CodeBlock>/g;
 
 function prose(text: string, route: string): string {
@@ -166,8 +200,10 @@ function prose(text: string, route: string): string {
   return out
     .replace(/^\s*(import|export)\s.+$/gm, "")
     .replace(/\{OTTU_(CONNECT|DEV)_BASE_URL\}/g, OTTU_CONNECT_BASE_URL)
-    .replace(/<\/?(details|summary|div|span|br)[^>]*>/g, "")
-    .replace(/^(#{1,6}\s.*?)\s*\{#[\w-]+\}\s*$/gm, "$1")
+    .replace(/<\/?(details|summary|div|span|br)\b[^>]*>/g, "")
+    .replace(/&#x20;/g, " ")
+    // Keep explicit heading ids as anchors, so links like #catalogue still land in the markdown.
+    .replace(/^(#{1,6}\s.*?)\s*\{#([\w-]+)\}\s*$/gm, '$1 <a id="$2"></a>')
     .replace(/\]\((\.\.?\/[^)]+?)\.mdx?(#[^)]*)?\)/g, (_m, link: string, hash = "") => `](${resolveLink(route, link)}${hash})`);
 }
 
@@ -177,9 +213,12 @@ function isInsideInlineCode(text: string, at: number): boolean {
   return ticks % 2 === 1;
 }
 
+/** Set per page: an index page (docs/x/index.md, route /x/) resolves ./y from /x/, a leaf page from its parent. */
+let currentIsIndex = false;
+
 function resolveLink(route: string, rel: string): string {
   const base = route.endsWith("/") ? route : `${route}/`;
-  const parent = base.split("/").slice(0, -2).join("/") + "/";
+  const parent = currentIsIndex ? base : base.split("/").slice(0, -2).join("/") + "/";
   const resolved = path.posix.normalize(path.posix.join(parent, rel)).replace(/\/index$/, "");
   return resolved.replace(/\/?$/, "/");
 }
@@ -196,6 +235,9 @@ function dedentComponents(body: string): string {
 }
 
 function toMarkdown(body: string, route: string): string {
+  diagramNames = new Set(
+    [...body.matchAll(/^import\s+(\w+)\s+from\s+["']@site\/src\/diagrams\/[^"']+["']/gm)].map((m) => m[1]),
+  );
   body = dedentComponents(body);
   body = body.replace(CODE_BLOCK, (_m, attrs: string, code: string) => {
     const lang = attrs.match(/language=["']([^"']+)["']/)?.[1] ?? "";
@@ -239,6 +281,7 @@ function dedent(line: string, indent: number): string {
 
 // ── Main ──────────────────────────────────────────────────────────────────
 let written = 0;
+const meta: Record<string, { title: string; description: string }> = {};
 const skipped: string[] = [];
 for (const file of walk(DOCS)) {
   const { data, body } = frontMatter(fs.readFileSync(file, "utf8"));
@@ -249,10 +292,13 @@ for (const file of walk(DOCS)) {
     skipped.push(route);
     continue;
   }
+  currentIsIndex = path.basename(file).replace(/\.(md|mdx)$/, "") === "index";
   let markdown = toMarkdown(body, route);
+  meta[route] = { title: data.title ?? "", description: data.description ?? "" };
   if (!/^#\s/m.test(markdown) && data.title) markdown = `# ${data.title}\n\n${markdown}`;
   fs.writeFileSync(target, markdown);
   written += 1;
 }
+fs.writeFileSync(path.join(OUT, ".md-meta.json"), JSON.stringify(meta));
 console.log(`md-export: ${written} pages written${skipped.length ? `, ${skipped.length} without a built page` : ""}`);
 if (process.env.MD_EXPORT_VERBOSE) console.log(skipped.join("\n"));
