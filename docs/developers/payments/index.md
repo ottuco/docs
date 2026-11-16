@@ -38,7 +38,7 @@ Refund payments to a customer's wallet balance instead of returning funds via th
 
 ### AutoPay (Managed Subscriptions) {#autopay-managed-subscriptions}
 
-Set up recurring billing with a single checkout call. AutoPay owns the schedule after that — it generates each billing cycle, retries failed charges, sends dunning emails, and gives customers a self-service page to manage their own subscription.
+Set up recurring billing with a single checkout call. Ottu runs the schedule after that — it generates each billing cycle, retries failed charges, sends dunning emails, and gives customers a self-service page to manage their own subscription.
 
 [**Go to AutoPay →**](autopay/index.mdx)
 

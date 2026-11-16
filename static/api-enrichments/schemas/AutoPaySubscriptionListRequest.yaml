@@ -6,8 +6,9 @@ _description: |
 
 properties:
   status:
+    enum: [pending_setup, trialing, active, past_due, canceled, expired, setup_failed]
     description: |
-      Return only subscriptions in this state. Enum: `pending_setup`, `trialing`, `active`, `past_due`, `canceled`, `expired`, `setup_failed`. Omit it to return every state.
+      Return only subscriptions in this state. Omit it to return every state.
   customer_id:
     description: |
       Return only the subscriptions of one customer. Exact match on the `customer_id` you sent at checkout.

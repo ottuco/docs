@@ -301,22 +301,25 @@ export default function Story(input: StoryProps): React.JSX.Element {
   // the left of the body.
   const sideChips = (
     <div className={styles.chips} role="group" aria-label="Show one side only">
-      {lanes.map((l, i) => (
-        <button
-          key={i}
-          type="button"
-          className={`${styles.chip} ${pinnedOf("lane") === i ? styles.chipOn : ""}`}
-          aria-pressed={pinnedOf("lane") === i}
-          onMouseEnter={() => setHover({ kind: "lane", i })}
-          onMouseLeave={() => setHover(null)}
-          onFocus={() => setHover({ kind: "lane", i })}
-          onBlur={() => setHover(null)}
-          onClick={() => toggle({ kind: "lane", i })}
-        >
-          <Icon path={l.icon} size={0.55} />
-          {l.chip}
-        </button>
-      ))}
+      {lanes
+        .map((l, i) => ({ l, i }))
+        .sort((a, b) => (a.l.chipOrder ?? a.i) - (b.l.chipOrder ?? b.i))
+        .map(({ l, i }) => (
+          <button
+            key={i}
+            type="button"
+            className={`${styles.chip} ${pinnedOf("lane") === i ? styles.chipOn : ""}`}
+            aria-pressed={pinnedOf("lane") === i}
+            onMouseEnter={() => setHover({ kind: "lane", i })}
+            onMouseLeave={() => setHover(null)}
+            onFocus={() => setHover({ kind: "lane", i })}
+            onBlur={() => setHover(null)}
+            onClick={() => toggle({ kind: "lane", i })}
+          >
+            <Icon path={l.icon} size={0.55} />
+            {l.chip}
+          </button>
+        ))}
     </div>
   );
   const journeyChips = hasPanel ? (

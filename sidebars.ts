@@ -256,6 +256,11 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
+                  label: "Setup",
+                  href: "/developers/payments/autopay#setup",
+                },
+                {
+                  type: "link",
                   label: "Guide",
                   href: "/developers/payments/autopay#guide",
                 },
@@ -268,6 +273,16 @@ const sidebars: SidebarsConfig = {
                   type: "link",
                   label: "API Reference",
                   href: "/developers/payments/autopay#api-reference",
+                },
+                {
+                  type: "link",
+                  label: "Subscription object",
+                  href: "/developers/payments/autopay#subscription-object",
+                },
+                {
+                  type: "link",
+                  label: "Status",
+                  href: "/developers/payments/autopay#subscription-states",
                 },
                 {
                   type: "link",
@@ -960,6 +975,11 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "link",
+              label: "Setting up AutoPay",
+              href: "/business/autopay#setting-up-autopay",
+            },
+            {
+              type: "link",
               label: "What your customer sees",
               href: "/business/autopay#what-your-customer-sees",
             },
@@ -972,11 +992,6 @@ const sidebars: SidebarsConfig = {
               type: "link",
               label: "Lifecycle and billing cycles",
               href: "/business/autopay#lifecycle-and-billing-cycles",
-            },
-            {
-              type: "link",
-              label: "Setting up AutoPay",
-              href: "/business/autopay#setting-up-autopay",
             },
             {
               type: "link",

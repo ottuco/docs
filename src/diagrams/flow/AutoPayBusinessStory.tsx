@@ -57,7 +57,7 @@ const steps: StoryStep[] = [
     sub: "Chooses a subscription",
     icon: mdiCartOutline,
     detail:
-      "Your customer chooses what to subscribe to. Your part: nothing yet.",
+      "Your customer picks a plan on your website or app. Your part: show your plans.",
   },
   {
     lane: 2,

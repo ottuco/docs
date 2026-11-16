@@ -19,6 +19,12 @@ export type StoryLane = {
   icon: string;
   /** Short label for the "show one side" chip, e.g. "Your part". */
   chip: string;
+  /**
+   * Position of this lane's chip among the side buttons, when it differs from
+   * the lane order (lanes follow the flow; chips can start with the reader's
+   * own part).
+   */
+  chipOrder?: number;
   /** Text for the side panel. Only shown when the story has journeys. */
   about?: { does: string; relies: string };
 };
