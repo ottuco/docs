@@ -209,7 +209,7 @@ export default function AutoPayDemoInner() {
       orderId,
       createReq,
       createRes: sampleCreateResponse,
-      subscriptionId: sampleSubscription.id,
+      subscriptionId: sampleSubscription.subscription_id,
     });
   }, [set]);
 
@@ -369,9 +369,9 @@ export default function AutoPayDemoInner() {
                 <ApiPanel label={`GET ${SUBSCRIPTIONS}/${state.subscriptionId}/`} data={state.sub} />
                 {(state.sample ||
                   (state.webhook?.extra?.autopay?.subscription_id &&
-                    state.webhook.extra.autopay.subscription_id === state.sub.id)) && (
+                    state.webhook.extra.autopay.subscription_id === state.sub.subscription_id)) && (
                   <p className={styles.cardDescription}>
-                    The webhook's <code>extra.autopay.subscription_id</code> equals this subscription's <code>id</code>.
+                    The webhook's <code>extra.autopay.subscription_id</code> equals this subscription's <code>subscription_id</code>.
                   </p>
                 )}
               </>
@@ -452,7 +452,7 @@ export default function AutoPayDemoInner() {
                 {canSchedule ? (
                   <>
                     the demo sends <code>mode: "at_period_end"</code>. The status stays <code>{status}</code>,
-                    the customer keeps access until the period ends, and <code>cancel_at_period_end</code> becomes{" "}
+                    the customer keeps access until the period ends, and <code>cancellation.at_period_end</code> becomes{" "}
                     <code>true</code>. Then Ottu cancels the subscription and charges nothing more.
                   </>
                 ) : (

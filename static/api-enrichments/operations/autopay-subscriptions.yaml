@@ -16,7 +16,7 @@ operations:
       2. The body is optional when you follow a link, because `limit` and `offset` are already in the query string. Resend your filters in the body if you want them applied to that page too.
       3. Query parameters win over body parameters. `{"offset": 1}` posted to a URL that ends `?offset=5` returns the page at offset 5.
 
-      Each item in `results` has the same attributes as the Subscription object, except `notification_config` and `current_cycle`. For those two, call Retrieve with the item's `id`.
+      Each item in `results` has the same attributes as the Subscription object, except `notification_config` and `current_cycle`. For those two, call Retrieve with the item's `subscription_id`.
 
   autopay_subscription_detail:
     description_replace: |
@@ -26,9 +26,9 @@ operations:
 
       To link a webhook to a subscription, read `extra.autopay.subscription_id` in the webhook payload: it is the subscription ID you stored at creation. As a fallback, the webhook's `session_id` equals `setup_session_id` on this object.
 
-      While the subscription is `pending_setup`, `card`, `current_cycle`, `next_billing_date`, `amount_variability`, `cycle_interval_days` and `total_cycles` are `null`. Ottu fills them in once the first payment is confirmed. If you did not send `end_date` in the `autopay` block, it is set to the agreement's `expiry_date` at that point, so the subscription ends when the agreement does.
+      While the subscription is `pending_setup`, every field of `card` is `null`, and so are `current_cycle` and `next_billing_date`. Ottu fills them in once the first payment is confirmed. If you did not send `end_date` in the `autopay` block, it is set to the agreement's `expiry_date` at that point, so the subscription ends when the agreement does.
 
-      `status`, `card` and `current_cycle` are the three fields worth polling. Together they tell you whether the first payment completed, which card is active and how the latest attempted charge went. `plan_name`, `merchant_reference` and `total_cycles` are read-only: the `autopay` request block has no field for them. `merchant_reference` is your checkout `order_no`.
+      `status`, `card` and `current_cycle` are the three fields worth polling. Together they tell you whether the first payment completed, which card is active and how the latest attempted charge went. `plan_name` and `agreement.total_cycles` are read-only: the `autopay` request block has no field for them. `order_no` is copied from your checkout `order_no`.
 
   autopay_subscription_cancel:
     parameters:
@@ -44,7 +44,7 @@ operations:
 
       Only you can cancel immediately. A cancellation from the customer's self-service page always takes effect at the end of the paid period.
 
-      `cancellation_initiator` records who requested the cancellation: `api_key` for you, `customer` for the customer. When the customer undoes a pending cancellation from the self-service page, Ottu clears it. Read `cancel_at_period_end` and `status` from Retrieve to know whether a cancellation is pending.
+      `cancellation.canceled_by.kind` records who requested the cancellation: `api_key` for you, `customer` for the customer. When the customer undoes a pending cancellation from the self-service page, Ottu clears it. Read `cancellation.at_period_end` and `status` from Retrieve to know whether a cancellation is pending.
 
   autopay_subscription_page_link:
     description_replace: |
