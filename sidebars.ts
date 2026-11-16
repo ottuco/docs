@@ -256,6 +256,11 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
+                  label: "Setup",
+                  href: "/developers/payments/autopay#setup",
+                },
+                {
+                  type: "link",
                   label: "Guide",
                   href: "/developers/payments/autopay#guide",
                 },
