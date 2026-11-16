@@ -9,9 +9,9 @@ import TabItem from "@theme/TabItem";
 import CodeBlock from "@theme/CodeBlock";
 import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
-# Signing Mechanism
+# Verify Signatures
 
-To ensure the integrity and authenticity of the [webhook notifications](/developers/webhooks/payment-events) sent to the merchant, Ottu employs a signing mechanism based on HMAC (Hash-based Message Authentication Code). By leveraging HMAC, Ottu can guarantee that the webhook's content remains untampered during transmission.
+To ensure the integrity and authenticity of the [webhook notifications](/developers/webhooks/event-catalogue) sent to the merchant, Ottu employs a signing mechanism based on HMAC (Hash-based Message Authentication Code). By leveraging HMAC, Ottu can guarantee that the webhook's content remains untampered during transmission.
 
 Two proofs of origin exist, and which one you verify depends on your [webhook format](/developers/webhooks/migrate-to-v3#formats). This page is self-contained: it gives the exact recipe, a published test vector and working code for each.
 
@@ -622,7 +622,8 @@ Compare that against the `v1` part of the `Ottu-Signature` header you received.
 The `v2` check (in [eight languages](#verify-v2)) and the [body signature](#body-signature) are covered above. The implementations below compute the **`v1` part** of the `Ottu-Signature` header on formats 1 and 2 in other languages.
 
 :::info How these samples were checked
-All four samples (Java, .NET, Ruby and Go) were run against the [`v1` test vector](#header-v1) and return `469fb5c5...`. The Python, Node.js, PHP, Go and Java `v2` verifiers above were run against the [`v2` vectors](#test-vectors), including the rejection cases. The C# and Ruby `v2` verifiers follow the same steps but have not been run yet.
+- **`v1` samples below:** all four (Java, .NET, Ruby and Go) were run against the [`v1` test vector](#header-v1) and return `469fb5c5...`.
+- **`v2` verifiers [above](#verify-v2):** the Python, Node.js, PHP, Go and Java verifiers were run against the [`v2` vectors](#test-vectors), including the rejection cases. The **C# and Ruby `v2` verifiers have not been run yet**: they follow the same steps, so test them against the vectors before you rely on them.
 :::
 
 ## Specific Examples

@@ -56,7 +56,7 @@ Always build your webhook handling logic against `pg_params`. When you add a new
 
 - [**Payment webhooks**](/developers/webhooks/payment-events/) — the `pg_params` object in every payment notification
 - [**Operation webhooks**](/developers/webhooks/operation-events/) — the `pg_params` object in refund, capture, and void notifications
-- [**Payment Status Query**](/developers/payments/psq/) — the response includes the same normalized fields
+- [**Payment Status Query v3**](/developers/payments/psq-v3) — the same normalized fields, as `params` in each attempt's `connector`
 
 The raw `gateway_response` is also included in webhook payloads for audit purposes, but you should not rely on it for business logic.
 

@@ -17,7 +17,7 @@ import PaymentEventOrder from "@site/src/diagrams/flow/PaymentEventOrder";
 
 Webhook **format 3** wraps every notification in one small, stable **envelope**. The envelope tells you *what happened* (`event`), *when* (`created`), *which event it is* (`id`), *who caused it* (`initiator`), and carries the details in `data`. For a `payment.*` event, `data` **is the payment itself, flat**: the same keys in every event, with no `payment` or `operation` wrapper to unwrap. Format 3 is authenticated by the [`Ottu-Signature` header](/developers/webhooks/verify-signatures#ottu-signature-header), so there is no body `signature` field.
 
-This page is self-contained: it lists every event Ottu sends (from [`payment.created`](#catalogue) to [`payment.refunded`](#catalogue)), what each `data` key means, and shows worked examples of receiving one. Every event id is also sent as the [`Idempotency-Key`](/developers/webhooks/delivery-and-retries#idempotency-key) header, and the [Payment Status API](/developers/payments/psq) returns the payment's current state when a snapshot is not enough. Delivery rules (success, retries, `Idempotency-Key`) live on [Delivery and Retries](/developers/webhooks/delivery-and-retries); moving from format 1 or 2 is on [Migrating to v3](/developers/webhooks/migrate-to-v3).
+This page is self-contained: it lists every event Ottu sends (from [`payment.created`](#catalogue) to [`payment.refunded`](#catalogue)), what each `data` key means, and shows worked examples of receiving one. Every event id is also sent as the [`Idempotency-Key`](/developers/webhooks/delivery-and-retries#idempotency-key) header, and the [Payment Status Query v3](/developers/payments/psq-v3) returns the payment's current state when a snapshot is not enough. Delivery rules (success, retries, `Idempotency-Key`) live on [Delivery and Retries](/developers/webhooks/delivery-and-retries); moving from format 1 or 2 is on [Migrating to v3](/developers/webhooks/migrate-to-v3).
 
 :::note Formats are never switched silently
 Ottu enables format 3 for your account only when you ask for it. Until then you keep receiving format 1 or 2 exactly as before. See [Migrating to v3](/developers/webhooks/migrate-to-v3).
@@ -342,7 +342,7 @@ Every format 3 body is one JSON object: the envelope keys at the top, and the pa
 `is_sandbox` and `merchant_id` live only in the envelope; `data` does not repeat them.
 
 :::warning The body is snapshotted once
-Ottu renders the body when the event is recorded and stores those exact bytes. Every delivery and retry of the event sends the **same bytes**, so `data` shows the payment *as it was when the event happened*, not as it is now. Do not treat an old retry as the current state: when the current state matters, call the [Payment Status API](/developers/payments/psq) instead.
+Ottu renders the body when the event is recorded and stores those exact bytes. Every delivery and retry of the event sends the **same bytes**, so `data` shows the payment *as it was when the event happened*, not as it is now. Do not treat an old retry as the current state: when the current state matters, call the [Payment Status Query v3](/developers/payments/psq-v3) instead.
 :::
 
 #### Actor {#actor}
@@ -606,7 +606,7 @@ The event is about the **refund**: `status` is `refunded`, `operation` is `refun
 ### Handling order and unknown events {#ordering}
 
 :::warning Delivery order is not guaranteed
-Events can arrive out of order. `payment.created` is delivered a few seconds after the payment is created, so it can arrive **after** a fast `payment.paid`; a `payment.paid` that was retried for an hour can arrive after a `payment.refunded` that succeeded first time. Order events for the same payment by `created`, and fetch the payment's current state with the [Payment Status API](/developers/payments/psq) when the final state matters. `created` has one-second resolution, so two events for the same payment can carry the same value: treat a tie as unordered and fetch the current state instead of guessing.
+Events can arrive out of order. `payment.created` is delivered a few seconds after the payment is created, so it can arrive **after** a fast `payment.paid`; a `payment.paid` that was retried for an hour can arrive after a `payment.refunded` that succeeded first time. Order events for the same payment by `created`, and fetch the payment's current state with the [Payment Status Query v3](/developers/payments/psq-v3) when the final state matters. `created` has one-second resolution, so two events for the same payment can carry the same value: treat a tie as unordered and fetch the current state instead of guessing.
 :::
 
 - **De-duplicate on the event `id`**, the same value as the `Idempotency-Key` header. Ottu sends the same event again on a retry, so processing an `id` twice must change nothing.
@@ -645,7 +645,7 @@ Events can arrive out of order. `payment.created` is delivered a few seconds aft
 
 <FAQ>
   <FAQItem question="Can events arrive out of order?">
-    Yes. `payment.created` can arrive after a fast `payment.paid`, and a retried event can arrive late. Order events for the same payment by `created`, de-duplicate on the event `id`, and fetch the current state from the [Payment Status API](/developers/payments/psq) when the final state matters. See [ordering](#ordering).
+    Yes. `payment.created` can arrive after a fast `payment.paid`, and a retried event can arrive late. Order events for the same payment by `created`, de-duplicate on the event `id`, and fetch the current state from the [Payment Status Query v3](/developers/payments/psq-v3) when the final state matters. See [ordering](#ordering).
   </FAQItem>
   <FAQItem question="How do I recognise a capture or a cash-on-delivery payment?">
     A capture is `payment.paid` with `data.operation` equal to `capture`, and cash on delivery is `payment.cod`. Read the event name from the envelope key `event`.
@@ -663,6 +663,6 @@ Events can arrive out of order. `payment.created` is delivered a few seconds aft
 
 ## What's Next?
 
-- [**Verify Signatures**](/developers/webhooks/verify-signatures#ottu-signature-header): verify `Ottu-Signature` v2 on the raw body, with Python, Node.js and PHP code
+- [**Verify Signatures**](/developers/webhooks/verify-signatures#ottu-signature-header): verify `Ottu-Signature` v2 on the raw body, with code in eight languages
 - [**Delivery and Retries**](/developers/webhooks/delivery-and-retries): success rules, the 8-attempt schedule and `Idempotency-Key`
 - [**Migrating to v3**](/developers/webhooks/migrate-to-v3): map format 1 and 2 fields to their v3 location

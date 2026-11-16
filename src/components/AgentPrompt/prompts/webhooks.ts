@@ -66,7 +66,7 @@ Unit test it with Ottu's published vector:
 
 ## 6. De-duplicate
 - Store each processed event id with a UNIQUE constraint, in the same transaction as the business change, so a crash never applies an event twice.
-- The same event can arrive more than once (retries, a manual re-send, or two of our URLs subscribed to the same event); processing an id twice must change nothing.
+- The same event can arrive more than once (retries, a manual re-send, or two of our URLs configured for the same event); processing an id twice must change nothing.
 
 ## 7. How our system reacts to each event
 Branch on "event" and data.operation, never on the human text in data.message.

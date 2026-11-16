@@ -94,7 +94,7 @@ Not carried over: `transactions`, `signature`, `transaction_log_id`, `capture_de
 
 ### New moments in format 3 {#new-moments}
 
-Format 3 sends events that formats 1 and 2 do not: `payment.created` (when a payment is created), `payment.attempted` (every failed try that leaves the payment payable), `payment.refund_pending` and `payment.refund_rejected` (a queued refund and its rejection). Subscribe to what you need; ignore the rest.
+Format 3 sends events that formats 1 and 2 do not: `payment.created` (when a payment is created), `payment.attempted` (every failed try that leaves the payment payable), `payment.refund_pending` and `payment.refund_rejected` (a queued refund and its rejection). Events are selected on Ottu's side, so ask Ottu which events your account receives; handle the ones you need and answer `2xx` to the rest without acting on them.
 
 :::warning Order is not guaranteed
 `payment.created` is delivered a few seconds after the payment is created, so it can arrive after a fast `payment.paid`. Order by `created` and de-duplicate on the event `id`. See [ordering](/developers/webhooks/event-catalogue#ordering).
@@ -109,7 +109,7 @@ On the payment's own `webhook_url` the payer waits for your answer on Ottu's pag
 
 ### Moments with no event type {#no-type}
 
-A format 3 account never receives a format 1 or 2 body. If a payment moment has no event in the [catalogue](/developers/webhooks/event-catalogue#catalogue), nothing is sent for it. Ottu logs the skip, and when the moment concerns the payer's waiting page, that page moves to its failure state instead of waiting for your answer. Build your integration on the catalogue types and reconcile anything else with the [Payment Status API](/developers/payments/psq).
+A format 3 account never receives a format 1 or 2 body. If a payment moment has no event in the [catalogue](/developers/webhooks/event-catalogue#catalogue), nothing is sent for it. Ottu logs the skip, and when the moment concerns the payer's waiting page, that page moves to its failure state instead of waiting for your answer. Build your integration on the catalogue types and reconcile anything else with the [Payment Status Query v3](/developers/payments/psq-v3).
 
 ### Error handling
 
