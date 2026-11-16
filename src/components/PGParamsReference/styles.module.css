@@ -170,6 +170,7 @@
 .categoryBadge {
   display: inline-flex;
   padding: 2px 8px;
+  border: 1px solid transparent;
   border-radius: 4px;
   font-size: 10px;
   font-weight: 600;
@@ -177,24 +178,29 @@
   white-space: nowrap;
 }
 
+/* The four categories in the brand palette only (FIGMA_DESIGN_SYSTEM.md):
+   Ottu orange tint and outline, neutral tint and outline. Text is the
+   darkest orange or the heading color, so the 10px labels stay readable. */
 .cat_card {
-  background: rgba(25, 131, 188, 0.1);
-  color: #1570a0;
+  background: rgba(242, 126, 32, 0.12);
+  color: var(--ifm-color-primary-darkest);
 }
 
 .cat_identifier {
-  background: rgba(107, 114, 128, 0.1);
-  color: #4b5563;
+  background: #f2f2f2;
+  color: var(--ifm-heading-color);
 }
 
 .cat_status {
-  background: rgba(139, 92, 246, 0.1);
-  color: #7c3aed;
+  background: transparent;
+  border-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary-darkest);
 }
 
 .cat_dcc {
-  background: rgba(16, 185, 129, 0.1);
-  color: #059669;
+  background: transparent;
+  border-color: var(--ifm-heading-color);
+  color: var(--ifm-heading-color);
 }
 
 /* ── Description ───────────────────────────────────── */
@@ -321,23 +327,23 @@
 }
 
 [data-theme="dark"] .cat_card {
-  background: rgba(25, 131, 188, 0.15);
-  color: #7dd3fc;
+  background: rgba(242, 126, 32, 0.18);
+  color: var(--ifm-color-primary-lightest);
 }
 
 [data-theme="dark"] .cat_identifier {
-  background: rgba(156, 163, 175, 0.15);
-  color: #9ca3af;
+  background: #1e2939;
+  color: #e5e7eb;
 }
 
 [data-theme="dark"] .cat_status {
-  background: rgba(139, 92, 246, 0.15);
-  color: #c4b5fd;
+  border-color: var(--ifm-color-primary-light);
+  color: var(--ifm-color-primary-lighter);
 }
 
 [data-theme="dark"] .cat_dcc {
-  background: rgba(16, 185, 129, 0.15);
-  color: #6ee7b7;
+  border-color: #9ca3af;
+  color: #e5e7eb;
 }
 
 [data-theme="dark"] .empty {
