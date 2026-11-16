@@ -24,7 +24,7 @@ The Checkout SDK collects card details, handles 3-D Secure, and routes payment s
 
 #### Server-side integration
 
-- **[Python SDK](https://github.com/ottuco/ottu-python)** — Python wrapper around the REST API.
+- **[Python SDK](https://github.com/ottuco/ottu-py)** — Python wrapper around the REST API.
 - **[Django SDK](/developers/getting-started/#django-sdk)** — Django-specific integration with built-in session management, webhooks, and card operations.
 
 :::note
