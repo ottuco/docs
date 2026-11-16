@@ -1,7 +1,8 @@
 // The webhook events an AutoPay integration receives, for the Events tab of
 // the API Reference shortcut box (docs/developers/payments/autopay/index.mdx).
 // The first charge is an ordinary checkout payment, so these are its v3
-// payment events; renewals reach only a webhook endpoint for subscription.* events (see AUTOPAY_EVENTS_NOTE).
+// payment events. Renewals reach only a webhook endpoint configured for the
+// subscription.* events, which are not listed here (see AUTOPAY_EVENTS_NOTE).
 import type { ShortcutEvent } from "@site/src/components/ApiReference/Shortcuts";
 
 const CATALOGUE = "/developers/webhooks/event-catalogue/#catalogue";

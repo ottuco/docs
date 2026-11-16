@@ -204,7 +204,11 @@ For the payment's own `webhook_url` (the one the payer waits on), formats 1 and 
 
 ### Same URL on a legacy route {#same-url}
 
-If an event is also configured to reach a URL that is one of your existing webhook URLs (the payment's `webhook_url`, a plugin URL or the operations URL), that URL receives **one** delivery of the event, in the format of that existing route, not one for each route. Nothing changes in your receiver. Separately, if the same event is configured for two **different** URLs, each URL gets its own delivery with the same event id, so de-duplicate on the event id wherever the URLs share a system.
+If a **payment** event is also configured to reach a URL that is one of your existing webhook URLs (the payment's `webhook_url`, a plugin URL or the operations URL), that URL receives **one** delivery of the event, in the format of that existing route, not one for each route. Nothing changes in your receiver. Separately, if the same event is configured for two **different** URLs, each URL gets its own delivery with the same event id, so de-duplicate on the event id wherever the URLs share a system.
+
+### Webhook endpoints and subscription events {#webhook-endpoints}
+
+[Subscription events](/developers/webhooks/event-catalogue#subscription-events) reach only the webhook endpoints configured for them in the Administration panel, never a payment's `webhook_url`, a plugin URL or the operations URL, and always in format 3. The success rules above, the retry schedule below and the `Idempotency-Key` apply to each endpoint the same way. Unticking an endpoint's **Is active** stops its deliveries, including retries still pending.
 
 ### Retry schedule {#retry-schedule}
 

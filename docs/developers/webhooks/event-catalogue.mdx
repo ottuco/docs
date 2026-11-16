@@ -645,7 +645,7 @@ A webhook endpoint always receives format 3, whatever **Version** is set in Webh
 | Key | Type | Meaning |
 |---|---|---|
 | `subscription_id` | string | The AutoPay subscription the event is about, at most 128 characters. Use it to find the subscription on your side and with [Retrieve a subscription](/developers/payments/autopay/?autopay-api=retrieve#api-reference). |
-| `status` | string | The subscription's status, one of the [subscription states](/developers/payments/autopay#subscription-states). |
+| `status` | string | The subscription's status after the event, as AutoPay reports it (for example `active` after `subscription.renewed`). See [subscription states](/developers/payments/autopay#subscription-states). |
 
 The envelope keys mean the same as for payment events, with these differences:
 

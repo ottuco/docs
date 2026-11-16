@@ -62,7 +62,7 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 <AutoPayStory />
 
-Create the subscription with one [Checkout API](../checkout-api) call. Ottu sends the result of the first payment to your `webhook_url`, if you set one. For renewals, read the status from the API: [retrieve](/developers/payments/autopay/?autopay-api=retrieve#api-reference) the subscription, read its [billing cycles](/developers/payments/autopay/?autopay-api=cycles#api-reference), or [list](/developers/payments/autopay/?autopay-api=list#api-reference) subscriptions with `status: "past_due"`, or receive [`subscription.*` events](/developers/webhooks/event-catalogue#subscription-events) at a webhook endpoint.
+Create the subscription with one [Checkout API](../checkout-api) call. Ottu sends the result of the first payment to your `webhook_url`, if you set one. For renewals, read the status from the API: [retrieve](/developers/payments/autopay/?autopay-api=retrieve#api-reference) the subscription, read its [billing cycles](/developers/payments/autopay/?autopay-api=cycles#api-reference), or [list](/developers/payments/autopay/?autopay-api=list#api-reference) subscriptions with `status: "past_due"`. Or set up a webhook endpoint for the [`subscription.*` events](/developers/webhooks/event-catalogue#subscription-events) in the Administration panel, and Ottu tells you about each renewal.
 
 ### Live Demo {#live-demo}
 
