@@ -74,7 +74,9 @@ async function check(header: string, body: string, key: string, now: number): Pr
 function Lab(): React.JSX.Element {
   const [mode, setMode] = useState<"sign" | "check">("sign");
   const [key, setKey] = useState(VECTOR.key);
-  const [body, setBody] = useState(JSON.stringify(paid));
+  // Pretty-printed so the curl reads well. The signature is over these exact
+  // bytes, so it stays valid; Ottu itself sends the body compact.
+  const [body, setBody] = useState(JSON.stringify(paid, null, 2));
   const [t, setT] = useState(() => String(Math.floor(Date.now() / 1000)));
   const [header, setHeader] = useState(VECTOR.header);
   const [useClock, setUseClock] = useState(false);
@@ -140,7 +142,7 @@ function Lab(): React.JSX.Element {
       </label>
       <label className={styles.label}>
         Raw body <span className={styles.hint}>the exact bytes, not re-formatted</span>
-        <textarea className={styles.textarea} value={body} onChange={(event) => setBody(event.target.value)} spellCheck={false} rows={5} />
+        <textarea className={styles.textarea} value={body} onChange={(event) => setBody(event.target.value)} spellCheck={false} rows={8} />
       </label>
 
       {mode === "sign" ? (
@@ -166,7 +168,10 @@ function Lab(): React.JSX.Element {
               Copy
             </button>
           </div>
-          <pre className={styles.out}>{curl}</pre>
+          <pre className={`${styles.out} ${styles.curl}`}>{curl}</pre>
+          <p className={styles.note}>
+            The body is pretty-printed here to read easily, and the signature is computed over exactly these bytes. Ottu sends it compact; your receiver must not care either way, because it verifies the raw bytes it got.
+          </p>
           <p className={styles.note}>
             Your receiver should answer 2xx. Send it again: the same id must not be processed twice. Change one character of the body: it must answer 401.
           </p>

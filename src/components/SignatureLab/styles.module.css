@@ -88,6 +88,14 @@
   margin: 4px 0 8px;
 }
 
+/* The curl keeps its line breaks and indentation, and scrolls past a screenful. */
+.curl {
+  white-space: pre;
+  word-break: normal;
+  overflow: auto;
+  max-height: 420px;
+}
+
 .note {
   font-size: 0.85rem;
   color: var(--ifm-color-emphasis-800);
