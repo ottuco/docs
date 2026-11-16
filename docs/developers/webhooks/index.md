@@ -4,6 +4,7 @@ sidebar_label: Overview & Setup
 ---
 
 import FAQ, { FAQItem } from '@site/src/components/FAQ';
+import AgentPrompt from '@site/src/components/AgentPrompt';
 
 # Webhooks
 
@@ -13,6 +14,8 @@ Ottu calls your server when something happens to a payment, so you don't have to
 - **Off by default.** Turn webhooks on in the Ottu dashboard, or send a `webhook_url` with the [Checkout API](/developers/payments/checkout-api).
 - **One shape for every gateway.** MPGS, KNET, PayPal or any other [payment gateway](/developers/payments/payment-methods): you parse one format. A gateway you add later needs no new code.
 - **Gateway details included.** Normalized gateway fields ([`pg_params`](./pg-params) on formats 1 and 2, [`connector.params`](./event-catalogue.mdx#event-data-connector-params) on format 3) plus the gateway's raw response as JSON ([`connector.responses`](./event-catalogue.mdx#event-data-connector-responses) on format 3), card numbers cut.
+
+<AgentPrompt topic="webhooks" />
 
 :::tip[Every event Ottu can send]
 See the [event catalogue](./event-catalogue.mdx#catalogue) for every event, when each one is sent, and the fields it carries.

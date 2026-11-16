@@ -7,6 +7,7 @@ toc_max_heading_level: 3
 ---
 
 import EventObject from "@site/src/components/EventObject";
+import AgentPrompt from "@site/src/components/AgentPrompt";
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
@@ -21,6 +22,8 @@ This page is self-contained: it lists every event Ottu sends (from [`payment.cre
 :::note Formats are never switched silently
 Ottu enables format 3 for your account only when you ask for it. Until then you keep receiving format 1 or 2 exactly as before. See [Migrating to v3](/developers/webhooks/migrate-to-v3).
 :::
+
+<AgentPrompt topic="webhooks" />
 
 ## When to Use
 
