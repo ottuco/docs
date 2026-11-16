@@ -160,7 +160,7 @@ The customer pays nothing and the card is saved only. Cycle 1 is the first real 
 
 A failed charge is retried one hour apart. The default is 3 retries, 4 attempts in total, and you can set it from 1 to 10 with `retry_count` on the `autopay` block. When the last attempt fails, the cycle becomes `failed`, the subscription becomes `past_due`, and the customer gets a final email with a link to pay the balance. See [When a payment fails](/business/autopay/#when-a-payment-fails).
 
-Read `past_due` from the API: [list subscriptions](/developers/payments/autopay/?autopay-api=list#api-reference) with `status: "past_due"` and poll that list. A `past_due` subscription is not billed again.
+Learn about `past_due` from a webhook endpoint for the [`subscription.past_due`](/developers/webhooks/event-catalogue#subscription-events) event, or from the API: [list subscriptions](/developers/payments/autopay/?autopay-api=list#api-reference) with `status: "past_due"` and poll that list. A `past_due` subscription is not billed again.
 
 :::warning Ottu never auto-cancels a past-due subscription
 A `past_due` subscription stays that way until the customer pays or you cancel it with `mode: "immediate"`.
@@ -290,7 +290,7 @@ These are the statuses you will meet most often, so you can handle them without 
 - **Billing periods.** `autopay.frequency` is `monthly` or `yearly`. There is no weekly or custom interval.
 - **No edits.** A running subscription cannot be edited: amount, `autopay.frequency`, billing day, retry count, `language`, `notification_preferences` or customer email. [Cancel](/developers/payments/autopay/?autopay-api=cancel#api-reference) it and create a new one. There is no proration.
 - **Retries.** You set only the retry count, and only when you create the subscription. Ottu sets the interval. See [Retries & Dunning](#retries-and-dunning).
-- **No `past_due` alert.** A `past_due` subscription is not billed again until the customer pays or you cancel it (see [Retries & Dunning](#retries-and-dunning)). Ottu does not notify you, so poll [List subscriptions](/developers/payments/autopay/?autopay-api=list#api-reference) with `status: "past_due"`.
+- **No `past_due` alert on your `webhook_url`.** A `past_due` subscription is not billed again until the customer pays or you cancel it (see [Retries & Dunning](#retries-and-dunning)). Ottu does not call your `webhook_url` for it: add a webhook endpoint for [`subscription.past_due`](/developers/webhooks/event-catalogue#subscription-events), or poll [List subscriptions](/developers/payments/autopay/?autopay-api=list#api-reference) with `status: "past_due"`.
 - **No dashboard screen.** AutoPay is API-only. Renewal charges appear in Payment Management as normal transactions.
 - **Sandbox.** You cannot trigger a renewal early.
 
