@@ -113,7 +113,7 @@ Send a checkout `amount` of `0.000`. Your customer pays nothing, Ottu saves the 
 #### Billing Cycles {#billing-cycles}
 
 - Ottu creates one cycle at a time: the next cycle exists only after the previous one is paid. Each cycle locks its own `amount_due` when it is created.
-- `start_date` does not delay the checkout charge. The customer pays it when they complete checkout.
+- The customer pays the first charge at checkout, on the day they complete it. `start_date` does not change that day. It sets the date of cycle 1 and the billing day for every later cycle.
 - When `amount` is above `0`, that charge is cycle 1: `charge_type: "cit"`, `scheduled_date` equal to `start_date`, and already `paid`. Cycle 2 comes one period (month or year) after `start_date`.
 - When `amount` is `0.000`, the card is saved only. Cycle 1 is the first real charge, one period after `start_date`.
 
