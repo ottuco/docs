@@ -633,7 +633,7 @@ The `v2` check (in [eight languages](#verify-v2)) and the [body signature](#body
 
 :::info How these samples were checked
 - **`v1` samples below:** all four (Java, .NET, Ruby and Go) were run against the [`v1` test vector](#header-v1) and return `469fb5c5...`.
-- **`v2` verifiers [above](#verify-v2):** the Python, Node.js, PHP, Go and Java verifiers were run against the [`v2` vectors](#test-vectors), including the rejection cases. The **C# and Ruby `v2` verifiers have not been run yet**: they follow the same steps, so test them against the vectors before you rely on them.
+- **`v2` verifiers [above](#verify-v2):** all were run against the [`v2` vectors](#test-vectors). The openssl command produces the expected `v2`; the seven verifiers (Python, Node.js, PHP, Go, Java, C# on .NET 8, Ruby 3.3) accept the vector and reject the changed `t`, the wrong key, and the vector's old `t` on the real clock.
 :::
 
 ## Specific Examples
