@@ -17,7 +17,7 @@ import AutoPayStates from "@site/src/diagrams/flow/AutoPayStates";
 
 Sell by subscription and let Ottu do the billing work. Your developer makes one checkout call. Ottu then generates every [billing cycle](/glossary/#term-billing-cycle), charges the saved card, retries failed charges, emails your customer, and hosts a page where they manage their own [subscription](/glossary/#term-subscription).
 
-[**See it live**](/developers/payments/autopay/#live-demo): try the demo. It creates a test subscription on Ottu's sandbox.
+**To start:** ask [Ottu support](/resources/#contact) to switch AutoPay on, then send your developer [AutoPay for developers](/developers/payments/autopay/). Your developer can also try the [live demo](/developers/payments/autopay/#live-demo) on Ottu's test system.
 
 ## Why use AutoPay {#why-use-autopay}
 
@@ -27,7 +27,9 @@ Sell by subscription and let Ottu do the billing work. Your developer makes one 
 - **Offer free trials without extra work.** Your customer saves a card and pays nothing today. Ottu charges the first real cycle on its own.
 
 :::info Before you start
-Your developer connects AutoPay through the API, on a [gateway with auto-debit](/business/payments/gateways/?features=autodebit). The full list is in [Limits](#limits).
+- **Your part:** Ottu support switches AutoPay on. Your developer adds one checkout call, confirms each new subscription, and runs a daily check for failed renewals.
+- **You need** a [gateway with auto-debit](/business/payments/gateways/?features=autodebit). It lets Ottu charge a saved card without your customer present.
+- **It fits** monthly or yearly plans. Your developer manages subscriptions through the API: there is no dashboard screen. See the [full checklist](#setting-up-autopay) and [Limits](#limits).
 :::
 
 ## How it works {#how-it-works}
@@ -35,6 +37,18 @@ Your developer connects AutoPay through the API, on a [gateway with auto-debit](
 Your team starts it, your customer pays once, and Ottu runs everything after. Click a step to see who does what. Building the integration? See [AutoPay for developers](/developers/payments/autopay/).
 
 <AutoPayBusinessStory />
+
+## Setting up AutoPay {#setting-up-autopay}
+
+Your developers call the API to create, look up, and cancel subscriptions. Before your first subscription, make sure you have:
+
+1. **AutoPay enabled for your account.** Ask [Ottu support](/resources/#contact) to turn it on.
+2. **A support email.** It appears on the customer's page and in the footer of every email Ottu sends.
+3. **A privacy policy URL.** It is linked from the footer of every email Ottu sends.
+4. **A payment gateway with auto-debit,** in the currency you bill in.
+5. **The email and text templates registered,** in English and Arabic: 6 emails and 3 text messages. Ottu support sets these up, the same way [notification templates](/business/notifications/) work for one-off payments.
+
+There is no catalog to maintain. Your team sets the plan name and price in each checkout call. The [developer docs](/developers/payments/autopay/#api-reference) show the request shape.
 
 ## What your customer sees {#what-your-customer-sees}
 
@@ -269,18 +283,6 @@ Every subscription bills on the same day, called its anchor day. The start date 
 
 **Anchored on the 31st:** Jan 31 → Feb 28 (Feb 29 in a leap year) → Mar 31
 
-## Setting up AutoPay {#setting-up-autopay}
-
-Your developers call the API to create, look up, and cancel subscriptions. Before your first subscription, make sure you have:
-
-1. **AutoPay enabled for your account.** Ask Ottu support to turn it on.
-2. **A support email.** It appears on the customer's page and in the footer of every email Ottu sends.
-3. **A privacy policy URL.** It is linked from the footer of every email Ottu sends.
-4. **A payment gateway with auto-debit,** in the currency you bill in.
-5. **The email and text templates registered,** in English and Arabic: 6 emails and 3 text messages. Ottu support sets these up, the same way [notification templates](/business/notifications/) work for one-off payments.
-
-There is no catalog to maintain. Your team sets the plan name and price in each checkout call. The [developer docs](/developers/payments/autopay/#api-reference) show the request shape.
-
 ## Limits {#limits}
 
 This is the full list. Each limit comes with what to do instead.
@@ -334,6 +336,7 @@ This is the full list. Each limit comes with what to do instead.
 
 ## What's Next? {#whats-next}
 
+- [Ottu support](/resources/#contact): switch AutoPay on and register your email and text templates.
 - [AutoPay for developers](/developers/payments/autopay/): API integration and the full request/response contract.
 - [Notifications](/business/notifications/): configuring email, SMS, and WhatsApp templates generally.
 - [Payment Management](/business/payment-management/): find and manage your transactions.

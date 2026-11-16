@@ -908,6 +908,11 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "link",
+              label: "Setting up AutoPay",
+              href: "/business/autopay#setting-up-autopay",
+            },
+            {
+              type: "link",
               label: "What your customer sees",
               href: "/business/autopay#what-your-customer-sees",
             },
@@ -920,11 +925,6 @@ const sidebars: SidebarsConfig = {
               type: "link",
               label: "Lifecycle and billing cycles",
               href: "/business/autopay#lifecycle-and-billing-cycles",
-            },
-            {
-              type: "link",
-              label: "Setting up AutoPay",
-              href: "/business/autopay#setting-up-autopay",
             },
             {
               type: "link",
