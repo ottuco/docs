@@ -1,14 +1,15 @@
 ---
 title: Operation Events
 sidebar_label: Operation Events
+displayed_sidebar: developerSidebar
 ---
 
 import SchemaEmbed from "@site/src/components/SchemaEmbed";
 
 # Operation Notification
 
-:::note This page describes webhook formats 1 and 2
-If your account uses [format 3](/developers/webhooks/event-catalogue), your refunds, captures and voids arrive inside an event envelope as `payment.refunded`, `payment.paid` (with `data.operation` equal to `capture`) and `payment.voided`, with the same flat `data` as every payment event; see [Webhook Events (v3)](/developers/webhooks/event-catalogue) and [Migrating to v3](/developers/webhooks/migrate-to-v3). Each delivery also carries an [`Idempotency-Key`](/developers/webhooks/delivery-and-retries#idempotency-key) header with the event id on every format.
+:::warning Webhook formats 1 and 2 are deprecated
+This page describes the older webhook formats. In [format 3](/developers/webhooks/event-catalogue), refunds, captures and voids arrive as `payment.refunded`, `payment.paid` (with `data.operation` equal to `capture`) and `payment.voided`. In v3, `refund_queued` is named `refund_pending` and `invalided` is `invalidated`. To move an existing integration, see [Migrating to v3](/developers/webhooks/migrate-to-v3).
 :::
 
 Ottu’s operation webhooks provide real-time insights into post-transaction activities, specifically focusing on `refund`, `capture`, and `void`. Operating asynchronously, they ensure merchants are promptly informed about these crucial subsequent payment gateway operations without disrupting the main transaction flow. By utilizing these webhooks, merchants gain a clearer view of their transactional landscape, enhancing decision-making and customer interactions.

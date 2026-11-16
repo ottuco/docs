@@ -1,6 +1,7 @@
 ---
 title: Payment Events
 sidebar_label: Payment Events
+displayed_sidebar: developerSidebar
 ---
 
 import SchemaEmbed from "@site/src/components/SchemaEmbed";
@@ -8,8 +9,8 @@ import PaymentRedirectSequence from "@site/src/diagrams/flow/PaymentRedirectSequ
 
 # Payment Notification
 
-:::note This page describes webhook formats 1 and 2
-If your account uses [format 3](/developers/webhooks/event-catalogue), your payments arrive inside an event envelope, and `data` is the payment itself, flat; see [Webhook Events (v3)](/developers/webhooks/event-catalogue) and [Migrating to v3](/developers/webhooks/migrate-to-v3). Each delivery also carries an [`Idempotency-Key`](/developers/webhooks/delivery-and-retries#idempotency-key) header with the event id on every format.
+:::warning Webhook formats 1 and 2 are deprecated
+This page describes the older webhook formats. New integrations use [format 3](/developers/webhooks/event-catalogue): every payment arrives as an event with the payment itself in `data`. In v3, `refund_queued` is named `refund_pending` and `invalided` is `invalidated`. To move an existing integration, see [Migrating to v3](/developers/webhooks/migrate-to-v3).
 :::
 
 Payment webhooks are specific to payment events and are triggered on multiple occasions:

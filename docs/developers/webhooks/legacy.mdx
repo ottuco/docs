@@ -1,0 +1,25 @@
+---
+title: Webhooks v1 and v2
+sidebar_label: Looking for v1 and v2?
+description: The older webhook formats 1 and 2, kept for existing integrations, and how to move to format 3.
+displayed_sidebar: developerSidebar
+hide_table_of_contents: true
+---
+
+# Webhooks v1 and v2
+
+New integrations use [webhook format 3](/developers/webhooks/event-catalogue). The pages below describe formats 1 and 2, which Ottu still sends to accounts that use them. Ottu never moves an account to a new format on its own.
+
+| Page | What it covers |
+|---|---|
+| [Payment Events (formats 1 and 2)](/developers/webhooks/payment-events) | The notification Ottu sends when a payment is processed: its fields, setup on the payment and the redirect behaviour of `200` and `201`. |
+| [Operation Events (formats 1 and 2)](/developers/webhooks/operation-events) | The notification Ottu sends after a refund, capture or void, including the pending `refund_queued` state. |
+
+## Coming from v1 or v2?
+
+Format 3 sends every webhook as an event, with the payment itself in `data`, and renames two values: `refund_queued` is `refund_pending`, and `invalided` is `invalidated`. [Here is how to migrate](/developers/webhooks/migrate-to-v3): a field-by-field map from formats 1 and 2, and steps you can test before anything changes for your customers.
+
+## What's Next?
+
+- [Events & Envelope](/developers/webhooks/event-catalogue): every format 3 event and its fields.
+- [Verify Signatures](/developers/webhooks/verify-signatures): check that a webhook came from Ottu.

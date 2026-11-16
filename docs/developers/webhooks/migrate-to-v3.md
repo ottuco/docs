@@ -2,6 +2,7 @@
 title: Webhook Formats and Migrating to v3
 sidebar_label: Formats & Migration
 description: The three Ottu webhook formats, what format 3 changes, a field-by-field map from formats 1 and 2, and the steps to switch safely.
+displayed_sidebar: developerSidebar
 ---
 
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
