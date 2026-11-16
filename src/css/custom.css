@@ -633,6 +633,11 @@ html[data-theme="dark"] {
   border: none;
 }
 
+/* A link written as code (`[`pg_params`](...)`) keeps the link color, so readers see it is clickable */
+.markdown a code {
+  color: var(--ifm-link-color);
+}
+
 /* Inline code in running text — tighter padding */
 .markdown p code {
   padding: 2px 4px;
