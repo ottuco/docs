@@ -32,7 +32,7 @@ Ottu sends webhooks in one of three **formats**, set per account. **Ottu never s
 
 Format 3 adds a [catalogue of 15 events](./event-catalogue.mdx#catalogue) named after the status reached (`payment.paid`, `payment.refunded`, ...), a fixed [retry schedule](./delivery-and-retries.mdx#retry-schedule), and `Idempotency-Key`. To move from format 1 or 2, follow [Migrating to v3](./migrate-to-v3.md).
 
-On **every** format each delivery carries an `Idempotency-Key` header with the event id, so you can drop a duplicate before you fulfil an order. See [Delivery and Retries](./delivery-and-retries.mdx#idempotency-key).
+Each delivery carries an `Idempotency-Key` header with the event id, so you can drop a duplicate before you fulfil an order. On formats 1 and 2 a delivery whose event Ottu could not record comes without it, so handle a missing header there. See [Delivery and Retries](./delivery-and-retries.mdx#idempotency-key).
 
 :::note Ordering is not guaranteed
 Events can arrive out of order, especially after a retry. `payment.created` can arrive after a fast `payment.paid`. Use the `created` time of a format 3 event to order them, de-duplicate on the event `id`, and fetch the payment's current state with the [Payment Status Query v3](/developers/payments/psq-v3) when the final state matters.

@@ -20,7 +20,7 @@ Copy the prompt below into Claude Code, Cursor or Copilot, then come back to ste
 
 ## 1. Add a route that reads the raw body
 
-One `POST` endpoint, for example `/webhooks/ottu`. Read the body **as bytes** before any JSON parsing: the signature covers the exact bytes Ottu sends. Exempt the route from CSRF and login middleware. Ready receivers in seven languages are in the [event catalogue](/developers/webhooks/event-catalogue#quick-implementation).
+One `POST` endpoint, for example `/webhooks/ottu`. Read the body **as bytes** before any JSON parsing: the signature covers the exact bytes Ottu sends. Exempt the route from CSRF and login middleware. Ready receivers in seven languages (Python, Node.js, PHP, Go, Java, C# and Ruby) are in the [event catalogue](/developers/webhooks/event-catalogue#quick-implementation).
 
 ## 2. Verify, de-duplicate, answer
 

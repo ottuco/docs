@@ -84,7 +84,10 @@ function fieldRows(schema: Schema, prefix = ""): string[] {
 function eventObject(part: string | undefined): string {
   const data = part === "data";
   const schema = data ? (EVENT_SCHEMA.properties as Record<string, Schema>).data : (EVENT_SCHEMA as Schema);
-  const table = ["| Field | Type | Description |", "|---|---|---|", ...fieldRows(schema, data ? "data." : "")].join("\n");
+  // The envelope lists data's own fields once, under its data section (<EventObject part="data" />), not twice.
+  const rows = fieldRows(schema, data ? "data." : "").filter((row) => data || !row.startsWith("| `data."));
+  if (!data) rows.push("| `data.*` | | Every key of `data` is in the data object table on this page (#data-keys). |");
+  const table = ["| Field | Type | Description |", "|---|---|---|", ...rows].join("\n");
   if (data) return table;
   const examples = fs
     .readdirSync(EXAMPLES_DIR)
@@ -133,7 +136,10 @@ function render(name: string, attrs: Record<string, string>, route: string): str
     case "EventObject":
       return eventObject(attrs.part);
     case "AgentPrompt":
-      return `**Prompt for your coding agent** (copy it into Claude Code, Cursor or Copilot):\n\n\`\`\`text\n${WEBHOOKS_PROMPT}\n\`\`\``;
+      // The full prompt once (on the quickstart); other pages point to it, so llms-full.txt carries it once.
+      return route === "/developers/webhooks/quickstart/"
+        ? `**Prompt for your coding agent** (copy it into Claude Code, Cursor or Copilot):\n\n\`\`\`text\n${WEBHOOKS_PROMPT}\n\`\`\``
+        : `_A ready prompt for your coding agent (Claude Code, Cursor, Copilot) is on ${SITE}/developers/webhooks/quickstart/ ._`;
     case "SignatureLab":
       return `_Interactive signature lab (sign a body, check a header, copy a signed curl): ${SITE}${route}#signature-lab. It needs a browser; to check offline, use the test vectors on ${SITE}/developers/webhooks/verify-signatures#test-vectors._`;
     default:

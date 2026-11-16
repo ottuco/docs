@@ -475,6 +475,7 @@ The resulting signature is dispatched with the [webhook notification](/developer
 
 #### 4. Verification by Merchant
 
+- Read `t` from the same header and reject the request if it is more than **300 seconds** from your clock, as for [`v2`](#verify-v2). This is the replay protection; the `v1` samples below show the signature part only, so add this check around them.
 - On receipt, rebuild the signed string from the payload you received, using the steps above.
 - Generate an HMAC signature using your stored [HMAC Key](/developers/webhooks).
 - Compare it to the `v1` value of the `Ottu-Signature` header. Use a constant-time comparison (`hmac.compare_digest` in Python, `hash_equals` in PHP, `crypto.timingSafeEqual` in Node.js) rather than `==`.
