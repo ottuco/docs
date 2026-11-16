@@ -205,6 +205,7 @@ export default function ApiReference({
   scenario,
   run,
   tabGroup,
+  object,
   body,
   response,
   fullReference,
@@ -224,6 +225,12 @@ export default function ApiReference({
    * (or `api` when there is no `run`).
    */
   tabGroup?: string;
+  /**
+   * Show only the object the endpoint returns, Stripe style ("The
+   * Subscription object"): its attributes on the left, one example on the
+   * right, under its own title and anchor. Not listed in <ApiShortcuts>.
+   */
+  object?: { id: string; title: string; intro?: string };
   /**
    * Show only these request body fields, each marked required (`agreement.id`
    * keeps one child of `agreement`). For one use of a shared endpoint, with
@@ -273,7 +280,7 @@ export default function ApiReference({
   const heading = title ?? source?.title ?? api;
   // The anchor of the endpoint and the prefix of its fields' anchors.
   const name = run ?? api;
-  const id = `${name}-api`;
+  const id = object?.id ?? `${name}-api`;
   useShowTabForHash(id, name, tabGroup);
   useWarnDuplicateAnchor(id);
   // The shape anchors of the body and the response, for the broken-anchor check.
@@ -284,6 +291,30 @@ export default function ApiReference({
   responseVariants.forEach((variant) =>
     brokenLinks.collectAnchor(variantId(`${id}-response`, variant.label)),
   );
+
+  if (object)
+    return (
+      <div className={styles.reference}>
+        <div className={styles.left}>
+          <Heading as="h3" id={id} className={styles.title}>
+            {object.title}
+          </Heading>
+          {object.intro && (
+            <div className={styles.description}>
+              <Markdown>{forMarkdown(object.intro)}</Markdown>
+            </div>
+          )}
+          <Section id={`${id}-attributes`} title="Attributes">
+            <FieldList fields={responseFields} prefix={id} />
+          </Section>
+        </div>
+        <div className={styles.right}>
+          <ResponseExamplesBox
+            examples={examples.filter((example) => example.code === ok)}
+          />
+        </div>
+      </div>
+    );
 
   // Checked above: both or neither.
   const runnable = scenario && run ? { scenario, run } : undefined;

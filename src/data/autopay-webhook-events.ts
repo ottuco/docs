@@ -1,8 +1,7 @@
 // The webhook events an AutoPay integration receives, for the Events tab of
 // the API Reference shortcut box (docs/developers/payments/autopay/index.mdx).
 // The first charge is an ordinary checkout payment, so these are its v3
-// payment events. Renewals reach only a webhook endpoint configured for the
-// subscription.* events, which are not listed here (see AUTOPAY_EVENTS_NOTE).
+// payment events; renewals do not call the webhook_url (see AUTOPAY_EVENTS_NOTE).
 import type { ShortcutEvent } from "@site/src/components/ApiReference/Shortcuts";
 
 const CATALOGUE = "/developers/webhooks/event-catalogue/#catalogue";
@@ -42,4 +41,4 @@ export const autopayEvents: ShortcutEvent[] = [
 ];
 
 export const AUTOPAY_EVENTS_NOTE =
-  "Renewals do not call your webhook_url. Add a webhook endpoint for subscription.* events, or list past-due subscriptions to follow them.";
+  "Renewals do not call your webhook_url. An endpoint set up by Ottu support also gets subscription.* events, such as subscription.renewed.";

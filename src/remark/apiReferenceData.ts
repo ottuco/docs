@@ -159,6 +159,9 @@ export default function apiReferenceData({ apisDir }: { apisDir: string }) {
         ...attributes,
         { type: "mdxJsxAttribute", name: "source", value: expression(name) },
       ];
+      // An object block (<ApiReference object={…}>) is not an endpoint: it
+      // has its own anchor and stays out of the shortcut box.
+      if (attributes.some((attribute) => attribute.name === "object")) return;
       const tab = [...ancestors]
         .reverse()
         .find((ancestor) => isElement(ancestor, "TabItem"));

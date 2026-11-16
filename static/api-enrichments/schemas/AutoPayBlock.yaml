@@ -14,8 +14,9 @@ _description: |
 
 properties:
   frequency:
+    enum: [monthly, yearly]
     description: |
-      How often Ottu charges the customer. Enum: `monthly`, `yearly`. These are the only two values accepted; there is no weekly or custom-interval billing. Required.
+      How often Ottu charges the customer: `monthly` or `yearly`. These are the only two values accepted; there is no weekly or custom-interval billing. Required.
   recurring_amount:
     description: |
       The amount charged on every billing cycle after the first payment, as a decimal string. Up to 9 digits before the decimal point and up to 3 decimal places, and it may not be negative: a value below `0` is rejected with a 400 even though the schema pattern admits a leading minus sign. Required.
@@ -36,6 +37,7 @@ properties:
 
       Retries run one hour apart, each timed from the previous failed attempt. This field changes how many retries happen, not how far apart they are; there is no exponential backoff.
   notification_preferences:
+    type: object
     description: |
       Optional object that switches the customer emails off for this subscription. Set it when you create the subscription: it cannot be changed afterwards. Nullable.
 
