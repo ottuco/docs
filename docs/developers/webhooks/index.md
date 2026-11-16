@@ -13,6 +13,10 @@ Ottu simplifies the integration process by providing a unified response across a
 
 Moreover, for those who might need it, the original response from the payment gateway, always converted to `JSON` format, is included in Ottu’s webhooks. This means that while Ottu takes on the heavy lifting of interpreting and standardizing payment gateway responses, you still have access to the raw data if required. The beauty of this approach is its extensibility. As you expand and decide to incorporate more payment gateways into your system, there’s no need for additional integration work on your end. Ottu ensures that everything will work seamlessly out of the box, saving you time and effort in the long run.
 
+:::tip[Every event Ottu can send]
+See the [event catalogue](./event-catalogue.mdx#catalogue) for every event, when each one is sent, and the fields it carries.
+:::
+
 ## **Webhook formats** {#webhook-formats}
 
 Ottu sends webhooks in one of three **formats**, set per account. **Ottu never switches you to a new format on its own.**
@@ -22,7 +26,7 @@ Ottu sends webhooks in one of three **formats**, set per account. **Ottu never s
 | **1 and 2** | A flat payment body or operation body, in JSON (XML on request), signed in the body and in the `Ottu-Signature` header | [Payment Events](./payment-events.mdx), [Operation Events](./operation-events.md) |
 | **3** | An **envelope** (`id`, `event`, `created`, `version`, `is_sandbox`, `merchant_id`, `initiator`, `data`), where `data` is the payment itself, flat, per event, in JSON, signed with `Ottu-Signature` `v2` over the raw body | [Webhook Events (v3)](./event-catalogue.mdx) |
 
-Format 3 adds a catalogue of 15 events named after the status reached (`payment.paid`, `payment.refunded`, ...), a fixed [retry schedule](./delivery-and-retries.mdx#retry-schedule), and `Idempotency-Key`. To move from format 1 or 2, follow [Migrating to v3](./migrate-to-v3.md).
+Format 3 adds a [catalogue of 15 events](./event-catalogue.mdx#catalogue) named after the status reached (`payment.paid`, `payment.refunded`, ...), a fixed [retry schedule](./delivery-and-retries.mdx#retry-schedule), and `Idempotency-Key`. To move from format 1 or 2, follow [Migrating to v3](./migrate-to-v3.md).
 
 On **every** format each delivery carries an `Idempotency-Key` header with the event id, so you can drop a duplicate before you fulfil an order. See [Delivery and Retries](./delivery-and-retries.mdx#idempotency-key).
 
