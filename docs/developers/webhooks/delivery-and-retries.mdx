@@ -257,7 +257,7 @@ Two different events can describe the same business outcome: a payment can be re
 
 ### Failure email {#failure-email}
 
-When the last attempt fails (attempt 8 on format 3; formats 1 and 2 keep their existing behaviour), Ottu sends **one** failure email to the addresses in your webhook configuration, for a webhook endpoint as for any other URL, provided **error notification** is enabled (`notify_on_error`, default on) and at least one recipient is set in `emails`. There is no email per attempt. See [Webhooks Overview](/developers/webhooks#webhook-notification-mechanism) for these settings.
+When the last attempt fails (attempt 8 on format 3; formats 1 and 2 keep their existing behaviour), Ottu sends **one** failure email to the addresses in your webhook configuration (the Webhook Config `emails`, not a setting of each endpoint), for a webhook endpoint as for any other URL, provided **error notification** is enabled (`notify_on_error`, default on) and at least one recipient is set in `emails`. There is no email per attempt. See [Webhooks Overview](/developers/webhooks#webhook-notification-mechanism) for these settings.
 
 ### Workflow {#the-delivery-flow}
 

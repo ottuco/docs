@@ -30,7 +30,7 @@ Ottu sends webhooks in one of three **formats**, set per account by **Version** 
 | **1 and 2** | A flat payment body or operation body, in JSON (XML on request), signed in the body and in the `Ottu-Signature` header | [Payment Events](./payment-events.mdx), [Operation Events](./operation-events.md) |
 | **3** | An **envelope** (`id`, `event`, `created`, `version`, `is_sandbox`, `merchant_id`, `initiator`, `data`), where `data` is the payment itself, flat, per event, in JSON, signed with `Ottu-Signature` `v2` over the raw body | [Webhook Events (v3)](./event-catalogue.mdx) |
 
-Format 3 adds a [catalogue of 15 events](./event-catalogue.mdx#catalogue) named after the status reached (`payment.paid`, `payment.refunded`, ...), a fixed [retry schedule](./delivery-and-retries.mdx#retry-schedule), and `Idempotency-Key`. To move from format 1 or 2, follow [Migrating to v3](./migrate-to-v3.md).
+Format 3 adds a [catalogue of 15 events](./event-catalogue.mdx#catalogue) named after the status reached (`payment.paid`, `payment.refunded`, ...), a fixed [retry schedule](./delivery-and-retries.mdx#retry-schedule), and `Idempotency-Key`. AutoPay adds 11 [`subscription.*` events](./event-catalogue.mdx#subscription-events), sent to the [webhook endpoints](./delivery-and-retries.mdx#webhook-endpoints) you configure for them. To move from format 1 or 2, follow [Migrating to v3](./migrate-to-v3.md).
 
 Each delivery carries an `Idempotency-Key` header with the event id, so you can drop a duplicate before you fulfil an order. On formats 1 and 2 a delivery whose event Ottu could not record comes without it, so handle a missing header there. See [Delivery and Retries](./delivery-and-retries.mdx#idempotency-key).
 
