@@ -1,0 +1,19 @@
+# Overrides for: components/schemas/AutoPayAgreement
+# The `agreement` object of a subscription.
+
+properties:
+  id:
+    description: |
+      The `agreement.id` you supplied on the checkout call. It ties every charge in the subscription to the same card-on-file agreement with the customer.
+  frequency:
+    description: |
+      How often the customer is charged: `monthly` or `yearly`.
+  amount_variability:
+    description: |
+      Taken from the agreement: `fixed` or `variable`. Ottu uses `fixed` when the agreement has no value.
+  cycle_interval_days:
+    description: |
+      Taken from the agreement: the number of days between charges. When the agreement has no value, Ottu uses 30 for a monthly and 365 for a yearly subscription.
+  total_cycles:
+    description: |
+      Taken from the agreement: the total number of charges it allows. Before the agreement is stored, Ottu counts it from `start_date` and `end_date`. `null` only for a subscription without `end_date`.

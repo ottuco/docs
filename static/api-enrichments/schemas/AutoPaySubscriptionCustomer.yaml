@@ -1,0 +1,19 @@
+# Overrides for: components/schemas/AutoPaySubscriptionCustomer
+# The `customer` object of a subscription.
+
+properties:
+  id:
+    description: |
+      Your own identifier for the customer, exactly as you sent it in `customer_id` on the checkout call that created the subscription. Use it to filter the subscription list.
+  email:
+    description: |
+      The customer's email address, captured when the subscription was created. Ottu sends the pre-charge, payment-failed and final-failure emails to this address.
+  first_name:
+    description: |
+      The customer's first name from the checkout call that created the subscription. `null` if the checkout call had none.
+  last_name:
+    description: |
+      The customer's last name from the checkout call that created the subscription. `null` if the checkout call had none.
+  phone:
+    description: |
+      The customer's phone number from the checkout call that created the subscription. `null` if the checkout call had none.
