@@ -109,37 +109,37 @@ const sidebars: SidebarsConfig = {
             {
               type: "category",
               label: "Payment Status Query",
-              link: { type: "doc", id: "developers/payments/psq" },
+              link: { type: "doc", id: "developers/payments/psq-v3" },
               items: [
                 {
                   type: "link",
                   label: "When to Use",
-                  href: "/developers/payments/psq#when-to-use",
-                },
-                {
-                  type: "link",
-                  label: "Setup",
-                  href: "/developers/payments/psq#setup",
+                  href: "/developers/payments/psq-v3#when-to-use",
                 },
                 {
                   type: "link",
                   label: "Guide",
-                  href: "/developers/payments/psq#guide",
+                  href: "/developers/payments/psq-v3#guide",
                 },
                 {
                   type: "link",
                   label: "API Reference",
-                  href: "/developers/payments/psq#api-reference",
+                  href: "/developers/payments/psq-v3#api-reference",
                 },
                 {
                   type: "link",
                   label: "Best Practices",
-                  href: "/developers/payments/psq#best-practices",
+                  href: "/developers/payments/psq-v3#best-practices",
                 },
                 {
                   type: "link",
                   label: "FAQ",
-                  href: "/developers/payments/psq#faq",
+                  href: "/developers/payments/psq-v3#faq",
+                },
+                {
+                  type: "link",
+                  label: "Looking for v2?",
+                  href: "/developers/payments/psq/legacy",
                 },
               ],
             },
@@ -495,29 +495,43 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "Operations",
-          link: { type: "doc", id: "developers/operations" },
+          link: { type: "doc", id: "developers/operations-v3" },
           items: [
             {
               type: "link",
               label: "When to Use",
-              href: "/developers/operations#when-to-use",
+              href: "/developers/operations-v3#when-to-use",
             },
             {
               type: "link",
               label: "Setup",
-              href: "/developers/operations#setup",
+              href: "/developers/operations-v3#setup",
             },
             {
               type: "link",
               label: "Guide",
-              href: "/developers/operations#guide",
+              href: "/developers/operations-v3#guide",
             },
             {
               type: "link",
               label: "API Reference",
-              href: "/developers/operations#api-reference",
+              href: "/developers/operations-v3#api-reference",
             },
-            { type: "link", label: "FAQ", href: "/developers/operations#faq" },
+            {
+              type: "link",
+              label: "Best Practices",
+              href: "/developers/operations-v3#best-practices",
+            },
+            {
+              type: "link",
+              label: "FAQ",
+              href: "/developers/operations-v3#faq",
+            },
+            {
+              type: "link",
+              label: "Looking for v2?",
+              href: "/developers/operations/legacy",
+            },
           ],
         },
         {
@@ -658,32 +672,27 @@ const sidebars: SidebarsConfig = {
             {
               type: "doc",
               id: "developers/webhooks/index",
-              label: "Overview & Setup",
+              label: "Overview",
+            },
+            {
+              type: "doc",
+              id: "developers/webhooks/quickstart",
+              label: "Quickstart (5 minutes)",
+            },
+            {
+              type: "doc",
+              id: "developers/webhooks/setup",
+              label: "Dashboard setup",
             },
             {
               type: "doc",
               id: "developers/webhooks/event-catalogue",
-              label: "Events & Envelope (v3)",
+              label: "Events & Envelope",
             },
             {
               type: "doc",
               id: "developers/webhooks/delivery-and-retries",
               label: "Delivery & Retries",
-            },
-            {
-              type: "doc",
-              id: "developers/webhooks/migrate-to-v3",
-              label: "Formats & Migration",
-            },
-            {
-              type: "doc",
-              id: "developers/webhooks/payment-events",
-              label: "Payment Events (v1/v2)",
-            },
-            {
-              type: "doc",
-              id: "developers/webhooks/operation-events",
-              label: "Operation Events (v1/v2)",
             },
             {
               type: "doc",
@@ -694,6 +703,16 @@ const sidebars: SidebarsConfig = {
               type: "doc",
               id: "developers/webhooks/verify-signatures",
               label: "Verify Signatures",
+            },
+            {
+              type: "doc",
+              id: "developers/webhooks/troubleshooting",
+              label: "Troubleshooting",
+            },
+            {
+              type: "link",
+              label: "Looking for v1 and v2?",
+              href: "/developers/webhooks/legacy",
             },
           ],
         },
@@ -785,6 +804,11 @@ const sidebars: SidebarsConfig = {
               type: "doc",
               id: "developers/reference/error-codes",
               label: "Error Codes",
+            },
+            {
+              type: "doc",
+              id: "developers/reference/v3-errors",
+              label: "Error Reference (v3)",
             },
             {
               type: "doc",

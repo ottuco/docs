@@ -2,13 +2,14 @@
 title: Webhook Formats and Migrating to v3
 sidebar_label: Formats & Migration
 description: The three Ottu webhook formats, what format 3 changes, a field-by-field map from formats 1 and 2, and the steps to switch safely.
+displayed_sidebar: developerSidebar
 ---
 
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 
 # Webhook Formats and Migrating to v3
 
-Ottu has three webhook **formats**. Your account uses exactly one. **Ottu never switches a merchant to a new format on its own**: you keep receiving the format you have today until you ask for a change. This page explains what format 3 changes, maps every format 1 and 2 field to its place in format 3, and gives a step-by-step migration that you can test before anything changes for your customers.
+Ottu has three webhook **formats**. Your account uses exactly one. **Ottu never switches a merchant to a new format on its own**: you keep receiving the format you have today until **Version** is changed in [Webhook Config](/developers/webhooks/setup). This page explains what format 3 changes, maps every format 1 and 2 field to its place in format 3, and gives a step-by-step migration that you can test before anything changes for your customers.
 
 ## When to Use
 
@@ -23,12 +24,12 @@ Ottu has three webhook **formats**. Your account uses exactly one. **Ottu never 
 |---|---|---|
 | Body | One flat object per notification: a payment body or an operation body | An [envelope](/developers/webhooks/event-catalogue#envelope) with `id`, `event`, `created`, `version`, `is_sandbox`, `merchant_id`, `initiator` and `data`. `data` is the payment, flat |
 | Encoding | JSON, or XML on request | JSON only |
-| Authenticity | Body field `signature`, plus the `Ottu-Signature` header (`v1` by default) | `Ottu-Signature` header, `v2` only. No `signature` field in the body |
+| Authenticity | `Ottu-Signature` header, `v2` (the same as format 3), plus the body field `signature` | `Ottu-Signature` header, `v2` only. No `signature` field in the body |
 | Success | HTTP `200` or `201` | Any `2xx` |
-| Retries | Your `retries` and `backoff_factor` settings, mainly on timeouts | 8 attempts over about 42 hours, see [Delivery and Retries](/developers/webhooks/delivery-and-retries#retry-schedule) |
+| Retries | Your `retries` and `backoff_factor` settings, on timeouts only | 8 attempts over about 42 hours, see [Delivery and Retries](/developers/webhooks/delivery-and-retries#retry-schedule) |
 | Event id | Only in the `Idempotency-Key` header | In the body `id` and the `Idempotency-Key` header |
 
-Format 1 and format 2 differ from each other as described on [Payment Events](/developers/webhooks/payment-events) and [Operation Events](/developers/webhooks/operation-events); both are unchanged. The only addition on them is the new **header**: `Ottu-Signature` (controlled by your account's signature versions, default `v1`) and `Idempotency-Key`. Your body bytes, retries and redirect behaviour stay exactly as they were.
+Format 1 and format 2 differ from each other as described on [Payment Events](/developers/webhooks/payment-events) and [Operation Events](/developers/webhooks/operation-events); both are unchanged. The only addition on them is the new **header**: `Ottu-Signature` (`v2` over the raw body, exactly as on format 3) and `Idempotency-Key`. Your body bytes, retries and redirect behaviour stay exactly as they were.
 
 :::warning Format 3 is JSON only
 If your account receives XML today, switching to format 3 means you receive JSON from then on. Update your parser before format 3 is enabled.
@@ -40,7 +41,7 @@ The shortest safe path:
 
 1. **Update the receiver** using [Webhook Events (v3)](/developers/webhooks/event-catalogue#quick-implementation) and [Verify Signatures](/developers/webhooks/verify-signatures#verify-v2): parse the JSON envelope, read the flat `data`, branch on `event`, verify `Ottu-Signature` `v2` on the raw body, answer any `2xx`.
 2. **Test it with the published vector** in [Verify Signatures](/developers/webhooks/verify-signatures#test-vectors), then with a sandbox payment and a refund, comparing against the [field map](#field-map).
-3. **Ask Ottu to enable format 3 for your account:** contact [support@ottu.com](mailto:support@ottu.com) with the webhook configuration you want switched. Your existing `webhook_url` and operations URL then receive format 3 with the same moments. Deploy the new receiver before you ask.
+3. **Switch the account to format 3:** in [Webhook Config](/developers/webhooks/setup), set **Version** to 3 and save (or ask [support@ottu.com](mailto:support@ottu.com) to do it). Your existing `webhook_url` and operations URL then receive format 3 with the same moments. Deploy the new receiver first: the switch takes effect when you save.
 
 If a URL is also configured to receive the same event through another route, that URL gets one delivery, in the format of the existing route: see [Same URL on a legacy route](/developers/webhooks/delivery-and-retries#same-url).
 
@@ -93,7 +94,7 @@ Not carried over: `transactions`, `signature`, `transaction_log_id`, `capture_de
 
 ### New moments in format 3 {#new-moments}
 
-Format 3 sends events that formats 1 and 2 do not: `payment.created` (when a payment is created), `payment.attempted` (every failed try that leaves the payment payable), `payment.refund_pending` and `payment.refund_rejected` (a queued refund and its rejection). Subscribe to what you need; ignore the rest.
+Format 3 sends events that formats 1 and 2 do not: `payment.created` (when a payment is created), `payment.attempted` (every failed try that leaves the payment payable), `payment.refund_pending` and `payment.refund_rejected` (a queued refund and its rejection). You cannot turn single events off, except that a [plugin URL](/developers/webhooks/setup#plugin-urls) can be limited to some payment states: handle the events you need and answer `2xx` to the rest without acting on them.
 
 :::warning Order is not guaranteed
 `payment.created` is delivered a few seconds after the payment is created, so it can arrive after a fast `payment.paid`. Order by `created` and de-duplicate on the event `id`. See [ordering](/developers/webhooks/event-catalogue#ordering).
@@ -108,7 +109,7 @@ On the payment's own `webhook_url` the payer waits for your answer on Ottu's pag
 
 ### Moments with no event type {#no-type}
 
-A format 3 account never receives a format 1 or 2 body. If a payment moment has no event in the [catalogue](/developers/webhooks/event-catalogue#catalogue), nothing is sent for it. Ottu logs the skip, and when the moment concerns the payer's waiting page, that page moves to its failure state instead of waiting for your answer. Build your integration on the catalogue types and reconcile anything else with the [Payment Status API](/developers/payments/psq).
+A format 3 account never receives a format 1 or 2 body. If a payment moment has no event in the [catalogue](/developers/webhooks/event-catalogue#catalogue), nothing is sent for it. Ottu logs the skip, and when the moment concerns the payer's waiting page, that page moves to its failure state instead of waiting for your answer. Build your integration on the catalogue types and reconcile anything else with the [Payment Status Query v3](/developers/payments/psq-v3).
 
 ### Error handling
 
@@ -148,7 +149,7 @@ Nothing to call to migrate. The related references are:
 
 <FAQ>
   <FAQItem question="Will Ottu switch my account to format 3 on its own?">
-    No. Ottu never switches a merchant to a new format on its own; you keep receiving the format you have today until you ask for a change.
+    No. Ottu never switches a merchant to a new format on its own; you keep receiving the format you have today until **Version** is changed in [Webhook Config](/developers/webhooks/setup).
   </FAQItem>
   <FAQItem question="How do I ask for format 3?">
     Contact [support@ottu.com](mailto:support@ottu.com) and name the webhook configuration you want switched. Deploy and test your new receiver first.

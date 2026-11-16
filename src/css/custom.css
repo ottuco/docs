@@ -78,6 +78,24 @@
   --ifm-code-background: #f2f2f2;
   --ifm-code-color: #1d1d1d;
 
+  /* Infima's grey scale mapped to the brand neutrals (FIGMA_DESIGN_SYSTEM.md),
+     so tabs, hints, field types and badges stop using Infima's blue-greys
+     (#606770, #444950, #8d949e). Info is the brand blue, not Infima's #54c7ec. */
+  --ifm-color-emphasis-100: #f7f7f7;
+  --ifm-color-emphasis-200: #f2f2f2;
+  --ifm-color-emphasis-300: #e5e5e5;
+  --ifm-color-emphasis-400: #dadada;
+  --ifm-color-emphasis-500: #b4b4b8;
+  --ifm-color-emphasis-600: #8e8e93;
+  --ifm-color-emphasis-700: #4a4a4a;
+  --ifm-color-emphasis-800: #4a4a4a;
+  --ifm-color-emphasis-900: #302f37;
+  --ifm-color-info: #0b82be;
+  --ifm-color-info-darkest: #302f37;
+  --ifm-color-info-contrast-foreground: #302f37;
+  --ifm-color-primary-contrast-foreground: #302f37;
+  --ifm-font-color-secondary: #4a4a4a;
+
 }
 
 html {
@@ -107,6 +125,23 @@ html[data-theme="dark"] {
   --ifm-code-background: #020617;
   --ifm-global-border-color: #1e2939;
   --ifm-code-color: #e5e7eb;
+
+  /* The same grey scale in dark mode: the Figma API explorer's dark neutrals. */
+  --ifm-color-emphasis-100: #171a21;
+  --ifm-color-emphasis-200: #1e2939;
+  --ifm-color-emphasis-300: #1e2939;
+  --ifm-color-emphasis-400: #364153;
+  --ifm-color-emphasis-500: #99a1af;
+  --ifm-color-emphasis-600: #99a1af;
+  --ifm-color-emphasis-700: #d1d5dc;
+  --ifm-color-emphasis-800: #e5e7eb;
+  --ifm-color-emphasis-900: #ffffff;
+  --ifm-color-info: #0b82be;
+  --ifm-color-info-darkest: #e5e7eb;
+  --ifm-color-info-contrast-foreground: #e5e7eb;
+  /* Text on an orange fill stays dark in both themes: light text on #f27e20 is under 4.5:1. */
+  --ifm-color-primary-contrast-foreground: #1a1a1a;
+  --ifm-font-color-secondary: #d1d5dc;
 }
 
 .markdown a {
@@ -633,6 +668,11 @@ html[data-theme="dark"] {
   border: none;
 }
 
+/* A link written as code (`[`pg_params`](...)`) keeps the link color, so readers see it is clickable */
+.markdown a code {
+  color: var(--ifm-link-color);
+}
+
 /* Inline code in running text — tighter padding */
 .markdown p code {
   padding: 2px 4px;
@@ -969,4 +1009,13 @@ article .markdown header h1 {
     max-width: calc(100vw - 2rem);
     padding-bottom: 0.75rem;
   }
+}
+
+/* Buttons do not inherit the page font in browsers, so every button (Open
+   Markdown, Copy, tabs in components) fell back to Arial. Figma: Poppins. */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
 }

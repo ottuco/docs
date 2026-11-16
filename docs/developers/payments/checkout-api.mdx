@@ -11,6 +11,10 @@ import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
 Ottu provides a comprehensive collection of APIs that offer a seamless and efficient way to test payments and enable merchants to accept and process transactions instantly. The Checkout API is the cornerstone of any payment initiation, whether it's [API-based](/developers/payments/checkout-api/) or [SDK-based](/developers/payments/checkout-sdk/).
 
+:::note This page documents Checkout API v1
+Checkout API v1 is the current version and stays supported. A Checkout API v3 is planned; when it is published, this page will link to it. The payments you create here are already reported in v3 by [webhook format 3](/developers/webhooks/event-catalogue), [Payment Status Query v3](/developers/payments/psq-v3) and [Operations v3](/developers/operations-v3), where `refund_queued` is named `refund_pending` and `invalided` is `invalidated`.
+:::
+
 ## Best Practices and Guidelines
 
 In order to ensure optimal transaction success tracking and minimize the number of required payment transactions, merchants should [create](/developers/payments/checkout-api/) a Payment Transaction as soon as the amount is known. This typically occurs when a customer adds their first item to their cart. Following this, any changes to the total amount should be updated using the [Checkout API PATCH](/developers/payments/checkout-api/) method.
@@ -304,7 +308,7 @@ Merchants can use the [Checkout API](/developers/payments/checkout-api) to creat
 
 ## One-Step Checkout
 
-One-Step Checkout combines the [Checkout API](/developers/payments/checkout-api/) and the [Native Payments](/developers/payments/native-payments/)into a single backend request.\
+One-Step Checkout combines the [Checkout API](/developers/payments/checkout-api/) and the [Native Payments](/developers/payments/native-payments/) into a single backend request.\
 Instead of creating a session first and then calling a separate payment endpoint, you can perform both actions in one step by including the [payment_instrument](/developers/payments/checkout-api/) parameter.
 
 This flow is ideal when you want to immediately process a payment as it's created, for example:
@@ -503,8 +507,6 @@ When a valid [payment_instrument](/developers/payments/checkout-api/) is provide
     2. Pass the `session_id` to the SDK for UI rendering.
     3. Handle [webhooks](../webhooks/) for transaction updates.
 
-    **One-Step Checkout**
-
   </FAQItem>
 
   <FAQItem question="What are the benefits of One-Step Checkout?">
@@ -512,8 +514,6 @@ When a valid [payment_instrument](/developers/payments/checkout-api/) is provide
     - Consistent structure with [Native Payments](/developers/payments/native-payments/).
     - Unified handling of session creation + payment execution.
     - Ideal for wallets and tokenized recurring payments.
-
-    **Upload Attachment**
 
   </FAQItem>
 
