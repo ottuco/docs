@@ -1,0 +1,123 @@
+.lab {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 16px 0 28px;
+  background: var(--ifm-background-surface-color);
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tabs button {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  background: transparent;
+  color: var(--ifm-font-color-base);
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.tabs button.active {
+  background: var(--ifm-color-primary);
+  border-color: var(--ifm-color-primary);
+  color: #fff;
+}
+
+.tabs .vector {
+  margin-left: auto;
+  font-weight: 500;
+}
+
+.label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin: 10px 0 4px;
+}
+
+.hint {
+  font-weight: 400;
+  color: var(--ifm-color-emphasis-700);
+  margin-left: 6px;
+}
+
+.input,
+.textarea {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.8rem;
+  padding: 6px 8px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 6px;
+  background: var(--ifm-background-color);
+  color: var(--ifm-font-color-base);
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.row .input {
+  margin-top: 0;
+}
+
+.small {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  background: transparent;
+  color: var(--ifm-font-color-base);
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.out {
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-size: 0.8rem;
+  margin: 4px 0 8px;
+}
+
+.note {
+  font-size: 0.85rem;
+  color: var(--ifm-color-emphasis-800);
+  margin: 4px 0 0;
+}
+
+.checkbox {
+  display: block;
+  font-size: 0.85rem;
+  margin: 8px 0;
+}
+
+.steps {
+  margin: 8px 0 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.steps li {
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+
+.ok {
+  background: var(--ifm-color-success-contrast-background);
+}
+
+.fail {
+  background: var(--ifm-color-danger-contrast-background);
+}

@@ -157,6 +157,180 @@ http_response_code(200);
 ```
 
 </TabItem>
+<TabItem value="go" label="Go">
+
+```go title="net/http receiver"
+package main
+
+import (
+	"encoding/json"
+	"io"
+	"net/http"
+)
+
+const hmacKey = "your-hmac-key" // from the Webhook configuration, keep it secret
+
+type ottuEvent struct {
+	Event string `json:"event"`
+	Data  struct { // the payment itself, flat
+		SessionID string `json:"session_id"`
+		OrderNo   string `json:"order_no"`
+		Operation string `json:"operation"`
+		Connector struct {
+			ReferenceNumber string `json:"reference_number"`
+		} `json:"connector"`
+		Totals struct {
+			Refunded string `json:"refunded"`
+		} `json:"totals"`
+	} `json:"data"`
+}
+
+func ottuWebhook(w http.ResponseWriter, r *http.Request) {
+	rawBody, err := io.ReadAll(r.Body) // the exact bytes Ottu sent, never re-marshalled
+	if err != nil || !VerifyOttuSignature(rawBody, r.Header.Get("Ottu-Signature"), hmacKey, ToleranceSeconds, 0) {
+		http.Error(w, "invalid signature", http.StatusUnauthorized)
+		return
+	}
+
+	var event ottuEvent
+	if err := json.Unmarshal(rawBody, &event); err != nil {
+		http.Error(w, "invalid body", http.StatusBadRequest)
+		return
+	}
+	data := event.Data
+
+	switch {
+	case event.Event == "payment.paid" && data.Operation == "purchase":
+		fulfilOrder(data.OrderNo, data.Connector.ReferenceNumber)
+	case event.Event == "payment.paid" && data.Operation == "capture":
+		recordCapture(data.SessionID, data.Connector.ReferenceNumber)
+	case event.Event == "payment.refunded":
+		recordRefund(data.SessionID, data.Connector.ReferenceNumber, data.Totals.Refunded)
+	}
+	// Unknown events: acknowledge and ignore, new events are added over time.
+	w.WriteHeader(http.StatusOK)
+}
+
+func main() {
+	http.HandleFunc("/webhooks/ottu", ottuWebhook)
+	http.ListenAndServe(":8000", nil)
+}
+```
+
+</TabItem>
+<TabItem value="java" label="Java">
+
+```java title="Spring Boot receiver"
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class OttuWebhookController {
+    private static final String HMAC_KEY = "your-hmac-key"; // from the Webhook configuration, keep it secret
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    // @RequestBody byte[] keeps the exact bytes Ottu sent. Do not bind this route to a DTO.
+    @PostMapping("/webhooks/ottu")
+    public ResponseEntity<String> ottuWebhook(@RequestBody byte[] rawBody,
+            @RequestHeader(value = "Ottu-Signature", defaultValue = "") String signature) throws Exception {
+        if (!OttuSignature.verifyOttuSignature(rawBody, signature, HMAC_KEY)) {
+            return ResponseEntity.status(401).body("invalid signature");
+        }
+
+        JsonNode event = mapper.readTree(rawBody);
+        JsonNode data = event.path("data"); // the payment itself, flat
+        String type = event.path("event").asText();
+        String operation = data.path("operation").asText();
+        String reference = data.path("connector").path("reference_number").asText();
+
+        if (type.equals("payment.paid") && operation.equals("purchase")) {
+            fulfilOrder(data.path("order_no").asText(), reference);
+        } else if (type.equals("payment.paid") && operation.equals("capture")) {
+            recordCapture(data.path("session_id").asText(), reference);
+        } else if (type.equals("payment.refunded")) {
+            recordRefund(data.path("session_id").asText(), reference, data.path("totals").path("refunded").asText());
+        }
+        // Unknown events: acknowledge and ignore, new events are added over time.
+        return ResponseEntity.ok().build();
+    }
+}
+```
+
+</TabItem>
+<TabItem value="csharp" label="C#">
+
+```csharp title="ASP.NET Core receiver"
+using System.Text.Json;
+
+const string HmacKey = "your-hmac-key"; // from the Webhook configuration, keep it secret
+
+var app = WebApplication.Create(args);
+
+app.MapPost("/webhooks/ottu", async (HttpRequest request) =>
+{
+    using var buffer = new MemoryStream();
+    await request.Body.CopyToAsync(buffer); // the exact bytes Ottu sent, never a bound model re-serialised
+    var rawBody = buffer.ToArray();
+    if (!OttuSignature.VerifyOttuSignature(rawBody, request.Headers["Ottu-Signature"].ToString(), HmacKey))
+        return Results.Unauthorized();
+
+    using var doc = JsonDocument.Parse(rawBody);
+    var type = doc.RootElement.GetProperty("event").GetString();
+    var data = doc.RootElement.GetProperty("data"); // the payment itself, flat
+    var operation = data.GetProperty("operation").GetString();
+    var reference = data.GetProperty("connector").GetProperty("reference_number").GetString();
+
+    if (type == "payment.paid" && operation == "purchase")
+        FulfilOrder(data.GetProperty("order_no").GetString(), reference);
+    else if (type == "payment.paid" && operation == "capture")
+        RecordCapture(data.GetProperty("session_id").GetString(), reference);
+    else if (type == "payment.refunded")
+        RecordRefund(data.GetProperty("session_id").GetString(), reference,
+                     data.GetProperty("totals").GetProperty("refunded").GetString());
+    // Unknown events: acknowledge and ignore, new events are added over time.
+    return Results.Ok();
+});
+
+app.Run();
+```
+
+</TabItem>
+<TabItem value="ruby" label="Ruby">
+
+```ruby title="Sinatra receiver"
+require "json"
+require "sinatra"
+
+HMAC_KEY = "your-hmac-key" # from the Webhook configuration, keep it secret
+
+post "/webhooks/ottu" do
+  raw_body = request.body.read # the exact bytes Ottu sent, never params re-dumped
+  unless verify_ottu_signature(raw_body, request.env["HTTP_OTTU_SIGNATURE"].to_s, HMAC_KEY)
+    halt 401, "invalid signature"
+  end
+
+  event = JSON.parse(raw_body)
+  data = event["data"] # the payment itself, flat
+
+  if event["event"] == "payment.paid" && data["operation"] == "purchase"
+    fulfil_order(data["order_no"], data["connector"]["reference_number"])
+  elsif event["event"] == "payment.paid" && data["operation"] == "capture"
+    record_capture(data["session_id"], data["connector"]["reference_number"])
+  elsif event["event"] == "payment.refunded"
+    record_refund(data["session_id"], data["connector"]["reference_number"], data["totals"]["refunded"])
+  end
+  # Unknown events: acknowledge and ignore, new events are added over time.
+  status 200
+  ""
+end
+```
+
+</TabItem>
 </Tabs>
 
 ### The envelope {#envelope}

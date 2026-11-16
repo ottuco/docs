@@ -3,6 +3,7 @@ title: Verify Signatures
 sidebar_label: Verify Signatures
 ---
 
+import SignatureLab from "@site/src/components/SignatureLab";
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import CodeBlock from "@theme/CodeBlock";
@@ -149,6 +150,163 @@ function verifyOttuSignature(string $rawBody, string $header, string $key, int $
 ```
 
 </TabItem>
+<TabItem value="go" label="Go">
+
+```go
+package main
+
+import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"strconv"
+	"strings"
+	"time"
+)
+
+const ToleranceSeconds = 300
+
+// rawBody must be the request body exactly as received (io.ReadAll(r.Body)), never re-marshalled JSON.
+// Pass now = 0 to use the current time.
+func VerifyOttuSignature(rawBody []byte, header, key string, tolerance int64, now int64) bool {
+	parts := map[string]string{}
+	for _, item := range strings.Split(header, ",") {
+		name, value, _ := strings.Cut(strings.TrimSpace(item), "=")
+		parts[name] = value
+	}
+	t, v2 := parts["t"], parts["v2"]
+	if t == "" || v2 == "" || strings.Trim(t, "0123456789") != "" {
+		return false
+	}
+	ts, err := strconv.ParseInt(t, 10, 64)
+	if err != nil {
+		return false
+	}
+	if now == 0 {
+		now = time.Now().Unix()
+	}
+	if d := now - ts; d > tolerance || -d > tolerance {
+		return false
+	}
+	mac := hmac.New(sha256.New, []byte(key))
+	mac.Write([]byte(t + "."))
+	mac.Write(rawBody)
+	expected := hex.EncodeToString(mac.Sum(nil))
+	return hmac.Equal([]byte(expected), []byte(v2))
+}
+```
+
+</TabItem>
+<TabItem value="java" label="Java">
+
+```java
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.HashMap;
+import java.util.Map;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
+public final class OttuSignature {
+    public static final long TOLERANCE_SECONDS = 300;
+
+    public static boolean verifyOttuSignature(byte[] rawBody, String header, String key) throws Exception {
+        return verifyOttuSignature(rawBody, header, key, TOLERANCE_SECONDS, null);
+    }
+
+    // rawBody is the request body exactly as received (byte[]), never re-serialised JSON.
+    public static boolean verifyOttuSignature(byte[] rawBody, String header, String key, long tolerance, Long now)
+            throws Exception {
+        Map<String, String> parts = new HashMap<>();
+        for (String item : header.split(",")) {
+            String[] kv = item.trim().split("=", 2);
+            parts.put(kv[0], kv.length > 1 ? kv[1] : "");
+        }
+        String t = parts.get("t"), v2 = parts.get("v2");
+        if (t == null || v2 == null || !t.matches("[0-9]{1,18}")) {
+            return false;
+        }
+        long nowSeconds = now != null ? now : System.currentTimeMillis() / 1000;
+        if (Math.abs(nowSeconds - Long.parseLong(t)) > tolerance) {
+            return false;
+        }
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+        mac.update((t + ".").getBytes(StandardCharsets.UTF_8));
+        StringBuilder expected = new StringBuilder();
+        for (byte b : mac.doFinal(rawBody)) {
+            expected.append(String.format("%02x", b));
+        }
+        return MessageDigest.isEqual(expected.toString().getBytes(StandardCharsets.UTF_8),
+                v2.getBytes(StandardCharsets.UTF_8));
+    }
+}
+```
+
+</TabItem>
+<TabItem value="csharp" label="C#">
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
+
+public static class OttuSignature
+{
+    public const long ToleranceSeconds = 300;
+
+    // rawBody is the request body exactly as received (byte[]), never re-serialised JSON.
+    public static bool VerifyOttuSignature(byte[] rawBody, string header, string key,
+                                           long tolerance = ToleranceSeconds, long? now = null)
+    {
+        var parts = new Dictionary<string, string>();
+        foreach (var item in header.Split(','))
+        {
+            var kv = item.Trim().Split('=', 2);
+            parts[kv[0]] = kv.Length > 1 ? kv[1] : "";
+        }
+        if (!parts.TryGetValue("t", out var t) || !parts.TryGetValue("v2", out var v2)
+            || !long.TryParse(t, NumberStyles.None, CultureInfo.InvariantCulture, out var ts))
+            return false;
+        if (Math.Abs((now ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds()) - ts) > tolerance)
+            return false;
+
+        var prefix = Encoding.UTF8.GetBytes(t + ".");
+        var message = new byte[prefix.Length + rawBody.Length];
+        prefix.CopyTo(message, 0);
+        rawBody.CopyTo(message, prefix.Length);
+        var expected = Convert.ToHexString(HMACSHA256.HashData(Encoding.UTF8.GetBytes(key), message)).ToLowerInvariant();
+        return CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(expected), Encoding.UTF8.GetBytes(v2));
+    }
+}
+```
+
+</TabItem>
+<TabItem value="ruby" label="Ruby">
+
+```ruby
+require "openssl"
+
+TOLERANCE_SECONDS = 300
+
+# raw_body is the request body exactly as received (request.body.read), never re-serialised JSON.
+def verify_ottu_signature(raw_body, header, key, tolerance = TOLERANCE_SECONDS, now = Time.now.to_i)
+  parts = header.split(",").to_h do |item|
+    name, value = item.strip.split("=", 2)
+    [name, value.to_s]
+  end
+  t, v2 = parts["t"], parts["v2"]
+  return false if t.nil? || v2.nil? || !t.match?(/\A\d+\z/)
+  return false if (now - t.to_i).abs > tolerance
+
+  expected = OpenSSL::HMAC.hexdigest("SHA256", key, "#{t}.".b + raw_body.b)
+  expected.bytesize == v2.bytesize && OpenSSL.fixed_length_secure_compare(expected, v2)
+end
+```
+
+</TabItem>
 </Tabs>
 
 ### Test vectors {#test-vectors}
@@ -172,6 +330,12 @@ Each of these must be **rejected**:
 | Body re-serialised with non-ASCII escaped (`json.dumps`) | does not match `b2303219...` |
 
 Pass `now=1792417440` (the `now` argument in the samples above) so that the old `t` of the vector is inside the tolerance window. With the real clock the same header is correctly rejected as too old.
+
+### Try it in your browser {#signature-lab}
+
+Sign a body and see the exact header Ottu would send, check a header you received step by step, or copy a signed `curl` to test your own receiver. It runs in this page: the key never leaves your browser.
+
+<SignatureLab />
 
 ### Header v1 {#header-v1}
 
@@ -455,10 +619,10 @@ Compare that against the `v1` part of the `Ottu-Signature` header you received.
 
 ## Signature Generation
 
-The `v2` check for [Python, Node.js and PHP](#verify-v2) and the [body signature](#body-signature) are covered above. The implementations below compute the **`v1` part** of the `Ottu-Signature` header on formats 1 and 2 in other languages.
+The `v2` check (in [eight languages](#verify-v2)) and the [body signature](#body-signature) are covered above. The implementations below compute the **`v1` part** of the `Ottu-Signature` header on formats 1 and 2 in other languages.
 
 :::info How these samples were checked
-All four samples (Java, .NET, Ruby and Go) were run against the [`v1` test vector](#header-v1) and return `469fb5c5...`. The Python, Node.js and PHP `v2` verifiers above were run against the [`v2` vectors](#test-vectors), including the rejection cases.
+All four samples (Java, .NET, Ruby and Go) were run against the [`v1` test vector](#header-v1) and return `469fb5c5...`. The Python, Node.js, PHP, Go and Java `v2` verifiers above were run against the [`v2` vectors](#test-vectors), including the rejection cases. The C# and Ruby `v2` verifiers follow the same steps but have not been run yet.
 :::
 
 ## Specific Examples

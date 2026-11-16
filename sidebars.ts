@@ -676,6 +676,11 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "doc",
+              id: "developers/webhooks/quickstart",
+              label: "Quickstart (5 minutes)",
+            },
+            {
+              type: "doc",
               id: "developers/webhooks/event-catalogue",
               label: "Events & Envelope",
             },
@@ -693,6 +698,11 @@ const sidebars: SidebarsConfig = {
               type: "doc",
               id: "developers/webhooks/verify-signatures",
               label: "Verify Signatures",
+            },
+            {
+              type: "doc",
+              id: "developers/webhooks/troubleshooting",
+              label: "Troubleshooting",
             },
             {
               type: "link",
