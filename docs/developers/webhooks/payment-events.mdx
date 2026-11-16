@@ -133,7 +133,7 @@ To ensure a smooth redirection of the payer back to the designated [redirect_url
 
 Payments belonging to an [AutoPay](/developers/payments/autopay/) subscription may carry an additional `autopay` object. Note where it sits: at the **top level** of the payload, not inside `extra`.
 
-You receive it for the subscription's first payment only, the checkout session you created. Ottu charges renewals itself and sends no webhook to your `webhook_url` for them, so read renewal outcomes from the [subscription endpoints](/developers/payments/autopay/#api-reference).
+You receive it for the subscription's first payment only, the checkout session you created. Ottu charges renewals itself and sends no webhook to your `webhook_url` for them: read renewal outcomes from the [subscription endpoints](/developers/payments/autopay/#api-reference), or add a webhook endpoint for the [`subscription.*` events](/developers/webhooks/event-catalogue#subscription-events).
 
 ```json title="Payload excerpt — an AutoPay first payment"
 {
