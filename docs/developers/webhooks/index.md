@@ -7,11 +7,12 @@ import FAQ, { FAQItem } from '@site/src/components/FAQ';
 
 # Webhooks
 
-Ottu offers an optional end-to-end integration with the [Payment Gateway](/developers/payments/payment-methods) (PG) through webhooks. By default, these webhooks are **disabled**, ensuring merchants only receive notifications if they choose to. These webhooks act as a reactive mechanism, notifying merchants either in real-time or on-demand, depending on the event. Whether it’s a payment being processed or a subsequent payment gateway [operation](/developers/operations#external-operations) taking place, Ottu ensures that the merchant is promptly informed once the webhooks are enabled. Merchants can enable these webhooks in various ways, either directly from the Ottu dashboard or via the [Checkout API](/developers/payments/checkout-api).
+Ottu calls your server when something happens to a payment, so you don't have to keep asking.
 
-Ottu simplifies the integration process by providing a unified response across all payment gateways. Both webhook types include [`pg_params`](./pg-params) — normalized gateway response fields that stay consistent regardless of which gateway processed the transaction. Whether you’re working with MPGS, KNET, PayPal, or any other gateway, you only need to handle Ottu’s standardized response. This ensures a consistent experience, eliminating the need to interpret varied responses from different payment gateways.&#x20;
-
-Moreover, for those who might need it, the original response from the payment gateway, always converted to `JSON` format, is included in Ottu’s webhooks. This means that while Ottu takes on the heavy lifting of interpreting and standardizing payment gateway responses, you still have access to the raw data if required. The beauty of this approach is its extensibility. As you expand and decide to incorporate more payment gateways into your system, there’s no need for additional integration work on your end. Ottu ensures that everything will work seamlessly out of the box, saving you time and effort in the long run.
+- **When:** a payment is paid, fails or expires, and when a [refund, capture or void](/developers/operations-v3) runs on it.
+- **Off by default.** Turn webhooks on in the Ottu dashboard, or send a `webhook_url` with the [Checkout API](/developers/payments/checkout-api).
+- **One shape for every gateway.** MPGS, KNET, PayPal or any other [payment gateway](/developers/payments/payment-methods): you parse one format. A gateway you add later needs no new code.
+- **Gateway details included.** Normalized gateway fields ([`pg_params`](./pg-params) on formats 1 and 2, [`connector.params`](./event-catalogue.mdx) on format 3) plus the gateway's raw response as JSON (`connector.responses` on format 3), card numbers cut.
 
 :::tip[Every event Ottu can send]
 See the [event catalogue](./event-catalogue.mdx#catalogue) for every event, when each one is sent, and the fields it carries.
