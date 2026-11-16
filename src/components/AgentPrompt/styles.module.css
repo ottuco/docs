@@ -18,8 +18,9 @@
   line-height: 1.2;
 }
 
-.title {
+.box .title {
   font-weight: 700;
+  font-size: 1.05rem;
   margin: 0 0 4px;
 }
 

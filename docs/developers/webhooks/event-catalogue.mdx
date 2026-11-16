@@ -246,6 +246,8 @@ How to read the matrix:
 
 Every key is always present; what is empty is `null`, an empty object (`{}`), or an empty list (`[]`), never a dropped key and never `""`.
 
+<EventObject part="data" />
+
 `channel`, `form_of_payment` and `card` come only from a real gateway attempt that changed the transaction; otherwise they are `null`. A bookkeeping action Ottu records without a gateway (an expiry, a cancel with no attempt, a cash acknowledgement) never shows as a gateway, and an event never looks up an earlier attempt.
 
 :::warning Card numbers are never sent in the clear

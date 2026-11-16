@@ -50,14 +50,22 @@ const EXAMPLES: ResponseExamples = [
   { code: "payment.deleted", examples: [{ name: "deleted", summary: "a paid payment archived", value: deleted }] },
 ];
 
-export default function EventObject(): React.JSX.Element {
+// `part="data"`: the `data` object alone, its fields and each example's `data`.
+const DATA_FIELDS = fieldsOf(EVENT_SCHEMA.properties!.data, "response");
+const DATA_EXAMPLES: ResponseExamples = EXAMPLES.map(({ code, examples }) => ({
+  code,
+  examples: examples.map((example) => ({ ...example, value: (example.value as { data: unknown }).data })),
+}));
+
+export default function EventObject({ part = "event" }: { part?: "event" | "data" }): React.JSX.Element {
+  const data = part === "data";
   return (
     <div className={styles.reference}>
       <div className={styles.left}>
-        <FieldList fields={FIELDS} prefix="event" />
+        <FieldList fields={data ? DATA_FIELDS : FIELDS} prefix={data ? "data" : "event"} />
       </div>
       <div className={styles.right}>
-        <ResponseExamplesBox examples={EXAMPLES} title="Example" />
+        <ResponseExamplesBox examples={data ? DATA_EXAMPLES : EXAMPLES} title={data ? "data" : "Example"} />
       </div>
     </div>
   );
