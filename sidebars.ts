@@ -276,6 +276,16 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
+                  label: "Subscription object",
+                  href: "/developers/payments/autopay#subscription-object",
+                },
+                {
+                  type: "link",
+                  label: "Status",
+                  href: "/developers/payments/autopay#subscription-states",
+                },
+                {
+                  type: "link",
                   label: "Limits",
                   href: "/developers/payments/autopay#limits",
                 },
