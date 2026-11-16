@@ -155,7 +155,7 @@ function render(name: string, attrs: Record<string, string>, route: string): str
         ? `**Prompt for your coding agent** (copy it into Claude Code, Cursor or Copilot):\n\n\`\`\`text\n${WEBHOOKS_PROMPT}\n\`\`\``
         : `_A ready prompt for your coding agent (Claude Code, Cursor, Copilot) is on ${SITE}/developers/webhooks/quickstart/ ._`;
     case "SignatureLab":
-      return `_Interactive signature lab (sign a body, check a header, copy a signed curl): ${SITE}${route}#signature-lab. It needs a browser; to check offline, use the test vectors on ${SITE}/developers/webhooks/verify-signatures#test-vectors._`;
+      return `_Interactive signature lab (sign a body, check a header, copy a signed curl): ${SITE}/developers/webhooks/verify-signatures#signature-lab. It needs a browser; to check offline, use the test vectors on ${SITE}/developers/webhooks/verify-signatures#test-vectors._`;
     default:
       return null;
   }

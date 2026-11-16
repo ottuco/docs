@@ -280,7 +280,7 @@ Select the operation to see its example payload and the full interactive API sch
     [API-Key](/developers/getting-started/authentication#api-key-auth) grants superadmin privileges. [Basic Authentication](/developers/getting-started/authentication#basic-auth) allows granular permission control per operation. Use Basic Auth for production access control.
   </FAQItem>
   <FAQItem question="What permissions are required?">
-    Depends on the operation: `payment.capture` for capture, `payment.expire` for expire, etc. See [permission codes](#permission-codes-for-each-operation).
+    Depends on the operation: `payment.capture` for capture, `payment.expire` for expire, etc. Each endpoint in the [API Reference](#api-reference) lists its own under **Permissions**.
   </FAQItem>
   <FAQItem question="What happens when a refund is requested via the API?">
     The request goes directly to the payment gateway — the maker-checker approval flow is not activated for API refunds. The maker-checker flow only applies to refunds initiated via the Ottu dashboard.
