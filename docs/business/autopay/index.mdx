@@ -52,30 +52,20 @@ There is no catalog to maintain. Your developer sends the price and a descriptio
 
 ## What your customer sees {#what-your-customer-sees}
 
-Your customer gets emails, text messages, and one private page. Ottu sends and hosts all of them.
+Ottu sends and hosts everything your customer sees. There are three touchpoints:
+
+- **Emails.** Six emails keep your customer informed. See [The emails and texts](#the-emails).
+- **Texts.** Three texts go out with the first three emails: created, setup completed and link replaced.
+- **One private page.** Your customer sees the subscription and manages it there. See [The self-service page](#the-self-service-page).
 
 ### The emails and texts {#the-emails}
 
-Ottu sends 6 emails and 3 texts, in English or Arabic, chosen when the subscription is created. Texts go to the customer's phone number when one is on file.
-
-**Always sent.** You cannot switch these off:
-
-- **Subscription created** (email + text). At once. Carries the first-payment link.
-- **Setup completed** (email + text). Once, when the first payment is confirmed.
-- **Link replaced** (email + text). Each time your developer regenerates the customer's page link.
-
-**On by default.** You can switch these off, but only when the subscription is created:
-
-- **Upcoming charge** (email). Monthly: 3 days before the charge. Yearly: 31, 11, and 4 days before. Skipped if a cancellation is pending.
-- **Payment failed** (email). After each failed attempt while retries remain.
-- **Final failure** (email). Right after the last attempt fails. See [When a payment fails](#when-a-payment-fails).
-
-Here are the three emails you can switch off:
+Ottu sends 6 emails and 3 texts, in English or Arabic, chosen when the subscription is created. Texts go to the customer's phone number when one is on file. Three of the six emails can be switched off. Here they are:
 
 <Tabs groupId="email-language" queryString>
 <TabItem value="en" label="English">
 
-<StepGuide steps={[
+<StepGuide fitImages steps={[
   {
     title: "Upcoming charge",
     description: <>Goes out before money moves. Shows the amount, billing date, and card on file, with a link to manage the subscription.</>,
@@ -99,7 +89,7 @@ Here are the three emails you can switch off:
 </TabItem>
 <TabItem value="ar" label="العربية">
 
-<StepGuide steps={[
+<StepGuide fitImages steps={[
   {
     title: "Upcoming charge",
     description: <>Goes out before money moves. Shows the amount, billing date, and card on file, with a link to manage the subscription.</>,
@@ -123,6 +113,18 @@ Here are the three emails you can switch off:
 </TabItem>
 </Tabs>
 
+**Always sent.** You cannot switch these off:
+
+- **Subscription created** (email + text). At once. Carries the first-payment link.
+- **Setup completed** (email + text). Once, when the first payment is confirmed.
+- **Link replaced** (email + text). Each time your developer regenerates the customer's page link.
+
+**On by default.** You can switch these off, but only when the subscription is created:
+
+- **Upcoming charge** (email). Monthly: 3 days before the charge. Yearly: 31, 11, and 4 days before. Skipped if a cancellation is pending.
+- **Payment failed** (email). After each failed attempt while retries remain.
+- **Final failure** (email). Right after the last attempt fails. See [When a payment fails](#when-a-payment-fails).
+
 ### The self-service page {#the-self-service-page}
 
 Every subscription gets its own private page, hosted by Ottu and shown in English and Arabic. Ottu keeps it in sync with the subscription. The link is in every email Ottu sends. Treat it like a password: anyone holding the link can open the page. A cancellation made on this page waits for the end of the paid period, and the customer can undo it until then.
@@ -137,7 +139,7 @@ From this page, a customer can:
 
 What the page shows depends on the subscription's state:
 
-<StepGuide steps={[
+<StepGuide fitImages steps={[
   {
     title: "Active",
     description: <>Plan, status, next payment date, saved cards, and payment history on one page. Nothing is outstanding.</>,
@@ -172,10 +174,10 @@ What the page shows depends on the subscription's state:
 
 And these are the actions a customer can take:
 
-<StepGuide steps={[
+<StepGuide fitImages steps={[
   {
     title: "Add a card",
-    description: <>A secure card form opens on the page. The new card can become active immediately, and the next charge uses it.</>,
+    description: <>A secure card form opens on the page. Adding a card takes no payment, so the amount shows 0. The new card can become active immediately, and the next charge uses it.</>,
     image: "/img/business/autopay/cards-02-add-card.png",
     imageAlt: "Adding a card: a secure checkout where the customer enters and saves a new card to the subscription",
   },
@@ -283,16 +285,24 @@ The first payment is taken at sign-up. The anchor day applies from the next char
 
 This is the full list. Each limit comes with what to do instead.
 
+**Where you work**
+
 - **API-only.** There is no AutoPay screen in the dashboard. *Instead:* ask your developer to integrate it, and try the [live demo](/developers/payments/autopay/#live-demo).
 - **Renewals need a gateway with auto-debit.** *Instead:* pick a gateway from the [filtered catalog](/business/payments/gateways/?features=autodebit).
+- **No dashboard list of subscriptions.** *Instead:* your developer [lists them through the API](/developers/payments/autopay/#api-reference), filtered by status, for example Past Due.
+
+**What you set once**
+
 - **Monthly or yearly only.** There is no weekly or custom period. *Instead:* pick the closer of the two.
 - **A running subscription cannot be edited.** Amount, frequency, billing day, retry count, language, email settings, plan name, end date, and customer email are fixed. *Instead:* cancel it and create a new one.
 - **Retries are set once.** Your developer picks 1 to 10 retries when the subscription is created (3 by default). Ottu runs them about an hour apart. *Instead:* choose the retry count up front.
-- **No pause.** *Instead:* cancel at the end of the paid period, then create a new subscription when the customer returns. This works while the subscription is Active or Trialing and no payment is due or in progress.
 - **Some messages cannot be switched off.** The subscription created, setup completed, and link replaced messages always go out. Only the three billing-cycle emails can be switched off, and only at creation. *Instead:* decide on them when your developer creates the subscription.
 - **You cannot pick the exact charge time.** *Instead:* choose the start date. It sets the billing day.
+
+**What Ottu does not do**
+
+- **No pause.** *Instead:* cancel at the end of the paid period, then create a new subscription when the customer returns. This works while the subscription is Active or Trialing and no payment is due or in progress.
 - **Canceling does not refund.** A cancellation stops future charges only. *Instead:* refund the cycle's transaction in [Payment Management](/business/payment-management/).
-- **No dashboard list of subscriptions.** *Instead:* your developer [lists them through the API](/developers/payments/autopay/#api-reference), filtered by status, for example Past Due.
 - **Your team cannot undo a pending cancellation.** *Instead:* send your customer their page link. They can undo it there until the paid period ends.
 
 ## FAQ {#faq}
