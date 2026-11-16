@@ -2,6 +2,7 @@
 // group box, the numbered edge label, the title, and the edge colours.
 import React, { useEffect } from "react";
 import Icon from "@mdi/react";
+import Link from "@docusaurus/Link";
 import {
   BaseEdge,
   EdgeLabelRenderer,
@@ -27,6 +28,9 @@ export type CardData = {
   tone?: Tone;
   num?: number;
   width?: number;
+  href?: string;
+  mono?: boolean;
+  hidden?: boolean;
 };
 
 const allSides = [Position.Top, Position.Right, Position.Bottom, Position.Left];
@@ -63,12 +67,18 @@ export function Handles({
 
 export function CardNode({ data }: NodeProps): React.JSX.Element {
   const d = data as CardData;
+  if (d.hidden)
+    return (
+      <div aria-hidden="true" style={{ width: d.width ?? 190, height: 54 }} />
+    );
   const cls = [styles.node, d.tone ? styles[d.tone] : ""].join(" ");
-  return (
+  const body = (
     <div
       className={cls}
       style={d.width ? { width: d.width } : undefined}
-      title={d.sub ? `${d.title}: ${d.sub}` : d.title}
+      // Story cards cut long text, so they keep the full text as a tooltip.
+      // Others show it all: a native tooltip would only float over the diagram.
+      title={d.num ? (d.sub ? `${d.title}: ${d.sub}` : d.title) : undefined}
     >
       <Handles />
       {d.icon ? (
@@ -81,9 +91,20 @@ export function CardNode({ data }: NodeProps): React.JSX.Element {
           {d.num ? <span className={styles.nodeNum}>{d.num}</span> : null}
           {d.title}
         </div>
-        {d.sub ? <div className={styles.nodeSub}>{d.sub}</div> : null}
+        {d.sub ? (
+          <div className={`${styles.nodeSub} ${d.mono ? styles.mono : ""}`}>
+            {d.sub}
+          </div>
+        ) : null}
       </span>
     </div>
+  );
+  return d.href ? (
+    <Link to={d.href} className={`${styles.cardLink} nodrag nopan`}>
+      {body}
+    </Link>
+  ) : (
+    body
   );
 }
 
@@ -257,14 +278,26 @@ export const fitPadding = (pct: number): Padding => ({
 /** Put inside <ReactFlow>: fits the diagram again whenever the canvas is
  * resized (window resize, phone rotation), since panning and zooming are off
  * and the reader could not bring a cut-off part back into view. */
-export function FitOnResize({ pct }: { pct: number }): null {
+export function FitOnResize({
+  pct,
+  refit,
+}: {
+  pct: number;
+  /** Also refit when this changes (e.g. the lanes' width). */
+  refit?: number;
+}): null {
   const { fitView } = useReactFlow();
   const width = useStore((s) => s.width);
   const height = useStore((s) => s.height);
-  // Depends on numbers only, so a hover re-render never refits.
+  // Depends on numbers only, so a hover re-render never refits. The next
+  // frame, so moved nodes are measured first.
   useEffect(() => {
-    if (width && height) void fitView({ padding: fitPadding(pct), maxZoom: 1 });
-  }, [width, height, pct, fitView]);
+    if (!width || !height) return;
+    const frame = requestAnimationFrame(
+      () => void fitView({ padding: fitPadding(pct), maxZoom: 1 }),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [width, height, pct, refit, fitView]);
   return null;
 }
 

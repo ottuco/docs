@@ -93,7 +93,7 @@ const steps: StoryStep[] = [
     sub: "Checks the reference",
     icon: mdiPackageVariantClosed,
     detail:
-      "Before fulfilling, check that the payment's reference_number has not already been applied. Two events can describe the same outcome.",
+      "Before fulfilling, check that the order or connector.reference_number has not already been applied. Two events can describe the same outcome.",
   },
   {
     lane: 1,
@@ -162,7 +162,7 @@ const journeys: StoryJourney[] = [
       { step: 2, text: "Attempt 1 arrives, signed, with Idempotency-Key evt_X." },
       { step: 3, text: "Your receiver verifies v2 on the raw body." },
       { step: 4, text: "evt_X is new, so your database stores it." },
-      { step: 5, text: "You fulfil the order after checking reference_number." },
+      { step: 5, text: "You fulfil the order after checking your own reference." },
       { step: 6, text: "Your answer times out, so Ottu sees a failure." },
       { step: 7, text: "After about a minute Ottu sends the same bytes and key again." },
       { step: 8, text: "Your database already has evt_X." },

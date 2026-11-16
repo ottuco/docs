@@ -19,22 +19,22 @@ Ottu sends webhooks in one of three **formats**, set per account. **Ottu never s
 
 | Format | What you receive | Read |
 |---|---|---|
-| **1 and 2** | A flat payment body or operation body, in JSON (XML on request), signed in the body and in the `Ottu-Signature` header | [Payment Events](./payment-events.md), [Operation Events](./operation-events.md) |
-| **3** | An **envelope** (`id`, `type`, `created`, `version`, `is_sandbox`, `merchant_id`, `data`) per event, in JSON, signed with `Ottu-Signature` `v2` over the raw body | [Webhook Events (v3)](./event-catalogue.mdx) |
+| **1 and 2** | A flat payment body or operation body, in JSON (XML on request), signed in the body and in the `Ottu-Signature` header | [Payment Events](./payment-events.mdx), [Operation Events](./operation-events.md) |
+| **3** | An **envelope** (`id`, `event`, `created`, `version`, `is_sandbox`, `merchant_id`, `initiator`, `data`), where `data` is the payment itself, flat, per event, in JSON, signed with `Ottu-Signature` `v2` over the raw body | [Webhook Events (v3)](./event-catalogue.mdx) |
 
-Format 3 adds a catalogue of event types (`payment.paid`, `payment.refunded`, ...), a fixed [retry schedule](./delivery-and-retries.mdx#retry-schedule), and `Idempotency-Key`. To move from format 1 or 2, follow [Migrating to v3](./migrate-to-v3.md).
+Format 3 adds a catalogue of 15 events named after the status reached (`payment.paid`, `payment.refunded`, ...), a fixed [retry schedule](./delivery-and-retries.mdx#retry-schedule), and `Idempotency-Key`. To move from format 1 or 2, follow [Migrating to v3](./migrate-to-v3.md).
 
 On **every** format each delivery carries an `Idempotency-Key` header with the event id, so you can drop a duplicate before you fulfil an order. See [Delivery and Retries](./delivery-and-retries.mdx#idempotency-key).
 
 :::note Ordering is not guaranteed
-Events can arrive out of order, especially after a retry. Use the `created` time of a format 3 event to order them, and fetch the payment's current state with the [Payment Status API](/developers/payments/psq) when the final state matters.
+Events can arrive out of order, especially after a retry. `payment.created` can arrive after a fast `payment.paid`. Use the `created` time of a format 3 event to order them, de-duplicate on the event `id`, and fetch the payment's current state with the [Payment Status API](/developers/payments/psq) when the final state matters.
 :::
 
 ## **Types of Webhooks**
 
 Ottu supports two primary types of webhooks:
 
-1.  #### [Payment Event Webhook](./payment-events.md)
+1.  #### [Payment Event Webhook](./payment-events.mdx)
 
     This webhook is triggered when a transaction is processed. It’s a real-time notification mechanism that informs the merchant immediately after a payment event.
 2.  #### [Operations Webhook](./operation-events.md)
@@ -135,7 +135,7 @@ All the fields mentioned below come with default values to ensure a smooth integ
 
 ## Related
 
-- [**Webhook Events (v3)**](./event-catalogue.mdx): the envelope and every event type
+- [**Webhook Events (v3)**](./event-catalogue.mdx): the envelope and every event
 - [**Delivery and Retries**](./delivery-and-retries.mdx): success rules, retry schedule, `Idempotency-Key`
 - [**Migrating to v3**](./migrate-to-v3.md): move from format 1 or 2
 - [**Verify Signatures**](./verify-signatures.md): `Ottu-Signature` v1 and v2

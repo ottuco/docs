@@ -129,6 +129,20 @@
   transition: opacity 0.25s ease;
 }
 
+/* fitImages: the frame hugs the image; a shot narrower than the area (or
+   capped by max-height) is centred, with no bars beside it. */
+.fitImages .imageFrame {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.fitImages .imageFrame img {
+  width: auto;
+  max-width: 100%;
+  object-fit: initial;
+}
+
 .zoomHint {
   position: absolute;
   top: 12px;

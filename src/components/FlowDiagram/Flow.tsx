@@ -1,7 +1,7 @@
 // Free-layout diagram: cards placed by x/y, optional dashed groups, arrows
 // between cards. Use it for architecture views where a story or a sequence
 // doesn't fit.
-import React, { useMemo } from "react";
+import React, { useId, useMemo } from "react";
 import { useColorMode } from "@docusaurus/theme-common";
 import {
   Background,
@@ -22,6 +22,7 @@ import {
   sourceHandle,
   targetHandle,
 } from "./parts";
+import { dimCss } from "./storyFocus";
 import { CARD_H, CARD_W, flowHeight, flowMinWidth } from "./layout";
 import type { FlowArrow, FlowCard, FlowProps, Side } from "./types";
 import styles from "./styles.module.css";
@@ -39,7 +40,19 @@ function facing(
 }
 
 export default function Flow(props: FlowProps): React.JSX.Element {
-  const { title, sub, cards, groups = [], arrows, animate = true } = props;
+  const {
+    title,
+    sub,
+    cards,
+    groups = [],
+    arrows,
+    animate = true,
+    selected = null,
+    onSelect,
+    lit,
+  } = props;
+  const scope = `fd-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+  const arrowId = (a: FlowArrow, i: number) => `a-${i}-${a.from}-${a.to}`;
   const { colorMode } = useColorMode();
 
   const nodes: Node[] = useMemo(
@@ -63,6 +76,9 @@ export default function Flow(props: FlowProps): React.JSX.Element {
           icon: c.icon,
           tone: c.tone,
           width: c.width,
+          href: onSelect ? undefined : c.href,
+          mono: c.mono,
+          hidden: c.hidden,
         },
         // An unknown `parent` is ignored: the card is placed on its own, the
         // same way flowMinWidth and the arrow sides treat it.
@@ -71,7 +87,7 @@ export default function Flow(props: FlowProps): React.JSX.Element {
           : {}),
       })),
     ],
-    [cards, groups],
+    [cards, groups, onSelect],
   );
 
   const edges: Edge[] = useMemo(() => {
@@ -94,7 +110,7 @@ export default function Flow(props: FlowProps): React.JSX.Element {
         centre.get(a.to) ?? { x: 0, y: 0 },
       );
       return {
-        id: `a-${i}-${a.from}-${a.to}`,
+        id: arrowId(a, i),
         type: "step",
         source: a.from,
         target: a.to,
@@ -113,12 +129,51 @@ export default function Flow(props: FlowProps): React.JSX.Element {
     });
   }, [arrows, cards, groups, animate]);
 
+  // Dim everything but the selection and what it leads to.
+  const css =
+    selected && lit
+      ? dimCss(
+          `#${scope}`,
+          [
+            ...lit.cards.map((id) => `#${scope} [data-id="${id}"]`),
+            ...lit.arrows.map((i) => {
+              const id = arrowId(arrows[i], i);
+              return `#${scope} [data-id="${id}"], #${scope} [data-edge="${id}"]`;
+            }),
+          ],
+          `#${scope} [data-id="${selected}"] > div { outline: 2px solid var(--o-primary); outline-offset: 2px; }`,
+        )
+      : "";
+  // React Flow does not fire onNodeClick from the keyboard.
+  const onKeyDown = onSelect
+    ? (e: React.KeyboardEvent) => {
+        if (e.key === "Escape") return onSelect(null);
+        if (e.key !== "Enter" && e.key !== " ") return;
+        const id = (e.target as HTMLElement)
+          .closest(".react-flow__node")
+          ?.getAttribute("data-id");
+        if (id) {
+          e.preventDefault();
+          onSelect(id === selected ? null : id);
+          // The re-render must not take keyboard focus away from the card.
+          requestAnimationFrame(() =>
+            document
+              .querySelector<HTMLElement>(`#${scope} [data-id="${id}"]`)
+              ?.focus(),
+          );
+        }
+      }
+    : undefined;
+
   return (
     <div className={styles.scroller}>
       <div
+        id={scope}
+        onKeyDown={onKeyDown}
         className={`${styles.canvas} ${styles.frame}`}
         style={{ height: flowHeight(props), minWidth: flowMinWidth(props) }}
       >
+        {css ? <style>{css}</style> : null}
         <Title title={title} sub={sub} />
         <ReactFlow
           nodes={nodes}
@@ -129,7 +184,13 @@ export default function Flow(props: FlowProps): React.JSX.Element {
           fitView
           fitViewOptions={{ padding: fitPadding(6), maxZoom: 1 }}
           {...readOnlyFlow}
-          nodesFocusable={false}
+          nodesFocusable={!!onSelect}
+          onNodeClick={
+            onSelect
+              ? (_, n) => onSelect(n.id === selected ? null : n.id)
+              : undefined
+          }
+          onPaneClick={onSelect ? () => onSelect(null) : undefined}
         >
           <Background
             variant={BackgroundVariant.Dots}

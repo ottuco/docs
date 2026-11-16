@@ -55,6 +55,18 @@ export type StoryProps = {
   maxHeight?: number;
   /** Request and reply arrows flow (moving dashes). Set false for a still diagram. Default true. */
   animate?: boolean;
+  /**
+   * Where the side and journey buttons go: "top" (default), in rows above the
+   * lanes; "side", in a column left of the lanes, the journeys under a
+   * separator, so a wide page has no empty band beside the lanes.
+   */
+  controls?: "top" | "side";
+  /**
+   * The lanes widen to fill the figure's width (the cards too, up to a
+   * limit), so the diagram runs the full width of the page. Default false:
+   * the lanes keep their size and sit in the middle.
+   */
+  fillWidth?: boolean;
 };
 
 // ---------- Sequence ----------
@@ -86,6 +98,12 @@ export type FlowCard = {
   tone?: Tone;
   /** Card width in px. Default 190. */
   width?: number;
+  /** Makes the card a link (internal path or #anchor). */
+  href?: string;
+  /** Show `sub` in a monospace font (a code value). */
+  mono?: boolean;
+  /** Invisible: only reserves room (the fit and the scroll width count it), e.g. for an arrow that loops outside the cards. */
+  hidden?: boolean;
   /** Id of a FlowGroup this card sits inside. */
   parent?: string;
 };
@@ -127,4 +145,9 @@ export type FlowProps = {
   height: number;
   /** Request and reply arrows flow (moving dashes). Set false for a still diagram. Default true. */
   animate?: boolean;
+  /** Selectable cards: a click, Enter or Space calls `onSelect(id)` (empty canvas or Escape: `null`). */
+  selected?: string | null;
+  onSelect?: (id: string | null) => void;
+  /** While something is selected: the cards and arrows (by index) kept bright. The rest is dimmed. */
+  lit?: { cards: string[]; arrows: number[] };
 };

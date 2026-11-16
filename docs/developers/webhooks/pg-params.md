@@ -36,6 +36,10 @@ If you parse the raw `gateway_response` directly, your code is tightly coupled t
 
 Two completely different structures. Your code would need separate parsing logic for each.
 
+:::note Where to find them on format 3
+On [webhook format 3](/developers/webhooks/event-catalogue#data-keys) the same normalised fields arrive as `data.connector.params`. Each one is an object with a bilingual `label` (`en` and `ar`) and a `value`, for example `data.connector.params.rrn.value`, instead of a plain string under `pg_params`.
+:::
+
 **With PG Params** — same fields, every gateway:
 
 ```json title="pg_params (identical structure regardless of gateway)"

@@ -60,7 +60,7 @@ The key is your **HMAC Key** from the Webhook configuration, the same key as for
 
 Compute the expected `v2` for a body you saved, with `openssl`. `printf '%s'` adds no trailing newline, which would change the bytes.
 
-```bash
+```bash title="Compute v2 with openssl"
 KEY='pu9MpX3yPR'
 T=1792417440
 BODY='{"id":"evt_1","data":{"customer_first_name":"Zoë احمد"}}'
@@ -184,7 +184,7 @@ On formats 1 and 2 the `v1=` part signs the payload's fields rather than its byt
 | Payload | the sample below |
 | Expected `v1` | `469fb5c5ad75e589acd9c6d14c78af62f7c807adb49004dbe71b80c11467d837` |
 
-```json
+```json title="Test vector payload"
 {
   "amount": "86.000", "currency_code": "KWD", "customer_email": "jane@example.com",
   "customer_first_name": "Jane", "customer_last_name": "", "gateway_account": "credit-card",
@@ -228,7 +228,7 @@ def body_signature(payload: dict, key: str) -> str:
     return hmac.new(key.encode(), message.encode(), hashlib.sha256).hexdigest()
 ```
 
-Test vector: key `pu9MpX3yPR` and payload `{"amount": "86.000", "currency_code": "KWD", "customer_first_name": "example-customer"}` give `6143b8ad4bd283540721ab000f6de746e722231aaaa90bc38f639081d3ff9f67`. The body signature is not present in format 3, where `data.payment` and `data.operation` have no `signature` field.
+Test vector: key `pu9MpX3yPR` and payload `{"amount": "86.000", "currency_code": "KWD", "customer_first_name": "example-customer"}` give `6143b8ad4bd283540721ab000f6de746e722231aaaa90bc38f639081d3ff9f67`. Format 3 has no body `signature` field: its authenticity comes from the [`Ottu-Signature` header](#ottu-signature-header) only.
 
 
 ## Important Components
@@ -385,7 +385,7 @@ Consider this payload and a hypothetical HMAC key.
 
 **Webhook Payload**:
 
-```json
+```json title="Webhook payload"
 {
   "amount": "49.990",
   "currency_code": "KWD",
