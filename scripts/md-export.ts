@@ -35,10 +35,22 @@ function frontMatter(source: string): { data: Record<string, string>; body: stri
   const match = source.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
   if (!match) return { data: {}, body: source };
   const data: Record<string, string> = {};
-  for (const line of match[1].split(/\r?\n/)) {
+  const lines = match[1].split(/\r?\n/);
+  lines.forEach((line, index) => {
     const kv = line.match(/^([A-Za-z_]+):\s*(.*)$/);
-    if (kv) data[kv[1]] = kv[2].replace(/^["']|["']$/g, "").trim();
-  }
+    if (!kv) return;
+    let value = kv[2].trim();
+    // A folded (>) or literal (|) block: the indented lines that follow are the value.
+    if (/^[>|][+-]?$/.test(value)) {
+      const block: string[] = [];
+      for (const next of lines.slice(index + 1)) {
+        if (!/^\s+\S/.test(next)) break;
+        block.push(next.trim());
+      }
+      value = block.join(" ");
+    }
+    data[kv[1]] = value.replace(/^["']|["']$/g, "").trim();
+  });
   return { data, body: source.slice(match[0].length) };
 }
 
@@ -46,6 +58,8 @@ function routeOf(file: string, slug?: string, id?: string): string {
   const rel = path.relative(DOCS, file).replace(/\.(md|mdx)$/, "").split(path.sep);
   // An `id` in the front matter replaces the file name in the route (the API pages: x.api.mdx, id: x).
   if (id && !slug) rel[rel.length - 1] = id;
+  // Docusaurus drops a numeric prefix ("01-intro") from every path segment.
+  for (let i = 0; i < rel.length; i += 1) rel[i] = rel[i].replace(/^\d+[-_.]/, "");
   if (rel[rel.length - 1] === "index") rel.pop();
   const dir = rel.slice(0, -1).join("/");
   if (slug) return slug.startsWith("/") ? slug.replace(/\/?$/, "/") : `/${dir ? `${dir}/` : ""}${slug}/`;
@@ -174,6 +188,28 @@ function readTag(text: string, at: number) {
 /** Components imported from src/diagrams on the page being converted (set per page in toMarkdown). */
 let diagramNames = new Set<string>();
 
+/** The string a `{\`...\`}` template literal renders: escapes resolved, the known constants substituted. */
+function templateLiteral(code: string): string {
+  const host = OTTU_CONNECT_BASE_URL.replace("https://", "");
+  let out = "";
+  for (let i = 0; i < code.length; i += 1) {
+    const ch = code[i];
+    if (ch === "\\" && i + 1 < code.length) {
+      const next = code[i + 1];
+      out += next === "n" ? "\n" : next === "t" ? "\t" : next;
+      i += 1;
+    } else if (ch === "$" && code[i + 1] === "{") {
+      const end = code.indexOf("}", i);
+      const expr = code.slice(i + 2, end).trim();
+      if (/^OTTU_(CONNECT|DEV)_BASE_URL$/.test(expr)) out += OTTU_CONNECT_BASE_URL;
+      else if (/^OTTU_(CONNECT|DEV)_BASE_URL\.replace\(["']https:\/\/["'],\s*["']["']\)$/.test(expr)) out += host;
+      else throw new Error(`md-export: unknown expression \${${expr}} in a CodeBlock; add it to templateLiteral()`);
+      i = end;
+    } else out += ch;
+  }
+  return out;
+}
+
 const CODE_BLOCK = /<CodeBlock([^>]*)>\s*\{`([\s\S]*?)`\}\s*<\/CodeBlock>/g;
 
 function prose(text: string, route: string): string {
@@ -248,7 +284,7 @@ function toMarkdown(body: string, route: string): string {
   body = body.replace(CODE_BLOCK, (_m, attrs: string, code: string) => {
     const lang = attrs.match(/language=["']([^"']+)["']/)?.[1] ?? "";
     const title = attrs.match(/title=["']([^"']+)["']/)?.[1];
-    const text = code.replace(/\$\{OTTU_(CONNECT|DEV)_BASE_URL\}/g, OTTU_CONNECT_BASE_URL).replace(/\\`/g, "`");
+    const text = templateLiteral(code);
     return `\n\`\`\`${lang}${title ? ` title="${title}"` : ""}\n${text.replace(/^\n/, "").replace(/\s+$/, "")}\n\`\`\`\n`;
   });
   // Split on fenced code (``` or ~~~, any indent); fences are copied as written.

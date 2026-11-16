@@ -138,7 +138,7 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
-                  label: "Looking for v1 and v2?",
+                  label: "Looking for v2?",
                   href: "/developers/payments/psq/legacy",
                 },
               ],
@@ -529,7 +529,7 @@ const sidebars: SidebarsConfig = {
             },
             {
               type: "link",
-              label: "Looking for v1 and v2?",
+              label: "Looking for v2?",
               href: "/developers/operations/legacy",
             },
           ],
@@ -672,7 +672,7 @@ const sidebars: SidebarsConfig = {
             {
               type: "doc",
               id: "developers/webhooks/index",
-              label: "Overview & Setup",
+              label: "Overview",
             },
             {
               type: "doc",

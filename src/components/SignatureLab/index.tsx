@@ -21,6 +21,16 @@ const VECTOR = {
   header: "t=1792417440,v2=b230321937edb54b51b91f65d544aa8039e413f0a8e034e59acb9b13e11e7d4e",
 };
 
+/** Why HMAC cannot run here, or null when it can: Web Crypto needs a secure context, and HMAC a non-empty key. */
+function cannotSign(key: string): string | null {
+  if (typeof crypto === "undefined" || !crypto.subtle) return "Your browser blocks Web Crypto on this page (it needs HTTPS or localhost).";
+  if (!key) return "Enter the HMAC key.";
+  return null;
+}
+
+/** Quote a value for a single-quoted shell argument. */
+const shellQuote = (value: string) => value.replace(/'/g, "'\\''");
+
 async function hmacHex(key: string, message: string): Promise<string> {
   const encoder = new TextEncoder();
   const cryptoKey = await crypto.subtle.importKey(
@@ -52,7 +62,10 @@ async function check(header: string, body: string, key: string, now: number): Pr
   if (!parts.t || !parts.v2) {
     return [{ ok: false, text: `The header needs both t and v2; found ${Object.keys(parts).join(", ") || "nothing"}. Format 3 sends t=…,v2=….` }];
   }
+  if (!/^\d+$/.test(parts.t)) return [{ ok: false, text: `t is "${parts.t}", not a Unix time in seconds. A receiver rejects it.` }];
   steps.push({ ok: true, text: `Read t = ${parts.t} and v2 by name.` });
+  const problem = cannotSign(key);
+  if (problem) return [...steps, { ok: false, text: problem }];
   const age = Math.abs(now - Number(parts.t));
   steps.push(
     age <= TOLERANCE_SECONDS
@@ -87,22 +100,42 @@ function Lab(): React.JSX.Element {
   const [useClock, setUseClock] = useState(true);
   const [url, setUrl] = useState("http://localhost:8000/webhooks/ottu");
   const [signature, setSignature] = useState("");
+  const [signError, setSignError] = useState("");
   const [steps, setSteps] = useState<Step[]>([]);
 
+  // Each effect ignores a result that arrives after its inputs changed, so a slow HMAC never overwrites a newer one.
   useEffect(() => {
     if (mode !== "sign") return;
-    hmacHex(key, `${t}.${body}`).then(setSignature);
+    let current = true;
+    const problem = cannotSign(key);
+    if (problem) {
+      setSignature("");
+      setSignError(problem);
+      return;
+    }
+    hmacHex(key, `${t}.${body}`)
+      .then((value) => current && (setSignature(value), setSignError("")))
+      .catch((error: Error) => current && (setSignature(""), setSignError(error.message)));
+    return () => {
+      current = false;
+    };
   }, [mode, key, t, body]);
 
   useEffect(() => {
     if (mode !== "check") return;
+    let current = true;
     const now = useClock ? Date.now() / 1000 : Number(parseHeader(header).t ?? 0);
-    check(header, body, key, now).then(setSteps);
+    check(header, body, key, now)
+      .then((result) => current && setSteps(result))
+      .catch((error: Error) => current && setSteps([{ ok: false, text: error.message }]));
+    return () => {
+      current = false;
+    };
   }, [mode, header, body, key, useClock]);
 
   const signedHeader = `t=${t},v2=${signature}`;
   const curl = useMemo(() => {
-    const quoted = body.replace(/'/g, "'\\''");
+    const quoted = shellQuote(body);
     const id = (() => {
       try {
         return (JSON.parse(body) as { id?: string }).id ?? "";
@@ -111,10 +144,10 @@ function Lab(): React.JSX.Element {
       }
     })();
     return [
-      `curl -i -X POST '${url}' \\`,
+      `curl -i -X POST '${shellQuote(url)}' \\`,
       `  -H 'Content-Type: application/json' \\`,
       `  -H 'Ottu-Signature: ${signedHeader}' \\`,
-      ...(id ? [`  -H 'Idempotency-Key: ${id}' \\`] : []),
+      ...(id ? [`  -H 'Idempotency-Key: ${shellQuote(String(id))}' \\`] : []),
       `  --data-binary '${quoted}'`,
     ].join("\n");
   }, [url, signedHeader, body]);
@@ -162,7 +195,7 @@ function Lab(): React.JSX.Element {
             </span>
           </label>
           <p className={styles.label}>Ottu-Signature</p>
-          <pre className={styles.out}>{signedHeader}</pre>
+          {signError ? <p className={`${styles.steps} ${styles.fail}`}>{signError}</p> : <pre className={styles.out}>{signedHeader}</pre>}
           <label className={styles.label}>
             Your receiver's URL <span className={styles.hint}>to test it with a signed request</span>
             <input className={styles.input} value={url} onChange={(event) => setUrl(event.target.value)} spellCheck={false} />

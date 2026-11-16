@@ -282,7 +282,7 @@ There is no endpoint to call: this page describes what Ottu sends to you. The re
 
 - Answer `2xx` as soon as the event is stored, then process asynchronously.
 - Make the id store and the business change one transaction.
-- Treat the retry window as roughly two days: monitor failure emails, and use the [Payment Status Query v3](/developers/payments/psq-v3) to reconcile anything you may have missed.
+- Treat the retry window as about 42 hours: monitor failure emails, and use the [Payment Status Query v3](/developers/payments/psq-v3) to reconcile anything you may have missed.
 - Do not rely on one URL receiving events in order (`payment.created` can arrive after a fast `payment.paid`): order by `created`; see [ordering](/developers/webhooks/event-catalogue#ordering).
 - Keep the URL reachable on a public HTTPS address.
 

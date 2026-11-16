@@ -139,7 +139,8 @@ html[data-theme="dark"] {
   --ifm-color-info: #0b82be;
   --ifm-color-info-darkest: #e5e7eb;
   --ifm-color-info-contrast-foreground: #e5e7eb;
-  --ifm-color-primary-contrast-foreground: #e5e7eb;
+  /* Text on an orange fill stays dark in both themes: light text on #f27e20 is under 4.5:1. */
+  --ifm-color-primary-contrast-foreground: #1a1a1a;
   --ifm-font-color-secondary: #d1d5dc;
 }
 

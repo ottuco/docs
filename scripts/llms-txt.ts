@@ -39,7 +39,8 @@ function walk(dir: string, found: string[] = []): string[] {
 
 function pageOf(outDir: string, file: string): Page {
   const markdown = fs.readFileSync(file, "utf8");
-  const route = `/${path.relative(outDir, path.dirname(file)).split(path.sep).join("/")}/`;
+  const rel = path.relative(outDir, path.dirname(file)).split(path.sep).join("/");
+  const route = rel ? `/${rel}/` : "/";
   const title = markdown.match(/^#\s+(.+)$/m)?.[1].trim() ?? route;
   // The first paragraph after the title: one line a reader can choose by.
   const body = markdown.replace(/^#\s+.+$/m, "");
@@ -85,3 +86,5 @@ fs.writeFileSync(path.join(OUT, "llms.txt"), lines.join("\n"));
 const full = pages.map((page) => `<!-- ${SITE}${page.route} -->\n\n${page.markdown.trim()}\n`).join("\n---\n\n");
 fs.writeFileSync(path.join(OUT, "llms-full.txt"), full);
 console.log(`llms.txt: ${pages.length} pages`);
+// The meta file is a hand-off between the two scripts, not a page: do not publish it.
+fs.rmSync(META_FILE, { force: true });
