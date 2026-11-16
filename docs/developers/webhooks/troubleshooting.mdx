@@ -24,7 +24,7 @@ Something is wrong with your [format 3 webhooks](/developers/webhooks/event-cata
 | The payment in `data` is not what the dashboard shows now | [The data looks old](#old-data) |
 
 :::note This page is about format 3
-Format 3 sends an envelope (`id`, `event`, `created`, `version`, `data`, ...) signed with `Ottu-Signature` `v2` over the raw body. Formats 1 and 2 have other rules: see [Webhooks Overview](/developers/webhooks#webhook-formats).
+Format 3 sends an envelope (`id`, `event`, `created`, `version`, `data`, ...) signed with `Ottu-Signature` `v2` over the raw body. Formats 1 and 2 send a flat body with no envelope, signed with the same `Ottu-Signature` `v2` plus a body `signature` field, and retry differently: see [Webhooks Overview](/developers/webhooks#webhook-formats).
 :::
 
 ## Start here {#start-here}
@@ -104,7 +104,7 @@ The helpers `verify_ottu_signature` / `verifyOttuSignature` are defined on [Veri
 | **Body parsed and re-serialised** (`JSON.stringify(req.body)`, `json.dumps(request.json)`) | Every event fails; the test vector passes | Verify the raw bytes before any parsing. Use the [recipe for your framework](#raw-body-recipes). |
 | **Wrong key, or spaces around it** | Every event fails, the test vector passes with the published key | Copy the **HMAC Key** from your Webhook configuration again. Trim stray spaces or a trailing newline from your environment variable or secret store. |
 | **Stale `t` or clock drift** | Fails intermittently, or only on one server | `t` is signed fresh for every attempt. Sync your server clock (NTP). Verify on receipt, not later from a queue: an event checked after 300 seconds is correctly rejected. |
-| **Reading `v1` instead of `v2`** | `v1` is missing, or your code finds nothing to compare | Format 3 sends `v2` only. Split the header on `,`, then each part on the first `=`, and read parts **by name**, never by position. |
+| **Looking for `v1` instead of `v2`** | `v1` is missing, or your code finds nothing to compare | Every format sends `v2` only; there is no `v1` header part. Split the header on `,`, then each part on the first `=`, and read parts **by name**, never by position. |
 | **`==` comparison, or uppercase hex** | Fails although the hex looks the same; or works but leaks timing | `v2` is lowercase hex. Lowercase your digest if your library returns uppercase, and compare with `hmac.compare_digest`, `crypto.timingSafeEqual` or `hash_equals`. |
 | **Body decoded with the wrong charset** | Fails only for names or addresses with non-ASCII characters (Arabic, accents) | The body is UTF-8. Keep it as bytes; if you must turn it into a string, decode as UTF-8 and encode back as UTF-8, never Latin-1. |
 | **Header missing** | No `Ottu-Signature` header at all | Treat the request as unsigned and reject it. Check that a proxy in front of your app is not stripping headers. |
@@ -311,7 +311,7 @@ When you need the current state, call the [Payment Status Query v3](/developers/
 
 <FAQ>
   <FAQItem question="Can I use the Sign API to check my v2 code?">
-    No. `v2` signs the raw bytes of a delivery, which the [Sign API](/developers/webhooks/verify-signatures#sign-api) never sees, so it returns `signature` and the `v1` header value only. Check `v2` against the [published test vector](/developers/webhooks/verify-signatures#test-vectors).
+    Yes. The [Sign API](/developers/webhooks/verify-signatures#sign-api) returns `ottu_signature`, which is `t=<t>,v2=<hex>` over the exact bytes of the body you posted. Sign the same bytes with the same `t` in your code and compare. The [published test vector](/developers/webhooks/verify-signatures#test-vectors) works without a call.
   </FAQItem>
   <FAQItem question="Which status should I return when the signature is invalid?">
     `401`, and do not process the event. Ottu retries on the [schedule](/developers/webhooks/delivery-and-retries#retry-schedule), so once you fix your key or raw-body handling, the retries go through.

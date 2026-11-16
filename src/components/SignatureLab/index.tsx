@@ -60,7 +60,7 @@ async function check(header: string, body: string, key: string, now: number): Pr
   if (!header.trim()) return [{ ok: false, text: "No header: paste the Ottu-Signature value." }];
   const parts = parseHeader(header);
   if (!parts.t || !parts.v2) {
-    return [{ ok: false, text: `The header needs both t and v2; found ${Object.keys(parts).join(", ") || "nothing"}. Format 3 sends t=…,v2=….` }];
+    return [{ ok: false, text: `The header needs both t and v2; found ${Object.keys(parts).join(", ") || "nothing"}. Every webhook format sends t=…,v2=….` }];
   }
   if (!/^\d+$/.test(parts.t)) return [{ ok: false, text: `t is "${parts.t}", not a Unix time in seconds. A receiver rejects it.` }];
   steps.push({ ok: true, text: `Read t = ${parts.t} and v2 by name.` });

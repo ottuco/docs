@@ -31,7 +31,7 @@ It applies to all three webhook formats, and says where [format 3](/developers/w
 A receiver that is safe against duplicates does four things, in this order: verify the signature, store the event once (keyed on its id), answer `2xx`, then process it in the background. It answers `503` only when it cannot store the event, so that Ottu retries it (on format 3); once an event is stored, a failure in your business logic is retried by your own worker, never by asking Ottu to send it again.
 
 :::note These samples receive format 3
-They verify the `v2` signature and de-duplicate on the envelope's `id`, which a format 3 body carries. A format 1 or 2 body has no `id`: verify its `v1` as shown in [Verify Signatures](/developers/webhooks/verify-signatures#header-v1) and de-duplicate on the `Idempotency-Key` header instead (see [Idempotency-Key](#idempotency-key)).
+They verify the `v2` signature and de-duplicate on the envelope's `id`, which a format 3 body carries. A format 1 or 2 body has no `id`: verify its `v2` exactly as here (formats 1 and 2 send the same [`v2` header](/developers/webhooks/verify-signatures#header-v1)) and de-duplicate on the `Idempotency-Key` header instead (see [Idempotency-Key](#idempotency-key)).
 
 In the samples, `verify_ottu_signature` / `verifyOttuSignature` is the helper defined in [Verify Signatures](/developers/webhooks/verify-signatures#verify-v2) and `HMAC_KEY` is your webhook's HMAC key. `enqueue` hands the stored event id to your background worker, which runs your business logic (`handle_event` / `handleEvent`) and marks the event processed. Have the worker also pick up stored events that are not processed yet, so an event is not lost if the hand-off fails.
 :::
@@ -199,7 +199,7 @@ For the payment's own `webhook_url` (the one the payer waits on), formats 1 and 
 | Header | Value |
 |---|---|
 | `Content-Type` | `application/json` (format 3 is always JSON; XML is a format 1 and 2 option) |
-| `Ottu-Signature` | `t=<unix seconds>,v2=<hex>` on format 3. Formats 1 and 2 send `v1` by default. See [Verify Signatures](/developers/webhooks/verify-signatures#ottu-signature-header). `t` is read fresh for every attempt. |
+| `Ottu-Signature` | `t=<unix seconds>,v2=<hex>` on every format (1, 2 and 3). See [Verify Signatures](/developers/webhooks/verify-signatures#ottu-signature-header). `t` is read fresh for every attempt. |
 | `Idempotency-Key` | The event id, `evt_...`. See [below](#idempotency-key). |
 
 ### Same URL on a legacy route {#same-url}
@@ -238,7 +238,7 @@ Every delivery carries `Idempotency-Key: <event id>`, for example `Idempotency-K
 | A new state, a new attempt, or a second partial refund | No: it is a **new event** with a new id, so a new key |
 
 - **Format 3:** the header equals the envelope's `id`. Because the body is signed, the `id` inside it is authenticated; the header lets you check for a duplicate *before* parsing the body.
-- **Formats 1 and 2:** the body bytes are unchanged, so the event id is only available in the header. The header is **not covered by the `v1` signature**: treat it as a de-duplication hint. Replay of a captured request is limited by checking the `t` tolerance of `Ottu-Signature`.
+- **Formats 1 and 2:** the body bytes are unchanged, so the event id is only available in the header. The header is **not covered by the signature** (`v2` signs `t` and the body, not other headers): treat it as a de-duplication hint. Replay of a captured request is limited by checking the `t` tolerance of `Ottu-Signature`.
 - A delivery whose event could not be recorded on formats 1 and 2 is sent **without** the header. It is never sent with an invented id, so make a missing header a case you handle (fall back to your business reference).
 
 **Receiver guidance:**

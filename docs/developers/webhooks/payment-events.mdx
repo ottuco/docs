@@ -127,7 +127,7 @@ To ensure a smooth redirection of the payer back to the designated [redirect_url
 
 `extra` now always contains a `merchant_id` key holding your merchant domain, even when you sent no `extra` object when creating the session. Anything you did send in `extra` is preserved alongside it.
 
-`extra.merchant_id` is part of the [signed field set](/developers/webhooks/verify-signatures/#2-fields-for-signature), so it is covered by the `signature` and safe to trust once you have verified the payload. It is useful when one endpoint receives webhooks for several merchant accounts.
+`extra.merchant_id` is covered by the [`v2` header signature](/developers/webhooks/verify-signatures#verify-v2), which signs the whole raw body, so it is safe to trust once you have verified the header. It is not one of the 18 fields of the body `signature`. It is useful when one endpoint receives webhooks for several merchant accounts.
 
 ## The `autopay` block {#autopay-block}
 

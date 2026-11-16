@@ -24,12 +24,12 @@ Ottu has three webhook **formats**. Your account uses exactly one. **Ottu never 
 |---|---|---|
 | Body | One flat object per notification: a payment body or an operation body | An [envelope](/developers/webhooks/event-catalogue#envelope) with `id`, `event`, `created`, `version`, `is_sandbox`, `merchant_id`, `initiator` and `data`. `data` is the payment, flat |
 | Encoding | JSON, or XML on request | JSON only |
-| Authenticity | Body field `signature`, plus the `Ottu-Signature` header (`v1` by default) | `Ottu-Signature` header, `v2` only. No `signature` field in the body |
+| Authenticity | `Ottu-Signature` header, `v2` (the same as format 3), plus the body field `signature` | `Ottu-Signature` header, `v2` only. No `signature` field in the body |
 | Success | HTTP `200` or `201` | Any `2xx` |
 | Retries | Your `retries` and `backoff_factor` settings, on timeouts only | 8 attempts over about 42 hours, see [Delivery and Retries](/developers/webhooks/delivery-and-retries#retry-schedule) |
 | Event id | Only in the `Idempotency-Key` header | In the body `id` and the `Idempotency-Key` header |
 
-Format 1 and format 2 differ from each other as described on [Payment Events](/developers/webhooks/payment-events) and [Operation Events](/developers/webhooks/operation-events); both are unchanged. The only addition on them is the new **header**: `Ottu-Signature` (controlled by your account's signature versions, default `v1`) and `Idempotency-Key`. Your body bytes, retries and redirect behaviour stay exactly as they were.
+Format 1 and format 2 differ from each other as described on [Payment Events](/developers/webhooks/payment-events) and [Operation Events](/developers/webhooks/operation-events); both are unchanged. The only addition on them is the new **header**: `Ottu-Signature` (`v2` over the raw body, exactly as on format 3) and `Idempotency-Key`. Your body bytes, retries and redirect behaviour stay exactly as they were.
 
 :::warning Format 3 is JSON only
 If your account receives XML today, switching to format 3 means you receive JSON from then on. Update your parser before format 3 is enabled.

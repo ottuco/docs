@@ -32,7 +32,7 @@ Set these, in this order:
 | **Notify on error** and **Email list** | On, with a team address | One email when a delivery has failed for good ([failure email](/developers/webhooks/delivery-and-retries#failure-email)). |
 | **Timeout** | 15 (the default) | Seconds Ottu waits for your answer. Answer fast and do the work later. |
 | **Retries**, **Backoff factor**, **Enable retry webhook mechanism?** | Leave the defaults | These apply to formats 1 and 2 (`retries` is the total number of tries). Format 3 has its own fixed [retry schedule](/developers/webhooks/delivery-and-retries#retry-schedule). |
-| **Ottu-Signature versions** | Leave as is | The signature versions in the header of formats 1 and 2. Format 3 always sends `v2`. |
+| **Ottu-Signature versions** | Leave as is (`v2`, or empty) | `v2` is the only version, and every format sends it. Empty means `v2`. |
 
 Press **Save**. Nothing changes for your existing receiver until you save.
 
