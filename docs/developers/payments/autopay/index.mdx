@@ -101,8 +101,8 @@ Your customer pays the first charge on the checkout page, and Ottu saves the car
 </Beside>
 
 - **Start state.** A first charge above `0` makes the subscription `active`. A first charge of `0.000` makes it `trialing`.
-- **Activation can lag the payment.** `status` stays `pending_setup` until Ottu receives the payment result. If that result is missed, a backup check activates the subscription within about 15 minutes of the payment, and never earlier than 20 minutes after you created it. Your checkout webhook usually arrives in that state: treat it as "payment received, activation pending", not as a failure.
-- **Poll, do not wait.** [Retrieve](/developers/payments/autopay/?autopay-api=retrieve#api-reference) the subscription until `status` leaves `pending_setup`. Do not grant access from the webhook's [`autopay` block](/developers/webhooks/payment-events#autopay-block) alone: it is not signed. If the subscription is still `pending_setup` well after a successful payment, contact Ottu support with the subscription ID.
+- **Activation can lag the payment.** `status` stays `pending_setup` until Ottu receives the payment result. If that result is missed, a backup check activates the subscription 20 to about 35 minutes after you created it. Poll; do not hard-code a wait. Your checkout webhook can arrive in that state: treat it as "payment received, activation pending", not as a failure.
+- **Poll, do not wait.** [Retrieve](/developers/payments/autopay/?autopay-api=retrieve#api-reference) the subscription until `status` leaves `pending_setup`. Do not grant access from the webhook's [`autopay` block](/developers/webhooks/payment-events#autopay-block) alone: it is not signed. If the subscription is still `pending_setup` 35 minutes after creation and the payment succeeded, contact Ottu support with the subscription ID.
 - **Match the webhook.** `extra.autopay.subscription_id` in the payload is the subscription ID you stored at creation. As a fallback, the webhook's `session_id` equals `setup_session_id` on the subscription.
 - **Setup can fail.** The subscription becomes `setup_failed` when the customer cancels the checkout, when 24 hours pass without payment, or when the payment succeeds but Ottu cannot save the card. Ottu does not retry it: create a new subscription. If the first payment succeeded, refund it, because Ottu does not refund it automatically, and contact Ottu support with the subscription ID.
 
@@ -219,7 +219,7 @@ Create a subscription with the Checkout API: set `payment_type` to `auto_pay` an
 
 ## Best Practices
 
-- **Send a UUID `Idempotency-Key` on cancel.** A retried cancel with the same key replays safely. Regenerate needs no key. Before retrying a timed-out regenerate, call `page-link` and compare `page_url`.
+- **Guard against double submits.** Each create call makes a new subscription.- **Cancel needs a UUID `Idempotency-Key`.** A retried cancel with the same key replays safely. Regenerate needs no key. Before retrying a timed-out regenerate, call `page-link` and compare `page_url`.
 - **Get `page_url` from `page-link`.** Read it from `page-link` at any time after create. Use regenerate only to revoke a link.
 - **Know that regenerate contacts the customer.** Ottu emails and texts the new link to your customer, and the old link stops working. Still deliver `page_url` yourself where your product needs it.
 - **Always send `customer_email`.** It is required. A missing one returns a `400` with the error under the `autopay` key, which looks like a problem with the autopay block. Check `customer_email` first.
