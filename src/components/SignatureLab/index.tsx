@@ -60,8 +60,13 @@ async function check(header: string, body: string, key: string, now: number): Pr
       : { ok: false, text: `t is ${Math.round(age)} s from your clock, over the ${TOLERANCE_SECONDS} s limit: a receiver rejects it as a replay. (Untick "use my clock" to check an old header, such as the test vector.)` },
   );
   const expected = await hmacHex(key, `${parts.t}.${body}`);
+  // Compared exactly, as the published verifiers do: Ottu sends lowercase hex.
+  if (parts.v2 !== parts.v2.toLowerCase()) {
+    steps.push({ ok: false, text: "v2 has uppercase letters. Ottu sends lowercase hex, and the reference verifiers compare it exactly." });
+    return steps;
+  }
   steps.push(
-    expected === parts.v2.toLowerCase()
+    expected === parts.v2
       ? { ok: true, text: "HMAC-SHA256(key, t + \".\" + body) matches v2. The signature is valid." }
       : {
           ok: false,
@@ -79,7 +84,7 @@ function Lab(): React.JSX.Element {
   const [body, setBody] = useState(JSON.stringify(paid, null, 2));
   const [t, setT] = useState(() => String(Math.floor(Date.now() / 1000)));
   const [header, setHeader] = useState(VECTOR.header);
-  const [useClock, setUseClock] = useState(false);
+  const [useClock, setUseClock] = useState(true);
   const [url, setUrl] = useState("http://localhost:8000/webhooks/ottu");
   const [signature, setSignature] = useState("");
   const [steps, setSteps] = useState<Step[]>([]);
