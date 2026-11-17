@@ -6,6 +6,7 @@
 //   <AgentPrompt topic="webhooks" />
 import React, { useState } from "react";
 import { WEBHOOKS_PROMPT } from "./prompts/webhooks";
+import { AUTOPAY_PROMPT } from "./prompts/autopay";
 import styles from "./styles.module.css";
 
 const PROMPTS = {
@@ -13,6 +14,11 @@ const PROMPTS = {
     title: "Building with a coding agent?",
     text: "Copy a ready prompt that tells Claude Code, Cursor or Copilot how to build your Ottu webhook receiver: signature check, de-duplication, every event, and tests.",
     prompt: WEBHOOKS_PROMPT,
+  },
+  autopay: {
+    title: "Building with a coding agent?",
+    text: "Copy a ready prompt that tells Claude Code, Cursor or Copilot how to build your AutoPay integration: create, access from status, events, cancel, and tests.",
+    prompt: AUTOPAY_PROMPT,
   },
 } as const;
 
