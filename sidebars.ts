@@ -594,6 +594,9 @@ const sidebars: SidebarsConfig = {
           link: { type: "doc", id: "business/payment-management/index" },
           items: [
             "business/payment-management/search-and-filter",
+            "business/payment-management/export-transactions",
+            "business/payment-management/deleted-transactions",
+            "business/payment-management/settlements",
             "business/payment-management/transaction-insights",
             "business/payment-management/transaction-states",
             "business/payment-management/notifications-timing",
@@ -662,6 +665,7 @@ const sidebars: SidebarsConfig = {
           link: { type: "doc", id: "business/plugins/index" },
           items: [
             "business/plugins/payment-request",
+            "business/plugins/create-payment-link",
             "business/plugins/e-commerce",
             "business/plugins/bulk-payment-request",
           ],
@@ -673,6 +677,15 @@ const sidebars: SidebarsConfig = {
           items: [
             "business/operations/refund-void-access-control",
             "business/operations/two-step-authorization",
+          ],
+        },
+        {
+          type: "category",
+          label: "Users & Access",
+          link: { type: "doc", id: "business/users-and-access/index" },
+          items: [
+            "business/users-and-access/transaction-visibility",
+            "business/users-and-access/password",
           ],
         },
         "business/integrations",

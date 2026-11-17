@@ -7,9 +7,59 @@ import StepGuide from "@site/src/components/StepGuide";
 
 # Search & Filter Payments
 
-This guide explains how to display and filter payment links within the Ottu Dashboard. By following these steps, you can view payment links created by a specific user or processed through a specific [payment gateway](/business/payments/gateways). Administrators can also [choose the filters and search fields](#choose-the-filters-and-search-fields) that every transactions table offers.
+Every [plugin](/business/plugins) in the Ottu Dashboard has a **Transactions** table. This page shows how to see which transactions are paid and which are not, how to find one transaction, and how to list the payment links created by one user or processed through one [connector](/business/payments/gateways). Administrators can also [choose the filters and search fields](#choose-the-filters-and-search-fields) that every transactions table offers.
 
-## Step-by-Step Instructions
+**Who can do it:** any dashboard user. You only see the transactions you are allowed to see: if some are missing, see [Why can't I see all the transactions?](/business/users-and-access/transaction-visibility)
+
+## How can I see which transactions are paid and which are not?
+
+1. In the Ottu Dashboard sidebar, open the plugin, for example **Payment Request**, and click **Transactions**.
+2. Click **Filter** at the top right of the table.
+3. In **State**, choose:
+   - **Paid** to see the paid transactions;
+   - **All Unpaid** to see every transaction that is not paid. It covers the states Created, Pending, Attempted, Failed, Expired and Unavailable.
+4. Click **Search**.
+
+The table now shows only those transactions. To see everything again, click **Filter** and then **Reset**.
+
+**State** takes one value at a time. You can also choose a single state, such as **Expired** or **Canceled**. Canceled transactions are not part of **All Unpaid**. See [Transaction States](/business/payment-management/transaction-states) for what each state means.
+
+If there is no **State** filter, an administrator has removed it: ask them to [add it back](#choose-the-filters-and-search-fields).
+
+## How do I filter the unpaid transactions and export them?
+
+1. Open the plugin's **Transactions** table and click **Filter**.
+2. In **State**, choose **All Unpaid**, then click **Search**.
+3. Click **Export Transactions** above the table.
+4. Under **Select file type**, choose **CSV** or **XLSX**, then click **Export**.
+5. The **Generated Reports** page opens. When your export shows a download icon, click it to get the file.
+
+The file contains only the transactions the table was showing. See [Export Transactions](/business/payment-management/export-transactions) for more, including what to do when an export is slow.
+
+## How do I find one transaction?
+
+Use the search above the table. It searches one field at a time.
+
+1. Open the plugin's **Transactions** table.
+2. In **Select field**, choose what you know about the payment, for example the customer's email.
+3. Type the value in the **Search** box. Part of the value is enough, and capital letters do not matter: `shop` finds `shopify`.
+4. Click the **Search** button.
+
+### I only have the customer's name
+
+Look in **Select field** for the customer's name fields, such as **First Name** or **Last Name**:
+
+- If they are listed, choose one, type the name and click **Search**.
+- If they are not listed, the search cannot use the name yet. Ask your account administrator to add the name fields as [search fields](#search-fields). An administrator chooses which fields the search offers, and none are set up by default.
+
+Two other ways to find the payment:
+
+- If your sidebar has **Express Search**, open it. It can search by order number, session ID, customer email, customer first name, customer last name and customer phone.
+- Narrow the table with **Filter**, for example by the date the payment was created or by its **State**, and look through the shorter list.
+
+## List the payment links of one user or one connector
+
+### Step-by-Step Instructions
 
 <StepGuide steps={[
   {
@@ -68,6 +118,7 @@ A search matches part of the value and ignores case, so `shop` finds `shopify`. 
 
 ## What's Next?
 
+- [Export Transactions](/business/payment-management/export-transactions) -- Export the table you are looking at to CSV or Excel
 - [Transaction Insights](/business/payment-management/transaction-insights) -- Explore your transaction data and dashboard charts
 - [Transaction States](/business/payment-management/transaction-states) -- Understand the lifecycle of a payment
 - [Plugins](/business/plugins) -- Learn about Payment Request, E-Commerce, and Bulk plugins

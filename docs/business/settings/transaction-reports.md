@@ -7,6 +7,10 @@ sidebar_label: Transaction Reports
 
 Ottu provides automated transaction reporting so you can monitor payment activity without manual effort. Reports can be delivered by email or SFTP on a schedule you define. There are two report types:
 
+:::tip
+Want a report right now? [Export the transactions table](/business/payment-management/export-transactions) from the dashboard: no schedule needed.
+:::
+
 - **Periodic Transaction Reports** — recurring reports generated at a fixed interval (daily, weekly, monthly)
 - **Flexible Interval Transaction Reports** — custom reports with more granular control, including SFTP delivery and breakdown columns
 

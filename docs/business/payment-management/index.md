@@ -7,13 +7,19 @@ sidebar_label: Payment Management
 
 Ottu gives you full visibility into every payment that flows through your account. From searching and filtering individual transactions to monitoring overall sales performance, everything you need to track and manage payments lives in the dashboard.
 
-This section covers four areas:
+This section covers these areas:
 
 ## Search & Filter Payments
 
-Find any payment quickly using filters for user, payment gateway, date range, and more. Customize which columns appear in your transaction table so the data you care about is always visible.
+Find any payment quickly, and see which transactions are paid and which are not, using filters for state, user, connector, date range, and more. Customize which columns appear in your transaction table so the data you care about is always visible.
 
 [Go to Search & Filter](/business/payment-management/search-and-filter)
+
+## Export Transactions
+
+Export the transactions you are looking at to a CSV or Excel file, for example only the unpaid ones, and see what to do when an export is slow.
+
+[Go to Export Transactions](/business/payment-management/export-transactions)
 
 ## Transaction Insights
 
@@ -33,6 +39,18 @@ Configure when and how notifications are sent, use short URLs for SMS delivery, 
 
 [Go to Notifications & Timing](/business/payment-management/notifications-timing)
 
+## Deleted Transactions
+
+Find a paid transaction that was deleted by mistake and restore it.
+
+[Go to Deleted Transactions](/business/payment-management/deleted-transactions)
+
+## Settlements
+
+Ottu does not hold your money: your bank settles it. See what "settled" means in Ottu and what to check when a payment has not reached your bank account.
+
+[Go to Settlements](/business/payment-management/settlements)
+
 ---
 
 ## What's Next?
@@ -40,4 +58,5 @@ Configure when and how notifications are sent, use short URLs for SMS delivery, 
 - [Operations](/business/operations) -- Manage refunds, voids, and captures
 - [Plugins](/business/plugins) -- Configure payment request and e-commerce plugins
 - [Notification Channels](/business/notifications) -- Set up email, SMS, and WhatsApp notifications
-- [Transaction Reports](/business/settings/transaction-reports) -- Export and analyze transaction data
+- [Transaction Reports](/business/settings/transaction-reports) -- Schedule reports by email or SFTP
+- [Users and Access](/business/users-and-access/) -- Who is on your account and which transactions they see
