@@ -28,7 +28,7 @@ First check the payment in Ottu:
    - **Paid**: the bank accepted the payment and the amount was deducted from the customer. Continue with step 4.
    - **Authorized**: the amount is only held on the customer's card. It is not settled until you [capture](/business/operations) it.
    - Any other state: the payment did not succeed, so there is nothing to settle. See [Transaction States](/business/payment-management/transaction-states).
-4. Open the transaction's details and note:
+4. Click the transaction's ID to open its details and note:
    - the **Amount** and the currency;
    - the payment date;
    - the connector the payment went through;

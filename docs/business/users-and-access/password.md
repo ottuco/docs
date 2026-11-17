@@ -14,7 +14,7 @@ You change your own password inside the Ottu Dashboard. If you forgot it and can
 
 1. In the Ottu Dashboard, click the three-dot menu in the top-right corner, next to your name.
 2. Click **Account settings**.
-3. Click **change password**.
+3. Click **Change password**.
 4. Type the new password in **New password** and again in **Confirm password**.
 5. Click **Submit**.
 
