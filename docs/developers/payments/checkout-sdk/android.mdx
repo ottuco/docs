@@ -1004,6 +1004,86 @@ Scaffold(
     }
 ```
 
+Column presentation.
+
+```kotlin
+@Composable
+fun CheckoutPaymentButtonScreen(
+    onPaymentButtonReady: ((PaymentButton) -> Unit)? = null,
+    onContainerReady: ((FrameLayout) -> Unit)? = null
+) {
+    val scrollState = rememberScrollState()
+    val tealColor = colorResource(id = R.color.teal_700)
+    val backgroundColor = colorResource(id = R.color.background)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(backgroundColor)
+            .verticalScroll(scrollState)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // tvTitle
+        Text(
+            text = "Customers Application",
+            color = tealColor,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 18.dp)
+        )
+
+        // com.ottu.checkout.ui.payment.view.PaymentButton
+        AndroidView(
+            factory = { context ->
+                PaymentButton(context).apply {
+                    id = R.id.paymentButton
+                }
+            },
+            update = { button ->
+                onPaymentButtonReady?.invoke(button)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(top = 20.dp)
+        )
+
+        // tvAboveContent
+        Text(
+            text = "Some users UI elements, Some users UI elements, Some users UI elements, Some users UI elements, Some users UI elements",
+            color = tealColor,
+            fontSize = 16.sp,
+            modifier = Modifier.padding(top = 18.dp)
+        )
+
+        // @id/ottu_checkout_container
+        AndroidView(
+            factory = { context ->
+                FrameLayout(context).apply {
+                    id = R.id.ottu_checkout_container
+                }
+            },
+            update = { container ->
+                onContainerReady?.invoke(container)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(top = 15.dp)
+        )
+
+        // tvBelowContent
+        Text(
+            text = "Some users UI elements, Some users UI elements, Some users UI elements, Some users UI elements, Some users UI elements",
+            color = tealColor,
+            fontSize = 16.sp,
+            modifier = Modifier.padding(top = 15.dp)
+        )
+    }
+}
+```
+
 ## Error Reporting & Security
 
 ### Error Reporting
