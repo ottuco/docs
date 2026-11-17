@@ -2183,116 +2183,176 @@ paths:
     post:
       operationId: autopay_subscription_list
       description: |-
-        Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant.
+        Authenticate with your private API key in the `Authorization: Api-Key <your key>` header.
 
         Lists subscriptions using AutoPay's filter-body API. Pagination uses `limit` and `offset`, accepted in the request body or as query parameters (query wins). The returned `next` and `previous` URLs point at this endpoint and can be followed directly.
       summary: List AutoPay subscriptions
       parameters:
-      - in: header
-        name: Authorization
-        schema:
-          type: string
-          default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-        description: Private API key to be provided in the format `Api-Key <key>`.
-        required: true
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+          description: Private API key to be provided in the format `Api-Key <key>`.
+          required: true
       tags:
-      - AutoPay Subscriptions
+        - AutoPay Subscriptions
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AutoPaySubscriptionListRequest'
+              $ref: "#/components/schemas/AutoPaySubscriptionListRequest"
             examples:
               ListActiveSubscriptions:
                 value:
-                - status: active
-                  customer_id: cust_123
-                  created_after: '2026-01-01'
-                  created_before: '2026-12-31'
-                  limit: 20
-                  offset: 0
+                  - status: active
+                    customer_id: cust_123
+                    created_after: "2026-01-01"
+                    created_before: "2026-12-31"
+                    limit: 20
+                    offset: 0
                 summary: List active subscriptions
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/AutoPaySubscriptionListRequest'
+              $ref: "#/components/schemas/AutoPaySubscriptionListRequest"
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/AutoPaySubscriptionListRequest'
+              $ref: "#/components/schemas/AutoPaySubscriptionListRequest"
       security:
-      - SSO_BasicAuth: []
-      - basicAuth: []
-      - SSO_JWT_Auth: []
+        - SSO_BasicAuth: []
+        - basicAuth: []
+        - SSO_JWT_Auth: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AutoPayPaginatedSubscriptions'
+                $ref: "#/components/schemas/AutoPayPaginatedSubscriptions"
               examples:
                 FirstPage:
                   value:
-                  - count: 42
+                    count: 42
                     next: https://sandbox.ottu.net/b/pbl/v2/subscriptions/?limit=20&offset=20
                     previous: null
                     results:
-                    - id: sub_9kq2w7xp4m
-                      customer_id: cust_10042
-                      customer_email: customer@example.com
-                      frequency: monthly
-                      recurring_amount: '9.990'
-                      currency: KWD
-                      status: active
-                      next_billing_date: '2026-12-01'
-                      created_at: '2026-11-01T08:15:42Z'
+                      - subscription_id: sub_2fJREt7nqsCbZoOVUPAPIuSn
+                        status: active
+                        order_no: PLAN-PREMIUM-10042
+                        plan_name: Premium Plan
+                        description: Premium plan, monthly
+                        language: en
+                        amount: "9.900"
+                        first_payment_amount: "9.900"
+                        currency: KWD
+                        billing_anchor_day: 1
+                        retry_count: 3
+                        start_date: "2026-11-01"
+                        end_date: "2027-11-01"
+                        next_billing_date: "2026-12-01"
+                        customer:
+                          id: cust_10042
+                          email: customer@example.com
+                          first_name: John
+                          last_name: Edgar
+                          phone: "+96550000000"
+                          phone_2: null
+                          birthdate: null
+                        card:
+                          number: 5123 45** **** 0008
+                          brand: MASTERCARD
+                          scheme: null
+                          bin: null
+                          expiry_month: null
+                          expiry_year: null
+                          name_on_card: null
+                          token: null
+                          cvv_required: null
+                          is_preferred: null
+                          agreements: []
+                        agreement:
+                          id: AGR-10042
+                          type: recurring
+                          frequency: monthly
+                          amount_variability: fixed
+                          cycle_interval_days: 30
+                          total_cycles: 12
+                          start_date: "2026-11-01"
+                          expiry_date: "2027-11-01"
+                          max_amount_per_cycle: null
+                          seller:
+                            name: null
+                            short_name: null
+                            category_code: null
+                        cancellation:
+                          at_period_end: false
+                          cancel_date: null
+                          canceled_at: null
+                          canceled_by:
+                            kind: null
+                            id: null
+                            first_name: null
+                            last_name: null
+                            email: null
+                          reason: null
+                          note: null
+                        setup_session_id: 5f9a80592eb5d81fb6c601e1004588af22b5fa4d
+                        created_by:
+                          kind: system
+                          id: null
+                          first_name: null
+                          last_name: null
+                          email: null
+                        created_at: "2026-11-01T08:15:42.937305Z"
+                        updated_at: "2026-11-01T08:16:41.462267Z"
+                        latest_session_id: 5f9a80592eb5d81fb6c601e1004588af22b5fa4d
+                        status_changed_at: "2026-11-01T08:16:41.447281Z"
                   summary: First page
-          description: ''
-        '400':
+          description: ""
+        "400":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 LimitAbove100:
                   value:
                     limit:
-                    - Ensure this value is less than or equal to 100.
+                      - Ensure this value is less than or equal to 100.
                   summary: Limit above 100
           description: "The request is malformed, for example a `limit` above 100. Fix it: retrying unchanged fails again."
-        '401':
+        "401":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 NotAuthenticated:
                   value:
                     detail: Authentication credentials were not provided.
                   summary: Not authenticated
           description: "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`."
-        '422':
+        "422":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 UnknownStatusFilter:
                   value:
                     detail:
-                    - type: enum
-                      loc:
-                      - body
-                      - payload
-                      - status
-                      msg: Input should be 'pending_setup', 'trialing', 'active', 'past_due', 'canceled', 'expired' or 'setup_failed'
+                      - type: enum
+                        loc:
+                          - body
+                          - payload
+                          - status
+                        msg: Input should be 'pending_setup', 'trialing', 'active', 'past_due', 'canceled', 'expired' or 'setup_failed'
                   summary: Unknown status filter
           description: "A filter value is invalid, and `detail` lists each one. Fix it: retrying unchanged fails again."
-        '423':
+        "423":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 PaymentsPaused:
                   value:
@@ -2300,140 +2360,176 @@ paths:
                     code: service_paused
                   summary: Payments paused
           description: "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed."
-        '503':
+        "503":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 AutoPayUnavailable:
                   value:
                     detail: AutoPay bridge is unavailable.
                   summary: AutoPay unavailable
-          description: "The subscription service is unavailable. Retry with backoff."
-        '504':
+          description: The subscription service is unavailable. Retry with backoff.
+        "504":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 AutoPayTimedOut:
                   value:
                     detail: AutoPay bridge request timed out.
                   summary: AutoPay timed out
-          description: "The subscription service timed out. Nothing was changed, so the request is safe to retry."
+          description: The subscription service timed out. Nothing was changed, so the request is safe to retry.
   /b/pbl/v2/subscriptions/{subscription_id}/:
     get:
       operationId: autopay_subscription_detail
       description: |-
-        Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant.
+        Authenticate with your private API key in the `Authorization: Api-Key <your key>` header.
 
         Returns the full subscription object from AutoPay for the authenticated merchant.
       summary: Retrieve an AutoPay subscription
       parameters:
-      - in: header
-        name: Authorization
-        schema:
-          type: string
-          default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-        description: Private API key to be provided in the format `Api-Key <key>`.
-        required: true
-      - in: path
-        name: subscription_id
-        schema:
-          type: string
-        description: AutoPay subscription identifier returned by subscription creation.
-        required: true
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+          description: Private API key to be provided in the format `Api-Key <key>`.
+          required: true
+        - in: path
+          name: subscription_id
+          schema:
+            type: string
+          description: AutoPay subscription identifier returned by subscription creation.
+          required: true
       tags:
-      - AutoPay Subscriptions
+        - AutoPay Subscriptions
       security:
-      - SSO_BasicAuth: []
-      - basicAuth: []
-      - SSO_JWT_Auth: []
+        - SSO_BasicAuth: []
+        - basicAuth: []
+        - SSO_JWT_Auth: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AutoPaySubscription'
+                $ref: "#/components/schemas/AutoPaySubscription"
               examples:
                 ActiveSubscription:
                   value:
-                    id: sub_9kq2w7xp4m
-                    customer_id: cust_10042
-                    customer_email: customer@example.com
-                    customer_name: Sara Ahmad
-                    customer_phone: '50001234'
-                    frequency: monthly
-                    currency: KWD
-                    recurring_amount: '9.990'
-                    first_payment_amount: '9.990'
-                    start_date: '2026-11-01'
-                    end_date: '2027-11-01'
-                    billing_anchor_day: 1
-                    setup_session_id: 6b1f0c9e4d2a8f73e5c1b0a9d8e7f6a5b4c3d2e1
-                    agreement_id: AGR-10042
-                    amount_variability: fixed
-                    cycle_interval_days: 30
-                    total_cycles: 12
-                    notification_config: null
+                    subscription_id: sub_2fJREt7nqsCbZoOVUPAPIuSn
                     status: active
-                    cancel_at_period_end: false
-                    cancels_on: null
-                    canceled_at: null
-                    cancellation_initiator: null
-                    cancellation_reason: null
-                    cancellation_note: null
-                    next_billing_date: '2026-12-01'
-                    description: Premium plan
-                    merchant_reference: PLAN-PREMIUM-10042
-                    plan_name: ''
+                    order_no: PLAN-PREMIUM-10042
+                    plan_name: Premium Plan
+                    description: Premium plan, monthly
                     language: en
+                    amount: "9.900"
+                    first_payment_amount: "9.900"
+                    currency: KWD
+                    billing_anchor_day: 1
                     retry_count: 3
-                    created_at: '2026-11-01T08:15:42Z'
-                    updated_at: '2026-11-01T08:19:07Z'
+                    start_date: "2026-11-01"
+                    end_date: "2027-11-01"
+                    next_billing_date: "2026-12-01"
+                    customer:
+                      id: cust_10042
+                      email: customer@example.com
+                      first_name: John
+                      last_name: Edgar
+                      phone: "+96550000000"
+                      phone_2: null
+                      birthdate: null
                     card:
-                      masked_card: '**** 0008'
-                      card_brand: MASTERCARD
+                      number: 5123 45** **** 0008
+                      brand: MASTERCARD
+                      scheme: null
+                      bin: null
+                      expiry_month: null
+                      expiry_year: null
+                      name_on_card: null
+                      token: null
+                      cvv_required: null
+                      is_preferred: null
+                      agreements: []
+                    agreement:
+                      id: AGR-10042
+                      type: recurring
+                      frequency: monthly
+                      amount_variability: fixed
+                      cycle_interval_days: 30
+                      total_cycles: 12
+                      start_date: "2026-11-01"
+                      expiry_date: "2027-11-01"
+                      max_amount_per_cycle: null
+                      seller:
+                        name: null
+                        short_name: null
+                        category_code: null
+                    cancellation:
+                      at_period_end: false
+                      cancel_date: null
+                      canceled_at: null
+                      canceled_by:
+                        kind: null
+                        id: null
+                        first_name: null
+                        last_name: null
+                        email: null
+                      reason: null
+                      note: null
+                    setup_session_id: 5f9a80592eb5d81fb6c601e1004588af22b5fa4d
+                    created_by:
+                      kind: system
+                      id: null
+                      first_name: null
+                      last_name: null
+                      email: null
+                    created_at: "2026-11-01T08:15:42.937305Z"
+                    updated_at: "2026-11-01T08:16:41.462267Z"
+                    latest_session_id: 5f9a80592eb5d81fb6c601e1004588af22b5fa4d
+                    status_changed_at: "2026-11-01T08:16:41.447281Z"
+                    notification_config: null
                     current_cycle:
                       cycle_number: 1
-                      scheduled_date: '2026-11-01'
-                      amount_due: '9.990'
+                      scheduled_date: "2026-11-01"
+                      amount_due: "9.900"
                       status: paid
-                      paid_at: '2026-11-01T08:18:51Z'
+                      paid_at: "2026-11-01T08:16:38Z"
                       failure_reason: null
-                      session_id: 6b1f0c9e4d2a8f73e5c1b0a9d8e7f6a5b4c3d2e1
+                      session_id: 5f9a80592eb5d81fb6c601e1004588af22b5fa4d
                       charge_type: cit
                   summary: Active subscription
-          description: ''
-        '401':
+          description: ""
+        "401":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 NotAuthenticated:
                   value:
                     detail: Authentication credentials were not provided.
                   summary: Not authenticated
           description: "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`."
-        '404':
+        "404":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 UnknownSubscription:
                   value:
                     detail: Not found
                     code: subscription_not_found
                   summary: Unknown subscription
-          description: "No subscription with this id exists on your account. Do not retry."
-        '423':
+          description: No subscription with this id exists on your account. Do not retry.
+        "423":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 PaymentsPaused:
                   value:
@@ -2441,64 +2537,64 @@ paths:
                     code: service_paused
                   summary: Payments paused
           description: "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed."
-        '503':
+        "503":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 AutoPayUnavailable:
                   value:
                     detail: AutoPay bridge is unavailable.
                   summary: AutoPay unavailable
-          description: "The subscription service is unavailable. Retry with backoff."
-        '504':
+          description: The subscription service is unavailable. Retry with backoff.
+        "504":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 AutoPayTimedOut:
                   value:
                     detail: AutoPay bridge request timed out.
                   summary: AutoPay timed out
-          description: "The subscription service timed out. Nothing was changed, so the request is safe to retry."
+          description: The subscription service timed out. Nothing was changed, so the request is safe to retry.
   /b/pbl/v2/subscriptions/{subscription_id}/cancel/:
     post:
       operationId: autopay_subscription_cancel
       description: |-
-        Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant.
+        Authenticate with your private API key in the `Authorization: Api-Key <your key>` header.
 
         Cancels a subscription through AutoPay and records the merchant as the initiator upstream.
       summary: Cancel an AutoPay subscription
       parameters:
-      - in: header
-        name: Authorization
-        schema:
-          type: string
-          default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-        description: Private API key to be provided in the format `Api-Key <key>`.
-        required: true
-      - in: header
-        name: Idempotency-Key
-        schema:
-          type: string
-          format: uuid
-        description: Unique UUID for idempotent AutoPay mutation requests. Required by AutoPay for cancel and regenerate-page-token.
-        required: true
-      - in: path
-        name: subscription_id
-        schema:
-          type: string
-        description: AutoPay subscription identifier returned by subscription creation.
-        required: true
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+          description: Private API key to be provided in the format `Api-Key <key>`.
+          required: true
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+            format: uuid
+          description: Unique UUID for idempotent AutoPay mutation requests. Required by AutoPay for cancel and regenerate-page-token.
+          required: true
+        - in: path
+          name: subscription_id
+          schema:
+            type: string
+          description: AutoPay subscription identifier returned by subscription creation.
+          required: true
       tags:
-      - AutoPay Subscriptions
+        - AutoPay Subscriptions
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AutoPayCancelSubscriptionRequest'
+              $ref: "#/components/schemas/AutoPayCancelSubscriptionRequest"
             examples:
               CancelImmediately:
                 value:
@@ -2510,116 +2606,152 @@ paths:
                 summary: Cancel at period end
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/AutoPayCancelSubscriptionRequest'
+              $ref: "#/components/schemas/AutoPayCancelSubscriptionRequest"
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/AutoPayCancelSubscriptionRequest'
+              $ref: "#/components/schemas/AutoPayCancelSubscriptionRequest"
         required: true
       security:
-      - SSO_BasicAuth: []
-      - basicAuth: []
-      - SSO_JWT_Auth: []
+        - SSO_BasicAuth: []
+        - basicAuth: []
+        - SSO_JWT_Auth: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AutoPaySubscription'
+                $ref: "#/components/schemas/AutoPaySubscription"
               examples:
                 ScheduledToEnd:
                   value:
-                    id: sub_9kq2w7xp4m
-                    customer_id: cust_10042
-                    customer_email: customer@example.com
-                    customer_name: Sara Ahmad
-                    customer_phone: '50001234'
-                    frequency: monthly
-                    currency: KWD
-                    recurring_amount: '9.990'
-                    first_payment_amount: '9.990'
-                    start_date: '2026-11-01'
-                    end_date: '2027-11-01'
-                    billing_anchor_day: 1
-                    setup_session_id: 6b1f0c9e4d2a8f73e5c1b0a9d8e7f6a5b4c3d2e1
-                    agreement_id: AGR-10042
-                    amount_variability: fixed
-                    cycle_interval_days: 30
-                    total_cycles: 12
-                    notification_config: null
+                    subscription_id: sub_2fJREt7nqsCbZoOVUPAPIuSn
                     status: active
-                    cancel_at_period_end: true
-                    cancels_on: '2026-11-30'
-                    canceled_at: null
-                    cancellation_initiator: merchant
-                    cancellation_reason: null
-                    cancellation_note: null
-                    next_billing_date: '2026-12-01'
-                    description: Premium plan
-                    merchant_reference: PLAN-PREMIUM-10042
-                    plan_name: ''
+                    order_no: PLAN-PREMIUM-10042
+                    plan_name: Premium Plan
+                    description: Premium plan, monthly
                     language: en
+                    amount: "9.900"
+                    first_payment_amount: "9.900"
+                    currency: KWD
+                    billing_anchor_day: 1
                     retry_count: 3
-                    created_at: '2026-11-01T08:15:42Z'
-                    updated_at: '2026-11-01T08:19:07Z'
+                    start_date: "2026-11-01"
+                    end_date: "2027-11-01"
+                    next_billing_date: null
+                    customer:
+                      id: cust_10042
+                      email: customer@example.com
+                      first_name: John
+                      last_name: Edgar
+                      phone: "+96550000000"
+                      phone_2: null
+                      birthdate: null
                     card:
-                      masked_card: '**** 0008'
-                      card_brand: MASTERCARD
+                      number: 5123 45** **** 0008
+                      brand: MASTERCARD
+                      scheme: null
+                      bin: null
+                      expiry_month: null
+                      expiry_year: null
+                      name_on_card: null
+                      token: null
+                      cvv_required: null
+                      is_preferred: null
+                      agreements: []
+                    agreement:
+                      id: AGR-10042
+                      type: recurring
+                      frequency: monthly
+                      amount_variability: fixed
+                      cycle_interval_days: 30
+                      total_cycles: 12
+                      start_date: "2026-11-01"
+                      expiry_date: "2027-11-01"
+                      max_amount_per_cycle: null
+                      seller:
+                        name: null
+                        short_name: null
+                        category_code: null
+                    cancellation:
+                      at_period_end: true
+                      cancel_date: "2026-11-30"
+                      canceled_at: null
+                      canceled_by:
+                        kind: api_key
+                        id: null
+                        first_name: null
+                        last_name: null
+                        email: null
+                      reason: null
+                      note: null
+                    setup_session_id: 5f9a80592eb5d81fb6c601e1004588af22b5fa4d
+                    created_by:
+                      kind: system
+                      id: null
+                      first_name: null
+                      last_name: null
+                      email: null
+                    created_at: "2026-11-01T08:15:42.937305Z"
+                    updated_at: "2026-11-01T08:16:41.462267Z"
+                    latest_session_id: 5f9a80592eb5d81fb6c601e1004588af22b5fa4d
+                    status_changed_at: "2026-11-01T08:16:41.447281Z"
+                    notification_config: null
                     current_cycle:
                       cycle_number: 1
-                      scheduled_date: '2026-11-01'
-                      amount_due: '9.990'
+                      scheduled_date: "2026-11-01"
+                      amount_due: "9.900"
                       status: paid
-                      paid_at: '2026-11-01T08:18:51Z'
+                      paid_at: "2026-11-01T08:16:38Z"
                       failure_reason: null
-                      session_id: 6b1f0c9e4d2a8f73e5c1b0a9d8e7f6a5b4c3d2e1
+                      session_id: 5f9a80592eb5d81fb6c601e1004588af22b5fa4d
                       charge_type: cit
                   summary: Scheduled to end
-          description: ''
-        '400':
+          description: ""
+        "400":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 MissingIdempotency-Key:
                   value:
                     Idempotency-Key:
-                    - This header is required.
+                      - This header is required.
                   summary: Missing Idempotency-Key
                 UnknownMode:
                   value:
                     mode:
-                    - '"now" is not a valid choice.'
+                      - "\"now\" is not a valid choice."
                   summary: Unknown mode
-          description: "The `Idempotency-Key` header is missing, or `mode` is not `immediate` or `at_period_end`."
-        '401':
+          description: The `Idempotency-Key` header is missing, or `mode` is not `immediate` or `at_period_end`.
+        "401":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 NotAuthenticated:
                   value:
                     detail: Authentication credentials were not provided.
                   summary: Not authenticated
           description: "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`."
-        '404':
+        "404":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 UnknownSubscription:
                   value:
                     detail: Not found
                     code: subscription_not_found
                   summary: Unknown subscription
-          description: "No subscription with this id exists on your account. Do not retry."
-        '409':
+          description: No subscription with this id exists on your account. Do not retry.
+        "409":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 Idempotency-KeyReused:
                   value:
@@ -2627,23 +2759,23 @@ paths:
                     code: idempotency_conflict
                   summary: Idempotency-Key reused
           description: "This `Idempotency-Key` was already used with a different body (`code: idempotency_conflict`). Send a new key for a new request, and reuse a key only to retry the same request."
-        '422':
+        "422":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 AlreadyCanceled:
                   value:
-                    detail: 'Cancel is only allowed from pending_setup, setup_failed, trialing, active, past_due. Current status: canceled'
+                    detail: "Cancel is only allowed from pending_setup, setup_failed, trialing, active, past_due. Current status: canceled"
                     code: invalid_transition
                   summary: Already canceled
           description: "The subscription's status does not allow a cancel, for example it has already ended (`code: invalid_transition`). Retrieve it to read its `status`."
-        '423':
+        "423":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 PaymentsPaused:
                   value:
@@ -2651,72 +2783,72 @@ paths:
                     code: service_paused
                   summary: Payments paused
           description: "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed."
-        '503':
+        "503":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 AutoPayUnavailable:
                   value:
                     detail: AutoPay bridge is unavailable.
                   summary: AutoPay unavailable
-          description: "The subscription service is unavailable. Retry with backoff."
-        '504':
+          description: The subscription service is unavailable. Retry with backoff.
+        "504":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 AutoPayTimedOut:
                   value:
                     detail: AutoPay bridge request timed out.
                   summary: AutoPay timed out
-          description: "The subscription service timed out, and the cancel may still have been applied. Retry with the same `Idempotency-Key`."
+          description: The subscription service timed out, and the cancel may still have been applied. Retry with the same `Idempotency-Key`.
   /b/pbl/v2/subscriptions/{subscription_id}/cycles/:
     get:
       operationId: autopay_subscription_cycles
       description: |-
-        Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant.
+        Authenticate with your private API key in the `Authorization: Api-Key <your key>` header.
 
         Returns AutoPay billing-cycle history, including nested payment attempts and pagination.
       summary: List AutoPay billing cycles
       parameters:
-      - in: header
-        name: Authorization
-        schema:
-          type: string
-          default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-        description: Private API key to be provided in the format `Api-Key <key>`.
-        required: true
-      - in: query
-        name: limit
-        schema:
-          type: integer
-        description: Number of billing cycles to return. Defaults to 20; maximum is 100.
-      - in: query
-        name: offset
-        schema:
-          type: integer
-        description: Zero-based index of the first billing cycle to return. Defaults to 0.
-      - in: path
-        name: subscription_id
-        schema:
-          type: string
-        description: AutoPay subscription identifier returned by subscription creation.
-        required: true
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+          description: Private API key to be provided in the format `Api-Key <key>`.
+          required: true
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: Number of billing cycles to return. Defaults to 20; maximum is 100.
+        - in: query
+          name: offset
+          schema:
+            type: integer
+          description: Zero-based index of the first billing cycle to return. Defaults to 0.
+        - in: path
+          name: subscription_id
+          schema:
+            type: string
+          description: AutoPay subscription identifier returned by subscription creation.
+          required: true
       tags:
-      - AutoPay Subscriptions
+        - AutoPay Subscriptions
       security:
-      - SSO_BasicAuth: []
-      - basicAuth: []
-      - SSO_JWT_Auth: []
+        - SSO_BasicAuth: []
+        - basicAuth: []
+        - SSO_JWT_Auth: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AutoPayPaginatedBillingCycles'
+                $ref: "#/components/schemas/AutoPayPaginatedBillingCycles"
               examples:
                 ARetryAfterADecline:
                   value:
@@ -2724,62 +2856,62 @@ paths:
                     next: null
                     previous: null
                     results:
-                    - cycle_number: 2
-                      scheduled_date: '2026-12-01'
-                      amount_due: '9.990'
-                      status: retry_scheduled
-                      paid_at: null
-                      failure_reason: Insufficient funds
-                      session_id: c8e1f2a94b7d3e6f0a1b2c3d4e5f6a7b8c9d0e1f
-                      charge_type: mit
-                      payment_attempts:
-                      - attempt_number: 1
+                      - cycle_number: 2
+                        scheduled_date: "2026-12-01"
+                        amount_due: "9.990"
+                        status: retry_scheduled
+                        paid_at: null
+                        failure_reason: Insufficient funds
                         session_id: c8e1f2a94b7d3e6f0a1b2c3d4e5f6a7b8c9d0e1f
-                        result: failed
-                        created_at: '2026-12-01T06:00:04Z'
-                    - cycle_number: 1
-                      scheduled_date: '2026-11-01'
-                      amount_due: '9.990'
-                      status: paid
-                      paid_at: '2026-11-01T08:15:40Z'
-                      failure_reason: null
-                      session_id: a12f71075a834a34d692736ac43a212fcebfb6ec
-                      charge_type: cit
-                      payment_attempts:
-                      - attempt_number: 1
+                        charge_type: mit
+                        payment_attempts:
+                          - attempt_number: 1
+                            session_id: c8e1f2a94b7d3e6f0a1b2c3d4e5f6a7b8c9d0e1f
+                            result: failed
+                            created_at: "2026-12-01T06:00:04Z"
+                      - cycle_number: 1
+                        scheduled_date: "2026-11-01"
+                        amount_due: "9.990"
+                        status: paid
+                        paid_at: "2026-11-01T08:15:40Z"
+                        failure_reason: null
                         session_id: a12f71075a834a34d692736ac43a212fcebfb6ec
-                        result: success
-                        created_at: '2026-11-01T08:15:12Z'
+                        charge_type: cit
+                        payment_attempts:
+                          - attempt_number: 1
+                            session_id: a12f71075a834a34d692736ac43a212fcebfb6ec
+                            result: success
+                            created_at: "2026-11-01T08:15:12Z"
                   summary: A retry after a decline
-          description: ''
-        '401':
+          description: ""
+        "401":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 NotAuthenticated:
                   value:
                     detail: Authentication credentials were not provided.
                   summary: Not authenticated
           description: "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`."
-        '404':
+        "404":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 UnknownSubscription:
                   value:
                     detail: Not found
                     code: subscription_not_found
                   summary: Unknown subscription
-          description: "No subscription with this id exists on your account. Do not retry."
-        '423':
+          description: No subscription with this id exists on your account. Do not retry.
+        "423":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 PaymentsPaused:
                   value:
@@ -2787,97 +2919,97 @@ paths:
                     code: service_paused
                   summary: Payments paused
           description: "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed."
-        '503':
+        "503":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 AutoPayUnavailable:
                   value:
                     detail: AutoPay bridge is unavailable.
                   summary: AutoPay unavailable
-          description: "The subscription service is unavailable. Retry with backoff."
-        '504':
+          description: The subscription service is unavailable. Retry with backoff.
+        "504":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 AutoPayTimedOut:
                   value:
                     detail: AutoPay bridge request timed out.
                   summary: AutoPay timed out
-          description: "The subscription service timed out. Nothing was changed, so the request is safe to retry."
+          description: The subscription service timed out. Nothing was changed, so the request is safe to retry.
   /b/pbl/v2/subscriptions/{subscription_id}/page-link/:
     get:
       operationId: autopay_subscription_page_link
       description: |-
-        Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant.
+        Authenticate with your private API key in the `Authorization: Api-Key <your key>` header.
 
         Returns the subscription's current customer-facing hosted-page link without rotating it, so a link already in the customer's hands keeps working. Use regenerate-page-token instead when the old link must be revoked.
       summary: Retrieve an AutoPay hosted-page link
       parameters:
-      - in: header
-        name: Authorization
-        schema:
-          type: string
-          default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-        description: Private API key to be provided in the format `Api-Key <key>`.
-        required: true
-      - in: path
-        name: subscription_id
-        schema:
-          type: string
-        description: AutoPay subscription identifier returned by subscription creation.
-        required: true
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+          description: Private API key to be provided in the format `Api-Key <key>`.
+          required: true
+        - in: path
+          name: subscription_id
+          schema:
+            type: string
+          description: AutoPay subscription identifier returned by subscription creation.
+          required: true
       tags:
-      - AutoPay Subscriptions
+        - AutoPay Subscriptions
       security:
-      - SSO_BasicAuth: []
-      - basicAuth: []
-      - SSO_JWT_Auth: []
+        - SSO_BasicAuth: []
+        - basicAuth: []
+        - SSO_JWT_Auth: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AutoPayPageLinkResponse'
+                $ref: "#/components/schemas/AutoPayPageLinkResponse"
               examples:
                 CurrentLink:
                   value:
                     page_token: tok_5c1e8b2f0a9d4e7b
                     page_url: https://sandbox.ottu.net/en/subscription/tok_5c1e8b2f0a9d4e7b
                   summary: Current link
-          description: ''
-        '401':
+          description: ""
+        "401":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 NotAuthenticated:
                   value:
                     detail: Authentication credentials were not provided.
                   summary: Not authenticated
           description: "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`."
-        '404':
+        "404":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 UnknownSubscription:
                   value:
                     detail: Not found
                     code: subscription_not_found
                   summary: Unknown subscription
-          description: "No subscription with this id exists on your account. Do not retry."
-        '423':
+          description: No subscription with this id exists on your account. Do not retry.
+        "423":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 PaymentsPaused:
                   value:
@@ -2885,116 +3017,116 @@ paths:
                     code: service_paused
                   summary: Payments paused
           description: "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed."
-        '503':
+        "503":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 AutoPayUnavailable:
                   value:
                     detail: AutoPay bridge is unavailable.
                   summary: AutoPay unavailable
-          description: "The subscription service is unavailable. Retry with backoff."
-        '504':
+          description: The subscription service is unavailable. Retry with backoff.
+        "504":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 AutoPayTimedOut:
                   value:
                     detail: AutoPay bridge request timed out.
                   summary: AutoPay timed out
-          description: "The subscription service timed out. Nothing was changed, so the request is safe to retry."
+          description: The subscription service timed out. Nothing was changed, so the request is safe to retry.
   /b/pbl/v2/subscriptions/{subscription_id}/regenerate-page-token/:
     post:
       operationId: autopay_subscription_regenerate_page_token
       description: |-
-        Microservices-only AutoPay subscription-management proxy. Connect terminates merchant authentication using private API key, Basic auth, or Keycloak JWT, resolves the merchant tenant, forwards the request to AutoPay with Merchant-Id, and returns AutoPay's response body and status to the merchant.
+        Authenticate with your private API key in the `Authorization: Api-Key <your key>` header.
 
         Invalidates the existing customer-facing hosted-page token and returns AutoPay's regenerated token payload.
       summary: Regenerate an AutoPay hosted-page token
       parameters:
-      - in: header
-        name: Authorization
-        schema:
-          type: string
-          default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
-        description: Private API key to be provided in the format `Api-Key <key>`.
-        required: true
-      - in: header
-        name: Idempotency-Key
-        schema:
-          type: string
-          format: uuid
-        description: Unique UUID for idempotent AutoPay mutation requests. Required by AutoPay for cancel and regenerate-page-token.
-        required: true
-      - in: path
-        name: subscription_id
-        schema:
-          type: string
-        description: AutoPay subscription identifier returned by subscription creation.
-        required: true
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            default: Api-Key vSUmxsXx.V81oYvOWFMcIywaOu57Utx6VSCmG11lo
+          description: Private API key to be provided in the format `Api-Key <key>`.
+          required: true
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+            format: uuid
+          description: Unique UUID for idempotent AutoPay mutation requests. Required by AutoPay for cancel and regenerate-page-token.
+          required: true
+        - in: path
+          name: subscription_id
+          schema:
+            type: string
+          description: AutoPay subscription identifier returned by subscription creation.
+          required: true
       tags:
-      - AutoPay Subscriptions
+        - AutoPay Subscriptions
       security:
-      - SSO_BasicAuth: []
-      - basicAuth: []
-      - SSO_JWT_Auth: []
+        - SSO_BasicAuth: []
+        - basicAuth: []
+        - SSO_JWT_Auth: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AutoPayRegeneratePageTokenResponse'
+                $ref: "#/components/schemas/AutoPayRegeneratePageTokenResponse"
               examples:
                 NewLink:
                   value:
                     page_token: tok_e7a90c3d5b2f4186
                     page_url: https://sandbox.ottu.net/en/subscription/tok_e7a90c3d5b2f4186
                   summary: New link
-          description: ''
-        '400':
+          description: ""
+        "400":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 MissingIdempotency-Key:
                   value:
                     Idempotency-Key:
-                    - This header is required.
+                      - This header is required.
                   summary: Missing Idempotency-Key
-          description: "The `Idempotency-Key` header is missing."
-        '401':
+          description: The `Idempotency-Key` header is missing.
+        "401":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 NotAuthenticated:
                   value:
                     detail: Authentication credentials were not provided.
                   summary: Not authenticated
           description: "The API key is missing or invalid. Send your private API key as `Authorization: Api-Key <your key>`."
-        '404':
+        "404":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 UnknownSubscription:
                   value:
                     detail: Not found
                     code: subscription_not_found
                   summary: Unknown subscription
-          description: "No subscription with this id exists on your account. Do not retry."
-        '423':
+          description: No subscription with this id exists on your account. Do not retry.
+        "423":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 PaymentsPaused:
                   value:
@@ -3002,28 +3134,28 @@ paths:
                     code: service_paused
                   summary: Payments paused
           description: "Payments are paused on your Ottu account (`code: service_paused`), so the subscription endpoints are unavailable. Retry once payments are resumed."
-        '503':
+        "503":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 AutoPayUnavailable:
                   value:
                     detail: AutoPay bridge is unavailable.
                   summary: AutoPay unavailable
-          description: "The subscription service is unavailable. Retry with backoff."
-        '504':
+          description: The subscription service is unavailable. Retry with backoff.
+        "504":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericErrorMessage'
+                $ref: "#/components/schemas/GenericErrorMessage"
               examples:
                 AutoPayTimedOut:
                   value:
                     detail: AutoPay bridge request timed out.
                   summary: AutoPay timed out
-          description: "The subscription service timed out, and a new link may already have been issued. Call page-link and compare `page_url` before retrying."
+          description: The subscription service timed out, and a new link may already have been issued. Call page-link and compare `page_url` before retrying.
 components:
   schemas:
     Address:
@@ -4023,19 +4155,18 @@ components:
           description: Connect session ID for this attempt.
         result:
           type:
-          - string
-          - 'null'
-          description: 'Outcome of this attempt: success, failed, pending, or null
-            before outcome is known.'
+            - string
+            - "null"
+          description: "Outcome of this attempt: success, failed, pending, or null before outcome is known."
         created_at:
           type: string
           format: date-time
           description: UTC timestamp when AutoPay initiated this payment attempt.
       required:
-      - attempt_number
-      - created_at
-      - result
-      - session_id
+        - attempt_number
+        - created_at
+        - result
+        - session_id
     AutoPayBillingCycle:
       type: object
       properties:
@@ -4053,49 +4184,46 @@ components:
           description: Amount charged or attempted for this cycle.
         status:
           type: string
-          description: Current billing cycle status, such as scheduled, processing,
-            paid, retry_scheduled, failed, or canceled.
+          description: Current billing cycle status, such as scheduled, processing, paid, retry_scheduled, failed, or canceled.
         paid_at:
           type:
-          - string
-          - 'null'
+            - string
+            - "null"
           format: date-time
           description: Timestamp when this cycle was paid, or null if unpaid.
         failure_reason:
           type:
-          - string
-          - 'null'
-          description: Gateway failure message from the last failed attempt, or null
-            if not failed.
+            - string
+            - "null"
+          description: Gateway failure message from the last failed attempt, or null if not failed.
         session_id:
           type:
-          - string
-          - 'null'
-          description: Connect session ID for the latest charge attempt, or null before
-            any attempt.
+            - string
+            - "null"
+          description: Connect session ID for the latest charge attempt, or null before any attempt.
         charge_type:
           type:
-          - string
-          - 'null'
-          description: 'Charge type: cit, mit, or null before any attempt.'
+            - string
+            - "null"
+          description: "Charge type: cit, mit, or null before any attempt."
         payment_attempts:
           type: array
           items:
-            $ref: '#/components/schemas/AutoPayBillingAttempt'
+            $ref: "#/components/schemas/AutoPayBillingAttempt"
           description: All payment attempts for this billing cycle, oldest first.
       required:
-      - amount_due
-      - cycle_number
-      - payment_attempts
-      - scheduled_date
-      - status
+        - amount_due
+        - cycle_number
+        - payment_attempts
+        - scheduled_date
+        - status
     AutoPayBlock:
       type: object
       properties:
         frequency:
           enum:
-          - monthly
-          - yearly
+            - monthly
+            - yearly
           type: string
           description: |-
             * `monthly` - Monthly
@@ -4110,13 +4238,13 @@ components:
           format: date
         end_date:
           type:
-          - string
-          - 'null'
+            - string
+            - "null"
           format: date
         description:
           type:
-          - string
-          - 'null'
+            - string
+            - "null"
           maxLength: 255
         retry_count:
           type: integer
@@ -4124,19 +4252,19 @@ components:
           minimum: 1
         notification_preferences:
           oneOf:
-          - {}
-          - type: 'null'
+            - {}
+            - type: "null"
       required:
-      - frequency
-      - recurring_amount
-      - start_date
+        - frequency
+        - recurring_amount
+        - start_date
     AutoPayCancelSubscriptionRequest:
       type: object
       properties:
         mode:
           enum:
-          - immediate
-          - at_period_end
+            - immediate
+            - at_period_end
           type: string
           x-spec-enum-id: 3b2c15f8fa0ee0ec
           description: |-
@@ -4145,7 +4273,7 @@ components:
             * `immediate` - immediate
             * `at_period_end` - at_period_end
       required:
-      - mode
+        - mode
     AutoPayCycleSummary:
       type: object
       properties:
@@ -4166,30 +4294,30 @@ components:
           description: Current billing cycle status, such as scheduled, processing, paid, retry_scheduled, failed, or canceled.
         paid_at:
           type:
-          - string
-          - 'null'
+            - string
+            - "null"
           format: date-time
           description: Timestamp when this cycle was paid, or null if unpaid.
         failure_reason:
           type:
-          - string
-          - 'null'
+            - string
+            - "null"
           description: Gateway failure message from the last failed attempt, or null if not failed.
         session_id:
           type:
-          - string
-          - 'null'
+            - string
+            - "null"
           description: Connect session ID for the latest charge attempt, or null before any attempt.
         charge_type:
           type:
-          - string
-          - 'null'
-          description: 'Charge type: cit, mit, or null before any attempt.'
+            - string
+            - "null"
+          description: "Charge type: cit, mit, or null before any attempt."
       required:
-      - amount_due
-      - cycle_number
-      - scheduled_date
-      - status
+        - amount_due
+        - cycle_number
+        - scheduled_date
+        - status
     AutoPayPaginatedBillingCycles:
       type: object
       properties:
@@ -4198,25 +4326,24 @@ components:
           description: Total number of billing cycles.
         next:
           type:
-          - string
-          - 'null'
+            - string
+            - "null"
           format: uri
           description: URL or cursor for the next billing-cycle page returned by AutoPay.
         previous:
           type:
-          - string
-          - 'null'
+            - string
+            - "null"
           format: uri
-          description: URL or cursor for the previous billing-cycle page returned
-            by AutoPay.
+          description: URL or cursor for the previous billing-cycle page returned by AutoPay.
         results:
           type: array
           items:
-            $ref: '#/components/schemas/AutoPayBillingCycle'
+            $ref: "#/components/schemas/AutoPayBillingCycle"
           description: Billing cycles in the current page.
       required:
-      - count
-      - results
+        - count
+        - results
     AutoPayPaginatedSubscriptions:
       type: object
       properties:
@@ -4225,24 +4352,26 @@ components:
           description: Total number of matching subscriptions.
         next:
           type:
-          - string
-          - 'null'
+            - string
+            - "null"
           format: uri
-          description: URL or cursor for the next page returned by AutoPay.
+          description: URL of the next page, or null on the last page.
         previous:
           type:
-          - string
-          - 'null'
+            - string
+            - "null"
           format: uri
-          description: URL or cursor for the previous page returned by AutoPay.
+          description: URL of the previous page, or null on the first page.
         results:
           type: array
           items:
-            $ref: '#/components/schemas/AutoPaySubscriptionListItem'
-          description: Subscriptions in the current page.
+            $ref: "#/components/schemas/AutoPaySubscriptionListItem"
+          description: Subscriptions on this page.
       required:
-      - count
-      - results
+        - count
+        - next
+        - previous
+        - results
     AutoPayPageLinkResponse:
       type: object
       properties:
@@ -4251,12 +4380,10 @@ components:
           description: The subscription's current hosted-page token, unrotated.
         page_url:
           type: string
-          description: Customer-facing hosted-page URL built by AutoPay from the tenant's
-            primary domain and the subscription's language. Treat it as a credential
-            — deliver it only to the subscription's own customer.
+          description: Customer-facing hosted-page URL built by AutoPay from the tenant's primary domain and the subscription's language. Treat it as a credential — deliver it only to the subscription's own customer.
       required:
-      - page_token
-      - page_url
+        - page_token
+        - page_url
     AutoPayRegeneratePageTokenResponse:
       type: object
       properties:
@@ -4265,325 +4392,428 @@ components:
           description: New hosted-page token generated by AutoPay.
         page_url:
           type: string
-          description: Customer-facing hosted-page URL built by AutoPay from the tenant's
-            primary domain and the subscription's language. Treat it as a credential
-            — deliver it only to the subscription's own customer.
+          description: Customer-facing hosted-page URL built by AutoPay from the tenant's primary domain and the subscription's language. Treat it as a credential — deliver it only to the subscription's own customer.
       required:
-      - page_token
-      - page_url
+        - page_token
+        - page_url
     AutoPaySubscription:
       type: object
       properties:
-        id:
+        subscription_id:
           type: string
-          description: AutoPay subscription identifier.
-        customer_id:
+          description: Subscription id, starting with `sub_`. Use it in the other subscription endpoints.
+        status:
+          enum:
+            - pending_setup
+            - trialing
+            - active
+            - past_due
+            - canceled
+            - expired
+            - setup_failed
           type: string
-          description: Merchant-side customer identifier.
-        customer_email:
+          x-spec-enum-id: 8e71acbcb08476ea
+          description: |-
+            The subscription's current state.
+
+            * `pending_setup` - Waiting for the first payment.
+            * `trialing` - In a free trial.
+            * `active` - Billing on schedule.
+            * `past_due` - A charge failed after every retry.
+            * `canceled` - Ended by a cancel.
+            * `expired` - Reached its `end_date`.
+            * `setup_failed` - The first payment failed.
+        order_no:
+          type:
+            - string
+            - "null"
+          description: The `order_no` sent at checkout, or null.
+        plan_name:
+          type:
+            - string
+            - "null"
+          description: The `plan_name` sent at checkout, or null. The customer page shows `description` when it is null.
+        description:
+          type:
+            - string
+            - "null"
+          description: The `description` sent in the `autopay` block, or null.
+        language:
+          enum:
+            - en
+            - ar
           type: string
-          format: email
-          description: Customer email address captured when the subscription was created.
-        customer_name:
+          x-spec-enum-id: 5b7bbf1ef388f556
+          description: |-
+            Language of the customer page and emails.
+
+            * `en` - en
+            * `ar` - ar
+        amount:
           type: string
-          description: Customer name captured when the subscription was created, or empty.
-        customer_phone:
-          type: string
-          description: Customer phone number captured when the subscription was created, or empty.
-        frequency:
-          type: string
-          description: Subscription billing frequency.
-        currency:
-          type: string
-          description: ISO currency code for recurring charges.
-        recurring_amount:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
-          description: Amount charged for each recurring billing cycle.
+          description: Amount of each recurring charge, as a string with the currency's decimals, such as `9.900`.
         first_payment_amount:
           type:
-          - string
-          - 'null'
-          format: decimal
-          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
-          description: Initial customer-initiated payment amount, or null when not applicable.
+            - string
+            - "null"
+          description: Amount of the first payment, or null.
+        currency:
+          type: string
+          description: ISO 4217 currency code, such as `KWD`.
+        billing_anchor_day:
+          type: integer
+          description: Day of the month charges fall on, taken from `start_date`.
+        retry_count:
+          type: integer
+          description: How many times a failed charge is retried.
         start_date:
           type: string
           format: date
-          description: Date from which billing can start.
+          description: Date billing starts.
         end_date:
           type:
-          - string
-          - 'null'
+            - string
+            - "null"
           format: date
-          description: Optional date after which AutoPay must stop billing.
-        billing_anchor_day:
-          type: integer
-          description: Day of the month billing is anchored to, taken from start_date.
-        setup_session_id:
-          type:
-          - string
-          - 'null'
-          description: Checkout session ID of the first payment.
-        agreement_id:
-          type:
-          - string
-          - 'null'
-          description: Agreement identifier supplied during Checkout subscription creation.
-        amount_variability:
-          enum:
-          - fixed
-          - variable
-          - null
-          type:
-          - string
-          - 'null'
-          x-spec-enum-id: 785209a99eed16de
-          description: 'Agreement amount variability, or null until the first payment is confirmed.
-    
-    
-            * `fixed` - fixed
-    
-            * `variable` - variable'
-        cycle_interval_days:
-          type:
-          - integer
-          - 'null'
-          description: Agreement cycle interval in days, or null until the first payment is confirmed.
-        total_cycles:
-          type:
-          - integer
-          - 'null'
-          description: Agreement total number of cycles, or null until the first payment is confirmed.
-        notification_config:
-          oneOf:
-          - {}
-          - type: 'null'
-          description: Notification preferences sent in the autopay block, or null for the defaults.
-        status:
-          type: string
-          description: Current AutoPay subscription status.
-        cancel_at_period_end:
-          type: boolean
-          description: Whether the subscription is scheduled to cancel at the current period end.
-        cancels_on:
-          type:
-          - string
-          - 'null'
-          format: date
-          description: Date a scheduled cancellation takes effect, or null.
-        canceled_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: Timestamp when the subscription was canceled, or null if it is not canceled.
-        cancellation_initiator:
-          type:
-          - string
-          - 'null'
-          description: Actor that initiated cancellation, such as merchant or customer.
-        cancellation_reason:
-          enum:
-          - too_expensive
-          - not_using
-          - missing_feature
-          - switched
-          - temporary
-          - other
-          - null
-          type:
-          - string
-          - 'null'
-          x-spec-enum-id: 2e62b76d1de9b5aa
-          description: 'Reason the customer chose when canceling, or null.
-    
-    
-            * `too_expensive` - too_expensive
-    
-            * `not_using` - not_using
-    
-            * `missing_feature` - missing_feature
-    
-            * `switched` - switched
-    
-            * `temporary` - temporary
-    
-            * `other` - other'
-        cancellation_note:
-          type:
-          - string
-          - 'null'
-          description: Free-text note the customer left when canceling, or null.
+          description: Date after which no charge is made, or null for no end.
         next_billing_date:
           type:
-          - string
-          - 'null'
+            - string
+            - "null"
           format: date
-          description: Next scheduled billing date, or null when no future charge is scheduled.
-        description:
+          description: Date of the next charge, or null when none is scheduled.
+        customer:
+          allOf:
+            - $ref: "#/components/schemas/AutoPaySubscriptionCustomer"
+          description: The customer, as sent at checkout.
+        card:
+          allOf:
+            - $ref: "#/components/schemas/AutoPaySubscriptionCard"
+          description: The card on file. Always an object; every value is null before the first payment.
+        agreement:
+          allOf:
+            - $ref: "#/components/schemas/AutoPayAgreement"
+          description: The recurring payment agreement.
+        cancellation:
+          allOf:
+            - $ref: "#/components/schemas/AutoPayCancellation"
+          description: Cancellation details. Always an object; every value is null or false when not canceled.
+        setup_session_id:
           type:
-          - string
-          - 'null'
-          description: Merchant-facing subscription description.
-        merchant_reference:
-          type:
-          - string
-          - 'null'
-          description: Merchant reference attached to the subscription.
-        plan_name:
-          type: string
-          description: Plan name, or empty.
-        language:
-          enum:
-          - en
-          - ar
-          type: string
-          x-spec-enum-id: 5b7bbf1ef388f556
-          description: 'Language of the customer page and emails.
-    
-    
-            * `en` - en
-    
-            * `ar` - ar'
-        retry_count:
-          type: integer
-          description: Maximum retry attempts AutoPay may make for a failed billing cycle.
+            - string
+            - "null"
+          description: Checkout `session_id` of the first payment, or null.
+        created_by:
+          allOf:
+            - $ref: "#/components/schemas/AutoPayActor"
+          description: Who created the subscription. `kind` is `system` today.
         created_at:
           type: string
           format: date-time
-          description: Timestamp when AutoPay created the subscription record.
+          description: When the subscription was created.
         updated_at:
           type: string
           format: date-time
-          description: Timestamp when AutoPay last changed the subscription record.
-        card:
+          description: When the subscription last changed.
+        latest_session_id:
+          type:
+            - string
+            - "null"
+          description: Checkout `session_id` of the latest payment or card update, or null.
+        status_changed_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+          description: When `status` last changed, or null if it never has.
+        notification_config:
           oneOf:
-          - $ref: '#/components/schemas/AutoPaySubscriptionCard'
-          - type: 'null'
-          description: The active card, or null until the first payment is confirmed.
+            - {}
+            - type: "null"
+          description: The `notification_preferences` sent in the `autopay` block, or null for the defaults.
         current_cycle:
           oneOf:
-          - $ref: '#/components/schemas/AutoPayCycleSummary'
-          - type: 'null'
+            - $ref: "#/components/schemas/AutoPayCycleSummary"
+            - type: "null"
           description: The latest attempted billing cycle, or null.
       required:
-      - amount_variability
-      - billing_anchor_day
-      - cancellation_note
-      - cancellation_reason
-      - cancels_on
-      - card
-      - currency
-      - current_cycle
-      - customer_id
-      - customer_name
-      - customer_phone
-      - cycle_interval_days
-      - frequency
-      - id
-      - language
-      - notification_config
-      - plan_name
-      - recurring_amount
-      - setup_session_id
-      - start_date
-      - status
-      - total_cycles
-      - updated_at
+        - agreement
+        - amount
+        - billing_anchor_day
+        - cancellation
+        - card
+        - created_at
+        - created_by
+        - currency
+        - current_cycle
+        - customer
+        - description
+        - end_date
+        - first_payment_amount
+        - language
+        - latest_session_id
+        - next_billing_date
+        - notification_config
+        - order_no
+        - plan_name
+        - retry_count
+        - setup_session_id
+        - start_date
+        - status
+        - status_changed_at
+        - subscription_id
+        - updated_at
     AutoPaySubscriptionCard:
       type: object
       properties:
-        masked_card:
-          type: string
-          description: Masked number of the active card.
-        card_brand:
-          type: string
-          description: Brand of the active card, such as VISA.
+        number:
+          type:
+            - string
+            - "null"
+          description: Masked card number, such as `5123 45** **** 0008`, or null before the first payment.
+        brand:
+          type:
+            - string
+            - "null"
+          description: Card brand, such as `MASTERCARD`, or null.
+        scheme:
+          type:
+            - string
+            - "null"
+          description: Card scheme, or null.
+        bin:
+          type:
+            - string
+            - "null"
+          description: Card BIN, or null.
+        expiry_month:
+          type:
+            - string
+            - "null"
+          description: Expiry month, or null.
+        expiry_year:
+          type:
+            - string
+            - "null"
+          description: Expiry year, or null.
+        name_on_card:
+          type:
+            - string
+            - "null"
+          description: Cardholder name, or null.
+        token:
+          type:
+            - string
+            - "null"
+          description: "Always null: Ottu keeps the card token for the recurring charges."
+        cvv_required:
+          type:
+            - boolean
+            - "null"
+          description: Whether the card needs a CVV, or null.
+        is_preferred:
+          type:
+            - boolean
+            - "null"
+          description: Whether this is the preferred card, or null.
+        agreements:
+          type: array
+          items:
+            type: string
+          description: Agreement ids saved with the card. Empty today.
       required:
-      - card_brand
-      - masked_card
+        - agreements
+        - bin
+        - brand
+        - cvv_required
+        - expiry_month
+        - expiry_year
+        - is_preferred
+        - name_on_card
+        - number
+        - scheme
+        - token
     AutoPaySubscriptionListItem:
       type: object
       properties:
-        id:
+        subscription_id:
           type: string
-          description: AutoPay subscription identifier.
-        customer_id:
+          description: Subscription id, starting with `sub_`. Use it in the other subscription endpoints.
+        status:
+          enum:
+            - pending_setup
+            - trialing
+            - active
+            - past_due
+            - canceled
+            - expired
+            - setup_failed
           type: string
-          description: Merchant-side customer identifier.
-        customer_email:
+          x-spec-enum-id: 8e71acbcb08476ea
+          description: |-
+            The subscription's current state.
+
+            * `pending_setup` - Waiting for the first payment.
+            * `trialing` - In a free trial.
+            * `active` - Billing on schedule.
+            * `past_due` - A charge failed after every retry.
+            * `canceled` - Ended by a cancel.
+            * `expired` - Reached its `end_date`.
+            * `setup_failed` - The first payment failed.
+        order_no:
+          type:
+            - string
+            - "null"
+          description: The `order_no` sent at checkout, or null.
+        plan_name:
+          type:
+            - string
+            - "null"
+          description: The `plan_name` sent at checkout, or null. The customer page shows `description` when it is null.
+        description:
+          type:
+            - string
+            - "null"
+          description: The `description` sent in the `autopay` block, or null.
+        language:
+          enum:
+            - en
+            - ar
           type: string
-          format: email
-          description: Customer email address.
-        frequency:
+          x-spec-enum-id: 5b7bbf1ef388f556
+          description: |-
+            Language of the customer page and emails.
+
+            * `en` - en
+            * `ar` - ar
+        amount:
           type: string
-          description: Subscription billing frequency.
-        recurring_amount:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,11}(?:\.\d{0,3})?$
-          description: Amount charged for each recurring billing cycle.
+          description: Amount of each recurring charge, as a string with the currency's decimals, such as `9.900`.
+        first_payment_amount:
+          type:
+            - string
+            - "null"
+          description: Amount of the first payment, or null.
         currency:
           type: string
-          description: ISO currency code for recurring charges.
-        status:
+          description: ISO 4217 currency code, such as `KWD`.
+        billing_anchor_day:
+          type: integer
+          description: Day of the month charges fall on, taken from `start_date`.
+        retry_count:
+          type: integer
+          description: How many times a failed charge is retried.
+        start_date:
           type: string
-          description: Current AutoPay subscription status.
+          format: date
+          description: Date billing starts.
+        end_date:
+          type:
+            - string
+            - "null"
+          format: date
+          description: Date after which no charge is made, or null for no end.
         next_billing_date:
           type:
-          - string
-          - 'null'
+            - string
+            - "null"
           format: date
-          description: Next scheduled billing date, or null when no future charge
-            is scheduled.
+          description: Date of the next charge, or null when none is scheduled.
+        customer:
+          allOf:
+            - $ref: "#/components/schemas/AutoPaySubscriptionCustomer"
+          description: The customer, as sent at checkout.
+        card:
+          allOf:
+            - $ref: "#/components/schemas/AutoPaySubscriptionCard"
+          description: The card on file. Always an object; every value is null before the first payment.
+        agreement:
+          allOf:
+            - $ref: "#/components/schemas/AutoPayAgreement"
+          description: The recurring payment agreement.
+        cancellation:
+          allOf:
+            - $ref: "#/components/schemas/AutoPayCancellation"
+          description: Cancellation details. Always an object; every value is null or false when not canceled.
+        setup_session_id:
+          type:
+            - string
+            - "null"
+          description: Checkout `session_id` of the first payment, or null.
+        created_by:
+          allOf:
+            - $ref: "#/components/schemas/AutoPayActor"
+          description: Who created the subscription. `kind` is `system` today.
         created_at:
           type: string
           format: date-time
-          description: Timestamp when AutoPay created the subscription record.
+          description: When the subscription was created.
+        updated_at:
+          type: string
+          format: date-time
+          description: When the subscription last changed.
+        latest_session_id:
+          type:
+            - string
+            - "null"
+          description: Checkout `session_id` of the latest payment or card update, or null.
+        status_changed_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+          description: When `status` last changed, or null if it never has.
       required:
-      - created_at
-      - currency
-      - customer_email
-      - customer_id
-      - frequency
-      - id
-      - next_billing_date
-      - recurring_amount
-      - status
+        - agreement
+        - amount
+        - billing_anchor_day
+        - cancellation
+        - card
+        - created_at
+        - created_by
+        - currency
+        - customer
+        - description
+        - end_date
+        - first_payment_amount
+        - language
+        - latest_session_id
+        - next_billing_date
+        - order_no
+        - plan_name
+        - retry_count
+        - setup_session_id
+        - start_date
+        - status
+        - status_changed_at
+        - subscription_id
+        - updated_at
     AutoPaySubscriptionListRequest:
       type: object
       properties:
         status:
           type: string
-          description: Filter subscriptions by AutoPay status, such as pending_setup,
-            trialing, active, past_due, canceled, expired, or setup_failed.
+          description: Filter subscriptions by AutoPay status, such as pending_setup, trialing, active, past_due, canceled, expired, or setup_failed.
         customer_id:
           type: string
-          description: Merchant-side customer identifier used when the subscription
-            was created through Checkout.
+          description: Merchant-side customer identifier used when the subscription was created through Checkout.
         created_after:
           type: string
           format: date
-          description: Return subscriptions created on or after this date, formatted
-            as YYYY-MM-DD.
+          description: Return subscriptions created on or after this date, formatted as YYYY-MM-DD.
         created_before:
           type: string
           format: date
-          description: Return subscriptions created on or before this date, formatted
-            as YYYY-MM-DD.
+          description: Return subscriptions created on or before this date, formatted as YYYY-MM-DD.
         limit:
           type: integer
           maximum: 100
           minimum: 1
-          description: Number of subscriptions AutoPay should return. Defaults to
-            20; maximum is 100.
+          description: Number of subscriptions AutoPay should return. Defaults to 20; maximum is 100.
         offset:
           type: integer
           minimum: 0
-          description: Zero-based index of the first subscription to return. Defaults
-            to 0.
+          description: Zero-based index of the first subscription to return. Defaults to 0.
     BrandingItem:
       type: object
       properties:
@@ -13068,6 +13298,234 @@ components:
         reserve_entry_id:
           type: integer
           description: Ledger entry ID for the reservation hold.
+    AutoPayActor:
+      type: object
+      properties:
+        kind:
+          type:
+            - string
+            - "null"
+          description: "Who acted: `customer` (on the subscription page), `api_key` (your API call), `system` (AutoPay itself), or null when nobody has."
+        id:
+          type:
+            - string
+            - "null"
+          description: The customer's id when `kind` is `customer`, otherwise null.
+        first_name:
+          type:
+            - string
+            - "null"
+          description: The customer's first name when `kind` is `customer`, otherwise null.
+        last_name:
+          type:
+            - string
+            - "null"
+          description: The customer's last name when `kind` is `customer`, otherwise null.
+        email:
+          type:
+            - string
+            - "null"
+          description: The customer's email when `kind` is `customer`, otherwise null.
+      required:
+        - email
+        - first_name
+        - id
+        - kind
+        - last_name
+    AutoPayAgreement:
+      type: object
+      properties:
+        id:
+          type:
+            - string
+            - "null"
+          description: The `agreement.id` sent at checkout, or null.
+        type:
+          type: string
+          description: Agreement type, `recurring` for AutoPay.
+        frequency:
+          enum:
+            - monthly
+            - yearly
+          type: string
+          x-spec-enum-id: 625c23d2df16af9c
+          description: |-
+            Billing frequency.
+
+            * `monthly` - monthly
+            * `yearly` - yearly
+        amount_variability:
+          enum:
+            - fixed
+            - variable
+          type: string
+          x-spec-enum-id: 785209a99eed16de
+          description: |-
+            Whether every charge is the same amount (`fixed`) or can change (`variable`).
+
+            * `fixed` - fixed
+            * `variable` - variable
+        cycle_interval_days:
+          type: integer
+          description: Days between two charges.
+        total_cycles:
+          type:
+            - integer
+            - "null"
+          description: Number of charges the agreement allows, or null for no limit.
+        start_date:
+          type: string
+          format: date
+          description: Date the agreement starts, the subscription's `start_date`.
+        expiry_date:
+          type:
+            - string
+            - "null"
+          format: date
+          description: Date the agreement ends, the subscription's `end_date`, or null.
+        max_amount_per_cycle:
+          type:
+            - string
+            - "null"
+          description: Highest amount one charge may take. Always null today.
+        seller:
+          allOf:
+            - $ref: "#/components/schemas/AutoPayAgreementSeller"
+          description: Seller details. Every value is null today.
+      required:
+        - amount_variability
+        - cycle_interval_days
+        - expiry_date
+        - frequency
+        - id
+        - max_amount_per_cycle
+        - seller
+        - start_date
+        - total_cycles
+        - type
+    AutoPayAgreementSeller:
+      type: object
+      properties:
+        name:
+          type:
+            - string
+            - "null"
+          description: Seller name. Always null today.
+        short_name:
+          type:
+            - string
+            - "null"
+          description: Seller short name. Always null today.
+        category_code:
+          type:
+            - string
+            - "null"
+          description: Merchant category code. Always null today.
+      required:
+        - category_code
+        - name
+        - short_name
+    AutoPayCancellation:
+      type: object
+      properties:
+        at_period_end:
+          type: boolean
+          description: True when the subscription is set to end on `cancel_date` rather than at once.
+        cancel_date:
+          type:
+            - string
+            - "null"
+          format: date
+          description: Date a scheduled cancellation takes effect, or null.
+        canceled_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+          description: When the subscription was canceled, or null if it is not canceled.
+        canceled_by:
+          allOf:
+            - $ref: "#/components/schemas/AutoPayActor"
+          description: Who canceled. Every value is null when nobody has.
+        reason:
+          enum:
+            - too_expensive
+            - not_using
+            - missing_feature
+            - switched
+            - temporary
+            - other
+            - null
+          type:
+            - string
+            - "null"
+          x-spec-enum-id: 2e62b76d1de9b5aa
+          description: |-
+            Reason the customer picked when canceling on the subscription page, or null.
+
+            * `too_expensive` - too_expensive
+            * `not_using` - not_using
+            * `missing_feature` - missing_feature
+            * `switched` - switched
+            * `temporary` - temporary
+            * `other` - other
+        note:
+          type:
+            - string
+            - "null"
+          description: Note the customer left when canceling, or null.
+      required:
+        - at_period_end
+        - cancel_date
+        - canceled_at
+        - canceled_by
+        - note
+        - reason
+    AutoPaySubscriptionCustomer:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Your customer id, the `customer_id` sent at checkout.
+        email:
+          type:
+            - string
+            - "null"
+          description: Customer email address, or null.
+        first_name:
+          type:
+            - string
+            - "null"
+          description: Customer first name, or null.
+        last_name:
+          type:
+            - string
+            - "null"
+          description: Customer last name, or null.
+        phone:
+          type:
+            - string
+            - "null"
+          description: Customer phone number, or null.
+        phone_2:
+          type:
+            - string
+            - "null"
+          description: Second phone number. Always null today.
+        birthdate:
+          type:
+            - string
+            - "null"
+          format: date
+          description: Customer birthdate. Always null today.
+      required:
+        - birthdate
+        - email
+        - first_name
+        - id
+        - last_name
+        - phone
+        - phone_2
   securitySchemes:
     SSO_BasicAuth:
       type: http

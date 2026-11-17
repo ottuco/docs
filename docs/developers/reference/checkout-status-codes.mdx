@@ -250,9 +250,9 @@ without a `code`. If you integrate against those two, branch on the HTTP status 
 <FAQ>
   <FAQItem question="Why did the `Invalided` label change to `Unavailable`?">
     "Invalided" was not a word. The English display label for the `invalided` payment state now
-    reads **Unavailable**. The **stored value is unchanged** — it is still `invalided` in webhooks,
+    reads **Unavailable**. The **stored value is unchanged** — it is still `invalided` in webhook formats 1 and 2,
     the Operations API, exports and filters, so nothing you have integrated against the value needs
-    to change. Only the human-readable label moved. See [Payment States](/developers/reference/payment-states).
+    to change. [Webhook format 3](/developers/webhooks/event-catalogue#catalogue) sends it as `invalidated`. Only the human-readable label moved. See [Payment States](/developers/reference/payment-states).
   </FAQItem>
 
   <FAQItem question="Is `code` ever translated?">

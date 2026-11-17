@@ -97,6 +97,11 @@ export function focusCss(focus: Focus): string {
       ? `${s} [data-id="${stepId(current)}"] > div { outline: 2px solid var(--o-primary); outline-offset: 2px; }`
       : "";
 
+  return dimCss(s, relit, outline);
+}
+
+/** Dim every card, arrow and label inside `s`, then bring `relit` back. The fade is strong on purpose: the picked part must stand out (Dacian, 2026-11-06 and round 3). */
+export function dimCss(s: string, relit: string[], outline = ""): string {
   return [
     `${s} .react-flow__node, ${s} .react-flow__edge, ${s} [data-edge] { opacity: 0.15; }`,
     `${relit.join(",\n")} { opacity: 1; }`,

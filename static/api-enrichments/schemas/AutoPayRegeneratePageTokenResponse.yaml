@@ -2,7 +2,7 @@
 # Response of POST /b/pbl/v2/subscriptions/{subscription_id}/regenerate-page-token/.
 
 _description: |
-  The newly issued self-service link. The previous link stopped working the moment it was replaced, and Ottu does not tell the customer, so you must deliver `page_url` yourself.
+  The newly issued self-service link. The previous link stopped working the moment it was replaced. Ottu emails and texts the new link to the customer's email and phone on file.
 
 properties:
   page_token:

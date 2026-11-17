@@ -2,14 +2,20 @@
 title: Operations
 sidebar_label: Operations
 hide_table_of_contents: true
+displayed_sidebar: developerSidebar
 ---
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import ApiDocEmbed from "@site/src/components/ApiDocEmbed";
 import FAQ, { FAQItem } from '@site/src/components/FAQ';
+import OperationsWorkflow from "@site/src/diagrams/flow/OperationsWorkflow";
 
 # Operations
+
+:::warning Operations v2 is deprecated
+Use [Operations v3](/developers/operations-v3): one endpoint per operation, a required `Idempotency-Key` on capture, refund and void, and one error format. In v3, `refund_queued` is named `refund_pending` and `invalided` is `invalidated`. See [Differences from v2](/developers/operations-v3#differences-from-v2).
+:::
 
 The Operations API lets you perform subsequent actions on existing payment transactions — refund a completed payment, cancel an unpaid link, capture an authorized amount, or void an authorization. Ottu provides a **unified API**: you send the same payload structure regardless of the payment gateway, and Ottu handles the gateway-specific communication.
 
@@ -45,18 +51,7 @@ Store the `session_id` securely — it's required for all operation requests. Pr
 
 ### Workflow
 
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#F4F4F4", "primaryColor": "#FAFAFA", "primaryTextColor": "#302F37", "primaryBorderColor": "#BFBFBF", "lineColor": "#302F37", "secondaryColor": "#FAFAFA", "tertiaryColor": "#FAFAFA"}}}%%
-graph LR
-    A([Merchant]) -->|Operation request| B[Operations API]
-    B -->|Internal ops| C{{Updated State}}
-    B -->|External ops| D[Payment Gateway]
-    D -->|PG response| B
-    B --> E{{Child Transaction}}
-
-    classDef accent fill:#0B82BE,color:#FFFFFF,stroke:#302F37
-    class B accent
-```
+<OperationsWorkflow />
 
 1. **Merchant sends an operation request** with `session_id`, `operation` type, and optional `amount`.
 2. **For internal operations** (cancel, expire, delete) — Ottu updates the transaction state directly.
@@ -285,7 +280,7 @@ Select the operation to see its example payload and the full interactive API sch
     [API-Key](/developers/getting-started/authentication#api-key-auth) grants superadmin privileges. [Basic Authentication](/developers/getting-started/authentication#basic-auth) allows granular permission control per operation. Use Basic Auth for production access control.
   </FAQItem>
   <FAQItem question="What permissions are required?">
-    Depends on the operation: `payment.capture` for capture, `payment.expire` for expire, etc. See [permission codes](#permission-codes-for-each-operation).
+    Depends on the operation: `payment.capture` for capture, `payment.expire` for expire, etc. Each endpoint in the [API Reference](#api-reference) lists its own under **Permissions**.
   </FAQItem>
   <FAQItem question="What happens when a refund is requested via the API?">
     The request goes directly to the payment gateway — the maker-checker approval flow is not activated for API refunds. The maker-checker flow only applies to refunds initiated via the Ottu dashboard.
@@ -296,4 +291,4 @@ Select the operation to see its example payload and the full interactive API sch
 
 - [**Webhooks**](./webhooks/operation-events.md) — Receive notifications when operations complete
 - [**Checkout API**](./payments/checkout-api.mdx) — Create payment sessions to operate on
-- [**Payment States**](./reference/payment-states.md) — Understand how operations change transaction states
+- [**Payment States**](./reference/payment-states.mdx) — Understand how operations change transaction states

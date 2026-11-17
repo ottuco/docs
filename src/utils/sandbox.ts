@@ -90,10 +90,9 @@ export interface SessionResult {
   [key: string]: unknown;
 }
 
-export async function createSandboxSession(
-  options: CreateSessionOptions
-): Promise<SessionResult> {
-  const body = {
+/** The body createSandboxSession sends (with a random customer each time). */
+export function sandboxSessionBody(options: CreateSessionOptions) {
+  return {
     type: options.type,
     pg_codes: options.pg_codes,
     amount: options.amount ?? "20",
@@ -103,7 +102,13 @@ export async function createSandboxSession(
     ...randomCustomer(),
     ...options.extra,
   };
+}
 
+export async function createSandboxSession(
+  options: CreateSessionOptions,
+  /** The body to send, when the caller also shows it: built from `options` otherwise. */
+  body: Record<string, unknown> = sandboxSessionBody(options),
+): Promise<SessionResult> {
   const response = await fetch(
     `${ACTIVE_CONNECT.connectBaseUrl}/b/checkout/v1/pymt-txn/`,
     {
@@ -161,10 +166,8 @@ export async function callAutoDebit(
   return response.json();
 }
 
-/**
- * Call the Payment Methods API to discover available gateways.
- */
-export async function callPaymentMethods(options: {
+/** What callPaymentMethods asks for. */
+export type PaymentMethodsOptions = {
   currencies: string[];
   /**
    * Required: gateways are enabled per plugin, so discovery must state which
@@ -179,7 +182,10 @@ export async function callPaymentMethods(options: {
   tokenizable?: boolean;
   auto_debit?: boolean;
   payment_services?: string[];
-}): Promise<any> {
+};
+
+/** The body callPaymentMethods sends. */
+export function paymentMethodsBody(options: PaymentMethodsOptions): Record<string, unknown> {
   const body: Record<string, unknown> = {
     plugin: options.plugin,
     operation: options.operation ?? "purchase",
@@ -190,7 +196,12 @@ export async function callPaymentMethods(options: {
   if (options.tokenizable != null) body.tokenizable = options.tokenizable;
   if (options.auto_debit != null) body.auto_debit = options.auto_debit;
   if (options.payment_services) body.payment_services = options.payment_services;
+  return body;
+}
 
+/** Call the Payment Methods API to discover available gateways. */
+export async function callPaymentMethods(options: PaymentMethodsOptions): Promise<any> {
+  const body = paymentMethodsBody(options);
   const response = await fetch(
     `${ACTIVE_CONNECT.connectBaseUrl}/b/pbl/v2/payment-methods/`,
     {

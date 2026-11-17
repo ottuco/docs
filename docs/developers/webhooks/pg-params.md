@@ -36,6 +36,10 @@ If you parse the raw `gateway_response` directly, your code is tightly coupled t
 
 Two completely different structures. Your code would need separate parsing logic for each.
 
+:::note Where to find them on format 3
+On [webhook format 3](/developers/webhooks/event-catalogue#data-keys) the same normalised fields arrive as `data.connector.params`. Each one is an object with a bilingual `label` (`en` and `ar`) and a `value`, for example `data.connector.params.rrn.value`, instead of a plain string under `pg_params`.
+:::
+
 **With PG Params** — same fields, every gateway:
 
 ```json title="pg_params (identical structure regardless of gateway)"
@@ -52,7 +56,7 @@ Always build your webhook handling logic against `pg_params`. When you add a new
 
 - [**Payment webhooks**](/developers/webhooks/payment-events/) — the `pg_params` object in every payment notification
 - [**Operation webhooks**](/developers/webhooks/operation-events/) — the `pg_params` object in refund, capture, and void notifications
-- [**Payment Status Query**](/developers/payments/psq/) — the response includes the same normalized fields
+- [**Payment Status Query v3**](/developers/payments/psq-v3) — the same normalized fields, as `params` in each attempt's `connector`
 
 The raw `gateway_response` is also included in webhook payloads for audit purposes, but you should not rely on it for business logic.
 

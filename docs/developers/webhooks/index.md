@@ -4,107 +4,123 @@ sidebar_label: Overview & Setup
 ---
 
 import FAQ, { FAQItem } from '@site/src/components/FAQ';
+import AgentPrompt from '@site/src/components/AgentPrompt';
 
 # Webhooks
 
-Ottu offers an optional end-to-end integration with the [Payment Gateway](/developers/payments/payment-methods) (PG) through webhooks. By default, these webhooks are **disabled**, ensuring merchants only receive notifications if they choose to. These webhooks act as a reactive mechanism, notifying merchants either in real-time or on-demand, depending on the event. Whether it’s a payment being processed or a subsequent payment gateway [operation](/developers/operations#external-operations) taking place, Ottu ensures that the merchant is promptly informed once the webhooks are enabled. Merchants can enable these webhooks in various ways, either directly from the Ottu dashboard or via the [Checkout API](/developers/payments/checkout-api).
+Ottu calls your server when something happens to a payment, so you don't have to keep asking.
 
-Ottu simplifies the integration process by providing a unified response across all payment gateways. Both webhook types include [`pg_params`](./pg-params) — normalized gateway response fields that stay consistent regardless of which gateway processed the transaction. Whether you’re working with MPGS, KNET, PayPal, or any other gateway, you only need to handle Ottu’s standardized response. This ensures a consistent experience, eliminating the need to interpret varied responses from different payment gateways.&#x20;
+- **When:** a payment is paid, fails or expires, and when a [refund, capture or void](/developers/operations-v3) runs on it.
+- **Off by default.** Turn webhooks on in the Ottu dashboard, or send a `webhook_url` with the [Checkout API](/developers/payments/checkout-api).
+- **One shape for every gateway.** MPGS, KNET, PayPal or any other [payment gateway](/developers/payments/payment-methods): you parse one format. A gateway you add later needs no new code.
+- **Gateway details included.** Normalized gateway fields ([`pg_params`](./pg-params) on formats 1 and 2, [`connector.params`](./event-catalogue.mdx#event-data-connector-params) on format 3) plus the gateway's raw response as JSON ([`connector.responses`](./event-catalogue.mdx#event-data-connector-responses) on format 3), card numbers cut.
 
-Moreover, for those who might need it, the original response from the payment gateway, always converted to `JSON` format, is included in Ottu’s webhooks. This means that while Ottu takes on the heavy lifting of interpreting and standardizing payment gateway responses, you still have access to the raw data if required. The beauty of this approach is its extensibility. As you expand and decide to incorporate more payment gateways into your system, there’s no need for additional integration work on your end. Ottu ensures that everything will work seamlessly out of the box, saving you time and effort in the long run.
+<AgentPrompt topic="webhooks" />
+
+:::tip[Every event Ottu can send]
+See the [event catalogue](./event-catalogue.mdx#catalogue) for every event, when each one is sent, and the fields it carries.
+:::
 
 ## **Webhook formats** {#webhook-formats}
 
-Ottu sends webhooks in one of three **formats**, set per account. **Ottu never switches you to a new format on its own.**
+Ottu sends webhooks in one of three **formats**, set per account by **Version** in [Webhook Config](./setup.mdx). **Ottu never switches you to a new format on its own.**
 
 | Format | What you receive | Read |
 |---|---|---|
-| **1 and 2** | A flat payment body or operation body, in JSON (XML on request), signed in the body and in the `Ottu-Signature` header | [Payment Events](./payment-events.md), [Operation Events](./operation-events.md) |
-| **3** | An **envelope** (`id`, `type`, `created`, `version`, `is_sandbox`, `merchant_id`, `data`) per event, in JSON, signed with `Ottu-Signature` `v2` over the raw body | [Webhook Events (v3)](./event-catalogue.mdx) |
+| **1 and 2** | A flat payment body or operation body, in JSON (XML on request), signed in the body and in the `Ottu-Signature` header | [Payment Events](./payment-events.mdx), [Operation Events](./operation-events.md) |
+| **3** | An **envelope** (`id`, `event`, `created`, `version`, `is_sandbox`, `merchant_id`, `initiator`, `data`), where `data` is the payment itself, flat, per event, in JSON, signed with `Ottu-Signature` `v2` over the raw body | [Webhook Events (v3)](./event-catalogue.mdx) |
 
-Format 3 adds a catalogue of event types (`payment.paid`, `payment.refunded`, ...), a fixed [retry schedule](./delivery-and-retries.mdx#retry-schedule), and `Idempotency-Key`. To move from format 1 or 2, follow [Migrating to v3](./migrate-to-v3.md).
+Format 3 adds a [catalogue of 15 events](./event-catalogue.mdx#catalogue) named after the status reached (`payment.paid`, `payment.refunded`, ...), a fixed [retry schedule](./delivery-and-retries.mdx#retry-schedule), and `Idempotency-Key`. AutoPay adds 11 [`subscription.*` events](./event-catalogue.mdx#subscription-events), sent to the [webhook endpoints](./delivery-and-retries.mdx#webhook-endpoints) you configure for them. To move from format 1 or 2, follow [Migrating to v3](./migrate-to-v3.md).
 
-On **every** format each delivery carries an `Idempotency-Key` header with the event id, so you can drop a duplicate before you fulfil an order. See [Delivery and Retries](./delivery-and-retries.mdx#idempotency-key).
+Each delivery carries an `Idempotency-Key` header with the event id, so you can drop a duplicate before you fulfil an order. On formats 1 and 2 a delivery whose event Ottu could not record comes without it, so handle a missing header there. See [Delivery and Retries](./delivery-and-retries.mdx#idempotency-key).
 
 :::note Ordering is not guaranteed
-Events can arrive out of order, especially after a retry. Use the `created` time of a format 3 event to order them, and fetch the payment's current state with the [Payment Status API](/developers/payments/psq) when the final state matters.
+Events can arrive out of order, especially after a retry. `payment.created` can arrive after a fast `payment.paid`. Use the `created` time of a format 3 event to order them, de-duplicate on the event `id`, and fetch the payment's current state with the [Payment Status Query v3](/developers/payments/psq-v3) when the final state matters.
 :::
 
-## **Types of Webhooks**
+## **Types of Webhooks** {#types-of-webhooks}
 
-Ottu supports two primary types of webhooks:
+Ottu sends webhooks to two kinds of URL:
 
-1.  #### [Payment Event Webhook](./payment-events.md)
+- **The payment's `webhook_url`:** called when a payment is processed (paid, failed, expired, ...). On formats 1 and 2 this is the [payment webhook](./payment-events.mdx).
+- **The operations URL:** called for later gateway operations on a payment, such as refunds, captures and voids. On formats 1 and 2 this is the asynchronous [operations webhook](./operation-events.md).
 
-    This webhook is triggered when a transaction is processed. It’s a real-time notification mechanism that informs the merchant immediately after a payment event.
-2.  #### [Operations Webhook](./operation-events.md)
+On format 3 both URLs receive the same [envelope](./event-catalogue.mdx#envelope): a refund is `payment.refunded`, a void is `payment.voided`, and a capture is `payment.paid` with `data.operation` equal to `capture`.
 
-    This webhook is asynchronous and is triggered for subsequent payment gateway operations on a transaction, such as refunds, captures, or voids.
+## **Body encoding** {#webhook-structure}
 
-## **Webhook Structure**
+- **Format 3** is always JSON.
+- **Formats 1 and 2** are JSON by default. XML is available on request: contact [support@ottu.com](mailto:support@ottu.com) to have it turned on.
 
-Webhooks from Ottu can be in two formats:
+## **Delivery Guarantees** {#delivery-guarantees}
 
-* **JSON:** This is the default format.
-* **XML:** Available only upon request. If you require XML formatted webhooks, please contact the support team for activation.
+- **The same event can arrive more than once.** Make your receiver idempotent (see [Endpoint Requirements](#endpoint-requirements)).
+- **Failed deliveries are retried.** The retry mechanism is on by default:
+  - **Format 3:** 8 attempts over about 42 hours. See the [retry schedule](./delivery-and-retries.mdx#retry-schedule).
+  - **Formats 1 and 2:** up to 3 attempts in total, on timeouts only. See [Formats 1 and 2 only](#formats-1-and-2-settings).
 
-Additionally, the user-agent header in the webhook mimics a Chrome browser by default. For custom user-agent headers, merchants can reach out to our support team for adjustments.
+## Endpoint Requirements {#endpoint-requirements}
 
-## **Delivery Guarantees**
+Your webhook endpoint must:
 
-Ottu prides itself on a **99.99%** delivery guarantee for webhooks. However, merchants should be aware of the following:
+- **Use an HTTPS URL.** A webhook carries payment and customer data; do not receive it over plain HTTP. Ottu verifies your certificate by default (`ignore_ssl` is `false`), so use a certificate from a public authority (see [SSL verification](#ssl-verification)).
+- **Be public and online.** Ottu must reach it from the internet.
+- **Answer within the configured `timeout`** (**15 seconds** by default; see [Webhook Notification Mechanism](#webhook-notification-mechanism)), or the delivery is treated as failed.
+- **Return a success status:** any `2xx` on format 3, `200` or `201` on formats 1 and 2. Any other status marks the notification as failed. Redirects (`3xx`) are not followed.
+- **Be idempotent.** Ottu can notify the URL more than once for the same event, and repeated calls must not cause side effects. Use the [`Idempotency-Key`](./delivery-and-retries.mdx#idempotency-key) header (the event id) to detect repeats, and also check the business `reference_number` before you fulfil or refund.
 
-* There might be multiple hits for the same payment event.
-* By default, the retry mechanism is enabled. If the webhook fails to deliver on the first attempt, Ottu will try to resend it. On formats 1 and 2 the default number of retries is set to 3. On format 3 there are 8 attempts over about 42 hours: see [Delivery and Retries](./delivery-and-retries.mdx#retry-schedule).
+## Security {#security}
 
-More details on the delivery mechanism and other related configurations will be discussed in subsequent sections.
+Every webhook is signed with HMAC-SHA256, so you can confirm it comes from Ottu and was not altered in transit:
 
-## Endpoint Requirements
+- **Every format (1, 2 and 3):** the `Ottu-Signature` header, `v2` part, computed over the raw body.
+- **Formats 1 and 2 also:** the `signature` field in the body (unchanged).
 
-For a seamless experience, merchants should ensure that their webhook endpoint:
+[Verify Signatures](/developers/webhooks/verify-signatures) gives the exact recipe, test vectors and code for each.
 
-* Is secure, preferably using HTTPS.
-* Is always online and accessible to the public.
-* Answers within the configured `timeout` (**15 seconds** by default; see [Webhook Notification Mechanism](#webhook-notification-mechanism)), so the delivery is not treated as failed.
-* Returns an HTTP status of 200 or 201 (formats 1 and 2) or any `2xx` (format 3). Any other status will lead Ottu to mark the notification as failed; redirects (`3xx`) are not followed.
-* Is idempotent. This is crucial as Ottu might notify the URL multiple times for the same event, and this ensures that the repeated calls do not result in unintended side effects. Use the [`Idempotency-Key`](./delivery-and-retries.mdx#idempotency-key) header (the event id) to detect repeats, and also check the business `reference_number` before you fulfil or refund.
+## Webhook Notification Mechanism {#webhook-notification-mechanism}
 
-While Ottu supports endpoints with disabled SSL verification, it’s not recommended due to potential security vulnerabilities.
+These settings belong to your webhook configuration. Each one has a default that works out of the box, and each can be adjusted for your account.
 
-## Security
+### Settings for every format {#settings}
 
-Ensuring the integrity and authenticity of webhook data is paramount. To guarantee that the data you receive originates from Ottu and hasn’t been tampered with during transit, we employ a robust [signing mechanism](/developers/webhooks/verify-signatures). Ottu uses the **SHA-256 algorithm** to sign all webhook payloads.&#x20;
+#### SSL verification {#ssl-verification}
 
-This cryptographic hash function provides a consistent and secure way to verify the data’s integrity. By checking the signature, you can be confident that the payload is genuine and has not been altered since it was sent by Ottu. For a detailed guide on how to verify the signature and implement this security measure in your system, click [here](/developers/webhooks/verify-signatures).
+- **Field:** `ignore_ssl`
+- **Default:** `False`: Ottu verifies the SSL certificate of your webhook URL.
+- **Description:** set it to `True` only while you test with a self-signed certificate, and turn it back off before you go live. Older webhook configurations may still have `True`; if yours does, ask Ottu to turn certificate verification on.
 
-## Webhook Notification Mechanism
+#### Error notification {#error-notification}
 
-All the fields mentioned below come with default values to ensure a smooth integration out of the box. However, Ottu understands that every merchant might have unique requirements. Hence, each of these settings can be tailored to fit your specific needs. Whether it’s adjusting the timeout duration or specifying the number of retries, you have the flexibility to configure them as per your system’s behavior and preferences.
+- **Field:** `notify_on_error`
+- **Default:** `True`
+- **Description:** when a webhook call fails, Ottu emails the recipients in `emails`. On format 3 this is one email after the last attempt; see [Failure email](./delivery-and-retries.mdx#failure-email).
 
-#### **SSL Verification**
+#### Email recipients for error notification {#emails}
 
-* **Field:** `ignore_ssl`
-* **Default:** `True`
-* **Description:** Ottu, by default, bypasses SSL certificate verification when calling the webhook URL. This is handy during development or testing with self-signed certificates. However, for production, it’s recommended to have SSL verification enabled to ensure security.
+- **Field:** `emails`
+- **Default:** empty list
+- **Description:** the addresses alerted when a webhook call fails, so the right people can act.
 
-#### **Error Notification**
+#### Timeout {#timeout}
 
-* **Field:** `notify_on_error`
-* **Default:** `True`
-* **Description:** If Ottu encounters an error while calling the webhook URL, it can send an email notification. This ensures you’re promptly informed of any issues.
+- **Field:** `timeout`
+- **Default:** `15` seconds
+- **Description:** how long Ottu waits for your response. No response within this time is a timeout, and the delivery counts as failed.
 
-#### **Email Recipients for Error Notification**
+### Formats 1 and 2 only {#formats-1-and-2-settings}
 
-* **Field:** `emails`
-* **Default:** Empty list
-* **Description:** You can specify a list of email recipients who will be alerted in case of an error during the webhook call. This ensures that the right stakeholders are informed and can act if needed.
+Format 3 does not use these settings: it follows its own fixed [retry schedule](./delivery-and-retries.mdx#retry-schedule).
 
-#### **Timeout and Retry Mechanism**
+#### Retries {#retries}
 
-* **Fields:** `timeout`, `retries`, and `backoff_factor`
-* **Defaults:** timeout: `15` seconds, retries: `3`, backoff\_factor: `5` seconds
-* **Description:** When Ottu sends a webhook, it waits for 15 seconds `timeout` for a response. If there’s no response within this timeframe, it’s considered a timeout. In the event of a timeout, Ottu will retry sending the webhook. It will make 3 attempts `retries` in total, waiting 5 seconds `backoff_factor` between each retry. This means, in a scenario where all retries are exhausted due to timeouts, Ottu would have tried for a total of 55 seconds to deliver the webhook. It’s crucial to note that retries are only triggered in case of timeouts. \
-  For other errors or non-200 HTTP responses, Ottu won’t retry. This means your endpoint should always return an HTTP status of 200 to indicate successful receipt of the webhook. If not, Ottu will consider the notification as `failed`. Given the retry mechanism, there’s a possibility that your endpoint might receive the same webhook multiple times in case of timeouts. It’s essential to design your endpoint to handle such scenarios to avoid duplicate processing.
+- **Fields:** `retries` and `backoff_factor`
+- **Defaults:** retries: `3`, backoff\_factor: `5` seconds
+- **Description:** `retries` is the total number of attempts, the first one included. Ottu retries **only on a timeout**: with the defaults it makes up to 3 attempts, waiting 5 seconds (`backoff_factor`) between them, so with the 15-second `timeout` it tries for up to 55 seconds in all. Any other error, or a status other than `200` or `201`, is not retried: Ottu marks the notification `failed`. Because a timed-out call may still have reached you, your endpoint can receive the same webhook more than once; handle repeats as described in [Endpoint Requirements](#endpoint-requirements).
+
+:::note User agent
+On formats 1 and 2 the `User-Agent` header mimics a Chrome browser by default. For a custom user agent, contact [support@ottu.com](mailto:support@ottu.com).
+:::
 
 ## FAQ
 
@@ -117,25 +133,23 @@ All the fields mentioned below come with default values to ensure a smooth integ
 
     1. Ensure that the webhook is enabled, either via the Ottu dashboard or the Checkout API.
     2. Check that your endpoint meets all the requirements, such as being secure (HTTPS) and answering within the configured `timeout` (15 seconds by default).
-    3. Verify that your endpoint returns an HTTP status of 200 or 201 to acknowledge receipt.
-    4. If you’re still facing issues, reach out to our support team for assistance.
+    3. Verify that your endpoint returns a success status: any `2xx` on format 3, `200` or `201` on formats 1 and 2.
+    4. If you’re still facing issues, see [Troubleshooting](./troubleshooting.mdx) or reach out to our support team.
   </FAQItem>
   <FAQItem question="How can I ensure the webhook notifications I receive are genuinely from Ottu?">
-    Ottu signs every webhook with the `Ottu-Signature` header: `v2` (HMAC-SHA256 over the raw body) on format 3, `v1` by default on formats 1 and 2, plus the `signature` field in the body of formats 1 and 2. See the [signing mechanism](/developers/webhooks/verify-signatures#ottu-signature-header). By verifying the signature attached to each payload, you can ensure its authenticity and integrity. Detailed steps on how to verify the signature can be found [here](/developers/webhooks/verify-signatures#4-verification-by-merchant).
+    Ottu signs every webhook, on every format, with the `Ottu-Signature` header: `v2`, HMAC-SHA256 over the raw body. Formats 1 and 2 also keep the `signature` field in the body. See [the `Ottu-Signature` header](/developers/webhooks/verify-signatures#ottu-signature-header). By verifying the signature attached to each payload, you can ensure its authenticity and integrity. Detailed steps on how to verify the signature can be found [here](/developers/webhooks/verify-signatures#verify-v2).
   </FAQItem>
   <FAQItem question="What should I do if I receive the same webhook notification multiple times?">
     Webhooks can be retried, especially in cases of timeouts. It’s essential to make your webhook processing idempotent, meaning processing the same webhook notification more than once should not have a different effect. Always check the event ID (the [`Idempotency-Key`](./delivery-and-retries.mdx#idempotency-key) header) and the transaction `reference_number` to ensure you’re not processing duplicates.
   </FAQItem>
   <FAQItem question="How long will Ottu retry a webhook if my server doesn’t respond?">
-    On formats 1 and 2, Ottu retries a webhook three times by default, with a `backoff` factor of 5 seconds between retries; this can be adjusted in the webhook settings. On format 3 there are 8 attempts over about 42 hours: see the [retry schedule](./delivery-and-retries.mdx#retry-schedule).
-
-    Feel free to ask any other questions or provide more context, and we can craft more FAQs accordingly!
+    On formats 1 and 2, Ottu makes up to 3 attempts in total by default (the `retries` setting), 5 seconds apart (`backoff_factor`), and only after a timeout; both can be adjusted in the webhook settings. On format 3 there are 8 attempts over about 42 hours: see the [retry schedule](./delivery-and-retries.mdx#retry-schedule).
   </FAQItem>
 </FAQ>
 
 ## Related
 
-- [**Webhook Events (v3)**](./event-catalogue.mdx): the envelope and every event type
+- [**Webhook Events (v3)**](./event-catalogue.mdx): the envelope and every event
 - [**Delivery and Retries**](./delivery-and-retries.mdx): success rules, retry schedule, `Idempotency-Key`
 - [**Migrating to v3**](./migrate-to-v3.md): move from format 1 or 2
-- [**Verify Signatures**](./verify-signatures.md): `Ottu-Signature` v1 and v2
+- [**Verify Signatures**](./verify-signatures.md): the `Ottu-Signature` header (`v2`) and the body signature

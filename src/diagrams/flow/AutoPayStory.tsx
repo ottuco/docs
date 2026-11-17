@@ -22,20 +22,25 @@ import {
   type StoryStep,
 } from "@site/src/components/FlowDiagram";
 
+// The lanes follow the flow (the customer starts it); the chips start with
+// the reader's own part: Merchant's part, Ottu's part, Customer's part.
 const customer = {
   title: "Customer",
   icon: mdiAccount,
   chip: "Customer's part",
+  chipOrder: 2,
 };
 const merchant = {
   title: "You (merchant)",
   icon: mdiServer,
-  chip: "Your part",
+  chip: "Merchant's part",
+  chipOrder: 0,
 };
 const ottu = {
   title: "Ottu",
   icon: mdiShieldCheckOutline,
   chip: "Ottu's part",
+  chipOrder: 1,
 };
 
 const autopayLanes: StoryLane[] = [
@@ -52,7 +57,7 @@ const autopayLanes: StoryLane[] = [
     about: {
       does: "Makes one Checkout API call, sends the customer to pay, and starts the service once the subscription is active.",
       relies:
-        "Ottu for the result of the first charge. Renewals send you no webhook, so you poll for past-due subscriptions.",
+        "Ottu for the result of the first charge. For renewals, you read the status from the API and list subscriptions with status past_due.",
     },
   },
   {
@@ -67,9 +72,9 @@ const autopaySteps: StoryStep[] = [
   {
     lane: 0,
     title: "Subscribes on your site",
-    sub: "Picks a plan",
+    sub: "Chooses a subscription",
     icon: mdiShoppingOutline,
-    detail: "Your customer picks a plan on your website or app.",
+    detail: "Your customer chooses a subscription on your website or app.",
   },
   {
     lane: 1,
@@ -77,7 +82,7 @@ const autopaySteps: StoryStep[] = [
     sub: "One Checkout API call",
     icon: mdiServer,
     detail:
-      "Send one Checkout API call with the plan and its schedule, and store the subscription ID it returns.",
+      "Send one Checkout API call with the amount and its schedule, and store the subscription ID it returns.",
   },
   {
     lane: 2,
@@ -143,7 +148,7 @@ const autopayJourneys: StoryJourney[] = [
   {
     name: "First charge",
     stops: [
-      { step: 1, text: "Your customer picks a plan on your site." },
+      { step: 1, text: "Your customer chooses a subscription on your site." },
       {
         step: 2,
         text: "You make one Checkout API call and store the subscription ID.",
@@ -169,7 +174,7 @@ const autopayJourneys: StoryJourney[] = [
       },
       {
         step: 8,
-        text: "Your customer gets the reminder with a link to their page. Renewals send you no webhook.",
+        text: "Your customer gets the reminder with a link to their page.",
       },
     ],
   },
@@ -186,7 +191,7 @@ const autopayJourneys: StoryJourney[] = [
       },
       {
         step: 9,
-        text: "Your customer pays the balance on their page, or you cancel. Ottu doesn't notify you, so poll for past_due.",
+        text: "Your customer pays the balance on their page, or you cancel. Read the status from the API: list subscriptions with status past_due.",
       },
     ],
   },
@@ -221,6 +226,8 @@ export default function AutoPayStory(): React.JSX.Element {
       steps={autopaySteps}
       links={autopayLinks}
       journeys={autopayJourneys}
+      controls="side"
+      fillWidth
     />
   );
 }

@@ -13,8 +13,9 @@ properties:
       The date this period was, or is, due to be charged, in `YYYY-MM-DD` format.
   amount_due:
     description: |
-      The amount charged or to be charged for this period, as a decimal string in the subscription's currency.
+      The amount charged or to be charged for this period, as a decimal string with 3 decimal places in every currency, for example `9.990` for USD.
   status:
+    enum: [scheduled, processing, paid, failed, retry_scheduled, canceled, needs_triage]
     description: |
       Where this cycle stands. One of `scheduled` (not attempted yet), `processing` (a charge is in flight), `paid`, `retry_scheduled` (an attempt failed and the next automatic retry is queued), `failed` (every retry was used up, and the subscription is now `past_due`), `canceled` (canceled together with the subscription), or `needs_triage` (contact Ottu support).
   paid_at:
@@ -22,13 +23,14 @@ properties:
       UTC timestamp of when the cycle was collected. `null` until it is `paid`.
   failure_reason:
     description: |
-      The gateway's message from the most recent failed attempt. `null` if no attempt has failed.
+      The gateway's message from the most recent failed attempt, with any card number masked. `null` if no attempt has failed. Ottu does not clear it when a later retry succeeds, so a `paid` cycle can still carry it.
   session_id:
     description: |
       The Ottu `session_id` of the latest charge attempt for this cycle. `null` while the cycle is `scheduled` and has not been attempted.
   charge_type:
+    enum: [cit, mit]
     description: |
-      How the cycle was charged. `cit` is a customer-initiated payment: the first payment at checkout, or a recovery payment. `mit` is an automatic charge Ottu makes against the saved card, and it is already set on a scheduled cycle that has not been attempted. To tell whether a cycle was attempted, check `status` and `payment_attempts`, not `charge_type`.
+      How the cycle is charged. `cit` is the customer-initiated first payment at checkout. `mit` is a charge Ottu makes against the saved card; it is already set on a scheduled cycle that has not been attempted. A cycle that the customer pays from the self-service page after it failed keeps `mit`. To tell whether a cycle was attempted, check `status`, not `charge_type`.
   payment_attempts:
     description: |
       Every charge attempt made for this cycle, oldest first. More than one entry means the cycle was retried after a failure. See [Retries & Dunning]({{apiBaseUrl}}/payments/autopay/#retries-and-dunning).

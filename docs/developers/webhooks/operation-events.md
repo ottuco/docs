@@ -1,14 +1,16 @@
 ---
 title: Operation Events
 sidebar_label: Operation Events
+description: The webhook body Ottu sends after a refund, capture or void on webhook formats 1 and 2 (deprecated; format 3 sends these as payment.* events).
+displayed_sidebar: developerSidebar
 ---
 
 import SchemaEmbed from "@site/src/components/SchemaEmbed";
 
 # Operation Notification
 
-:::note This page describes webhook formats 1 and 2
-If your account uses [format 3](/developers/webhooks/event-catalogue), your operations arrive inside an event envelope as `data.operation`, next to the original payment in `data.payment`; see [Webhook Events (v3)](/developers/webhooks/event-catalogue) and [Migrating to v3](/developers/webhooks/migrate-to-v3). Each delivery also carries an [`Idempotency-Key`](/developers/webhooks/delivery-and-retries#idempotency-key) header with the event id on every format.
+:::warning Webhook formats 1 and 2 are deprecated
+This page describes the older webhook formats. In [format 3](/developers/webhooks/event-catalogue), refunds, captures and voids arrive as `payment.refunded`, `payment.paid` (with `data.operation` equal to `capture`) and `payment.voided`. In v3, `refund_queued` is named `refund_pending` and `invalided` is `invalidated`. To move an existing integration, see [Migrating to v3](/developers/webhooks/migrate-to-v3).
 :::
 
 Ottu’s operation webhooks provide real-time insights into post-transaction activities, specifically focusing on `refund`, `capture`, and `void`. Operating asynchronously, they ensure merchants are promptly informed about these crucial subsequent payment gateway operations without disrupting the main transaction flow. By utilizing these webhooks, merchants gain a clearer view of their transactional landscape, enhancing decision-making and customer interactions.
@@ -46,7 +48,7 @@ Operation webhooks are activated under the following scenarios:
 
 ## Payload example (refund)
 
-```json
+```json title="Operation webhook (refund)"
 {
    "amount":"9.000",
    "initiator":{
@@ -62,7 +64,7 @@ Operation webhooks are activated under the following scenarios:
    "order_no":"Y3ODg",
    "pg_code":"credit-card",
    "pg_response":{
-      "It will contain the raw pg response sent by the pg to Ottu"
+      "_comment":"The raw response the payment gateway sent to Ottu, as JSON"
    },
    "reference_number":"staging4AQ64A",
    "result":"success",
@@ -94,7 +96,7 @@ Every operation is a subsequent action performed on a specific payment transacti
 - **Queued Operations:** The Payment Gateway (PG) might not approve the request instantly, placing it in a queue for later processing. Such operations initially bear a `<operation>_queued` state. Once processed, the state either transitions to the specific operation state (like `refunded`, `captured`, `voided`) or `<operation>_rejected`.
 
 2. **Understanding Real-time and Queued Payment Gateways:**&#x54;o determine which Payment Gateways operate in real-time and which ones use the queued system, you can consult the list provided [here](/developers/operations).
-3. **Additional Information:** Upon receiving a `<operation>_queued` status, such as `refund_queued`, it’s imperative to archive this response. Ottu will subsequently notify the operation webhook URL with the conclusive result.
+3. **Additional Information:** Upon receiving a `<operation>_queued` status, such as `refund_queued` (named `refund_pending` in [format 3](/developers/webhooks/event-catalogue#catalogue)), it’s imperative to archive this response. Ottu will subsequently notify the operation webhook URL with the conclusive result.
 4. **Understanding the result Field:** `result` this field elucidates the operation’s outcome:
 
 - `success`: The operation was executed successfully.
@@ -114,7 +116,7 @@ By accurately interpreting these fields and states, you can ensure precise ackno
 
 7. **Verifying the Signature**
 
-Every operation webhook payload includes a `signature` field — an HMAC-SHA256 hash that proves the payload came from Ottu. **Always verify this signature before processing the operation result.**
+Every delivery carries the `Ottu-Signature` header, `t=…,v2=…`: an HMAC-SHA256 over the raw body that proves the payload came from Ottu. **Always verify it before processing the operation result.** The body also carries a `signature` field (an 18-field HMAC), which you can check as well.
 
 For implementation details and code examples, see [Verify Signatures](/developers/webhooks/verify-signatures/).
 
@@ -130,6 +132,6 @@ For general webhook setup and configuration, see the [Webhooks Overview](./).
 - [**Payment Events**](/developers/webhooks/payment-events/) — Webhook notifications for payment transactions
 - [**Verify Signatures**](/developers/webhooks/verify-signatures/) — Validate webhook authenticity with HMAC-SHA256
 - [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration
-- [**Webhook Events (v3)**](/developers/webhooks/event-catalogue/) — Operations as `payment.refunded`, `payment.captured`, `payment.voided`
-- [**Migrating to v3**](/developers/webhooks/migrate-to-v3/) — Field map from this payload to `data.operation`
+- [**Webhook Events (v3)**](/developers/webhooks/event-catalogue/) — Refunds, captures and voids as `payment.refunded`, `payment.paid` and `payment.voided`
+- [**Migrating to v3**](/developers/webhooks/migrate-to-v3/) — Field map from this payload to the flat `data`
 - [**Delivery and Retries**](/developers/webhooks/delivery-and-retries/) — Success rules, retry schedule, `Idempotency-Key`

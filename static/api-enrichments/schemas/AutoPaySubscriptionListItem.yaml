@@ -2,35 +2,80 @@
 # One row of the subscription list. Mirrors SubscriptionListItem in AutoPay.
 
 _description: |
-  A lighter view of a subscription, returned for each row of the subscription list. It carries enough to show a table and to decide which subscriptions to open; call Retrieve a subscription for the full object.
+  One subscription in the list. It has the same attributes as the Subscription object returned by Retrieve, except `notification_config` and `current_cycle`; call Retrieve a subscription for those two.
 
 properties:
-  id:
+  subscription_id:
     description: |
-      The subscription's unique identifier. Pass it as `subscription_id` to retrieve, cancel, or list the cycles of this subscription.
-  customer_id:
-    description: |
-      Your own identifier for the customer, as sent in `customer_id` at checkout.
-  customer_email:
-    description: |
-      The customer's email address, captured when the subscription was created.
-  frequency:
-    description: |
-      How often the customer is charged. Enum: `monthly`, `yearly`.
-  recurring_amount:
-    description: |
-      The amount charged on each billing cycle, as a decimal string in `currency`.
-  currency:
-    description: |
-      Three-letter ISO 4217 currency code of the recurring charge, for example `KWD`.
+      The subscription's unique identifier, starting with `sub_`. Pass it as `subscription_id` to retrieve, cancel, or list the cycles of this subscription.
   status:
     description: |
-      The subscription's lifecycle state. One of `pending_setup` (created, first payment not completed yet), `trialing` (set up with a `0` first charge, waiting for its first billing date), `active` (billing normally), `past_due` (a billing cycle used up every retry), `canceled`, `expired` (the `end_date` passed), or `setup_failed` (the first payment never completed).
+      The subscription's lifecycle state. One of `pending_setup` (created, first payment not completed yet), `trialing` (set up with a `0` first charge, waiting for its first billing date), `active` (billing normally), `past_due` (a billing cycle used up every retry), `canceled`, `expired` (the last billing cycle before `end_date` was paid), or `setup_failed` (the first payment never completed).
 
       A `past_due` subscription is never canceled automatically. See [Subscription States]({{apiBaseUrl}}/payments/autopay/#subscription-states).
+  order_no:
+    description: |
+      Your checkout `order_no`, copied onto the subscription. `null` if the checkout call had none.
+  plan_name:
+    description: |
+      Always `null` for a subscription created through the Checkout API: the `autopay` block has no field for it.
+  description:
+    description: |
+      The free-text label you sent in `autopay.description`, shown to the customer on the self-service page. `null` if you did not send one.
+  language:
+    description: |
+      `en` or `ar`, taken from the checkout `language` field at creation (default `en`). It sets the language of the customer's self-service page and of every email Ottu sends them.
+  amount:
+    description: |
+      The amount charged on each billing cycle, as a decimal string with the currency's decimal places: 3 for KWD, BHD, OMR, JOD, TND, LYD and IQD, 0 for JPY and KRW, 2 for every other currency. It is independent of `first_payment_amount`.
+  first_payment_amount:
+    description: |
+      The amount of the first, customer-initiated payment made at checkout, as a decimal string with the currency's decimal places: 3 for KWD, BHD, OMR, JOD, TND, LYD and IQD, 0 for JPY and KRW, 2 for every other currency. `0` means the subscription started without a first charge (a free trial). `null` when no first payment applies.
+  currency:
+    description: |
+      Three-letter ISO 4217 currency code that every recurring charge is made in, for example `KWD`. It is taken from the checkout transaction and cannot be changed afterwards.
+  billing_anchor_day:
+    description: |
+      The day of the month every charge is due, taken from `start_date`. In a month without that day, the charge falls on the month's last day.
+  retry_count:
+    description: |
+      How many times Ottu retries a failed billing cycle before giving up, between 1 and 10. Retries run one hour apart. See [Retries & Dunning]({{apiBaseUrl}}/payments/autopay/#retries-and-dunning).
+  start_date:
+    description: |
+      The date billing starts from, in `YYYY-MM-DD` format. Its day of the month becomes the billing anchor: a subscription anchored on the 31st bills on the last day of shorter months.
+  end_date:
+    description: |
+      The date after which Ottu stops billing, in `YYYY-MM-DD` format. `null` for an open-ended subscription. Ottu moves the subscription to `expired` when it pays the last cycle that falls on or before this date, because the next cycle would fall after it. So a subscription can become `expired` before `end_date` arrives.
   next_billing_date:
     description: |
-      The date of the next scheduled charge, in `YYYY-MM-DD` format. `null` when no charge is scheduled.
+      The date of the next scheduled charge, in `YYYY-MM-DD` format. `null` when no charge is scheduled, including while a cancellation at period end is pending: Ottu cancels the next cycle as soon as you schedule it.
+  customer:
+    description: |
+      The customer, as you sent them on the checkout call that created the subscription.
+  card:
+    description: |
+      The card renewals are charged to: the masked card number, the brand, and the expiry month and year. Never the full card number, and `token` is always `null`. Ottu always returns this object; until the first payment saves a card, each of its fields is `null`. It changes when the customer updates their card on the self-service page.
+  agreement:
+    description: |
+      The card-on-file agreement every charge in the subscription is made under, built from the `agreement` you sent on the checkout call.
+  cancellation:
+    description: |
+      Whether and how the subscription is being canceled. Ottu always returns this object; when nothing is canceled or scheduled, `at_period_end` is `false` and every other field is `null`.
+  setup_session_id:
+    description: |
+      The checkout `session_id` of the first payment. The webhook for that payment carries the same `session_id`, so use it to match the webhook to this subscription.
+  created_by:
+    description: |
+      Who created the subscription. `kind` is `system` for a subscription created through the Checkout API.
   created_at:
     description: |
       UTC timestamp of when the subscription was created. The list is ordered by this field, newest first.
+  updated_at:
+    description: |
+      UTC timestamp of the last change to the subscription, in ISO 8601 format.
+  latest_session_id:
+    description: |
+      The checkout `session_id` of the latest payment or card update on the subscription. Use it to match a webhook to this subscription after the first payment. `null` when there is none yet.
+  status_changed_at:
+    description: |
+      UTC timestamp of the last change of `status`, in ISO 8601 format. `null` if the status has never changed.

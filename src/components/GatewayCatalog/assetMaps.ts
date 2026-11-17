@@ -6,7 +6,7 @@ export const BANK_LOGOS: Record<string, string> = {
   NBK: "nbk.png",
   ABK: "abk.png",
   KFH: "kfh.png",
-  Burgan: "burgan.png",
+  Burgan: "burgan.svg",
   KIB: "kib.png",
   "Gulf Bank": "gulf-bank.png",
   Gulf: "gulf-bank.png",
@@ -40,7 +40,7 @@ export const BANK_LOGOS: Record<string, string> = {
   Lesha: "lesha.png",
   // Oman
   "Bank Muscat": "bank-muscat.png",
-  NBO: "nbo.png",
+  NBO: "nbo.svg",
   "Bank Dhofar": "bank-dhofar.png",
   "Bank Nizwa": "bank-nizwa.png",
   Alizz: "alizz.png",

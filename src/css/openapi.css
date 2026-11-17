@@ -509,3 +509,56 @@ ul .openapi-schema__list-item {
 [data-theme="dark"] .openapi-markdown__details a {
   color: var(--ifm-link-color);
 }
+
+/* ── Operation chips ───────────────────────────────────────
+   <Tabs className="api-chips"> over a page's <ApiReference> tabs: each tab is
+   a chip saying what the call does, with its method from
+   attributes={{"data-method": "POST"}} (colours as in the run panel). The chips
+   wrap, so every operation stays in view without stacking them down the page. */
+.tabs.api-chips {
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.tabs.api-chips .tabs__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  /* The rows are spaced by the list's gap, not the markdown list-item margin. */
+  margin: 0;
+  padding: 6px 12px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ifm-font-color-base);
+  background: var(--ifm-background-color);
+}
+
+.tabs.api-chips .tabs__item:hover {
+  border-color: var(--ifm-color-primary);
+  background: var(--ifm-background-color);
+}
+
+/* Infima marks the active tab with a bottom border: a chip shows it filled. */
+.tabs.api-chips .tabs__item--active {
+  border-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary);
+  background: rgba(242, 126, 32, 0.08);
+}
+
+.tabs.api-chips .tabs__item[data-method]::before {
+  content: attr(data-method);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #fff;
+  background: #0b82be;
+}
+
+.tabs.api-chips .tabs__item[data-method="GET"]::before {
+  background: var(--ifm-color-primary);
+}

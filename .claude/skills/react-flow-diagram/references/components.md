@@ -37,6 +37,7 @@ https://pictogrammers.com/library/mdi/.
   links={links}       // StoryLink[]: [fromStep, toStep, label?, kind?]  (steps are 1-based)
   journeys={journeys} // optional StoryJourney[]: {name, stops: [{step, text}]}
   maxHeight={500}     // optional: lanes area at most this tall (px); a longer story scrolls
+  controls="side"     // optional: side and journey buttons in a column left of the lanes
 />
 ```
 
@@ -47,6 +48,11 @@ https://pictogrammers.com/library/mdi/.
   cap the lanes-and-cards area (at least 160px); it scrolls while the title,
   chips and panel stay in view, and walking a journey scrolls to the current
   card. Leave it unset (the default) to show the whole story.
+- `controls="side"` puts the side buttons, a separator and the journey
+  buttons in a column on the left, and the figure is only as wide as the
+  buttons plus the lanes (no empty band beside the lanes on a wide page).
+  Below 996px it falls back to the buttons above the lanes. AutoPay uses it;
+  the default stays `"top"`.
 - A link between two steps in the same lane goes bottom → top; across lanes
   it leaves from the side facing the target.
 - Interaction you get for free: hover/tap a lane chip to show that actor's

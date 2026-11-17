@@ -1,0 +1,22 @@
+# Overrides for: components/schemas/AutoPayCancellation
+# The `cancellation` object of a subscription.
+
+properties:
+  at_period_end:
+    description: |
+      `true` when a cancellation is scheduled for the end of the current paid period. The subscription keeps its current `status` until then. When the next billing date arrives, Ottu cancels the subscription and does not charge. `false` otherwise, including after an immediate cancellation.
+  cancel_date:
+    description: |
+      When a cancellation is scheduled, the last day the customer keeps access: the day before the next charge, and never earlier than today. Ottu cancels the subscription the day after. A repeated cancel request keeps the first date. `null` when no cancellation is scheduled, including after an immediate cancellation or a reactivation. It is also `null`, with `at_period_end` set to `true`, when the subscription had no upcoming cycle at the time of the request.
+  canceled_at:
+    description: |
+      UTC timestamp of when the subscription became `canceled`. `null` while it is not canceled, including while a cancellation is only scheduled through `at_period_end`.
+  canceled_by:
+    description: |
+      Who requested the cancellation, in `kind`: `api_key` when you called Cancel a subscription, `customer` when the customer used the self-service page, and `system` when Ottu ended the subscription itself. Every field is `null` when no cancellation is pending or done. When the customer undoes a pending cancellation, Ottu clears it, together with `reason`, `note` and `cancel_date`.
+  reason:
+    description: |
+      The reason the customer picked when canceling from the self-service page: `too_expensive`, `not_using`, `missing_feature`, `switched`, `temporary` or `other`. `null` when you canceled through the API, when no reason was given, or after the customer undid the cancellation.
+  note:
+    description: |
+      The free-text note the customer left when canceling from the self-service page. `null` when there is none, or after the customer undid the cancellation.

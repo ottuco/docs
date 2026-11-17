@@ -122,7 +122,7 @@ response.raise_for_status()
 cards = response.json()`}</CodeBlock>
 
 </TabItem>
-<TabItem value="nodejs" label="Node.js">
+<TabItem value="node" label="Node.js">
 
 <CodeBlock language="javascript" title="POST /b/pbl/v2/card/">{`const response = await fetch("${OTTU_CONNECT_BASE_URL}/b/pbl/v2/card/", {
   method: "POST",
@@ -209,7 +209,7 @@ response = requests.delete(
 deleted = response.status_code == 204`}</CodeBlock>
 
 </TabItem>
-<TabItem value="nodejs" label="Node.js">
+<TabItem value="node" label="Node.js">
 
 <CodeBlock language="javascript" title="DELETE /b/pbl/v2/card/{token}/">{`const url = new URL("${OTTU_CONNECT_BASE_URL}/b/pbl/v2/card/9446604314074503/");
 url.search = new URLSearchParams({ customer_id: "cust_123", type: "sandbox" });

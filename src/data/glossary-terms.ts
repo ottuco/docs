@@ -87,7 +87,7 @@ const glossaryTerms: GlossaryTerm[] = [
     term: "Billing Cycle",
     id: "billing-cycle",
     definition:
-      "One billing period of a subscription — its scheduled charge date and the amount snapshotted for that charge. AutoPay generates cycles one at a time, creating the next only after the previous one is paid.",
+      "One billing period of a subscription — its scheduled charge date and the amount snapshotted for that charge. Ottu generates cycles one at a time, creating the next only after the previous one is paid.",
   },
   {
     term: "Callback URL",
@@ -147,7 +147,7 @@ const glossaryTerms: GlossaryTerm[] = [
     term: "Dunning",
     id: "dunning",
     definition:
-      "The process of retrying failed recurring charges and notifying the customer, aimed at recovering payment without canceling the subscription. AutoPay handles dunning automatically — retrying on a flat schedule and emailing the customer at each stage.",
+      "The process of retrying failed recurring charges and notifying the customer, aimed at recovering payment without canceling the subscription. Ottu handles dunning automatically — retrying on a flat schedule and emailing the customer at each stage.",
   },
   {
     term: "E-commerce Payment",
