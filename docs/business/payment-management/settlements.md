@@ -34,7 +34,7 @@ In the Ottu Dashboard sidebar, open the [plugin](/business/plugins) the payment 
 
 <Step image="/img/business/dashboard/search-bar.png" alt="The search above the transactions table: Select field, the Search box and the Search button">
 
-Find the payment. See [How do I find one transaction?](/business/payment-management/search-and-filter#how-do-i-find-one-transaction)
+Find the payment: above the table, choose a field in **Select field**, type the value in the **Search** box and click **Search**. See [How do I find one transaction?](/business/payment-management/search-and-filter#how-do-i-find-one-transaction)
 
 </Step>
 

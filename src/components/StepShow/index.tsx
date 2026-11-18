@@ -3,7 +3,10 @@ import useBaseUrl from "@docusaurus/useBaseUrl";
 import styles from "./styles.module.css";
 
 export interface StepProps {
-  /** Screenshot shown beside the steps while this step is active. */
+  /**
+   * Screenshot shown beside the steps while this step is active. Save it at
+   * twice its on-page size (a 2x capture): it is drawn at half its pixels.
+   */
   image?: string;
   alt?: string;
   /**
@@ -32,14 +35,19 @@ function Shot({ src, alt, spot }: { src: string; alt: string; spot?: string }) {
     if (el && el.naturalWidth) setSize({ w: el.naturalWidth / 2, ratio: el.naturalWidth / el.naturalHeight });
   };
   useEffect(measure, []);
-  const [left, top, width, height] = (spot ?? "").split(",").map((n) => `${n.trim()}%`);
+  const box = spot ? spot.split(",").map((n) => Number(n)) : [];
+  const ring = box.length === 4 && box.every((n) => Number.isFinite(n));
+  if (spot && !ring && process.env.NODE_ENV !== "production") {
+    console.warn(`StepShow: spot "${spot}" on ${src} is not "left,top,width,height"; no ring drawn.`);
+  }
+  const [left, top, width, height] = box.map((n) => `${n}%`);
   return (
     <span
       className={styles.shot}
       style={size && { width: size.w, maxWidth: `min(100%, calc(${MAX_H} * ${size.ratio.toFixed(4)}))` }}
     >
-      <img ref={img} src={useBaseUrl(src)} alt={alt} onLoad={measure} />
-      {spot && <span className={styles.spot} style={{ left, top, width, height }} />}
+      <img ref={img} src={useBaseUrl(src)} alt={alt} loading="lazy" onLoad={measure} />
+      {ring && <span className={styles.spot} style={{ left, top, width, height }} />}
     </span>
   );
 }
@@ -89,6 +97,7 @@ export default function StepShow({ children }: { children: React.ReactNode }): R
               items.current[i] = el;
             }}
             className={i === active ? styles.on : undefined}
+            tabIndex={0}
             onMouseEnter={() => setActive(i)}
             onFocus={() => setActive(i)}
             onClick={() => setActive(i)}
