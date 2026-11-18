@@ -20,7 +20,7 @@ The full reference, with every field: ${PAGE}
 - POST {domain}/b/checkout/v1/pymt-txn/ with payment_type "auto_pay", customer_email (required), customer_id, an "agreement" object and an "autopay" block (frequency "monthly" or "yearly", recurring_amount, start_date as YYYY-MM-DD, today or later). Copy the required fields from the Create tab: ${PAGE}/?autopay-api=create#create-api
 - The checkout amount is the first charge, and it is billing cycle 1. An amount of 0.000 starts a free trial: the card is saved and the first real charge is one period after start_date.
 - Store extra.autopay.subscription_id from the 201 response on our record. Every later call takes it.
-- Send the customer to checkout_url from the same response.
+- Show the checkout on our own page or app with the Ottu Checkout SDK (web, iOS, Android or Flutter), started with the session_id from the same response. No redirect: the only Ottu page the customer opens is their self-service page.
 - Each create call makes a new subscription. Guard the button and the request against double submits.
 
 ## 2. Give access only from the subscription's status

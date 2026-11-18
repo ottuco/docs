@@ -74,7 +74,7 @@ Your part, in order:
 
 1. **Before your first call.** Check the [Setup](#setup) list.
 2. **Create the subscription.** Call [Create a subscription](/developers/payments/autopay/?autopay-api=create#create-api): `POST /b/checkout/v1/pymt-txn/` with `payment_type: "auto_pay"` and the `autopay` block. Store `extra.autopay.subscription_id` from the `201` response.
-3. **Show the checkout.** Send your customer to `checkout_url` from the same response.
+3. **Show the checkout on your page.** Start the [Checkout SDK](/developers/payments/checkout-sdk/) ([Web](/developers/payments/checkout-sdk/web), [iOS](/developers/payments/checkout-sdk/ios), [Android](/developers/payments/checkout-sdk/android) or [Flutter](/developers/payments/checkout-sdk/flutter)) with the `session_id` from the same response. Your customer pays the first charge inside your own page or app, with no redirect. The [Live Demo](#live-demo) runs it. The only Ottu page your customer opens is their [self-service page](#customer-self-service-page), to manage the subscription.
 4. **Receive the result.** If you set a `webhook_url`, Ottu calls it with the first-payment result. [Verify its signature](/developers/webhooks/verify-signatures#which-signature). Your account's [webhook format](/developers/webhooks/#webhook-formats) sets the payload: [Payment Events](/developers/webhooks/payment-events) for formats 1 and 2, the [event catalogue](/developers/webhooks/event-catalogue) for format 3. In Python, [`ottu-py`](https://github.com/ottuco/ottu-py#webhook-verification) verifies the signature and, on format 3, [reads the event](https://github.com/ottuco/ottu-py#reading-v3-events).
 5. **Start the service.** [Retrieve](/developers/payments/autopay/?autopay-api=retrieve#api-reference) the subscription until `status` is `active` or `trialing`, then give access. Timing: [First payment and activation](#first-payment-and-activation).
 6. **Ottu charges every cycle.** Ottu charges and retries. Renewals do not call your `webhook_url`: subscribe a webhook endpoint to [subscription events](#webhook-events) to hear about them. Once a day, [list](/developers/payments/autopay/?autopay-api=list#api-reference) subscriptions with `status: "past_due"`. [Cancel](/developers/payments/autopay/?autopay-api=cancel#api-reference) with `mode: "immediate"` when you stop the service.
@@ -99,7 +99,7 @@ After the first payment, Ottu runs the subscription. Each topic below has the ru
 
 <Beside image="/img/developers/autopay/first-charge-checkout.png" alt="Ottu's checkout page for the first AutoPay charge, with the card form and the amount due">
 
-Your customer pays the first charge on the checkout page, and Ottu saves the card for the later charges. This is a customer-initiated payment: see [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments) for CIT and MIT.
+Your customer pays the first charge in the Checkout SDK on your page, and Ottu saves the card for the later charges. This is a customer-initiated payment: see [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments) for CIT and MIT.
 
 </Beside>
 
@@ -296,7 +296,7 @@ Test on the sandbox with `pg_codes: ["ottu-sandbox-kwd"]` (the Ottu Sandbox gate
 
 #### First payment canceled {#test-canceled-payment}
 
-**Do:** Create a subscription and, before anyone opens the checkout, cancel the payment with the [cancel operation](/developers/operations). A checkout nobody pays expires after 24 hours with the same result.
+**Do:** Create a subscription and, before your customer pays, cancel the payment with the [cancel operation](/developers/operations). A checkout nobody pays expires after 24 hours with the same result.
 
 **Check:** `status` becomes `setup_failed` within seconds. Your code offers a new subscription.
 
