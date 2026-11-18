@@ -17,3 +17,9 @@ properties:
   total_cycles:
     description: |
       Taken from the agreement: the total number of charges it allows. Before the agreement is stored, Ottu counts it from `start_date` and `end_date`. `null` only for a subscription without `end_date`.
+  max_amount_per_cycle:
+    description: |
+      Highest amount one charge may take. Always `null`.
+  seller:
+    description: |
+      Seller details. Every value is `null`.

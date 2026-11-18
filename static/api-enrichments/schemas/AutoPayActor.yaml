@@ -1,0 +1,7 @@
+# Overrides for: components/schemas/AutoPayActor
+# `created_by` and `cancellation.canceled_by` on a subscription.
+
+properties:
+  kind:
+    description: |
+      Who acted: `customer` (on the subscription page), `api_key` (your API call), `system` (Ottu), or `null` when nobody has.

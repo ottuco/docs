@@ -1,0 +1,13 @@
+# Overrides for: components/schemas/AutoPayAgreementSeller
+# The `agreement.seller` object of a subscription.
+
+properties:
+  name:
+    description: |
+      Seller name. Always `null`.
+  short_name:
+    description: |
+      Seller short name. Always `null`.
+  category_code:
+    description: |
+      Merchant category code. Always `null`.
