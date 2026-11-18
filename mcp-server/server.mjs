@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 import { McpDocsServer } from "docusaurus-plugin-mcp-server";
 import { SANDBOX_OTTU_NET } from "./config.mjs";
 import { getKeycloakToken } from "./keycloak.mjs";
+import { createProvider } from "./search.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3456;
@@ -307,19 +308,32 @@ async function start() {
   // on disk. Reused by startup and by POST /refresh — so a refresh actually
   // reloads the index instead of only re-downloading the files.
   function buildMcpServer() {
+    // Must match the build-side FlexSearch config in docusaurus.config.ts.
+    // The query-side index is reconstructed from the artifact, so its
+    // tokenizer/resolution have to mirror how the index was built or
+    // lookups won't match. Replaces the former 0.11.0 patch-package patch.
+    const flexsearch = {
+      tokenize: "strict",
+      resolution: 3,
+      context: false,
+    };
     mcpServer = new McpDocsServer({
       docsPath: DOCS_PATH,
       indexPath: INDEX_PATH,
       name: "ottu-docs",
       baseUrl: BASE_URL,
-      // Must match the build-side FlexSearch config in docusaurus.config.ts.
-      // The query-side index is reconstructed from the artifact, so its
-      // tokenizer/resolution have to mirror how the index was built or
-      // lookups won't match. Replaces the former 0.11.0 patch-package patch.
-      flexsearch: {
-        tokenize: "strict",
-        resolution: 3,
-        context: false,
+      flexsearch,
+      // Our provider wraps the plugin's FlexSearch one: see search.mjs.
+      search: createProvider({ flexsearch, baseUrl: BASE_URL }),
+      tools: {
+        docs_search: {
+          description:
+            "Search the Ottu documentation. Returns matching pages with URLs, snippets and relevance scores. Use two or three specific words from the topic, for example `export transactions` or `password reset`. General words such as merchant, dashboard or Ottu do not help.",
+        },
+        docs_fetch: {
+          description:
+            "Fetch the complete markdown content of a documentation page. Pass the page's full URL, as a search result gives it. A trailing slash or an #anchor on the URL is fine.",
+        },
       },
     });
     ready = true;
