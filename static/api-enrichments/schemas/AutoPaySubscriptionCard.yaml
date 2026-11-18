@@ -1,0 +1,7 @@
+# Overrides for: components/schemas/AutoPaySubscriptionCard
+# The `card` object of a subscription.
+
+properties:
+  agreements:
+    description: |
+      Agreement ids saved with the card. Always an empty list.

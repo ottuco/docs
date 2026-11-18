@@ -17,3 +17,9 @@ properties:
   phone:
     description: |
       The customer's phone number from the checkout call that created the subscription. `null` if the checkout call had none.
+  phone_2:
+    description: |
+      Second phone number. Always `null`.
+  birthdate:
+    description: |
+      Customer birthdate. Always `null`.
