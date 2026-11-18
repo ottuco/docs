@@ -7,6 +7,10 @@ sidebar_label: Payment Request
 
 The Payment Request plugin lets you create individual payment links and share them with customers via email, SMS, or any messaging channel. Customers pay through a secure hosted checkout page — no code required on your side.
 
+:::tip
+Looking for the steps to create a payment link and send it by SMS, email or WhatsApp? See [Create a Payment Link and Send It to Your Customer](./create-payment-link.md).
+:::
+
 ## Key Characteristics
 
 - **Simple creation** — Fill out minimal details to generate a payment request directly from the dashboard.
@@ -123,6 +127,7 @@ Use custom fields to capture order-specific information (e.g., delivery address,
 
 ## What's Next?
 
+- [Create & Send a Payment Link](./create-payment-link.md) — Step-by-step: create a link and send it by SMS, email or WhatsApp
 - [E-Commerce](./e-commerce.mdx) — Integrate Ottu directly with your online store
 - [Bulk Payment Request](./bulk-payment-request.mdx) — Send payment requests to multiple customers at once
 - [Payment Management](../payment-management/index.md) — Track and manage all your transactions
