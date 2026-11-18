@@ -1,0 +1,119 @@
+/* ProviderCatalog: SMS and WhatsApp providers, grouped by country. */
+
+.wrap {
+  margin: 20px 0 28px;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.search,
+.select {
+  height: 38px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ifm-font-color-base);
+  background: var(--ifm-background-color);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+}
+
+.search {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.search:focus-visible,
+.select:focus-visible,
+.reset:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 1px;
+}
+
+.count {
+  font-size: 13px;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.group {
+  margin-bottom: 20px;
+}
+
+.groupTitle {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-800);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+  background: var(--ifm-background-color);
+}
+
+.name {
+  font-weight: 600;
+}
+
+.site {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.need {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.empty {
+  color: var(--ifm-color-emphasis-700);
+}
+
+.reset {
+  padding: 0;
+  font: inherit;
+  color: var(--ifm-color-primary);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* in the text, not on screen */
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* the docs theme spaces list items apart; the grid gap does that here */
+.wrap .grid > li.card {
+  margin: 0;
+}

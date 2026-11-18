@@ -1,0 +1,56 @@
+---
+title: Message Providers
+sidebar_label: Message Providers
+description: Which SMS company or WhatsApp provider you can use with Ottu, by country, and how to get your provider set up.
+---
+
+import ProviderCatalog from "@site/src/components/ProviderCatalog";
+
+# Message Providers
+
+Ottu sends your [SMS](/business/notifications/sms) and [WhatsApp](/business/notifications/whatsapp/) notifications through a message provider: an SMS company or a WhatsApp business provider that delivers the message to your customer's phone. The account with the provider is yours. Ottu connects to it and sends your payment links, receipts and other [notifications](/business/notifications/) through it.
+
+This page lists the SMS and WhatsApp providers Ottu is integrated with, by country, and shows how to get yours set up. Email does not need a provider from this list: see [Email Notifications](/business/notifications/email).
+
+## Which SMS company can I use?
+
+Choose an SMS provider from your country, or an international one. Use the **Country** filter to see the SMS providers for one country, for example Saudi Arabia or Kuwait, together with the international providers.
+
+<ProviderCatalog channel="sms" />
+
+A provider is listed under the country where it is based or has an office. International providers sell their service across many countries. Providers whose country Ottu has not confirmed are under **Other SMS providers**. Whether a provider can deliver to another country, and at what price, is something to ask the provider.
+
+## Which WhatsApp provider can I use?
+
+To send notifications by WhatsApp you need a WhatsApp business provider. Ottu is integrated with these:
+
+<ProviderCatalog channel="whatsapp" />
+
+See [WhatsApp Notifications](/business/notifications/whatsapp/) for how WhatsApp messages and their templates work in Ottu.
+
+## How do I get a provider set up?
+
+**Who can do it:** you arrange the account with the provider; Ottu support connects it to your dashboard.
+
+1. Pick a provider from the lists above and open an account with it. The contract and the message fees are between you and the provider.
+2. Ask the provider for the sender name (also called sender ID) that your messages will show. For WhatsApp, this is the phone number your messages are sent from.
+3. Collect what the list shows under **You need** for your provider, for example a username and password, or an API key.
+4. Contact [Ottu support](mailto:support@ottu.com) with the address of your Ottu Dashboard and the name of the provider, and say that you want it set up for SMS or WhatsApp.
+5. Ottu support connects the provider and confirms when it is active. Then make sure a [message template](/business/notifications/templates) exists for the notifications you want to send.
+
+:::warning
+Do not write a password, API key or token in an email or a chat message. Ottu support tells you how to hand them over safely.
+:::
+
+Only one SMS provider is active on an account at a time. To change to another provider, repeat the steps with the new one.
+
+## My provider is not on the list
+
+Contact [Ottu support](mailto:support@ottu.com) with the provider's name and website. Ottu support tells you whether it can be added.
+
+## What's Next?
+
+- [SMS Notifications](/business/notifications/sms) -- When SMS notifications are sent and what they need
+- [WhatsApp Notifications](/business/notifications/whatsapp/) -- Integrated and manual WhatsApp notifications
+- [Notification Templates](/business/notifications/templates) -- The text of each message
+- [My customer did not get the SMS or email](/business/notifications/delivery-process#my-customer-did-not-get-the-sms-or-email) -- Check whether a message was sent

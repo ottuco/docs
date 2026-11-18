@@ -1,0 +1,433 @@
+[
+  {
+    "slug": "bareed",
+    "name": "Bareed",
+    "channel": "sms",
+    "countries": [],
+    "international": false,
+    "website": "https://www.bareedsms.com",
+    "credentials": [
+      "Username",
+      "Password",
+      "Sender ID"
+    ]
+  },
+  {
+    "slug": "bhsms",
+    "name": "BHSMS",
+    "channel": "sms",
+    "countries": [
+      "Bahrain"
+    ],
+    "international": false,
+    "website": "https://bhsms.net",
+    "credentials": [
+      "Username",
+      "API Key",
+      "Sender ID"
+    ]
+  },
+  {
+    "slug": "deewan",
+    "name": "DEEWAN",
+    "channel": "sms",
+    "countries": [
+      "Saudi Arabia"
+    ],
+    "international": true,
+    "website": "https://www.deewan.sa",
+    "credentials": [
+      "API Key",
+      "Sender ID"
+    ]
+  },
+  {
+    "slug": "etisal",
+    "name": "Etisal",
+    "channel": "sms",
+    "countries": [],
+    "international": false,
+    "credentials": [
+      "Username",
+      "Password",
+      "Sender ID",
+      "FID"
+    ]
+  },
+  {
+    "slug": "fcc",
+    "name": "FCC",
+    "channel": "sms",
+    "countries": [],
+    "international": false,
+    "credentials": [
+      "Username",
+      "Sender ID",
+      "Password, if the provider gave you one"
+    ]
+  },
+  {
+    "slug": "fcc_falcon",
+    "name": "FCC Falcon",
+    "channel": "sms",
+    "countries": [],
+    "international": false,
+    "credentials": [
+      "Username",
+      "Account ID",
+      "Sender ID",
+      "Password, if the provider gave you one"
+    ]
+  },
+  {
+    "slug": "fcc_puffin",
+    "name": "FCC Puffin",
+    "channel": "sms",
+    "countries": [],
+    "international": false,
+    "credentials": [
+      "Username",
+      "Sender ID",
+      "Password, if the provider gave you one"
+    ]
+  },
+  {
+    "slug": "gic",
+    "name": "GIC",
+    "channel": "sms",
+    "countries": [
+      "Kuwait"
+    ],
+    "international": false,
+    "website": "https://www.gickuwait.com",
+    "credentials": [
+      "Username",
+      "Password",
+      "Sender ID"
+    ]
+  },
+  {
+    "slug": "ismart",
+    "name": "iSmart",
+    "channel": "sms",
+    "countries": [
+      "Oman"
+    ],
+    "international": false,
+    "website": "https://www.ismartsms.net",
+    "credentials": [
+      "User ID",
+      "Password"
+    ]
+  },
+  {
+    "slug": "kic",
+    "name": "KIC",
+    "channel": "sms",
+    "countries": [
+      "Kuwait"
+    ],
+    "international": false,
+    "credentials": [
+      "API Key"
+    ]
+  },
+  {
+    "slug": "kwbsms",
+    "name": "KwbSMS",
+    "channel": "sms",
+    "countries": [],
+    "international": false,
+    "credentials": [
+      "Username",
+      "Password",
+      "Customer ID",
+      "Sender Text"
+    ]
+  },
+  {
+    "slug": "kwtsms",
+    "name": "KwtSMS",
+    "channel": "sms",
+    "countries": [
+      "Kuwait"
+    ],
+    "international": true,
+    "website": "https://www.kwtsms.com",
+    "credentials": [
+      "Username",
+      "Password",
+      "Sender ID"
+    ]
+  },
+  {
+    "slug": "mobishastra",
+    "name": "Mobishastra",
+    "channel": "sms",
+    "countries": [],
+    "international": false,
+    "credentials": [
+      "Username",
+      "Password",
+      "Sender ID"
+    ]
+  },
+  {
+    "slug": "mpp",
+    "name": "MPP",
+    "channel": "sms",
+    "countries": [],
+    "international": false,
+    "credentials": [
+      "Username",
+      "API key",
+      "Sender"
+    ]
+  },
+  {
+    "slug": "msgq8",
+    "name": "MsgQ8",
+    "channel": "sms",
+    "countries": [
+      "Kuwait"
+    ],
+    "international": false,
+    "credentials": [
+      "API Key",
+      "Private Key",
+      "Sender ID"
+    ]
+  },
+  {
+    "slug": "nexmo",
+    "name": "Nexmo",
+    "channel": "sms",
+    "countries": [],
+    "international": true,
+    "website": "https://www.vonage.com",
+    "credentials": [
+      "API Key",
+      "API Secret",
+      "Sender"
+    ]
+  },
+  {
+    "slug": "ooredoo",
+    "name": "Ooredoo",
+    "channel": "sms",
+    "countries": [
+      "Oman"
+    ],
+    "international": false,
+    "credentials": [
+      "Username",
+      "Password",
+      "Sender"
+    ]
+  },
+  {
+    "slug": "route",
+    "name": "Route Mobile",
+    "channel": "sms",
+    "countries": [],
+    "international": true,
+    "website": "https://routemobile.com",
+    "credentials": [
+      "Username",
+      "Password",
+      "Sender"
+    ]
+  },
+  {
+    "slug": "smsbox",
+    "name": "SMS Box",
+    "channel": "sms",
+    "countries": [],
+    "international": false,
+    "credentials": [
+      "Username",
+      "Password",
+      "Sender ID"
+    ]
+  },
+  {
+    "slug": "smsvas",
+    "name": "SMS VAS",
+    "channel": "sms",
+    "countries": [],
+    "international": false,
+    "credentials": [
+      "Username",
+      "Password",
+      "SMS Sender",
+      "Campaign ID, if you use one"
+    ]
+  },
+  {
+    "slug": "country",
+    "name": "SMSCountry",
+    "channel": "sms",
+    "countries": [],
+    "international": true,
+    "website": "https://www.smscountry.com",
+    "credentials": [
+      "User",
+      "Password",
+      "Sender ID"
+    ]
+  },
+  {
+    "slug": "strust",
+    "name": "Strust",
+    "channel": "sms",
+    "countries": [],
+    "international": false,
+    "credentials": [
+      "Username",
+      "Password",
+      "Sender ID"
+    ]
+  },
+  {
+    "slug": "synapse",
+    "name": "Synapse",
+    "channel": "sms",
+    "countries": [],
+    "international": false,
+    "credentials": [
+      "Username",
+      "Password",
+      "Source ID"
+    ]
+  },
+  {
+    "slug": "taqnyat",
+    "name": "Taqnyat",
+    "channel": "sms",
+    "countries": [
+      "Saudi Arabia"
+    ],
+    "international": false,
+    "website": "https://www.taqnyat.sa",
+    "credentials": [
+      "API Key",
+      "Sender ID"
+    ]
+  },
+  {
+    "slug": "twilio",
+    "name": "Twilio",
+    "channel": "sms",
+    "countries": [],
+    "international": true,
+    "website": "https://www.twilio.com",
+    "credentials": [
+      "Account SID",
+      "Auth Token",
+      "Sender"
+    ]
+  },
+  {
+    "slug": "unifonic",
+    "name": "Unifonic",
+    "channel": "sms",
+    "countries": [
+      "Saudi Arabia"
+    ],
+    "international": false,
+    "website": "https://www.unifonic.com",
+    "credentials": [
+      "App SID",
+      "Sender ID"
+    ]
+  },
+  {
+    "slug": "united",
+    "name": "United",
+    "channel": "sms",
+    "countries": [
+      "Kuwait"
+    ],
+    "international": false,
+    "website": "https://www.uigtc.com",
+    "credentials": [
+      "API Key",
+      "Sender ID"
+    ]
+  },
+  {
+    "slug": "zainbh",
+    "name": "Zain Bahrain",
+    "channel": "sms",
+    "countries": [
+      "Bahrain"
+    ],
+    "international": false,
+    "credentials": [
+      "Username",
+      "Password",
+      "Sender ID"
+    ]
+  },
+  {
+    "slug": "fcc",
+    "name": "FCC",
+    "channel": "whatsapp",
+    "countries": [],
+    "international": false,
+    "credentials": [
+      "Bearer Token",
+      "The WhatsApp number you send from"
+    ]
+  },
+  {
+    "slug": "freshchat",
+    "name": "Freshchat",
+    "channel": "whatsapp",
+    "countries": [],
+    "international": true,
+    "website": "https://www.freshworks.com",
+    "credentials": [
+      "Access Token",
+      "The WhatsApp number you send from"
+    ]
+  },
+  {
+    "slug": "gupshup",
+    "name": "Gupshup",
+    "channel": "whatsapp",
+    "countries": [],
+    "international": true,
+    "website": "https://www.gupshup.ai",
+    "credentials": [
+      "API Key",
+      "Source Number"
+    ]
+  },
+  {
+    "slug": "octopus",
+    "name": "Octopus",
+    "channel": "whatsapp",
+    "countries": [
+      "India",
+      "Kuwait"
+    ],
+    "international": true,
+    "website": "https://www.ai-octopus.com",
+    "credentials": [
+      "Token"
+    ]
+  },
+  {
+    "slug": "respond_io",
+    "name": "Respond.io",
+    "channel": "whatsapp",
+    "countries": [],
+    "international": true,
+    "website": "https://respond.io",
+    "credentials": [
+      "API Token",
+      "Channel ID"
+    ]
+  }
+]
