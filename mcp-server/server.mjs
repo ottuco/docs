@@ -328,7 +328,7 @@ async function start() {
       tools: {
         docs_search: {
           description:
-            "Search the Ottu documentation. Returns matching pages with URLs, snippets and relevance scores. Use two or three specific words from the topic, for example `export transactions` or `password reset`. General words such as merchant, dashboard or Ottu do not help.",
+            "Search the Ottu documentation. Returns matching pages with URLs, snippets and relevance scores. Use two or three specific words from the topic, for example `export transactions` or `password reset`. General words such as merchant, dashboard or Ottu do not help. Scores only rank the results of one query; do not compare them across queries.",
         },
         docs_fetch: {
           description:

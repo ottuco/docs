@@ -13,6 +13,10 @@
 //    emptied the result. Here a query of several words is scored word by
 //    word, and a rare word counts for more than a word found on most pages.
 //    A one-word query goes to the plugin unchanged.
+//
+// Verified against docusaurus-plugin-mcp-server 0.13.0. It reads two things
+// the plugin does not document, `provider.docs` and `provider.getDocCount()`;
+// initialize() warns if a later version drops them.
 import { loadSearchProvider } from "docusaurus-plugin-mcp-server";
 
 const stripSlash = (s) => s.replace(/\/+$/, "");
@@ -25,18 +29,24 @@ const originOf = (s) => {
   }
 };
 
+// A pasted paragraph must not turn into dozens of index searches.
+const MAX_WORDS = 8;
+
+// One-letter tokens are dropped. If that leaves fewer than two words, the
+// query goes to the plugin as typed.
 function splitWords(query) {
   const words = query
     .toLowerCase()
     .split(/[^\p{L}\p{N}]+/u)
     .filter((w) => w.length > 1);
-  return [...new Set(words)];
+  return [...new Set(words)].slice(0, MAX_WORDS);
 }
 
 export function createProvider({ flexsearch, baseUrl = "" } = {}) {
   let inner = null;
   const keyByRoute = new Map();
   const origins = new Set();
+  let total = 0; // pages in the index
 
   return {
     name: "ottu-flexsearch",
@@ -53,6 +63,17 @@ export function createProvider({ flexsearch, baseUrl = "" } = {}) {
       }
       const own = originOf(baseUrl);
       if (own) origins.add(own);
+      total = keyByRoute.size || provider.getDocCount?.() || 0;
+      if (keyByRoute.size === 0) {
+        console.warn(
+          "search provider: the plugin exposes no page list; addresses with a trailing slash resolve only through BASE_URL"
+        );
+      }
+      if (total === 0) {
+        console.warn(
+          "search provider: page count unknown; multi-word search falls back to the plugin's own search"
+        );
+      }
       inner = provider;
     },
 
@@ -90,9 +111,8 @@ export function createProvider({ flexsearch, baseUrl = "" } = {}) {
     async search(query, options) {
       const limit = options?.limit ?? 16;
       const words = splitWords(String(query ?? ""));
-      if (words.length < 2) return inner.search(query, options);
+      if (words.length < 2 || total === 0) return inner.search(query, options);
 
-      const total = inner.getDocCount?.() || 1000;
       const all = { limit: total };
       const pages = new Map(); // url -> { result, score, best }
 
@@ -107,9 +127,10 @@ export function createProvider({ flexsearch, baseUrl = "" } = {}) {
         const hits = await inner.search(word, all);
         if (hits.length === 0) continue;
         const weight = Math.log(1 + total / hits.length);
-        const top = hits[0].score || 1;
+        const top = Number(hits[0].score) || 1;
         for (const hit of hits) {
-          const points = weight * (FLOOR + ((1 - FLOOR) * hit.score) / top);
+          const own = Number(hit.score) || 0;
+          const points = weight * (FLOOR + ((1 - FLOOR) * own) / top);
           const page = pages.get(hit.url);
           if (!page) {
             pages.set(hit.url, { result: hit, score: points, best: points });

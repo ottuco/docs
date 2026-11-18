@@ -298,7 +298,11 @@ async function testMCPEndpoint() {
   for (const tool of ["docs_search", "docs_fetch"]) {
     if (!raw.includes(tool)) return fail("MCP endpoint", `tools/list misses ${tool}`);
   }
-  pass("MCP endpoint lists docs_search and docs_fetch");
+  // our descriptions replace the plugin's defaults
+  for (const hint of ["two or three specific words", "trailing slash"]) {
+    if (!raw.includes(hint)) return fail("MCP endpoint", `tool description misses "${hint}"`);
+  }
+  pass("MCP endpoint lists docs_search and docs_fetch with our descriptions");
 }
 
 async function testFetchAcceptsAddressSpellings() {
@@ -342,6 +346,9 @@ async function testSearchSurvivesMissingAndCommonWords() {
     "password reset": "/business/users-and-access/password",
     // one word goes to the plugin unchanged
     settlements: "/business/payment-management/settlements",
+    // only the first eight words are searched; the rest, which point at the
+    // home page, are ignored
+    "export transactions csv file merchant dashboard your to welcome open start docs home here": "/business/payment-management/export-transactions",
   };
   for (const [query, route] of Object.entries(cases)) {
     const text = await callTool("docs_search", { query });
