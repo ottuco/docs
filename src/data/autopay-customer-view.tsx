@@ -9,7 +9,7 @@ export const autopayCustomerViewSteps: Step[] = [
     title: "The first-charge checkout",
     description: (
       <>
-        Your customer pays the first charge on Ottu's checkout page. Ottu saves their card, so the
+        Your customer pays the first charge in the checkout on your page. Ottu saves their card, so the
         later charges need no action from them. More in{" "}
         <Link to="#first-payment-and-activation">First payment and activation</Link>.
       </>

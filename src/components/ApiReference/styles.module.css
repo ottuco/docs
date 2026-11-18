@@ -186,6 +186,11 @@
   padding: 0 12px;
 }
 
+/* "Show N more attributes" under an object's main attributes. */
+.more {
+  margin-top: 16px;
+}
+
 /* Shape anchors (`<field>--<label>`) land below the navbar, like field rows. */
 .children[id],
 .variant {

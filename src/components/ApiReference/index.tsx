@@ -22,7 +22,7 @@ import Markdown from "docusaurus-theme-openapi-docs/lib/theme/Markdown";
 import ApiExecute, { type ResponseExamples } from "@site/src/components/ApiExecute";
 import ResponseExamplesBox from "@site/src/components/ApiExecute/ResponseExamples";
 import { runOf, type ScenarioKey } from "@site/src/components/ApiExecute/scenarios";
-import FieldList from "./Fields";
+import FieldList, { MoreFields } from "./Fields";
 import {
   examplesOf,
   fieldsOf,
@@ -230,7 +230,13 @@ export default function ApiReference({
    * Subscription object"): its attributes on the left, one example on the
    * right, under its own title and anchor. Not listed in <ApiShortcuts>.
    */
-  object?: { id: string; title: string; intro?: string };
+  object?: {
+    id: string;
+    title: string;
+    intro?: string;
+    /** The attributes shown first; the rest fold under "Show N more attributes". All when omitted. */
+    primary?: string[];
+  };
   /**
    * Show only these request body fields, each marked required (`agreement.id`
    * keeps one child of `agreement`). For one use of a shared endpoint, with
@@ -292,6 +298,21 @@ export default function ApiReference({
     brokenLinks.collectAnchor(variantId(`${id}-response`, variant.label)),
   );
 
+  // The object's main attributes first, Stripe style; an unknown name fails the build.
+  const primaryNames = object?.primary;
+  if (primaryNames && primaryNames.length === 0)
+    throw new Error(`ApiReference api="${api}": object.primary is empty; leave it out to show every attribute.`);
+  primaryNames?.forEach((name) => {
+    if (!responseFields.some((field) => field.name === name))
+      throw new Error(`ApiReference api="${api}": object.primary names "${name}", which the response does not have.`);
+  });
+  const primaryFields = primaryNames
+    ? primaryNames.map((name) => responseFields.find((field) => field.name === name)!)
+    : responseFields;
+  const moreFields = primaryNames
+    ? responseFields.filter((field) => !primaryNames.includes(field.name))
+    : [];
+
   if (object)
     return (
       <div className={styles.reference}>
@@ -305,7 +326,8 @@ export default function ApiReference({
             </div>
           )}
           <Section id={`${id}-attributes`} title="Attributes">
-            <FieldList fields={responseFields} prefix={id} />
+            <FieldList fields={primaryFields} prefix={id} />
+            <MoreFields fields={moreFields} prefix={id} />
           </Section>
         </div>
         <div className={styles.right}>

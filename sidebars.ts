@@ -271,6 +271,21 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
+                  label: "Webhook events",
+                  href: "/developers/payments/autopay#webhook-events",
+                },
+                {
+                  type: "link",
+                  label: "Testing",
+                  href: "/developers/payments/autopay#testing",
+                },
+                {
+                  type: "link",
+                  label: "Troubleshooting",
+                  href: "/developers/payments/autopay#troubleshooting",
+                },
+                {
+                  type: "link",
                   label: "API Reference",
                   href: "/developers/payments/autopay#api-reference",
                 },
@@ -283,6 +298,11 @@ const sidebars: SidebarsConfig = {
                   type: "link",
                   label: "Status",
                   href: "/developers/payments/autopay#subscription-states",
+                },
+                {
+                  type: "link",
+                  label: "Errors",
+                  href: "/developers/payments/autopay#errors",
                 },
                 {
                   type: "link",

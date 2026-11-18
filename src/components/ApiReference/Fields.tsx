@@ -190,4 +190,33 @@ const FieldList = React.memo(function FieldList({
   );
 });
 
+/**
+ * Stripe's "More attributes": the less-used fields of an object, folded under
+ * the main ones. A link to one of them (or to a child) opens the box.
+ */
+export function MoreFields({ fields, prefix }: { fields: Field[]; prefix: string }) {
+  const { hash, visit } = useHashNavigation();
+  const inside = fields.some((field) => {
+    const id = fieldId(prefix, field.name);
+    return hash === id || hash.startsWith(`${id}-`);
+  });
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (inside) setOpen(true);
+  }, [inside, visit]);
+  if (fields.length === 0) return null;
+  return (
+    <details
+      className={`${styles.children} ${styles.more}`}
+      open={open}
+      onToggle={(event) => setOpen((event.currentTarget as HTMLDetailsElement).open)}
+    >
+      <summary>
+        {open ? "Hide" : "Show"} {fields.length} more attributes
+      </summary>
+      <FieldList fields={fields} prefix={prefix} />
+    </details>
+  );
+}
+
 export default FieldList;

@@ -47,7 +47,7 @@ const autopayLanes: StoryLane[] = [
   {
     ...customer,
     about: {
-      does: "Pays the first charge once, on the checkout page. After that they only act on the emails and their own page.",
+      does: "Pays the first charge once, in the checkout on your page. After that they only act on the emails and their own page.",
       relies:
         "Ottu for the charges and emails, and you for the link to their page.",
     },
@@ -90,7 +90,7 @@ const autopaySteps: StoryStep[] = [
     sub: "For the first charge",
     icon: mdiCreditCardOutline,
     tone: "accent",
-    detail: "Send your customer to the checkout_url from the response.",
+    detail: "Start the Checkout SDK on your page with the session_id from the response. No redirect.",
   },
   {
     lane: 0,
@@ -153,7 +153,7 @@ const autopayJourneys: StoryJourney[] = [
         step: 2,
         text: "You make one Checkout API call and store the subscription ID.",
       },
-      { step: 3, text: "You send your customer to the checkout_url." },
+      { step: 3, text: "You show the checkout on your page with the Checkout SDK." },
       { step: 4, text: "Your customer pays, and Ottu saves the card." },
       {
         step: 5,
