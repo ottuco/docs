@@ -138,6 +138,21 @@ Ottu emails your customer when you create the subscription. The email's footer l
 
 </Beside>
 
+#### Payment outcomes {#payment-outcomes}
+
+How each charge result shows on the attempt, the billing cycle and the subscription. Read them with [Billing cycles](/developers/payments/autopay/?autopay-api=cycles#api-reference) and [Retrieve](/developers/payments/autopay/?autopay-api=retrieve#api-reference).
+
+| Charge result | Attempt `result` | Cycle `status` | Subscription `status` |
+|---|---|---|---|
+| First payment paid | `success` | Cycle 1 `paid`, `charge_type: "cit"` | `active`, or `trialing` after a `0.000` first charge |
+| First payment declined, customer can try again | none yet | no cycle yet | `pending_setup` |
+| First payment canceled, unpaid for 24 hours, or the card not saved | none | no cycle | `setup_failed` |
+| Renewal paid | `success` | `paid` | `active` |
+| Renewal declined, retries left | `failed` | `retry_scheduled` | unchanged |
+| Last retry declined | `failed` | `failed` | `past_due` |
+| Customer pays the `past_due` balance on their page | `success` | `paid` | `active` |
+| Result could not be confirmed | `pending` | `needs_triage` | unchanged. Contact Ottu support. |
+
 #### Canceling {#canceling}
 
 There are three ways a cancellation happens. Each one changes the [Subscription object](#subscription-object) and sends a [subscription event](#webhook-events).
@@ -178,6 +193,36 @@ Renewals do not call your `webhook_url`. To hear about them, add a webhook endpo
 3. [Retrieve](/developers/payments/autopay/?autopay-api=retrieve#api-reference) the subscription and act on its current `status` (see [Status](#subscription-states)). Events can arrive out of order, so the event name tells you to look, and the subscription tells you the state.
 4. Keep the daily [list](/developers/payments/autopay/?autopay-api=list#api-reference) of `past_due` subscriptions as a backstop, in case a delivery fails for good.
 
+### Testing {#testing}
+
+Test on the sandbox with `pg_codes: ["ottu-sandbox-kwd"]` (the Ottu Sandbox gateway, KWD) and the [sandbox test cards](/developers/payments/ottu-sandbox#test-cards). The [Live Demo](#live-demo) runs a successful first payment and a cancel for you. Every row below was run on the sandbox.
+
+| Scenario | How to test | What to check |
+|---|---|---|
+| First payment succeeds | Create a subscription and pay with `411111111111111`. | `status` goes from `pending_setup` to `active`. `card` is filled in. |
+| Free trial | Create with a checkout `amount` of `0.000` and pay with `411111111111111`. | `status` becomes `trialing`. No money moves. |
+| First payment declined | Pay with `411111111111112`. | The checkout shows **Try Again**, and `status` stays `pending_setup`. |
+| First payment canceled | Create a subscription and, before anyone opens `checkout_url`, cancel the payment with the [cancel operation](/developers/operations). A checkout nobody pays expires after 24 hours with the same result. | `status` becomes `setup_failed` within seconds. Your code offers a new subscription. |
+| 3-D Secure | Tick **Simulate 3-D Secure challenge** on the pay page, then **Approve** or **Deny**. | Approve: as the card decides. Deny: the payment fails like a decline, and `status` stays `pending_setup`. |
+| Cancel at period end, then undo | Cancel with `mode: "at_period_end"`, then open `page_url` from [Get the page link](/developers/payments/autopay/?autopay-api=page-link#api-reference) and press **Reactivate subscription**. | Before the undo: `status` unchanged, `cancellation.at_period_end` `true`, `cancel_date` the last paid day, `next_billing_date` `null`. After it: `cancellation` is cleared and `next_billing_date` is back. |
+| Cancel now | Cancel with `mode: "immediate"`. | `status` is `canceled`. Your code ends access. |
+| Renewal declined | Pay the first charge with `411111111111114`, `411111111111115` or `411111111111116`. | One period after `start_date`, the cycle goes through `retry_scheduled` to `failed` and the subscription becomes `past_due`. |
+| Your events endpoint | In **Webhook endpoints**, select your endpoint and run **Send a test event**. | Your endpoint verifies the signature and answers `2xx`. |
+
+You cannot trigger a renewal early on the sandbox: the first renewal is charged one billing period after `start_date`. Test your renewal and `past_due` handling with stored copies of the Subscription object and of the [example events](/developers/webhooks/event-catalogue#subscription-events), and leave one long-running sandbox subscription to confirm it end to end.
+
+### Troubleshooting {#troubleshooting}
+
+| What you see | Why | Fix |
+|---|---|---|
+| The Create call returns `400` with the error under `autopay` | `customer_email` is missing. It is required, and its error is reported under the `autopay` key. | Send `customer_email` and check it first. |
+| The subscription is still `pending_setup` after the customer paid | Ottu activates the subscription when it receives the payment result. If that result is missed, a backup check activates it 20 to about 35 minutes after creation. | Keep polling. If it is still `pending_setup` 35 minutes after creation and the payment succeeded, contact Ottu support with the subscription ID. |
+| The subscription is `setup_failed` but the customer paid | The card could not be saved. | Refund the payment (Ottu does not) and create a new subscription. |
+| No webhook for a renewal | Renewals never call your `webhook_url`. | Subscribe a webhook endpoint to `subscription.*` events, or read [Billing cycles](/developers/payments/autopay/?autopay-api=cycles#api-reference). |
+| The SDK payload says `auto_debit`, not `auto_pay` | Renewals are ordinary auto-debit payments, so the [Checkout SDK](../checkout-sdk/web) preload carries `auto_debit` and no `autopay` key. | Nothing. The Checkout API response still reports `auto_pay`. |
+| A cycle has `status: "needs_triage"` | Ottu could not confirm the result of a charge. | Contact Ottu support with the subscription ID. |
+| An endpoint answers `4xx` or `401` | Each status has its own cause. | See [Errors](#errors) for the body, cause and fix of each. |
+
 ## API Reference
 
 <ApiShortcuts events={autopayEvents} eventsNote={AUTOPAY_EVENTS_NOTE}>
@@ -193,6 +238,7 @@ Every endpoint accepts all the authentication methods on the [Authentication](/d
   object={{
     id: "subscription-object",
     title: "The Subscription object",
+    primary: ["subscription_id", "status", "amount", "currency", "next_billing_date", "customer", "card", "cancellation", "current_cycle"],
     intro: "One AutoPay subscription. [Retrieve](/developers/payments/autopay/?autopay-api=retrieve#api-reference) and [Cancel](/developers/payments/autopay/?autopay-api=cancel#api-reference) return it. [List](/developers/payments/autopay/?autopay-api=list#api-reference) returns it for each subscription, without `notification_config` and `current_cycle`.",
   }}
 />
@@ -289,6 +335,30 @@ Create a subscription with the Checkout API: set `payment_type` to `auto_pay` an
 
 </ApiExecuteGroup>
 
+#### Errors {#errors}
+
+Every error answers with a JSON body; the `detail` text can differ from the examples. A rule error has `detail` (for a person) and `code` (for your code): branch on `code`. A field error names the field and lists what is wrong with it. Each body below is a real sandbox response. The endpoint tabs show each status with its example, and the Checkout API's own errors are in [Error codes](/developers/reference/error-codes).
+
+| Status | Body | When | Fix |
+|---|---|---|---|
+| `400` | `{"autopay": ["AutoPayClient rejected request (422)"]}` | Create: AutoPay refused the subscription, most often because `customer_email` is missing | Send `customer_email`, then check the `autopay` block against the Create tab. |
+| `400` | `{"Idempotency-Key": ["This header is required."]}` | Cancel or Regenerate without the header | Send a UUID v4 in `Idempotency-Key`. |
+| `400` | `{"detail": "Idempotency-Key must be a valid UUID.", "code": "invalid_idempotency_key"}` | The header is not a UUID | Send a UUID v4. |
+| `400` | `{"mode": ["\"later\" is not a valid choice."]}` | Cancel with a `mode` other than `immediate` or `at_period_end` | Fix the field named in the body. |
+| `400` | `{"limit": ["Ensure this value is greater than or equal to 1."]}` | List with `limit` outside 1 to 100 | Fix the field named in the body. |
+| `401` | `{"detail": "Authentication credentials were not provided."}` | The API key is missing or wrong | Send `Authorization: Api-Key {your_api_key}` ([Authentication](/developers/getting-started/authentication)). |
+| `404` | `{"detail": "Not found", "code": "subscription_not_found"}` | No subscription with this `subscription_id` on your account | Check the ID you stored at creation. |
+| `405` | `{"detail": "Method \"GET\" not allowed."}` | `GET` on List subscriptions | List is a `POST`, and so is following its `next` link. |
+| `409` | `{"detail": "Idempotency key … was already used with a different request payload.", "code": "idempotency_conflict"}` | A cancel reused a key with another body or subscription | A new cancel gets a new key. Reuse a key only to retry the same request. |
+| `422` | `{"detail": "Cannot schedule a cancel before setup completes; …", "code": "invalid_transition"}` | `mode: "at_period_end"` before the first payment, on a `past_due` subscription, or while a charge is being retried | Cancel with `mode: "immediate"`. |
+| `422` | `{"detail": [{"type": "enum", "loc": ["body", "payload", "status"], "msg": "Input should be 'pending_setup', …"}]}` | List with an unknown `status` value | Use one of the seven [status values](#subscription-states). |
+
+#### Paging and retries {#paging-and-retries}
+
+- **Paging.** List subscriptions and List billing cycles return `count`, `next`, `previous` and `results`. On List subscriptions, `limit` is 1 to 100 (20 by default) and `offset` starts at 0. Follow `next` until it is `null`: with `POST` on List subscriptions, with `GET` on List billing cycles. A `next` link carries `limit` and `offset` in its query string, which win over the body; resend your filters in the body to keep them.
+- **Retries.** Cancel and Regenerate need an `Idempotency-Key` header with a UUID v4. A retried cancel with the same key and body returns the first response; the same key with another body returns `409`. A cancel that failed with a `4xx` is not stored, so its retry runs again. Regenerate always issues a new link, even with the same key: before retrying it, compare `page_url` from [Get the page link](/developers/payments/autopay/?autopay-api=page-link#api-reference).
+- **Create is not idempotent.** Each Create call makes a new subscription. Guard against double submits on your side.
+
 ## Limits {#limits}
 
 - **Gateways.** A payment gateway without auto-debit cannot renew a subscription. `pg_codes` must name a gateway that supports tokenization and auto-debit. See the [gateways with auto-debit](/business/payments/gateways/?features=autodebit). To list the ones enabled on your account, call the [Payment Methods API](/developers/payments/payment-methods/) with `auto_debit: true`.
@@ -307,38 +377,6 @@ Create a subscription with the Checkout API: set `payment_type` to `auto_pay` an
 - **Know that regenerate contacts the customer.** Ottu emails and texts the new link to your customer, and the old link stops working. Still deliver `page_url` yourself where your product needs it.
 - **Always send `customer_email`.** It is required. A missing one returns a `400` with the error under the `autopay` key, which looks like a problem with the autopay block. Check `customer_email` first.
 - **Expect `auto_debit` in the SDK payload.** The [Checkout SDK](../checkout-sdk/web) preload payload for an `auto_pay` session carries `payment_type: "auto_debit"` and no `autopay` key, because Ottu charges every renewal as an ordinary auto-debit payment. The Checkout API response still reports `auto_pay`.
-
-## Testing {#testing}
-
-Test on the sandbox with `pg_codes: ["ottu-sandbox-kwd"]` (the Ottu Sandbox gateway, KWD) and the [sandbox test cards](/developers/payments/ottu-sandbox#test-cards). The [Live Demo](#live-demo) runs the first five rows for you.
-
-| Scenario | How to test | What to check |
-|---|---|---|
-| First payment succeeds | Create a subscription and pay with `411111111111111`. | `status` goes from `pending_setup` to `active`. `card` is filled in. |
-| Free trial | Create with a checkout `amount` of `0.000` and pay with `411111111111111`. | `status` becomes `trialing`. No money moves. |
-| First payment declined | Pay with `411111111111112`. | `status` stays `pending_setup`, and the customer can try again on the same checkout. |
-| Customer abandons the checkout | Cancel on the checkout page. | `status` becomes `setup_failed`. Your code offers a new subscription. |
-| 3-D Secure | Tick **Simulate 3-D Secure challenge** on the pay page, then **Approve** or **Deny**. | Approve: as the card decides. Deny: the payment fails and the subscription is not activated. |
-| Cancel at period end, then undo | Cancel with `mode: "at_period_end"`, then open `page_url` from [Get the page link](/developers/payments/autopay/?autopay-api=page-link#api-reference) and undo it there. | `cancellation.at_period_end` is `true` and `next_billing_date` is `null`; after the undo both are back. |
-| Cancel now | Cancel with `mode: "immediate"`. | `status` is `canceled`. Your code ends access. |
-| Renewal declined | Pay the first charge with `411111111111114`, `411111111111115` or `411111111111116`. | One period after `start_date`, the cycle goes through `retry_scheduled` to `failed` and the subscription becomes `past_due`. |
-| Your events endpoint | In **Webhook endpoints**, select your endpoint and run **Send a test event**. | Your endpoint verifies the signature and answers `2xx`. |
-
-You cannot trigger a renewal early on the sandbox: the first renewal is charged one billing period after `start_date`. Test your renewal and `past_due` handling with stored copies of the Subscription object and of the [example events](/developers/webhooks/event-catalogue#subscription-events), and leave one long-running sandbox subscription to confirm it end to end.
-
-## Troubleshooting {#troubleshooting}
-
-| What you see | Why | Fix |
-|---|---|---|
-| The Create call returns `400` with the error under `autopay` | `customer_email` is missing. It is required, and its error is reported under the `autopay` key. | Send `customer_email` and check it first. |
-| The subscription is still `pending_setup` after the customer paid | Ottu activates the subscription when it receives the payment result. If that result is missed, a backup check activates it 20 to about 35 minutes after creation. | Keep polling. If it is still `pending_setup` 35 minutes after creation and the payment succeeded, contact Ottu support with the subscription ID. |
-| The subscription is `setup_failed` but the customer paid | The card could not be saved. | Refund the payment (Ottu does not) and create a new subscription. |
-| No webhook for a renewal | Renewals never call your `webhook_url`. | Subscribe a webhook endpoint to `subscription.*` events, or read [Billing cycles](/developers/payments/autopay/?autopay-api=cycles#api-reference). |
-| Cancel returns `422` | `mode: "at_period_end"` while a payment is due or in progress, or before the first payment. | Use `mode: "immediate"`. |
-| Cancel returns `409` with `idempotency_conflict` | You reused an `Idempotency-Key` with a different body or subscription. | Use a new key for a new cancel; reuse a key only to retry the same one. |
-| Following `next` on List subscriptions returns `405` | List links are followed with `POST`. | `POST` to the `next` URL with the same headers. |
-| The SDK payload says `auto_debit`, not `auto_pay` | Renewals are ordinary auto-debit payments, so the [Checkout SDK](../checkout-sdk/web) preload carries `auto_debit` and no `autopay` key. | Nothing. The Checkout API response still reports `auto_pay`. |
-| A cycle has `status: "needs_triage"` | Ottu could not confirm the result of a charge. | Contact Ottu support with the subscription ID. |
 
 ## FAQ
 

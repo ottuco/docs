@@ -276,6 +276,16 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
+                  label: "Testing",
+                  href: "/developers/payments/autopay#testing",
+                },
+                {
+                  type: "link",
+                  label: "Troubleshooting",
+                  href: "/developers/payments/autopay#troubleshooting",
+                },
+                {
+                  type: "link",
                   label: "API Reference",
                   href: "/developers/payments/autopay#api-reference",
                 },
@@ -291,6 +301,11 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                   type: "link",
+                  label: "Errors",
+                  href: "/developers/payments/autopay#errors",
+                },
+                {
+                  type: "link",
                   label: "Limits",
                   href: "/developers/payments/autopay#limits",
                 },
@@ -298,16 +313,6 @@ const sidebars: SidebarsConfig = {
                   type: "link",
                   label: "Best Practices",
                   href: "/developers/payments/autopay#best-practices",
-                },
-                {
-                  type: "link",
-                  label: "Testing",
-                  href: "/developers/payments/autopay#testing",
-                },
-                {
-                  type: "link",
-                  label: "Troubleshooting",
-                  href: "/developers/payments/autopay#troubleshooting",
                 },
                 {
                   type: "link",
