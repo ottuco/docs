@@ -20,7 +20,7 @@ Connect's code, `ottu_backend/contrib/communication/sms` or `/whatsapp`:
 - `slug`: the `provider` value of the model in `models.py`. One entry per company: if the company already has an entry (another channel, or another API variant such as FCC Falcon), add to that entry instead.
 - `channels`: `["sms"]`, `["whatsapp"]` or both.
 - `name`: the model's `verbose_name`. Change it only when the code itself shows the company's real name (the model "country" calls `api.smscountry.com`, so it is listed as SMSCountry).
-- `countries`: only what you can show. First the code (a country domain or a country in the API host, such as `api.taqnyat.sa`), then the provider's own website. If neither states it, use `[]`: the catalog then lists the provider under "Other". Never guess from the name.
+- `countries`: only what you can show. First the code (a country domain or a country in the API host, such as `api.taqnyat.sa`), then the provider's own website. If neither states it, use `[]`: the card then shows no country, and the provider appears only under "All countries". Never guess from the name.
 - `international`: `true` only when the provider's own site says it serves many countries.
 - `website`: the provider's official site, opened and checked. Leave it out if you could not open it.
 

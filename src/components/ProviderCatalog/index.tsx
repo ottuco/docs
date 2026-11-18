@@ -16,6 +16,11 @@ function where(p: MessageProvider): string {
   return [...p.countries, ...(p.international ? ["International"] : [])].join(", ");
 }
 
+// What the search box looks in: name, channels and countries.
+function haystack(p: MessageProvider): string {
+  return [p.name, ...p.channels.map((c) => CHANNEL_LABEL[c]), where(p)].join(" ").toLowerCase();
+}
+
 /**
  * The SMS and WhatsApp providers Ottu integrates, as one grid. Every card is
  * ordinary text in the page, so search and the docs MCP read each provider
@@ -34,7 +39,7 @@ export default function ProviderCatalog(): React.ReactElement {
           (!channel || p.channels.includes(channel)) &&
           // a chosen country shows its own providers and the international ones
           (!country || p.countries.includes(country) || p.international) &&
-          (!q || p.name.toLowerCase().includes(q)),
+          (!q || haystack(p).includes(q)),
       ),
     [channel, country, q],
   );
@@ -114,7 +119,9 @@ export default function ProviderCatalog(): React.ReactElement {
                 ) : (
                   <span className={styles.name}>{p.name}</span>
                 )}
-                {/* the hidden separators keep the plain-text version readable */}
+                {/* Not dead markup: the hidden separators are what make the page's
+                    plain text, as the docs MCP and search read it, come out as
+                    "Taqnyat. SMS. Saudi Arabia." Do not remove them. */}
                 <span className={styles.hidden}>{". "}</span>
                 <span className={styles.tags}>
                   {p.channels.map((c, i) => (
