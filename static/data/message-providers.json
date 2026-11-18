@@ -3,7 +3,9 @@
     "slug": "bareed",
     "name": "Bareed",
     "channel": "sms",
-    "countries": [],
+    "countries": [
+      "Bahrain"
+    ],
     "international": false,
     "website": "https://www.bareedsms.com",
     "credentials": [
@@ -45,8 +47,11 @@
     "slug": "etisal",
     "name": "Etisal",
     "channel": "sms",
-    "countries": [],
+    "countries": [
+      "Bahrain"
+    ],
     "international": false,
+    "website": "https://www.etisalcom.com",
     "credentials": [
       "Username",
       "Password",
@@ -58,7 +63,9 @@
     "slug": "fcc",
     "name": "FCC",
     "channel": "sms",
-    "countries": [],
+    "countries": [
+      "Kuwait"
+    ],
     "international": false,
     "credentials": [
       "Username",
@@ -70,7 +77,9 @@
     "slug": "fcc_falcon",
     "name": "FCC Falcon",
     "channel": "sms",
-    "countries": [],
+    "countries": [
+      "Kuwait"
+    ],
     "international": false,
     "credentials": [
       "Username",
@@ -83,7 +92,9 @@
     "slug": "fcc_puffin",
     "name": "FCC Puffin",
     "channel": "sms",
-    "countries": [],
+    "countries": [
+      "Kuwait"
+    ],
     "international": false,
     "credentials": [
       "Username",
@@ -164,7 +175,10 @@
     "slug": "mobishastra",
     "name": "Mobishastra",
     "channel": "sms",
-    "countries": [],
+    "countries": [
+      "India",
+      "United Arab Emirates"
+    ],
     "international": false,
     "credentials": [
       "Username",
@@ -229,7 +243,9 @@
     "slug": "route",
     "name": "Route Mobile",
     "channel": "sms",
-    "countries": [],
+    "countries": [
+      "India"
+    ],
     "international": true,
     "website": "https://routemobile.com",
     "credentials": [
@@ -242,8 +258,11 @@
     "slug": "smsbox",
     "name": "SMS Box",
     "channel": "sms",
-    "countries": [],
+    "countries": [
+      "Kuwait"
+    ],
     "international": false,
+    "website": "https://www.smsbox.com",
     "credentials": [
       "Username",
       "Password",
@@ -254,7 +273,9 @@
     "slug": "smsvas",
     "name": "SMS VAS",
     "channel": "sms",
-    "countries": [],
+    "countries": [
+      "Egypt"
+    ],
     "international": false,
     "credentials": [
       "Username",
@@ -280,7 +301,9 @@
     "slug": "strust",
     "name": "Strust",
     "channel": "sms",
-    "countries": [],
+    "countries": [
+      "Saudi Arabia"
+    ],
     "international": false,
     "credentials": [
       "Username",
@@ -292,7 +315,9 @@
     "slug": "synapse",
     "name": "Synapse",
     "channel": "sms",
-    "countries": [],
+    "countries": [
+      "United Arab Emirates"
+    ],
     "international": false,
     "credentials": [
       "Username",
@@ -373,7 +398,9 @@
     "slug": "fcc",
     "name": "FCC",
     "channel": "whatsapp",
-    "countries": [],
+    "countries": [
+      "Kuwait"
+    ],
     "international": false,
     "credentials": [
       "Bearer Token",
