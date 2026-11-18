@@ -10,12 +10,86 @@ import { spawn } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import http from "http";
+import os from "os";
+import { loadIndexer } from "docusaurus-plugin-mcp-server";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = 9876;
 const BASE_URL = `http://localhost:${PORT}`;
 
 let server;
+let origin; // stands in for the docs site that serves /_mcp-data
+const DOCS_ORIGIN_PORT = 9877;
+const DOCS_ORIGIN = `http://localhost:${DOCS_ORIGIN_PORT}`;
+
+// Must match the FlexSearch settings in server.mjs and docusaurus.config.ts.
+const FLEXSEARCH = { tokenize: "strict", resolution: 3, context: false };
+
+const page = (route, title, description, markdown, headings = []) => ({
+  route,
+  title,
+  description,
+  markdown,
+  headings: headings.map((text) => ({ level: 2, text, id: text })),
+});
+
+// A handful of pages, indexed the same way the site build indexes the docs.
+// "dashboard" and "merchant" are on every page on purpose.
+const PAGES = [
+  page("/", "Docs home", "Start here.", "Welcome, merchant. Open the dashboard."),
+  page(
+    "/business/users-and-access",
+    "Users and Access",
+    "Get the list of users on your account.",
+    "Each merchant has users. In the dashboard, open Users to see the list of users.",
+    ["How do I get the list of users on my account?"]
+  ),
+  page(
+    "/business/users-and-access/password",
+    "Change or Reset Your Password",
+    "Change your password or have it reset.",
+    "A merchant user can change the password in the dashboard, or ask for a password reset.",
+    ["I forgot my password"]
+  ),
+  page(
+    "/business/payment-management/export-transactions",
+    "Export Transactions",
+    "Export your transactions to a file.",
+    "A merchant can export transactions from the dashboard to CSV.",
+    ["How do I export my transactions?"]
+  ),
+  page(
+    "/business/payment-management/settlements",
+    "Settlements",
+    "Where the money goes.",
+    "The merchant bank settles payments. The dashboard shows each payment.",
+    ["My customer paid but the money is not in my bank"]
+  ),
+];
+
+async function startDocsOrigin() {
+  const indexer = await loadIndexer("flexsearch", { flexsearch: FLEXSEARCH });
+  await indexer.initialize({
+    baseUrl: DOCS_ORIGIN,
+    serverName: "test",
+    serverVersion: "1.0.0",
+    outputDir: os.tmpdir(),
+  });
+  await indexer.indexDocuments(PAGES);
+  const artifacts = await indexer.finalize();
+  origin = http.createServer((req, res) => {
+    const name = (req.url || "").replace("/_mcp-data/", "");
+    if (!artifacts.has(name)) {
+      res.writeHead(404);
+      res.end();
+      return;
+    }
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(artifacts.get(name)));
+  });
+  await new Promise((resolve) => origin.listen(DOCS_ORIGIN_PORT, resolve));
+}
 let passed = 0;
 let failed = 0;
 
@@ -34,26 +108,22 @@ function fail(name, reason) {
 }
 
 async function startServer() {
-  // Ensure data dir exists with minimal test files so server can start
-  const dataDir = path.join(__dirname, "data");
-  fs.mkdirSync(dataDir, { recursive: true });
-  if (!fs.existsSync(path.join(dataDir, "docs.json"))) {
-    fs.writeFileSync(path.join(dataDir, "docs.json"), "[]");
-  }
-  if (!fs.existsSync(path.join(dataDir, "search-index.json"))) {
-    fs.writeFileSync(path.join(dataDir, "search-index.json"), "{}");
-  }
+  // The server downloads its docs and search index from BASE_URL/_mcp-data
+  // at startup; here that is the local stand-in started above.
+  await startDocsOrigin();
 
   return new Promise((resolve, reject) => {
     server = spawn("node", ["server.mjs"], {
       cwd: __dirname,
-      env: { ...process.env, PORT: String(PORT), BASE_URL: "http://localhost" },
+      env: { ...process.env, PORT: String(PORT), BASE_URL: DOCS_ORIGIN },
       stdio: ["pipe", "pipe", "pipe"],
     });
 
     let started = false;
+    let out = "";
     server.stdout.on("data", (data) => {
-      if (!started && data.toString().includes("listening")) {
+      out += data.toString();
+      if (!started && out.includes("MCP server ready.")) {
         started = true;
         resolve();
       }
@@ -70,6 +140,40 @@ async function startServer() {
 
 function stopServer() {
   if (server) server.kill("SIGTERM");
+  if (origin) origin.close();
+}
+
+// Calls an MCP tool the way a client does and returns the text it answers.
+async function callTool(name, args) {
+  const res = await fetch(`${BASE_URL}/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json, text/event-stream",
+    },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "tools/call",
+      params: { name, arguments: args },
+    }),
+  });
+  const raw = await res.text();
+  const json = raw.trimStart().startsWith("{")
+    ? raw
+    : raw
+        .split("\n")
+        .filter((l) => l.startsWith("data:"))
+        .map((l) => l.slice(5))
+        .join("");
+  const body = JSON.parse(json);
+  return (body.result?.content ?? []).map((c) => c.text).join("\n");
+}
+
+// The first address a docs_search answer lists.
+function firstUrl(text) {
+  const m = text.match(/https?:\/\/[^\s)]+/);
+  return m ? m[0] : null;
 }
 
 // ── Tests ──
@@ -178,18 +282,88 @@ async function testWebhookInvalidJSON() {
 }
 
 async function testMCPEndpoint() {
-  // MCP may or may not be ready (artifacts might not load in test env)
-  // Just verify the endpoint responds (200 or 503)
   const res = await fetch(`${BASE_URL}/`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json, text/event-stream",
+    },
     body: JSON.stringify({ jsonrpc: "2.0", method: "tools/list", id: 1 }),
   });
 
-  if (res.status !== 200 && res.status !== 503) {
+  if (res.status !== 200) {
     return fail("MCP endpoint", `unexpected status ${res.status}`);
   }
-  pass(`MCP endpoint responds (status ${res.status})`);
+  const raw = await res.text();
+  for (const tool of ["docs_search", "docs_fetch"]) {
+    if (!raw.includes(tool)) return fail("MCP endpoint", `tools/list misses ${tool}`);
+  }
+  // our descriptions replace the plugin's defaults
+  for (const hint of ["two or three specific words", "trailing slash"]) {
+    if (!raw.includes(hint)) return fail("MCP endpoint", `tool description misses "${hint}"`);
+  }
+  pass("MCP endpoint lists docs_search and docs_fetch with our descriptions");
+}
+
+async function testFetchAcceptsAddressSpellings() {
+  const page = `${DOCS_ORIGIN}/business/users-and-access`;
+  const spellings = {
+    "as indexed": page,
+    "trailing slash": `${page}/`,
+    "anchor": `${page}#how-do-i-get-the-list`,
+    "slash and query": `${page}/?from=sitemap`,
+  };
+  for (const [label, url] of Object.entries(spellings)) {
+    const text = await callTool("docs_fetch", { url });
+    if (!text.includes("Users and Access")) {
+      return fail(`docs_fetch ${label}`, `no page for ${url}: ${text.slice(0, 80)}`);
+    }
+  }
+  pass("docs_fetch finds a page with a trailing slash, anchor or query on its address");
+}
+
+async function testFetchUnknownStaysNotFound() {
+  const misses = {
+    "unknown path": `${DOCS_ORIGIN}/business/nope/`,
+    "other host": "https://example.com/business/users-and-access",
+  };
+  for (const [label, url] of Object.entries(misses)) {
+    const text = await callTool("docs_fetch", { url });
+    if (!text.includes("Page not found")) {
+      return fail(`docs_fetch ${label}`, `expected not found, got: ${text.slice(0, 80)}`);
+    }
+  }
+  pass("docs_fetch still answers not found for unknown paths and other hosts");
+}
+
+async function testSearchSurvivesMissingAndCommonWords() {
+  const cases = {
+    // "forgotten" is on no page; "dashboard" is on every page
+    "forgotten dashboard password reset": "/business/users-and-access/password",
+    "merchant dashboard list users": "/business/users-and-access",
+    "merchant export transactions dashboard": "/business/payment-management/export-transactions",
+    // already worked before: several words, all on the page
+    "password reset": "/business/users-and-access/password",
+    // one word goes to the plugin unchanged
+    settlements: "/business/payment-management/settlements",
+    // only the first eight words are searched; the rest, which point at the
+    // home page, are ignored
+    "export transactions csv file merchant dashboard your to welcome open start docs home here": "/business/payment-management/export-transactions",
+  };
+  for (const [query, route] of Object.entries(cases)) {
+    const text = await callTool("docs_search", { query });
+    const first = firstUrl(text);
+    if (first !== `${DOCS_ORIGIN}${route}`) {
+      return fail(`docs_search "${query}"`, `first result ${first}, expected ${route}`);
+    }
+  }
+  pass("docs_search ranks the right page first despite missing or common words");
+}
+
+async function testSearchNoMatch() {
+  const text = await callTool("docs_search", { query: "zebra xylophone" });
+  if (firstUrl(text)) return fail("docs_search no match", `got ${firstUrl(text)}`);
+  pass("docs_search returns no page when no word matches");
 }
 
 async function test404() {
@@ -214,6 +388,10 @@ async function run() {
   await testWebhookPollSinceCursor();
   await testWebhookInvalidJSON();
   await testMCPEndpoint();
+  await testFetchAcceptsAddressSpellings();
+  await testFetchUnknownStaysNotFound();
+  await testSearchSurvivesMissingAndCommonWords();
+  await testSearchNoMatch();
   await test404();
 
   console.log(`\n  ${passed} passed, ${failed} failed\n`);
