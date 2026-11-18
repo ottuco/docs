@@ -3,87 +3,67 @@ import data from "@site/static/data/message-providers.json";
 import type { MessageChannel, MessageProvider } from "@site/src/types/messageProvider";
 import styles from "./styles.module.css";
 
-const providers = data as MessageProvider[];
+const providers = (data as MessageProvider[])
+  .slice()
+  .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
 
-const INTERNATIONAL = "International providers";
-const OTHER = "Other providers";
+const CHANNEL_LABEL: Record<MessageChannel, string> = { sms: "SMS", whatsapp: "WhatsApp" };
+const CHANNELS: MessageChannel[] = ["sms", "whatsapp"];
 
-interface Group {
-  label: string;
-  items: MessageProvider[];
-}
+const countries = [...new Set(providers.flatMap((p) => p.countries))].sort((a, b) => a.localeCompare(b));
 
-// Country groups in A-Z order, then the international providers, then any
-// provider whose country is not established.
-function groupByCountry(list: MessageProvider[]): Group[] {
-  const byCountry = new Map<string, MessageProvider[]>();
-  const international: MessageProvider[] = [];
-  const other: MessageProvider[] = [];
-  for (const p of list) {
-    for (const c of p.countries) {
-      byCountry.set(c, [...(byCountry.get(c) ?? []), p]);
-    }
-    if (p.international) international.push(p);
-    if (p.countries.length === 0 && !p.international) other.push(p);
-  }
-  const groups: Group[] = [...byCountry.keys()]
-    .sort((a, b) => a.localeCompare(b))
-    .map((label) => ({ label, items: byCountry.get(label)! }));
-  if (international.length) groups.push({ label: INTERNATIONAL, items: international });
-  if (other.length) groups.push({ label: OTHER, items: other });
-  return groups;
-}
-
-function title(group: string, channel: string): string {
-  if (group === INTERNATIONAL) return `International ${channel} providers`;
-  if (group === OTHER) return `Other ${channel} providers`;
-  return `${channel} providers in ${group}`;
-}
-
-function host(url: string): string {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return url;
-  }
+function where(p: MessageProvider): string {
+  return [...p.countries, ...(p.international ? ["International"] : [])].join(", ");
 }
 
 /**
- * The SMS or WhatsApp providers Ottu integrates, grouped by country. All of
- * it is rendered as ordinary headings and lists, so search and the docs MCP
- * read every name with its country. The search box and the country filter
- * only hide entries.
+ * The SMS and WhatsApp providers Ottu integrates, as one grid. Every card is
+ * ordinary text in the page, so search and the docs MCP read each provider
+ * with its channels and country. The controls only hide cards.
  */
-export default function ProviderCatalog({ channel }: { channel: MessageChannel }): React.ReactElement {
-  const [query, setQuery] = useState("");
+export default function ProviderCatalog(): React.ReactElement {
+  const [channel, setChannel] = useState<MessageChannel | "">("");
   const [country, setCountry] = useState("");
-
-  const all = useMemo(() => providers.filter((p) => p.channel === channel), [channel]);
-  const countries = useMemo(
-    () => [...new Set(all.flatMap((p) => p.countries))].sort((a, b) => a.localeCompare(b)),
-    [all],
-  );
+  const [query, setQuery] = useState("");
 
   const q = query.trim().toLowerCase();
-  const matching = all.filter((p) => !q || p.name.toLowerCase().includes(q));
-  // A chosen country shows its own providers and the international ones.
-  const groups = groupByCountry(matching).filter(
-    (g) => !country || g.label === country || g.label === INTERNATIONAL,
+  const shown = useMemo(
+    () =>
+      providers.filter(
+        (p) =>
+          (!channel || p.channels.includes(channel)) &&
+          // a chosen country shows its own providers and the international ones
+          (!country || p.countries.includes(country) || p.international) &&
+          (!q || p.name.toLowerCase().includes(q)),
+      ),
+    [channel, country, q],
   );
-  const shown = new Set(groups.flatMap((g) => g.items.map((p) => p.slug))).size;
-  const label = channel === "sms" ? "SMS" : "WhatsApp";
+
+  const tabs: { value: MessageChannel | ""; label: string; count: number }[] = [
+    { value: "", label: "All", count: providers.length },
+    ...CHANNELS.map((c) => ({
+      value: c,
+      label: CHANNEL_LABEL[c],
+      count: providers.filter((p) => p.channels.includes(c)).length,
+    })),
+  ];
 
   return (
     <div className={styles.wrap}>
       <div className={styles.controls}>
-        <input
-          type="search"
-          className={styles.search}
-          placeholder={`Search ${label} providers`}
-          aria-label={`Search ${label} providers`}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+        <div className={styles.tabs} role="group" aria-label="Channel">
+          {tabs.map((t) => (
+            <button
+              key={t.label}
+              type="button"
+              className={t.value === channel ? styles.tabOn : styles.tab}
+              aria-pressed={t.value === channel}
+              onClick={() => setChannel(t.value)}
+            >
+              {t.label} <span className={styles.tabCount}>{t.count}</span>
+            </button>
+          ))}
+        </div>
         <select
           className={styles.select}
           aria-label="Country"
@@ -97,48 +77,67 @@ export default function ProviderCatalog({ channel }: { channel: MessageChannel }
             </option>
           ))}
         </select>
-        <span className={styles.count} aria-live="polite">
-          {`${shown} of ${all.length} providers`}
-        </span>
+        <input
+          type="search"
+          className={styles.search}
+          placeholder="Search providers"
+          aria-label="Search providers"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
       </div>
 
-      {groups.length === 0 && (
+      {shown.length === 0 ? (
         <p className={styles.empty}>
           No provider matches.{" "}
           <button
             type="button"
             className={styles.reset}
             onClick={() => {
-              setQuery("");
+              setChannel("");
               setCountry("");
+              setQuery("");
             }}
           >
             Show all providers
           </button>
         </p>
-      )}
-
-      {groups.map((group) => (
-        <section key={group.label} className={styles.group}>
-          <h3 className={styles.groupTitle}>{title(group.label, label)}</h3>
-          <ul className={styles.grid}>
-            {group.items.map((p) => (
-              <li key={p.slug} className={styles.card}>
-                <span className={styles.name}>{p.name}</span>
-                {/* the hidden separators keep the plain-text version readable */}
-                <span className={styles.hidden}>{p.website ? " (" : ". "}</span>
-                {p.website && (
-                  <a className={styles.site} href={p.website} target="_blank" rel="noopener noreferrer">
-                    {host(p.website)}
+      ) : (
+        <ul className={styles.grid}>
+          {shown.map((p) => (
+            <li key={p.slug} className={styles.card}>
+              <span className={styles.head}>
+                {p.website ? (
+                  <a className={styles.name} href={p.website} target="_blank" rel="noopener noreferrer">
+                    {p.name}
                   </a>
+                ) : (
+                  <span className={styles.name}>{p.name}</span>
                 )}
-                {p.website && <span className={styles.hidden}>{"). "}</span>}
-                <span className={styles.need}>{`You need: ${p.credentials.join(", ")}.`}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
+                {/* the hidden separators keep the plain-text version readable */}
+                <span className={styles.hidden}>{". "}</span>
+                <span className={styles.tags}>
+                  {p.channels.map((c, i) => (
+                    <React.Fragment key={c}>
+                      {i > 0 && <span className={styles.hidden}>{", "}</span>}
+                      <span className={styles.tag} data-channel={c}>
+                        {CHANNEL_LABEL[c]}
+                      </span>
+                    </React.Fragment>
+                  ))}
+                </span>
+              </span>
+              {where(p) && (
+                <>
+                  <span className={styles.hidden}>{". "}</span>
+                  <span className={styles.where}>{where(p)}</span>
+                  <span className={styles.hidden}>.</span>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

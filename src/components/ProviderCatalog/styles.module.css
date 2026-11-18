@@ -1,4 +1,4 @@
-/* ProviderCatalog: SMS and WhatsApp providers, grouped by country. */
+/* ProviderCatalog: the SMS and WhatsApp providers as one grid of cards. */
 
 .wrap {
   margin: 20px 0 28px;
@@ -9,11 +9,46 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
-.search,
-.select {
+/* channel switch */
+.tabs {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 9px;
+  background: var(--ifm-color-emphasis-100);
+}
+
+.tab,
+.tabOn {
+  height: 32px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ifm-color-emphasis-700);
+  background: none;
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.tabOn {
+  color: var(--ifm-font-color-base);
+  background: var(--ifm-background-color);
+  box-shadow: 0 1px 2px rgba(48, 47, 55, 0.16);
+}
+
+.tabCount {
+  margin-left: 2px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.select,
+.search {
   height: 38px;
   padding: 0 12px;
   font: inherit;
@@ -25,36 +60,22 @@
 }
 
 .search {
-  flex: 1 1 220px;
+  flex: 1 1 180px;
   min-width: 0;
 }
 
-.search:focus-visible,
+.tab:focus-visible,
+.tabOn:focus-visible,
 .select:focus-visible,
+.search:focus-visible,
 .reset:focus-visible {
   outline: 2px solid var(--ifm-color-primary);
   outline-offset: 1px;
 }
 
-.count {
-  font-size: 13px;
-  color: var(--ifm-color-emphasis-700);
-}
-
-.group {
-  margin-bottom: 20px;
-}
-
-.groupTitle {
-  margin: 0 0 10px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--ifm-color-emphasis-800);
-}
-
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 10px;
   margin: 0;
   padding: 0;
@@ -65,25 +86,63 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   min-width: 0;
-  margin: 0;
   padding: 12px 14px;
   border: 1px solid var(--ifm-color-emphasis-200);
   border-radius: 8px;
   background: var(--ifm-background-color);
 }
 
+/* the docs theme spaces list items apart; the grid gap does that here */
+.wrap .grid > li.card {
+  margin: 0;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .name {
   font-weight: 600;
-}
-
-.site {
-  font-size: 13px;
   overflow-wrap: anywhere;
+  color: var(--ifm-font-color-base);
 }
 
-.need {
+a.name:hover {
+  color: var(--ifm-color-primary);
+}
+
+.tags {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 4px;
+}
+
+.tag {
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.5;
+  border-radius: 999px;
+  color: var(--ifm-color-emphasis-800);
+  background: var(--ifm-color-emphasis-200);
+}
+
+.tag[data-channel="whatsapp"] {
+  color: #0b6b3a;
+  background: #dff5e7;
+}
+
+:global([data-theme="dark"]) .tag[data-channel="whatsapp"] {
+  color: #8ee0ae;
+  background: #143524;
+}
+
+.where {
   font-size: 13px;
   line-height: 1.4;
   color: var(--ifm-color-emphasis-700);
@@ -111,9 +170,4 @@
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
-}
-
-/* the docs theme spaces list items apart; the grid gap does that here */
-.wrap .grid > li.card {
-  margin: 0;
 }

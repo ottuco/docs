@@ -21,7 +21,7 @@ Before SMS notifications can be sent, the following must be in place:
 
    ![SMS notification checkboxes](/img/business/notifications/sms-notification-checkboxes.png)
 
-4. **SMS Provider** -- A dedicated SMS provider must be configured. See [Which SMS company can I use?](/business/notifications/message-providers#which-sms-company-can-i-use) for the SMS providers Ottu is integrated with, by country, and [how to get one set up](/business/notifications/message-providers#how-do-i-get-a-provider-set-up).
+4. **SMS Provider** -- A dedicated SMS provider must be configured. See [Message Providers](/business/notifications/message-providers) for the SMS companies you can use, by country, and [how to get one set up](/business/notifications/message-providers#how-do-i-get-a-provider-set-up).
 
 ## Notification Availability
 

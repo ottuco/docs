@@ -7,7 +7,7 @@ sidebar_label: WhatsApp
 
 WhatsApp provides a conversational way to communicate payment information to customers. With its widespread adoption, WhatsApp notifications offer a familiar and user-friendly platform for receiving payment updates -- especially in regions where WhatsApp is commonly used for business communications.
 
-Ottu supports two approaches for sending WhatsApp notifications. The integrated channel needs a WhatsApp business provider: see [Which WhatsApp provider can I use?](/business/notifications/message-providers#which-whatsapp-provider-can-i-use)
+Ottu supports two approaches for sending WhatsApp notifications. The integrated channel needs a WhatsApp business provider: see [Message Providers](/business/notifications/message-providers) for the ones you can use.
 
 ## Integrated WhatsApp Channel
 
