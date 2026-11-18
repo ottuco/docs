@@ -12,7 +12,7 @@ A paid transaction that was deleted by mistake is not lost. Ottu keeps it in a s
 
 ## A paid transaction was deleted by mistake. How do I bring it back?
 
-**Who can do it:** a user with the **Can restore payment requests** permission (for the E-Commerce plugin: **Can restore e-commerce payments**). If you do not see the menu or the **Restore** action, ask your account administrator to restore the transaction or to give you the permission. See [Users and Access](/business/users-and-access/).
+**Who can do it:** a user with the **Can restore payment requests** permission (for the E-Commerce plugin: **Can restore e-commerce payments**). If you do not see **Deleted Paid Transactions** in the sidebar or **Restore** under **Actions**, ask your account administrator to restore the transaction or to give you the permission. See [Users and Access](/business/users-and-access/).
 
 <StepShow>
 
@@ -34,9 +34,15 @@ Find the transaction. The list has the same **Filter** and search as the transac
 
 </Step>
 
-<Step image="/img/business/dashboard/row-actions.png" spot="26.8,69.7,9.9,27.1" alt="The three-dot menu at the start of a row, in the Actions column">
+<Step image="/img/business/dashboard/deleted-row-ticked.png" spot="4.2,72,8.4,22" alt="A ticked checkbox at the start of a row in Deleted Paid Transactions">
 
-Click the three-dot menu at the start of the transaction's row and choose **Restore**.
+Tick the checkbox at the start of the transaction's row. To restore several transactions at once, tick each of them.
+
+</Step>
+
+<Step image="/img/business/dashboard/deleted-actions-restore.png" spot="22.7,15.8,24.4,68.6" alt="The Actions menu above the table, open, with Restore">
+
+Click **Actions** above the table and choose **Restore**. **Actions** is greyed out until a row is ticked.
 
 </Step>
 
@@ -50,7 +56,7 @@ In the **Are you sure?** window, click **Yes**.
 
 The message **Transaction restored.** appears and the transaction is back in the plugin's **Transactions** table, in the same [state](/business/payment-management/transaction-states) it had before.
 
-To restore several transactions at once, tick their rows, click **Actions** and choose **Restore**.
+**Restore** is only in **Actions** above the table. The three-dot menu of a row does not have it.
 
 ## Which deleted transactions can be restored?
 
