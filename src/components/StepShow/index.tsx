@@ -20,11 +20,25 @@ export function Step({ children }: StepProps): React.ReactElement {
   return <>{children}</>;
 }
 
+// Screenshots are saved at twice their on-page size so they stay sharp on
+// high-density screens. The cap keeps a tall screenshot inside the stage.
+const MAX_H = "min(60vh, 440px)";
+
 function Shot({ src, alt, spot }: { src: string; alt: string; spot?: string }) {
+  const img = useRef<HTMLImageElement>(null);
+  const [size, setSize] = useState<{ w: number; ratio: number }>();
+  const measure = () => {
+    const el = img.current;
+    if (el && el.naturalWidth) setSize({ w: el.naturalWidth / 2, ratio: el.naturalWidth / el.naturalHeight });
+  };
+  useEffect(measure, []);
   const [left, top, width, height] = (spot ?? "").split(",").map((n) => `${n.trim()}%`);
   return (
-    <span className={styles.shot}>
-      <img src={useBaseUrl(src)} alt={alt} loading="lazy" />
+    <span
+      className={styles.shot}
+      style={size && { width: size.w, maxWidth: `min(100%, calc(${MAX_H} * ${size.ratio.toFixed(4)}))` }}
+    >
+      <img ref={img} src={useBaseUrl(src)} alt={alt} onLoad={measure} />
       {spot && <span className={styles.spot} style={{ left, top, width, height }} />}
     </span>
   );

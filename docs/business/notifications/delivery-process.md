@@ -3,6 +3,8 @@ title: Notification Delivery Process
 sidebar_label: Delivery Process
 ---
 
+import StepShow, { Step } from "@site/src/components/StepShow";
+
 # Notification Delivery Process
 
 Ottu supports two methods for delivering notifications to customers: **automatic** and **manual**. The delivery method depends on the notification channel being used.
@@ -52,13 +54,37 @@ When a customer says the SMS, email or WhatsApp message was not received, first 
 
 ### Check whether the message was sent
 
-1. In the Ottu Dashboard sidebar, open the [plugin](/business/plugins), for example **Payment Request**, and click **Transactions**.
-2. Find the transaction and open its details. See [How do I find one transaction?](/business/payment-management/search-and-filter#how-do-i-find-one-transaction)
-3. Open the **Mail Logs** tab. Despite its name, it lists every email, SMS and WhatsApp message Ottu tried to send for this transaction.
-4. Open an entry and read:
-   - **Is sent**: a green icon means the message was sent, a red icon means it was not;
-   - **Backend**: the channel, `mail`, `sms` or `whatsapp`;
-   - the address or phone number the message went to.
+<StepShow>
+
+<Step image="/img/business/payment-management/export-sidebar.png" spot="19,53,42,13" alt="The dashboard sidebar with Payment Request open and Transactions selected">
+
+In the Ottu Dashboard sidebar, open the [plugin](/business/plugins), for example **Payment Request**, and click **Transactions**.
+
+</Step>
+
+<Step image="/img/business/dashboard/search-bar.png" alt="The search above the transactions table: Select field, the Search box and the Search button">
+
+Find the transaction and open its details. See [How do I find one transaction?](/business/payment-management/search-and-filter#how-do-i-find-one-transaction)
+
+</Step>
+
+<Step image="/img/business/dashboard/details-sections.png" spot="4.4,84.8,81.2,6.8" alt="The list of sections on the transaction details page, with Mail Logs">
+
+Click **Mail Logs** in the list of sections on the right. Despite its name, it lists every email, SMS and WhatsApp message Ottu tried to send for this transaction.
+
+</Step>
+
+<Step>
+
+Open an entry and read:
+
+- **Is sent**: a green icon means the message was sent, a red icon means it was not;
+- **Backend**: the channel, `mail`, `sms` or `whatsapp`;
+- the address or phone number the message went to.
+
+</Step>
+
+</StepShow>
 
 What the result means:
 
@@ -69,16 +95,57 @@ What the result means:
 
 ### See why a message failed (administrators)
 
-1. Click the three-dot menu in the top-right corner of the dashboard and click **Administration panel**.
-2. In the top menu, click **DB Mailer**, then **Mail logs**.
-3. Find the message. You can search by the customer's email or phone number, and filter by **Is sent**.
-4. Open it and read **Error message**.
+<StepShow>
+
+<Step image="/img/business/dashboard/user-menu.png" spot="28.7,10.4,60.9,14.2" alt="The three-dot menu in the top-right corner, with Administration panel and Account settings">
+
+Click the three-dot menu in the top-right corner of the dashboard and click **Administration panel**.
+
+</Step>
+
+<Step image="/img/business/dashboard/admin-db-mailer.png" spot="17.9,68.6,38.5,8.8" alt="The Db Mailer menu of the Administration panel, with Mail Logs">
+
+In the top menu, click **Db Mailer**, then **Mail Logs**.
+
+</Step>
+
+<Step>
+
+Find the message. You can search by the customer's email or phone number, and filter by **Is sent**.
+
+</Step>
+
+<Step>
+
+Open it and read **Error message**.
+
+</Step>
+
+</StepShow>
 
 ### Send the message again
 
-1. In the **Transactions** table, click the three-dot menu at the start of the transaction's row.
-2. Choose **Email**, **SMS** or **WhatsApp**.
-3. In the **Are you sure?** window, click **Yes**. The message **Customer notified.** appears.
+<StepShow>
+
+<Step image="/img/business/dashboard/row-actions.png" spot="26.8,69.7,9.9,27.1" alt="The three-dot menu at the start of a row, in the Actions column">
+
+In the **Transactions** table, click the three-dot menu at the start of the transaction's row.
+
+</Step>
+
+<Step>
+
+Choose **Email**, **SMS** or **WhatsApp**.
+
+</Step>
+
+<Step image="/img/business/dashboard/are-you-sure.png" spot="30.9,61.3,19.8,27" alt="The Are you sure? window with Yes and No">
+
+In the **Are you sure?** window, click **Yes**. The message **Customer notified.** appears.
+
+</Step>
+
+</StepShow>
 
 For a payment link, the menu offers a channel only if it was chosen when the link was created and the link can still be paid. Otherwise [copy the link and send it yourself](/business/plugins/create-payment-link#copy-the-link-and-send-it-yourself).
 

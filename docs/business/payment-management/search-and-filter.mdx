@@ -3,6 +3,7 @@ title: Search & Filter Payments
 sidebar_label: Search & Filter
 ---
 
+import StepShow, { Step } from "@site/src/components/StepShow";
 import StepGuide from "@site/src/components/StepGuide";
 
 # Search & Filter Payments
@@ -13,12 +14,36 @@ Every [plugin](/business/plugins) in the Ottu Dashboard has a **Transactions** t
 
 ## How can I see which transactions are paid and which are not?
 
-1. In the Ottu Dashboard sidebar, open the plugin, for example **Payment Request**, and click **Transactions**.
-2. Click **Filter** at the top right of the table.
-3. In **State**, choose:
-   - **Paid** to see the paid transactions;
-   - **All Unpaid** to see every transaction that is not paid. It covers the states Created, Pending, Attempted, Failed, Expired and Unavailable.
-4. Click **Search**.
+<StepShow>
+
+<Step image="/img/business/payment-management/export-sidebar.png" spot="19,53,42,13" alt="The dashboard sidebar with Payment Request open and Transactions selected">
+
+In the Ottu Dashboard sidebar, open the plugin, for example **Payment Request**, and click **Transactions**.
+
+</Step>
+
+<Step image="/img/business/payment-management/export-toolbar.png" spot="72.8,25.8,21.2,31" alt="The Filter button above the transactions table">
+
+Click **Filter** at the top right of the table.
+
+</Step>
+
+<Step image="/img/business/dashboard/state-paid.png" spot="3.2,67.5,90,15.3" alt="The State filter open, with Paid in the list">
+
+In **State**, choose:
+
+- **Paid** to see the paid transactions;
+- **All Unpaid** to see every transaction that is not paid. It covers the states Created, Pending, Attempted, Failed, Expired and Unavailable.
+
+</Step>
+
+<Step image="/img/business/payment-management/filter-panel.png" spot="22.4,85.6,27,10.6" alt="The Search button at the bottom of the Filter panel">
+
+Click **Search**.
+
+</Step>
+
+</StepShow>
 
 The table now shows only those transactions. To see everything again, click **Filter** and then **Reset**.
 
@@ -28,11 +53,39 @@ If there is no **State** filter, an administrator has removed it: ask them to [a
 
 ## How do I filter the unpaid transactions and export them?
 
-1. Open the plugin's **Transactions** table and click **Filter**.
-2. In **State**, choose **All Unpaid**, then click **Search**.
-3. Click **Export Transactions** above the table.
-4. Under **Select file type**, choose **CSV** or **XLSX**, then click **Export**.
-5. The **Generated Reports** page opens. When your export shows a download icon, click it to get the file.
+<StepShow>
+
+<Step image="/img/business/payment-management/export-toolbar.png" spot="72.8,25.8,21.2,31" alt="The Filter button above the transactions table">
+
+Open the plugin's **Transactions** table and click **Filter**.
+
+</Step>
+
+<Step image="/img/business/dashboard/state-unpaid.png" spot="3.2,79.6,90,15.3" alt="The State filter open, with All Unpaid at the end of the list">
+
+In **State**, choose **All Unpaid**, then click **Search**.
+
+</Step>
+
+<Step image="/img/business/payment-management/export-toolbar.png" spot="39,26,33,31" alt="The Export Transactions button above the transactions table">
+
+Click **Export Transactions** above the table.
+
+</Step>
+
+<Step image="/img/business/payment-management/export-options.png" spot="5,69,32,16" alt="The export options with Select file type: CSV or XLSX">
+
+Under **Select file type**, choose **CSV** or **XLSX**, then click **Export**.
+
+</Step>
+
+<Step image="/img/business/payment-management/generated-reports.png" spot="81,23,9.5,16.5" alt="The Generated Reports table with the Download column">
+
+The **Generated Reports** page opens. When your export shows a download icon, click it to get the file.
+
+</Step>
+
+</StepShow>
 
 The file contains only the transactions the table was showing. See [Export Transactions](/business/payment-management/export-transactions) for more, including what to do when an export is slow.
 
@@ -40,10 +93,33 @@ The file contains only the transactions the table was showing. See [Export Trans
 
 Use the search above the table. It searches one field at a time.
 
-1. Open the plugin's **Transactions** table.
-2. In **Select field**, choose what you know about the payment, for example the customer's email.
-3. Type the value in the **Search** box. Part of the value is enough, and capital letters do not matter: `shop` finds `shopify`.
-4. Click the **Search** button.
+<StepShow>
+
+<Step image="/img/business/payment-management/export-sidebar.png" spot="19,53,42,13" alt="The dashboard sidebar with Payment Request open and Transactions selected">
+
+Open the plugin's **Transactions** table.
+
+</Step>
+
+<Step image="/img/business/dashboard/search-bar.png" spot="1.3,11.8,44.9,80.9" alt="The search above the transactions table: Select field, the Search box and the Search button">
+
+In **Select field**, choose what you know about the payment, for example the customer's email.
+
+</Step>
+
+<Step image="/img/business/dashboard/search-bar.png" spot="46.5,11.8,40.9,80.9" alt="The search above the transactions table: Select field, the Search box and the Search button">
+
+Type the value in the **Search** box. Part of the value is enough, and capital letters do not matter: `shop` finds `shopify`.
+
+</Step>
+
+<Step image="/img/business/dashboard/search-bar.png" spot="87.2,21.6,12.1,58.8" alt="The search above the transactions table: Select field, the Search box and the Search button">
+
+Click the **Search** button.
+
+</Step>
+
+</StepShow>
 
 ### I only have the customer's name
 

@@ -84,6 +84,7 @@
   position: sticky;
   top: calc(var(--ifm-navbar-height) + 20px);
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   border: 1px solid var(--ifm-color-emphasis-200);
   border-radius: 12px;
   background: var(--ifm-color-emphasis-100);
@@ -95,6 +96,7 @@
   margin: 0;
   padding: 14px;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   place-items: center;
   opacity: 0;
   visibility: hidden;
@@ -119,11 +121,8 @@
 
 .shot img {
   display: block;
-  max-width: 100%;
-}
-
-.stage .shot img {
-  max-height: min(60vh, 440px);
+  width: 100%;
+  height: auto;
 }
 
 .spot {
