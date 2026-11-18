@@ -120,7 +120,9 @@
     "channels": [
       "sms"
     ],
-    "countries": [],
+    "countries": [
+      "Kuwait"
+    ],
     "international": false
   },
   {
@@ -142,8 +144,7 @@
       "sms"
     ],
     "countries": [
-      "India",
-      "United Arab Emirates"
+      "Bahrain"
     ],
     "international": false
   },
@@ -153,7 +154,9 @@
     "channels": [
       "sms"
     ],
-    "countries": [],
+    "countries": [
+      "Kuwait"
+    ],
     "international": false
   },
   {
@@ -274,7 +277,7 @@
       "sms"
     ],
     "countries": [
-      "United Arab Emirates"
+      "Kuwait"
     ],
     "international": false
   },
