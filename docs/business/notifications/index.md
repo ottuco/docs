@@ -17,6 +17,8 @@ Ottu supports three channels for sending payment notifications to customers:
 | [SMS](./sms.md) | Fast and concise. Best for time-sensitive alerts like payment confirmations and critical status changes. |
 | [WhatsApp](./whatsapp/) | Conversational and familiar. Great for regions where WhatsApp is commonly used for business communications. |
 
+SMS and WhatsApp are sent through a message provider that you choose. See [Message Providers](./message-providers.mdx) for the SMS and WhatsApp providers Ottu is integrated with, by country.
+
 ## How Notifications Work
 
 Each channel can deliver notifications at different stages of a payment's lifecycle:

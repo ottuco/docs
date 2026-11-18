@@ -708,6 +708,7 @@ const sidebars: SidebarsConfig = {
                 "business/notifications/whatsapp/manual",
               ],
             },
+            "business/notifications/message-providers",
             "business/notifications/templates",
             "business/notifications/delivery-process",
           ],
