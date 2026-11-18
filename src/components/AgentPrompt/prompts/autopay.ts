@@ -20,15 +20,15 @@ The full reference, with every field: ${PAGE}
 - POST {domain}/b/checkout/v1/pymt-txn/ with payment_type "auto_pay", customer_email (required), customer_id, an "agreement" object and an "autopay" block (frequency "monthly" or "yearly", recurring_amount, start_date as YYYY-MM-DD, today or later). Copy the required fields from the Create tab: ${PAGE}/?autopay-api=create#create-api
 - The checkout amount is the first charge, and it is billing cycle 1. An amount of 0.000 starts a free trial: the card is saved and the first real charge is one period after start_date.
 - Store extra.autopay.subscription_id from the 201 response on our record. Every later call takes it.
-- Show the checkout on our own page or app with the Ottu Checkout SDK (web, iOS, Android or Flutter), started with the session_id from the same response. No redirect: the only Ottu page the customer opens is their self-service page.
+- Show the checkout in one of two ways: send the customer to checkout_url (Ottu's hosted page), or start the Ottu Checkout SDK (web, iOS, Android or Flutter) on our own page with the session_id from the same response. After the first charge, the only Ottu page the customer opens is their self-service page.
 - Each create call makes a new subscription. Guard the button and the request against double submits.
 
 ## 2. Give access only from the subscription's status
 - The new subscription is "pending_setup". Do not grant access yet.
-- GET {domain}/b/pbl/v2/subscriptions/{subscription_id}/ returns the Subscription object. Poll it until status leaves pending_setup. Never hard-code a wait: activation can lag the payment by up to about 35 minutes.
+- GET {domain}/b/pbl/v2/subscriptions/{subscription_id}/ returns the Subscription object. Ottu activates the subscription when the payment result arrives, usually within one to two minutes, and sends the subscription.activated event to our webhook endpoint (Ottu support sets it up). Grant access on that event. If Ottu misses the result, a backup check activates it 20 to about 35 minutes after creation. If it is still pending_setup 35 minutes after creation and at least 15 minutes after the payment, contact Ottu support.
 - Grant access on "active" or "trialing". End access on "canceled" or "expired". On "setup_failed", create a new subscription; if the first payment went through, refund it, because Ottu does not.
 - "past_due" means a billing cycle used up every retry. Ottu stops billing and never cancels it. Our policy decides access; ask me which one we want.
-- The checkout webhook (our webhook_url) only says the first payment was received. Its autopay block is not signed. Do not grant access from it alone.
+- The checkout webhook (our webhook_url) only says the first payment was received. Its autopay block is not covered by the body signature and can be missing. Do not grant access from it alone.
 
 ## 3. Renewals and events
 - Renewals do not call our webhook_url.
