@@ -34,15 +34,15 @@ Find the transaction. The list has the same **Filter** and search as the transac
 
 </Step>
 
-<Step image="/img/business/dashboard/row-actions.png" spot="4.5,75,8,21" alt="The checkbox at the start of a row in the table">
+<Step image="/img/business/dashboard/deleted-row-ticked.png" spot="4.2,72,8.4,22" alt="A ticked checkbox at the start of a row in Deleted Paid Transactions">
 
 Tick the checkbox at the start of the transaction's row. To restore several transactions at once, tick each of them.
 
 </Step>
 
-<Step image="/img/business/payment-management/export-toolbar.png" spot="20.8,25.8,17.8,31" alt="The Actions button above the table, next to Export Transactions">
+<Step image="/img/business/dashboard/deleted-actions-restore.png" spot="22.7,15.8,24.4,68.6" alt="The Actions menu above the table, open, with Restore">
 
-Click **Actions** above the table and choose **Restore**.
+Click **Actions** above the table and choose **Restore**. **Actions** is greyed out until a row is ticked.
 
 </Step>
 
