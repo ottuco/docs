@@ -300,6 +300,8 @@ export default function ApiReference({
 
   // The object's main attributes first, Stripe style; an unknown name fails the build.
   const primaryNames = object?.primary;
+  if (primaryNames && primaryNames.length === 0)
+    throw new Error(`ApiReference api="${api}": object.primary is empty; leave it out to show every attribute.`);
   primaryNames?.forEach((name) => {
     if (!responseFields.some((field) => field.name === name))
       throw new Error(`ApiReference api="${api}": object.primary names "${name}", which the response does not have.`);
