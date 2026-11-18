@@ -4,6 +4,8 @@ sidebar_label: Export Transactions
 description: How to export your transactions or generate a report of your payments from the Ottu Dashboard, export only unpaid transactions, and what to do when an export is slow.
 ---
 
+import StepShow, { Step } from "@site/src/components/StepShow";
+
 # Export Transactions and Generate a Report
 
 To get a report of your payments, export the transactions table of a [plugin](/business/plugins) to a CSV or Excel file. The export contains exactly the transactions the table is showing, so [filter](/business/payment-management/search-and-filter) first if you only want some of them, for example only the unpaid ones.
@@ -16,13 +18,29 @@ Need the same report every day, week or month, sent by email or SFTP? Set up a [
 
 ## How do I export my transactions?
 
-1. In the Ottu Dashboard sidebar, open the plugin, for example **Payment Request**, and click **Transactions**.
-2. Optional: click **Filter**, choose what you want to see (for example a date or a **State**), and click **Search**. The export keeps your filters and your search.
-3. Click **Export Transactions** above the table.
-4. Under **Timezone**, pick a timezone in **Select timezone** if the dates in the file should use a specific one.
-5. Under **Select file type**, choose **CSV** or **XLSX**.
-6. Click **Export**.
-7. The dashboard opens the **Generated Reports** page. The file is prepared in the background: wait until the row of your export shows a download icon in the **Download** column, then click it.
+<StepShow>
+  <Step image="/img/business/payment-management/export-sidebar.png" spot="19,53,42,13" alt="The dashboard sidebar with Payment Request open and Transactions selected">
+    In the sidebar, open the plugin, for example **Payment Request**, and click **Transactions**.
+  </Step>
+  <Step image="/img/business/payment-management/filter-panel.png" spot="2,3,96,10" alt="The Filter panel with State, the other filters, Search and Reset">
+    Optional: click **Filter**, choose what you want to see, for example a **Created** period or a **State**, and click **Search**. The export keeps your filters and your search.
+  </Step>
+  <Step image="/img/business/payment-management/export-toolbar.png" spot="39,26,33,31" alt="The Export Transactions button above the transactions table, next to Filter">
+    Click **Export Transactions** above the table.
+  </Step>
+  <Step image="/img/business/payment-management/export-options.png" spot="5,44,91,15" alt="The export options with Timezone and Select timezone">
+    Under **Timezone**, pick a timezone in **Select timezone** if the dates in the file should use a specific one.
+  </Step>
+  <Step image="/img/business/payment-management/export-options.png" spot="5,69,32,16" alt="The export options with Select file type: CSV or XLSX">
+    Under **Select file type**, choose **CSV** or **XLSX**.
+  </Step>
+  <Step image="/img/business/payment-management/export-options.png" spot="77,90,21,9.5" alt="The Export button at the bottom of the export options">
+    Click **Export**.
+  </Step>
+  <Step image="/img/business/payment-management/generated-reports.png" spot="81,23,9.5,16.5" alt="The Generated Reports table with the Available until and Download columns">
+    The **Generated Reports** page opens. The file is prepared in the background: when your export shows a download icon in the **Download** column, click it.
+  </Step>
+</StepShow>
 
 You can leave the page while the file is prepared. To come back later, click **Generated Reports** in the sidebar. Each file stays there until the date in its **Available until** column. You see only your own exports.
 

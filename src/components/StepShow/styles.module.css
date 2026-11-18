@@ -1,0 +1,173 @@
+/* StepShow: steps on the left, the matching screenshot on the right. */
+
+.wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: 28px;
+  align-items: start;
+  margin: 24px 0 32px;
+}
+
+.steps {
+  list-style: none;
+  counter-reset: step;
+  margin: 0;
+  padding: 0;
+}
+
+.steps > li {
+  counter-increment: step;
+  position: relative;
+  margin: 0;
+  padding: 10px 12px 10px 46px;
+  border-radius: 10px;
+  cursor: default;
+  transition: background-color 0.15s ease;
+}
+
+/* number */
+.steps > li::before {
+  content: counter(step);
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ifm-color-emphasis-700);
+  background: var(--ifm-background-color);
+  border: 1.5px solid var(--ifm-color-emphasis-300);
+  z-index: 1;
+}
+
+/* rail joining the numbers */
+.steps > li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 21.5px;
+  top: 34px;
+  bottom: -10px;
+  width: 1.5px;
+  background: var(--ifm-color-emphasis-200);
+}
+
+.steps > li.on {
+  background: var(--ifm-color-emphasis-100);
+}
+
+.steps > li.on::before {
+  color: #fff;
+  background: var(--ifm-color-primary);
+  border-color: var(--ifm-color-primary);
+}
+
+.body > :first-child {
+  margin-top: 0;
+}
+
+.body > :last-child {
+  margin-bottom: 0;
+}
+
+.body p,
+.body ul {
+  margin-bottom: 6px;
+}
+
+/* right side */
+.stage {
+  position: sticky;
+  top: calc(var(--ifm-navbar-height) + 20px);
+  display: grid;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 12px;
+  background: var(--ifm-color-emphasis-100);
+  overflow: hidden;
+}
+
+.stage figure {
+  grid-area: 1 / 1;
+  margin: 0;
+  padding: 14px;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s;
+}
+
+.stage figure.shown {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* screenshot plus the ring that marks the control */
+.shot {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  line-height: 0;
+  overflow: hidden;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(48, 47, 55, 0.18);
+}
+
+.shot img {
+  display: block;
+  max-width: 100%;
+}
+
+.stage .shot img {
+  max-height: min(60vh, 440px);
+}
+
+.spot {
+  position: absolute;
+  box-sizing: border-box;
+  border: 2px solid var(--ifm-color-primary);
+  border-radius: 8px;
+  /* dims the rest of the screenshot */
+  box-shadow: 0 0 0 2000px rgba(48, 47, 55, 0.07);
+  pointer-events: none;
+}
+
+.inlineShot {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .steps > li,
+  .stage figure {
+    transition: none;
+  }
+}
+
+/* narrow: one column, each screenshot under its step */
+@media (max-width: 996px) {
+  .wrap {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stage {
+    display: none;
+  }
+
+  .steps > li.on {
+    background: none;
+  }
+
+  .inlineShot {
+    display: block;
+    margin-top: 10px;
+  }
+
+  .inlineShot .shot {
+    border: 1px solid var(--ifm-color-emphasis-200);
+    box-shadow: none;
+  }
+}
