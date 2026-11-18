@@ -8,7 +8,7 @@ import StepShow, { Step } from "@site/src/components/StepShow";
 
 # Change or Reset Your Password
 
-You change your own password inside the Ottu Dashboard. If you forgot it and cannot sign in, an administrator of your account sets a new one for you.
+You change your own password inside the Ottu Dashboard. If you forgot it and cannot sign in, use **Forgot Password?** on the sign-in page, or email Ottu's Customer Success team to have it reset.
 
 ## How do I change my password?
 
@@ -54,7 +54,14 @@ If you sign in with your company account (single sign-on), you have no Ottu pass
 
 ## I forgot my password
 
-Ask an administrator of your Ottu account to set a new password for you (steps below). When you are signed in again, change it to one only you know, as described above.
+1. On the sign-in page of your Ottu Dashboard, click **Forgot Password?** and follow the instructions.
+2. If the sign-in page has no **Forgot Password?** link, email Ottu's Customer Success team at [csd@ottu.com](mailto:csd@ottu.com) with:
+   - the address of your Ottu Dashboard, for example `yourcompany.ottu.net`;
+   - your username.
+
+The team resets your password and sends the new one to the email address saved on your user. When you are signed in again, change it to one only you know, as described above.
+
+An administrator of your Ottu account can also set a new password for you: see the steps below.
 
 ## Reset the password of another user
 
