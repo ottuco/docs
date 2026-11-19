@@ -1,8 +1,7 @@
-// The box at the top of an API Reference, Stripe style: a box of shortcuts
-// with two tabs, every endpoint the page shows (each links to its section)
-// and the webhook events. On desktop it floats in the right half and the intro
-// (and the text after it) runs down the left; narrower, it sits above the
-// intro.
+// The box at the top of an API Reference, Stripe style: a full-width box of
+// shortcuts with two tabs, every endpoint the page shows (each links to its
+// section) and the webhook events (each links to its catalogue entry,
+// grouped by where they are sent). The intro follows under the box.
 //
 // Usage in MDX, around the intro:
 //   <ApiShortcuts events={autopayEvents} eventsNote={AUTOPAY_EVENTS_NOTE}>
@@ -34,9 +33,22 @@ export type ShortcutEvent = {
   meaning: string;
   /** Where it is documented. */
   href?: string;
+  /** Events with the same group are listed together under it, in order. */
+  group?: string;
 };
 
 type Tab = "endpoints" | "events";
+
+/** Events in their groups, groups in the order they first appear. */
+function groupEvents(events: ShortcutEvent[]): [string | undefined, ShortcutEvent[]][] {
+  const groups = new Map<string | undefined, ShortcutEvent[]>();
+  events.forEach((event) => {
+    const list = groups.get(event.group) ?? [];
+    list.push(event);
+    groups.set(event.group, list);
+  });
+  return [...groups.entries()];
+}
 
 export default function ApiShortcuts({
   endpoints = [],
@@ -58,10 +70,7 @@ export default function ApiShortcuts({
 
   return (
     <>
-      <nav
-        className={`${styles.shortcutsBox} float-beside`}
-        aria-label="API shortcuts"
-      >
+      <nav className={styles.shortcutsBox} aria-label="API shortcuts">
         {/* Toggle buttons, not ARIA tabs: no tabpanel or arrow keys here. */}
         <div className={styles.shortcutsTabs} role="group" aria-label="Show">
           {tabs.map(([value, label]) => (
@@ -77,7 +86,7 @@ export default function ApiShortcuts({
           ))}
         </div>
         {tab === "endpoints" ? (
-          <ul className={styles.shortcutsList}>
+          <ul className={`${styles.shortcutsList} ${styles.shortcutsGrid}`}>
             {endpoints.map(({ api, run, label, source }) => {
               const { method, path } = endpointOf(source).operation;
               const verb = method.toUpperCase();
@@ -97,7 +106,7 @@ export default function ApiShortcuts({
                         >
                           {verb}
                         </span>
-                        <code>{path}</code>
+                        <code title={path}>{path}</code>
                       </span>
                     </span>
                     <Icon path={mdiChevronRight} size={0.7} />
@@ -107,21 +116,28 @@ export default function ApiShortcuts({
             })}
           </ul>
         ) : (
-          <ul className={styles.shortcutsList}>
-            {eventsNote && <li className={styles.eventsNote}>{eventsNote}</li>}
-            {events.map(({ name, meaning, href }) => (
-              <li key={name} className={styles.event}>
-                {href ? (
-                  <Link to={href} className={styles.eventName}>
-                    <code>{name}</code>
-                  </Link>
-                ) : (
-                  <code className={styles.eventName}>{name}</code>
-                )}
-                <span className={styles.eventMeaning}>{meaning}</span>
-              </li>
+          <div className={styles.shortcutsList}>
+            {eventsNote && <p className={styles.eventsNote}>{eventsNote}</p>}
+            {groupEvents(events).map(([group, list]) => (
+              <section key={group ?? "events"} className={styles.eventGroup}>
+                {group && <h4 className={styles.eventGroupTitle}>{group}</h4>}
+                <ul className={styles.shortcutsGrid}>
+                  {list.map(({ name, meaning, href }) => (
+                    <li key={name} className={styles.event}>
+                      {href ? (
+                        <Link to={href} className={styles.eventName}>
+                          <code>{name}</code>
+                        </Link>
+                      ) : (
+                        <code className={styles.eventName}>{name}</code>
+                      )}
+                      <span className={styles.eventMeaning}>{meaning}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             ))}
-          </ul>
+          </div>
         )}
       </nav>
       {children}

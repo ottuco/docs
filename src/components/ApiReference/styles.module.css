@@ -207,20 +207,10 @@
   font-weight: 600;
 }
 
-/* ApiShortcuts: the intro on the left, the endpoint / event box on the right. */
-/* Desktop: floated into the right half, so the intro and the text after it
-   run down the left (see .float-beside in src/css/custom.css; the AutoPay
-   page caps its prose at half width in its autopay.css). Narrower, it sits
-   above the intro. */
-@media (min-width: 997px) {
-  .shortcutsBox {
-    float: right;
-    width: min(420px, calc(50% - 32px));
-    margin-left: 32px;
-  }
-}
-
+/* ApiShortcuts: a full-width box at the top of the reference, Stripe style
+   (#161111 R11); the intro follows under it. */
 .shortcutsBox {
+  clear: both;
   margin-bottom: 24px;
   border: 1px solid var(--ifm-color-emphasis-300);
   border-radius: 10px;
@@ -253,11 +243,40 @@
 }
 
 .shortcutsList {
-  max-height: 60vh;
   margin: 0;
-  padding: 4px 0;
+  padding: 6px 0;
   list-style: none;
-  overflow-y: auto;
+}
+
+/* Endpoints and events in columns, as many as fit. */
+.shortcutsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Beats the docs' `.markdown li + li` spacing, which would push every
+   entry but the first down. */
+.shortcutsBox .shortcutsGrid > li {
+  margin: 0;
+  min-width: 0;
+}
+
+.eventGroup + .eventGroup {
+  margin-top: 4px;
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+
+/* `.shortcutsBox` in front: the docs' heading and paragraph styles would
+   win otherwise. */
+.shortcutsBox .eventGroupTitle {
+  margin: 0;
+  padding: 10px 16px 2px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-700);
 }
 
 .shortcutsList > li {
@@ -336,7 +355,8 @@
   color: var(--ifm-color-emphasis-800);
 }
 
-.eventsNote {
+.shortcutsBox .eventsNote {
+  margin: 0;
   padding: 8px 16px;
   font-size: 12.5px;
   color: var(--ifm-color-emphasis-700);
