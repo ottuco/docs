@@ -901,9 +901,10 @@ export function onRouteDidUpdate(): void {
     // A link (e.g. `?tab=x#same-hash`) or one without a query still
     // scrolls, below.
   } else {
-    // Same-page hash change (sidebar anchor click, back/forward). Nothing
-    // else scrolls here: Docusaurus only scrolls after a pathname change,
-    // and the router does not make the browser follow a pushState hash.
+    // Same-page hash change (sidebar anchor click, back/forward). Docusaurus
+    // scrolls the target into view at once, before it may exist or be
+    // visible (a closed box, another tab), and the browser does not follow a
+    // pushState hash; a hash-less route it scrolls to the top itself.
     // No hydration wait is needed, but the new hash can open collapsed
     // parents or switch a tab on this render (ApiReference), so
     // scrollWhenVisible waits (up to 2 s) until the target can be

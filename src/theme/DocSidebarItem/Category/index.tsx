@@ -33,28 +33,22 @@ type SidebarCategoryItem = {
 };
 
 /**
- * Scrolls the current page back to the top and drops the "#section" from
- * the URL, through the router (a replace: no new history entry), so the
- * router's location has no hash either and a later query-only change (a
- * tab) does not bring it back. The route update lets the sidebar's hash
- * module (src/clientModules/sidebarHashActiveLink.ts) clear the section
- * highlight, and re-mutes its scroll-spy (as every route change does), so
- * the scroll up writes no section into the URL.
+ * Back to the top of the current page. With a "#section" in the URL, the
+ * hash is dropped through the router (a replace: no new history entry), and
+ * Docusaurus's own scrollAfterNavigation scrolls a hash-less route to the
+ * top; the route update also clears the sidebar's section highlight and
+ * re-mutes its scroll-spy (src/clientModules/sidebarHashActiveLink.ts).
+ * Without a hash, it scrolls itself. A long page first jumps to one screen
+ * from the top, so the smooth scroll that follows is short.
  */
 function goToPageTop(history: ReturnType<typeof useHistory>): void {
+  if (window.scrollY > window.innerHeight) {
+    window.scrollTo({ top: window.innerHeight, behavior: "instant" });
+  }
   if (window.location.hash) {
     history.replace({ pathname: window.location.pathname, search: window.location.search });
-  }
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (reduceMotion) {
-    window.scrollTo({ top: 0, behavior: "instant" });
   } else {
-    // A smooth scroll over a long page takes seconds: jump to one screen
-    // from the top, then glide the rest of the way.
-    if (window.scrollY > window.innerHeight) {
-      window.scrollTo({ top: window.innerHeight, behavior: "instant" });
-    }
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0 });
   }
 }
 
