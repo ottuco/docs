@@ -14,7 +14,10 @@
   min-width: 0;
 }
 
-@media (min-width: 997px) {
+/* Side by side only from 1200px: below that the right column would be
+   narrower than the visuals' own layouts expect (the live demos switch
+   their layouts on the viewport, not on their column). */
+@media (min-width: 1200px) {
   .wrap {
     grid-template-columns: minmax(260px, 2fr) minmax(0, 3fr);
     gap: 32px;
