@@ -115,97 +115,24 @@ Open the screen or widget where you plan to add the **Ottu SDK widget**.
 
 <ol className="stepper">
   <li className="stepper-item">
-    <strong>Define `ValueNotifier`</strong>
-    <div>
-      In the State class of your screen widget, define a new member of type
-      `ValueNotifier<int>`:
-    </div>
-
-    ```dart
-    final _checkoutHeight = ValueNotifier(300);
-    ```
-
-    <div>
-      Here, the default value of **300** represents the most suitable height
-      for the `OttuCheckoutWidget`.
-    </div>
-  </li>
-  <li className="stepper-item">
-    <strong>Add and Wrap `OttuCheckoutWidget`</strong>
+    <strong>Add `OttuCheckoutWidget`</strong>
     <div>Add the `OttuCheckoutWidget` to the desired location in your layout.</div>
-    <div>
-      Wrap the `OttuCheckoutWidget` inside a `SizedBox`, then wrap this
-      `SizedBox` within a `ValueListenableBuilder<int>` to dynamically adjust
-      the widget height based on the `ValueNotifier` value.
-    </div>
-    <div>
-      Set the `valueListenable` parameter of the builder to the value you
-      created earlier in previous step.
-    </div>
 
     ```dart
-    ValueListenableBuilder(
-      valueListenable: _checkoutHeight,
-      builder: (context, height, child) {
-        return SizedBox(
-          height: height.toDouble(),
-          child: OttuCheckoutWidget(
-            arguments: CheckoutArguments(
-              merchantId: "alpha.ottu.net",
-              apiKey: 'your Api key',
-              sessionId: 'your session id',
-              amount: 20.0,
-              showPaymentDetails: true,
-              paymentOptionsDisplaySettings: PaymentOptionsDisplaySettings(
-                mode: PaymentOptionsDisplayMode.BOTTOM_SHEET,
-                visibleItemsCount: 5,
-                defaultSelectedPgCode: "",
-              ),
-            ),
-          ),
-        );
-      },
+    OttuCheckoutWidget(
+      arguments: CheckoutArguments(
+        merchantId: "alpha.ottu.net",
+        apiKey: 'your Api key',
+        sessionId: 'your session id',
+        amount: 20.0,
+        showPaymentDetails: true,
+        paymentOptionsDisplaySettings: PaymentOptionsDisplaySettings(
+          mode: PaymentOptionsDisplayMode.BOTTOM_SHEET,
+          visibleItemsCount: 5,
+          defaultSelectedPgCode: "",
+        ),
+      ),
     ),
-    ```
-  </li>
-  <li className="stepper-item">
-    <strong>Define `MethodChannel` and Constant</strong>
-    <div>
-      Define your `MethodChannel` as a top-level member of the file. It listens
-      to messages from the native Android or iOS view:
-    </div>
-
-    ```dart
-    const _methodChannel = MethodChannel("com.ottu.sample/checkout");
-    ```
-
-    <div>
-      Also, define a constant string member to identify the channel's method
-      name:
-    </div>
-
-    ```dart
-    const _methodCheckoutHeight = "METHOD_CHECKOUT_HEIGHT";
-    ```
-  </li>
-  <li className="stepper-item">
-    <strong>Register `MethodChannel` Handler</strong>
-    <div>
-      Register a handler for this `MethodChannel`. It is recommended to do
-      this inside the `didChangeDependencies()` widget state callback method:
-    </div>
-    ```dart
-    @override
-    void didChangeDependencies() {
-      _methodChannel.setMethodCallHandler((call) async {
-        switch (call.method) {
-          case _methodCheckoutHeight:
-            int height = call.arguments as int;
-            _checkoutHeight.value = height;
-        }
-      });
-      super.didChangeDependencies();
-    }
     ```
   </li>
   <li className="stepper-item">
