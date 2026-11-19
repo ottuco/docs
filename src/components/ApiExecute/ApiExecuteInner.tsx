@@ -19,6 +19,7 @@ import {
   mdiPlay,
 } from "@mdi/js";
 import ApiPanel from "@site/src/components/ApiPanel";
+import panelStyles from "@site/src/components/ApiPanel/styles.module.css";
 import type { AnyScenario, Picked, StepRun } from "./scenario";
 import { runOf, type ScenarioKey } from "./scenarios";
 import { send, type ExecuteResult } from "./send";
@@ -69,18 +70,34 @@ function PickedList({ picked }: { picked: Picked[] }) {
   );
 }
 
-/** The response, with the lines that hold an extracted value highlighted like a diff. */
+/**
+ * The response, with the lines that hold an extracted value highlighted like
+ * a diff, under the same JSON header and Copy button as the request body.
+ */
 function MarkedResponse({ response, values }: { response: unknown; values: string[] }) {
   const lines = markExtracted(response, values);
+  const text = lines.map((line) => line.text).join("\n");
   return (
-    <pre className={styles.markedResponse} style={{ maxHeight: STEP_CODE_HEIGHT }}>
-      {lines.map((line, i) => (
-        <span key={i} className={line.extracted ? styles.markedLine : undefined}>
-          {line.text}
-          {"\n"}
-        </span>
-      ))}
-    </pre>
+    <div className={`${panelStyles.apiPanel} ${styles.stepPanel}`}>
+      <div className={panelStyles.apiPanelHeader}>
+        <span>JSON</span>
+        <button
+          type="button"
+          className={panelStyles.apiPanelCopy}
+          onClick={() => navigator.clipboard?.writeText(text)}
+        >
+          Copy
+        </button>
+      </div>
+      <pre className={styles.markedResponse} style={{ maxHeight: STEP_CODE_HEIGHT }}>
+        {lines.map((line, i) => (
+          <span key={i} className={line.extracted ? styles.markedLine : undefined}>
+            {line.text}
+            {"\n"}
+          </span>
+        ))}
+      </pre>
+    </div>
   );
 }
 
