@@ -31,6 +31,31 @@ type SidebarCategoryItem = {
   linkUnlisted?: boolean;
 };
 
+/**
+ * Scrolls the current page back to the top and drops the "#section" from
+ * the URL (no new history entry). The hashchange event lets the sidebar's
+ * hash module (src/clientModules/sidebarHashActiveLink.ts) clear the
+ * section highlight, as it does for any hash change.
+ */
+function goToPageTop(): void {
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduceMotion) {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  } else {
+    // A smooth scroll over a long page takes seconds: jump to one screen
+    // from the top, then glide the rest of the way.
+    if (window.scrollY > window.innerHeight) {
+      window.scrollTo({ top: window.innerHeight, behavior: "instant" });
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  if (window.location.hash) {
+    const oldURL = window.location.href;
+    window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
+    window.dispatchEvent(new HashChangeEvent("hashchange", { oldURL, newURL: window.location.href }));
+  }
+}
+
 type Props = {
   item: SidebarCategoryItem;
   onItemClick?: (item: SidebarCategoryItem) => void;
@@ -190,8 +215,14 @@ export default function DocSidebarItemCategory({
                   onItemClick?.(item);
                   if (hrefWithSSRFallback) {
                     if (isCurrentPage) {
+                      // Already on this category's page (a one-page doc whose
+                      // children are its sections): go back to the top
+                      // instead of only folding the list, so the reader can
+                      // always return to the start (#161111 R9). The caret
+                      // button next to the label still folds the list.
                       e.preventDefault();
-                      updateCollapsed();
+                      updateCollapsed(false);
+                      goToPageTop();
                     } else {
                       updateCollapsed(false);
                     }

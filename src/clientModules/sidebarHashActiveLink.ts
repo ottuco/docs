@@ -605,6 +605,11 @@ function maintainTargetPosition(hashId: string): void {
   const compensate = () => {
     if (cancelled) return false;
     if (!spyMuted) return false; // user took over
+    // The URL no longer points at this section (the reader went back to the
+    // top, which drops the hash, or on to another section): stop pinning.
+    // This also covers a compensator that starts late, after the wait for
+    // the initial scroll to settle.
+    if (getHashTargetId() !== hashId) return false;
     if (performance.now() - startedAt > MAINTAIN_DURATION_MS) return false;
     // If the element fell out of the live DOM (route change since we
     // started), or is hidden again (its box closed, its tab switched away),
@@ -915,7 +920,18 @@ if (typeof window !== "undefined") {
   // scroll events are ignored from module load until the user's first
   // real scroll input — regardless of how long hydration takes.
 
-  window.addEventListener("hashchange", () => updateActiveLinks());
+  window.addEventListener("hashchange", () => {
+    // The hash was removed (e.g. the sidebar's own category entry takes the
+    // reader back to the top of the page, #161111 R9): there is no section
+    // to reach or keep pinned any more, so stop a pending reveal and the
+    // layout-shift compensator; otherwise they pull the page back down.
+    if (!window.location.hash) {
+      scrollTicket += 1;
+      cancelMaintain?.();
+      lastNavHash = "";
+    }
+    updateActiveLinks();
+  });
   document.addEventListener(
     "click",
     (e) => {
