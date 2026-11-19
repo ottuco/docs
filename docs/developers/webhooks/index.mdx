@@ -37,7 +37,7 @@ Looking for the old docs? [Click here](/developers/webhooks/legacy). Still on th
 - Fulfil an order when [`payment.paid`](#payment-paid) arrives, and release stock when [`payment.expired`](#payment-expired) or [`payment.canceled`](#payment-canceled) arrives.
 - Record [refunds, captures and voids](/developers/operations-v3) at the same URL: they arrive as [`payment.refunded`](#payment-refunded), `payment.paid` with `data.operation` equal to `capture`, and [`payment.voided`](#payment-voided).
 - Follow [AutoPay](/developers/payments/autopay) subscriptions through their [`subscription.*` events](#subscription-events).
-- Parse one shape for every [payment gateway](/developers/payments/payment-methods). MPGS, KNET or PayPal: the event is the same, and the gateway's own details sit in [`data.connector`](#event-data-connector-params).
+- Parse one shape for every [payment gateway](/developers/payments/payment-methods). MPGS, KNET or PayPal: the event is the same, and the gateway's own details sit in [`data.connector`](#data-keys).
 
 ## Setup
 
@@ -662,9 +662,9 @@ A delivery gets **8 attempts in total**: the first one and seven retries.
 2. **Attempt 2:** 1 minute later.
 3. **Attempt 3:** 5 minutes later (6 minutes from the start).
 4. **Attempt 4:** 30 minutes later (36 minutes).
-5. **Attempt 5:** 2 hours later (2.5 hours).
-6. **Attempt 6:** 5 hours later (7.5 hours).
-7. **Attempt 7:** 10 hours later (17.5 hours).
+5. **Attempt 5:** 2 hours later (about 2.6 hours).
+6. **Attempt 6:** 5 hours later (about 7.6 hours).
+7. **Attempt 7:** 10 hours later (about 17.6 hours).
 8. **Attempt 8:** 24 hours later (about 42 hours).
 
 - **Each wait varies by plus or minus 10 percent**, so a burst of failures does not come back in one wave.
