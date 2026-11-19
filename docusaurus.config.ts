@@ -1,5 +1,6 @@
 import path from "node:path";
 import { darkCodeTheme, lightCodeTheme } from "./src/prism/brandThemes";
+import { MOVED, MOVED_ROUTE_PATTERNS } from "./src/components/MovedTo/routes";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
 // Adds the `devServer` key to webpack's Configuration type (used by the plugin below).
@@ -274,6 +275,8 @@ const config: Config = {
           "/overview/changelog*",
           // Internal reference page for authors of React Flow diagrams.
           "/diagrams/*",
+          // Removed pages kept as redirects (src/components/MovedTo/routes.ts).
+          ...Object.keys(MOVED).flatMap((route) => [route.replace(/\/$/, ""), `${route}*`]),
         ],
       },
     ],
@@ -308,6 +311,8 @@ const config: Config = {
         indexDocs: true,
         indexBlog: false,
         docsRouteBasePath: "/",
+        // Removed pages kept as redirects (src/components/MovedTo/routes.ts).
+        ignoreFiles: MOVED_ROUTE_PATTERNS,
       },
     ],
   ],

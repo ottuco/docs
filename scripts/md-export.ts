@@ -337,8 +337,15 @@ const meta: Record<string, { title: string; description: string }> = {};
 const skipped: string[] = [];
 for (const file of walk(DOCS)) {
   const { data, body } = frontMatter(fs.readFileSync(file, "utf8"));
-  if (data.draft === "true" || data.unlisted === "true") continue;
   const route = routeOf(file, data.slug, data.id);
+  if (data.draft === "true" || data.unlisted === "true") {
+    // No Markdown copy of an unlisted page (the removed pages kept as
+    // redirects, src/components/MovedTo/): drop the one
+    // docusaurus-markdown-source-plugin wrote, so llms.txt does not list it.
+    const copy = path.join(OUT, route, "intro.md");
+    if (fs.existsSync(copy)) fs.unlinkSync(copy);
+    continue;
+  }
   const target = path.join(OUT, route, "intro.md");
   if (!fs.existsSync(path.dirname(target)) || !fs.existsSync(path.join(OUT, route, "index.html"))) {
     skipped.push(route);
