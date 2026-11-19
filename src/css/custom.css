@@ -23,6 +23,11 @@
 
 /* You can override the default Infima variables here. */
 :root {
+  /* A value the docs took from a response (the Run dialog's "Extracted"
+     tag and highlighted lines), coloured like a diff's added line. */
+  --ottu-extracted-text: #1a7f37;
+  --ottu-extracted-bg: rgba(46, 160, 67, 0.15);
+
   /* Typography — Poppins */
   --ifm-font-family-base: "Poppins", system-ui, -apple-system, sans-serif;
   --ifm-heading-font-family: "Poppins", system-ui, -apple-system, sans-serif;
@@ -110,6 +115,8 @@ html {
    higher specificity (0,1,1) over :root (0,0,1), preventing cssnano from
    overriding these variables when it merges and repositions :root rules. */
 html[data-theme="dark"] {
+  --ottu-extracted-text: #3fb950;
+  --ottu-extracted-bg: rgba(46, 160, 67, 0.2);
   --ifm-background-color: #0f1117;
   --ifm-background-surface-color: #171a21;
 
