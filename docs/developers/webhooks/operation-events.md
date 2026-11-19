@@ -1,16 +1,17 @@
 ---
 title: Operation Events
 sidebar_label: Operation Events
-description: The webhook body Ottu sends after a refund, capture or void on webhook formats 1 and 2 (deprecated; format 3 sends these as payment.* events).
+description: The old (format 2) webhook body Ottu sends after a refund, capture or void. Obsolete - webhooks v3 send these as payment.* events.
 displayed_sidebar: developerSidebar
+hide_table_of_contents: true
 ---
 
 import SchemaEmbed from "@site/src/components/SchemaEmbed";
 
 # Operation Notification
 
-:::warning Webhook formats 1 and 2 are deprecated
-This page describes the older webhook formats. In [format 3](/developers/webhooks/event-catalogue), refunds, captures and voids arrive as `payment.refunded`, `payment.paid` (with `data.operation` equal to `capture`) and `payment.voided`. In v3, `refund_queued` is named `refund_pending` and `invalided` is `invalidated`. To move an existing integration, see [Migrating to v3](/developers/webhooks/migrate-to-v3).
+:::warning This version is obsolete
+This page describes the old webhooks (format 2). Use [webhooks v3](/developers/webhooks): refunds, captures and voids arrive as the events [`payment.refunded`](/developers/webhooks#payment-refunded), [`payment.paid`](/developers/webhooks#payment-paid) (with `data.operation` equal to `capture`) and [`payment.voided`](/developers/webhooks#payment-voided). In v3, `refund_queued` is named `refund_pending` and `invalided` is `invalidated`. To move, follow [Migrate to v3](/developers/webhooks/migrate-to-v3).
 :::
 
 Ottu’s operation webhooks provide real-time insights into post-transaction activities, specifically focusing on `refund`, `capture`, and `void`. Operating asynchronously, they ensure merchants are promptly informed about these crucial subsequent payment gateway operations without disrupting the main transaction flow. By utilizing these webhooks, merchants gain a clearer view of their transactional landscape, enhancing decision-making and customer interactions.
@@ -96,7 +97,7 @@ Every operation is a subsequent action performed on a specific payment transacti
 - **Queued Operations:** The Payment Gateway (PG) might not approve the request instantly, placing it in a queue for later processing. Such operations initially bear a `<operation>_queued` state. Once processed, the state either transitions to the specific operation state (like `refunded`, `captured`, `voided`) or `<operation>_rejected`.
 
 2. **Understanding Real-time and Queued Payment Gateways:**&#x54;o determine which Payment Gateways operate in real-time and which ones use the queued system, you can consult the list provided [here](/developers/operations).
-3. **Additional Information:** Upon receiving a `<operation>_queued` status, such as `refund_queued` (named `refund_pending` in [format 3](/developers/webhooks/event-catalogue#catalogue)), it’s imperative to archive this response. Ottu will subsequently notify the operation webhook URL with the conclusive result.
+3. **Additional Information:** Upon receiving a `<operation>_queued` status, such as `refund_queued` (named `refund_pending` in [v3](/developers/webhooks#payment-refund-pending)), it’s imperative to archive this response. Ottu will subsequently notify the operation webhook URL with the conclusive result.
 4. **Understanding the result Field:** `result` this field elucidates the operation’s outcome:
 
 - `success`: The operation was executed successfully.
@@ -131,7 +132,5 @@ For general webhook setup and configuration, see the [Webhooks Overview](./).
 - [**PG Params**](/developers/webhooks/pg-params/) — Normalized gateway response fields reference
 - [**Payment Events**](/developers/webhooks/payment-events/) — Webhook notifications for payment transactions
 - [**Verify Signatures**](/developers/webhooks/verify-signatures/) — Validate webhook authenticity with HMAC-SHA256
-- [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration
-- [**Webhook Events (v3)**](/developers/webhooks/event-catalogue/) — Refunds, captures and voids as `payment.refunded`, `payment.paid` and `payment.voided`
-- [**Migrating to v3**](/developers/webhooks/migrate-to-v3/) — Field map from this payload to the flat `data`
-- [**Delivery and Retries**](/developers/webhooks/delivery-and-retries/) — Success rules, retry schedule, `Idempotency-Key`
+- [**Webhooks v3**](/developers/webhooks) — The current webhooks: setup, the receiver and every event
+- [**Migrate to v3**](/developers/webhooks/migrate-to-v3/) — Where every field of this body is in v3

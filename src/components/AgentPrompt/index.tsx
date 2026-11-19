@@ -4,7 +4,10 @@
 // Usage in MDX:
 //   import AgentPrompt from "@site/src/components/AgentPrompt";
 //   <AgentPrompt topic="webhooks" />
+//   <AgentPrompt topic="webhooks" compact />   one slim row: label, Copy prompt, View prompt
 import React, { useState } from "react";
+import Icon from "@mdi/react";
+import { mdiRobotOutline } from "@mdi/js";
 import { WEBHOOKS_PROMPT } from "./prompts/webhooks";
 import { AUTOPAY_PROMPT } from "./prompts/autopay";
 import styles from "./styles.module.css";
@@ -22,9 +25,17 @@ const PROMPTS = {
   },
 } as const;
 
-export default function AgentPrompt({ topic }: { topic: keyof typeof PROMPTS }): React.JSX.Element {
+export default function AgentPrompt({
+  topic,
+  compact = false,
+}: {
+  topic: keyof typeof PROMPTS;
+  /** One slim row (label, Copy prompt, View prompt) instead of the box. */
+  compact?: boolean;
+}): React.JSX.Element {
   const { title, text, prompt } = PROMPTS[topic];
   const [copied, setCopied] = useState(false);
+  const [open, setOpen] = useState(false);
   const copy = () => {
     navigator.clipboard
       ?.writeText(prompt)
@@ -34,6 +45,28 @@ export default function AgentPrompt({ topic }: { topic: keyof typeof PROMPTS }):
       })
       .catch(() => {});
   };
+  if (compact) {
+    return (
+      <div className={styles.compact}>
+        <div className={styles.row}>
+          <Icon path={mdiRobotOutline} size={0.75} className={styles.rowIcon} />
+          <span className={styles.rowLabel}>{title}</span>
+          <button type="button" className={styles.rowButton} onClick={copy}>
+            {copied ? "Copied" : "Copy prompt"}
+          </button>
+          <button
+            type="button"
+            className={styles.rowButton}
+            aria-expanded={open}
+            onClick={() => setOpen(!open)}
+          >
+            {open ? "Hide prompt" : "View prompt"}
+          </button>
+        </div>
+        {open && <pre className={styles.rowPrompt}>{prompt}</pre>}
+      </div>
+    );
+  }
   return (
     <div className={styles.box}>
       <div className={styles.head}>

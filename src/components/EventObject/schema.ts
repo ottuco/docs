@@ -1,6 +1,6 @@
-// The format 3 webhook event, as a JSON schema for the Stripe-style field list
-// (src/components/ApiReference/Fields.tsx). The texts are the event catalogue's
-// tables (docs/developers/webhooks/event-catalogue.mdx); keep the two in step.
+// The webhook event, as a JSON schema for the Stripe-style field list
+// (src/components/ApiReference/Fields.tsx). The texts follow the event entries
+// on the Webhooks page (docs/developers/webhooks/index.mdx); keep the two in step.
 import type { Schema } from "@site/src/components/ApiReference/schema";
 
 const S = (description: string): Schema => ({ type: "string", description });
@@ -113,11 +113,11 @@ export const EVENT_SCHEMA: Schema = {
   type: "object",
   properties: {
     id: S(
-      "The event id, `evt_` followed by 26 characters. Identical on every retry and on every URL that receives the event, and sent as the [`Idempotency-Key`](/developers/webhooks/delivery-and-retries#idempotency-key) header. De-duplicate on it.",
+      "The event id, `evt_` followed by 26 characters. Identical on every retry and on every URL that receives the event, and sent as the [`Idempotency-Key`](/developers/webhooks#idempotency-key) header. De-duplicate on it.",
     ),
     event: S("The event name, such as `payment.paid`. See the [catalogue](#catalogue)."),
     created: S("When Ottu recorded the event, UTC, `YYYY-MM-DDTHH:MM:SSZ`."),
-    version: { type: "integer", description: "Always `3` for this format." },
+    version: { type: "integer", description: "Always `3`." },
     is_sandbox: {
       type: "boolean",
       description: "`true` when the payment runs on a sandbox gateway. See [`is_sandbox`](#is-sandbox).",

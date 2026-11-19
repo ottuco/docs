@@ -54,13 +54,15 @@ docs/developers/
 │   └── recurring-payments.mdx      # Auto-debit, CIT/MIT, agreement setup, recurring billing
 │
 ├── webhooks/
-│   ├── index.md                    # Webhook setup, formats, retries, delivery guarantees
-│   ├── event-catalogue.mdx         # Format 3 envelope, 15 payment events, flat data
-│   ├── migrate-to-v3.md            # Format 1/2 to format 3 field map
-│   ├── delivery-and-retries.mdx    # Success rules, retry schedule, Idempotency-Key
-│   ├── payment-events.mdx          # Payment webhook payload reference (formats 1 and 2)
-│   ├── operation-events.md         # Operation webhook payload reference
-│   └── verify-signatures.md        # HMAC-SHA256 signature verification with code examples
+│   ├── index.mdx                   # The one Webhooks page: When to Use, Setup, Guide (step-by-step, delivery and retries,
+│   │                               #   reconciliation, testing, troubleshooting), API Reference (the event object, every event)
+│   ├── pg-params.md                # The normalized gateway fields (connector.params); listed under Reference
+│   ├── verify-signatures.md        # The Ottu-Signature header, code in eight languages, test vectors, Sign API; under Reference
+│   ├── migrate-to-v3.md            # For an integration on the old webhooks: steps and field map (not in the menu: linked from What's Next and the old docs)
+│   ├── legacy.mdx                  # Target of the "Looking for the old docs?" note (not in the menu)
+│   ├── payment-events.mdx          # OLD (format 2) payment webhook body, obsolete note on top
+│   ├── operation-events.md         # OLD (format 2) operation webhook body, obsolete note on top
+│   └── _*.mdx                      # Code samples shared between pages (partials, not routed)
 │
 ├── reference/
 │   ├── error-codes.md              # Error code reference (EMPTY — needs content)
@@ -80,11 +82,9 @@ Standard structure for developer API/feature pages. **Section order is fixed** �
 ```
 # Page Title
 
-[Overview paragraph — what this is and why you need it]
+[Overview paragraph — what this is and why you need it; a section hub opens with three short steps]
 
-:::tip Boost Your Integration
-Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../getting-started/#boost-your-integration) for all available options.
-:::
+[One "Looking for the old docs?" note, only when the section has an older version]
 
 ## When to Use                    ← scenarios / bullet list of when this feature applies
 
@@ -132,10 +132,30 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 - **Section order is fixed** — Overview → When to Use → Setup → Guide → API Reference → Best Practices → FAQ → What's Next? Skip optional sections, never reorder.
 - **Optional sections** — Setup, Best Practices can be omitted. When to Use, Guide, FAQ, and What's Next? should be on every page.
 
+### Review rules (every developer page)
+
+Set by Dacian's reviews of 2026-11-17 and 2026-11-18 (#160604 R9-R17, #160903, #161001, #161109, #161111). They apply to every developer page, not only the page that was reviewed.
+
+- **One menu for every section: When to Use, Setup, Guide, API Reference, Best Practices, FAQ.** Exactly these six, in this order, as the page's `##` headings and as the section's left menu (Operations, Payment Status Query, Webhooks). No section invents its own menu, and no title carries a time ("5 minutes"). "Quick implementation" and "Quickstart" do not exist: the one walkthrough is `### Step-by-Step` inside Guide.
+- **One long page per section**, as Stripe does: everything about the feature lives under those six headings. Walkthrough material (delivery and retries, reconciliation, testing, troubleshooting) is a `###` inside Guide; what Ottu sends or answers (objects, events, fields, errors) is a `###` inside API Reference. A section with nothing to call (Webhooks) still has API Reference: it holds the event object and every event. Each fact is stated once.
+- **A section hub opens with three short steps** that say what the feature is and how to start, and links the business page ("Related guide").
+- **No right-hand contents column.** Every developer page sets `hide_table_of_contents: true`: the menu is on the left, and the content has two columns, text and visuals. Business pages keep the contents column.
+- **Text left, visuals right.** A section's code, JSON, screenshot or diagram sits to the right of the text that explains it: `<Beside>` with the visual in `<Visual>` (`src/components/Beside/`; the right column is sticky while it fits the screen, and never scrolls inside). Screenshots of a procedure use `<StepShow>` (`src/components/StepShow/`): steps on the left, one screenshot on the right with the control ringed. No carousel. A section with no visual runs full width; never leave a white half.
+- **No tables.** A table row cannot be linked. Anything a reader may be sent a link to (an event, a status, an error, a field, a setting, a scenario) is a heading with an explicit id, followed by one to three short labelled lines (`**Sent when:**`, `**What to do:**`).
+- **Never two notes one under another**, and never a note next to `<AgentPrompt>`. Put a note in the paragraph it belongs to, and keep notes for mistakes that cost money or security.
+- **One compact coding-agent prompt per section**: `<AgentPrompt topic="…" compact />`, once, in Step-by-Step.
+- **Only the current version is documented.** No page compares versions or formats, and there is no version switcher. A section with an older version shows one note at the top of its main page, "Looking for the old docs? Click here", linking to the old page. An old page keeps its URL, is not in the menu, and opens with an "obsolete" note that links the v3 page and the migration guide and names the values renamed in v3 (`refund_queued` is `refund_pending`, `invalided` is `invalidated`). Webhook format 1 is not documented.
+- **Webhook first.** Never tell the reader to poll. The Payment Status Query is for a missed webhook, for reconciliation, and after a `502` or `504`.
+- **An object is not a response.** An object section does not say "Response" and has no required badges. An operation ends with a `**Returns**` line that links the object.
+- **Interactivity reuses what exists**: Run (`<ApiReference … run>`), the Live Demo components, `<StoryDiagram>`, `<StepShow>`, `<FAQ>`. No page-specific widget. A widget must do what it says.
+- **Diagrams are React Flow.** A story diagram uses `controls="side"` (chips on the left of the diagram), and its part buttons read "Your part", "Ottu's part", "Customer's part", in that order.
+- **Examples are clean.** `customer@example.com` as the email, never an `@ottu.com` address or a colleague's name; only the fields the call needs; `{name}` placeholders (`{your_api_key}`). JSON is pretty-printed, one key per line, and no code line runs past its column.
+- **Calm pages.** No emoji, no bold headings, no checkbox lists, no colour beyond the design tokens.
+
 ### Additional Rules
 
 - **No standalone Authentication or Permissions sections** — authentication is documented in `getting-started/authentication.md`, and per-endpoint permissions are injected into the API reference via the enrichment engine (`static/api-enrichments/`). Do not duplicate this on individual pages.
-- **No per-page SDK/package callouts** — all integration options are documented centrally in `getting-started/index.md#boost-your-integration`. Individual pages use the `:::tip Boost Your Integration` block shown above.
+- **No per-page SDK/package callouts** — all integration options are documented centrally in `getting-started/index.md#boost-your-integration`. A page links it from What's Next ("Boost your integration"), never as a tip at the top of the page.
 - **Every page ends with "What's Next?"** — 3-5 links to the logical next steps in the developer journey.
 - **Code block titles** — API request/response examples and webhook payloads use the Docusaurus `title` attribute for premium styling (constrained width, labeled header bar). Use the `/code-blocks` skill for the full convention and naming patterns.
 - **FAQ is always second-to-last** (before What's Next). Use the `<FAQ>` / `<FAQItem>` component from `@site/src/components/FAQ` for questions (not H3s, which create sidebar entries).

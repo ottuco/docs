@@ -1,5 +1,6 @@
 import path from "node:path";
-import { themes as prismThemes } from "prism-react-renderer";
+import { darkCodeTheme, lightCodeTheme } from "./src/prism/brandThemes";
+import { MOVED, MOVED_ROUTE_PATTERNS } from "./src/components/MovedTo/routes";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
 // Adds the `devServer` key to webpack's Configuration type (used by the plugin below).
@@ -89,7 +90,7 @@ const config: Config = {
         },
         blog: false,
         theme: {
-          customCss: "./src/css/custom.css",
+          customCss: ["./src/css/custom.css", "./src/css/brand-code.css"],
         },
       } satisfies Preset.Options,
     ],
@@ -213,8 +214,12 @@ const config: Config = {
       copyright: `Copyright © ${new Date().getFullYear()} Ottu. Built with Docusaurus.`,
     },
     prism: {
-      theme: prismThemes.github,
-      darkTheme: prismThemes.dracula,
+      // github and dracula with brandable colours: src/prism/brandThemes.ts
+      // (unchanged unless src/css/brand-code.css sets its variables).
+      theme: lightCodeTheme,
+      darkTheme: darkCodeTheme,
+      // Languages the code samples use beyond Prism's default set.
+      additionalLanguages: ["bash", "php", "java", "csharp", "ruby"],
     },
     languageTabs: [
       { language: "javascript" },
@@ -270,6 +275,8 @@ const config: Config = {
           "/overview/changelog*",
           // Internal reference page for authors of React Flow diagrams.
           "/diagrams/*",
+          // Removed pages kept as redirects (src/components/MovedTo/routes.ts).
+          ...Object.keys(MOVED).flatMap((route) => [route.replace(/\/$/, ""), `${route}*`]),
         ],
       },
     ],
@@ -304,6 +311,8 @@ const config: Config = {
         indexDocs: true,
         indexBlog: false,
         docsRouteBasePath: "/",
+        // Removed pages kept as redirects (src/components/MovedTo/routes.ts).
+        ignoreFiles: MOVED_ROUTE_PATTERNS,
       },
     ],
   ],

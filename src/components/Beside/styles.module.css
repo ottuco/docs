@@ -21,3 +21,82 @@
   width: 100%;
   height: auto;
 }
+
+/* Mode 2: text left, every <Visual> right. */
+.columns {
+  margin-bottom: var(--ifm-leading);
+}
+
+.visual {
+  margin-top: var(--ifm-leading);
+}
+
+.visualItem + .visualItem {
+  margin-top: 1rem;
+}
+
+/* Text and visual start on the same line and end flush. */
+.text > :first-child,
+.visualItem > :first-child {
+  margin-top: 0;
+}
+
+.text > :last-child,
+.visualItem > :last-child {
+  margin-bottom: 0;
+}
+
+/* Code in the right column soft-wraps instead of scrolling sideways, as
+   Docusaurus's own word-wrap toggle does, so no line is ever cut off. */
+.visualItem pre code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Language tabs wrap onto a second row instead of scrolling sideways, so
+   every tab stays visible in the half-width column. */
+.visualItem :global(.tabs) {
+  flex-wrap: wrap;
+  overflow-x: visible;
+}
+
+/* Images and diagrams take the column's width. */
+.visualItem img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (min-width: 997px) {
+  .columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 2rem;
+    align-items: start;
+  }
+
+  .visual {
+    margin-top: 0;
+    min-width: 0;
+  }
+
+  /* Set only while the column fits the window (measured in index.tsx), so a
+     tall visual scrolls with the page instead of hiding its end. */
+  .sticky {
+    position: sticky;
+    top: calc(var(--ifm-navbar-height) + 1rem);
+  }
+}
+
+/* wideVisual: between 997px and 1400px the right column would be under
+   500px, too narrow for a story diagram, so the visual goes under the text
+   at the full width (and is not sticky). */
+@media (min-width: 997px) and (max-width: 1399.98px) {
+  .wideVisual {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--ifm-leading);
+  }
+
+  .wideVisual .sticky {
+    position: static;
+  }
+}

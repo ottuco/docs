@@ -1,68 +1,15 @@
 ---
-title: Set Up Webhooks in the Dashboard
-sidebar_label: Dashboard setup
-description: Turn on webhooks in the Ottu dashboard - where Webhook Config is, the HMAC key, the format (Version 3), timeout and retries, the operations URL, and a URL per plugin with an optional filter on payment states.
+title: Webhook setup (moved)
+description: This page has moved. Kept so old links still work; it sends the reader to the new place.
+unlisted: true
+displayed_sidebar: developerSidebar
+hide_table_of_contents: true
+pagination_prev: null
+pagination_next: null
 ---
 
-# Set Up Webhooks in the Dashboard
+{/* A removed URL kept alive: src/components/MovedTo/routes.ts says where it went. */}
 
-Everything Ottu needs to send you webhooks lives on one page of the dashboard: **Webhook Config**. You need a dashboard user with access to the Administration panel.
+import MovedTo from "@site/src/components/MovedTo";
 
-## 1. Open Webhook Config
-
-1. Sign in to your Ottu dashboard.
-2. Open the menu with the three dots at the top right and choose **Administration panel**.
-3. Go to **Webhook** › **Webhook Config**.
-
-The page has two tabs: **General** (the settings for every webhook) and **Payment Webhook Plugin Configs** (a URL per plugin).
-
-## 2. General settings
-
-![Webhook Config, General tab: HMAC key, SSL, error email, timeout, retries, version and the operations URL](/img/developers/webhooks/dashboard-webhook-config-general.png)
-
-Set these, in this order:
-
-| Field | What to set | Why |
-|---|---|---|
-| **HMAC Key** | Copy it into your secret store; never into code or a log. | Your receiver needs it to [verify every signature](/developers/webhooks/verify-signatures). |
-| **Version** | **3** | Format 3: the [event envelope](/developers/webhooks/event-catalogue) with `Ottu-Signature` `v2`. 1 and 2 are the older formats. Saving 3 shows a warning: format 3 is JSON only, so a configuration that received XML stops receiving XML. See [Migrating to v3](/developers/webhooks/migrate-to-v3) before you switch a live account. |
-| **Enable webhook notifications?** | On | Sends operation webhooks (refunds, voids, expiries) for every transaction, whether or not it was created through the API. |
-| **Operations webhook_url** | Your receiver's HTTPS URL | Where refund, capture, void and other operation events go. |
-| **Ignore ssl** | Off | Off means Ottu checks your certificate. Turn it on only while you test with a self-signed certificate. |
-| **Notify on error** and **Email list** | On, with a team address | One email when a delivery has failed for good ([failure email](/developers/webhooks/delivery-and-retries#failure-email)). |
-| **Timeout** | 15 (the default) | Seconds Ottu waits for your answer. Answer fast and do the work later. |
-| **Retries**, **Backoff factor**, **Enable retry webhook mechanism?** | Leave the defaults | These apply to formats 1 and 2 (`retries` is the total number of tries). Format 3 has its own fixed [retry schedule](/developers/webhooks/delivery-and-retries#retry-schedule). |
-| **Ottu-Signature versions** | Leave as is (`v2`, or empty) | `v2` is the only version, and every format sends it. Empty means `v2`. |
-
-Press **Save**. Nothing changes for your existing receiver until you save.
-
-:::tip Set up a sandbox first
-Do this on your sandbox account, take a test payment, and check your receiver verified, stored and answered it ([Quickstart](/developers/webhooks/quickstart)). Then repeat on your live account.
-:::
-
-## 3. A URL per plugin (optional) {#plugin-urls}
-
-![Webhook Config, Payment Webhook Plugin Configs tab: a plugin, its webhook URL and a notification status filter](/img/developers/webhooks/dashboard-webhook-config-plugins.png)
-
-To send the payments of one plugin (for example **Payment request**, **E-Commerce** or **Bulk**) to their own URL, add a row:
-
-| Column | What it does |
-|---|---|
-| **Webhook Plugin** | The plugin the row applies to. |
-| **Webhook URL** | Where that plugin's payment webhooks go. |
-| **Enable payment state webhook notifications?** | Turns the row on. |
-| **Notification status** | Optional filter: only payments that reach one of these states are sent to this URL (**Authorized**, **Paid**, **Failed**, **Canceled**). |
-
-A payment's own `webhook_url`, sent when you [create the payment](/developers/payments/checkout-api), also receives its webhooks. When the same event goes to more than one URL, each URL gets its own delivery with the **same event id**, so [de-duplicate on the id](/developers/webhooks/delivery-and-retries#idempotency-key).
-
-## 4. Check it works
-
-1. Take a sandbox payment with a [test card](/developers/payments/sandbox).
-2. Your receiver gets `payment.paid` with `"is_sandbox": true` and `"version": 3`.
-3. If nothing arrives, follow [Troubleshooting](/developers/webhooks/troubleshooting#never-received).
-
-## What's Next?
-
-- [Quickstart](/developers/webhooks/quickstart): build and test the receiver in five minutes.
-- [Events & Envelope](/developers/webhooks/event-catalogue): every event and field.
-- [Delivery & Retries](/developers/webhooks/delivery-and-retries): what counts as success, and the retry schedule.
+<MovedTo from="/developers/webhooks/setup/" />

@@ -13,8 +13,8 @@ import { OTTU_CONNECT_BASE_URL } from "@site/src/constants/api";
 
 # Payment Status Query
 
-:::warning Payment Status Query v2 is deprecated
-Use [Payment Status Query v3](/developers/payments/psq-v3): it answers with the payment object and every attempt made on it. In v3, `refund_queued` is named `refund_pending` and `invalided` is `invalidated`. See [Differences from v2](/developers/payments/psq-v3#differences-from-v2).
+:::warning This version is obsolete
+This page describes the Payment Status Query v2. Use the [Payment Status Query v3](/developers/payments/psq-v3): it answers with the payment object and every attempt made on it. In v3, `refund_queued` is named `refund_pending` and `invalided` is `invalidated`. To move, follow [Migrate to v3](#migrate-to-v3).
 :::
 
 The Payment Status Query API lets you manually check the status of a payment transaction. It acts as a confirmation mechanism when your system hasn't received a [webhook notification](/developers/webhooks/payment-events) about a status change — due to network issues, temporary downtime, or third-party service failures.
@@ -150,6 +150,34 @@ Provide `session_id` (preferred — always present) or `order_no`. At least one 
 #### Consider the payment transaction state
 
 `paid` and `authorized` payment transactions return status immediately. For other states, Ottu queries the gateway — factor in the gateway's session expiration time when scheduling your inquiry.
+
+## Migrate to v3 {#migrate-to-v3}
+
+The [Payment Status Query v3](/developers/payments/psq-v3) asks the same question with the same permission. This is what changes in your code.
+
+#### The endpoint {#migrate-endpoint}
+
+**v2:** `POST /b/pbl/v2/inquiry/`. **v3:** `POST /b/pbl/v3/inquiry/`.
+
+#### The answer lists every attempt {#migrate-answer}
+
+**v2:** the payment webhook body, with one current attempt. **v3:** the [payment object](/developers/payments/psq-v3#payment-object), with `totals` and every attempt, oldest first.
+
+#### An unknown payment is a `404` {#migrate-not-found}
+
+**v2:** `400`. **v3:** `404 payment_not_found`.
+
+#### One error format {#migrate-errors}
+
+**v2:** free text. **v3:** the [v3 error format](/errors#format).
+
+#### `refund_queued` is `refund_pending` {#migrate-refund-pending}
+
+A refund the gateway has not confirmed yet is `refund_pending` in v3. `invalided` is `invalidated`.
+
+#### The IP allowlist is checked {#migrate-ip-allowlist}
+
+**v2:** not checked. **v3:** checked, as on [Operations v3](/developers/operations-v3#rules-every-call-follows).
 
 ## FAQ
 

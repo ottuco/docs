@@ -1,70 +1,15 @@
 ---
-title: Webhooks Quickstart
-sidebar_label: Quickstart (5 minutes)
-description: Receive, verify and answer your first Ottu webhook in five minutes - build the receiver, test it locally with a signed request from this page, then take a real sandbox payment.
+title: Webhook quickstart (moved)
+description: This page has moved. Kept so old links still work; it sends the reader to the new place.
+unlisted: true
 displayed_sidebar: developerSidebar
+hide_table_of_contents: true
+pagination_prev: null
+pagination_next: null
 ---
 
-import SignatureLab from "@site/src/components/SignatureLab";
-import AgentPrompt from "@site/src/components/AgentPrompt";
+{/* A removed URL kept alive: src/components/MovedTo/routes.ts says where it went. */}
 
-# Webhooks Quickstart
+import MovedTo from "@site/src/components/MovedTo";
 
-Five steps from nothing to a verified `payment.paid` on your server. You need your **HMAC key** from the webhook configuration in the Ottu dashboard and a sandbox account.
-
-:::tip Prefer to let your coding agent write it?
-Copy the prompt below into Claude Code, Cursor or Copilot, then come back to step 3 to test what it built.
-:::
-
-<AgentPrompt topic="webhooks" />
-
-## 1. Add a route that reads the raw body
-
-One `POST` endpoint, for example `/webhooks/ottu`. Read the body **as bytes** before any JSON parsing: the signature covers the exact bytes Ottu sends. Exempt the route from CSRF and login middleware. Ready receivers in seven languages (Python, Node.js, PHP, Go, Java, C# and Ruby) are in the [event catalogue](/developers/webhooks/event-catalogue#quick-implementation).
-
-## 2. Verify, de-duplicate, answer
-
-In this order, on every request:
-
-1. **Verify** `Ottu-Signature` (`t=…,v2=…`): `v2 = HMAC-SHA256(key, t + "." + raw body)`, compared in constant time, `t` within 300 seconds. Code in every language: [Verify Signatures](/developers/webhooks/verify-signatures#verify-v2).
-2. **De-duplicate** on the event `id` (also the `Idempotency-Key` header). Seen it? Answer `200` and stop.
-3. **Store** the event, answer **`200`**, and do the work in a background job. Ottu waits 15 seconds by default.
-
-## 3. Test it locally with a signed request
-
-No Ottu account needed for this step. Put your key in the lab below (or keep the sample key and use it in your receiver while testing), enter your local URL, and run the curl it gives you.
-
-<SignatureLab />
-
-Your receiver passes when:
-
-- the request answers `2xx`;
-- the same request sent again changes nothing (de-duplication works);
-- the request with one character of the body changed answers `401`.
-
-## 4. Point Ottu at your receiver
-
-Ottu needs an HTTPS URL it can reach. While developing, expose your local port through a tunnel of your choice, then either:
-
-- set the URL in the **webhook configuration** of the Ottu dashboard, or
-- send it as `webhook_url` when you [create the payment](/developers/payments/checkout-api).
-
-Make sure **Version** is 3 in [Webhook Config](/developers/webhooks/setup) (format 3). Ottu never switches formats on its own ([Migrating to v3](/developers/webhooks/migrate-to-v3)).
-
-## 5. Take a sandbox payment
-
-Create a payment on your sandbox account and pay it with a [test card](/developers/payments/sandbox). Within seconds your receiver gets `payment.paid` with `"is_sandbox": true`, signed with your real key. Check your logs: verified, stored once, answered `200`.
-
-That is a working integration. Before you go live:
-
-- [ ] Every event you act on is handled: see the [catalogue](/developers/webhooks/event-catalogue#catalogue).
-- [ ] Unknown events and unknown keys are ignored with `200`.
-- [ ] Before fulfilling or refunding, you also check `order_no` and `connector.reference_number`, and fetch [Payment Status Query v3](/developers/payments/psq-v3) when the final state matters.
-- [ ] Failures are visible to you: Ottu emails the addresses in your webhook configuration after the last of [8 attempts](/developers/webhooks/delivery-and-retries#retry-schedule).
-- [ ] `is_sandbox: true` events never ship goods in production.
-
-## What's Next?
-
-- [Events & Envelope](/developers/webhooks/event-catalogue): every event, every field, an example body for each.
-- [Delivery & Retries](/developers/webhooks/delivery-and-retries): what counts as success and when Ottu retries.
-- [Troubleshooting](/developers/webhooks/troubleshooting): when the signature does not match or nothing arrives.
+<MovedTo from="/developers/webhooks/quickstart/" />

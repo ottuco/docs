@@ -118,5 +118,5 @@ Or click the **MCP** button in the navbar for setup instructions for Cursor, VS 
 
 - [**Checkout API**](../payments/checkout-api.mdx) — Full guide to creating, retrieving, and updating payment transactions
 - [**Checkout SDK**](../payments/checkout-sdk/index.md) — Drop-in UI for ecommerce and mobile apps
-- [**Webhooks**](../webhooks/index.md) — Get real-time notifications when payment states change
+- [**Webhooks**](../webhooks/index.mdx) — Get real-time notifications when payment states change
 - [**Authentication**](authentication.md) — API keys, Basic Auth, and permissions
