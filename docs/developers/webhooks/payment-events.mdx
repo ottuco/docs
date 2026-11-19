@@ -1,8 +1,9 @@
 ---
 title: Payment Events
 sidebar_label: Payment Events
-description: The webhook body Ottu sends when a payment is processed on webhook formats 1 and 2 (deprecated; format 3 is the event catalogue).
+description: The old (format 2) webhook body Ottu sends when a payment is processed. Obsolete - webhooks v3 send every payment as an event.
 displayed_sidebar: developerSidebar
+hide_table_of_contents: true
 ---
 
 import SchemaEmbed from "@site/src/components/SchemaEmbed";
@@ -10,8 +11,8 @@ import PaymentRedirectSequence from "@site/src/diagrams/flow/PaymentRedirectSequ
 
 # Payment Notification
 
-:::warning Webhook formats 1 and 2 are deprecated
-This page describes the older webhook formats. New integrations use [format 3](/developers/webhooks/event-catalogue): every payment arrives as an event with the payment itself in `data`. In v3, `refund_queued` is named `refund_pending` and `invalided` is `invalidated`. To move an existing integration, see [Migrating to v3](/developers/webhooks/migrate-to-v3).
+:::warning This version is obsolete
+This page describes the old webhooks (format 2). Use [webhooks v3](/developers/webhooks): every payment arrives as an [event](/developers/webhooks#api-reference) with the payment itself in `data`. In v3, `refund_queued` is named `refund_pending` and `invalided` is `invalidated`. To move, follow [Migrate to v3](/developers/webhooks/migrate-to-v3).
 :::
 
 Payment webhooks are specific to payment events and are triggered on multiple occasions:
@@ -133,7 +134,7 @@ To ensure a smooth redirection of the payer back to the designated [redirect_url
 
 Payments belonging to an [AutoPay](/developers/payments/autopay/) subscription may carry an additional `autopay` object. Note where it sits: at the **top level** of the payload, not inside `extra`.
 
-You receive it for the subscription's first payment only, the checkout session you created. Ottu charges renewals itself and sends no webhook to your `webhook_url` for them: read renewal outcomes from the [subscription endpoints](/developers/payments/autopay/#api-reference), or add a webhook endpoint for the [`subscription.*` events](/developers/webhooks/event-catalogue#subscription-events).
+You receive it for the subscription's first payment only, the checkout session you created. Ottu charges renewals itself and sends no webhook to your `webhook_url` for them: read renewal outcomes from the [subscription endpoints](/developers/payments/autopay/#api-reference), or add a webhook endpoint for the [`subscription.*` events](/developers/webhooks#subscription-events).
 
 ```json title="Payload excerpt — an AutoPay first payment"
 {
@@ -160,14 +161,12 @@ You receive it for the subscription's first payment only, the checkout session y
 
 The webhook usually arrives before Ottu has confirmed the payment, so the subscription is still `pending_setup` and the cycle fields and `event_type` are `null`. See [First payment and activation](/developers/payments/autopay/#first-payment-and-activation).
 
-| Field | Description |
-|---|---|
-| `subscription_id` | The AutoPay subscription this payment belongs to. |
-| `subscription_status` | Subscription status at the moment the webhook was assembled, for example `active`, `past_due`, `canceled`. |
-| `cycle_number` | Sequential number of the billing cycle being charged. Nullable. |
-| `cycle_status` | Status of that billing cycle, for example `paid`, `retry_scheduled`, `failed`. Nullable. |
-| `next_billing_date` | Next scheduled billing date, or `null` when nothing further is scheduled. |
-| `event_type` | One of `cit_success`, `cit_failure`, `mit_success`, `mit_failure`, `card_updated`, or `null`. `null` means AutoPay could not yet tell whether the subscription's setup payment succeeded — it does **not** mean success. |
+- `subscription_id`: The AutoPay subscription this payment belongs to.
+- `subscription_status`: Subscription status at the moment the webhook was assembled, for example `active`, `past_due`, `canceled`.
+- `cycle_number`: Sequential number of the billing cycle being charged. Nullable.
+- `cycle_status`: Status of that billing cycle, for example `paid`, `retry_scheduled`, `failed`. Nullable.
+- `next_billing_date`: Next scheduled billing date, or `null` when nothing further is scheduled.
+- `event_type`: One of `cit_success`, `cit_failure`, `mit_success`, `mit_failure`, `card_updated`, or `null`. `null` means AutoPay could not yet tell whether the subscription's setup payment succeeded — it does **not** mean success.
 
 :::danger Identify the subscription by `extra.autopay.subscription_id`, never by the top-level `autopay` block
 Two blocks carry a `subscription_id`, and only one of them is reliable.
@@ -226,7 +225,7 @@ By understanding and interpreting these fields correctly, you can ensure accurat
 
 #### **6. Verifying the Signature**
 
-Every delivery carries the `Ottu-Signature` header, `t=…,v2=…`: an HMAC-SHA256 over the raw body that proves the payload came from Ottu and was not changed. **Always verify it before processing the payment.** Formats 1 and 2 also carry a body `signature` field (an 18-field HMAC), which you can check as well.
+Every delivery carries the `Ottu-Signature` header, `t=…,v2=…`: an HMAC-SHA256 over the raw body that proves the payload came from Ottu and was not changed. **Always verify it before processing the payment.** This body also carries a `signature` field (an [18-field HMAC](/developers/webhooks/verify-signatures#body-signature)), which you can check as well.
 
 For implementation details and code examples in Python, PHP, Node.js, Java, C#, Ruby, and Go, see [Verify Signatures](/developers/webhooks/verify-signatures/).
 
@@ -251,7 +250,5 @@ For general webhook setup and configuration, see the [Webhooks Overview](./).
 - [**PG Params**](/developers/webhooks/pg-params/) — Searchable reference for all normalized gateway response fields
 - [**Operation Events**](/developers/webhooks/operation-events/) — Webhook notifications for refunds, captures, and voids
 - [**Verify Signatures**](/developers/webhooks/verify-signatures/) — Validate webhook authenticity with HMAC-SHA256
-- [**Webhooks Overview**](./) — Setup, delivery guarantees, and configuration
-- [**Webhook Events (v3)**](/developers/webhooks/event-catalogue/) — The format 3 envelope, with the payment as a flat `data`
-- [**Migrating to v3**](/developers/webhooks/migrate-to-v3/) — Move from format 1 or 2
-- [**Delivery and Retries**](/developers/webhooks/delivery-and-retries/) — Success rules, retry schedule, `Idempotency-Key`
+- [**Webhooks v3**](/developers/webhooks) — The current webhooks: setup, the receiver and every event
+- [**Migrate to v3**](/developers/webhooks/migrate-to-v3/) — Where every field of this body is in v3

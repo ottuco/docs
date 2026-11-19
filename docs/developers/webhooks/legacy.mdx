@@ -1,25 +1,33 @@
 ---
-title: Webhooks v1 and v2
-sidebar_label: Looking for v1 and v2?
-description: The older webhook formats 1 and 2, kept for existing integrations, and how to move to format 3.
+title: The Old Webhook Docs
+sidebar_label: The old webhook docs
+description: The pages for the old Ottu webhooks (format 2), kept for the accounts that still receive them, and the way to v3.
 displayed_sidebar: developerSidebar
 hide_table_of_contents: true
 ---
 
-# Webhooks v1 and v2
+# The Old Webhook Docs
 
-New integrations use [webhook format 3](/developers/webhooks/event-catalogue). The pages below describe webhook formats 1 and 2 (the "v1 and v2" of this page), which Ottu still sends to accounts that use them. Ottu never moves an account to a new format on its own.
+The old webhooks (format 2) are obsolete. Ottu still sends them to the accounts that use them, and never switches an account on its own. Every new integration uses [webhooks v3](/developers/webhooks).
 
-| Page | What it covers |
-|---|---|
-| [Payment Events (formats 1 and 2)](/developers/webhooks/payment-events) | The notification Ottu sends when a payment is processed: its fields, setup on the payment and the redirect behaviour of `200` and `201`. |
-| [Operation Events (formats 1 and 2)](/developers/webhooks/operation-events) | The notification Ottu sends after a refund, capture or void, including the pending `refund_queued` state. |
+## The old pages {#pages}
 
-## Coming from v1 or v2?
+#### Payment notification {#payment-notification}
 
-Format 3 sends every webhook as an event, with the payment itself in `data`, and renames two values: `refund_queued` is `refund_pending`, and `invalided` is `invalidated`. [Here is how to migrate](/developers/webhooks/migrate-to-v3): a field-by-field map from formats 1 and 2, and steps you can test before anything changes for your customers.
+[The body Ottu sends when a payment is processed](/developers/webhooks/payment-events): its fields, how to set it on a payment, and how `200` and `201` change the payer's redirect.
+
+#### Operation notification {#operation-notification}
+
+[The body Ottu sends after a refund, capture or void](/developers/webhooks/operation-events), including the pending `refund_queued` state.
+
+## Move to v3 {#move-to-v3}
+
+v3 sends every webhook as an event, with the payment itself in `data`, and renames two values: `refund_queued` is `refund_pending`, and `invalided` is `invalidated`.
+
+[Migrate to v3](/developers/webhooks/migrate-to-v3) has the steps, which you can test before anything changes for your customers, and shows where every old field is now.
 
 ## What's Next?
 
-- [Events & Envelope](/developers/webhooks/event-catalogue): every format 3 event and its fields.
-- [Verify Signatures](/developers/webhooks/verify-signatures): check that a webhook came from Ottu.
+- [**Webhooks**](/developers/webhooks): set up and build the v3 receiver.
+- [**Events**](/developers/webhooks#api-reference): the event object and every event.
+- [**Verify signatures**](/developers/webhooks/verify-signatures): check that a webhook came from Ottu.

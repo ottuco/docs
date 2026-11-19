@@ -1,5 +1,5 @@
 // The prompt a merchant developer pastes into their coding agent to build an
-// Ottu webhook receiver (format 3). Every rule here is stated on a docs page
+// Ottu webhook receiver (webhooks v3). Every rule here is stated on a docs page
 // (docs/developers/webhooks/*) or is marked as our advice; keep it in step.
 // Links are absolute so the agent can open them.
 const DOCS = "https://docs.ottu.com/developers/webhooks";
@@ -8,21 +8,23 @@ export const WEBHOOKS_PROMPT = `You are adding an Ottu webhook receiver to this 
 
 ## Before you start
 Fill these in, and ask me if they are not clear from the code:
-- Language and framework: <for example Python / Django, Node.js / Express, PHP / Laravel>
-- Where the Ottu HMAC key is stored: <environment variable or secret manager entry>. The key comes from the Webhook configuration in the Ottu dashboard. Never hard-code it, commit it or log it.
-- Our order / payment model that a webhook updates: <model or table name>
+- Language and framework: {for example Python / Django, Node.js / Express, PHP / Laravel}
+- Where the Ottu HMAC key is stored: {environment variable or secret manager entry}. The key is the HMAC Key on the Webhook Config page of the Ottu Administration panel. Never hard-code it, commit it or log it.
+- Our order / payment model that a webhook updates: {model or table name}
 
-Build for webhook format 3 (an envelope with "version": 3). Format 3 is on when Version is 3 in the Ottu dashboard (Administration panel > Webhook > Webhook Config); if we still receive format 1 or 2, tell me before building.
+Build for Ottu webhooks v3: the body is an event with "version": 3 and an "event" key. It is on when Version is 3 on the Webhook Config page (Ottu dashboard > Administration panel > Webhook > Webhook Config). If the bodies we receive have no "event" key, tell me before building: the account is still on the old webhooks, and the way to move is ${DOCS}/migrate-to-v3
 
 Docs to open when in doubt:
-- Events, fields and example bodies: ${DOCS}/event-catalogue
+- Setup and the receiver, step by step: ${DOCS}
+- Events, fields and example bodies: ${DOCS}#api-reference
 - Signatures and test vectors: ${DOCS}/verify-signatures
-- Delivery, retries and Idempotency-Key: ${DOCS}/delivery-and-retries
+- Delivery, retries and Idempotency-Key: ${DOCS}#delivery-and-retries
+- Which fields to match before fulfilling or refunding: ${DOCS}#reconciliation
 
 ## 1. The request Ottu sends
 - Method POST, body JSON, UTF-8.
 - Headers to read:
-  - Ottu-Signature: t=<unix seconds>,v2=<hex>. The signature. t is new on every attempt.
+  - Ottu-Signature: t={unix_seconds},v2={hex}. The signature. t is new on every attempt.
   - Idempotency-Key: the event id (evt_...), the same as "id" in the body.
   - Content-Type: application/json.
 - Body: the envelope {id, event, created, version, is_sandbox, merchant_id, initiator, data}. "data" is the payment itself, flat, with the same keys in every event; every key is always present (empty values are null, {} or []).
@@ -101,7 +103,7 @@ Capture, refund and void events describe the child transaction: data.status, dat
 ## 10. Tests
 - Signature: the vector above (valid), a tampered body, a stale t, a missing header, a missing v2 part.
 - A duplicate id is processed once and answers 200.
-- One test per event in section 7, using the example bodies on ${DOCS}/event-catalogue.
+- One test per event in section 7, using the example bodies on ${DOCS}#api-reference.
 - An out-of-order pair (payment.pending after payment.paid) leaves the order paid.
 - An unknown event returns 200 and changes nothing.
 - Storage down returns 503.

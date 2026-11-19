@@ -1,0 +1,1961 @@
+---
+title: Webhooks
+sidebar_label: Webhooks
+description: Receive Ottu payment and subscription events on your server - set up the URL, verify the signature, answer 2xx, act on the event and reconcile.
+hide_table_of_contents: true
+---
+
+import FAQ, { FAQItem } from "@site/src/components/FAQ";
+import AgentPrompt from "@site/src/components/AgentPrompt";
+import Beside, { Visual } from "@site/src/components/Beside";
+import StepShow, { Step } from "@site/src/components/StepShow";
+import EventObject from "@site/src/components/EventObject";
+import WebhookDeliveryStory, { WebhookDeliveryControls } from "@site/src/diagrams/flow/WebhookDeliveryStory";
+import PaymentEventOrder from "@site/src/diagrams/flow/PaymentEventOrder";
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import HashAlias from "@site/src/components/HashAlias";
+
+# Webhooks
+
+<HashAlias aliases={{ "webhook-formats": "", security: "step-by-step", "webhook-notification-mechanism": "settings", "delivery-guarantees": "delivery-and-retries", "types-of-webhooks": "where-events-go", "webhook-structure": "envelope", "formats-1-and-2-settings": "settings" }} />
+
+Ottu calls your server when something happens to a payment or a subscription, so you never have to keep asking. Three steps:
+
+1. **Give Ottu an HTTPS URL.** Set it once in the [Administration panel](#admin-setup), or send `webhook_url` with the [Checkout API](/developers/payments/checkout-api). Check the [endpoint requirements](#endpoint-requirements) first.
+2. **Verify every request.** Ottu signs each one in the `Ottu-Signature` header. The code is in [Verify signatures](/developers/webhooks/verify-signatures#verify-v2).
+3. **Answer `2xx`, then act on the event.** [`payment.paid`](#payment-paid) means the money is in. Every event is in [Events](#api-reference).
+
+Related guide: [Webhooks for merchants](/business/settings/webhooks), with every field of the Webhook Config page.
+
+:::note
+Looking for the old docs? [Click here](/developers/webhooks/legacy). Still on the old webhooks? [Migrate to v3](/developers/webhooks/migrate-to-v3).
+:::
+
+## When to Use
+
+- Fulfil an order when [`payment.paid`](#payment-paid) arrives, and release stock when [`payment.expired`](#payment-expired) or [`payment.canceled`](#payment-canceled) arrives.
+- Record [refunds, captures and voids](/developers/operations-v3) at the same URL: they arrive as [`payment.refunded`](#payment-refunded), `payment.paid` with `data.operation` equal to `capture`, and [`payment.voided`](#payment-voided).
+- Follow [AutoPay](/developers/payments/autopay) subscriptions through their [`subscription.*` events](#subscription-events).
+- Parse one shape for every [payment gateway](/developers/payments/payment-methods). MPGS, KNET or PayPal: the event is the same, and the gateway's own details sit in [`data.connector`](#data-keys).
+
+## Setup
+
+### Endpoint requirements {#endpoint-requirements}
+
+Your webhook URL must:
+
+- **Use HTTPS, with a certificate from a public authority.** Ottu checks the certificate.
+- **Be public and online.** Ottu calls it from the internet.
+- **Answer within 15 seconds**, the default [timeout](#timeout). A slower answer is a failed delivery.
+- **Answer any `2xx`.** Every other status is a failure, and Ottu does not follow a redirect (`3xx`).
+- **Be idempotent.** The same event can arrive more than once. Skip an event `id` you have already processed: see [Idempotency-Key](#idempotency-key).
+
+### Admin setup {#admin-setup}
+
+One page of the Administration panel holds everything: **Webhook Config**. You need a dashboard user who can open the Administration panel. Do it on your sandbox account first, then repeat it on your live account.
+
+<StepShow>
+  <Step image="/img/developers/webhooks/admin-setup/1-open-webhook-config.png" spot="37.0,12.6,45.0,18.3" alt="Webhook Config in the Administration panel, under Webhook">
+    Sign in to your Ottu dashboard, open the three-dot menu at the top right and choose **Administration panel**. Go to **Webhook**, then **Webhook Config**.
+  </Step>
+  <Step image="/img/developers/webhooks/admin-setup/2-hmac-key.png" spot="2.5,33.3,87.5,33.7" alt="The HMAC Key field at the top of the General tab">
+    Copy the **HMAC Key** into your secret store, never into code or a log. Your receiver needs it to [verify every signature](/developers/webhooks/verify-signatures#verify-v2).
+  </Step>
+  <Step image="/img/developers/webhooks/admin-setup/3-version.png" spot="2.5,41.6,72.2,36.8" alt="The Version field set to 3">
+    Set **Version** to **3**. On a live account that already receives webhooks, read [Migrate to v3](/developers/webhooks/migrate-to-v3) before you change it.
+  </Step>
+  <Step image="/img/developers/webhooks/admin-setup/4-operations-url.png" spot="2.5,4.1,87.5,70.6" alt="Enable webhook notifications ticked, and the Operations webhook_url field">
+    Tick **Enable webhook notifications?** and put your receiver's HTTPS URL in **Operations webhook_url**. Refunds, captures, voids and expiries are sent there, for every transaction.
+  </Step>
+  <Step image="/img/developers/webhooks/admin-setup/5-notify-on-error.png" spot="2.5,39.1,87.5,56.7" alt="Notify on error ticked, and the Email list field">
+    Keep **Notify on error** ticked and add a team address to **Email list**. Ottu sends one email when a delivery has [failed for good](#failure-email).
+  </Step>
+  <Step image="/img/developers/webhooks/admin-setup/6-save.png" spot="24.2,8.5,73.3,26.7" alt="The Save button at the top right">
+    Press **Save**. Nothing changes for your receiver until you save.
+  </Step>
+  <Step image="/img/developers/webhooks/admin-setup/7-plugin-row.png" spot="1.2,56.3,89.7,30.6" alt="A row on the Payment Webhook Plugin Configs tab: a plugin, its webhook URL and the notification status">
+    Optional: on the **Payment Webhook Plugin Configs** tab, add a row to send the payments of one plugin, for example **Payment request**, to their own URL.
+  </Step>
+  <Step image="/img/developers/webhooks/admin-setup/8-notification-status.png" spot="59.9,36.9,35.2,33.8" alt="The Notification status filter of a plugin row">
+    **Notification status** limits that row to payments that reach one of the states you pick: **Authorized**, **Paid**, **Failed** or **Canceled**.
+  </Step>
+</StepShow>
+
+Then [take a sandbox payment](#testing) and check your receiver got the event.
+
+### Settings {#settings}
+
+The other fields of **Webhook Config** work as they are. Change one only for the reason given here.
+
+#### Ignore ssl {#ssl-verification}
+
+**Default:** off.
+
+Off means Ottu checks the certificate of your URL. Turn it on only while you test with a self-signed certificate, and off again before you go live.
+
+**Example:** off for `https://yourcompany.com/webhooks/ottu`. On only for a test server such as `https://staging.yourcompany.com` with a self-signed certificate.
+
+#### Notify on error {#error-notification}
+
+**Default:** on.
+
+Ottu sends one email after the last failed attempt, not one per attempt.
+
+**Example:** your server is down for two days. You get one email, after the last attempt, not eight.
+
+#### Email list {#emails}
+
+**Default:** empty.
+
+Who gets that email, separated by commas. It is empty by default, so add an address.
+
+**Example:** `alerts@yourcompany.com, payments@yourcompany.com`
+
+#### Timeout {#timeout}
+
+**Default:** `15`.
+
+The seconds Ottu waits for your answer. Answer first and do the work afterwards.
+
+**Example:** with `15`, an answer that takes 16 seconds is a failed delivery, and Ottu tries again 1 minute later.
+
+#### Retries and Backoff factor {#retries}
+
+**Default:** `3` and `5`.
+
+Not used. Leave them: every delivery follows the fixed [retry schedule](#retry-schedule).
+
+### Where events go {#where-events-go}
+
+Ottu can send events to four kinds of URL. Use one receiver for all of them: every URL gets the same [event object](#envelope) and the same signature.
+
+#### The payment's `webhook_url` {#webhook-url}
+
+**Where you set it:** in the [Checkout API](/developers/payments/checkout-api) call that creates the payment.
+
+**What it receives:** the events of that payment.
+
+**Example:** `"webhook_url": "https://yourcompany.com/webhooks/ottu"` gets `payment.paid` when the customer pays.
+
+#### The operations URL {#operations-url}
+
+**Where you set it:** **Operations webhook_url** in Webhook Config.
+
+**What it receives:** the events of the [operations](/developers/operations-v3) run on a payment: refund, capture, void and the others.
+
+**Example:** `https://yourcompany.com/webhooks/ottu` gets `payment.refunded` after you refund a payment.
+
+#### A plugin URL {#plugin-urls}
+
+**Where you set it:** a row on **Payment Webhook Plugin Configs**.
+
+**What it receives:** the payments of one plugin, optionally only in the states you pick.
+
+**Example:** plugin **Payment request**, status **Paid**, URL `https://yourcompany.com/webhooks/invoices`. Only paid payment requests are sent there.
+
+#### A webhook endpoint {#webhook-endpoints}
+
+**Where you set it:** **Webhook endpoints** in the Administration panel.
+
+**What it receives:** the events it subscribes to, by name or with a wildcard. [Subscription events](#subscription-events) reach endpoints only.
+
+**Example:** events `subscription.*`, URL `https://yourcompany.com/webhooks/subscriptions`. It gets `subscription.renewed` at every renewal.
+
+About a webhook endpoint:
+
+- **Who sets it up:** a user with access to the webhook settings, or Ottu support on request.
+- **The URL** must be a public `https` address. Plain `http` is accepted only when the sandbox switch is on. Ottu checks that the host resolves to a public address before every attempt.
+- **Is active:** unticking it stops the endpoint's deliveries, including retries still pending.
+
+When one event goes to more than one URL, each URL gets its own delivery with the same event `id`. A URL that is set in two places for the same payment event, for example as a webhook endpoint and as the operations URL, receives that event once.
+
+## Guide
+
+### Workflow {#workflow}
+
+<Beside wideVisual>
+
+One event travels like this:
+
+1. **Something happens.** A payment is created, paid, refunded or expires. Ottu records one event with its own `id`.
+2. **Ottu signs it and calls your URL.** The request is a `POST` with a JSON body, an `Ottu-Signature` header and an `Idempotency-Key` header.
+3. **You verify, store and answer `2xx`.** That ends the delivery.
+4. **No `2xx`? Ottu tries again**, up to 8 attempts over about 42 hours, with the same body and the same `id`.
+5. **You skip the repeat.** An `id` you have already stored is answered with `2xx` and not processed again.
+
+Each step in detail: [Delivery & retries](#delivery-and-retries).
+
+In the diagram, "you" is the merchant: your server receives the events.
+
+<WebhookDeliveryControls />
+
+<Visual>
+
+<WebhookDeliveryStory />
+
+</Visual>
+
+</Beside>
+
+### Step-by-Step {#step-by-step}
+
+<AgentPrompt topic="webhooks" compact />
+
+<Beside>
+
+Build the receiver in this order. It is the same for every event.
+
+1. **Add a route that reads the raw body.** One `POST` endpoint, for example `/webhooks/ottu`. Read the body as bytes before any JSON parsing, because the signature covers the exact bytes Ottu sends. Exempt the route from CSRF and login middleware.
+2. **Verify the signature.** `Ottu-Signature` is `t=…,v2=…`, and `v2` is `HMAC-SHA256(key, t + "." + raw body)`. Compare in constant time, accept `t` within 300 seconds, and answer `401` when it does not match. The helper in eight languages: [Verify signatures](/developers/webhooks/verify-signatures#verify-v2).
+3. **Skip what you have already processed.** The event `id` is also sent as the `Idempotency-Key` header. Seen it before? Answer `200` and stop. The storage pattern: [Idempotency-Key](#idempotency-key).
+4. **Store the event, answer `200`, then do the work.** Ottu waits 15 seconds, so run your business logic in a background job. Branch on `event`, then read `data`.
+5. **Ignore what you do not know.** New events and new keys are added over time. Answer `200` and move on.
+
+<Visual>
+
+<Tabs groupId="language">
+<TabItem value="python" label="Python">
+
+```python title="Flask receiver"
+import json
+
+from flask import Flask, request
+
+app = Flask(__name__)
+# from the Webhook configuration, keep it secret
+HMAC_KEY = "your-hmac-key"
+
+@app.post("/webhooks/ottu")
+def ottu_webhook():
+    # the exact bytes Ottu sent,
+    # never request.json re-dumped
+    raw_body = request.get_data()
+    if not verify_ottu_signature(
+        raw_body,
+        request.headers.get("Ottu-Signature", ""),
+        HMAC_KEY
+    ):
+        return "invalid signature", 401
+
+    event = json.loads(raw_body)
+    data = event["data"]  # the payment itself, flat
+
+    if (event["event"] == "payment.paid"
+            and data["operation"] == "purchase"):
+        fulfil_order(
+            data["order_no"],
+            data["connector"]["reference_number"]
+        )
+    elif (event["event"] == "payment.paid"
+            and data["operation"] == "capture"):
+        record_capture(
+            data["session_id"],
+            data["connector"]["reference_number"]
+        )
+    elif event["event"] == "payment.refunded":
+        record_refund(
+            data["session_id"],
+            data["connector"]["reference_number"],
+            data["totals"]["refunded"]
+        )
+    # Unknown events: acknowledge and ignore,
+    # new events are added over time.
+    return "", 200
+```
+
+</TabItem>
+<TabItem value="node" label="Node.js">
+
+```javascript title="Express receiver"
+import express from "express";
+
+const app = express();
+// from the Webhook configuration, keep it secret
+const HMAC_KEY = "your-hmac-key";
+
+// express.raw keeps the exact bytes Ottu sent.
+// Do not use express.json() on this route.
+app.post(
+  "/webhooks/ottu",
+  express.raw({ type: "*/*" }),
+  (req, res) => {
+    if (!verifyOttuSignature(
+      req.body,
+      req.get("Ottu-Signature") ?? "",
+      HMAC_KEY
+    )) {
+      return res.status(401).send("invalid signature");
+    }
+
+    const event = JSON.parse(
+      req.body.toString("utf8")
+    );
+    // the payment itself, flat
+    const data = event.data;
+
+    if (event.event === "payment.paid" &&
+        data.operation === "purchase") {
+      fulfilOrder(
+        data.order_no,
+        data.connector.reference_number
+      );
+    } else if (event.event === "payment.paid" &&
+               data.operation === "capture") {
+      recordCapture(
+        data.session_id,
+        data.connector.reference_number
+      );
+    } else if (event.event === "payment.refunded") {
+      recordRefund(
+        data.session_id,
+        data.connector.reference_number,
+        data.totals.refunded
+      );
+    }
+    // Unknown events: acknowledge and ignore,
+    // new events are added over time.
+    res.sendStatus(200);
+  });
+```
+
+</TabItem>
+<TabItem value="php" label="PHP">
+
+```php title="PHP receiver"
+<?php
+// from the Webhook configuration, keep it secret
+$hmacKey = 'your-hmac-key';
+
+// the exact bytes Ottu sent
+$rawBody = file_get_contents('php://input');
+$header = $_SERVER['HTTP_OTTU_SIGNATURE'] ?? '';
+
+if (!verifyOttuSignature(
+    $rawBody, $header, $hmacKey
+)) {
+    http_response_code(401);
+    exit('invalid signature');
+}
+
+$event = json_decode($rawBody, true);
+$data = $event['data']; // the payment itself, flat
+
+if ($event['event'] === 'payment.paid'
+    && $data['operation'] === 'purchase') {
+    fulfilOrder(
+        $data['order_no'],
+        $data['connector']['reference_number']
+    );
+} elseif ($event['event'] === 'payment.paid'
+    && $data['operation'] === 'capture') {
+    recordCapture(
+        $data['session_id'],
+        $data['connector']['reference_number']
+    );
+} elseif ($event['event'] === 'payment.refunded') {
+    recordRefund(
+        $data['session_id'],
+        $data['connector']['reference_number'],
+        $data['totals']['refunded']
+    );
+}
+// Unknown events: acknowledge and ignore,
+// new events are added over time.
+http_response_code(200);
+```
+
+</TabItem>
+<TabItem value="go" label="Go">
+
+```go title="net/http receiver"
+package main
+
+import (
+  "encoding/json"
+  "io"
+  "net/http"
+)
+
+// from the Webhook configuration, keep it secret
+const hmacKey = "your-hmac-key"
+
+type ottuEvent struct {
+  Event string `json:"event"`
+  Data  struct { // the payment itself, flat
+    SessionID string `json:"session_id"`
+    OrderNo   string `json:"order_no"`
+    Operation string `json:"operation"`
+    Connector struct {
+      ReferenceNumber string `json:"reference_number"`
+    } `json:"connector"`
+    Totals struct {
+      Refunded string `json:"refunded"`
+    } `json:"totals"`
+  } `json:"data"`
+}
+
+func ottuWebhook(
+  w http.ResponseWriter, r *http.Request) {
+  // the exact bytes Ottu sent, never re-marshalled
+  rawBody, err := io.ReadAll(r.Body)
+  if err != nil || !VerifyOttuSignature(
+    rawBody,
+    r.Header.Get("Ottu-Signature"),
+    hmacKey,
+    ToleranceSeconds,
+    0) {
+    http.Error(w, "invalid signature",
+      http.StatusUnauthorized)
+    return
+  }
+
+  var event ottuEvent
+  if err := json.Unmarshal(
+    rawBody, &event); err != nil {
+    http.Error(w, "invalid body",
+      http.StatusBadRequest)
+    return
+  }
+  data := event.Data
+
+  switch {
+  case event.Event == "payment.paid" &&
+    data.Operation == "purchase":
+    fulfilOrder(data.OrderNo,
+      data.Connector.ReferenceNumber)
+  case event.Event == "payment.paid" &&
+    data.Operation == "capture":
+    recordCapture(data.SessionID,
+      data.Connector.ReferenceNumber)
+  case event.Event == "payment.refunded":
+    recordRefund(data.SessionID,
+      data.Connector.ReferenceNumber,
+      data.Totals.Refunded)
+  }
+  // Unknown events: acknowledge and ignore,
+  // new events are added over time.
+  w.WriteHeader(http.StatusOK)
+}
+
+func main() {
+  http.HandleFunc("/webhooks/ottu", ottuWebhook)
+  http.ListenAndServe(":8000", nil)
+}
+```
+
+</TabItem>
+<TabItem value="java" label="Java">
+
+```java title="Spring Boot receiver"
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation
+    .PostMapping;
+import org.springframework.web.bind.annotation
+    .RequestBody;
+import org.springframework.web.bind.annotation
+    .RequestHeader;
+import org.springframework.web.bind.annotation
+    .RestController;
+
+@RestController
+public class OttuWebhookController {
+  // from the Webhook configuration, keep it secret
+  private static final String HMAC_KEY =
+      "your-hmac-key";
+  private final ObjectMapper mapper =
+      new ObjectMapper();
+
+  // @RequestBody byte[] keeps the exact bytes Ottu
+  // sent. Do not bind this route to a DTO.
+  @PostMapping("/webhooks/ottu")
+  public ResponseEntity<String> ottuWebhook(
+      @RequestBody byte[] rawBody,
+      @RequestHeader(value = "Ottu-Signature",
+          defaultValue = "") String signature)
+      throws Exception {
+    if (!OttuSignature.verifyOttuSignature(
+        rawBody, signature, HMAC_KEY)) {
+      return ResponseEntity.status(401)
+          .body("invalid signature");
+    }
+
+    JsonNode event = mapper.readTree(rawBody);
+    // the payment itself, flat
+    JsonNode data = event.path("data");
+    String type = event.path("event").asText();
+    String operation =
+        data.path("operation").asText();
+    String reference = data.path("connector")
+        .path("reference_number").asText();
+
+    if (type.equals("payment.paid")
+        && operation.equals("purchase")) {
+      fulfilOrder(
+          data.path("order_no").asText(), reference);
+    } else if (type.equals("payment.paid")
+        && operation.equals("capture")) {
+      recordCapture(
+          data.path("session_id").asText(), reference);
+    } else if (type.equals("payment.refunded")) {
+      recordRefund(
+          data.path("session_id").asText(),
+          reference,
+          data.path("totals").path("refunded")
+              .asText());
+    }
+    // Unknown events: acknowledge and ignore,
+    // new events are added over time.
+    return ResponseEntity.ok().build();
+  }
+}
+```
+
+</TabItem>
+<TabItem value="csharp" label="C#">
+
+```csharp title="ASP.NET Core receiver"
+using System.Text.Json;
+
+// from the Webhook configuration, keep it secret
+const string HmacKey = "your-hmac-key";
+
+var app = WebApplication.Create(args);
+
+app.MapPost(
+    "/webhooks/ottu",
+    async (HttpRequest request) =>
+{
+    using var buffer = new MemoryStream();
+    // the exact bytes Ottu sent,
+    // never a bound model re-serialised
+    await request.Body.CopyToAsync(buffer);
+    var rawBody = buffer.ToArray();
+    if (!OttuSignature.VerifyOttuSignature(
+            rawBody,
+            request.Headers["Ottu-Signature"]
+                .ToString(),
+            HmacKey))
+        return Results.Unauthorized();
+
+    using var doc = JsonDocument.Parse(rawBody);
+    var type = doc.RootElement
+        .GetProperty("event").GetString();
+    // the payment itself, flat
+    var data = doc.RootElement.GetProperty("data");
+    var operation =
+        data.GetProperty("operation").GetString();
+    var reference = data.GetProperty("connector")
+        .GetProperty("reference_number").GetString();
+
+    if (type == "payment.paid"
+        && operation == "purchase")
+        FulfilOrder(
+            data.GetProperty("order_no").GetString(),
+            reference);
+    else if (type == "payment.paid"
+             && operation == "capture")
+        RecordCapture(
+            data.GetProperty("session_id").GetString(),
+            reference);
+    else if (type == "payment.refunded")
+        RecordRefund(
+            data.GetProperty("session_id").GetString(),
+            reference,
+            data.GetProperty("totals")
+                .GetProperty("refunded").GetString());
+    // Unknown events: acknowledge and ignore,
+    // new events are added over time.
+    return Results.Ok();
+});
+
+app.Run();
+```
+
+</TabItem>
+<TabItem value="ruby" label="Ruby">
+
+```ruby title="Sinatra receiver"
+require "json"
+require "sinatra"
+
+# from the Webhook configuration, keep it secret
+HMAC_KEY = "your-hmac-key"
+
+post "/webhooks/ottu" do
+  # the exact bytes Ottu sent, never params re-dumped
+  raw_body = request.body.read
+  unless verify_ottu_signature(
+    raw_body,
+    request.env["HTTP_OTTU_SIGNATURE"].to_s,
+    HMAC_KEY
+  )
+    halt 401, "invalid signature"
+  end
+
+  event = JSON.parse(raw_body)
+  data = event["data"] # the payment itself, flat
+
+  if event["event"] == "payment.paid" &&
+     data["operation"] == "purchase"
+    fulfil_order(
+      data["order_no"],
+      data["connector"]["reference_number"]
+    )
+  elsif event["event"] == "payment.paid" &&
+        data["operation"] == "capture"
+    record_capture(
+      data["session_id"],
+      data["connector"]["reference_number"]
+    )
+  elsif event["event"] == "payment.refunded"
+    record_refund(
+      data["session_id"],
+      data["connector"]["reference_number"],
+      data["totals"]["refunded"]
+    )
+  end
+  # Unknown events: acknowledge and ignore,
+  # new events are added over time.
+  status 200
+  ""
+end
+```
+
+</TabItem>
+</Tabs>
+
+</Visual>
+
+</Beside>
+
+### Delivery and retries {#delivery-and-retries}
+
+Ottu delivers every event with an HTTP `POST` to your URL and judges the delivery by the status code you answer. No success means Ottu tries again, on a fixed schedule.
+
+#### What counts as success {#success-rules}
+
+Ottu reads only the **HTTP status code** of your answer. The body is ignored.
+
+- **Any `2xx` is success.** The delivery is done.
+- **Every other status is a failure, and Ottu tries again**, `4xx` and `5xx` alike. Answer `503` on purpose when you cannot store the event.
+- **A `3xx` is a failure.** Ottu does not follow redirects, so register the final address.
+- **A timeout, a refused connection or a TLS error is a failure.** Your URL must answer within the [timeout](#timeout), 15 seconds by default.
+
+On the payment's own `webhook_url`, the payer waits on the Ottu page for your answer. Any `2xx` lets the redirect to your `redirect_url` proceed.
+
+#### The request Ottu sends {#request}
+
+A `POST` with a JSON body and three headers:
+
+- **`Content-Type`:** always `application/json`.
+- **`Ottu-Signature`:** `t={unix_seconds},v2={hex}`. Ottu signs each attempt again, so `t` is new on every attempt. See [Verify signatures](/developers/webhooks/verify-signatures#ottu-signature-header).
+- **`Idempotency-Key`:** the event id, `evt_...`. It is the same on every attempt.
+
+#### Retry schedule {#retry-schedule}
+
+A delivery gets **8 attempts in total**: the first one and seven retries.
+
+1. **Attempt 1:** immediately.
+2. **Attempt 2:** 1 minute later.
+3. **Attempt 3:** 5 minutes later (6 minutes from the start).
+4. **Attempt 4:** 30 minutes later (36 minutes).
+5. **Attempt 5:** 2 hours later (about 2.6 hours).
+6. **Attempt 6:** 5 hours later (about 7.6 hours).
+7. **Attempt 7:** 10 hours later (about 17.6 hours).
+8. **Attempt 8:** 24 hours later (about 42 hours).
+
+- **Each wait varies by plus or minus 10 percent**, so a burst of failures does not come back in one wave.
+- **Every retry sends the same body bytes and the same `Idempotency-Key`.** Only the `Ottu-Signature` `t` and signature are new.
+- **After attempt 8 fails**, Ottu marks the delivery `failed`, stops, and sends the [failure email](#failure-email).
+- **On the payment's `webhook_url`**, attempt 1 runs while the payer waits on the Ottu page. If it fails, attempts 2 to 8 follow in the background and never change what the payer sees. Deliveries to a [webhook endpoint](#webhook-endpoints) are all in the background.
+
+#### Idempotency-Key {#idempotency-key}
+
+Every delivery carries `Idempotency-Key: {event_id}`, for example `Idempotency-Key: evt_01JABCDEFGHJKMNPQRSTVWXYZ0`. The header equals the `id` in the body. The body is signed, so trust the `id` inside it; the header lets you spot a repeat before you parse.
+
+- **The key repeats** on the first attempt and every retry of a delivery, on a manual re-disclose of a payment whose state did not change (the **Disclose** action on a transaction in the Ottu dashboard), and when the same event is delivered to several URLs.
+- **The key is new** for a new state, a new attempt, or a second partial refund: each is a new event with a new id.
+
+##### Drop duplicates {#drop-duplicates}
+
+<Beside>
+
+A receiver that is safe against repeats does four things, in this order:
+
+1. **Verify the signature.**
+2. **Store the event once**, keyed on its `id`. A unique key in your database makes two retries arriving together safe.
+3. **Answer `2xx`.** When the `id` is already stored, answer `2xx` and do nothing else.
+4. **Process in the background.** Record "processed" and the business effect in one database transaction, so a crash cannot mark an event processed that was never applied.
+
+Answer `503` only when you cannot store the event: that asks Ottu to send it again. Once an event is stored, a failure in your own logic is retried by your worker, not by Ottu.
+
+In the samples, `verify_ottu_signature` is the helper from [Verify signatures](/developers/webhooks/verify-signatures#verify-v2), and `enqueue` hands the stored event id to your background worker. Have the worker also pick up stored events that are not processed yet, so an event is not lost when the hand-off fails.
+
+:::warning The key stops repeated deliveries, not repeated business actions
+Two different events can describe the same outcome: a payment can be re-disclosed, retried or confirmed by an inquiry. Before you **fulfil an order or refund money**, also check your own record of `data.connector.reference_number`. It is the attempt's own reference, so a refund or a capture has its own. Act only when the event `id` is new **and** the reference has not been applied.
+:::
+
+To test it, send the same signed event twice ([Testing](#testing)): both calls must answer `200`, and the second one must not store or queue the event again.
+
+<Visual>
+
+<Tabs groupId="language">
+<TabItem value="python" label="Python">
+
+```python title="Flask receiver with de-duplication"
+import json
+import sqlite3
+
+from flask import Flask, request
+
+app = Flask(__name__)
+db = sqlite3.connect(
+    "webhooks.db",
+    isolation_level=None,
+    check_same_thread=False
+)
+db.execute(
+    "CREATE TABLE IF NOT EXISTS webhook_events ("
+    " event_id TEXT PRIMARY KEY,"
+    " body BLOB NOT NULL,"
+    " processed INTEGER NOT NULL DEFAULT 0)"
+)
+
+def store_once(event_id: str, raw_body: bytes) -> bool:
+    """True only for the first caller. The PRIMARY KEY
+    makes concurrent retries safe."""
+    cursor = db.execute(
+        "INSERT OR IGNORE INTO webhook_events"
+        " (event_id, body) VALUES (?, ?)",
+        (event_id, raw_body)
+    )
+    return cursor.rowcount == 1
+
+@app.post("/webhooks/ottu")
+def ottu_webhook():
+    raw_body = request.get_data()
+    if not verify_ottu_signature(
+        raw_body,
+        request.headers.get("Ottu-Signature", ""),
+        HMAC_KEY
+    ):
+        return "invalid signature", 401
+
+    event = json.loads(raw_body)
+    # The header equals event["id"]; the id in the
+    # signed body is the one to trust.
+    try:
+        is_new = store_once(event["id"], raw_body)
+    except sqlite3.Error:
+        # nothing stored: Ottu retries later
+        return "could not store the event", 503
+
+    if is_new:
+        # the worker runs handle_event; it also
+        # checks the business reference
+        # (see the warning below)
+        enqueue(event["id"])
+    # stored (now or on an earlier delivery):
+    # acknowledge
+    return "", 200
+```
+
+</TabItem>
+<TabItem value="node" label="Node.js">
+
+```javascript title="Express receiver with de-duplication"
+import express from "express";
+
+const app = express();
+// stand-in: use a database table with a unique key
+// on the event id in production
+const stored = new Map();
+
+async function storeOnce(eventId, rawBody) {
+  // In production, one INSERT that relies on the
+  // unique key, so concurrent retries are safe.
+  if (stored.has(eventId)) return false;
+  stored.set(eventId, rawBody);
+  return true;
+}
+
+app.post(
+  "/webhooks/ottu",
+  express.raw({ type: "*/*" }),
+  async (req, res) => {
+    if (!verifyOttuSignature(
+      req.body,
+      req.get("Ottu-Signature") ?? "",
+      HMAC_KEY
+    )) {
+      return res.status(401).send("invalid signature");
+    }
+
+    const event = JSON.parse(
+      req.body.toString("utf8")
+    );
+    // The header equals event.id; the id in the
+    // signed body is the one to trust.
+    let isNew;
+    try {
+      isNew = await storeOnce(event.id, req.body);
+    } catch (err) {
+      // nothing stored: Ottu retries later
+      return res.status(503)
+        .send("could not store the event");
+    }
+
+    // the worker runs handleEvent; it also checks
+    // the business reference (see the warning below)
+    if (isNew) enqueue(event.id);
+    // stored (now or on an earlier delivery):
+    // acknowledge
+    res.sendStatus(200);
+  });
+```
+
+</TabItem>
+<TabItem value="php" label="PHP">
+
+```php title="PHP receiver with de-duplication"
+<?php
+function openStore(): PDO {
+    $pdo = new PDO(
+        'sqlite:webhooks.db',
+        null,
+        null,
+        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+    );
+    $pdo->exec(
+        'CREATE TABLE IF NOT EXISTS webhook_events (
+        event_id TEXT PRIMARY KEY, '
+        . 'body BLOB NOT NULL, '
+        . 'processed INTEGER NOT NULL DEFAULT 0)'
+    );
+    return $pdo;
+}
+
+function storeOnce(
+    PDO $pdo,
+    string $eventId,
+    string $rawBody
+): bool {
+    // The PRIMARY KEY makes concurrent retries safe:
+    // only one insert succeeds.
+    $stmt = $pdo->prepare(
+        'INSERT OR IGNORE INTO webhook_events'
+        . ' (event_id, body) VALUES (?, ?)'
+    );
+    $stmt->execute([$eventId, $rawBody]);
+    return $stmt->rowCount() === 1;
+}
+
+$rawBody = file_get_contents('php://input');
+if (!verifyOttuSignature(
+    $rawBody,
+    $_SERVER['HTTP_OTTU_SIGNATURE'] ?? '',
+    $hmacKey
+)) {
+    http_response_code(401);
+    exit;
+}
+
+$event = json_decode($rawBody, true);
+// The header equals $event['id']; the id in the
+// signed body is the one to trust.
+try {
+    $isNew = storeOnce(
+        openStore(), $event['id'], $rawBody
+    );
+} catch (PDOException $e) {
+    // nothing stored: Ottu retries later
+    http_response_code(503);
+    exit;
+}
+
+if ($isNew) {
+    // the worker runs handleEvent; it also checks
+    // the business reference (see the warning below)
+    enqueue($event['id']);
+}
+// stored (now or on an earlier delivery): acknowledge
+http_response_code(200);
+```
+
+</TabItem>
+</Tabs>
+
+</Visual>
+
+</Beside>
+
+#### Failure email {#failure-email}
+
+When attempt 8 fails, Ottu sends **one** email to the addresses in [Email list](#emails), provided [Notify on error](#error-notification) is on and at least one address is set. There is no email per attempt, and the addresses are the ones in Webhook Config, also for a webhook endpoint.
+
+Fix the receiver, then find what you missed with the [Payment Status Query v3](/developers/payments/psq-v3): see [Missed webhooks](#missed-webhooks).
+
+
+### Reconciliation {#reconciliation}
+
+Reconciliation answers two questions: **was this order really paid**, and **does the money at the bank match**. Every answer is a field of the [event object](#envelope). Each case below has its own link.
+
+#### Confirm a payment {#confirm-a-payment}
+
+<Beside>
+
+Fulfil an order only when all four are true:
+
+1. **`event` is `payment.paid` and `data.operation` is `purchase`.** `payment.authorized` holds the money without taking it, and `payment.attempted` is a failed try.
+2. **`data.order_no` or `data.session_id` is an order you created**, and `data.amount` and `data.currency` are what you asked for.
+3. **`data.connector.reference_number` is new to you.** It is the reference of this one attempt at the gateway. Store it with the order.
+4. **`is_sandbox` is `false`** on your live account.
+
+Then keep three values with the order, because every later case uses them: `data.session_id`, `data.connector.reference_number` and the event `id`.
+
+The example is shortened. A real event carries every key of the event object.
+
+#### Payments {#reconcile-payments}
+
+##### A payment to your order {#payment-to-order}
+
+**Match:** `data.order_no` to your order number, or `data.session_id` to the `session_id` the [Checkout API](/developers/payments/checkout-api) returned.
+
+Both stay the same in every event of the payment, including its refunds, captures and voids.
+
+##### A payment to a bank settlement line {#payment-to-settlement}
+
+**Match:** `data.connector.reference_number`, then `data.connector.params.rrn.value` and `data.connector.params.auth_code.value` when the gateway provides them.
+
+**Amount:** `data.connector.total` in `data.connector.currency`. This is what the gateway processed, so it is the number on the bank's line. Which params a gateway returns is in [PG Params](/developers/webhooks/pg-params).
+
+##### A payment in another currency {#currency-conversion}
+
+**Match:** `data.amount` in `data.currency` to your order, and `data.connector.amount` in `data.connector.currency` to the bank.
+
+`data.connector.exchange_rate` is the rate between the two. `data.amount` and `data.totals` always stay in the currency of the payment.
+
+##### A fee paid by the payer {#payer-fee}
+
+**Match:** `data.connector.fee` is the fee, and `data.connector.total` is the amount with the fee.
+
+`data.totals` never includes fees. Compare your order with `data.amount`, and the bank's line with `data.connector.total`.
+
+<Visual>
+
+```json title="payment.paid, the keys used on this page"
+{
+  "id": "evt_01JABCDEFGHJKMNPQRSTVWXYZ0",
+  "event": "payment.paid",
+  "created": "2026-10-22T10:00:00Z",
+  "is_sandbox": false,
+  "data": {
+    "session_id": "golden-session-1",
+    "order_no": "ORDER-1",
+    "amount": "100.000",
+    "currency": "KWD",
+    "status": "paid",
+    "operation": "purchase",
+    "result": "success",
+    "connector": {
+      "code": "mpgs",
+      "reference_number": "GOLDENATT1",
+      "currency": "KWD",
+      "amount": "100.000",
+      "exchange_rate": "1",
+      "fee": "0.000",
+      "total": "100.000",
+      "params": {
+        "auth_code": {
+          "label": {
+            "en": "Auth Code",
+            "ar": "رمز التفويض"
+          },
+          "value": "A83921"
+        }
+      }
+    },
+    "totals": {
+      "paid": "100.000",
+      "settled": "100.000",
+      "refunded": "0.000",
+      "refund_pending": "0.000",
+      "voided": "0.000",
+      "remaining": "0.000"
+    }
+  }
+}
+```
+
+</Visual>
+
+</Beside>
+
+##### Authorize, then capture {#authorize-capture}
+
+**Match:** `payment.authorized` to the order (money held), then each `payment.paid` with `data.operation` equal to `capture` to a capture you ran.
+
+Each capture has its own `data.connector.reference_number`. `data.totals.paid` is the amount captured so far, and the payment's own status stays `authorized`. A [void](#payment-voided) arrives as `payment.voided`, with the released amount in `data.totals.voided`.
+
+##### A payment split with a wallet {#split-wallet}
+
+**Match:** each entry of `data.wallets` is one wallet leg, with its own `result` and its own `connector.reference_number`.
+
+Reconcile the gateway part with `data.connector`, and each wallet part with its entry.
+
+##### Cash on delivery {#cash-on-delivery}
+
+**Match:** `payment.cod` by `data.order_no` or `data.session_id`.
+
+No gateway is involved, so `data.connector` is empty and there is no bank line. `initiator` names the user or API key that acknowledged the cash.
+
+##### An AutoPay charge {#autopay-charges}
+
+**Match:** a subscription event by `data.subscription_id`, the ID you stored when you created the subscription.
+
+**Amount:** each billing cycle has its own `amount_due`. Read it with [List billing cycles](/developers/payments/autopay/?autopay-api=cycles#api-reference).
+
+In Payment Management, each billing cycle is one transaction whose order number is the subscription ID, then `-c` and the cycle number, for example `sub_…-c2`. More in [AutoPay](/developers/payments/autopay#webhook-events).
+
+#### Refunds {#reconcile-refunds}
+
+##### One refund {#refund}
+
+**Match:** `payment.refunded` by `data.session_id` to the payment, and by `data.connector.reference_number` to the refund you asked for.
+
+The reference is the refund's own, not the payment's. The refunded amount is `data.connector.amount`.
+
+##### Partial refunds {#partial-refunds}
+
+**Match:** one `payment.refunded` per refund, each with its own reference.
+
+`data.totals.refunded` is the running total after this refund. Your own refund records must add up to it.
+
+##### A pending refund {#pending-refund}
+
+**Match:** `payment.refund_pending` to the refund you asked for. The amount waiting is in `data.totals.refund_pending`.
+
+Do not book the refund yet. The gateway decides later, and Ottu then sends `payment.refunded` (book it) or `payment.refund_rejected` (the money did not go back).
+
+##### A rejected refund {#rejected-refund}
+
+**Match:** `payment.refund_rejected` by `data.connector.reference_number`.
+
+`data.totals.refunded` does not grow. Alert a person: the customer is still waiting for the money.
+
+#### When things go wrong {#reconcile-problems}
+
+##### The same event twice {#duplicates}
+
+**Match:** the event `id`, which is also the `Idempotency-Key` header.
+
+Store every `id` you process and skip a repeat. For a shipment or a refund, also check `data.connector.reference_number`: two different events can describe the same outcome. See [Drop duplicates](#drop-duplicates).
+
+##### Missed webhooks {#missed-webhooks}
+
+**Ask:** the [Payment Status Query v3](/developers/payments/psq-v3) with `session_id` or `order_no`.
+
+It answers with the payment as it is now: `status`, `totals` and every attempt, oldest first. Use it after downtime, after a [failure email](#failure-email), and for any order that has waited longer than you expect.
+
+##### Events out of order {#out-of-order}
+
+**Match:** order the events of one payment by `created`.
+
+When two events carry the same `created`, or the final state matters, ask the Payment Status Query v3 instead of guessing. See [Order and unknown events](#ordering).
+
+### Testing {#testing}
+
+<Beside>
+
+**On your machine.** Sign a sample event yourself and post it to your local receiver. Set `KEY` to the HMAC key your receiver verifies with. Your receiver passes when:
+
+- the request answers `2xx`;
+- the same request sent again changes nothing;
+- the request answers `401` after you change one character of `BODY` without signing it again.
+
+**On the sandbox.** Ottu needs an HTTPS URL it can reach, so expose your local port through a tunnel, or deploy the receiver. Create a payment on your sandbox account and pay it with a [test card](/developers/payments/sandbox). Within seconds your receiver gets `payment.paid` with `"is_sandbox": true`, signed with your real key.
+
+**A webhook endpoint.** In **Webhook endpoints**, select your endpoint and run **Send a test event**. Ottu sends one [`webhook.ping`](#webhook-ping) to that endpoint only, and never retries it.
+
+Nothing arrives? See [I never received the webhook](#never-received).
+
+<Visual>
+
+```bash title="Send a signed sample event"
+KEY='your-hmac-key'
+BODY='{
+  "id": "evt_01JABCDEFGHJKMNPQRSTVWXYZ0",
+  "event": "payment.paid",
+  "created": "2026-10-22T10:00:00Z",
+  "version": 3,
+  "is_sandbox": true,
+  "merchant_id": "merchant.ottu.net",
+  "initiator": {
+    "kind": "customer",
+    "id": "CUST-1",
+    "first_name": null,
+    "last_name": null,
+    "email": null
+  },
+  "data": {
+    "session_id": "golden-session-1",
+    "order_no": "ORDER-1",
+    "status": "paid",
+    "operation": "purchase",
+    "result": "success",
+    "connector": {
+      "reference_number": "GOLDENATT1"
+    }
+  }
+}'
+T=$(date +%s)
+SIG=$(printf '%s' "$T.$BODY" |
+  openssl dgst -sha256 -hmac "$KEY" |
+  awk '{print $NF}')
+
+curl -X POST http://localhost:8000/webhooks/ottu \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: evt_01JABCDEFGHJKMNPQRSTVWXYZ0" \
+  -H "Ottu-Signature: t=$T,v2=$SIG" \
+  --data-binary "$BODY"
+```
+
+</Visual>
+
+</Beside>
+
+### Troubleshooting {#troubleshooting}
+
+Find your symptom and jump to it.
+
+- Your receiver rejects every event with "invalid signature": [The signature does not match](#signature-mismatch).
+- Ottu reports a failed delivery, or you got a failure email: [Ottu says the delivery failed](#delivery-failed).
+- Nothing arrives at all: [I never received the webhook](#never-received).
+- The same event twice, or `payment.created` after `payment.paid`: [Duplicates and order](#duplicates-and-order).
+- The payment in `data` is not what the dashboard shows now: [The data looks old](#old-data).
+
+#### Start here {#start-here}
+
+Run these checks in order. Most problems stop at one of them.
+
+1. **Webhooks are on and a URL is set.** They are off by default. Switch them on in [Webhook Config](#admin-setup), or send a `webhook_url` with the [Checkout API](/developers/payments/checkout-api).
+2. **The URL is public HTTPS and online.** A `localhost` or private address never receives anything.
+3. **The URL does not redirect.** A `3xx` is a failure. Register the final address: watch `http` to `https`, and a missing or extra trailing slash.
+4. **It answers `2xx` within 15 seconds.** Store the event, answer, then do the heavy work in a queue.
+5. **You verify the signature on the raw body**, not on your parsed JSON.
+6. **Version is 3 in Webhook Config.** An event has `"version": 3` and an `event` key. If you receive a body with a `signature` field instead, the account is still on the old webhooks: see [Migrate to v3](/developers/webhooks/migrate-to-v3).
+7. **De-duplication is not swallowing new events.** De-duplicate on the event `id`, never on `session_id` or `order_no`. A new state or a second partial refund is a new event with a new `id`.
+
+#### The signature does not match {#signature-mismatch}
+
+<Beside>
+
+**First step, always:** run the [published test vector](/developers/webhooks/verify-signatures#test-vectors) through your verifier.
+
+- **It fails:** the bug is in your verify code. Compare it with the [recipe](/developers/webhooks/verify-signatures#verify-v2).
+- **It passes:** the bug is in how your framework hands you the body. Go to the [raw-body recipes](#raw-body-recipes).
+
+`verify_ottu_signature` is the helper from [Verify signatures](/developers/webhooks/verify-signatures#verify-v2). It computes `HMAC-SHA256(key, "{t}." + raw body bytes)` as lowercase hex, compares in constant time, and accepts `t` within 300 seconds of your clock.
+
+<Visual>
+
+<Tabs groupId="language">
+<TabItem value="curl" label="cURL">
+
+```bash title="Reproduce the test vector with openssl"
+KEY='pu9MpX3yPR'
+T=1792417440
+BODY='{"id":"evt_1","data":{"customer_first_name":"Zoë احمد"}}'
+
+printf '%s' "$T.$BODY" |
+  openssl dgst -sha256 -hmac "$KEY" |
+  awk '{print $NF}'
+# expected:
+# b230321937edb54b51b91f65d544aa8039e413f0a8e034e59acb9b13e11e7d4e
+```
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+```python title="Run your verifier on the test vector"
+body = '{"id":"evt_1","data":{"customer_first_name":"Zoë احمد"}}'.encode("utf-8")
+header = "t=1792417440,v2=b230321937edb54b51b91f65d544aa8039e413f0a8e034e59acb9b13e11e7d4e"
+
+# now= puts the vector's old t inside the 300 s window
+assert verify_ottu_signature(
+    body, header, "pu9MpX3yPR", now=1792417440
+)
+assert not verify_ottu_signature(
+    body, header, "wrongkey000", now=1792417440
+)
+```
+
+</TabItem>
+<TabItem value="node" label="Node.js">
+
+```javascript title="Run your verifier on the test vector"
+const body = Buffer.from(
+  '{"id":"evt_1","data":{"customer_first_name":"Zoë احمد"}}',
+  "utf8"
+);
+const header =
+  "t=1792417440,v2=b230321937edb54b51b91f65d544aa8039e413f0a8e034e59acb9b13e11e7d4e";
+
+// now = 1792417440 puts the vector's old t inside
+// the 300 s window
+console.assert(
+  verifyOttuSignature(
+    body, header, "pu9MpX3yPR", 300, 1792417440
+  ) === true
+);
+console.assert(
+  verifyOttuSignature(
+    body, header, "wrongkey000", 300, 1792417440
+  ) === false
+);
+```
+
+</TabItem>
+<TabItem value="php" label="PHP">
+
+```php title="Run your verifier on the test vector (save the file as UTF-8)"
+<?php
+$body =
+    '{"id":"evt_1","data":{"customer_first_name":"Zoë احمد"}}';
+$header =
+    't=1792417440,v2=b230321937edb54b51b91f65d544aa8039e413f0a8e034e59acb9b13e11e7d4e';
+
+// $now = 1792417440 puts the vector's old t inside
+// the 300 s window
+// bool(true)
+var_dump(verifyOttuSignature(
+    $body, $header, 'pu9MpX3yPR', 300, 1792417440
+));
+// bool(false)
+var_dump(verifyOttuSignature(
+    $body, $header, 'wrongkey000', 300, 1792417440
+));
+```
+
+</TabItem>
+</Tabs>
+
+</Visual>
+
+</Beside>
+
+
+##### The body was parsed and re-serialised {#cause-reserialised-body}
+
+**You see:** every event fails, and the test vector passes. Typical code: `JSON.stringify(req.body)` or `json.dumps(request.json)`.
+
+**Fix:** verify the raw bytes before any parsing, with the [recipe for your framework](#raw-body-recipes).
+
+##### Wrong key, or spaces around it {#cause-wrong-key}
+
+**You see:** every event fails, and the test vector passes with the published key.
+
+**Fix:** copy the **HMAC Key** from Webhook Config again. Trim stray spaces or a trailing newline from your environment variable or secret store.
+
+##### Stale `t`, or clock drift {#cause-stale-t}
+
+**You see:** it fails now and then, or on one server only.
+
+**Fix:** sync the server clock (NTP). Verify when the request arrives, not later from a queue: an event checked after 300 seconds is correctly rejected.
+
+##### Reading the header by position {#cause-header-position}
+
+**You see:** your code finds nothing to compare.
+
+**Fix:** split the header on `,`, then each part on the first `=`, and read `t` and `v2` **by name**.
+
+##### `==` comparison, or uppercase hex {#cause-comparison}
+
+**You see:** it fails although the hex looks the same, or it works but leaks timing.
+
+**Fix:** `v2` is lowercase hex. Lowercase your digest when your library returns uppercase, and compare with `hmac.compare_digest`, `crypto.timingSafeEqual` or `hash_equals`.
+
+##### Wrong charset {#cause-charset}
+
+**You see:** it fails only for names or addresses with non-ASCII characters, such as Arabic or accents.
+
+**Fix:** the body is UTF-8. Keep it as bytes. If you must turn it into a string, decode and encode as UTF-8, never Latin-1.
+
+##### No header at all {#cause-header-missing}
+
+**You see:** there is no `Ottu-Signature` header.
+
+**Fix:** treat the request as unsigned and reject it. Check that a proxy in front of your app is not stripping headers.
+
+:::danger Never switch the check off to "make it work"
+A failing signature is a bug to find, not a check to remove. Without it, anyone who knows your URL can post a fake `payment.paid`. Answer `401` while you fix it: Ottu retries on the [retry schedule](#retry-schedule), so the events come back once the fix is live.
+:::
+
+##### Raw-body recipes {#raw-body-recipes}
+
+<Beside>
+
+Each recipe gets the exact bytes Ottu sent and the `Ottu-Signature` header, then passes both to your verifier.
+
+Anything that touches the body before you do changes the bytes: body-parsing middleware, a logging layer that re-serialises JSON, a gateway mapping template. When the test vector passes but live events fail, log the length and the first bytes of the body your handler receives, and compare them with what Ottu sent.
+
+<Visual>
+
+<Tabs groupId="framework">
+<TabItem value="express" label="Express">
+
+```javascript title="express.raw on the route, before express.json app-wide"
+// Register the webhook route FIRST: once
+// express.json() has read the body, the raw bytes
+// are gone.
+app.post(
+  "/webhooks/ottu",
+  express.raw({ type: "*/*" }),
+  (req, res) => {
+    // req.body is a Buffer
+    const ok = verifyOttuSignature(
+      req.body,
+      req.get("Ottu-Signature") ?? "",
+      HMAC_KEY
+    );
+    if (!ok)
+      return res.status(401).send("invalid signature");
+    res.sendStatus(200);
+  });
+app.use(express.json()); // the rest of your app
+```
+
+</TabItem>
+<TabItem value="nextjs" label="Next.js">
+
+```javascript title="App Router: app/webhooks/ottu/route.js"
+export async function POST(request) {
+  // not request.json()
+  const raw = Buffer.from(await request.arrayBuffer());
+  const ok = verifyOttuSignature(
+    raw,
+    request.headers.get("ottu-signature") ?? "",
+    process.env.OTTU_HMAC_KEY
+  );
+  return new Response(null, {
+    status: ok ? 200 : 401
+  });
+}
+```
+
+```javascript title="Pages Router: pages/api/webhooks/ottu.js"
+// keep the raw stream
+export const config = { api: { bodyParser: false } };
+
+export default async function handler(req, res) {
+  const chunks = [];
+  for await (const chunk of req) chunks.push(chunk);
+  const ok = verifyOttuSignature(
+    Buffer.concat(chunks),
+    req.headers["ottu-signature"] ?? "",
+    process.env.OTTU_HMAC_KEY
+  );
+  res.status(ok ? 200 : 401).end();
+}
+```
+
+</TabItem>
+<TabItem value="django" label="Django">
+
+```python title="views.py"
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
+@csrf_exempt  # Ottu sends no CSRF token
+@require_POST
+def ottu_webhook(request):
+    # request.body is bytes
+    ok = verify_ottu_signature(
+        request.body,
+        request.headers.get("Ottu-Signature", ""),
+        HMAC_KEY
+    )
+    return HttpResponse(status=200 if ok else 401)
+```
+
+</TabItem>
+<TabItem value="flask" label="Flask">
+
+```python title="app.py"
+@app.post("/webhooks/ottu")
+def ottu_webhook():
+    # bytes; read it before request.json
+    # or request.form
+    raw = request.get_data()
+    if not verify_ottu_signature(
+        raw,
+        request.headers.get("Ottu-Signature", ""),
+        HMAC_KEY
+    ):
+        return "invalid signature", 401
+    return "", 200
+```
+
+</TabItem>
+<TabItem value="fastapi" label="FastAPI">
+
+```python title="main.py"
+from fastapi import FastAPI, Request, Response
+
+app = FastAPI()
+
+@app.post("/webhooks/ottu")
+async def ottu_webhook(request: Request):
+    # bytes; do not declare a Pydantic body model
+    # on this route
+    raw = await request.body()
+    ok = verify_ottu_signature(
+        raw,
+        request.headers.get("ottu-signature", ""),
+        HMAC_KEY
+    )
+    return Response(status_code=200 if ok else 401)
+```
+
+</TabItem>
+<TabItem value="laravel" label="Laravel">
+
+```php title="routes/api.php (no CSRF), or exclude the path from CSRF if it lives in web.php"
+Route::post(
+    '/webhooks/ottu',
+    function (Illuminate\Http\Request $request) {
+        // the raw body,
+        // never json_encode($request->all())
+        $raw = $request->getContent();
+        $ok = verifyOttuSignature(
+            $raw,
+            $request->header('Ottu-Signature', ''),
+            config('services.ottu.hmac_key')
+        );
+        return response('', $ok ? 200 : 401);
+    });
+// web.php route? Add 'webhooks/ottu' to $except in
+// VerifyCsrfToken (Laravel 10), or
+// validateCsrfTokens(except: ['webhooks/ottu'])
+// in bootstrap/app.php (Laravel 11+).
+```
+
+</TabItem>
+<TabItem value="spring" label="Spring Boot">
+
+```java title="OttuWebhookController.java"
+@PostMapping("/webhooks/ottu")
+public ResponseEntity<Void> receive(
+    @RequestBody byte[] body,
+    @RequestHeader(value = "Ottu-Signature",
+        defaultValue = "") String signature)
+    throws Exception {
+  // byte[] is the exact bytes. Avoid a DTO here:
+  // Jackson parses the body and the bytes are lost.
+  // the Java sample on Verify Signatures
+  boolean ok = OttuSignature.verifyOttuSignature(
+      body, signature, hmacKey);
+  return ResponseEntity.status(ok ? 200 : 401).build();
+}
+```
+
+</TabItem>
+<TabItem value="lambda" label="AWS Lambda">
+
+```javascript title="Lambda behind API Gateway (proxy integration)"
+export const handler = async (event) => {
+  const raw = event.isBase64Encoded
+    ? Buffer.from(event.body, "base64")
+    : Buffer.from(event.body ?? "", "utf8");
+  const headers = event.headers ?? {};
+  // HTTP APIs lower-case header names
+  const signature = headers["ottu-signature"]
+    ?? headers["Ottu-Signature"] ?? "";
+  const ok = verifyOttuSignature(
+    raw, signature, process.env.OTTU_HMAC_KEY
+  );
+  return { statusCode: ok ? 200 : 401, body: "" };
+};
+```
+
+</TabItem>
+</Tabs>
+
+</Visual>
+
+</Beside>
+
+#### Ottu says the delivery failed {#delivery-failed}
+
+Any answer that is not `2xx` is a failed delivery, and Ottu tries again on the [retry schedule](#retry-schedule). What to fix depends on what you answered:
+
+- **`3xx`:** register the final URL (scheme, host, trailing slash). Ottu does not follow redirects.
+- **`401`:** your signature check rejects the event. See [The signature does not match](#signature-mismatch).
+- **`404`:** the route is wrong.
+- **`5xx`:** your code crashed. Fix it, and the next retry goes through.
+- **No answer in 15 seconds:** answer first, process later in a queue.
+- **Connection refused or TLS error:** keep the URL online on a public HTTPS address.
+
+A stale `t` is never the reason a retry fails: Ottu signs every attempt again. The exact rules are in [What counts as success](#success-rules).
+
+#### I never received the webhook {#never-received}
+
+1. **Are webhooks on?** They are off by default. Switch them on in [Webhook Config](#admin-setup), or send a `webhook_url` with the [Checkout API](/developers/payments/checkout-api).
+2. **Which URL is Ottu calling?** A `webhook_url` sent with the Checkout API belongs to that payment. The URLs in Webhook Config are separate settings. Check that the URL on the payment you are testing is the one your server listens on. See [Where events go](#where-events-go).
+3. **Is Version 3?** If you receive a body with a `signature` field and no `event` key, the account is still on the old webhooks. Set **Version** to 3 and follow [Migrate to v3](/developers/webhooks/migrate-to-v3).
+4. **Can the internet reach you?** A firewall, a VPN-only host or a private DNS name blocks Ottu.
+5. **Did a failure email arrive?** Then Ottu did call you, and your server did not answer `2xx`: go to [Ottu says the delivery failed](#delivery-failed). No email? Check that [Notify on error](#error-notification) is on and [Email list](#emails) has an address.
+6. **Catch up.** Ask the [Payment Status Query v3](/developers/payments/psq-v3) for the payment's current state and apply what your system does not have yet. See [Missed webhooks](#missed-webhooks).
+
+Log the `id` and `event` of every request you receive. They identify the exact delivery when you ask Ottu support about it.
+
+#### I received the same event twice, or out of order {#duplicates-and-order}
+
+Both are **expected**, not a fault.
+
+##### The same `id` twice {#same-id-twice}
+
+**Why:** a retry, a manual re-disclose (the **Disclose** action on a transaction in the Ottu dashboard), or the same event sent to two URLs.
+
+**Do:** store each `id` you process. When it comes again, answer `2xx` and skip it. See [Drop duplicates](#drop-duplicates).
+
+##### `payment.created` after `payment.paid` {#created-after-paid}
+
+**Why:** `payment.created` is delivered a few seconds after creation, and a fast payment can beat it.
+
+**Do:** order the events of one payment by `created`, not by arrival.
+
+##### An old `payment.paid` after `payment.refunded` {#paid-after-refunded}
+
+**Why:** the paid event was retried for a while, and the refund succeeded first time.
+
+**Do:** the same: order by `created`.
+
+##### Two events with the same `created` {#same-created}
+
+**Why:** `created` has one-second resolution.
+
+**Do:** treat the tie as unordered and ask the [Payment Status Query v3](/developers/payments/psq-v3) for the current state.
+
+#### The data looks old {#old-data}
+
+That is by design. Ottu renders the body **once**, when the event happens, and every retry sends the same bytes. `data` is the payment as it was then, not as it is now.
+
+- A `payment.created` delivered after the payer paid still shows `status: created` and zero `totals`.
+- A retried `payment.paid` arriving hours later does not show the refund that happened in between.
+- After a refund, capture or void, the payment's own status does not change. Read `data.totals` for the money that moved.
+
+For the current state, ask the [Payment Status Query v3](/developers/payments/psq-v3).
+
+## API Reference
+
+There is no endpoint to call: Ottu calls you. The reference is what Ottu sends. Every webhook is one **event**: a small envelope that says what happened (`event`), when (`created`), which event it is (`id`) and who caused it (`initiator`), with the details in `data`. Each event below has its own link, so you can point a colleague at exactly one.
+
+### The event object {#envelope}
+
+The body is one JSON object: the envelope keys at the top, and the payment itself in `data`. Open a field to see its child attributes, and pick an event on the right to see a real body.
+
+<EventObject />
+
+Three rules hold for every event:
+
+- **Every key is always present.** What is empty is `null`, an empty object (`{}`) or an empty list (`[]`). A key is never dropped and never `""`.
+- **The body is a snapshot.** Ottu renders it once, when the event happens, and every retry sends the same bytes. `data` shows the payment as it was then, not as it is now. For the current state, ask the [Payment Status Query v3](/developers/payments/psq-v3).
+- **Card numbers are cut.** In `responses`, `extra` and `params`, a card number shows only its first six and last four digits. Sandbox test numbers are cut too. Gateway transaction, payment and receipt ids are never touched.
+
+`is_sandbox` and `merchant_id` are in the envelope only. `data` does not repeat them.
+
+#### The `data` object {#data-keys}
+
+For a `payment.*` event, `data` is the payment itself, flat, with the same keys in every event. The keys fall in three groups that never share a name:
+
+- **The payment**, the same in every event: `session_id`, `order_no`, `amount`, `currency`, `totals`, `customer`, the addresses, `agreement`, `wallets`, `extra`, `created_by`, `created_at`, `updated_at`.
+- **What happened:** `status`, `operation`, `processed_at`.
+- **The attempt:** `result`, `message`, `channel`, `form_of_payment`, `card`, `connector`.
+
+<EventObject part="data" />
+
+`channel`, `form_of_payment` and `card` are filled only by a real gateway attempt. An action Ottu records without a gateway (an expiry, a cancel with no attempt, a cash acknowledgement) leaves them `null`. The gateway's own fields are in [`connector.params`](/developers/webhooks/pg-params).
+
+#### Actor {#actor}
+
+Wherever a "who" appears (`initiator`, and `data.created_by`), it has one shape: `{kind, id, first_name, last_name, email}`. All five keys are always present, and a value that does not apply is `null`. `kind` is one of:
+
+##### `user` {#actor-user}
+
+A dashboard or Basic-auth user. `id` is the user id (a number), and `first_name`, `last_name` and `email` are filled in.
+
+##### `api_key` {#actor-api-key}
+
+A call made with your API key. `id` is `null`.
+
+##### `customer` {#actor-customer}
+
+The payer. `id` is the `customer.id` of the payment (text).
+
+##### `system` {#actor-system}
+
+Ottu itself, for example the expiry job or a reconcile. `id` is `null`.
+
+##### `connector` {#actor-connector}
+
+The gateway reported it, for example a refund approved or rejected on the gateway's side. `id` is `null`.
+
+Who owns an event:
+
+- A user or API key that runs the **expire** operation owns the resulting `payment.expired`, even when the operation closed a payer's open attempt.
+- The **cash-on-delivery** acknowledgement names the user or API key that made it on `payment.cod`.
+- A **payer's own try** that failed or was canceled stays the `customer`, also when a user's status inquiry found it.
+- An event nobody caused, such as an expiry because the expiry time passed, names `system`.
+
+#### `is_sandbox` {#is-sandbox}
+
+`true` when the payment ran, or will run, on a sandbox gateway. It is known before any attempt: Ottu reads it from the gateway of the attempt the event is about, and otherwise from the gateways the payment was created with, when all of them are sandbox. A payment that offers both sandbox and live gateways shows `false` until a try picks one, so a live payment is never taken for a test.
+
+#### `message` text {#messages}
+
+A successful or rejected attempt carries one of these texts in `data.message`, in the payment's own language (Arabic when the payment's `language` is `ar`, otherwise English). Show them to your users if you like, but branch your logic on `event` and `status`, never on the text.
+
+- **Purchase succeeded:** Payment successful · تمت عملية الدفع بنجاح
+- **Authorize succeeded:** Payment authorized · تم تفويض الدفع بنجاح
+- **Cash on delivery acknowledged:** Cash on delivery confirmed · تم تأكيد الدفع عند الاستلام
+- **Capture succeeded:** Capture successful · تم تحصيل المبلغ المفوَّض بنجاح
+- **Void succeeded:** Void successful · تم إلغاء التفويض بنجاح
+- **Refund succeeded:** Refund successful · تم استرداد المبلغ بنجاح
+- **Refund rejected:** Refund rejected by the gateway · رفضت بوابة الدفع عملية الاسترداد
+
+### Payment events {#catalogue}
+
+A payment event is named after the **status** the transaction reached: `payment.<status>`. The event name and `data.status` always match, with one exception: [`payment.deleted`](#payment-deleted) carries the status the payment had.
+
+`status` and `operation` always have a value. `result` is `null` only on `payment.created` and `payment.deleted`, where no attempt exists or nothing ran. Otherwise it is one of the [attempt states](/developers/reference/payment-states#payment-attempt-states): `pending`, `success`, `failed`, `canceled`, `error`, `cod`.
+
+Jump to: [`created`](#payment-created) · [`pending`](#payment-pending) · [`attempted`](#payment-attempted) · [`authorized`](#payment-authorized) · [`paid`](#payment-paid) · [`failed`](#payment-failed) · [`cod`](#payment-cod) · [`canceled`](#payment-canceled) · [`expired`](#payment-expired) · [`invalidated`](#payment-invalidated) · [`refund_pending`](#payment-refund-pending) · [`refunded`](#payment-refunded) · [`refund_rejected`](#payment-refund-rejected) · [`voided`](#payment-voided) · [`deleted`](#payment-deleted)
+
+#### `payment.created` {#payment-created}
+
+**Sent when:** A payment is created, through the [Checkout API](/developers/apis/create-payment-transaction-checkout), the dashboard, a bulk upload or a plugin.
+
+**What to do:** Record that the payment exists. There is nothing to fulfil.
+
+**Carries:** `status` `created` · `operation` `purchase` or `authorize` · `result` `null`
+
+The event shows the payment as it was created: `totals` are zero and `remaining` equals `amount`. Ottu delivers it a few seconds after creation, so it can arrive after a fast `payment.paid`.
+
+#### `payment.pending` {#payment-pending}
+
+**Sent when:** The payment first becomes pending: the payer opened it. Sent once, however many times the payer opens the page.
+
+**What to do:** Nothing is required. Use it for analytics if you like.
+
+**Carries:** `status` `pending` · `operation` `purchase` or `authorize` · `result` `pending`
+
+#### `payment.attempted` {#payment-attempted}
+
+**Sent when:** A payer's try failed, errored or was canceled, and the payment can still be paid. Sent for every failed try.
+
+**What to do:** Do not cancel the order: the payer can still pay.
+
+**Carries:** `status` `attempted` · `operation` `purchase` or `authorize` · `result` `failed`, `canceled` or `error`
+
+#### `payment.authorized` {#payment-authorized}
+
+**Sent when:** An [authorize](/glossary/#term-authorization) succeeded, or the merchant acknowledged it manually.
+
+**What to do:** The money is held, not taken. Reserve stock, and [capture](/developers/operations-v3#capture) later.
+
+**Carries:** `status` `authorized` · `operation` `authorize` · `result` `success`
+
+#### `payment.paid` {#payment-paid}
+
+**Sent when:** A purchase succeeded or was acknowledged manually, or a [capture](/glossary/#term-capture) succeeded.
+
+**What to do:** For `operation` `purchase`, mark the order paid and fulfil it ([Confirm a payment](#confirm-a-payment)). For `operation` `capture`, record the captured amount from `totals.paid`.
+
+**Carries:** `status` `paid` · `operation` `purchase` or `capture` · `result` `success`
+
+A capture is not a separate event: it is `payment.paid` with `data.operation` equal to `capture`.
+
+#### `payment.failed` {#payment-failed}
+
+**Sent when:** A payer's try failed or errored, and the payment allows no other try.
+
+**What to do:** This is final. Release reserved stock and tell the customer.
+
+**Carries:** `status` `failed` · `operation` `purchase` or `authorize` · `result` `failed` or `error`
+
+#### `payment.cod` {#payment-cod}
+
+**Sent when:** The merchant acknowledged [cash on delivery](/developers/reference/payment-states#payment-transaction-states) through the [cash payment acknowledgement](/developers/apis/cash-payment-acknowledgement).
+
+**What to do:** Mark the order as cash on delivery.
+
+**Carries:** `status` `cod` · `operation` `purchase` or `authorize` · `result` `cod`
+
+No gateway is called, so `channel`, `form_of_payment`, `card` and `connector` are empty.
+
+#### `payment.canceled` {#payment-canceled}
+
+**Sent when:** The [cancel operation](/developers/operations-v3#cancel) ran, or the payer canceled on the gateway page of a payment that allows one try.
+
+**What to do:** The payment will not complete. Close or release the order.
+
+**Carries:** `status` `canceled` · `operation` `purchase` or `authorize` · `result` `canceled`
+
+When the payment allows more tries, a payer's cancel sends [`payment.attempted`](#payment-attempted) instead.
+
+#### `payment.expired` {#payment-expired}
+
+**Sent when:** The payment expired: its expiry time passed, the [expire operation](/developers/operations-v3#expire) ran, or the gateway session timed out.
+
+**What to do:** The payment will not complete. Close or release the order.
+
+**Carries:** `status` `expired` · `operation` `purchase` or `authorize` · `result` `failed`
+
+Expiry closes an open attempt as `failed`, never `canceled`. A payment that expires with no open attempt has empty gateway keys.
+
+#### `payment.invalidated` {#payment-invalidated}
+
+**Sent when:** Ottu can no longer start a payment for it: the gateway or currency setup changed, or the gateway page failed to open.
+
+**What to do:** The payment will not complete. Close or release the order.
+
+**Carries:** `status` `invalidated` · `operation` `purchase` or `authorize` · `result` `error`
+
+#### `payment.refund_pending` {#payment-refund-pending}
+
+**Sent when:** The gateway accepted a refund but has not confirmed it yet (for example QPay).
+
+**What to do:** Show "refund in progress". Do not mark the order refunded yet.
+
+**Carries:** `status` `refund_pending` · `operation` `refund` · `result` `pending`
+
+When the gateway decides, Ottu sends [`payment.refunded`](#payment-refunded) or [`payment.refund_rejected`](#payment-refund-rejected).
+
+#### `payment.refunded` {#payment-refunded}
+
+**Sent when:** A [refund](/developers/operations-v3#refund) succeeded, full or partial, wallet legs included.
+
+**What to do:** The money went back. Record `totals.refunded`.
+
+**Carries:** `status` `refunded` · `operation` `refund` · `result` `success`
+
+Each partial refund is its own event, and `totals.refunded` is the running total. `connector.reference_number` is the refund's own reference.
+
+#### `payment.refund_rejected` {#payment-refund-rejected}
+
+**Sent when:** The gateway rejected a refund.
+
+**What to do:** The money did not go back. Alert a person.
+
+**Carries:** `status` `refund_rejected` · `operation` `refund` · `result` `failed`
+
+#### `payment.voided` {#payment-voided}
+
+**Sent when:** A [void](/developers/operations-v3#void) succeeded.
+
+**What to do:** The authorization was released. Nothing will be charged.
+
+**Carries:** `status` `voided` · `operation` `void` · `result` `success`
+
+#### `payment.deleted` {#payment-deleted}
+
+**Sent when:** The [delete operation](/developers/operations-v3#delete) archived the payment.
+
+**What to do:** It is archived on Ottu's side. Keep your own records.
+
+**Carries:** `status` the status the payment had · `operation` `purchase` or `authorize` · `result` `null`
+
+#### Capture, refund and void events {#child-events}
+
+These three are about the operation, not the payment. `status` and `result` are the operation's, while `session_id` and every payment key stay the **original payment's**. The payment's own status does not change: after a refund the payment stays `paid` (or `authorized`), and `totals` shows the money that moved.
+
+### Subscription events {#subscription-events}
+
+[AutoPay](/developers/payments/autopay) reports what happens to a subscription as `subscription.*` events. They use the same envelope, the same signature and the same [retry schedule](#retry-schedule) as payment events. Only `data` differs: it is the subscription, not the payment.
+
+Subscription events reach **only a webhook endpoint** that subscribes to them. In the Administration panel, open **Webhook endpoints**, add an endpoint with your URL, and under **Events** pick **All subscription events (`subscription.*`)** or single events. This needs the same access as [Webhook Config](#admin-setup); without it, ask Ottu support to set the endpoint up. They are never sent to a payment's `webhook_url`, the operations URL or a plugin URL.
+
+Every subscription event has the same body as the [example below](#subscription-data): only `event` and `data.status` change. What each event means for your service, and what to do, is on the AutoPay page: follow the link in each entry.
+
+Jump to: [`created`](#subscription-created) · [`activated`](#subscription-activated) · [`setup_failed`](#subscription-setup-failed) · [`renewed`](#subscription-renewed) · [`payment_failed`](#subscription-payment-failed) · [`past_due`](#subscription-past-due) · [`card_updated`](#subscription-card-updated) · [`cancel_scheduled`](#subscription-cancel-scheduled) · [`cancel_reverted`](#subscription-cancel-reverted) · [`canceled`](#subscription-canceled) · [`expired`](#subscription-expired) · [`webhook.ping`](#webhook-ping)
+
+#### `subscription.created` {#subscription-created}
+
+**Sent when:** The subscription was created. [In AutoPay](/developers/payments/autopay#event-created).
+
+**Carries:** `data.status` `pending_setup`
+
+#### `subscription.activated` {#subscription-activated}
+
+**Sent when:** The subscription became active. [In AutoPay](/developers/payments/autopay#event-activated).
+
+**Carries:** `data.status` `active`, or `trialing` after a `0.000` first charge
+
+#### `subscription.setup_failed` {#subscription-setup-failed}
+
+**Sent when:** Setting the subscription up failed. [In AutoPay](/developers/payments/autopay#event-setup-failed).
+
+**Carries:** `data.status` `setup_failed`
+
+#### `subscription.renewed` {#subscription-renewed}
+
+**Sent when:** A billing cycle was renewed. [In AutoPay](/developers/payments/autopay#event-renewed).
+
+**Carries:** `data.status` `active`
+
+#### `subscription.payment_failed` {#subscription-payment-failed}
+
+**Sent when:** A billing cycle payment failed. [In AutoPay](/developers/payments/autopay#event-payment-failed).
+
+**Carries:** `data.status` `active` while Ottu retries, `past_due` after the last retry
+
+#### `subscription.past_due` {#subscription-past-due}
+
+**Sent when:** The subscription is past due. [In AutoPay](/developers/payments/autopay#event-past-due).
+
+**Carries:** `data.status` `past_due`
+
+#### `subscription.card_updated` {#subscription-card-updated}
+
+**Sent when:** The card on the subscription was updated. [In AutoPay](/developers/payments/autopay#event-card-updated).
+
+**Carries:** `data.status` unchanged
+
+#### `subscription.cancel_scheduled` {#subscription-cancel-scheduled}
+
+**Sent when:** Cancellation was scheduled. [In AutoPay](/developers/payments/autopay#event-cancel-scheduled).
+
+**Carries:** `data.status` unchanged
+
+#### `subscription.cancel_reverted` {#subscription-cancel-reverted}
+
+**Sent when:** A scheduled cancellation was withdrawn. [In AutoPay](/developers/payments/autopay#event-cancel-reverted).
+
+**Carries:** `data.status` unchanged
+
+#### `subscription.canceled` {#subscription-canceled}
+
+**Sent when:** The subscription was canceled. [In AutoPay](/developers/payments/autopay#event-canceled).
+
+**Carries:** `data.status` `canceled`
+
+#### `subscription.expired` {#subscription-expired}
+
+**Sent when:** The subscription expired. [In AutoPay](/developers/payments/autopay#event-expired).
+
+**Carries:** `data.status` `expired`
+
+#### `webhook.ping` {#webhook-ping}
+
+**Sent when:** You select an endpoint in **Webhook endpoints** and run **Send a test event**. Ottu sends it to that endpoint only and never retries it.
+
+**What to do:** Verify the signature and answer `2xx`. It proves the endpoint works before any real event.
+
+#### The `data` object of a subscription event {#subscription-data}
+
+<Beside>
+
+`data` is the subscription as AutoPay published it. Ottu delivers it unchanged and does not check its keys, so read them defensively.
+
+##### `subscription_id` {#subscription-data-subscription-id}
+
+String, at most 128 characters. The AutoPay subscription the event is about. Use it to find the subscription on your side and with [Retrieve a subscription](/developers/payments/autopay/?autopay-api=retrieve#api-reference).
+
+##### `status` {#subscription-data-status}
+
+String. The subscription's status after the event, as AutoPay reports it: for example `active` after `subscription.renewed`. See the [subscription states](/developers/payments/autopay#subscription-states).
+
+The envelope keys mean the same as for payment events, with three differences:
+
+- `created` is when AutoPay says the event happened, in whole seconds, UTC.
+- `initiator` is the actor AutoPay reports, for example `system` for a renewal. When AutoPay reports none, all five keys are `null`.
+- `is_sandbox` is `true` when AutoPay marks the event as coming from a sandbox gateway.
+
+`subscription.renewed` and `subscription.payment_failed` are about one billing-cycle charge. The other events report a change to the subscription itself. When the current state matters, [retrieve the subscription](/developers/payments/autopay/?autopay-api=retrieve#api-reference).
+
+<Visual>
+
+```json title="subscription.renewed"
+{
+  "id": "evt_01JB3Q7Z5W8K2N4R6T9V0XCYDE",
+  "event": "subscription.renewed",
+  "created": "2026-10-22T10:00:05Z",
+  "version": 3,
+  "is_sandbox": false,
+  "merchant_id": "merchant.ottu.net",
+  "initiator": {
+    "kind": "system",
+    "id": null,
+    "first_name": null,
+    "last_name": null,
+    "email": null
+  },
+  "data": {
+    "subscription_id": "sub_1eQ",
+    "status": "active"
+  }
+}
+```
+
+</Visual>
+
+</Beside>
+
+### Order and unknown events {#ordering}
+
+Ottu does not promise the order in which events arrive.
+
+- **Order by `created`, not by arrival.** `payment.created` is delivered a few seconds after the payment is created, so it can arrive after a fast `payment.paid`. A `payment.paid` that was retried for an hour can arrive after a `payment.refunded` that succeeded first time.
+- **A tie is unordered.** `created` has one-second resolution. When two events of one payment carry the same value, ask the [Payment Status Query v3](/developers/payments/psq-v3) for the current state.
+- **De-duplicate on the event `id`.** It is the same value as the `Idempotency-Key` header. A retry sends the same event again, so processing an `id` twice must change nothing.
+- **Ignore unknown `event` values and unknown keys.** New ones are added over time. Answer `2xx` and move on. Existing keys keep their meaning.
+
+<PaymentEventOrder />
+
+### Related references {#related-references}
+
+- [**PG Params**](/developers/webhooks/pg-params): every gateway field in `data.connector.params`.
+- [**Verify signatures**](/developers/webhooks/verify-signatures): the `Ottu-Signature` header, the code in eight languages and the test vectors.
+
+## Best Practices
+
+- **Verify first.** Check the signature on the raw body before you parse anything.
+- **Store each `id` once.** When it comes again, answer `2xx` and do nothing.
+- **Order by `created`, not by arrival.** `payment.created` can arrive after a fast `payment.paid`.
+- **Check the business reference too.** The event `id` stops a repeated delivery. `order_no` and `connector.reference_number` stop a repeated shipment or refund.
+- **Answer fast.** Store, answer, then process in the background.
+- **Log `id` and `event`** for every request. They identify the exact delivery when you ask Ottu about it.
+
+## FAQ
+
+<FAQ>
+  <FAQItem question="I set up my webhook, but nothing arrives. What do I check?">
+    Three things, in this order: webhooks are switched on in [Webhook Config](#admin-setup) or the payment was created with a `webhook_url`; your URL meets the [endpoint requirements](#endpoint-requirements); your receiver answers `2xx` within 15 seconds. The full list is in [Troubleshooting](#never-received).
+  </FAQItem>
+  <FAQItem question="How do I know a request really comes from Ottu?">
+    Ottu signs every request with HMAC-SHA256 in the `Ottu-Signature` header. Compute the same value over the raw body with your HMAC key and compare: see [Verify signatures](/developers/webhooks/verify-signatures#verify-v2).
+  </FAQItem>
+  <FAQItem question="The same event arrived twice. Is something wrong?">
+    No. A retry repeats an event with the same `id`. Store each `id` you process and answer `2xx` when it comes again: see [Idempotency-Key](#idempotency-key).
+  </FAQItem>
+  <FAQItem question="How long does Ottu keep trying when my server is down?">
+    8 attempts over about 42 hours. After the last one fails, Ottu sends one failure email and stops. See the [retry schedule](#retry-schedule).
+  </FAQItem>
+  <FAQItem question="Can events arrive out of order?">
+    Yes. Order the events of one payment by `created`, and ask the [Payment Status Query v3](/developers/payments/psq-v3) when the current state matters. See [Order and unknown events](#ordering).
+  </FAQItem>
+</FAQ>
+
+## What's Next?
+
+- [**Verify signatures**](/developers/webhooks/verify-signatures): the recipe, the code in eight languages and the test vectors.
+- [**PG Params**](/developers/webhooks/pg-params): the gateway fields in `data.connector.params`.
+- [**Payment Status Query v3**](/developers/payments/psq-v3): the payment's current state, when a webhook is missing.
+- [**Operations v3**](/developers/operations-v3): refund, capture and void, answered with the same events.
+- [**Migrate to v3**](/developers/webhooks/migrate-to-v3): for an integration built on the old webhooks.
+- [**Boost your integration**](/developers/getting-started/#boost-your-integration): the SDKs and tools that speed it up.

@@ -1,5 +1,12 @@
-// Webhook format 3 delivery: one event, a failed first attempt, a retry the receiver de-duplicates.
-// Usage in MDX:  import WebhookDeliveryStory from "@site/src/diagrams/flow/WebhookDeliveryStory";  <WebhookDeliveryStory />
+// Webhook delivery: one event, a failed first attempt, a retry the receiver de-duplicates.
+// Usage in MDX, the buttons in the text column and the diagram beside them
+// (storyParts.tsx explains how the two talk):
+//   import WebhookDeliveryStory, { WebhookDeliveryControls } from "@site/src/diagrams/flow/WebhookDeliveryStory";
+//   <Beside wideVisual>
+//   …text…
+//   <WebhookDeliveryControls />
+//   <Visual><WebhookDeliveryStory /></Visual>
+//   </Beside>
 import React from "react";
 import {
   mdiAlertCircleOutline,
@@ -15,19 +22,21 @@ import {
   mdiShieldKeyOutline,
   mdiWebhook,
 } from "@mdi/js";
-import {
-  StoryDiagram,
-  type StoryJourney,
-  type StoryLane,
-  type StoryLink,
-  type StoryStep,
+import type {
+  StoryJourney,
+  StoryLane,
+  StoryLink,
+  StoryProps,
+  StoryStep,
 } from "@site/src/components/FlowDiagram";
+import { StoryControls, StoryFrame } from "./storyParts";
 
 const lanes: StoryLane[] = [
   {
     title: "Ottu",
     icon: mdiShieldCheckOutline,
     chip: "Ottu's part",
+    chipOrder: 2,
     about: {
       does: "Records each event once, signs every attempt, and retries until your receiver answers 2xx or 8 attempts have failed.",
       relies: "A public HTTPS webhook URL that answers quickly.",
@@ -37,6 +46,7 @@ const lanes: StoryLane[] = [
     title: "Your receiver",
     icon: mdiServer,
     chip: "Your receiver",
+    chipOrder: 0,
     about: {
       does: "Verifies the signature, processes the event once, and answers 2xx.",
       relies: "Ottu-Signature and Idempotency-Key on every attempt.",
@@ -46,6 +56,7 @@ const lanes: StoryLane[] = [
     title: "Your database",
     icon: mdiDatabaseOutline,
     chip: "Your database",
+    chipOrder: 1,
     about: {
       does: "Keeps the ids of processed events under a unique key.",
       relies: "Your receiver writing the id and the business change in one transaction.",
@@ -187,15 +198,26 @@ const journeys: StoryJourney[] = [
   },
 ];
 
+// The hint ("click a step") sits with the buttons in the text column, so the
+// diagram keeps only its title line.
+const props: StoryProps = {
+  title: "How a webhook is delivered",
+  lanes,
+  steps,
+  links,
+  journeys,
+};
+
+const KEY = "webhook-delivery";
+/** Natural size without the buttons, figure margin included (measured in
+ * the browser at zoom 1), for the placeholder. */
+const WIDTH = 627;
+const HEIGHT = 1069;
+
+export function WebhookDeliveryControls(): React.JSX.Element {
+  return <StoryControls storyKey={KEY} props={props} hint="Read top to bottom · click a step" />;
+}
+
 export default function WebhookDeliveryStory(): React.JSX.Element {
-  return (
-    <StoryDiagram
-      title="How a webhook is delivered"
-      sub="Read top to bottom · click a step"
-      lanes={lanes}
-      steps={steps}
-      links={links}
-      journeys={journeys}
-    />
-  );
+  return <StoryFrame storyKey={KEY} props={props} width={WIDTH} height={HEIGHT} />;
 }

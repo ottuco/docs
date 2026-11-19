@@ -67,7 +67,7 @@ const lines = [
   "",
   `> ${TAGLINE}. Ottu is a payment platform: Checkout API and SDKs, payment operations (refund, capture, void), webhooks, cards and tokenization. Every link below is the page's markdown.`,
   "",
-  "Start with the webhooks event catalogue for format 3 events, and Verify Signatures for Ottu-Signature v2.",
+  "Start with the Webhooks page for the events, and Verify Signatures for Ottu-Signature v2.",
   "",
 ];
 for (const [name, pattern] of SECTIONS) {

@@ -13,8 +13,8 @@ import OperationsWorkflow from "@site/src/diagrams/flow/OperationsWorkflow";
 
 # Operations
 
-:::warning Operations v2 is deprecated
-Use [Operations v3](/developers/operations-v3): one endpoint per operation, a required `Idempotency-Key` on capture, refund and void, and one error format. In v3, `refund_queued` is named `refund_pending` and `invalided` is `invalidated`. See [Differences from v2](/developers/operations-v3#differences-from-v2).
+:::warning This version is obsolete
+This page describes Operations v2. Use [Operations v3](/developers/operations-v3): one endpoint per operation, a required `Idempotency-Key` on capture, refund and void, and one error format. In v3, `refund_queued` is named `refund_pending` and `invalided` is `invalidated`. To move, follow [Migrate to v3](#migrate-to-v3).
 :::
 
 The Operations API lets you perform subsequent actions on existing payment transactions — refund a completed payment, cancel an unpaid link, capture an authorized amount, or void an authorization. Ottu provides a **unified API**: you send the same payload structure regardless of the payment gateway, and Ottu handles the gateway-specific communication.
@@ -23,10 +23,6 @@ Ottu supports six operations. Three are **internal** (handled within Ottu's syst
 
 :::warning
 Operations via the Operations API do not work with **foreign currencies**. If the customer paid using [currency exchange](/developers/getting-started/api-fundamentals) (e.g., MID is KWD but customer paid in USD), external operations will fail. The payment currency must match the MID currency.
-:::
-
-:::tip[Boost Your Integration]
-Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
 :::
 
 ## When to Use
@@ -254,6 +250,44 @@ Select the operation to see its example payload and the full interactive API sch
 
 </TabItem>
 </Tabs>
+
+## Migrate to v3 {#migrate-to-v3}
+
+[Operations v3](/developers/operations-v3) does the same six operations. This is what changes in your code.
+
+#### One endpoint per operation {#migrate-endpoint}
+
+**v2:** `POST /b/pbl/v2/operation/` with an `operation` field. **v3:** `/b/pbl/v3/operation/<operation>/`, for example [`/b/pbl/v3/operation/refund/`](/developers/operations-v3#refund), with no `operation` field.
+
+#### `Idempotency-Key` instead of `Tracking-Key` {#migrate-idempotency}
+
+**v2:** an optional `Tracking-Key` header that returns the status of the earlier operation. **v3:** a required [`Idempotency-Key`](/developers/operations-v3#idempotency) on capture, refund and void. The stored answer is replayed.
+
+#### The answer is the payment event {#migrate-answer}
+
+**v2:** the child transaction of the operation. **v3:** the [payment event](/developers/webhooks#data-keys), the same object the webhook carries.
+
+#### `refund_queued` is `refund_pending` {#migrate-refund-pending}
+
+A refund the gateway has not confirmed yet answers `refund_pending` in v3. `invalided` is `invalidated`.
+
+#### A declined refund is a `200` {#migrate-declined-refund}
+
+**v2:** an error. **v3:** `200` with `status` `refund_rejected`, and a `payment.refund_rejected` event. See [Refund results](/developers/operations-v3#refund-results).
+
+#### A gateway that does not answer {#migrate-gateway-timeout}
+
+**v2:** a generic error. **v3:** `504 gateway_timeout` or `502 gateway_error`, which mean the result is unknown. See [After a 502 or 504](/developers/operations-v3#after-504).
+
+#### One error format {#migrate-errors}
+
+**v2:** `detail`, `result`, `operation`. **v3:** `type`, `status`, `request_id`, and `errors` with `code`, `detail`, `attr` and `doc_url`. See the [error reference](/errors).
+
+#### One operation per payment at a time {#migrate-one-at-a-time}
+
+**v2:** not enforced. **v3:** a second capture, refund or void on the same payment answers `409 operation_in_progress` while the first is running.
+
+Your webhooks move separately: see [Migrate to Webhooks v3](/developers/webhooks/migrate-to-v3).
 
 ## FAQ
 

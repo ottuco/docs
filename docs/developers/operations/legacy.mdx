@@ -1,24 +1,15 @@
 ---
-title: Operations v2
-sidebar_label: Looking for v2?
-description: The older Operations API v2, kept for existing integrations, and how to move to Operations v3.
+title: Operations v2 (moved)
+description: This page has moved. Kept so old links still work; it sends the reader to the new place.
+unlisted: true
 displayed_sidebar: developerSidebar
 hide_table_of_contents: true
+pagination_prev: null
+pagination_next: null
 ---
 
-# Operations v2
+{/* A removed URL kept alive: src/components/MovedTo/routes.ts says where it went. */}
 
-New integrations use [Operations v3](/developers/operations-v3). The page below describes Operations v2, which keeps working for existing integrations.
+import MovedTo from "@site/src/components/MovedTo";
 
-| Page | What it covers |
-|---|---|
-| [Operations v2](/developers/operations) | Refund, capture, void, cancel, expire and delete through one endpoint, with the v2 answers and errors. |
-
-## Coming from v2?
-
-Operations v3 has one endpoint per operation, requires an `Idempotency-Key` on capture, refund and void so a retry never acts twice, answers with the payment event, and uses one error format. A pending refund is `refund_pending` instead of `refund_queued`. [Here is how to migrate](/developers/operations-v3#differences-from-v2): every difference from v2, side by side.
-
-## What's Next?
-
-- [Operations v3](/developers/operations-v3): the current API, with a quick start in cURL, Python, Node.js and PHP.
-- [Error Reference](/errors): every v3 error code and what to do about it.
+<MovedTo from="/developers/operations/legacy/" />

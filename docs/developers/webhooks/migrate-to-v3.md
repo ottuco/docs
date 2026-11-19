@@ -1,169 +1,212 @@
 ---
-title: Webhook Formats and Migrating to v3
-sidebar_label: Formats & Migration
-description: The three Ottu webhook formats, what format 3 changes, a field-by-field map from formats 1 and 2, and the steps to switch safely.
+title: Migrate to Webhooks v3
+sidebar_label: Migrate to v3
+description: Move an integration built on the old Ottu webhooks (format 2) to v3 - the two renamed values, the steps to switch safely, and where every old field is now.
 displayed_sidebar: developerSidebar
+hide_table_of_contents: true
 ---
 
-import FAQ, { FAQItem } from "@site/src/components/FAQ";
+# Migrate to Webhooks v3
 
-# Webhook Formats and Migrating to v3
+This page is for an integration built on the old webhooks (format 2). It tells you what to change in your receiver, how to switch without risk, and where every field you read today is in v3.
 
-Ottu has three webhook **formats**. Your account uses exactly one. **Ottu never switches a merchant to a new format on its own**: you keep receiving the format you have today until **Version** is changed in [Webhook Config](/developers/webhooks/setup). This page explains what format 3 changes, maps every format 1 and 2 field to its place in format 3, and gives a step-by-step migration that you can test before anything changes for your customers.
+Ottu never switches an account on its own. You keep receiving the old webhooks until **Version** is set to 3 in [Webhook Config](/developers/webhooks#admin-setup).
 
-## When to Use
+## Renamed values {#renamed-values}
 
-- You receive `payment` and operation webhooks today and want the event envelope, `Idempotency-Key` and `Ottu-Signature` v2.
-- You want one event per payment status (`payment.paid`, `payment.refunded`, ...) instead of inferring it from `state`.
-
-## Guide
-
-### The three formats {#formats}
-
-| | Formats 1 and 2 | Format 3 |
-|---|---|---|
-| Body | One flat object per notification: a payment body or an operation body | An [envelope](/developers/webhooks/event-catalogue#envelope) with `id`, `event`, `created`, `version`, `is_sandbox`, `merchant_id`, `initiator` and `data`. `data` is the payment, flat |
-| Encoding | JSON, or XML on request | JSON only |
-| Authenticity | `Ottu-Signature` header, `v2` (the same as format 3), plus the body field `signature` | `Ottu-Signature` header, `v2` only. No `signature` field in the body |
-| Success | HTTP `200` or `201` | Any `2xx` |
-| Retries | Your `retries` and `backoff_factor` settings, on timeouts only | 8 attempts over about 42 hours, see [Delivery and Retries](/developers/webhooks/delivery-and-retries#retry-schedule) |
-| Event id | Only in the `Idempotency-Key` header | In the body `id` and the `Idempotency-Key` header |
-
-Format 1 and format 2 differ from each other as described on [Payment Events](/developers/webhooks/payment-events) and [Operation Events](/developers/webhooks/operation-events); both are unchanged. The only addition on them is the new **header**: `Ottu-Signature` (`v2` over the raw body, exactly as on format 3) and `Idempotency-Key`. Your body bytes, retries and redirect behaviour stay exactly as they were.
-
-:::warning Format 3 is JSON only
-If your account receives XML today, switching to format 3 means you receive JSON from then on. Update your parser before format 3 is enabled.
+:::warning Two values have a new name in v3
+`refund_queued` is **`refund_pending`**, and `invalided` is **`invalidated`**, in the event name and in `data.status`. If your code compares `state` with either value, change the comparison. There is no `payment.refund_queued` event.
 :::
 
-### Quick implementation {#quick-implementation}
+Three more points to get right: a capture is `payment.paid` with `data.operation` equal to `capture`, cash on delivery is `payment.cod`, and the name of the event is in the key `event`.
 
-The shortest safe path:
+## How to switch {#how-to-switch}
 
-1. **Update the receiver** using [Webhook Events (v3)](/developers/webhooks/event-catalogue#quick-implementation) and [Verify Signatures](/developers/webhooks/verify-signatures#verify-v2): parse the JSON envelope, read the flat `data`, branch on `event`, verify `Ottu-Signature` `v2` on the raw body, answer any `2xx`.
-2. **Test it with the published vector** in [Verify Signatures](/developers/webhooks/verify-signatures#test-vectors), then with a sandbox payment and a refund, comparing against the [field map](#field-map).
-3. **Switch the account to format 3:** in [Webhook Config](/developers/webhooks/setup), set **Version** to 3 and save (or ask [support@ottu.com](mailto:support@ottu.com) to do it). Your existing `webhook_url` and operations URL then receive format 3 with the same moments. Deploy the new receiver first: the switch takes effect when you save.
+1. **Update the receiver.** Parse the JSON event, read `data`, branch on `event`, verify `Ottu-Signature` on the raw body, and answer any `2xx`. The [Webhooks guide](/developers/webhooks#step-by-step) has the code. You can build and test the [signature check](/developers/webhooks/verify-signatures#verify-v2) today: the old webhooks carry the same `Ottu-Signature` header.
+2. **Test it.** First with the [published test vector](/developers/webhooks/verify-signatures#test-vectors), then with a sandbox payment and a refund, comparing against the [field map](#field-map).
+3. **Set Version to 3** in [Webhook Config](/developers/webhooks#admin-setup) and save, or ask [support@ottu.com](mailto:support@ottu.com) to do it. The switch takes effect when you save, so deploy the new receiver first. Your `webhook_url` and operations URL stay the same.
 
-If a URL is also configured to receive the same event through another route, that URL gets one delivery, in the format of the existing route: see [Same URL on a legacy route](/developers/webhooks/delivery-and-retries#same-url).
+Keep the old receiver deployable until the first live day on v3 has passed.
 
-:::tip Prepare your signature check first
-While still on format 1 or 2 you can already build and test the [v2 verification](/developers/webhooks/verify-signatures#verify-v2) against the vector, with no change to the body.
-:::
+## What changes {#what-changes}
 
+#### The body is an event {#change-body}
 
-### Renamed values {#renamed-values}
+One [event object](/developers/webhooks#envelope) with `id`, `event`, `created`, `version`, `is_sandbox`, `merchant_id`, `initiator` and `data`. `data` is the payment, flat. There are no separate payment and operation bodies.
 
-:::warning Two stored values have a new name in v3
-`refund_queued` is **`refund_pending`** and `invalided` is **`invalidated`**, in the event name and in `data.status`. Formats 1 and 2 keep sending the old values. If your code compares `state` to either value, change the comparison when you move to format 3. There is no `payment.refund_queued` event.
-:::
+#### JSON only {#change-json}
 
-Three points to get right: a capture is `payment.paid` with `data.operation` equal to `capture`, cash on delivery is `payment.cod`, and the envelope key is `event`.
+If your account receives XML today, you receive JSON after the switch. Update your parser first.
 
-### Field map: formats 1 and 2 to format 3 {#field-map}
+#### The signature is in the header only {#change-signature}
 
-In format 3 `data` is one flat object for every `payment.*` event. Refunds, captures and voids are events about a child transaction, described by the same keys: `data.status`, `data.operation` and the [attempt keys](/developers/webhooks/event-catalogue#data-keys), while `data.session_id` stays the original payment's.
+The body has no `signature` field. Verify the `Ottu-Signature` header.
 
-| Where it is today (format 2) | Where it is in format 3 | Notes |
-|---|---|---|
-| Payment webhook body (the whole object) | `data` | Renamed as in the rows below. Sent in `payment.*` events. |
-| Operation webhook body (refund, capture, void) | `data` | The same flat object. A refund is `payment.refunded` with `data.operation` equal to `refund`; a void is `payment.voided`; a capture is `payment.paid` with `data.operation` equal to `capture`. |
-| `state` | `data.status` | Renamed values: `refund_queued` becomes `refund_pending`, `invalided` becomes `invalidated`. |
-| `result` | `data.result` | `null` only on `payment.created` and `payment.deleted`. See the [matrix](/developers/webhooks/event-catalogue#catalogue). |
-| `timestamp_utc` | `data.processed_at` | ISO 8601 UTC with `Z`. The event time is the envelope's `created`. |
-| `amount`, `currency_code` | `data.amount`, `data.currency` | Money is a string with the currency's decimals. |
-| `amount_details`, `fee` | `data.connector` (`currency`, `amount`, `exchange_rate`, `fee`, `total`) | In the gateway's currency. |
-| `paid_amount`, `settled_amount`, `refunded_amount`, `voided_amount`, `remaining_amount` | `data.totals` (`paid`, `settled`, `refunded`, `refund_pending`, `voided`, `remaining`) | In the session's currency, fees excluded. |
-| `customer_*` | `data.customer` | `id`, `email`, `first_name`, `last_name`, `phone`, `phone_2` (was `customer_additional_phone`), `birthdate`. |
-| `customer_address_*` | `data.billing_address` | `line1`, `line2`, `city`, `state`, `country`, `postal_code`. |
-| `customer_shipping_address` | `data.shipping_address` | A fixed set of keys, always present. |
-| `gateway_account`, `gateway_name`, `gateway_response`, `pg_params`, `reference_number` | `data.connector` (`code`, `identifier`/`processor`, `responses`, `params`, `reference_number`) | `params` keep their bilingual labels. See [PG Params](/developers/webhooks/pg-params). |
-| `token` | `data.card` | The card used in the attempt; `data.card.token` is set when the card is saved. |
-| `customer_wallet_transactions` | `data.wallets` | One entry per wallet leg. |
-| `initiator` | `data.created_by`, and the envelope `initiator` for who caused the event | An [actor](/developers/webhooks/event-catalogue#actor): `kind`, `id`, `first_name`, `last_name`, `email`. |
-| Operation `source` (`input`, `pg`) | Envelope `initiator.kind` | `user`, `api_key`, `customer`, `system` or `connector`. |
-| Operation `reference_number` | `data.connector.reference_number` | The operation's own attempt. `data.session_id` is the original payment's. |
-| Body field `signature` | Header `Ottu-Signature`, `v2=` part | Verify on the raw body: [Verify Signatures](/developers/webhooks/verify-signatures#verify-v2). |
-| `state` that you read to detect a refund (`refunded` on format 1) | The event `payment.refunded` | `data.operation` is `refund`. The payment's own status stays `paid`. |
-| `result` / `state` to detect success | `event` (`payment.paid`, `payment.authorized`, `payment.cod`) | Branch on `event` first, then read details. |
-| `is_sandbox` | Envelope `is_sandbox` | Not repeated in `data`. Known before any attempt; see [`is_sandbox`](/developers/webhooks/event-catalogue#is-sandbox). |
-| `extra.merchant_id` | Envelope `merchant_id` | Removed from `data.extra`. |
-| Duplicate detection by `session_id` or `reference_number` | `Idempotency-Key` / body `id`, plus `reference_number` | Keep the business reference check as well. |
-| Success status `200`/`201` | Any `2xx` | A `3xx` is a failure on every format. |
-| `webhook_url` and operations URL | Same URLs | The payment's `webhook_url` and the operations URL receive the same moments in format 3 as in format 2, plus the new moments below. |
+#### Any `2xx` is success {#change-success}
 
-Not carried over: `transactions`, `signature`, `transaction_log_id`, `capture_delivery_address`, `capture_delivery_location` and `card_acceptance_criteria`.
+Before, only `200` and `201` were. On the payment's own `webhook_url`, `201` used to keep the payer on the Ottu page: now any `2xx` lets the redirect to your `redirect_url` proceed. If your receiver relied on `201` to hold the payer, change that first.
 
-### New moments in format 3 {#new-moments}
+#### Retries follow a fixed schedule {#change-retries}
 
-Format 3 sends events that formats 1 and 2 do not: `payment.created` (when a payment is created), `payment.attempted` (every failed try that leaves the payment payable), `payment.refund_pending` and `payment.refund_rejected` (a queued refund and its rejection). You cannot turn single events off, except that a [plugin URL](/developers/webhooks/setup#plugin-urls) can be limited to some payment states: handle the events you need and answer `2xx` to the rest without acting on them.
+8 attempts over about 42 hours, for any failure. Your `retries` and `backoff_factor` settings are no longer used. See the [retry schedule](/developers/webhooks#retry-schedule).
 
-:::warning Order is not guaranteed
-`payment.created` is delivered a few seconds after the payment is created, so it can arrive after a fast `payment.paid`. Order by `created` and de-duplicate on the event `id`. See [ordering](/developers/webhooks/event-catalogue#ordering).
-:::
+#### The event id is in the body {#change-event-id}
 
-### Behaviours that change for the payer {#payer-behaviour}
+`id` in the body, and the same value in the `Idempotency-Key` header.
 
-On the payment's own `webhook_url` the payer waits for your answer on Ottu's page:
+#### Four new events {#new-moments}
 
-- **Formats 1 and 2:** `200` redirects the payer to your `redirect_url`, `201` keeps them on the Ottu summary page.
-- **Format 3:** any `2xx` is success and lets the redirect proceed.
+`payment.created`, `payment.attempted`, `payment.refund_pending` and `payment.refund_rejected` have no old equivalent. You cannot switch single events off, except that a [plugin URL](/developers/webhooks#plugin-urls) can be limited to some payment states. Handle the events you need, and answer `2xx` to the rest.
 
-### Moments with no event type {#no-type}
+#### Order is not guaranteed {#change-order}
 
-A format 3 account never receives a format 1 or 2 body. If a payment moment has no event in the [catalogue](/developers/webhooks/event-catalogue#catalogue), nothing is sent for it. Ottu logs the skip, and when the moment concerns the payer's waiting page, that page moves to its failure state instead of waiting for your answer. Build your integration on the catalogue types and reconcile anything else with the [Payment Status Query v3](/developers/payments/psq-v3).
+`payment.created` is delivered a few seconds after the payment is created, so it can arrive after a fast `payment.paid`. Order by `created`. See [Order and unknown events](/developers/webhooks#ordering).
 
-### Error handling
+#### A moment with no event sends nothing {#no-type}
 
-| Symptom after switching | Likely cause | Fix |
-|---|---|---|
-| Receiver returns `400` on every event | Parser still expects XML or the flat body | Parse the JSON envelope and read the flat `data`. |
-| Every signature check fails | Verifying the body `signature` field, which no longer exists | Verify `Ottu-Signature` `v2` on the raw bytes. |
-| Signature fails only on some payments | The body was parsed and re-serialised before verifying | Verify before parsing: [raw bytes](/developers/webhooks/verify-signatures#verify-v2). |
-| Payers stay on the Ottu page | Receiver answered a non-`2xx` | Answer `200` for the redirect, within the timeout. |
-| Refund logic never fires | Waiting for `state == "refunded"` | Branch on `event == "payment.refunded"`. |
-| A `refund_queued` or `invalided` comparison never matches | Those values are renamed | Compare with `refund_pending` and `invalidated`. |
-| Duplicate fulfilment | Not de-duplicating | Use [`Idempotency-Key`](/developers/webhooks/delivery-and-retries#idempotency-key) and the business reference. |
+After the switch you never receive an old body. If a payment moment has no event in the [list](/developers/webhooks#catalogue), nothing is sent for it, and when the payer is waiting on that moment, their page moves to its failure state. Build on the listed events, and check anything else with the [Payment Status Query v3](/developers/payments/psq-v3).
 
-### Related references
+## Field map {#field-map}
 
-Nothing to call to migrate. The related references are:
+Every old field, and where it is now. In v3, refunds, captures and voids use the same keys as payments: `data.status`, `data.operation` and the attempt keys describe the operation, while `data.session_id` stays the original payment's.
 
-- The new body: [Webhook Events (v3)](/developers/webhooks/event-catalogue#envelope)
-- The old bodies: [Payment Events](/developers/webhooks/payment-events#params), [Operation Events](/developers/webhooks/operation-events#params)
-- The header: [Verify Signatures](/developers/webhooks/verify-signatures#ottu-signature-header)
+#### The payment body {#map-payment-body}
 
-## Best Practices
+**Now:** `data`, in `payment.*` events.
 
-- Deploy the new receiver before format 3 is enabled, and test sandbox before production.
-- Keep your format 1 or 2 receiver deployable until the first live day on format 3 has passed.
-- Ignore unknown `event` values and unknown keys.
-- Order by `created` and de-duplicate on the event `id`.
+#### The operation body (refund, capture, void) {#map-operation-body}
 
-## Related
+**Now:** `data`, the same flat object. A refund is `payment.refunded` with `data.operation` equal to `refund`, a void is `payment.voided`, and a capture is `payment.paid` with `data.operation` equal to `capture`.
 
-- [Webhooks Overview](/developers/webhooks)
-- [Payment Events (formats 1 and 2)](/developers/webhooks/payment-events)
-- [Operation Events (formats 1 and 2)](/developers/webhooks/operation-events)
-- [PG Params](/developers/webhooks/pg-params)
+#### `session_id`, `order_no`, `payment_type`, `message`, `agreement`, `extra` {#map-same-name}
 
-## FAQ
+**Now:** the same names, inside `data`. `extra` no longer carries `merchant_id`.
 
-<FAQ>
-  <FAQItem question="Will Ottu switch my account to format 3 on its own?">
-    No. Ottu never switches a merchant to a new format on its own; you keep receiving the format you have today until **Version** is changed in [Webhook Config](/developers/webhooks/setup).
-  </FAQItem>
-  <FAQItem question="How do I ask for format 3?">
-    Contact [support@ottu.com](mailto:support@ottu.com) and name the webhook configuration you want switched. Deploy and test your new receiver first.
-  </FAQItem>
-  <FAQItem question="Can I test format 3 before it affects my customers?">
-    Yes. Deploy the new receiver first and test it in the sandbox before production; the steps are in [Quick implementation](#quick-implementation).
-  </FAQItem>
-  <FAQItem question="What changes for the payer when I move to format 3?">
-    On the payment's `webhook_url`, any `2xx` now lets the redirect proceed, so `201` no longer holds the payer on the Ottu page. See [behaviours that change for the payer](#payer-behaviour).
-  </FAQItem>
-</FAQ>
+#### The `autopay` block {#map-autopay}
+
+**Now:** not in the event. What happens to a subscription arrives as its own [`subscription.*` events](/developers/webhooks#subscription-events).
+
+#### `state` {#map-state}
+
+**Now:** `data.status`. Renamed values: `refund_queued` is `refund_pending`, and `invalided` is `invalidated`.
+
+#### `result` {#map-result}
+
+**Now:** `data.result`. It is `null` only on `payment.created` and `payment.deleted`.
+
+#### `timestamp_utc` {#map-timestamp-utc}
+
+**Now:** `data.processed_at`, ISO 8601 UTC with `Z`. The time of the event itself is `created`.
+
+#### `amount`, `currency_code` {#map-amount}
+
+**Now:** `data.amount`, `data.currency`. Money is a string with the currency's decimals.
+
+#### `amount_details`, `fee` {#map-amount-details}
+
+**Now:** `data.connector`: `currency`, `amount`, `exchange_rate`, `fee`, `total`, in the gateway's currency.
+
+#### `paid_amount`, `settled_amount`, `refunded_amount`, `voided_amount`, `remaining_amount` {#map-totals}
+
+**Now:** `data.totals`: `paid`, `settled`, `refunded`, `refund_pending`, `voided`, `remaining`, in the payment's currency, fees excluded.
+
+#### `customer_*` {#map-customer}
+
+**Now:** `data.customer`: `id`, `email`, `first_name`, `last_name`, `phone`, `phone_2` (was `customer_additional_phone`), `birthdate`.
+
+#### `customer_address_*` {#map-billing-address}
+
+**Now:** `data.billing_address`: `line1`, `line2`, `city`, `state`, `country`, `postal_code`.
+
+#### `customer_shipping_address` {#map-shipping-address}
+
+**Now:** `data.shipping_address`, a fixed set of keys that is always present.
+
+#### `gateway_account`, `gateway_name`, `gateway_response`, `pg_params`, `reference_number` {#map-connector}
+
+**Now:** `data.connector`: `code`, `identifier` and `processor`, `responses`, `params`, `reference_number`. `params` keep their bilingual labels: see [PG Params](/developers/webhooks/pg-params).
+
+#### `token` {#map-token}
+
+**Now:** `data.card`, the card used in the attempt. `data.card.token` is set when the card is saved.
+
+#### `customer_wallet_transactions` {#map-wallets}
+
+**Now:** `data.wallets`, one entry per wallet leg.
+
+#### `initiator` {#map-initiator}
+
+**Now:** `data.created_by` for who created the payment, and `initiator` in the envelope for who caused the event. Both are an [actor](/developers/webhooks#actor).
+
+#### Operation `source` (`input`, `pg`) {#map-source}
+
+**Now:** `initiator.kind`: `user`, `api_key`, `customer`, `system` or `connector`.
+
+#### Operation `reference_number` {#map-operation-reference}
+
+**Now:** `data.connector.reference_number`, the operation's own reference. `data.session_id` is the original payment's.
+
+#### `signature` {#map-signature}
+
+**Now:** the `Ottu-Signature` header. Verify it on the raw body: [Verify signatures](/developers/webhooks/verify-signatures#verify-v2).
+
+#### `is_sandbox` {#map-is-sandbox}
+
+**Now:** `is_sandbox` in the envelope. `data` does not repeat it.
+
+#### `extra.merchant_id` {#map-merchant-id}
+
+**Now:** `merchant_id` in the envelope. It is no longer in `data.extra`.
+
+#### Detecting a refund from `state` {#map-detect-refund}
+
+**Now:** the event `payment.refunded`. The payment's own status stays `paid`.
+
+#### Detecting success from `result` or `state` {#map-detect-success}
+
+**Now:** `event`: `payment.paid`, `payment.authorized` or `payment.cod`. Branch on `event` first, then read the details.
+
+#### Detecting duplicates from `session_id` or `reference_number` {#map-duplicates}
+
+**Now:** the event `id`, also sent as `Idempotency-Key`. Keep your check on the reference as well.
+
+#### Not carried over {#map-not-carried}
+
+`transactions`, `transaction_log_id`, `capture_delivery_address`, `capture_delivery_location` and `card_acceptance_criteria`.
+
+## After the switch {#after-the-switch}
+
+#### The receiver answers `400` to every event {#after-400}
+
+The parser still expects XML or the old flat body. Parse the JSON event and read `data`.
+
+#### Every signature check fails {#after-signature}
+
+The code verifies the body `signature` field, which no longer exists. Verify `Ottu-Signature` on the raw bytes.
+
+#### The signature fails on some payments only {#after-signature-some}
+
+The body was parsed and re-serialised before verifying. [Verify before parsing](/developers/webhooks/verify-signatures#verify-v2).
+
+#### Payers stay on the Ottu page {#after-payer-waits}
+
+The receiver answered something other than `2xx`. Answer `200` within the timeout.
+
+#### Refund logic never runs {#after-refund}
+
+The code waits for `state == "refunded"`. Branch on `event == "payment.refunded"`.
+
+#### A `refund_queued` or `invalided` comparison never matches {#after-renamed}
+
+Those values are renamed. Compare with `refund_pending` and `invalidated`.
+
+#### An order is fulfilled twice {#after-duplicates}
+
+The receiver does not de-duplicate. Use the event `id` and the business reference: [Drop duplicates](/developers/webhooks#drop-duplicates).
 
 ## What's Next?
 
-- [**Webhook Events (v3)**](/developers/webhooks/event-catalogue): every event and example
-- [**Verify Signatures**](/developers/webhooks/verify-signatures#ottu-signature-header): build the v2 check
-- [**Delivery and Retries**](/developers/webhooks/delivery-and-retries): success rules and `Idempotency-Key`
+- [**Webhooks guide**](/developers/webhooks): set up and build the v3 receiver.
+- [**Events**](/developers/webhooks#api-reference): the event object and every event.
+- [**Verify signatures**](/developers/webhooks/verify-signatures#verify-v2): the signature check.
+- [**The old webhook docs**](/developers/webhooks/legacy): the pages for format 2.

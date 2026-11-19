@@ -1,4 +1,4 @@
-// Webhook format 3: payment.created can arrive after a fast payment.paid.
+// Webhook events: payment.created can arrive after a fast payment.paid.
 // Usage in MDX:  import PaymentEventOrder from "@site/src/diagrams/flow/PaymentEventOrder";  <PaymentEventOrder />
 import React from "react";
 import { mdiAccount, mdiServer, mdiShieldCheckOutline } from "@mdi/js";
@@ -7,6 +7,7 @@ import {
   type SequenceActor,
   type SequenceMessage,
 } from "@site/src/components/FlowDiagram";
+import styles from "./ourDiagrams.module.css";
 
 const actors: SequenceActor[] = [
   { title: "Customer", icon: mdiAccount },
@@ -24,11 +25,13 @@ const messages: SequenceMessage[] = [
 
 export default function PaymentEventOrder(): React.JSX.Element {
   return (
-    <SequenceDiagram
-      title="A fast payment's events"
-      sub="Arrival order is not event order"
-      actors={actors}
-      messages={messages}
-    />
+    <div className={styles.center}>
+      <SequenceDiagram
+        title="A fast payment's events"
+        sub="Arrival order is not event order"
+        actors={actors}
+        messages={messages}
+      />
+    </div>
   );
 }
