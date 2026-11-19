@@ -215,8 +215,8 @@ function Prerequisites({
             </h3>
             <p className={styles.dialogText}>
               This call needs {toRun > 1 ? "these objects" : "this object"} on
-              the sandbox first. {runButtonLabel(toRun, false)} creates{" "}
-              {toRun > 1 ? "them" : "it"} here, in this dialog. Then{" "}
+              the sandbox first. {runButtonLabel(toRun, false)} sets{" "}
+              {toRun > 1 ? "them" : "it"} up here, in this dialog. Then{" "}
               <strong>Continue</strong> runs the call itself on the page, where you
               see its request and response.
             </p>
