@@ -335,6 +335,14 @@ A text value contains a NUL character.
 
 **What to do:** Remove it.
 
+### `not_a_dict` {#not_a_dict}
+
+**HTTP 400** · `type`: `validation_error`
+
+A field that takes an object was sent as another type. `attr` names it (for example `extra` sent as a string).
+
+**What to do:** Send the field as a JSON object, or omit it.
+
 ### `parse_error` {#parse_error}
 
 **HTTP 400** · `type`: `validation_error`
@@ -347,7 +355,7 @@ The body is not valid JSON, is not a JSON object, or is nested too deeply.
 
 **HTTP 401** · `type`: `client_error`
 
-The credentials were sent but are wrong or revoked.
+Basic credentials were sent but the username or password is wrong, or the `Basic` value is malformed.
 
 **What to do:** Check the `Authorization` header: see [Authentication](/developers/getting-started/authentication).
 
@@ -355,9 +363,9 @@ The credentials were sent but are wrong or revoked.
 
 **HTTP 401** · `type`: `client_error`
 
-No credentials were sent.
+No valid credentials were sent: the `Authorization` header is missing, uses a scheme Ottu does not accept, or carries an API key or a Bearer token Ottu does not recognise (wrong, revoked or expired).
 
-**What to do:** Send the `Authorization` header: see [Authentication](/developers/getting-started/authentication).
+**What to do:** Send the `Authorization` header with a current API key or token: see [Authentication](/developers/getting-started/authentication).
 
 ### `permission_denied` {#permission_denied}
 
