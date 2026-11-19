@@ -449,7 +449,7 @@ A subscription is always in one of seven states, in its `status` attribute. Clic
     "autopay.recurring_amount",
     "autopay.start_date",
   ]}
-  response={["session_id", "checkout_url", "state", "payment_type", "amount", "currency_code"]}
+  returns="Returns the [payment transaction](/developers/payments/checkout-api/) for the first charge. Store `extra.autopay.subscription_id`: every other call takes it. The customer pays at `checkout_url`."
   fullReference={{ href: "/developers/payments/checkout-api/", label: "full Checkout API reference" }}
 >
 
@@ -462,32 +462,32 @@ Create a subscription with the Checkout API: set `payment_type` to `auto_pay` an
 </TabItem>
 <TabItem value="list" label="List subscriptions" attributes={{"data-method": "POST"}}>
 
-<ApiReference api="autopay-subscription-list" scenario="autopay" run="list" tabGroup="autopay-api" />
+<ApiReference api="autopay-subscription-list" scenario="autopay" run="list" tabGroup="autopay-api" returns="Returns a page of [Subscription objects](#subscription-object): `count`, `next`, `previous` and `results`, one subscription per item." />
 
 </TabItem>
 <TabItem value="retrieve" label="Retrieve a subscription" attributes={{"data-method": "GET"}}>
 
-<ApiReference api="autopay-subscription-detail" scenario="autopay" run="retrieve" tabGroup="autopay-api" />
+<ApiReference api="autopay-subscription-detail" scenario="autopay" run="retrieve" tabGroup="autopay-api" returns="Returns the [Subscription object](#subscription-object)." />
 
 </TabItem>
 <TabItem value="cancel" label="Cancel a subscription" attributes={{"data-method": "POST"}}>
 
-<ApiReference api="autopay-subscription-cancel" scenario="autopay" run="cancel" tabGroup="autopay-api" />
+<ApiReference api="autopay-subscription-cancel" scenario="autopay" run="cancel" tabGroup="autopay-api" returns="Returns the [Subscription object](#subscription-object), with the cancellation recorded." />
 
 </TabItem>
 <TabItem value="cycles" label="List billing cycles" attributes={{"data-method": "GET"}}>
 
-<ApiReference api="autopay-subscription-cycles" scenario="autopay" run="cycles" tabGroup="autopay-api" />
+<ApiReference api="autopay-subscription-cycles" scenario="autopay" run="cycles" tabGroup="autopay-api" returns="Returns a page of billing cycles: `count`, `next`, `previous` and `results`, one cycle per item." />
 
 </TabItem>
 <TabItem value="page-link" label="Get the customer page link" attributes={{"data-method": "GET"}}>
 
-<ApiReference api="autopay-subscription-page-link" scenario="autopay" run="page-link" tabGroup="autopay-api" />
+<ApiReference api="autopay-subscription-page-link" scenario="autopay" run="page-link" tabGroup="autopay-api" returns="Returns the customer's page link, `page_url`, and its `page_token`." />
 
 </TabItem>
 <TabItem value="regenerate-page-token" label="Regenerate the page token" attributes={{"data-method": "POST"}}>
 
-<ApiReference api="autopay-subscription-regenerate-page-token" scenario="autopay" run="regenerate-page-token" tabGroup="autopay-api" />
+<ApiReference api="autopay-subscription-regenerate-page-token" scenario="autopay" run="regenerate-page-token" tabGroup="autopay-api" returns="Returns the new `page_url` and `page_token`. The old link stops working." />
 
 </TabItem>
 </Tabs>

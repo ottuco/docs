@@ -211,6 +211,7 @@ export default function ApiReference({
   fullReference,
   showDescription = true,
   title,
+  returns,
   children,
 }: {
   api: ApiSlug;
@@ -259,6 +260,13 @@ export default function ApiReference({
    * both are shown.
    */
   children?: React.ReactNode;
+  /**
+   * What the call returns, in one Markdown line, Stripe style ("Returns the
+   * Subscription object"). Shown in place of the response's field-by-field
+   * list (the object section already explains every field); the examples on
+   * the right stay (#161109 R15, #161111 R16).
+   */
+  returns?: string;
 }): React.JSX.Element {
   if (Boolean(scenario) !== Boolean(run))
     throw new Error(
@@ -412,7 +420,14 @@ export default function ApiReference({
             ))}
           </Section>
         )}
-        {ok && (
+        {returns && (
+          <Section id={`${id}-returns`} title="Returns">
+            <div className={styles.description}>
+              <Markdown>{forMarkdown(returns)}</Markdown>
+            </div>
+          </Section>
+        )}
+        {ok && !returns && (
           <Section id={`${id}-response`} title={`Response ${ok}`}>
             {okIsArray && (
               <p className={styles.muted}>

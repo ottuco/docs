@@ -23,6 +23,7 @@ import type { AnyScenario, Picked, StepRun } from "./scenario";
 import { runOf, type ScenarioKey } from "./scenarios";
 import { send, type ExecuteResult } from "./send";
 import { LANGUAGES, snippet } from "./snippets";
+import { markExtracted, runButtonLabel } from "./dialog";
 import {
   CODE_HEIGHT,
   ExamplePanel,
@@ -37,17 +38,22 @@ import styles from "./styles.module.css";
 
 type StepState = "pending" | "running" | "done" | "failed";
 
-// A step's body and response sit side by side in the dialog: short boxes.
-const STEP_CODE_HEIGHT = "180px";
+// A step's body and response, stacked and folded in the dialog: short boxes.
+const STEP_CODE_HEIGHT = "220px";
+
+/** The raw values a step's picked items point at in its response. */
+const extractedValues = (picked: Picked[]): string[] =>
+  picked.flatMap(({ extracted, value, href }) => extracted ?? (href ? [] : [value]));
 
 /** What a done step took from its response: an id, a link to open. */
 function PickedList({ picked }: { picked: Picked[] }) {
   if (picked.length === 0) return null;
   return (
-    <ul className={styles.picked}>
+    <ul className={styles.picked} aria-label="Extracted from the response">
       {picked.map(({ label, value, href, note }, i) => (
         <li key={`${i}-${label}`}>
-          <span className={styles.pickedLabel}>{label}</span>{" "}
+          <span className={styles.pickedTag}>Extracted</span>{" "}
+          <span className={styles.pickedLabel}>{label}:</span>{" "}
           {/* Only a web link from the sandbox response, never another scheme. */}
           {href?.startsWith("https://") ? (
             <a href={href} target="_blank" rel="noopener noreferrer">
@@ -63,24 +69,48 @@ function PickedList({ picked }: { picked: Picked[] }) {
   );
 }
 
-/** The call a step made, as Stripe shows one: the body it sent, then the response. */
-function StepCall({ call }: { call: StepRun }) {
+/** The response, with the lines that hold an extracted value highlighted like a diff. */
+function MarkedResponse({ response, values }: { response: unknown; values: string[] }) {
+  const lines = markExtracted(response, values);
+  return (
+    <pre className={styles.markedResponse} style={{ maxHeight: STEP_CODE_HEIGHT }}>
+      {lines.map((line, i) => (
+        <span key={i} className={line.extracted ? styles.markedLine : undefined}>
+          {line.text}
+          {"\n"}
+        </span>
+      ))}
+    </pre>
+  );
+}
+
+/**
+ * The call a step made, as Stripe shows one: the body it sent, then the
+ * response, one under the other and folded, so the dialog stays short.
+ */
+function StepCall({ call, extracted }: { call: StepRun; extracted: string[] }) {
   return (
     <div className={styles.stepCall}>
       {call.body !== undefined && (
-        <ApiPanel
-          label="Request body"
-          data={call.body}
-          maxHeight={STEP_CODE_HEIGHT}
-          className={styles.stepPanel}
-        />
+        <details className={styles.stepFold}>
+          <summary>Request body</summary>
+          <ApiPanel
+            label="JSON"
+            data={call.body}
+            maxHeight={STEP_CODE_HEIGHT}
+            className={styles.stepPanel}
+          />
+        </details>
       )}
-      <ApiPanel
-        label="Response"
-        data={call.response}
-        maxHeight={STEP_CODE_HEIGHT}
-        className={styles.stepPanel}
-      />
+      <details className={styles.stepFold}>
+        <summary>
+          Response
+          {extracted.length > 0 && (
+            <span className={styles.stepFoldHint}> · extracted values highlighted</span>
+          )}
+        </summary>
+        <MarkedResponse response={call.response} values={extracted} />
+      </details>
     </div>
   );
 }
@@ -155,8 +185,11 @@ function Prerequisites({
               Set up prerequisites
             </h3>
             <p className={styles.dialogText}>
-              This call depends on other objects. Create them in the sandbox
-              first?
+              This call needs {steps.length > 1 ? "these objects" : "this object"} on
+              the sandbox first. {runButtonLabel(steps.length, false)} creates{" "}
+              {steps.length > 1 ? "them" : "it"} here, in this dialog. Then{" "}
+              <strong>Continue</strong> runs the call itself on the page, where you
+              see its request and response.
             </p>
           </div>
           <button
@@ -169,7 +202,7 @@ function Prerequisites({
               size={0.7}
               spin={running}
             />
-            {finished ? "Continue" : "Run all"}
+            {runButtonLabel(steps.length, finished)}
           </button>
         </div>
         <ol className={styles.steps}>
@@ -195,7 +228,12 @@ function Prerequisites({
                   {state === "done" && done(sessionState) && (
                     <PickedList picked={picked(sessionState)} />
                   )}
-                  {calls[step] && <StepCall call={calls[step]} />}
+                  {calls[step] && (
+                    <StepCall
+                      call={calls[step]}
+                      extracted={extractedValues(picked(sessionState))}
+                    />
+                  )}
                 </div>
               </li>
             );
