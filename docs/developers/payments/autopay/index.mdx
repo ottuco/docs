@@ -74,9 +74,9 @@ Your part, in order:
 
 1. **Before your first call.** Check the [Setup](#setup) list.
 2. **Create the subscription.** Call [Create a subscription](/developers/payments/autopay/?autopay-api=create#create-api): `POST /b/checkout/v1/pymt-txn/` with `payment_type: "auto_pay"` and the `autopay` block. Store `extra.autopay.subscription_id` from the `201` response.
-3. **Show the checkout on your page.** Start the [Checkout SDK](/developers/payments/checkout-sdk/) ([Web](/developers/payments/checkout-sdk/web), [iOS](/developers/payments/checkout-sdk/ios), [Android](/developers/payments/checkout-sdk/android) or [Flutter](/developers/payments/checkout-sdk/flutter)) with the `session_id` from the same response. Your customer pays the first charge inside your own page or app, with no redirect. The [Live Demo](#live-demo) runs it. The only Ottu page your customer opens is their [self-service page](#customer-self-service-page), to manage the subscription.
-4. **Receive the result.** If you set a `webhook_url`, Ottu calls it with the first-payment result. [Verify its signature](/developers/webhooks/verify-signatures#which-signature). The payload is a [`payment.*` event](/developers/webhooks#api-reference). In Python, [`ottu-py`](https://github.com/ottuco/ottu-py#webhook-verification) verifies the signature and [reads the event](https://github.com/ottuco/ottu-py#reading-v3-events).
-5. **Start the service.** [Retrieve](/developers/payments/autopay/?autopay-api=retrieve#api-reference) the subscription until `status` is `active` or `trialing`, then give access. Timing: [First payment and activation](#first-payment-and-activation).
+3. **Show the checkout.** Send your customer to the `checkout_url` from the same response, or start the [Checkout SDK](/developers/payments/checkout-sdk/) on your own page with the `session_id`. Both [options](#first-payment-and-activation) take the same first payment. The [Live Demo](#live-demo) runs the SDK. After the first charge, the only Ottu page your customer opens is their [self-service page](#customer-self-service-page), to manage the subscription.
+4. **Receive the result.** If you set a `webhook_url`, Ottu calls it with the first-payment result. [Verify its signature](/developers/webhooks/verify-signatures#which-signature). Your account's [webhook format](/developers/webhooks/#webhook-formats) sets the payload: [Payment Events](/developers/webhooks/payment-events) for formats 1 and 2, the [event catalogue](/developers/webhooks/event-catalogue) for format 3. In Python, [`ottu-py`](https://github.com/ottuco/ottu-py#webhook-verification) verifies the signature and, on format 3, [reads the event](https://github.com/ottuco/ottu-py#reading-v3-events).
+5. **Start the service.** Ottu activates the subscription when the payment result arrives, then sends [`subscription.activated`](#event-activated) to your [events endpoint](#webhook-events). Give access on that event. Details and the backup check: [First payment and activation](#first-payment-and-activation).
 6. **Ottu charges every cycle.** Ottu charges and retries. Renewals do not call your `webhook_url`: subscribe a webhook endpoint to [subscription events](#webhook-events) to hear about them. Once a day, [list](/developers/payments/autopay/?autopay-api=list#api-reference) subscriptions with `status: "past_due"`. [Cancel](/developers/payments/autopay/?autopay-api=cancel#api-reference) with `mode: "immediate"` when you stop the service.
 
 ### Live Demo {#live-demo}
@@ -97,30 +97,38 @@ After the first payment, Ottu runs the subscription. Each topic below has the ru
 
 #### First payment and activation {#first-payment-and-activation}
 
+Your customer pays the first charge in Ottu's checkout, and Ottu saves the card for the later charges. You choose where the checkout appears. Your customer can pay on Ottu's hosted checkout page. Or you can show the same checkout on your own page with the [Checkout SDK](/developers/payments/checkout-sdk/), so your customer never leaves your page. The [Create call](/developers/payments/autopay/?autopay-api=create#create-api) returns a `checkout_url` for the hosted page and a `session_id` for the SDK. This is a customer-initiated payment: see [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments) for CIT and MIT. Choose where your customer pays:
+
+<Tabs groupId="autopay-checkout" queryString>
+<TabItem value="ottu-page" label="Ottu's checkout page">
+
 <Beside image="/img/developers/autopay/first-charge-checkout.png" alt="Ottu's checkout page for the first AutoPay charge, with the card form and the amount due">
 
-Your customer pays the first charge in the Checkout SDK on your page, and Ottu saves the card for the later charges. This is a customer-initiated payment: see [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments) for CIT and MIT.
+Send your customer to the `checkout_url` from the Create response. Ottu hosts this page: your customer enters the card on it, sees the amount due and pays.
 
 </Beside>
 
-- **Start state.** A first charge above `0` makes the subscription `active`. A first charge of `0.000` makes it `trialing`.
-- **Activation can lag the payment.** `status` stays `pending_setup` until Ottu receives the payment result. If that result is missed, a backup check activates the subscription 20 to about 35 minutes after you created it. Poll; do not hard-code a wait. Your checkout [webhook](/developers/webhooks/) can arrive in that state: treat it as "payment received, activation pending", not as a failure.
-- **Poll, do not wait.** [Retrieve](/developers/payments/autopay/?autopay-api=retrieve#api-reference) the subscription until `status` leaves `pending_setup`. Do not grant access from the webhook's [`autopay` block](/developers/webhooks/payment-events#autopay-block) alone: it is not signed. If the subscription is still `pending_setup` 35 minutes after creation and the payment succeeded, contact Ottu support with the subscription ID.
-- **Match the webhook.** In formats 1 and 2, `extra.autopay.subscription_id` in the [payload](/developers/webhooks/payment-events#autopay-block) is the subscription ID you stored at creation. Format 3 payloads are in the [event catalogue](/developers/webhooks#api-reference). As a fallback, the webhook's `session_id` equals `setup_session_id` on the subscription.
-- **Setup can fail.** The subscription becomes `setup_failed` when the customer cancels the checkout, when 24 hours pass without payment, or when the payment succeeds but Ottu cannot save the card. Ottu does not retry it: create a new subscription. If the first payment succeeded, refund it, because Ottu does not refund it automatically, and contact Ottu support with the subscription ID.
+</TabItem>
+<TabItem value="your-page" label="Your own page">
 
-#### Free trials {#free-trials}
+Start the [Checkout SDK](/developers/payments/checkout-sdk/) with the `session_id` from the Create response. Your customer sees the same checkout inside your page and pays there, with no redirect. How to add it: [Web](/developers/payments/checkout-sdk/web), [iOS](/developers/payments/checkout-sdk/ios), [Android](/developers/payments/checkout-sdk/android) or [Flutter](/developers/payments/checkout-sdk/flutter). The SDK's success callback means the customer finished paying, not that the subscription is active: give access on [`subscription.activated`](#event-activated).
 
-Send a checkout `amount` of `0.000`. Your customer pays nothing, Ottu saves the card, and the subscription starts in `trialing`, not `active`. The first real charge comes one period after `start_date`.
+</TabItem>
+</Tabs>
 
-#### Billing Cycles {#billing-cycles}
+Nothing else changes for the subscription, whichever tab you use. The first charge sets the start state:
 
-- Ottu creates one cycle at a time: the next cycle exists only after the previous one is paid. Each cycle locks its own `amount_due` when it is created.
-- The customer pays the first charge at checkout, on the day they complete it. `start_date` does not change that day. It sets the date of cycle 1 and the billing day for every later cycle.
-- When `amount` is above `0`, that charge is cycle 1: `charge_type: "cit"`, `scheduled_date` equal to `start_date`, and already `paid`. Cycle 2 comes one period (month or year) after `start_date`.
-- When `amount` is `0.000`, the card is saved only. Cycle 1 is the first real charge, one period after `start_date`.
+- **Regular:** an `amount` above `0`. Your customer pays at checkout and cycle 1 is `paid`. The subscription becomes `active`. Cycle 2 comes one period (month or year) after `start_date`.
+- <span id="free-trials" />**Free trial:** an `amount` of `0.000`. Your customer pays nothing and Ottu saves the card. The subscription becomes `trialing`. The first real charge comes one period after `start_date`. [Test a free trial](#test-free-trial).
 
-Billing days and short months: [Anchor days](/business/autopay/#anchor-days).
+The rules below apply to both.
+
+- **Activate on the event.** `status` stays `pending_setup` until Ottu receives the payment result from the checkout. Ottu then sets `active` (or `trialing` after a `0.000` first charge) and sends [`subscription.activated`](#event-activated) to your [events endpoint](#webhook-events), which Ottu support sets up. Give access on that event. This usually takes one to two minutes, depending on load and system health. Your checkout [webhook](/developers/webhooks/) can arrive first: treat it as "payment received, activation pending", not as a failure.
+- **If Ottu misses the payment result.** A backup check activates the subscription 20 to about 35 minutes after you created it. Do not grant access from the webhook's [`autopay` block](/developers/webhooks/payment-events#autopay-block): the body signature does not cover it, and it can be missing. If the subscription is still `pending_setup` 35 minutes after creation and at least 15 minutes after the payment succeeded, contact Ottu support with the subscription ID.
+- **Match the webhook.** In formats 1 and 2, `extra.autopay.subscription_id` in the [payload](/developers/webhooks/payment-events#autopay-block) is the subscription ID you stored at creation. Format 3 payloads are in the [event catalogue](/developers/webhooks/event-catalogue). As a fallback, the webhook's `session_id` equals `setup_session_id` on the subscription.
+- **Setup can fail.** The subscription becomes `setup_failed` when the customer cancels the checkout, when Ottu cannot confirm a payment within 24 hours, or when the payment succeeds but Ottu cannot save the card. Ottu does not retry it: create a new subscription. If the first payment succeeded, refund it, because Ottu does not refund it automatically, and contact Ottu support with the subscription ID.
+
+**Next:** give access on [`subscription.activated`](#event-activated). Then read how [Ottu retries a failed renewal](#retries-and-dunning).
 
 #### Retries & Dunning {#retries-and-dunning}
 
@@ -152,7 +160,7 @@ No attempt and no cycle yet. The subscription stays `pending_setup`, and your cu
 
 ##### First payment never completes {#outcome-setup-failed}
 
-The payment was canceled, 24 hours passed without payment, or the card was not saved. There is no cycle, and the subscription becomes `setup_failed`.
+The payment was canceled, Ottu could not confirm a payment within 24 hours, or the card was not saved. There is no cycle, and the subscription becomes `setup_failed`.
 
 ##### Renewal paid {#outcome-renewal-paid}
 
@@ -197,7 +205,7 @@ Before the period ends, your customer presses **Reactivate subscription** on the
 
 #### Webhook events {#webhook-events}
 
-Renewals do not call your `webhook_url`. To hear about them, add a webhook endpoint subscribed to `subscription.*` events: see [Subscription events](/developers/webhooks#subscription-events) for the setup, the envelope and the signature.
+Renewals do not call your `webhook_url`. To hear about them, add a webhook endpoint subscribed to `subscription.*` events: see [Subscription events](/developers/webhooks/event-catalogue#subscription-events) for the setup, the envelope and the signature.
 
 ##### `subscription.created` {#event-created}
 
@@ -213,7 +221,7 @@ Renewals do not call your `webhook_url`. To hear about them, add a webhook endpo
 
 ##### `subscription.setup_failed` {#event-setup-failed}
 
-**Sent when:** The payment was canceled, 24 hours passed without payment, or the card could not be saved.
+**Sent when:** The payment was canceled, Ottu could not confirm a payment within 24 hours, or the card could not be saved.
 
 **What to do:** Create a new subscription. Refund the first payment if it went through: Ottu does not.
 
@@ -330,7 +338,7 @@ Test on the sandbox with `pg_codes: ["ottu-sandbox-kwd"]` (the Ottu Sandbox gate
 
 **Check:** Your endpoint verifies the signature and answers `2xx`.
 
-You cannot trigger a renewal early on the sandbox: the first renewal is charged one billing period after `start_date`. Test your renewal and `past_due` handling with stored copies of the Subscription object and of the [example events](/developers/webhooks#subscription-events), and leave one long-running sandbox subscription to confirm it end to end.
+You cannot trigger a renewal early on the sandbox: the first renewal is charged one billing period after `start_date`. Test your renewal and `past_due` handling with stored copies of the Subscription object and of the [example events](/developers/webhooks/event-catalogue#subscription-events), and leave one long-running sandbox subscription to confirm it end to end.
 
 ### Troubleshooting {#troubleshooting}
 
@@ -344,7 +352,7 @@ You cannot trigger a renewal early on the sandbox: the first renewal is charged 
 
 **Why:** Ottu activates the subscription when it receives the payment result. If that result is missed, a backup check activates it 20 to about 35 minutes after creation.
 
-**Fix:** Keep polling. If it is still `pending_setup` 35 minutes after creation and the payment succeeded, contact Ottu support with the subscription ID.
+**Fix:** Wait for [`subscription.activated`](#event-activated). If it is still `pending_setup` 35 minutes after creation and at least 15 minutes after the payment succeeded, contact Ottu support with the subscription ID.
 
 #### `setup_failed` but the customer paid {#trouble-setup-failed-paid}
 
@@ -392,7 +400,7 @@ Every endpoint accepts all the authentication methods on the [Authentication](/d
     id: "subscription-object",
     title: "The Subscription object",
     primary: ["subscription_id", "status", "amount", "currency", "next_billing_date", "customer", "card", "cancellation", "current_cycle"],
-    intro: "One AutoPay subscription. [Retrieve](/developers/payments/autopay/?autopay-api=retrieve#api-reference) and [Cancel](/developers/payments/autopay/?autopay-api=cancel#api-reference) return it. [List](/developers/payments/autopay/?autopay-api=list#api-reference) returns it for each subscription, without `notification_config` and `current_cycle`.",
+    intro: "One AutoPay subscription. [Retrieve](/developers/payments/autopay/?autopay-api=retrieve#api-reference) and [Cancel](/developers/payments/autopay/?autopay-api=cancel#api-reference) return it. [List](/developers/payments/autopay/?autopay-api=list#api-reference) returns it for each subscription, without `notification_config` and `current_cycle`.\n\n**Billing cycles.**\n\n- Ottu creates one cycle at a time: the next cycle exists only after the previous one is paid. Each cycle locks its own `amount_due` when it is created.\n- The customer pays the first charge at checkout, on the day they complete it. `start_date` does not change that day. It sets the date of cycle 1 and the billing day for every later cycle.\n\nWhich charge is cycle 1, for a regular and for a free-trial subscription: [First payment and activation](#first-payment-and-activation). Billing days and short months: [Anchor days](/business/autopay/#anchor-days). Each cycle is listed by [List cycles](/developers/payments/autopay/?autopay-api=cycles#api-reference).",
   }}
 />
 
@@ -627,7 +635,7 @@ Every error answers with a JSON body; the `detail` text can differ from the exam
     The list endpoint takes its filters in a request body, and it only reads. Keep `customer_id` in that body: a customer identifier in a URL ends up in access logs.
   </FAQItem>
   <FAQItem question="How do I know when the customer finishes the first payment?">
-    Poll [Retrieve a subscription](/developers/payments/autopay/?autopay-api=retrieve#api-reference) and check `status`. It leaves `pending_setup` when Ottu confirms the first payment. If your account has a webhook endpoint set up by Ottu support, Ottu also sends `subscription.activated` when the subscription turns active or starts a trial. The checkout [webhook](/developers/webhooks/) is only "payment received". Timing and details: [First payment and activation](#first-payment-and-activation).
+    Wait for [`subscription.activated`](#event-activated). Ottu sends it to your webhook endpoint when the subscription turns active or starts a trial. Ottu support sets up that endpoint: ask for one if your account has none. The checkout [webhook](/developers/webhooks/) is only "payment received". [Retrieve a subscription](/developers/payments/autopay/?autopay-api=retrieve#api-reference) shows `status` at any time; it leaves `pending_setup` when Ottu confirms the first payment. Timing and details: [First payment and activation](#first-payment-and-activation).
   </FAQItem>
   <FAQItem question="What happens when the customer's card expires?">
     Ottu doesn't track the card's expiry date, so there is no warning in advance. The next renewal fails and follows the normal path: retries, then `past_due` and the final email. The customer adds a new card and pays the balance on the [self-service page](#customer-self-service-page).
@@ -651,7 +659,7 @@ Every error answers with a JSON body; the `detail` text can differ from the exam
 
 ## What's Next?
 
-- [**Webhook delivery and retries**](/developers/webhooks#delivery-and-retries) — what counts as a successful delivery, when Ottu retries, and how to drop duplicates.
+- [**Webhook delivery and retries**](/developers/webhooks/delivery-and-retries) — what counts as a successful delivery, when Ottu retries, and how to drop duplicates.
 - [**Signature verification**](/developers/webhooks/verify-signatures#which-signature) — how to trust the first-payment webhook.
 - [**Sandbox test cards**](/developers/payments/ottu-sandbox#test-cards) — cards for a successful first payment and for a declined renewal.
 - [**Recurring Payments & Auto-Debit**](/developers/cards-and-tokens/recurring-payments) — the alternative when you want to own the billing schedule yourself.

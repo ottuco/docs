@@ -32,7 +32,7 @@ export const sampleWebhook = {
   signature: "60bf40cf******",
   timestamp_utc: "2026-11-06 10:02:07",
   extra: {
-    merchant_id: "ksa.ottu.dev",
+    merchant_id: "sandbox.ottu.net",
     autopay: { subscription_id: SUB_ID },
   },
   autopay: {
