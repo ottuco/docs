@@ -143,7 +143,19 @@ function Prerequisites({
   onDone: () => void;
   onClose: () => void;
 }) {
-  const [states, setStates] = useState<Record<string, StepState>>({});
+  // Steps already done when the dialog opens (an earlier call found the
+  // gateway) show as done and are not counted: the button and the text speak
+  // of the steps Run will actually run.
+  const [states, setStates] = useState<Record<string, StepState>>(() =>
+    Object.fromEntries(
+      steps
+        .filter((step) => scenario.steps[step].done(scenario.getState()))
+        .map((step) => [step, "done" as StepState]),
+    ),
+  );
+  const [toRun] = useState(
+    () => steps.filter((step) => !scenario.steps[step].done(scenario.getState())).length,
+  );
   const [calls, setCalls] = useState<Record<string, StepRun>>({});
   // A done step shows what the state holds from it, kept current.
   const sessionState = useSyncExternalStore(
@@ -202,9 +214,9 @@ function Prerequisites({
               Set up prerequisites
             </h3>
             <p className={styles.dialogText}>
-              This call needs {steps.length > 1 ? "these objects" : "this object"} on
-              the sandbox first. {runButtonLabel(steps.length, false)} creates{" "}
-              {steps.length > 1 ? "them" : "it"} here, in this dialog. Then{" "}
+              This call needs {toRun > 1 ? "these objects" : "this object"} on
+              the sandbox first. {runButtonLabel(toRun, false)} creates{" "}
+              {toRun > 1 ? "them" : "it"} here, in this dialog. Then{" "}
               <strong>Continue</strong> runs the call itself on the page, where you
               see its request and response.
             </p>
@@ -219,7 +231,7 @@ function Prerequisites({
               size={0.7}
               spin={running}
             />
-            {runButtonLabel(steps.length, finished)}
+            {runButtonLabel(toRun, finished)}
           </button>
         </div>
         <ol className={styles.steps}>
