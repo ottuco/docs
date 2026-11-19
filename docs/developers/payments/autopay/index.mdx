@@ -397,26 +397,36 @@ Before the period ends, your customer presses **Reactivate subscription** on the
 </ReferenceAside>
 
 #### Webhook events {#webhook-events}
-
+{/* Stripe-style reference card (#161111 R10): one example event payload on the right, like Stripe's event object page https://docs.stripe.com/api/events/object . The full event list lives on the webhook pages (#161109 R13), so the card does not repeat it. */}
 {/* Stripe-style reference card on the right of a text-only section (#161111 R10), like Stripe's API reference text sections: https://docs.stripe.com/api/errors , https://docs.stripe.com/api/authentication , https://docs.stripe.com/api */}
 
 <ReferenceAside>
 
-<ReferenceCard title="Events at a glance">
+<ReferenceCard title="Example event">
 
-| Event | What to do |
-|---|---|
-| `subscription.created` | Link it; no access yet |
-| `subscription.activated` | Grant access |
-| `subscription.setup_failed` | Create a new one |
-| `subscription.renewed` | Extend access |
-| `subscription.payment_failed` | Nothing yet |
-| `subscription.past_due` | Apply your policy |
-| `subscription.card_updated` | Nothing |
-| `subscription.cancel_scheduled` | Keep access until `cancel_date` |
-| `subscription.cancel_reverted` | Keep access |
-| `subscription.canceled` | End access |
-| `subscription.expired` | End access |
+```json title="subscription.renewed"
+{
+  "id": "evt_01JB3Q7Z5W8K2N4R6T9V0XCYDE",
+  "event": "subscription.renewed",
+  "created": "2026-10-22T10:00:05Z",
+  "version": 3,
+  "is_sandbox": false,
+  "merchant_id": "merchant.ottu.net",
+  "initiator": {
+    "kind": "system",
+    "id": null,
+    "first_name": null,
+    "last_name": null,
+    "email": null
+  },
+  "data": {
+    "subscription_id": "sub_1eQ",
+    "status": "active"
+  }
+}
+```
+
+Every `subscription.*` event has this envelope; only `event` and `data.status` change. [All keys](/developers/webhooks/event-catalogue#subscription-data).
 
 </ReferenceCard>
 
