@@ -19,7 +19,6 @@ import {
   mdiPlay,
 } from "@mdi/js";
 import ApiPanel from "@site/src/components/ApiPanel";
-import panelStyles from "@site/src/components/ApiPanel/styles.module.css";
 import type { AnyScenario, Picked, StepRun } from "./scenario";
 import { runOf, type ScenarioKey } from "./scenarios";
 import { send, type ExecuteResult } from "./send";
@@ -70,34 +69,20 @@ function PickedList({ picked }: { picked: Picked[] }) {
   );
 }
 
-/**
- * The response, with the lines that hold an extracted value highlighted like
- * a diff, under the same JSON header and Copy button as the request body.
- */
+/** The response, with the lines that hold an extracted value highlighted like a diff. */
 function MarkedResponse({ response, values }: { response: unknown; values: string[] }) {
-  const lines = markExtracted(response, values);
-  const text = lines.map((line) => line.text).join("\n");
+  // Re-rendered on every session change while steps run: mark only when the
+  // response or the values change.
+  const key = values.join("\u0000");
+  const lines = useMemo(() => markExtracted(response, values), [response, key]);
   return (
-    <div className={`${panelStyles.apiPanel} ${styles.stepPanel}`}>
-      <div className={panelStyles.apiPanelHeader}>
-        <span>JSON</span>
-        <button
-          type="button"
-          className={panelStyles.apiPanelCopy}
-          onClick={() => navigator.clipboard?.writeText(text)}
-        >
-          Copy
-        </button>
-      </div>
-      <pre className={styles.markedResponse} style={{ maxHeight: STEP_CODE_HEIGHT }}>
-        {lines.map((line, i) => (
-          <span key={i} className={line.extracted ? styles.markedLine : undefined}>
-            {line.text}
-            {"\n"}
-          </span>
-        ))}
-      </pre>
-    </div>
+    <ApiPanel
+      label="JSON"
+      data={lines.map((line) => line.text).join("\n")}
+      marked={lines.map((line) => line.extracted)}
+      maxHeight={STEP_CODE_HEIGHT}
+      className={styles.stepPanel}
+    />
   );
 }
 
