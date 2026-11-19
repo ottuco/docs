@@ -172,7 +172,7 @@ Some outcomes aren't decided by a card. Background inquiries, captures, voids, a
 }
 ```
 
-A declined refund is kept as a rejected refund: [Operations v3](/developers/operations-v3) answers `200` with `status` `refund_rejected`. With `"sandbox_result": "timeout"` it answers `504` `gateway_timeout`, and the same `Idempotency-Key` replays that stored answer. A `sandbox_result` set on the session's `extra` applies to every capture, void and refund on it, unless the operation's own `extra` sets another.
+A declined refund is kept as a rejected refund: [Operations v3](/developers/operations-v3) answers `200` with `status` `refund_rejected`. A declined capture or void answers `422` [`operation_declined`](/developers/reference/v3-errors#operation_declined). With `"sandbox_result": "timeout"` it answers `504` `gateway_timeout`, and the same `Idempotency-Key` replays that stored answer. A `sandbox_result` set on the session's `extra` applies to every capture, void and refund on it, unless the operation's own `extra` sets another.
 
 The same `sandbox_inquiry_result` value is also honored by **any** manual status inquiry on the transaction (e.g. a [Payment Status Query](/developers/payments/psq/)) — `expires_in_minutes` only controls the *automatic* scheduling.
 
