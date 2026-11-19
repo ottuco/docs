@@ -355,7 +355,7 @@ The body is not valid JSON, is not a JSON object, or is nested too deeply.
 
 **HTTP 401** · `type`: `client_error`
 
-Basic credentials were sent but the username or password is wrong, the user is inactive, or the `Basic` value is malformed.
+Reserved. Ottu does not return this code today: a wrong, revoked or expired credential of any kind answers [`not_authenticated`](#not_authenticated). Handle both codes the same way.
 
 **What to do:** Check the `Authorization` header: see [Authentication](/developers/getting-started/authentication).
 
@@ -363,7 +363,7 @@ Basic credentials were sent but the username or password is wrong, the user is i
 
 **HTTP 401** · `type`: `client_error`
 
-No valid credentials were sent: the `Authorization` header is missing, uses a scheme Ottu does not accept, or carries an API key or a Bearer token Ottu does not recognise (wrong, revoked or expired).
+No valid credentials were sent: the `Authorization` header is missing, uses a scheme Ottu does not accept, or carries an API key, a Bearer token or a Basic username and password that Ottu does not accept (wrong, revoked, expired, or a deactivated user).
 
 **What to do:** Send the `Authorization` header with a current API key or token: see [Authentication](/developers/getting-started/authentication).
 
