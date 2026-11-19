@@ -16,6 +16,11 @@
     > :is(p, ul, ol, blockquote, .theme-admonition) {
     max-width: 50%;
   }
+  /* Prose inside a tab (First payment's "Your own page") keeps the same width. */
+  html[class~="docs-doc-id-developers/payments/autopay/index"]
+    .theme-doc-markdown [role="tabpanel"] > :is(p, ul, ol) {
+    max-width: 50%;
+  }
   /* A screenshot or box floated into the right half (.float-beside: Beside,
      ApiShortcuts) lets the section's prose run down the left; headings and
      wide blocks (code, tables, diagrams) start below it. */
