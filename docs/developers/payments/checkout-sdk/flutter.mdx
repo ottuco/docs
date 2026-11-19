@@ -1345,32 +1345,22 @@ Since the implementation differs between the two platforms, please refer to the 
 ## FAQ
 
 <FAQ>
-  <FAQItem question="What forms of payment are supported by the SDK?">
-    The SDK supports the following [forms of payment](#formsofpayment-array-optional):
+  <FAQItem question="What forms of payments are supported by the SDK?">
+    The SDK supports the following payment forms: `tokenPay`, `redirect`, `stcPay` and `cardOnsite`. For iOS plaform `applePay` is supported as well. Merchants can display specific methods according to their needs. For more details look at `FormsOfPayment`\` enum.
 
-    - `tokenPay`
-    - `redirect`
-    - `StcPay` &#x20;
-    - `cardOnsite`
-    - `applePay` _(iOS only)_
+    For example, if you want to only show the STC Pay button, you can do so using the following construction.
 
-    Merchants can configure the forms of payment displayed according to their needs.
+    `formsOfPayment = [FormsOfPayment.stcPay]`
 
-    For example, to **display only the STC Bank button**, use:
-
-    ```
-    formsOfPayment = ["stcPay"]
-    ```
-
-    This ensures that only the **STC Bank** button is shown. The same approach applies to other payment methods.
+    And only the STC Pay button will be displayed. The same applies for other methods.
   </FAQItem>
-  <FAQItem question="What are the minimum system requirements for SDK integration?">
-    The SDK requires a device running:
+  <FAQItem question="What are the minimum system requirements for the SDK integration?">
+    It is required to have a device with one of the operating systems:
 
-    - **Android 8** or higher (**API level 26** or higher)
-    - **iOS 14** or higher
+    - Android 8 or higher (Android API level 26 or higher);
+    - iOS 15 or higher.
   </FAQItem>
   <FAQItem question="Can I customize the appearance beyond the provided themes?">
-    Yes, customization is supported. For more details, refer to the [Theme](#theme) section.
+    Yes, see the “Customization theme” section.
   </FAQItem>
 </FAQ>
