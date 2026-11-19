@@ -119,6 +119,11 @@ function Lightbox({
     close.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
+      // Focus stays in the dialog: its close button is the only control.
+      if (e.key === "Tab") {
+        e.preventDefault();
+        close.current?.focus();
+      }
     };
     document.addEventListener("keydown", onKey);
     return () => {
