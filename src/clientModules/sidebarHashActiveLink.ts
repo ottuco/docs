@@ -844,16 +844,6 @@ function tabPicked(tab: Element): void {
   linkClickedAt = -Infinity;
 }
 
-/**
- * A scroll the page makes on its own (the sidebar's back-to-top) is not the
- * reader reading: mute the scroll-spy until their next real scroll input, so
- * it does not write the sections it passes into the URL on the way.
- */
-export function holdScrollSpy(): void {
-  spyMuted = true;
-  lastActiveHash = null;
-}
-
 export function onRouteDidUpdate(): void {
   // New route: drop stale state so the scroll listener doesn't act on
   // a previous page's cached sections. Re-mute scroll-spy on every
@@ -930,18 +920,7 @@ if (typeof window !== "undefined") {
   // scroll events are ignored from module load until the user's first
   // real scroll input — regardless of how long hydration takes.
 
-  window.addEventListener("hashchange", () => {
-    // The hash was removed (e.g. the sidebar's own category entry takes the
-    // reader back to the top of the page, #161111 R9): there is no section
-    // to reach or keep pinned any more, so stop a pending reveal and the
-    // layout-shift compensator; otherwise they pull the page back down.
-    if (!window.location.hash) {
-      scrollTicket += 1;
-      cancelMaintain?.();
-      lastNavHash = "";
-    }
-    updateActiveLinks();
-  });
+  window.addEventListener("hashchange", () => updateActiveLinks());
   document.addEventListener(
     "click",
     (e) => {
