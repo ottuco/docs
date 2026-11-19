@@ -12,9 +12,10 @@ export function runButtonLabel(stepCount: number, finished: boolean): string {
 /**
  * The response as the dialog prints it, one entry per line, each marked when
  * it holds one of the values the step extracted, so they can be highlighted
- * the way a diff highlights a change. A value matches as a whole JSON string
- * (`"cybersource-autopay"`) or, for numbers and booleans, as a whole value
- * after a key, never as part of a longer value.
+ * the way a diff highlights a change. A value matches only as a whole JSON
+ * string value (`"code": "cybersource-autopay"`), never as part of a longer
+ * one or as a bare number, which would mark unrelated fields that happen to
+ * hold the same digits.
  */
 export function markExtracted(
   response: unknown,
@@ -29,9 +30,9 @@ export function markExtracted(
   }));
 }
 
+/** The line is a key/value or array item whose whole string value is `value`. */
 function holds(line: string, value: string): boolean {
-  if (line.includes(JSON.stringify(value))) return true;
-  // A bare number or boolean: `"count": 3,` holds "3", `"amount": 30` does not.
-  const bare = line.match(/:\s*([^"\s,][^,]*?)\s*,?\s*$/);
-  return bare !== null && bare[1] === value;
+  const quoted = JSON.stringify(value);
+  const item = line.trim().replace(/,$/, "");
+  return item === quoted || item.endsWith(`: ${quoted}`);
 }
