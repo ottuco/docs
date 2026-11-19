@@ -46,11 +46,52 @@ Ottu offers SDKs and tools to speed up your integration. See [Getting Started](.
 
 ## When to Use
 
+{/* Stripe-style reference card on the right of a text-only section (#161111 R10), like Stripe's API reference text sections: https://docs.stripe.com/api/errors , https://docs.stripe.com/api/authentication , https://docs.stripe.com/api */}
+
+<ReferenceAside>
+
+<ReferenceCard title="AutoPay or Auto-Debit?">
+
+| | AutoPay | Auto-Debit |
+|---|---|---|
+| Who runs the schedule | Ottu | You |
+| Billing periods | Monthly, yearly | Any |
+| Your calls | One checkout call | One charge per payment |
+
+</ReferenceCard>
+
 - **Use AutoPay** for monthly or yearly plans when Ottu should run the subscription after one checkout call. Why it helps your business: [Why use AutoPay](/business/autopay/#why-use-autopay).
 - **Use [Recurring Payments & Auto-Debit](/developers/cards-and-tokens/recurring-payments)** when your own system must decide when each charge happens, for example installments or on-demand billing. You run the schedule and charge a saved card on demand.
 
+</ReferenceAside>
 
 ## Setup {#setup}
+
+{/* Stripe-style reference card on the right of a text-only section (#161111 R10), like Stripe's API reference text sections: https://docs.stripe.com/api/errors , https://docs.stripe.com/api/authentication , https://docs.stripe.com/api */}
+
+<ReferenceAside>
+
+<ReferenceCard title="Is AutoPay on?">
+
+```http
+GET /b/api/v1/config/
+```
+
+The response has `autopay_api_url` only when AutoPay is switched on for your account.
+
+</ReferenceCard>
+
+<ReferenceCard title="A gateway with auto-debit">
+
+Call [Payment Methods](/developers/payments/payment-methods/) with:
+
+```json
+"auto_debit": true
+```
+
+and send one of the returned codes in `pg_codes`.
+
+</ReferenceCard>
 
 Before your first call:
 
@@ -61,6 +102,7 @@ Before your first call:
 
 To go live, check the same list on your live account. Also call your own merchant domain instead of `sandbox.ottu.net`. Ask Ottu support to register the email and text templates, your support email and your privacy policy URL ([merchant checklist](/business/autopay/#setting-up-autopay)).
 
+</ReferenceAside>
 
 ## Guide
 
@@ -146,9 +188,41 @@ Start the [Checkout SDK](/developers/payments/checkout-sdk/) on your page with t
 
 #### Free trials {#free-trials}
 
+{/* Stripe-style reference card on the right of a text-only section (#161111 R10), like Stripe's API reference text sections: https://docs.stripe.com/api/errors , https://docs.stripe.com/api/authentication , https://docs.stripe.com/api */}
+
+<ReferenceAside>
+
+<ReferenceCard title="A free trial">
+
+```json
+"amount": "0.000"
+```
+
+The card is saved, no money moves, and `status` is `trialing`.
+
+</ReferenceCard>
+
 Send a checkout `amount` of `0.000`. Your customer pays nothing, Ottu saves the card, and the subscription starts in `trialing`, not `active`. The first real charge comes one period after `start_date`.
 
+</ReferenceAside>
+
 #### Billing Cycles {#billing-cycles}
+
+{/* Stripe-style reference card on the right of a text-only section (#161111 R10), like Stripe's API reference text sections: https://docs.stripe.com/api/errors , https://docs.stripe.com/api/authentication , https://docs.stripe.com/api */}
+
+<ReferenceAside>
+
+<ReferenceCard title="Example: monthly, start_date 2026-11-01">
+
+| Cycle | Date | Charge |
+|---|---|---|
+| 1 | 2026-11-01 | At checkout, `cit`, `paid` |
+| 2 | 2026-12-01 | Renewal |
+| 3 | 2027-01-01 | Renewal |
+
+Each cycle exists only once the one before it is paid. With a `0.000` first charge, cycle 1 is the first real charge, on 2026-12-01.
+
+</ReferenceCard>
 
 - Ottu creates one cycle at a time: the next cycle exists only after the previous one is paid. Each cycle locks its own `amount_due` when it is created.
 - The customer pays the first charge at checkout, on the day they complete it. `start_date` does not change that day. It sets the date of cycle 1 and the billing day for every later cycle.
@@ -157,13 +231,57 @@ Send a checkout `amount` of `0.000`. Your customer pays nothing, Ottu saves the 
 
 Billing days and short months: [Anchor days](/business/autopay/#anchor-days).
 
+</ReferenceAside>
+
 #### Retries & Dunning {#retries-and-dunning}
+
+{/* Stripe-style reference card on the right of a text-only section (#161111 R10), like Stripe's API reference text sections: https://docs.stripe.com/api/errors , https://docs.stripe.com/api/authentication , https://docs.stripe.com/api */}
+
+<ReferenceAside>
+
+<ReferenceCard title="A declined renewal, default retries">
+
+| Attempt | When |
+|---|---|
+| 1 | Billing date, from 00:00 UTC |
+| 2 | 1 hour later |
+| 3 | 2 hours later |
+| 4 | 3 hours later |
+
+After the 4th fails, the cycle is `failed` and the subscription `past_due`. Set 1 to 10 retries with `retry_count` when you create it.
+
+</ReferenceCard>
 
 Ottu charges a renewal from 00:00 UTC on its billing date. It retries a failed charge one hour apart: 3 retries by default (4 attempts in total), or 1 to 10 with `retry_count` on the `autopay` block. When the last attempt fails, the cycle becomes `failed` and the subscription becomes `past_due`, normally the same day. A slow gateway or an outage can move this later, so run your `past_due` check after that day. Ottu never cancels a `past_due` subscription and does not bill it again: it stays that way until the customer pays or you [cancel](/developers/payments/autopay/?autopay-api=cancel#api-reference) it with `mode: "immediate"`. To find these subscriptions, [list](/developers/payments/autopay/?autopay-api=list#api-reference) with `status: "past_due"`. What your customer gets: [When a payment fails](/business/autopay/#when-a-payment-fails).
 
+</ReferenceAside>
+
 #### Notifications {#notifications}
 
+{/* Stripe-style reference card on the right of a text-only section (#161111 R10), like Stripe's API reference text sections: https://docs.stripe.com/api/errors , https://docs.stripe.com/api/authentication , https://docs.stripe.com/api */}
+
+<ReferenceAside>
+
+<ReferenceCard title="Messages to your customer">
+
+| Message | Can you switch it off? |
+|---|---|
+| Subscription created | No |
+| Setup completed | No |
+| Link replaced | No |
+| Upcoming charge | Yes |
+| Payment failed | Yes |
+| Final failure | Yes |
+
+```json
+"language": "ar"
+```
+
+</ReferenceCard>
+
 Ottu emails and texts your customer. Two fields control it: `notification_preferences` on the `autopay` block switches off the three billing emails (upcoming charge, payment failed, final failure), and the checkout `language` (default `en`) sets the language of every message and of the customer's page. What each message says and when it goes: [The emails and texts](/business/autopay/#the-emails).
+
+</ReferenceAside>
 
 #### Customer Self-Service Page {#customer-self-service-page}
 
@@ -174,6 +292,25 @@ Ottu emails your customer when you create the subscription. The email's footer l
 </Beside>
 
 #### Payment outcomes {#payment-outcomes}
+
+{/* Stripe-style reference card on the right of a text-only section (#161111 R10), like Stripe's API reference text sections: https://docs.stripe.com/api/errors , https://docs.stripe.com/api/authentication , https://docs.stripe.com/api */}
+
+<ReferenceAside>
+
+<ReferenceCard title="Outcomes at a glance">
+
+| Outcome | Cycle | Subscription |
+|---|---|---|
+| First payment paid | `paid` | `active` or `trialing` |
+| First payment declined | none | `pending_setup` |
+| Never completes | none | `setup_failed` |
+| Renewal paid | `paid` | `active` |
+| Declined, retries left | `retry_scheduled` | unchanged |
+| Last retry declined | `failed` | `past_due` |
+| Past-due balance paid | `paid` | `active` |
+| Result not confirmed | `needs_triage` | unchanged |
+
+</ReferenceCard>
 
 How each charge result shows on the attempt, the billing cycle and the subscription. Read them with [Billing cycles](/developers/payments/autopay/?autopay-api=cycles#api-reference) and [Retrieve](/developers/payments/autopay/?autopay-api=retrieve#api-reference).
 
@@ -209,7 +346,34 @@ Your customer pays on their self-service page. The attempt `result` is `success`
 
 Ottu could not confirm a charge. The attempt `result` is `pending` and the cycle is `needs_triage`. The subscription does not change. Contact Ottu support with the subscription ID.
 
+</ReferenceAside>
+
 #### Canceling {#canceling}
+
+{/* Stripe-style reference card on the right of a text-only section (#161111 R10), like Stripe's API reference text sections: https://docs.stripe.com/api/errors , https://docs.stripe.com/api/authentication , https://docs.stripe.com/api */}
+
+<ReferenceAside>
+
+<ReferenceCard title="Cancel request">
+
+```http
+POST /b/pbl/v2/subscriptions/{subscription_id}/cancel/
+Idempotency-Key: {uuid_v4}
+
+{"mode": "at_period_end"}
+```
+
+</ReferenceCard>
+
+<ReferenceCard title="Who can do what">
+
+| Action | You (API) | Customer (page) |
+|---|---|---|
+| Cancel now | Yes | No |
+| Cancel at period end | Yes | Yes |
+| Undo a pending cancel | No | Yes |
+
+</ReferenceCard>
 
 There are three ways a cancellation happens. Each one changes the [Subscription object](#subscription-object) and sends a [subscription event](#webhook-events).
 
@@ -230,7 +394,31 @@ Before the period ends, your customer presses **Reactivate subscription** on the
 - **`at_period_end` is refused while a payment is due or in progress**: on a `past_due` subscription, while a cycle is being retried, or before the first payment. Ottu answers `422`; use `mode: "immediate"` then.
 - **Retry safely.** Cancel requires an `Idempotency-Key` header. Create one UUID per cancel and store it with your cancel record, so a retry after a timeout sends the same key.
 
+</ReferenceAside>
+
 #### Webhook events {#webhook-events}
+
+{/* Stripe-style reference card on the right of a text-only section (#161111 R10), like Stripe's API reference text sections: https://docs.stripe.com/api/errors , https://docs.stripe.com/api/authentication , https://docs.stripe.com/api */}
+
+<ReferenceAside>
+
+<ReferenceCard title="Events at a glance">
+
+| Event | What to do |
+|---|---|
+| `subscription.created` | Link it; no access yet |
+| `subscription.activated` | Grant access |
+| `subscription.setup_failed` | Create a new one |
+| `subscription.renewed` | Extend access |
+| `subscription.payment_failed` | Nothing yet |
+| `subscription.past_due` | Apply your policy |
+| `subscription.card_updated` | Nothing |
+| `subscription.cancel_scheduled` | Keep access until `cancel_date` |
+| `subscription.cancel_reverted` | Keep access |
+| `subscription.canceled` | End access |
+| `subscription.expired` | End access |
+
+</ReferenceCard>
 
 Renewals do not call your `webhook_url`. To hear about them, add a webhook endpoint subscribed to `subscription.*` events: see [Subscription events](/developers/webhooks/event-catalogue#subscription-events) for the setup, the envelope and the signature.
 
@@ -306,6 +494,8 @@ Renewals do not call your `webhook_url`. To hear about them, add a webhook endpo
 2. Find your record by `data.subscription_id`.
 3. [Retrieve](/developers/payments/autopay/?autopay-api=retrieve#api-reference) the subscription and act on its current `status` (see [Status](#subscription-states)). Events can arrive out of order, so the event name tells you to look, and the subscription tells you the state.
 4. Keep the daily [list](/developers/payments/autopay/?autopay-api=list#api-reference) of `past_due` subscriptions as a backstop, in case a delivery fails for good.
+
+</ReferenceAside>
 
 ### Testing {#testing}
 
@@ -407,6 +597,22 @@ You cannot trigger a renewal early on the sandbox: the first renewal is charged 
 
 ### Troubleshooting {#troubleshooting}
 
+{/* Stripe-style reference card on the right of a text-only section (#161111 R10), like Stripe's API reference text sections: https://docs.stripe.com/api/errors , https://docs.stripe.com/api/authentication , https://docs.stripe.com/api */}
+
+<ReferenceAside>
+
+<ReferenceCard title="Quick checks">
+
+| You see | Check first |
+|---|---|
+| `400` under `autopay` | `customer_email` |
+| Still `pending_setup` | Wait 35 minutes, then support |
+| `setup_failed`, card charged | Refund, create a new one |
+| No renewal webhook | A `subscription.*` endpoint |
+| `needs_triage` | Ottu support |
+
+</ReferenceCard>
+
 #### Create returns `400` with the error under `autopay` {#trouble-create-400-autopay}
 
 **Why:** `customer_email` is missing. It is required, and its error is reported under the `autopay` key.
@@ -449,13 +655,40 @@ You cannot trigger a renewal early on the sandbox: the first renewal is charged 
 
 **Fix:** See [Errors](#errors): one entry per error, with its body and fix.
 
+</ReferenceAside>
+
 ## API Reference
 
 <ApiShortcuts events={autopayEvents} eventsNote={AUTOPAY_EVENTS_NOTE}>
 
+{/* Stripe-style reference cards (#161111 R10), like the Base URL and authenticated-request boxes of https://docs.stripe.com/api and https://docs.stripe.com/api/authentication */}
+
+<ReferenceAside>
+
+<ReferenceCard title="Base URL">
+
+```http
+https://sandbox.ottu.net
+```
+
+Your own merchant domain on your live account.
+
+</ReferenceCard>
+
+<ReferenceCard title="Authenticated request">
+
+```http
+GET /b/pbl/v2/subscriptions/{subscription_id}/
+Authorization: Api-Key {your_api_key}
+```
+
+</ReferenceCard>
+
 All six subscription-management endpoints, plus the Checkout API call that creates a subscription, are in the reference below. Each tab lists the fields you send, with their types, values and defaults (open "Show child attributes" for nested fields), and says what the call returns; the response examples are on the right, and [The Subscription object](#subscription-object) explains every field of a subscription. Press **Run** to call the endpoint on the Ottu sandbox.
 
 Every endpoint accepts all the authentication methods on the [Authentication](/developers/getting-started/authentication) page except the public key, and applies to your own merchant account. You never send a `Merchant-Id` header yourself.
+
+</ReferenceAside>
 
 </ApiShortcuts>
 
@@ -706,11 +939,59 @@ Every error answers with a JSON body; the `detail` text can differ from the exam
 
 #### Paging and retries {#paging-and-retries}
 
+{/* Stripe-style reference card on the right of a text-only section (#161111 R10), like Stripe's API reference text sections: https://docs.stripe.com/api/errors , https://docs.stripe.com/api/authentication , https://docs.stripe.com/api */}
+
+<ReferenceAside>
+
+<ReferenceCard title="A page of results">
+
+```json
+{
+  "count": 42,
+  "next": "…?limit=20&offset=20",
+  "previous": null,
+  "results": []
+}
+```
+
+Follow `next` until it is `null`.
+
+</ReferenceCard>
+
+<ReferenceCard title="Safe retries">
+
+```http
+Idempotency-Key: {uuid_v4}
+```
+
+Same key and body: the first response. Same key, other body: `409`.
+
+</ReferenceCard>
+
 - **Paging.** List subscriptions and List billing cycles return `count`, `next`, `previous` and `results`. On List subscriptions, `limit` is 1 to 100 (20 by default) and `offset` starts at 0. Follow `next` until it is `null`: with `POST` on List subscriptions, with `GET` on List billing cycles. A `next` link carries `limit` and `offset` in its query string, which win over the body; resend your filters in the body to keep them.
 - **Retries.** Cancel and Regenerate need an `Idempotency-Key` header with a UUID v4. A retried cancel with the same key and body returns the first response; the same key with another body returns `409`. A cancel that failed with a `4xx` is not stored, so its retry runs again. Regenerate always issues a new link, even with the same key: before retrying it, compare `page_url` from [Get the page link](/developers/payments/autopay/?autopay-api=page-link#api-reference).
 - **Create is not idempotent.** Each Create call makes a new subscription. Guard against double submits on your side.
 
+</ReferenceAside>
+
 ## Limits {#limits}
+
+{/* Stripe-style reference card on the right of a text-only section (#161111 R10), like Stripe's API reference text sections: https://docs.stripe.com/api/errors , https://docs.stripe.com/api/authentication , https://docs.stripe.com/api */}
+
+<ReferenceAside>
+
+<ReferenceCard title="Limits at a glance">
+
+| | |
+|---|---|
+| Billing periods | `monthly`, `yearly` |
+| Retries | 1 to 10, set at create |
+| Edits | None: cancel and create |
+| Gateways | Auto-debit only |
+| Dashboard | None: API only |
+| Sandbox renewals | Not early |
+
+</ReferenceCard>
 
 - **Gateways.** A payment gateway without auto-debit cannot renew a subscription. `pg_codes` must name a gateway that supports tokenization and auto-debit. See the [gateways with auto-debit](/business/payments/gateways/?features=autodebit). To list the ones enabled on your account, call the [Payment Methods API](/developers/payments/payment-methods/) with `auto_debit: true`.
 - **Billing periods.** `autopay.frequency` is `monthly` or `yearly`. There is no weekly or custom interval.
@@ -720,7 +1001,24 @@ Every error answers with a JSON body; the `detail` text can differ from the exam
 - **No dashboard screen.** AutoPay is API-only. Renewal charges appear in Payment Management as normal transactions.
 - **Sandbox.** You cannot trigger a renewal early.
 
+</ReferenceAside>
+
 ## Best Practices
+
+{/* Stripe-style reference card on the right of a text-only section (#161111 R10), like Stripe's API reference text sections: https://docs.stripe.com/api/errors , https://docs.stripe.com/api/authentication , https://docs.stripe.com/api */}
+
+<ReferenceAside>
+
+<ReferenceCard title="Checklist">
+
+- Guard Create against double submits.
+- Send a UUID `Idempotency-Key` on Cancel.
+- Read `page_url` from `page-link`.
+- Regenerate only to revoke a link.
+- Always send `customer_email`.
+- Expect `auto_debit` in the SDK payload.
+
+</ReferenceCard>
 
 - **Guard against double submits.** Each create call makes a new subscription.
 - **Cancel needs a UUID `Idempotency-Key`.** A retried cancel with the same key replays safely. Regenerate needs no key. Before retrying a timed-out regenerate, call `page-link` and compare `page_url`.
@@ -728,6 +1026,8 @@ Every error answers with a JSON body; the `detail` text can differ from the exam
 - **Know that regenerate contacts the customer.** Ottu emails and texts the new link to your customer, and the old link stops working. Still deliver `page_url` yourself where your product needs it.
 - **Always send `customer_email`.** It is required. A missing one returns a `400` with the error under the `autopay` key, which looks like a problem with the autopay block. Check `customer_email` first.
 - **Expect `auto_debit` in the SDK payload.** The [Checkout SDK](../checkout-sdk/web) preload payload for an `auto_pay` session carries `payment_type: "auto_debit"` and no `autopay` key, because Ottu charges every renewal as an ordinary auto-debit payment. The Checkout API response still reports `auto_pay`.
+
+</ReferenceAside>
 
 ## FAQ
 
@@ -763,8 +1063,13 @@ Every error answers with a JSON body; the `detail` text can differ from the exam
 
 ## What's Next?
 
-- [**Webhook delivery and retries**](/developers/webhooks/delivery-and-retries) — what counts as a successful delivery, when Ottu retries, and how to drop duplicates.
-- [**Signature verification**](/developers/webhooks/verify-signatures#which-signature) — how to trust the first-payment webhook.
-- [**Sandbox test cards**](/developers/payments/ottu-sandbox#test-cards) — cards for a successful first payment and for a declined renewal.
-- [**Recurring Payments & Auto-Debit**](/developers/cards-and-tokens/recurring-payments) — the alternative when you want to own the billing schedule yourself.
-- [**AutoPay for merchants**](/business/autopay/) — the business-side overview of the same feature.
+{/* Full-width link cards, so the last section has no empty right half (#161111 R10). */}
+
+<UseCases>
+  <UseCase title="Webhook delivery and retries" href="/developers/webhooks/delivery-and-retries">What counts as a successful delivery, when Ottu retries, and how to drop duplicates.</UseCase>
+  <UseCase title="Signature verification" href="/developers/webhooks/verify-signatures#which-signature">How to trust the first-payment webhook.</UseCase>
+  <UseCase title="Sandbox test cards" href="/developers/payments/ottu-sandbox#test-cards">Cards for a successful first payment and for a declined renewal.</UseCase>
+  <UseCase title="Recurring Payments & Auto-Debit" href="/developers/cards-and-tokens/recurring-payments">The alternative when you want to own the billing schedule yourself.</UseCase>
+  <UseCase title="AutoPay for merchants" href="/business/autopay/">The business-side overview of the same feature.</UseCase>
+</UseCases>
+
