@@ -350,8 +350,9 @@ export default function AutoPayDemoInner() {
             />
             )}
             <p className={styles.cardDescription} style={{ marginTop: 12 }}>
-              This is "payment received", not "subscription active". The <code>autopay</code> block is not
-              signed: confirm by retrieving the subscription. See{" "}
+              This is "payment received", not "subscription active". Give access when{" "}
+              <code>subscription.activated</code> arrives. The <code>autopay</code> block can be missing, so do
+              not grant access from it. See{" "}
               <a href="#first-payment-and-activation">First payment and activation</a> for how to match this
               webhook to your subscription.
             </p>

@@ -28,7 +28,7 @@ The full reference, with every field: ${PAGE}
 - GET {domain}/b/pbl/v2/subscriptions/{subscription_id}/ returns the Subscription object. Ottu activates the subscription when the payment result arrives, usually within one to two minutes, and sends the subscription.activated event to our webhook endpoint (Ottu support sets it up). Grant access on that event. If Ottu misses the result, a backup check activates it 20 to about 35 minutes after creation. If it is still pending_setup 35 minutes after creation and at least 15 minutes after the payment, contact Ottu support.
 - Grant access on "active" or "trialing". End access on "canceled" or "expired". On "setup_failed", create a new subscription; if the first payment went through, refund it, because Ottu does not.
 - "past_due" means a billing cycle used up every retry. Ottu stops billing and never cancels it. Our policy decides access; ask me which one we want.
-- The checkout webhook (our webhook_url) only says the first payment was received. Its autopay block is not covered by the body signature and can be missing. Do not grant access from it alone.
+- The checkout webhook (our webhook_url) only says the first payment was received. Its autopay block can be missing (Ottu leaves it out when its lookup is slow) and its event_type is a best guess. Grant access on subscription.activated, never from this block.
 
 ## 3. Renewals and events
 - Renewals do not call our webhook_url.
