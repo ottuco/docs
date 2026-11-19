@@ -71,3 +71,51 @@
     margin-left: 0;
   }
 }
+
+/* compact: one slim row that hugs its content. */
+.compact {
+  margin: 0 0 var(--ifm-leading);
+}
+
+.row {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  max-width: 100%;
+  padding: 5px 12px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.rowIcon {
+  flex: none;
+  color: var(--ifm-color-emphasis-700);
+  margin-right: -6px;
+}
+
+.rowLabel {
+  color: var(--ifm-color-emphasis-800);
+}
+
+.rowButton {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ifm-link-color);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rowButton:hover {
+  text-decoration: underline;
+}
+
+.rowPrompt {
+  margin: 8px 0 0;
+  white-space: pre-wrap;
+  font-size: 0.8rem;
+}

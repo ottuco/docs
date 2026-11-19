@@ -1,0 +1,70 @@
+/* Brand colours for code blocks: Ottu dark and Ottu orange, with a grey for
+   comments. Pilot on the webhook, Operations v3, PSQ v3 and v3-error pages.
+
+   How it works: the Prism themes (src/prism/brandThemes.ts) write every token
+   colour as var(--ottu-code-<role>, <the theme's own colour>). Where these
+   variables are not set, code looks exactly as before. This file sets them.
+
+   SITE-WIDE SWITCH: to use the brand palette on every page, replace the
+   page list in the two selectors marked SCOPE below with :root (and
+   :root[data-theme="dark"]). Nothing else changes. */
+
+/* SCOPE (light) */
+html:is(
+    [class~="docs-doc-id-developers/webhooks/index"],
+    [class~="docs-doc-id-developers/webhooks/verify-signatures"],
+    [class~="docs-doc-id-developers/webhooks/pg-params"],
+    [class~="docs-doc-id-developers/webhooks/migrate-to-v3"],
+    [class~="docs-doc-id-developers/webhooks/legacy"],
+    [class~="docs-doc-id-developers/operations-v3"],
+    [class~="docs-doc-id-developers/payments/psq-v3"],
+    [class~="docs-doc-id-developers/reference/v3-errors"]
+  ) {
+  --ottu-brand-dark: #302f37;
+  --ottu-brand-orange: var(--ifm-color-primary-dark);
+  --ottu-brand-comment: #6b6b73;
+  --ottu-code-plain: var(--ottu-brand-dark);
+  --ottu-code-value: var(--ottu-brand-dark);
+  --ottu-code-accent: var(--ottu-brand-orange);
+  --ottu-code-comment: var(--ottu-brand-comment);
+  --ottu-code-comment-style: italic;
+  --ottu-code-plain-style: normal;
+  --ottu-code-value-style: normal;
+  --ottu-code-accent-style: normal;
+}
+
+/* SCOPE (dark) */
+html[data-theme="dark"]:is(
+    [class~="docs-doc-id-developers/webhooks/index"],
+    [class~="docs-doc-id-developers/webhooks/verify-signatures"],
+    [class~="docs-doc-id-developers/webhooks/pg-params"],
+    [class~="docs-doc-id-developers/webhooks/migrate-to-v3"],
+    [class~="docs-doc-id-developers/webhooks/legacy"],
+    [class~="docs-doc-id-developers/operations-v3"],
+    [class~="docs-doc-id-developers/payments/psq-v3"],
+    [class~="docs-doc-id-developers/reference/v3-errors"]
+  ) {
+  --ottu-brand-dark: var(--ifm-code-color);
+  --ottu-brand-orange: var(--ifm-color-primary);
+  --ottu-brand-comment: #9aa0aa;
+}
+
+/* Token types the themes leave uncoloured (they inherit the plain colour, so
+   nothing changes where the variables are unset) but that belong to the
+   orange group. */
+.token:is(.builtin, .class-name, .function, .keyword, .variable, .property, .tag, .attr-name, .selector, .atrule, .assign-left) {
+  color: var(--ottu-code-accent);
+}
+
+/* Values that Prism also labels as keywords (JSON null, Ruby nil) read as
+   values: their inline colour uses the accent variable, so point it at the
+   value colour on the token itself. */
+.token:is(.null, .nil, .boolean) {
+  --ottu-code-accent: var(--ottu-code-value);
+}
+
+/* Comments in italic in both modes (the dark theme has no italic): unset
+   variable means the theme's own look, as everywhere else. */
+.token:is(.comment, .prolog, .doctype, .cdata) {
+  font-style: var(--ottu-code-comment-style);
+}

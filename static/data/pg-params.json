@@ -22,7 +22,7 @@
     "name": "card_holder",
     "description": "Full name of the cardholder as provided by the payment gateway.",
     "category": "card",
-    "example": "Ahmed Al-Sabah"
+    "example": "AHMAD AL-KUWAITI"
   },
   {
     "name": "cardholder_email",

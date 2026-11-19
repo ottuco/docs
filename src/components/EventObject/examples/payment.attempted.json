@@ -33,7 +33,7 @@
       "bin": "411111",
       "expiry_month": "05",
       "expiry_year": "2030",
-      "name_on_card": "CASEY CUSTOMER",
+      "name_on_card": "AHMAD AL-KUWAITI",
       "token": null,
       "cvv_required": true,
       "is_preferred": false,
@@ -71,9 +71,9 @@
     },
     "customer": {
       "id": "CUST-1",
-      "email": "customer1@example.com",
-      "first_name": "Casey",
-      "last_name": "Customer",
+      "email": "customer@example.com",
+      "first_name": "Ahmad",
+      "last_name": "Al-Kuwaiti",
       "phone": "+96550000000",
       "phone_2": null,
       "birthdate": null
@@ -119,9 +119,9 @@
     "created_by": {
       "kind": "user",
       "id": 1,
-      "first_name": "Golden",
-      "last_name": "User",
-      "email": "golden-user@example.com"
+      "first_name": "Noura",
+      "last_name": "Al-Kuwaiti",
+      "email": "user@example.com"
     },
     "created_at": "2026-10-22T09:50:00Z",
     "updated_at": "2026-10-22T09:57:00Z"

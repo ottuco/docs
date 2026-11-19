@@ -67,7 +67,7 @@ Lead with what the feature does for their business. No code. Dashboard-focused w
 - **Error handling**: immediately after the happy path, show common errors and how to handle them
 - **Authentication in every example**: include the auth header/setup, with a link to the authentication page
 - **Interactive API docs**: reference the auto-generated API reference for try-it-out exploration; link to specific endpoints
-- **5-minute quickstarts**: each major feature should have a quickstart getting developers from zero to a working call quickly
+- **Fast to a working call**: each major feature gets developers from zero to a working call quickly, in the Live Demo or the Step-by-Step of its Guide. There is no separate "Quickstart" page, and no title carries a time ("5 minutes")
 
 ### Business Documentation
 

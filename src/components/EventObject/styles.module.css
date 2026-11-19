@@ -1,0 +1,30 @@
+/* EventObject's columns. No max-height and no scrollbar anywhere: every
+   field and every example line shows in full and scrolls with the page. */
+.right {
+  min-width: 0;
+}
+
+/* The two columns keep their own heights (the grid would stretch them), so
+   the shorter one can be sticky. */
+.reference {
+  align-items: start;
+}
+
+/* The shorter column (measured in index.tsx) stays in view while the
+   taller one scrolls past, so no blank block shows beside it. */
+.sticky {
+  position: sticky;
+  top: calc(var(--ifm-navbar-height) + 16px);
+}
+
+.caption {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+@media (max-width: 996px) {
+  .sticky {
+    position: static;
+  }
+}

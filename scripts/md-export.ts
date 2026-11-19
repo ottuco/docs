@@ -15,6 +15,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { EVENT_SCHEMA } from "../src/components/EventObject/schema";
 import { WEBHOOKS_PROMPT } from "../src/components/AgentPrompt/prompts/webhooks";
+import { AUTOPAY_PROMPT } from "../src/components/AgentPrompt/prompts/autopay";
 import { OTTU_CONNECT_BASE_URL } from "../src/constants/api";
 
 type Schema = {
@@ -124,11 +125,21 @@ const PG_CATEGORIES: Record<string, string> = {
 
 function pgParams(): string {
   const params = JSON.parse(fs.readFileSync(path.resolve("static/data/pg-params.json"), "utf8")) as PGParam[];
-  const cell = (text = "") => text.replace(/\|/g, "\\|").replace(/\n/g, " ");
-  const rows = params.map(
-    (p) => `| \`${p.name}\` | ${PG_CATEGORIES[p.category] ?? p.category} | ${cell(p.description)}${p.notes ? ` ${cell(p.notes)}` : ""} | ${p.example ? `\`${cell(p.example)}\`` : ""} |`,
-  );
-  return ["| Field | Category | Description | Example |", "|---|---|---|---|", ...rows].join("\n");
+  // Same shape as the page (src/components/PGParamsReference): a heading per
+  // category, an entry per param.
+  return Object.entries(PG_CATEGORIES)
+    .map(([cat, label]) => {
+      const entries = params
+        .filter((p) => p.category === cat)
+        .map((p) =>
+          [`#### \`${p.name}\``, p.description, p.example ? `Example: \`${p.example}\`` : "", p.notes ?? ""]
+            .filter(Boolean)
+            .join("\n\n"),
+        );
+      return entries.length ? [`### ${label}`, ...entries].join("\n\n") : "";
+    })
+    .filter(Boolean)
+    .join("\n\n");
 }
 
 /** A schema the page renders with SchemaEmbed (static/schemas/<path>): its fields as a table. */
@@ -149,13 +160,11 @@ function render(name: string, attrs: Record<string, string>, route: string): str
       return attrs.path ? schemaTable(attrs.path) : null;
     case "EventObject":
       return eventObject(attrs.part);
-    case "AgentPrompt":
-      // The full prompt once (on the quickstart); other pages point to it, so llms-full.txt carries it once.
-      return route === "/developers/webhooks/quickstart/"
-        ? `**Prompt for your coding agent** (copy it into Claude Code, Cursor or Copilot):\n\n\`\`\`text\n${WEBHOOKS_PROMPT}\n\`\`\``
-        : `_A ready prompt for your coding agent (Claude Code, Cursor, Copilot) is on ${SITE}/developers/webhooks/quickstart/ ._`;
-    case "SignatureLab":
-      return `_Interactive signature lab (sign a body, check a header, copy a signed curl): ${SITE}/developers/webhooks/verify-signatures#signature-lab. It needs a browser; to check offline, use the test vectors on ${SITE}/developers/webhooks/verify-signatures#test-vectors._`;
+    case "AgentPrompt": {
+      // Each section shows its prompt once (webhooks: the hub's Step-by-Step).
+      const prompt = attrs.topic === "autopay" ? AUTOPAY_PROMPT : WEBHOOKS_PROMPT;
+      return `**Prompt for your coding agent** (copy it into Claude Code, Cursor or Copilot):\n\n\`\`\`text\n${prompt}\n\`\`\``;
+    }
     default:
       return null;
   }
