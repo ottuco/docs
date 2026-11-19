@@ -331,6 +331,16 @@ export default function ApiReference({
     ? responseFields.filter((field) => !primaryNames.includes(field.name))
     : [];
 
+  // An object's attributes are not request fields: no "required" badges,
+  // at any depth (#161109 R14).
+  const asAttributes = (fields: Field[]): Field[] =>
+    fields.map((field) => ({
+      ...field,
+      required: false,
+      children: asAttributes(field.children),
+      variants: field.variants.map((variant) => ({ ...variant, children: asAttributes(variant.children) })),
+    }));
+
   if (object)
     return (
       <div className={styles.reference}>
@@ -344,13 +354,17 @@ export default function ApiReference({
             </div>
           )}
           <Section id={`${id}-attributes`} title="Attributes">
-            <FieldList fields={primaryFields} prefix={id} />
-            <MoreFields fields={moreFields} prefix={id} />
+            <FieldList fields={asAttributes(primaryFields)} prefix={id} />
+            <MoreFields fields={asAttributes(moreFields)} prefix={id} />
           </Section>
         </div>
         <div className={styles.right}>
+          {/* The object's example, not a response: no "Response" label and no
+              status code in the picker (#161109 R14). */}
           <ResponseExamplesBox
             examples={examples.filter((example) => example.code === ok)}
+            title="Example"
+            showStatus={false}
           />
         </div>
       </div>

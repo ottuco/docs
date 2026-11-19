@@ -29,7 +29,7 @@ const ALONE_HEIGHT = "calc(100vh - var(--ifm-navbar-height) - 120px)";
  * The documented examples, one option each in the order of the spec; which one
  * is shown, and the picker that changes it.
  */
-export function useExample(examples: ResponseExamples) {
+export function useExample(examples: ResponseExamples, showStatus = true) {
   const options: ExampleOption[] = useMemo(
     () =>
       examples.flatMap(({ code, examples: list }) =>
@@ -53,7 +53,7 @@ export function useExample(examples: ResponseExamples) {
       >
         {options.map((option) => (
           <option key={option.key} value={option.key}>
-            {option.code} · {option.summary}
+            {showStatus ? `${option.code} · ${option.summary}` : option.summary}
           </option>
         ))}
       </select>
@@ -83,12 +83,15 @@ export function ExamplePanel({
 export default function ResponseExamplesBox({
   examples,
   title = "Response",
+  showStatus = true,
 }: {
   examples: ResponseExamples;
   /** The box head's label; an object page shows "Example" instead. */
   title?: string;
+  /** False leaves the status code out of the picker (an object's example). */
+  showStatus?: boolean;
 }): React.JSX.Element | null {
-  const { example, picker } = useExample(examples);
+  const { example, picker } = useExample(examples, showStatus);
   if (!example) return null;
   return (
     <div className={styles.box}>
