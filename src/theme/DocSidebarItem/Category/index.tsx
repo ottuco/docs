@@ -1,4 +1,5 @@
 import Link from "@docusaurus/Link";
+import { useHistory } from "@docusaurus/router";
 import {
   findFirstSidebarItemLink,
   isActiveSidebarItem,
@@ -33,11 +34,16 @@ type SidebarCategoryItem = {
 
 /**
  * Scrolls the current page back to the top and drops the "#section" from
- * the URL (no new history entry). The hashchange event lets the sidebar's
- * hash module (src/clientModules/sidebarHashActiveLink.ts) clear the
- * section highlight, as it does for any hash change.
+ * the URL, through the router (a replace: no new history entry), so the
+ * router's location has no hash either and a later query-only change (a
+ * tab) does not bring it back. The route update lets the sidebar's hash
+ * module (src/clientModules/sidebarHashActiveLink.ts) clear the section
+ * highlight.
  */
-function goToPageTop(): void {
+function goToPageTop(history: ReturnType<typeof useHistory>): void {
+  if (window.location.hash) {
+    history.replace({ pathname: window.location.pathname, search: window.location.search });
+  }
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (reduceMotion) {
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -48,11 +54,6 @@ function goToPageTop(): void {
       window.scrollTo({ top: window.innerHeight, behavior: "instant" });
     }
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-  if (window.location.hash) {
-    const oldURL = window.location.href;
-    window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
-    window.dispatchEvent(new HashChangeEvent("hashchange", { oldURL, newURL: window.location.href }));
   }
 }
 
@@ -147,6 +148,7 @@ export default function DocSidebarItemCategory({
   ...props
 }: Props) {
   const { items, label, collapsible, className } = item;
+  const history = useHistory();
   const {
     docs: {
       sidebar: { autoCollapseCategories },
@@ -222,7 +224,7 @@ export default function DocSidebarItemCategory({
                       // button next to the label still folds the list.
                       e.preventDefault();
                       updateCollapsed(false);
-                      goToPageTop();
+                      goToPageTop(history);
                     } else {
                       updateCollapsed(false);
                     }
