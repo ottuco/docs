@@ -298,7 +298,9 @@ export default function ApiReference({
         false,
       )
     : view.responseFields;
-  const responseVariants = response ? [] : view.responseVariants;
+  // With `returns` the response's fields and shapes are not shown, so they
+  // have no anchors either (none collected for the broken-anchor check).
+  const responseVariants = response || returns ? [] : view.responseVariants;
   const heading = title ?? source?.title ?? api;
   // The anchor of the endpoint and the prefix of its fields' anchors.
   const name = run ?? api;
