@@ -32,8 +32,7 @@ The full reference, with every field: ${PAGE}
 
 ## 3. Renewals and events
 - Renewals do not call our webhook_url.
-- If an Ottu webhook endpoint is subscribed to subscription.* events, handle them: verify the Ottu-Signature v2 header on the raw body, de-duplicate on the event id, read data.subscription_id, then GET the subscription and act on its current status. Events can arrive out of order. Events and what to do: ${PAGE}#webhook-events
-- With or without events, run a daily job: POST {domain}/b/pbl/v2/subscriptions/ with {"status": "past_due"} in the body, and follow "next" with POST (not GET) until it is null.
+- Ottu sends every subscription.* event to one events endpoint URL. Ottu support sets it up; ask me if we have none. Handle the events: verify the Ottu-Signature v2 header on the raw body, de-duplicate on the event id, read data.subscription_id, then GET the subscription and act on its current status. Events can arrive out of order. Events and what to do: ${PAGE}#webhook-events
 
 ## 4. Cancel
 - POST {domain}/b/pbl/v2/subscriptions/{subscription_id}/cancel/ with {"mode": "immediate"} or {"mode": "at_period_end"}.
@@ -43,6 +42,6 @@ The full reference, with every field: ${PAGE}
 
 ## 5. Tests
 - On the sandbox, use pg_codes ["ottu-sandbox-kwd"] and pay with card 411111111111111 (success). 411111111111114, 411111111111115 and 411111111111116 save on the first payment and decline every renewal.
-- Unit test: the status-to-access mapping for all seven statuses, the double-submit guard, the cancel retry with the same Idempotency-Key, and the daily past_due job with paging.
+- Unit test: the status-to-access mapping for all seven statuses, the double-submit guard, the cancel retry with the same Idempotency-Key, and the subscription.past_due handler.
 
 Do not invent field names. If something here is unclear or a field is missing from the reference, stop and ask me.`;

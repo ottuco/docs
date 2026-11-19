@@ -25,7 +25,7 @@ export const autopayEvents: ShortcutEvent[] = [
   {
     name: "payment.paid",
     meaning:
-      "The customer paid the first charge. Retrieve the subscription: it turns active once Ottu confirms the payment.",
+      "The customer paid the first charge. The subscription can still be pending_setup. Give access on subscription.activated.",
     href: CATALOGUE,
   },
   {
