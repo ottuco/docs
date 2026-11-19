@@ -211,6 +211,8 @@ export default function ApiReference({
   fullReference,
   showDescription = true,
   title,
+  returns,
+  children,
 }: {
   api: ApiSlug;
   /** The generated page's data: added by src/remark/apiReferenceData.ts, not written by hand. */
@@ -251,6 +253,20 @@ export default function ApiReference({
   showDescription?: boolean;
   /** The heading, when this use of a shared endpoint has its own name (an AutoPay create is a Checkout API call). */
   title?: string;
+  /**
+   * The page's own text about this use, shown where the operation's
+   * description goes (under the method and path), so every operation of a
+   * page has the same layout (#161111 R15). Follows the description when
+   * both are shown.
+   */
+  children?: React.ReactNode;
+  /**
+   * What the call returns, in one Markdown line, Stripe style ("Returns the
+   * Subscription object"). Shown in place of the response's field-by-field
+   * list (the object section already explains every field); the examples on
+   * the right stay (#161109 R15, #161111 R16).
+   */
+  returns?: string;
 }): React.JSX.Element {
   if (Boolean(scenario) !== Boolean(run))
     throw new Error(
@@ -282,7 +298,9 @@ export default function ApiReference({
         false,
       )
     : view.responseFields;
-  const responseVariants = response ? [] : view.responseVariants;
+  // With `returns` the response's fields and shapes are not shown, so they
+  // have no anchors either (none collected for the broken-anchor check).
+  const responseVariants = response || returns ? [] : view.responseVariants;
   const heading = title ?? source?.title ?? api;
   // The anchor of the endpoint and the prefix of its fields' anchors.
   const name = run ?? api;
@@ -363,6 +381,7 @@ export default function ApiReference({
             <Markdown>{forMarkdown(operation.description)}</Markdown>
           </div>
         )}
+        {children && <div className={styles.description}>{children}</div>}
 
         {pathFields.length > 0 && (
           <Section id={`${id}-path`} title="Path parameters">
@@ -403,7 +422,14 @@ export default function ApiReference({
             ))}
           </Section>
         )}
-        {ok && (
+        {returns && (
+          <Section id={`${id}-returns`} title="Returns">
+            <div className={styles.description}>
+              <Markdown>{forMarkdown(returns)}</Markdown>
+            </div>
+          </Section>
+        )}
+        {ok && !returns && (
           <Section id={`${id}-response`} title={`Response ${ok}`}>
             {okIsArray && (
               <p className={styles.muted}>

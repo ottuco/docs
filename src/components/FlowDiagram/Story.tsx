@@ -31,6 +31,7 @@ import {
   STORY_CONTROLS_W,
   STORY_FIT_PCT,
   STORY_PANEL_GAP,
+  textLeftStyle,
   STORY_ROW,
   STORY_TOP,
   STORY_BODY_PAD,
@@ -117,6 +118,7 @@ export default function Story(input: StoryProps): React.JSX.Element {
     maxHeight,
     controls = "top",
     fillWidth = false,
+    textLeft = false,
   } = props;
   const journeys = props.journeys ?? [];
   const hasPanel = journeys.length > 0;
@@ -417,14 +419,14 @@ export default function Story(input: StoryProps): React.JSX.Element {
 
   if (!hasPanel) return diagram;
 
-  return (
-    <div
-      ref={wrap}
-      className={`${styles.storyWrap} ${side ? styles.storyWrapSide : ""}`}
-      style={{ gap: STORY_PANEL_GAP, maxWidth }}
-    >
-      {diagram}
-      <StoryPanel
+  // With `textLeft` and room for both, the explanation is page text on the
+  // left (first in the DOM too, so it is read before the diagram).
+  // The panel moves, never the diagram: moving the diagram would remount it
+  // (React Flow mounted twice, and useWidth left watching a detached body).
+  const textBeside = side && textLeft;
+  const panel = (
+    <StoryPanel
+        asText={textLeft}
         id={`${scope}-panel`}
         lanes={lanes}
         steps={steps}
@@ -435,6 +437,16 @@ export default function Story(input: StoryProps): React.JSX.Element {
         onStop={setStop}
         onEscape={showAll}
       />
+  );
+  return (
+    <div
+      ref={wrap}
+      className={`${styles.storyWrap} ${side ? styles.storyWrapSide : ""} ${textBeside ? styles.storyWrapTextLeft : ""}`}
+      style={textBeside ? { ...textLeftStyle, maxWidth } : { gap: STORY_PANEL_GAP, maxWidth }}
+    >
+      {textBeside && panel}
+      {diagram}
+      {!textBeside && panel}
     </div>
   );
 }

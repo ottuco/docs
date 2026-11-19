@@ -69,6 +69,7 @@ const autopay: Scenario<Session, StepKey> = {
         {
           label: "Gateway (pg_codes)",
           value: (session.pgCodes ?? []).join(", "),
+          extracted: session.pgCodes ?? [],
           note: "an auto-debit gateway of the sandbox merchant; Create sends it in pg_codes",
         },
       ],
@@ -85,6 +86,7 @@ const autopay: Scenario<Session, StepKey> = {
         {
           label: "Subscription",
           value: `${session.subscriptionId} (${session.subscriptionStatus})`,
+          extracted: session.subscriptionId ? [session.subscriptionId] : [],
           note: "every other call works on it",
         },
         ...(session.checkoutUrl
@@ -93,6 +95,7 @@ const autopay: Scenario<Session, StepKey> = {
                 label: "Checkout URL",
                 value: "Pay the first charge",
                 href: session.checkoutUrl,
+                extracted: [session.checkoutUrl],
                 note: "the customer pays the first charge here; the subscription turns active after it",
               },
             ]

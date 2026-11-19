@@ -374,21 +374,21 @@ An event is named after the **status** the transaction reached: `payment.<status
 
 | Event | Sent when | `data.status` | `data.operation` | `data.result` | What your system does |
 |---|---|---|---|---|---|
-| `payment.created` | A payment is created ([Checkout API](/developers/apis/create-payment-transaction-checkout), dashboard, bulk, plugins). | `created` | `purchase`, `authorize` | `null` | Record that the payment exists; nothing to fulfil. |
-| `payment.pending` | The payment first becomes pending: the payer opened it. Sent once. | `pending` | `purchase`, `authorize` | `pending` | Optional: the payer opened the page (analytics). Sent once. |
-| `payment.attempted` | A payer's try failed, errored or was canceled, and the payment can still be paid. | `attempted` | `purchase`, `authorize` | `failed`, `canceled`, `error` | One try failed but the payer can still pay: do not cancel the order. |
-| `payment.authorized` | An [authorize](/glossary/#term-authorization) succeeded, or the merchant acknowledged it manually. | `authorized` | `authorize` | `success` | Money is held, not taken: reserve stock, capture later. |
-| `payment.paid` | A purchase succeeded or was acknowledged manually, or a **[capture](/glossary/#term-capture)** succeeded. | `paid` | `purchase`, `capture` | `success` | `purchase`: mark paid and fulfil. `capture`: record the captured amount (`totals.paid`). |
-| `payment.failed` | A payer's try failed or errored and the payment allows no other try. | `failed` | `purchase`, `authorize` | `failed`, `error` | Final: release reserved stock and tell the customer. |
-| `payment.cod` | The merchant acknowledged [cash on delivery](/developers/reference/payment-states#payment-transaction-states) through the [cash payment acknowledgement](/developers/apis/cash-payment-acknowledgement). | `cod` | `purchase`, `authorize` | `cod` | Mark the order as cash on delivery. |
-| `payment.canceled` | The [cancel operation](/developers/apis/public-operations), or the payer canceled on the gateway page of a one-try payment. | `canceled` | `purchase`, `authorize` | `canceled` | The payment will not complete: close or release the order. |
-| `payment.expired` | The payment expired: its expiry time passed, the [expire operation](/developers/apis/public-operations) ran, or the gateway session timed out. | `expired` | `purchase`, `authorize` | `failed` | The payment will not complete: close or release the order. |
-| `payment.invalidated` | Ottu can no longer start a payment for it: the gateway or currency setup changed, or the gateway page failed to open. | `invalidated` | `purchase`, `authorize` | `error` | The payment will not complete: close or release the order. |
-| `payment.refund_pending` | The gateway accepted a refund but has not confirmed it yet (for example QPay). | `refund_pending` | `refund` | `pending` | Show "refund in progress"; do not mark refunded yet. |
-| `payment.refunded` | A [refund](/developers/apis/public-operations) succeeded, full or partial (wallet legs included). | `refunded` | `refund` | `success` | Money went back: record `totals.refunded` (partial refunds add up). |
-| `payment.refund_rejected` | The gateway rejected a refund. | `refund_rejected` | `refund` | `failed` | The money did not go back: alert a person. |
-| `payment.voided` | A [void](/developers/apis/public-operations) succeeded. | `voided` | `void` | `success` | The authorization was released; nothing will be charged. |
-| `payment.deleted` | The [delete operation](/developers/apis/public-operations) archived the payment. | the status the payment had | `purchase`, `authorize` | `null` | Archived on Ottu's side: keep your own records. |
+| <a id="event-payment-created"></a>`payment.created` | A payment is created ([Checkout API](/developers/apis/create-payment-transaction-checkout), dashboard, bulk, plugins). | `created` | `purchase`, `authorize` | `null` | Record that the payment exists; nothing to fulfil. |
+| <a id="event-payment-pending"></a>`payment.pending` | The payment first becomes pending: the payer opened it. Sent once. | `pending` | `purchase`, `authorize` | `pending` | Optional: the payer opened the page (analytics). Sent once. |
+| <a id="event-payment-attempted"></a>`payment.attempted` | A payer's try failed, errored or was canceled, and the payment can still be paid. | `attempted` | `purchase`, `authorize` | `failed`, `canceled`, `error` | One try failed but the payer can still pay: do not cancel the order. |
+| <a id="event-payment-authorized"></a>`payment.authorized` | An [authorize](/glossary/#term-authorization) succeeded, or the merchant acknowledged it manually. | `authorized` | `authorize` | `success` | Money is held, not taken: reserve stock, capture later. |
+| <a id="event-payment-paid"></a>`payment.paid` | A purchase succeeded or was acknowledged manually, or a **[capture](/glossary/#term-capture)** succeeded. | `paid` | `purchase`, `capture` | `success` | `purchase`: mark paid and fulfil. `capture`: record the captured amount (`totals.paid`). |
+| <a id="event-payment-failed"></a>`payment.failed` | A payer's try failed or errored and the payment allows no other try. | `failed` | `purchase`, `authorize` | `failed`, `error` | Final: release reserved stock and tell the customer. |
+| <a id="event-payment-cod"></a>`payment.cod` | The merchant acknowledged [cash on delivery](/developers/reference/payment-states#payment-transaction-states) through the [cash payment acknowledgement](/developers/apis/cash-payment-acknowledgement). | `cod` | `purchase`, `authorize` | `cod` | Mark the order as cash on delivery. |
+| <a id="event-payment-canceled"></a>`payment.canceled` | The [cancel operation](/developers/apis/public-operations), or the payer canceled on the gateway page of a one-try payment. | `canceled` | `purchase`, `authorize` | `canceled` | The payment will not complete: close or release the order. |
+| <a id="event-payment-expired"></a>`payment.expired` | The payment expired: its expiry time passed, the [expire operation](/developers/apis/public-operations) ran, or the gateway session timed out. | `expired` | `purchase`, `authorize` | `failed` | The payment will not complete: close or release the order. |
+| <a id="event-payment-invalidated"></a>`payment.invalidated` | Ottu can no longer start a payment for it: the gateway or currency setup changed, or the gateway page failed to open. | `invalidated` | `purchase`, `authorize` | `error` | The payment will not complete: close or release the order. |
+| <a id="event-payment-refund_pending"></a>`payment.refund_pending` | The gateway accepted a refund but has not confirmed it yet (for example QPay). | `refund_pending` | `refund` | `pending` | Show "refund in progress"; do not mark refunded yet. |
+| <a id="event-payment-refunded"></a>`payment.refunded` | A [refund](/developers/apis/public-operations) succeeded, full or partial (wallet legs included). | `refunded` | `refund` | `success` | Money went back: record `totals.refunded` (partial refunds add up). |
+| <a id="event-payment-refund_rejected"></a>`payment.refund_rejected` | The gateway rejected a refund. | `refund_rejected` | `refund` | `failed` | The money did not go back: alert a person. |
+| <a id="event-payment-voided"></a>`payment.voided` | A [void](/developers/apis/public-operations) succeeded. | `voided` | `void` | `success` | The authorization was released; nothing will be charged. |
+| <a id="event-payment-deleted"></a>`payment.deleted` | The [delete operation](/developers/apis/public-operations) archived the payment. | the status the payment had | `purchase`, `authorize` | `null` | Archived on Ottu's side: keep your own records. |
 
 `status` and `operation` always have a value. `result` is `null` only on `payment.created` and `payment.deleted`, where no attempt exists or nothing ran. `result` takes the [attempt states](/developers/reference/payment-states#payment-attempt-states): `pending`, `success`, `failed`, `canceled`, `error`, `cod`.
 
@@ -626,17 +626,17 @@ A webhook endpoint always receives format 3, whatever **Version** is set in Webh
 
 | Event | Sent when |
 |---|---|
-| `subscription.created` | The subscription was created. |
-| `subscription.activated` | The subscription became active. |
-| `subscription.setup_failed` | Setting the subscription up failed. |
-| `subscription.renewed` | A billing cycle was renewed. |
-| `subscription.payment_failed` | A billing cycle payment failed. |
-| `subscription.past_due` | The subscription is past due. |
-| `subscription.card_updated` | The card on the subscription was updated. |
-| `subscription.cancel_scheduled` | Cancellation was scheduled. |
-| `subscription.cancel_reverted` | A scheduled cancellation was withdrawn. |
-| `subscription.canceled` | The subscription was canceled. |
-| `subscription.expired` | The subscription expired. |
+| <a id="event-subscription-created"></a>`subscription.created` | The subscription was created. |
+| <a id="event-subscription-activated"></a>`subscription.activated` | The subscription became active. |
+| <a id="event-subscription-setup_failed"></a>`subscription.setup_failed` | Setting the subscription up failed. |
+| <a id="event-subscription-renewed"></a>`subscription.renewed` | A billing cycle was renewed. |
+| <a id="event-subscription-payment_failed"></a>`subscription.payment_failed` | A billing cycle payment failed. |
+| <a id="event-subscription-past_due"></a>`subscription.past_due` | The subscription is past due. |
+| <a id="event-subscription-card_updated"></a>`subscription.card_updated` | The card on the subscription was updated. |
+| <a id="event-subscription-cancel_scheduled"></a>`subscription.cancel_scheduled` | Cancellation was scheduled. |
+| <a id="event-subscription-cancel_reverted"></a>`subscription.cancel_reverted` | A scheduled cancellation was withdrawn. |
+| <a id="event-subscription-canceled"></a>`subscription.canceled` | The subscription was canceled. |
+| <a id="event-subscription-expired"></a>`subscription.expired` | The subscription expired. |
 
 #### The `data` object of a subscription event {#subscription-data}
 

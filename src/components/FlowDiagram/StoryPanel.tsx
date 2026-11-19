@@ -17,6 +17,8 @@ type Props = {
   onStop: (stop: number) => void;
   onEscape: () => void;
   id?: string;
+  /** Page text beside the diagram (Story `textLeft`), not a boxed caption. */
+  asText?: boolean;
 };
 
 export default function StoryPanel(p: Props): React.JSX.Element {
@@ -60,7 +62,12 @@ export default function StoryPanel(p: Props): React.JSX.Element {
       </>
     );
   } else {
-    text = (
+    text = p.asText ? (
+      <p className={styles.panelHint}>
+        Pick a side, a step or a journey in the diagram: what it means shows
+        here, and a journey walks you through it one step at a time.
+      </p>
+    ) : (
       <p>
         Click a side or a step to read about it, or pick a journey to walk it
         one step at a time.
@@ -71,7 +78,7 @@ export default function StoryPanel(p: Props): React.JSX.Element {
   return (
     <aside
       id={p.id}
-      className={styles.panel}
+      className={p.asText ? `${styles.panel} ${styles.panelText}` : styles.panel}
       onKeyDown={(e) => e.key === "Escape" && p.onEscape()}
     >
       {/* Only the text is a live region: a screen reader reads the new step,

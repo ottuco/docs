@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 // Layout numbers shared by the server placeholder and the browser diagram, so
 // the page doesn't jump when React Flow takes over. No React Flow import here.
 import type { FlowProps, SequenceProps, StoryProps } from "./types";
@@ -34,6 +35,19 @@ export const STORY_PANEL_H = 128;
 export const STORY_PANEL_GAP = 12;
 /** Width of the caption column when it sits beside the diagram (keep in sync with `.storyWrapSide > .panel`). */
 export const PANEL_W = 300;
+/** The explanation's width with `textLeft` (page text, not a box). */
+export const PANEL_TEXT_W = 340;
+/** The gap between that text and the diagram. */
+export const TEXT_LEFT_GAP = 32;
+/**
+ * The wrapper style of a `textLeft` layout (Story and CaptionLayout): the
+ * gap, and the text's width for the CSS (--text-left-w). One source for
+ * both, and for the side-by-side checks above.
+ */
+export const textLeftStyle: CSSProperties = {
+  gap: TEXT_LEFT_GAP,
+  ["--text-left-w" as string]: `${PANEL_TEXT_W}px`,
+};
 
 export const hasJourneys = (p: StoryProps): boolean =>
   (p.journeys?.length ?? 0) > 0;
@@ -86,7 +100,8 @@ export const storyDiagramHeight = (p: StoryProps): number =>
   storyFigureHeight(p) - (hasJourneys(p) ? STORY_PANEL_GAP + STORY_PANEL_H : 0);
 /** Container width from which the caption sits beside the diagram. */
 export const storySideAt = (p: StoryProps): number =>
-  storyMinWidth(p) + PANEL_W + STORY_PANEL_GAP;
+  storyMinWidth(p) +
+  (p.textLeft ? PANEL_TEXT_W + TEXT_LEFT_GAP : PANEL_W + STORY_PANEL_GAP);
 /**
  * With `controls="side"`, the widest the figure needs to be: the buttons, the
  * gap, and the lanes at full size (plus the fit padding and the canvas

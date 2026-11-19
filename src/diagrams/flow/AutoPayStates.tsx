@@ -496,8 +496,8 @@ export default function AutoPayStates({
         ) : null}
       </>
     ) : (
-      <p>
-        Click a state to see what it means and what to do. Press Escape to
+      <p className={captionClass.hint}>
+        The state you pick in the diagram is explained here. Press Escape to
         clear.
       </p>
     );
@@ -509,6 +509,7 @@ export default function AutoPayStates({
         panel={panel}
         selected={selected}
         scrollToPanel={picked}
+        textLeft
       >
         <FlowDiagram
           title={dev ? "Subscription status values" : "Subscription states"}
