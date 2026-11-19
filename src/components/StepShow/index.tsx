@@ -6,10 +6,17 @@ import styles from "./styles.module.css";
 export interface StepProps {
   /**
    * Screenshot shown beside the steps while this step is active. Save it at
-   * twice its on-page size (a 2x capture): it is drawn at half its pixels.
+   * twice its on-page size (a 2x capture): it is drawn at half its pixels
+   * (see `density`). Left out, the step shows the nearest earlier screenshot;
+   * `false` shows none (a quiet "no screenshot" note in the stage).
    */
-  image?: string;
+  image?: string | false;
   alt?: string;
+  /**
+   * How many image pixels make one on-page pixel: 2 (default) for a 2x
+   * capture, 1 for a capture taken at its on-page size.
+   */
+  density?: number;
   /**
    * The control this step is about, as "left,top,width,height" in percent
    * of the screenshot. Drawn as a ring over the image, so one screenshot
@@ -25,8 +32,13 @@ export function Step({ children }: StepProps): React.ReactElement {
 }
 
 // Screenshots are saved at twice their on-page size so they stay sharp on
-// high-density screens. The cap keeps a tall screenshot inside the stage.
+// high-density screens. The cap keeps a screenshot inside the stage.
 const MAX_H = "min(60vh, 440px)";
+// Narrower than this (width / height), a screenshot is "tall" (an email, a
+// long page): it keeps its width and the stage shows its top, cut off with a
+// fade, instead of shrinking it until it is unreadable. The whole image opens
+// on click.
+const TALL = 0.8;
 
 /** "left,top,width,height" in percent, or nothing when the value is not that. */
 function parseSpot(spot?: string): string[] | null {
@@ -34,25 +46,45 @@ function parseSpot(spot?: string): string[] | null {
   return box.length === 4 && box.every((n) => Number.isFinite(n)) ? box.map((n) => `${n}%`) : null;
 }
 
-function Shot({ src, alt, spot }: { src: string; alt: string; spot?: string }) {
+function Shot({
+  src,
+  alt,
+  spot,
+  density = 2,
+}: {
+  src: string;
+  alt: string;
+  spot?: string;
+  density?: number;
+}) {
   const img = useRef<HTMLImageElement>(null);
   const [size, setSize] = useState<{ w: number; ratio: number }>();
   const measure = () => {
     const el = img.current;
-    if (el && el.naturalWidth) setSize({ w: el.naturalWidth / 2, ratio: el.naturalWidth / el.naturalHeight });
+    if (el && el.naturalWidth)
+      setSize({ w: el.naturalWidth / density, ratio: el.naturalWidth / el.naturalHeight });
   };
   useEffect(measure, []);
   const ring = parseSpot(spot);
   if (spot && !ring && process.env.NODE_ENV !== "production") {
     console.warn(`StepShow: spot "${spot}" on ${src} is not "left,top,width,height"; no ring drawn.`);
   }
+  const tall = size !== undefined && size.ratio < TALL;
+  // A tall shot keeps its width and is cut to the stage height; any other
+  // shrinks to fit the stage whole.
+  const style = size && {
+    width: size.w,
+    maxWidth: tall ? "100%" : `min(100%, calc(${MAX_H} * ${size.ratio.toFixed(4)}))`,
+    maxHeight: tall ? MAX_H : undefined,
+  };
   return (
-    <span
-      className={styles.shot}
-      style={size && { width: size.w, maxWidth: `min(100%, calc(${MAX_H} * ${size.ratio.toFixed(4)}))` }}
-    >
-      <img ref={img} src={useBaseUrl(src)} alt={alt} loading="lazy" onLoad={measure} />
-      {ring && <span className={styles.spot} style={{ left: ring[0], top: ring[1], width: ring[2], height: ring[3] }} />}
+    <span className={tall ? `${styles.shot} ${styles.tall}` : styles.shot} style={style}>
+      {/* The ring is placed in percent of the whole image, so it sits in the
+          full-size inner box, not in the (possibly cut) outer one. */}
+      <span className={styles.shotInner}>
+        <img ref={img} src={useBaseUrl(src)} alt={alt} loading="lazy" onLoad={measure} />
+        {ring && <span className={styles.spot} style={{ left: ring[0], top: ring[1], width: ring[2], height: ring[3] }} />}
+      </span>
     </span>
   );
 }
@@ -142,8 +174,10 @@ export default function StepShow({ children }: { children: React.ReactNode }): R
   const [zoomed, setZoomed] = useState<number | null>(null);
   const items = useRef<(HTMLLIElement | null)[]>([]);
 
-  // The screenshot a step shows: its own, or the nearest earlier one.
+  // The screenshot a step shows: its own, or the nearest earlier one; none
+  // for a step with `image={false}`.
   const shotFor = (i: number): number => {
+    if (steps[i].props.image === false) return -1;
     for (let j = i; j >= 0; j--) if (steps[j].props.image) return j;
     return steps.findIndex((s) => s.props.image);
   };
@@ -188,7 +222,7 @@ export default function StepShow({ children }: { children: React.ReactNode }): R
                   aria-label={`Enlarge screenshot: ${s.props.alt ?? ""}`}
                   onClick={() => setZoomed(i)}
                 >
-                  <Shot src={s.props.image} alt={s.props.alt ?? ""} spot={s.props.spot} />
+                  <Shot src={s.props.image} alt={s.props.alt ?? ""} spot={s.props.spot} density={s.props.density} />
                   <ZoomHint />
                 </button>
               </div>
@@ -196,7 +230,7 @@ export default function StepShow({ children }: { children: React.ReactNode }): R
           </li>
         ))}
       </ol>
-      {shown >= 0 && (
+      {steps.some((s) => s.props.image) && (
         <div className={styles.stage}>
           {steps.map((s, i) =>
             s.props.image ? (
@@ -207,12 +241,15 @@ export default function StepShow({ children }: { children: React.ReactNode }): R
                   aria-label={`Enlarge screenshot: ${s.props.alt ?? ""}`}
                   onClick={() => setZoomed(active)}
                 >
-                  <Shot src={s.props.image} alt="" spot={s.props.spot} />
+                  <Shot src={s.props.image} alt="" spot={s.props.spot} density={s.props.density} />
                   <ZoomHint />
                 </button>
               </figure>
             ) : null,
           )}
+          <p className={shown < 0 ? `${styles.noShot} ${styles.shown}` : styles.noShot}>
+            No screenshot for this step.
+          </p>
         </div>
       )}
       {zoomed !== null && shotFor(zoomed) >= 0 && (

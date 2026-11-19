@@ -153,10 +153,40 @@
   box-shadow: 0 1px 3px rgba(48, 47, 55, 0.18);
 }
 
+.shotInner {
+  position: relative;
+  display: block;
+}
+
 .shot img {
   display: block;
   width: 100%;
   height: auto;
+}
+
+/* A tall screenshot (an email): its top, cut off with a fade. */
+.shot.tall {
+  -webkit-mask-image: linear-gradient(to bottom, #000 82%, transparent);
+  mask-image: linear-gradient(to bottom, #000 82%, transparent);
+}
+
+/* A step with image={false}: a quiet note in the stage, in the figures' cell. */
+.noShot {
+  grid-area: 1 / 1;
+  align-self: center;
+  justify-self: center;
+  margin: 0;
+  font-size: 13px;
+  color: var(--ifm-color-emphasis-600);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 220ms ease-out, visibility 0s linear 220ms;
+}
+
+.noShot.shown {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 220ms ease-out, visibility 0s;
 }
 
 .spot {
