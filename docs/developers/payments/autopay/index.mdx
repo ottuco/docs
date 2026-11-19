@@ -424,10 +424,6 @@ A subscription is always in one of seven states, in its `status` attribute. Clic
 <Tabs groupId="autopay-api" queryString className="api-chips">
 <TabItem value="create" label="Create a subscription" attributes={{"data-method": "POST"}}>
 
-Create a subscription with the Checkout API: set `payment_type` to `auto_pay` and send the `autopay` block. The `201` response carries `extra.autopay.subscription_id`: store it, every other call takes it. The new subscription starts as `pending_setup`. See [Status](#subscription-states) for what each `status` means.
-
-`agreement` is a full recurring agreement and the `autopay` block repeats its schedule. `autopay.start_date` is the first billing cycle (today or later, `YYYY-MM-DD`). The checkout payment is cycle 1, so `total_cycles: 12` means 11 renewals. Set `agreement.expiry_date` to the last day of the month of cycle 12, which is 11 months after `start_date` (for a start on `2026-11-01`, use `2027-10-31`).
-
 <ApiReference
   api="create-payment-transaction-checkout"
   title="Create an AutoPay subscription"
@@ -455,7 +451,13 @@ Create a subscription with the Checkout API: set `payment_type` to `auto_pay` an
   ]}
   response={["session_id", "checkout_url", "state", "payment_type", "amount", "currency_code"]}
   fullReference={{ href: "/developers/payments/checkout-api/", label: "full Checkout API reference" }}
-/>
+>
+
+Create a subscription with the Checkout API: set `payment_type` to `auto_pay` and send the `autopay` block. The `201` response carries `extra.autopay.subscription_id`: store it, every other call takes it. The new subscription starts as `pending_setup`. See [Status](#subscription-states) for what each `status` means.
+
+`agreement` is a full recurring agreement and the `autopay` block repeats its schedule. `autopay.start_date` is the first billing cycle (today or later, `YYYY-MM-DD`). The checkout payment is cycle 1, so `total_cycles: 12` means 11 renewals. Set `agreement.expiry_date` to the last day of the month of cycle 12, which is 11 months after `start_date` (for a start on `2026-11-01`, use `2027-10-31`).
+
+</ApiReference>
 
 </TabItem>
 <TabItem value="list" label="List subscriptions" attributes={{"data-method": "POST"}}>

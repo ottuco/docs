@@ -211,6 +211,7 @@ export default function ApiReference({
   fullReference,
   showDescription = true,
   title,
+  children,
 }: {
   api: ApiSlug;
   /** The generated page's data: added by src/remark/apiReferenceData.ts, not written by hand. */
@@ -251,6 +252,13 @@ export default function ApiReference({
   showDescription?: boolean;
   /** The heading, when this use of a shared endpoint has its own name (an AutoPay create is a Checkout API call). */
   title?: string;
+  /**
+   * The page's own text about this use, shown where the operation's
+   * description goes (under the method and path), so every operation of a
+   * page has the same layout (#161111 R15). Follows the description when
+   * both are shown.
+   */
+  children?: React.ReactNode;
 }): React.JSX.Element {
   if (Boolean(scenario) !== Boolean(run))
     throw new Error(
@@ -363,6 +371,7 @@ export default function ApiReference({
             <Markdown>{forMarkdown(operation.description)}</Markdown>
           </div>
         )}
+        {children && <div className={styles.description}>{children}</div>}
 
         {pathFields.length > 0 && (
           <Section id={`${id}-path`} title="Path parameters">
