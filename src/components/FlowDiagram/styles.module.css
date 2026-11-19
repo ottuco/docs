@@ -673,7 +673,6 @@
 }
 
 .panelText {
-  min-height: 0;
   justify-content: flex-start;
   padding: 4px 0 0;
   border: 0;
@@ -685,6 +684,12 @@
 
 .panelText h4 {
   font-size: 17px;
+}
+
+/* Beside the diagram the text needs no floor; under it (narrow screens) it
+   keeps the panel's 128px so picking a step does not move the page below. */
+.storyWrapTextLeft > .panelText {
+  min-height: 0;
 }
 
 .panelHint {
