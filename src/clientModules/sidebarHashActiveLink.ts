@@ -844,6 +844,16 @@ function tabPicked(tab: Element): void {
   linkClickedAt = -Infinity;
 }
 
+/**
+ * A scroll the page makes on its own (the sidebar's back-to-top) is not the
+ * reader reading: mute the scroll-spy until their next real scroll input, so
+ * it does not write the sections it passes into the URL on the way.
+ */
+export function holdScrollSpy(): void {
+  spyMuted = true;
+  lastActiveHash = null;
+}
+
 export function onRouteDidUpdate(): void {
   // New route: drop stale state so the scroll listener doesn't act on
   // a previous page's cached sections. Re-mute scroll-spy on every

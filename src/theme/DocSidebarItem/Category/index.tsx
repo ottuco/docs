@@ -1,5 +1,6 @@
 import Link from "@docusaurus/Link";
 import { useHistory } from "@docusaurus/router";
+import { holdScrollSpy } from "@site/src/clientModules/sidebarHashActiveLink";
 import {
   findFirstSidebarItemLink,
   isActiveSidebarItem,
@@ -38,9 +39,11 @@ type SidebarCategoryItem = {
  * router's location has no hash either and a later query-only change (a
  * tab) does not bring it back. The route update lets the sidebar's hash
  * module (src/clientModules/sidebarHashActiveLink.ts) clear the section
- * highlight.
+ * highlight; its scroll-spy is held first, so the scroll up writes no
+ * section into the URL.
  */
 function goToPageTop(history: ReturnType<typeof useHistory>): void {
+  holdScrollSpy();
   if (window.location.hash) {
     history.replace({ pathname: window.location.pathname, search: window.location.search });
   }
