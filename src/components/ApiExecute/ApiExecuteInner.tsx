@@ -260,7 +260,8 @@ function Prerequisites({
                   {calls[step] && (
                     <StepCall
                       call={calls[step]}
-                      extracted={extractedValues(picked(sessionState))}
+                      // picked() describes a done step only.
+                      extracted={done(sessionState) ? extractedValues(picked(sessionState)) : []}
                     />
                   )}
                 </div>
