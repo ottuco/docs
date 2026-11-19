@@ -19,9 +19,7 @@ import ApiReference from "@site/src/components/ApiReference";
 import ApiShortcuts from "@site/src/components/ApiReference/Shortcuts";
 import { autopayEvents, AUTOPAY_EVENTS_NOTE } from "@site/src/data/autopay-webhook-events";
 import ApiExecuteGroup from "@site/src/components/ApiExecute/Group";
-import StepGuide from "@site/src/components/StepGuide";
 import Beside from "@site/src/components/Beside";
-import { autopayCustomerViewSteps } from "@site/src/data/autopay-customer-view";
 import AgentPrompt from "@site/src/components/AgentPrompt";
 import "./autopay.css";
 
@@ -89,7 +87,23 @@ Run the whole journey against the sandbox: create a subscription, pay its first 
 
 Your customer sees Ottu in three places. See [What your customer sees](/business/autopay/#what-your-customer-sees) on the business page for the full tour.
 
-<StepGuide steps={autopayCustomerViewSteps} fitImages />
+<StepShow>
+  <Step image="/img/developers/autopay/first-charge-checkout.png" alt="Ottu's checkout page for the first AutoPay charge, with the card form and the amount due">
+
+  **The first-charge checkout.** Your customer pays the first charge in the checkout on your page. Ottu saves their card, so the later charges need no action from them. More in [First payment and activation](#first-payment-and-activation).
+
+  </Step>
+  <Step image="/img/developers/autopay/self-service-page.png" alt="The customer's self-service page: subscription summary, saved card and payment history">
+
+  **The self-service page.** Your customer opens the private link you deliver. Ottu's emails link to this page too. They see their status and billing history, add or switch a card, pay an overdue balance, and cancel or undo a pending cancellation. More in [Customer Self-Service Page](#customer-self-service-page).
+
+  </Step>
+  <Step image="/img/business/autopay/notifications-01-upcoming-charge-en.png" alt="The upcoming charge reminder email">
+
+  **One email: the charge reminder.** Ottu emails your customer before each charge. The email carries your business name, your support email and a link to the self-service page. More in [Notifications](#notifications).
+
+  </Step>
+</StepShow>
 
 ### Use Cases
 
