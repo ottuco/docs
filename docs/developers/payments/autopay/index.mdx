@@ -292,7 +292,6 @@ Renewals do not call your `webhook_url`. Ottu sends the events below to your eve
 1. Verify the `Ottu-Signature` on the raw body and skip an event `id` you have already processed ([Verify signatures](/developers/webhooks/verify-signatures#which-signature)).
 2. Find your record by `data.subscription_id`.
 3. [Retrieve](/developers/payments/autopay/?autopay-api=retrieve#api-reference) the subscription and act on its current `status` (see [Status](#subscription-states)). Events can arrive out of order, so the event name tells you to look, and the subscription tells you the state.
-4. Keep the daily [list](/developers/payments/autopay/?autopay-api=list#api-reference) of `past_due` subscriptions as a backstop, in case a delivery fails for good.
 
 ### Testing {#testing}
 
