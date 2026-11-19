@@ -117,6 +117,7 @@ export default function Story(input: StoryProps): React.JSX.Element {
     maxHeight,
     controls = "top",
     fillWidth = false,
+    textLeft = false,
   } = props;
   const journeys = props.journeys ?? [];
   const hasPanel = journeys.length > 0;
@@ -417,14 +418,18 @@ export default function Story(input: StoryProps): React.JSX.Element {
 
   if (!hasPanel) return diagram;
 
+  // With `textLeft` and room for both, the explanation is page text on the
+  // left (first in the DOM too, so it is read before the diagram).
+  const textBeside = side && textLeft;
   return (
     <div
       ref={wrap}
-      className={`${styles.storyWrap} ${side ? styles.storyWrapSide : ""}`}
-      style={{ gap: STORY_PANEL_GAP, maxWidth }}
+      className={`${styles.storyWrap} ${side ? styles.storyWrapSide : ""} ${textBeside ? styles.storyWrapTextLeft : ""}`}
+      style={{ gap: textBeside ? 32 : STORY_PANEL_GAP, maxWidth }}
     >
-      {diagram}
+      {!textBeside && diagram}
       <StoryPanel
+        asText={textLeft}
         id={`${scope}-panel`}
         lanes={lanes}
         steps={steps}
@@ -435,6 +440,7 @@ export default function Story(input: StoryProps): React.JSX.Element {
         onStop={setStop}
         onEscape={showAll}
       />
+      {textBeside && diagram}
     </div>
   );
 }

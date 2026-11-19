@@ -29,6 +29,8 @@ export const captionClass = {
   chips: styles.chips,
   chip: styles.chip,
   chipOn: styles.chipOn,
+  /** The "click something" line shown before anything is picked. */
+  hint: styles.panelHint,
 };
 
 // Shown only while the diagram really overflows its box (any viewport).

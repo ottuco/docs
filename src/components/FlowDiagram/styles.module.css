@@ -388,11 +388,39 @@
   cursor: pointer;
 }
 
+/* Chips are buttons: they say so on hover and press (#161111 R12). */
+.chip {
+  transition:
+    border-color 150ms ease,
+    color 150ms ease,
+    background-color 150ms ease,
+    transform 120ms ease-out;
+}
+
 .chip:hover,
 .chip:focus-visible,
 .chipOn {
   border-color: var(--o-primary);
   color: var(--o-primary);
+}
+
+.chip:hover,
+.chipOn {
+  background: color-mix(in srgb, var(--o-primary) 8%, var(--o-bg));
+}
+
+.chip:active {
+  transform: scale(0.97);
+}
+
+/* The cards of a story are clickable too. */
+.story :global(.react-flow__node-card) {
+  cursor: pointer;
+}
+
+.story :global(.react-flow__node-card:hover) .node {
+  border-color: var(--o-primary);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--o-primary) 18%, transparent);
 }
 
 /* controls="side": the side and journey buttons in a column left of the
@@ -629,6 +657,37 @@
   top: calc(var(--ifm-navbar-height, 60px) + 16px);
   flex: none;
   width: 300px;
+}
+
+/* textLeft: the explanation is page text on the left, the diagram on the
+   right (PANEL_TEXT_W in layout.ts). */
+.storyWrapTextLeft > .panel {
+  flex: none;
+  width: 340px;
+}
+
+.storyWrapTextLeft > :last-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.panelText {
+  min-height: 0;
+  justify-content: flex-start;
+  padding: 4px 0 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: none;
+  font-size: 15px;
+}
+
+.panelText h4 {
+  font-size: 17px;
+}
+
+.panelHint {
+  color: var(--ifm-color-emphasis-700);
 }
 
 /* React Flow's attribution badge: keep it, but theme it (it was a grey block in dark mode). */
