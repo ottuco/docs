@@ -1,5 +1,4 @@
-// Pure helpers for the "Set up prerequisites" dialog (ApiExecuteInner.tsx),
-// kept apart so they can be unit tested (dialog.test.ts, `npm test`).
+// Pure helpers for the "Set up prerequisites" dialog (ApiExecuteInner.tsx).
 
 /**
  * The dialog's main button: "Run" for one prerequisite, "Run all" for two or
