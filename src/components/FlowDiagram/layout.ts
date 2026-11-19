@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 // Layout numbers shared by the server placeholder and the browser diagram, so
 // the page doesn't jump when React Flow takes over. No React Flow import here.
 import type { FlowProps, SequenceProps, StoryProps } from "./types";
@@ -38,6 +39,15 @@ export const PANEL_W = 300;
 export const PANEL_TEXT_W = 340;
 /** The gap between that text and the diagram. */
 export const TEXT_LEFT_GAP = 32;
+/**
+ * The wrapper style of a `textLeft` layout (Story and CaptionLayout): the
+ * gap, and the text's width for the CSS (--text-left-w). One source for
+ * both, and for the side-by-side checks above.
+ */
+export const textLeftStyle: CSSProperties = {
+  gap: TEXT_LEFT_GAP,
+  ["--text-left-w" as string]: `${PANEL_TEXT_W}px`,
+};
 
 export const hasJourneys = (p: StoryProps): boolean =>
   (p.journeys?.length ?? 0) > 0;

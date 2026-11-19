@@ -31,8 +31,7 @@ import {
   STORY_CONTROLS_W,
   STORY_FIT_PCT,
   STORY_PANEL_GAP,
-  PANEL_TEXT_W,
-  TEXT_LEFT_GAP,
+  textLeftStyle,
   STORY_ROW,
   STORY_TOP,
   STORY_BODY_PAD,
@@ -429,7 +428,7 @@ export default function Story(input: StoryProps): React.JSX.Element {
       className={`${styles.storyWrap} ${side ? styles.storyWrapSide : ""} ${textBeside ? styles.storyWrapTextLeft : ""}`}
       style={
         textBeside
-          ? ({ gap: TEXT_LEFT_GAP, "--text-left-w": `${PANEL_TEXT_W}px`, maxWidth } as React.CSSProperties)
+          ? { ...textLeftStyle, maxWidth }
           : { gap: STORY_PANEL_GAP, maxWidth }
       }
     >
