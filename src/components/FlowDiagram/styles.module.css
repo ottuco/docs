@@ -419,6 +419,42 @@
 
 .controls .chip {
   justify-content: flex-start;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--o-text);
+  text-align: left;
+}
+
+.controls .chip:hover,
+.controls .chip:focus-visible,
+.controls .chipOn {
+  color: var(--o-primary);
+  background: color-mix(in srgb, var(--o-primary) 6%, var(--o-bg));
+}
+
+/* "3 steps" / "6 stops" on the right of a side-column chip. */
+.chipCount {
+  margin-left: auto;
+  color: var(--o-text-2);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.controlsLabel {
+  margin: 4px 0 2px;
+  color: var(--o-text-2);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* The explanation panel inside the side column. */
+.controls .panel {
+  width: auto;
+  min-height: 0;
+  font-size: 14px;
 }
 
 /* Between the sides and the journeys. */

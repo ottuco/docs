@@ -20,7 +20,7 @@ export const STORY_HEADER_H = 92;
 export const STORY_JOURNEYS_H = 40;
 /** With `controls="side"`: the title alone above, the buttons in a column left of the body. */
 export const STORY_TITLE_H = 56;
-export const STORY_CONTROLS_W = 168;
+export const STORY_CONTROLS_W = 248;
 export const STORY_CONTROLS_GAP = 16;
 /** React Flow fit padding around the story's lanes, % each side. */
 export const STORY_FIT_PCT = 3;
