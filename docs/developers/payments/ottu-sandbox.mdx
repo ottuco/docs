@@ -145,7 +145,7 @@ Some outcomes aren't decided by a card. Background inquiries, captures, voids, a
 | `extra` key | Values | Applies to | Effect |
 | --- | --- | --- | --- |
 | `sandbox_inquiry_result` | `success` · `failed` · `error` | Any flow resolved by a status [**inquiry**](/developers/payments/psq/) (unattended / timed-out sessions) | The outcome a background or manual inquiry applies. Defaults to `success`. |
-| `sandbox_result` | `success` · `failed` · `error` · `timeout` | **Capture**, **void**, **refund**, and **wallet** payments | The final status of that operation or wallet payment — for wallets it takes precedence over the test card that was used. `failed` and `error` are a decline from the gateway; `timeout` (capture, void and refund only) is a gateway that never answers, so the outcome is unknown. Defaults to `success`. |
+| `sandbox_result` | `success` · `failed` · `error` · `timeout` | **Capture**, **void**, **refund**, and **wallet** payments | The final status of that operation or wallet payment — for wallets it takes precedence over the test card that was used. `failed` and `error` are a decline from the gateway; `timeout` (capture, void and refund only) is a gateway that never answers, so the outcome is unknown; on a wallet payment it is ignored and the payment succeeds. Defaults to `success`. |
 | `expires_in_minutes` | integer | Pairs with `sandbox_inquiry_result` | Arms an auto-inquiry to apply the outcome after N minutes (**non-production only**). |
 
 ```json title="POST /b/checkout/v1/pymt-txn/ — pin an unattended session to fail after 5 minutes"
