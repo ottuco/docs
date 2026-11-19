@@ -20,6 +20,7 @@ import ApiShortcuts from "@site/src/components/ApiReference/Shortcuts";
 import { autopayEvents, AUTOPAY_EVENTS_NOTE } from "@site/src/data/autopay-webhook-events";
 import ApiExecuteGroup from "@site/src/components/ApiExecute/Group";
 import Beside from "@site/src/components/Beside";
+import TextBeside from "@site/src/components/TextBeside";
 import AgentPrompt from "@site/src/components/AgentPrompt";
 import "./autopay.css";
 
@@ -79,9 +80,11 @@ Your part, in order:
 
 ### Live Demo {#live-demo}
 
+<TextBeside visual={<AutoPayDemo />}>
+
 Run the whole journey against the sandbox: create a subscription, pay its first charge with a test card, receive the [webhook](/developers/webhooks/), and read the subscription and the customer's page link. Each step shows the request and the response. If the sandbox cannot create a subscription, the demo offers a walk-through with labeled sample responses. No real money moves. You cannot trigger a renewal early on the sandbox: the first renewal is charged one billing period after `start_date`, so the demo ends after the first charge.
 
-<AutoPayDemo />
+</TextBeside>
 
 ### What your customer sees {#what-your-customer-sees}
 

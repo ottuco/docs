@@ -1,0 +1,28 @@
+/* TextBeside: text left (sticky), visual right; stacked on narrow screens. */
+.wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  margin: 16px 0 32px;
+}
+
+.text > :last-child {
+  margin-bottom: 0;
+}
+
+.visual {
+  min-width: 0;
+}
+
+@media (min-width: 997px) {
+  .wrap {
+    grid-template-columns: minmax(260px, 2fr) minmax(0, 3fr);
+    gap: 32px;
+    align-items: start;
+  }
+
+  .text {
+    position: sticky;
+    top: calc(var(--ifm-navbar-height, 60px) + 16px);
+  }
+}
