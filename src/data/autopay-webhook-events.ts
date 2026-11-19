@@ -4,7 +4,7 @@
 // payment events; renewals do not call the webhook_url (see AUTOPAY_EVENTS_NOTE).
 import type { ShortcutEvent } from "@site/src/components/ApiReference/Shortcuts";
 
-const CATALOGUE = "/developers/webhooks#catalogue";
+const CATALOGUE = "/developers/webhooks/event-catalogue/#catalogue";
 
 export const autopayEvents: ShortcutEvent[] = [
   {
