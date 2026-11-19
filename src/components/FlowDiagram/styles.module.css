@@ -661,9 +661,10 @@
 
 /* textLeft: the explanation is page text on the left, the diagram on the
    right (PANEL_TEXT_W in layout.ts). */
+/* Width and gap set inline from layout.ts (PANEL_TEXT_W, TEXT_LEFT_GAP). */
 .storyWrapTextLeft > .panel {
   flex: none;
-  width: 340px;
+  width: var(--text-left-w);
 }
 
 .storyWrapTextLeft > :last-child {

@@ -4,7 +4,7 @@
 // the selected card leaves the screen. Used with the Flow kind; the Story kind
 // has the same rules built in (Story.tsx).
 import React, { useEffect, useId, useRef, useState } from "react";
-import { PANEL_TEXT_W, PANEL_W, STORY_PANEL_GAP } from "./layout";
+import { PANEL_TEXT_W, PANEL_W, STORY_PANEL_GAP, TEXT_LEFT_GAP } from "./layout";
 import { useWidthFlag } from "./useWidthFlag";
 import styles from "./styles.module.css";
 
@@ -26,10 +26,17 @@ type Props = {
   children: React.ReactNode;
 };
 
+/** The text column's width and gap with `textLeft`, from layout.ts (one source). */
+const textLeftStyle = {
+  gap: TEXT_LEFT_GAP,
+  "--text-left-w": `${PANEL_TEXT_W}px`,
+} as React.CSSProperties;
+
 export default function CaptionLayout(p: Props): React.JSX.Element {
   const wrap = useRef<HTMLDivElement>(null);
   const panelId = `fp-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
-  const needed = p.diagramMinWidth + (p.textLeft ? PANEL_TEXT_W : PANEL_W) + STORY_PANEL_GAP;
+  const needed =
+    p.diagramMinWidth + (p.textLeft ? PANEL_TEXT_W + TEXT_LEFT_GAP : PANEL_W + STORY_PANEL_GAP);
   const side = useWidthFlag(wrap, needed);
 
   useEffect(() => {
@@ -70,7 +77,7 @@ export default function CaptionLayout(p: Props): React.JSX.Element {
     <div
       ref={wrap}
       className={`${styles.storyWrap} ${side ? styles.storyWrapSide : ""} ${textBeside ? styles.storyWrapTextLeft : ""}`}
-      style={{ gap: textBeside ? 32 : STORY_PANEL_GAP }}
+      style={textBeside ? textLeftStyle : { gap: STORY_PANEL_GAP }}
     >
       {textBeside && panel}
       {p.children}
