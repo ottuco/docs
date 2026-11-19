@@ -21,6 +21,7 @@ import { autopayEvents, AUTOPAY_EVENTS_NOTE } from "@site/src/data/autopay-webho
 import ApiExecuteGroup from "@site/src/components/ApiExecute/Group";
 import Beside from "@site/src/components/Beside";
 import TextBeside from "@site/src/components/TextBeside";
+import ReferenceAside, { ReferenceCard } from "@site/src/components/ReferenceAside";
 import AgentPrompt from "@site/src/components/AgentPrompt";
 import "./autopay.css";
 
@@ -308,6 +309,42 @@ Renewals do not call your `webhook_url`. To hear about them, add a webhook endpo
 
 ### Testing {#testing}
 
+{/* Stripe-style reference cards on the right of a text-only section, so the
+    right column is never empty (#161111 R10, Dacian: "impress me"). Modelled
+    on Stripe's API reference text sections, which always carry a small card
+    on the right (a summary table, a short code box or a note):
+    https://docs.stripe.com/api/errors (summary tables),
+    https://docs.stripe.com/api/authentication (request box + note),
+    https://docs.stripe.com/api (base URL + client libraries boxes). */}
+
+<ReferenceAside>
+
+<ReferenceCard title="Sandbox test cards">
+
+| Card | Result |
+|---|---|
+| `411111111111111` | Pays |
+| `411111111111112` | Declined |
+| `411111111111113` | Error |
+| `411111111111114` to `…116` | Pays now, renewals decline |
+
+Any expiry and CVV. All [sandbox test cards](/developers/payments/ottu-sandbox#test-cards).
+
+</ReferenceCard>
+<ReferenceCard title="Sandbox gateway">
+
+```json
+"pg_codes": ["ottu-sandbox-kwd"]
+```
+
+</ReferenceCard>
+<ReferenceCard title="Renewals">
+
+The first renewal is charged one billing period after `start_date`; the sandbox cannot run it early.
+
+</ReferenceCard>
+
+
 Test on the sandbox with `pg_codes: ["ottu-sandbox-kwd"]` (the Ottu Sandbox gateway, KWD) and the [sandbox test cards](/developers/payments/ottu-sandbox#test-cards). The [Live Demo](#live-demo) runs a successful first payment and a cancel for you. Every scenario below was run on the sandbox.
 
 #### First payment succeeds {#test-first-payment}
@@ -365,6 +402,8 @@ Test on the sandbox with `pg_codes: ["ottu-sandbox-kwd"]` (the Ottu Sandbox gate
 **Check:** Your endpoint verifies the signature and answers `2xx`.
 
 You cannot trigger a renewal early on the sandbox: the first renewal is charged one billing period after `start_date`. Test your renewal and `past_due` handling with stored copies of the Subscription object and of the [example events](/developers/webhooks/event-catalogue#subscription-events), and leave one long-running sandbox subscription to confirm it end to end.
+
+</ReferenceAside>
 
 ### Troubleshooting {#troubleshooting}
 
@@ -516,6 +555,41 @@ Create a subscription with the Checkout API: set `payment_type` to `auto_pay` an
 
 #### Errors {#errors}
 
+{/* Same Stripe-style reference cards as Testing (#161111 R10). Modelled on
+    the "HTTP status code summary" and "Error types" cards of
+    https://docs.stripe.com/api/errors */}
+
+<ReferenceAside>
+
+<ReferenceCard title="HTTP status summary">
+
+| Status | Meaning |
+|---|---|
+| `400` | A field or a rule is wrong, or `Idempotency-Key` is missing or not a UUID. |
+| `401` | The API key is missing or wrong. |
+| `404` | No such subscription on your account. |
+| `405` | Wrong method (`GET` on List). |
+| `409` | An `Idempotency-Key` reused with another request. |
+| `422` | The subscription's state does not allow it (`invalid_transition`), or an unknown `status` filter. |
+
+</ReferenceCard>
+<ReferenceCard title="Two error shapes">
+
+A rule error: branch on `code`.
+
+```json
+{"detail": "…", "code": "invalid_transition"}
+```
+
+A field error: it names the field.
+
+```json
+{"mode": ["\"later\" is not a valid choice."]}
+```
+
+</ReferenceCard>
+
+
 Every error answers with a JSON body; the `detail` text can differ from the examples. A rule error has `detail` (for a person) and `code` (for your code): branch on `code`. A field error names the field and lists what is wrong with it. Each body below is a real sandbox response, and each error has its own link. The endpoint tabs show each status with its example, and the Checkout API's own errors are in [Error codes](/developers/reference/error-codes).
 
 ##### `400` AutoPay rejected the create {#error-autopay-rejected}
@@ -627,6 +701,8 @@ Every error answers with a JSON body; the `detail` text can differ from the exam
 **When:** List with an unknown `status` value.
 
 **Fix:** Use one of the seven [status values](#subscription-states).
+
+</ReferenceAside>
 
 #### Paging and retries {#paging-and-retries}
 
