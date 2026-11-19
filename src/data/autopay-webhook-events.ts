@@ -42,4 +42,4 @@ export const autopayEvents: ShortcutEvent[] = [
 ];
 
 export const AUTOPAY_EVENTS_NOTE =
-  "Renewals do not call the webhook_url. To receive the subscription.* events, a webhook endpoint must subscribe to them (set up by Ottu support for now).";
+  "Renewals do not call the webhook_url. To receive the subscription.* events, add a webhook endpoint that subscribes to them (Administration panel, then Webhook endpoints), or ask Ottu support to set one up.";
