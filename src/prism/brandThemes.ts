@@ -4,6 +4,8 @@
 // looks exactly as before; src/css/brand-code.css sets the variables (Ottu
 // dark, Ottu orange, a grey for comments) for the pages that use the brand
 // palette.
+// The code box background is a variable too:
+// `var(--ottu-code-background, <the theme's own background>)`.
 //
 // Roles:
 //   plain   - text, punctuation, operators (and the theme's plain colour)
@@ -79,7 +81,11 @@ function brand(theme: PrismTheme): PrismTheme {
   }
   return {
     ...theme,
-    plain: { ...theme.plain, color: `var(--ottu-code-plain, ${theme.plain.color})` },
+    plain: {
+      ...theme.plain,
+      color: `var(--ottu-code-plain, ${theme.plain.color})`,
+      backgroundColor: `var(--ottu-code-background, ${theme.plain.backgroundColor})`,
+    },
     styles,
   };
 }
