@@ -244,34 +244,6 @@ A subscription moves through seven states. Canceled and Expired are final. Click
 
 <AutoPayStates audience="business" />
 
-### Pending setup {#state-pending-setup}
-
-Ottu created the subscription and waits for the first payment. Ottu activates it automatically after your customer pays. Your part: nothing.
-
-### Trialing {#state-trialing}
-
-The first payment was zero, so no money has moved. The customer only saved a card. Ottu charges the saved card at the next billing cycle. Canceling before the trial ends means no charge at all. Your part: nothing.
-
-### Active {#state-active}
-
-Billing normally. The latest cycle was paid. Your part: give your customer the service.
-
-### Past Due {#state-past-due}
-
-Every retry on a cycle failed. The subscription waits for your customer to pay. Your part: decide what to do if it stays Past Due. See [When a payment fails](#when-a-payment-fails).
-
-### Canceled {#state-canceled}
-
-Billing has stopped. A cancellation set for the end of the period, by your customer or your developer, lands here when that period ends. An immediate cancel by your developer lands here at once. Your part: nothing.
-
-### Expired {#state-expired}
-
-The last cycle was paid and the next billing date would fall after the end date. Billing stopped. The history stays readable. Your part: nothing. To continue, create a new subscription.
-
-### Setup Failed {#state-setup-failed}
-
-The customer canceled the checkout, did not pay within 24 hours, or paid but the card could not be saved. Ottu does not retry it. Your part: create a new subscription. If the customer paid, refund that payment in Payment Management. Ottu does not refund it automatically.
-
 ### Billing cycles {#billing-cycles}
 
 Ottu creates [billing cycles](/glossary/#term-billing-cycle) one at a time. The next cycle exists only once the current one is paid.
