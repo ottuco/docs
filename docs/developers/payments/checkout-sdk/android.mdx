@@ -57,8 +57,8 @@ The SDK is compatible with devices running Android 8 or higher (API version 26 o
       Include the Ottu Checkout SDK in your app-level `build.gradle.kts` file:
     </div>
 
-    ```swift
-    implementation("com.github.ottuco:ottu-android-checkout:2.2.6")
+    ```kotlin
+    implementation("com.github.ottuco:ottu-android-checkout:2.3.0")
     ```
   </li>
 </ol>
@@ -376,6 +376,17 @@ See [Prepayment Hook](#prepayment-hook) for details.
 
 See [Full Example](#full-example) for the reference.
 
+#### **isSplitPayButton** _`boolean`_ _`optional`_
+
+Separates the SDK payment button from the checkout fragment. Place the SDK's `PaymentButton` where it fits your checkout screen: after your order summary, beneath merchant content, or in a fixed footer. The checkout fragment still displays payment methods and collects payment details.
+
+“Split” refers to separating the button's placement. It does not split a payment amount or enable installment payments.
+
+**false** (default) - Includes the embedded Pay button. Keep your existing integration; no separate button is needed.
+
+**true** - Hides the embedded Pay button. Add the SDK PaymentButton to your own layout.
+
+See this sample of [Ottu SDK - Android | Split Payment Button](#split-payment-button).
 
 ### Preloading
 
@@ -856,6 +867,220 @@ checkoutFragment = Checkout.init(
     }
   }
 )
+```
+
+## Split Payment Button
+
+#### Define the PaymentButton in Activity/Fragment layout in XML
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <FrameLayout
+            android:id="@+id/ottu_checkout_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Your order summary and delivery information" />
+        <!-- Define the PaymentButton -->
+        <com.ottu.checkout.ui.payment.view.PaymentButton
+            android:id="@+id/paymentButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp" />
+    </LinearLayout>
+</ScrollView>
+```
+
+For a fixed footer, put the PaymentButton outside the scrolling content, constrain it to the bottom of your screen, and constrain the scrolling content above it.
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/background"
+        android:clipToPadding="false"
+        android:fillViewport="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/checkoutContent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="16dp"
+            tools:context="Ottu.checkout.sdk.CustomersAppActivity">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvAboveContent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:text="Some users UI elements"
+                android:textColor="@color/teal_700"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <FrameLayout
+                android:id="@id/ottu_checkout_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:padding="0dp"
+                app:layout_constraintBottom_toTopOf="@id/tvBelowContent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvAboveContent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvBelowContent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="Some users UI elements"
+                android:textColor="@color/teal_700"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ottu_checkout_container" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+    <!-- Define the PaymentButton -->
+    <com.ottu.checkout.ui.payment.view.PaymentButton
+        android:id="@+id/paymentButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp" />
+</LinearLayout>
+```
+
+#### Define the Jetpack Compose layout
+
+You may place **PaymentButton** either in `Scaffold` as a `bottomBar` or in a `Column`
+
+```kotlin
+Scaffold(
+        modifier = modifier.fillMaxSize(),
+        bottomBar = {
+            AndroidView(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .imePadding()
+                    .padding(horizontal = 16.dp),
+                factory = { context ->
+                    PaymentButton(context)
+                },
+            )
+        },
+    ){
+      // your content there
+    }
+```
+
+Column presentation.
+
+```kotlin
+@Composable
+fun CheckoutPaymentButtonScreen(
+    onPaymentButtonReady: ((PaymentButton) -> Unit)? = null,
+    onContainerReady: ((FrameLayout) -> Unit)? = null
+) {
+    val scrollState = rememberScrollState()
+    val tealColor = colorResource(id = R.color.teal_700)
+    val backgroundColor = colorResource(id = R.color.background)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(backgroundColor)
+            .verticalScroll(scrollState)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // tvTitle
+        Text(
+            text = "Customers Application",
+            color = tealColor,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 18.dp)
+        )
+
+        // com.ottu.checkout.ui.payment.view.PaymentButton
+        AndroidView(
+            factory = { context ->
+                PaymentButton(context).apply {
+                    id = R.id.paymentButton
+                }
+            },
+            update = { button ->
+                onPaymentButtonReady?.invoke(button)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(top = 20.dp)
+        )
+
+        // tvAboveContent
+        Text(
+            text = "Some users UI elements, Some users UI elements, Some users UI elements, Some users UI elements, Some users UI elements",
+            color = tealColor,
+            fontSize = 16.sp,
+            modifier = Modifier.padding(top = 18.dp)
+        )
+
+        // @id/ottu_checkout_container
+        AndroidView(
+            factory = { context ->
+                FrameLayout(context).apply {
+                    id = R.id.ottu_checkout_container
+                }
+            },
+            update = { container ->
+                onContainerReady?.invoke(container)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(top = 15.dp)
+        )
+
+        // tvBelowContent
+        Text(
+            text = "Some users UI elements, Some users UI elements, Some users UI elements, Some users UI elements, Some users UI elements",
+            color = tealColor,
+            fontSize = 16.sp,
+            modifier = Modifier.padding(top = 15.dp)
+        )
+    }
+}
 ```
 
 ## Error Reporting & Security

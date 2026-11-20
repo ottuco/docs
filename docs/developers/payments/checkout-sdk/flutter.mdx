@@ -87,7 +87,7 @@ The SDK can be used on devices running **iOS 15** or higher.
     ottu_flutter_checkout:
       git:
         url: https://github.com/ottuco/ottu-flutter.git
-        ref: 2.2.7
+        ref: 2.3.0
     ```
   </li>
   <li className="stepper-item">
@@ -100,7 +100,7 @@ The SDK can be used on devices running **iOS 15** or higher.
 
     :::info
     If you choose to use CocoaPods, please use release version
-    **2.2.7-cocoapods**.
+    **2.3.0-cocoapods**.
     :::
   </li>
 </ol>
@@ -397,6 +397,14 @@ displaySettings:paymentOptionsDisplaySettings
 ```
 
 To see the full function call, please refer the code snippet in the [Full Example](#full-example) section.
+
+#### **isSplitPayButton** _`boolean`_ _**`optional`**_
+
+This parameter controls button placement. It does not split the payment amount or create another payment session.
+
+**false** (default) - The native SDK displays checkout with its integrated Pay button.
+
+**true** - Checkout content and the native Pay button are displayed separately. See [Ottu SDK - Flutter | PayButtonWidget](#paybuttonwidget).
 
 ### Preloading
 
@@ -1138,6 +1146,65 @@ child: Text(
 );
 ```
 
+## PayButtonWidget
+
+The arguments passed to this example must have `isSplitPayButton: true`. Attach your existing payment and verification callbacks to `OttuCheckoutWidget` as shown in the bottom bar example below.
+
+```dart
+//Import the package's public API:
+import 'package:flutter/material.dart';
+import 'package:ottu_flutter_checkout/ottu_flutter_checkout.dart';
+
+class SplitCheckoutScreen extends StatelessWidget {
+  const SplitCheckoutScreen({
+    super.key,
+    required this.arguments,
+    required this.verifyPayment,
+    this.onSuccess,
+    this.onError,
+    this.onCancel,
+  });
+
+  final CheckoutArguments arguments; // Created with isSplitPayButton: true.
+  final VerifyPaymentDelegate verifyPayment;
+  final ValueChanged<String>? onSuccess;
+  final ValueChanged<String>? onError;
+  final ValueChanged<String>? onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Checkout')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text('Your order summary'),
+            const SizedBox(height: 16),
+            OttuCheckoutWidget(
+              arguments: arguments,
+              verifyPayment: verifyPayment,
+              successCallback: onSuccess,
+              errorCallback: onError,
+              cancelCallback: onCancel,
+            ),
+          ],
+        ),
+      ),
+      //Stick the PayButtonWidget to the bottom
+      bottomNavigationBar: const SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: PayButtonWidget(),
+        ),
+      ),
+    );
+  }
+}
+```
+
 ## Releasing Your App
 
 ### Android
@@ -1278,32 +1345,22 @@ Since the implementation differs between the two platforms, please refer to the 
 ## FAQ
 
 <FAQ>
-  <FAQItem question="What forms of payment are supported by the SDK?">
-    The SDK supports the following [forms of payment](#formsofpayment-array-optional):
+  <FAQItem question="What forms of payments are supported by the SDK?">
+    The SDK supports the following payment forms: `tokenPay`, `redirect`, `stcPay` and `cardOnsite`. For iOS platform `applePay` is supported as well. Merchants can display specific methods according to their needs. For more details look at [`FormsOfPayment`](#formsofpayment-array-optional) enum.
 
-    - `tokenPay`
-    - `redirect`
-    - `StcPay` &#x20;
-    - `cardOnsite`
-    - `applePay` _(iOS only)_
+    For example, if you want to only show the STC Pay button, you can do so using the following construction.
 
-    Merchants can configure the forms of payment displayed according to their needs.
+    `formsOfPayment = [FormsOfPayment.stcPay]`
 
-    For example, to **display only the STC Bank button**, use:
-
-    ```
-    formsOfPayment = ["stcPay"]
-    ```
-
-    This ensures that only the **STC Bank** button is shown. The same approach applies to other payment methods.
+    And only the STC Pay button will be displayed. The same applies for other methods.
   </FAQItem>
-  <FAQItem question="What are the minimum system requirements for SDK integration?">
-    The SDK requires a device running:
+  <FAQItem question="What are the minimum system requirements for the SDK integration?">
+    It is required to have a device with one of the operating systems:
 
-    - **Android 8** or higher (**API level 26** or higher)
-    - **iOS 14** or higher
+    - Android 8 or higher (Android API level 26 or higher);
+    - iOS 15 or higher.
   </FAQItem>
   <FAQItem question="Can I customize the appearance beyond the provided themes?">
-    Yes, customization is supported. For more details, refer to the [Theme](#theme) section.
+    Yes, see the [“Customization theme”](#theme) section.
   </FAQItem>
 </FAQ>
