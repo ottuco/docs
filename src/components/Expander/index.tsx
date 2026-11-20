@@ -8,7 +8,9 @@
 //   <Expander title="A payment gateway with auto-debit">
 //   The details, as ordinary Markdown.
 //   </Expander>
-import React from "react";
+//
+// With `id`, a link to #<id> opens the item (a closed <details> hides its text).
+import React, { useEffect, useRef } from "react";
 import Icon from "@mdi/react";
 import { mdiChevronDown } from "@mdi/js";
 import styles from "./styles.module.css";
@@ -16,15 +18,30 @@ import styles from "./styles.module.css";
 export default function Expander({
   title,
   open = false,
+  id,
   children,
 }: {
   title: React.ReactNode;
   /** Start open. */
   open?: boolean;
+  /** Anchor: a link to `#id` opens this item and scrolls to it. */
+  id?: string;
   children: React.ReactNode;
 }): React.JSX.Element {
+  const ref = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    if (!id) return;
+    const openIfLinked = () => {
+      if (window.location.hash !== `#${id}` || !ref.current) return;
+      ref.current.open = true;
+      ref.current.scrollIntoView();
+    };
+    openIfLinked();
+    window.addEventListener("hashchange", openIfLinked);
+    return () => window.removeEventListener("hashchange", openIfLinked);
+  }, [id]);
   return (
-    <details className={styles.expander} open={open}>
+    <details ref={ref} id={id} className={styles.expander} open={open}>
       <summary className={styles.summary}>
         <span>{title}</span>
         <Icon path={mdiChevronDown} size={0.8} className={styles.chevron} />

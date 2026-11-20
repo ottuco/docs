@@ -244,33 +244,43 @@ A subscription moves through seven states. Canceled and Expired are final. Click
 
 <AutoPayStates audience="business" />
 
-### Pending setup {#state-pending-setup}
+<Expander id="state-pending-setup" title="Pending setup">
 
 Ottu created the subscription and waits for the first payment. Ottu activates it automatically after your customer pays. Your part: nothing.
 
-### Trialing {#state-trialing}
+</Expander>
+<Expander id="state-trialing" title="Trialing">
 
 The first payment was zero, so no money has moved. The customer only saved a card. Ottu charges the saved card at the next billing cycle. Canceling before the trial ends means no charge at all. Your part: nothing.
 
-### Active {#state-active}
+</Expander>
+<Expander id="state-active" title="Active">
 
 Billing normally. The latest cycle was paid. Your part: give your customer the service.
 
-### Past Due {#state-past-due}
+</Expander>
+<Expander id="state-past-due" title="Past Due">
 
 Every retry on a cycle failed. The subscription waits for your customer to pay. Your part: decide what to do if it stays Past Due. See [When a payment fails](#when-a-payment-fails).
 
-### Canceled {#state-canceled}
+</Expander>
+<Expander id="state-canceled" title="Canceled">
 
 Billing has stopped. A cancellation set for the end of the period, by your customer or your developer, lands here when that period ends. An immediate cancel by your developer lands here at once. Your part: nothing.
 
-### Expired {#state-expired}
+</Expander>
+<Expander id="state-expired" title="Expired">
 
 The last cycle was paid and the next billing date would fall after the end date. Billing stopped. The history stays readable. Your part: nothing. To continue, create a new subscription.
 
-### Setup Failed {#state-setup-failed}
+</Expander>
+<Expander id="state-setup-failed" title="Setup Failed">
 
 The customer canceled the checkout, did not pay within 24 hours, or paid but the card could not be saved. Ottu does not retry it. Your part: create a new subscription. If the customer paid, refund that payment in Payment Management. Ottu does not refund it automatically.
+
+
+
+</Expander>
 
 ### Billing cycles {#billing-cycles}
 
