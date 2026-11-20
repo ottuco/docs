@@ -11,6 +11,18 @@ import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import AutoPayBusinessStory from "@site/src/diagrams/flow/AutoPayBusinessStory";
 import AutoPayStates from "@site/src/diagrams/flow/AutoPayStates";
+import {
+  mdiAccountCircleOutline,
+  mdiAccountCogOutline,
+  mdiAccountGroupOutline,
+  mdiCalendarCheck,
+  mdiCellphoneMessage,
+  mdiChartTimelineVariant,
+  mdiCreditCardCheckOutline,
+  mdiEmailFastOutline,
+  mdiEmailOutline,
+  mdiGiftOutline,
+} from "@mdi/js";
 
 # AutoPay
 
@@ -23,17 +35,19 @@ Sell by subscription and let Ottu do the billing work. Your developer makes one 
 {/* TODO(ankit, #161109 R18): these cards still carry the "Why use AutoPay" benefits as placeholders. Replace them with real use cases, Stripe style (Dacian's business review, 00:00-00:35 and 04:00-04:45), e.g. "Accept recurring payments", "Enable customers to manage their subscriptions": a short title and one line each, linking to a short section that uses <Expander> items for the details. */}
 
 <UseCases>
-  <UseCase title="Get paid on time without chasing" href="#how-it-works">Ottu charges the saved card every month or year. It retries failed payments on its own.</UseCase>
-  <UseCase title="Keep customers informed without writing a word" href="#the-emails">Ottu emails them reminders and failure notices, and texts them their links, in English or Arabic.</UseCase>
-  <UseCase title="Cut your support load" href="#the-self-service-page">Customers change their card, pay an overdue balance, see their history, or cancel on their own page.</UseCase>
-  <UseCase title="Offer free trials without extra work" href="#state-trialing">Your customer saves a card and pays nothing today. Ottu charges the first real cycle on its own.</UseCase>
+  <UseCase icon={mdiCalendarCheck} title="Get paid on time without chasing" href="#how-it-works" cta="See how it works">Ottu charges the saved card every month or year. It retries failed payments on its own.</UseCase>
+  <UseCase icon={mdiEmailFastOutline} title="Keep customers informed without writing a word" href="#the-emails" cta="See the emails">Ottu emails them reminders and failure notices, and texts them their links, in English or Arabic.</UseCase>
+  <UseCase icon={mdiAccountCogOutline} title="Cut your support load" href="#the-self-service-page" cta="See the page">Customers change their card, pay an overdue balance, see their history, or cancel on their own page.</UseCase>
+  <UseCase icon={mdiGiftOutline} title="Offer free trials without extra work" href="#state-trialing" cta="See trials">Your customer saves a card and pays nothing today. Ottu charges the first real cycle on its own.</UseCase>
 </UseCases>
 
-:::info Before you start
-- **Your part:** Ottu support switches AutoPay on. Your developer adds one checkout call, confirms each new subscription, and runs a daily check for failed renewals.
-- **You need** a [gateway with auto-debit](/business/payments/gateways/?features=autodebit). It lets Ottu charge a saved card without your customer present.
-- **It fits** monthly or yearly plans. Your developer manages subscriptions through the API: there is no dashboard screen. See the [full checklist](#setting-up-autopay) and [Limits](#limits).
-:::
+**Before you start**
+
+<UseCases>
+  <UseCase icon={mdiAccountGroupOutline} title="Your part" href="#setting-up-autopay" cta="See the checklist">Ottu support switches AutoPay on. Your developer adds one checkout call, confirms each new subscription, and runs a daily check for failed renewals.</UseCase>
+  <UseCase icon={mdiCreditCardCheckOutline} title="You need a gateway with auto-debit" href="/business/payments/gateways/?features=autodebit" cta="See the gateways">It lets Ottu charge a saved card without your customer present.</UseCase>
+  <UseCase icon={mdiChartTimelineVariant} title="It fits monthly or yearly plans" href="#limits" cta="See the limits">Your developer manages subscriptions through the API: there is no dashboard screen.</UseCase>
+</UseCases>
 
 ## How it works {#how-it-works}
 
@@ -77,9 +91,11 @@ There is no catalog to maintain. Your developer sends the price and a descriptio
 
 Ottu sends and hosts everything your customer sees. There are three touchpoints:
 
-- **Emails.** Six emails keep your customer informed. See [The emails and texts](#the-emails).
-- **Texts.** Three texts go out with the first three emails: created, setup completed and link replaced.
-- **One private page.** Your customer sees the subscription and manages it there. See [The self-service page](#the-self-service-page).
+<UseCases>
+  <UseCase icon={mdiEmailOutline} title="Emails" href="#the-emails" cta="See the emails">Six emails keep your customer informed.</UseCase>
+  <UseCase icon={mdiCellphoneMessage} title="Texts" href="#the-emails" cta="See the texts">Three texts go out with the first three emails: created, setup completed and link replaced.</UseCase>
+  <UseCase icon={mdiAccountCircleOutline} title="One private page" href="#the-self-service-page" cta="See the page">Your customer sees the subscription and manages it there.</UseCase>
+</UseCases>
 
 ### The emails and texts {#the-emails}
 

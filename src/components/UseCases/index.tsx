@@ -15,21 +15,32 @@ import styles from "./styles.module.css";
 export function UseCase({
   title,
   href,
+  icon,
+  cta = "Learn more",
   children,
 }: {
   title: string;
   /** The section (or page) that explains it. */
   href: string;
+  /** An @mdi/js path, shown in a small tile above the title. */
+  icon?: string;
+  /** Link label at the bottom of the card. */
+  cta?: string;
   /** One line. */
   children: React.ReactNode;
 }): React.JSX.Element {
   return (
     <li className={styles.item}>
       <Link to={href} className={styles.card}>
+        {icon && (
+          <span className={styles.tile} aria-hidden="true">
+            <Icon path={icon} size={0.9} />
+          </span>
+        )}
         <span className={styles.title}>{title}</span>
         <span className={styles.text}>{children}</span>
         <span className={styles.more} aria-hidden="true">
-          Learn more <Icon path={mdiArrowRight} size={0.6} />
+          {cta} <Icon path={mdiArrowRight} size={0.6} />
         </span>
       </Link>
     </li>

@@ -41,6 +41,18 @@
   transform: scale(0.99);
 }
 
+.tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 6px;
+  border-radius: 10px;
+  color: var(--ifm-color-primary);
+  background: color-mix(in srgb, var(--ifm-color-primary) 12%, transparent);
+}
+
 .title {
   font-size: 15px;
   font-weight: 600;
