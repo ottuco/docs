@@ -42,8 +42,11 @@ export function ReferenceCard({
 }
 
 export default function ReferenceAside({
+  top,
   children,
 }: {
+  /** Shown first in the right column, above the cards (ApiShortcuts' box). */
+  top?: React.ReactNode;
   /** The section's text, with its <ReferenceCard>s anywhere among it. */
   children: React.ReactNode;
 }): React.JSX.Element {
@@ -55,7 +58,10 @@ export default function ReferenceAside({
   return (
     <div className={styles.wrap}>
       <div className={styles.text}>{text}</div>
-      <aside className={styles.aside}>{aside}</aside>
+      <aside className={styles.aside}>
+        {top}
+        {aside}
+      </aside>
     </div>
   );
 }

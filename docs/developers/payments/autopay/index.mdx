@@ -31,6 +31,10 @@ import "./autopay.css";
 
 # AutoPay
 
+{/* The Endpoints / Events box fills the right half beside the page's opening section, like the top of https://docs.stripe.com/api/payment_intents (#161111 R11, Dacian: "on top"). */}
+
+<ApiShortcuts events={autopayEvents} eventsNote={AUTOPAY_EVENTS_NOTE}>
+
 AutoPay is Ottu's managed subscriptions feature. You make one [Checkout API](../checkout-api) call with `payment_type: "auto_pay"`, and Ottu runs the rest: each [billing cycle](/glossary/#term-billing-cycle), the retries, the [dunning](/glossary/#term-dunning) emails and your customer's self-service page.
 
 Every call on this page uses the standard [Ottu API key](/developers/getting-started/authentication) and targets <code>{OTTU_CONNECT_BASE_URL}</code>. Swap in your own merchant domain when you integrate. Your integration is six steps: see [Workflow](#workflow). To start, [create a subscription](/developers/payments/autopay/?autopay-api=create#create-api). The [Live Demo](#live-demo) runs the steps on the sandbox.
@@ -38,6 +42,8 @@ Every call on this page uses the standard [Ottu API key](/developers/getting-sta
 Related guide: [AutoPay for merchants](/business/autopay/), with what your customer sees and what it does for the business.
 
 <AgentPrompt topic="autopay" />
+
+</ApiShortcuts>
 
 :::tip Boost Your Integration
 Ottu offers SDKs and tools to speed up your integration. See [Getting Started](../../getting-started/#boost-your-integration) for all available options.
@@ -669,8 +675,6 @@ You cannot trigger a renewal early on the sandbox: the first renewal is charged 
 
 ## API Reference
 
-<ApiShortcuts events={autopayEvents} eventsNote={AUTOPAY_EVENTS_NOTE}>
-
 {/* Stripe-style reference cards (#161111 R10), like the Base URL and authenticated-request boxes of https://docs.stripe.com/api and https://docs.stripe.com/api/authentication */}
 
 <ReferenceAside>
@@ -699,8 +703,6 @@ All six subscription-management endpoints, plus the Checkout API call that creat
 Every endpoint accepts all the authentication methods on the [Authentication](/developers/getting-started/authentication) page except the public key, and applies to your own merchant account. You never send a `Merchant-Id` header yourself.
 
 </ReferenceAside>
-
-</ApiShortcuts>
 
 <ApiReference
   api="autopay-subscription-detail"
