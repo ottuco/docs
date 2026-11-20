@@ -1,13 +1,16 @@
 /* Brand colours for code blocks: Ottu dark and Ottu orange, with a grey for
-   comments. Pilot on the webhook, Operations v3, PSQ v3 and v3-error pages.
+   comments, on the site's own code background. Pilot on the webhook,
+   Operations v3, PSQ v3 and v3-error pages.
 
    How it works: the Prism themes (src/prism/brandThemes.ts) write every token
-   colour as var(--ottu-code-<role>, <the theme's own colour>). Where these
-   variables are not set, code looks exactly as before. This file sets them.
+   colour, and the code box background, as var(--ottu-code-<role>, <the
+   theme's own colour>). Where these variables are not set, code looks
+   exactly as before. This file sets them.
 
    SITE-WIDE SWITCH: to use the brand palette on every page, replace the
-   page list in the two selectors marked SCOPE below with :root (and
-   :root[data-theme="dark"]). Nothing else changes. */
+   page list in every selector marked SCOPE below with :root (with
+   :root[data-theme="dark"] for the dark one), keeping the rest of each
+   selector as it is. Nothing else changes. */
 
 /* SCOPE (light) */
 html:is(
@@ -31,6 +34,9 @@ html:is(
   --ottu-code-plain-style: normal;
   --ottu-code-value-style: normal;
   --ottu-code-accent-style: normal;
+  /* The site's code background. It follows dark mode on its own, because
+     --ifm-code-background is redefined there. */
+  --ottu-code-background: var(--ifm-code-background);
 }
 
 /* SCOPE (dark) */
@@ -47,6 +53,27 @@ html[data-theme="dark"]:is(
   --ottu-brand-dark: var(--ifm-code-color);
   --ottu-brand-orange: var(--ifm-color-primary);
   --ottu-brand-comment: #9aa0aa;
+}
+
+/* The site's inline code style (.markdown code in custom.css) also paints the
+   code inside a code block, which would cover the box background set above.
+   Clear it there so the whole box shows one background, in both modes. The
+   pre.theme-code-block form covers the rare MDX block whose pre is the box
+   itself. */
+/* SCOPE (code area) */
+html:is(
+    [class~="docs-doc-id-developers/webhooks/index"],
+    [class~="docs-doc-id-developers/webhooks/verify-signatures"],
+    [class~="docs-doc-id-developers/webhooks/pg-params"],
+    [class~="docs-doc-id-developers/webhooks/migrate-to-v3"],
+    [class~="docs-doc-id-developers/webhooks/legacy"],
+    [class~="docs-doc-id-developers/operations-v3"],
+    [class~="docs-doc-id-developers/payments/psq-v3"],
+    [class~="docs-doc-id-developers/reference/v3-errors"]
+  )
+  :is(.theme-code-block pre, pre.theme-code-block)
+  code {
+  background-color: transparent;
 }
 
 /* Token types the themes leave uncoloured (they inherit the plain colour, so
