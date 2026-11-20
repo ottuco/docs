@@ -6,6 +6,7 @@ export default function ApiPanel({
   data,
   maxHeight,
   className,
+  marked,
 }: {
   label: string;
   data: any;
@@ -13,6 +14,11 @@ export default function ApiPanel({
   maxHeight?: string;
   /** Extra class on the root, e.g. to drop the border inside another box. */
   className?: string;
+  /**
+   * One flag per line of the printed data: true lines are highlighted like a
+   * diff's added line (the Run dialog's extracted values).
+   */
+  marked?: boolean[];
 }) {
   const text = typeof data === "string" ? data : JSON.stringify(data, null, 2);
   return (
@@ -34,7 +40,18 @@ export default function ApiPanel({
         className={styles.apiPanelBody}
         style={maxHeight ? { maxHeight } : undefined}
       >
-        <pre>{text}</pre>
+        {marked ? (
+          <pre className={styles.markedPre}>
+            {text.split("\n").map((line, i) => (
+              <span key={i} className={marked[i] ? styles.markedLine : undefined}>
+                {line}
+                {"\n"}
+              </span>
+            ))}
+          </pre>
+        ) : (
+          <pre>{text}</pre>
+        )}
       </div>
     </div>
   );

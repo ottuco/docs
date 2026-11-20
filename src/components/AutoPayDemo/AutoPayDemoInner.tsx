@@ -14,6 +14,8 @@ import CheckoutSDKEmbed from "@site/src/components/CheckoutSDKEmbed";
 import TestCardCallout from "@site/src/components/TestCardCallout";
 import WebhookViewer from "@site/src/components/RecurringDemo/WebhookViewer";
 import styles from "@site/src/components/RecurringDemo/styles.module.css";
+import own from "./styles.module.css";
+import useBaseUrl from "@docusaurus/useBaseUrl";
 import {
   sampleCancelResponse,
   sampleCreateResponse,
@@ -112,6 +114,7 @@ async function connectCall(
 }
 
 export default function AutoPayDemoInner() {
+  const pagePreview = useBaseUrl("/img/developers/autopay/self-service-page.png");
   const [state, dispatch] = useReducer(reducer, initialState);
   const set = useCallback((patch: Partial<State>) => dispatch({ type: "SET", patch }), []);
   const mounted = useRef(true);
@@ -350,8 +353,9 @@ export default function AutoPayDemoInner() {
             />
             )}
             <p className={styles.cardDescription} style={{ marginTop: 12 }}>
-              This is "payment received", not "subscription active". The <code>autopay</code> block is not
-              signed: confirm by retrieving the subscription. See{" "}
+              This is "payment received", not "subscription active". Give access when{" "}
+              <code>subscription.activated</code> arrives. The <code>autopay</code> block can be missing, so do
+              not grant access from it. See{" "}
               <a href="#first-payment-and-activation">First payment and activation</a> for how to match this
               webhook to your subscription.
             </p>
@@ -415,6 +419,21 @@ export default function AutoPayDemoInner() {
                   <code>page_url</code> is your customer's private self-service page. The link is the
                   credential, so you deliver it to your customer yourself. Ottu's emails also link to this page.
                 </p>
+                {/* Ottu's page refuses to be framed by another site
+                    (frame-ancestors 'self'), so the demo shows what it looks
+                    like and the button opens the real one (#161111 R13). */}
+                <figure className={own.pagePreview}>
+                  <img
+                    src={pagePreview}
+                    alt="The customer's self-service page: subscription summary, saved card and payment history"
+                    loading="lazy"
+                  />
+                  <figcaption>
+                    {state.sample
+                      ? "What your customer sees at page_url."
+                      : "What your customer sees at page_url. Open it to see this subscription's own page."}
+                  </figcaption>
+                </figure>
                 <div className={styles.actions}>
                   {!state.sample && (
                   <a

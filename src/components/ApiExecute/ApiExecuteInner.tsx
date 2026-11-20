@@ -23,6 +23,7 @@ import type { AnyScenario, Picked, StepRun } from "./scenario";
 import { runOf, type ScenarioKey } from "./scenarios";
 import { send, type ExecuteResult } from "./send";
 import { LANGUAGES, snippet } from "./snippets";
+import { markExtracted, runButtonLabel } from "./dialog";
 import {
   CODE_HEIGHT,
   ExamplePanel,
@@ -37,17 +38,22 @@ import styles from "./styles.module.css";
 
 type StepState = "pending" | "running" | "done" | "failed";
 
-// A step's body and response sit side by side in the dialog: short boxes.
-const STEP_CODE_HEIGHT = "180px";
+// A step's body and response, stacked and folded in the dialog: short boxes.
+const STEP_CODE_HEIGHT = "220px";
+
+/** The raw values a step's picked items point at in its response. */
+const extractedValues = (picked: Picked[]): string[] =>
+  picked.flatMap(({ extracted, value, href }) => extracted ?? (href ? [] : [value]));
 
 /** What a done step took from its response: an id, a link to open. */
 function PickedList({ picked }: { picked: Picked[] }) {
   if (picked.length === 0) return null;
   return (
-    <ul className={styles.picked}>
+    <ul className={styles.picked} aria-label="Extracted from the response">
       {picked.map(({ label, value, href, note }, i) => (
         <li key={`${i}-${label}`}>
-          <span className={styles.pickedLabel}>{label}</span>{" "}
+          <span className={styles.pickedTag}>Extracted</span>{" "}
+          <span className={styles.pickedLabel}>{label}:</span>{" "}
           {/* Only a web link from the sandbox response, never another scheme. */}
           {href?.startsWith("https://") ? (
             <a href={href} target="_blank" rel="noopener noreferrer">
@@ -63,24 +69,50 @@ function PickedList({ picked }: { picked: Picked[] }) {
   );
 }
 
-/** The call a step made, as Stripe shows one: the body it sent, then the response. */
-function StepCall({ call }: { call: StepRun }) {
+/** The response, with the lines that hold an extracted value highlighted like a diff. */
+function MarkedResponse({ response, values }: { response: unknown; values: string[] }) {
+  // Re-rendered on every session change while steps run: mark only when the
+  // response or the values change.
+  const key = values.join("\u0000");
+  const lines = useMemo(() => markExtracted(response, values), [response, key]);
+  return (
+    <ApiPanel
+      label="JSON"
+      data={lines.map((line) => line.text).join("\n")}
+      marked={lines.map((line) => line.extracted)}
+      maxHeight={STEP_CODE_HEIGHT}
+      className={styles.stepPanel}
+    />
+  );
+}
+
+/**
+ * The call a step made, as Stripe shows one: the body it sent, then the
+ * response, one under the other and folded, so the dialog stays short.
+ */
+function StepCall({ call, extracted }: { call: StepRun; extracted: string[] }) {
   return (
     <div className={styles.stepCall}>
       {call.body !== undefined && (
-        <ApiPanel
-          label="Request body"
-          data={call.body}
-          maxHeight={STEP_CODE_HEIGHT}
-          className={styles.stepPanel}
-        />
+        <details className={styles.stepFold}>
+          <summary>Request body</summary>
+          <ApiPanel
+            label="JSON"
+            data={call.body}
+            maxHeight={STEP_CODE_HEIGHT}
+            className={styles.stepPanel}
+          />
+        </details>
       )}
-      <ApiPanel
-        label="Response"
-        data={call.response}
-        maxHeight={STEP_CODE_HEIGHT}
-        className={styles.stepPanel}
-      />
+      <details className={styles.stepFold}>
+        <summary>
+          Response
+          {extracted.length > 0 && (
+            <span className={styles.stepFoldHint}> · extracted values highlighted</span>
+          )}
+        </summary>
+        <MarkedResponse response={call.response} values={extracted} />
+      </details>
     </div>
   );
 }
@@ -96,7 +128,19 @@ function Prerequisites({
   onDone: () => void;
   onClose: () => void;
 }) {
-  const [states, setStates] = useState<Record<string, StepState>>({});
+  // Steps already done when the dialog opens (an earlier call found the
+  // gateway) show as done and are not counted: the button and the text speak
+  // of the steps Run will actually run.
+  const [states, setStates] = useState<Record<string, StepState>>(() =>
+    Object.fromEntries(
+      steps
+        .filter((step) => scenario.steps[step].done(scenario.getState()))
+        .map((step) => [step, "done" as StepState]),
+    ),
+  );
+  const [toRun] = useState(
+    () => steps.filter((step) => !scenario.steps[step].done(scenario.getState())).length,
+  );
   const [calls, setCalls] = useState<Record<string, StepRun>>({});
   // A done step shows what the state holds from it, kept current.
   const sessionState = useSyncExternalStore(
@@ -155,8 +199,11 @@ function Prerequisites({
               Set up prerequisites
             </h3>
             <p className={styles.dialogText}>
-              This call depends on other objects. Create them in the sandbox
-              first?
+              This call needs {toRun > 1 ? "these objects" : "this object"} on
+              the sandbox first. {runButtonLabel(toRun, false)} sets{" "}
+              {toRun > 1 ? "them" : "it"} up here, in this dialog. Then{" "}
+              <strong>Continue</strong> runs the call itself on the page, where you
+              see its request and response.
             </p>
           </div>
           <button
@@ -169,7 +216,7 @@ function Prerequisites({
               size={0.7}
               spin={running}
             />
-            {finished ? "Continue" : "Run all"}
+            {runButtonLabel(toRun, finished)}
           </button>
         </div>
         <ol className={styles.steps}>
@@ -195,7 +242,13 @@ function Prerequisites({
                   {state === "done" && done(sessionState) && (
                     <PickedList picked={picked(sessionState)} />
                   )}
-                  {calls[step] && <StepCall call={calls[step]} />}
+                  {calls[step] && (
+                    <StepCall
+                      call={calls[step]}
+                      // picked() describes a done step only.
+                      extracted={done(sessionState) ? extractedValues(picked(sessionState)) : []}
+                    />
+                  )}
                 </div>
               </li>
             );

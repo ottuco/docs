@@ -56,3 +56,16 @@
   word-break: break-word;
   font-family: "Consolas", "Monaco", "Courier New", monospace;
 }
+
+/* marked: each line is a block, so a marked line's band spans the width. */
+.apiPanelBody pre.markedPre > span {
+  display: block;
+  margin: 0 -16px;
+  padding: 0 16px;
+}
+
+/* A line that holds an extracted value, as a diff marks an added line. */
+.apiPanelBody pre.markedPre > span.markedLine {
+  background: var(--ottu-extracted-bg);
+  box-shadow: inset 3px 0 0 var(--ottu-extracted-text);
+}

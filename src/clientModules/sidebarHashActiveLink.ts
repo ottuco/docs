@@ -605,6 +605,11 @@ function maintainTargetPosition(hashId: string): void {
   const compensate = () => {
     if (cancelled) return false;
     if (!spyMuted) return false; // user took over
+    // The URL no longer points at this section (the reader went back to the
+    // top, which drops the hash, or on to another section): stop pinning.
+    // This also covers a compensator that starts late, after the wait for
+    // the initial scroll to settle.
+    if (getHashTargetId() !== hashId) return false;
     if (performance.now() - startedAt > MAINTAIN_DURATION_MS) return false;
     // If the element fell out of the live DOM (route change since we
     // started), or is hidden again (its box closed, its tab switched away),
@@ -896,9 +901,10 @@ export function onRouteDidUpdate(): void {
     // A link (e.g. `?tab=x#same-hash`) or one without a query still
     // scrolls, below.
   } else {
-    // Same-page hash change (sidebar anchor click, back/forward). Nothing
-    // else scrolls here: Docusaurus only scrolls after a pathname change,
-    // and the router does not make the browser follow a pushState hash.
+    // Same-page hash change (sidebar anchor click, back/forward). Docusaurus
+    // scrolls the target into view at once, before it may exist or be
+    // visible (a closed box, another tab), and the browser does not follow a
+    // pushState hash; a hash-less route it scrolls to the top itself.
     // No hydration wait is needed, but the new hash can open collapsed
     // parents or switch a tab on this render (ApiReference), so
     // scrollWhenVisible waits (up to 2 s) until the target can be

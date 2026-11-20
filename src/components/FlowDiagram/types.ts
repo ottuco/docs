@@ -73,6 +73,13 @@ export type StoryProps = {
    * the lanes keep their size and sit in the middle.
    */
   fillWidth?: boolean;
+  /**
+   * The explanation (what the picked side, step or journey stop means) sits
+   * on the left as page text and the diagram on the right, as on Stripe's
+   * docs: text left, visuals right (#161111 R12). Narrower than both fit, the
+   * text goes under the diagram. Default false: the boxed panel on the right.
+   */
+  textLeft?: boolean;
 };
 
 // ---------- Sequence ----------

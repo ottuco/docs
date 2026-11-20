@@ -207,21 +207,9 @@
   font-weight: 600;
 }
 
-/* ApiShortcuts: the intro on the left, the endpoint / event box on the right. */
-/* Desktop: floated into the right half, so the intro and the text after it
-   run down the left (see .float-beside in src/css/custom.css; the AutoPay
-   page caps its prose at half width in its autopay.css). Narrower, it sits
-   above the intro. */
-@media (min-width: 997px) {
-  .shortcutsBox {
-    float: right;
-    width: min(420px, calc(50% - 32px));
-    margin-left: 32px;
-  }
-}
-
+/* ApiShortcuts: the box fills the right half at the top of the page, beside
+   its opening text, Stripe style (#161111 R11). */
 .shortcutsBox {
-  margin-bottom: 24px;
   border: 1px solid var(--ifm-color-emphasis-300);
   border-radius: 10px;
   background: var(--ifm-background-surface-color);
@@ -253,11 +241,41 @@
 }
 
 .shortcutsList {
-  max-height: 60vh;
   margin: 0;
-  padding: 4px 0;
+  padding: 6px 0;
   list-style: none;
-  overflow-y: auto;
+}
+
+/* One entry per row in the right column; side by side when the box is
+   stacked full width on a narrower screen. */
+.shortcutsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Beats the docs' `.markdown li + li` spacing, which would push every
+   entry but the first down. */
+.shortcutsBox .shortcutsGrid > li {
+  margin: 0;
+  min-width: 0;
+}
+
+.eventGroup + .eventGroup {
+  margin-top: 4px;
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+
+/* `.shortcutsBox` in front: the docs' heading and paragraph styles would
+   win otherwise. */
+.shortcutsBox .eventGroupTitle {
+  margin: 0;
+  padding: 10px 16px 2px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-700);
 }
 
 .shortcutsList > li {
@@ -310,7 +328,9 @@
   font-size: 10px;
 }
 
-.shortcutPath code {
+/* `.shortcutsBox` in front: the dark theme's `.markdown code` pill would win
+   otherwise. */
+.shortcutsBox .shortcutPath code {
   overflow: hidden;
   padding: 0;
   font-size: 12px;
@@ -318,6 +338,7 @@
   white-space: nowrap;
   border: 0;
   background: none;
+  color: inherit;
 }
 
 .event {
@@ -336,7 +357,8 @@
   color: var(--ifm-color-emphasis-800);
 }
 
-.eventsNote {
+.shortcutsBox .eventsNote {
+  margin: 0;
   padding: 8px 16px;
   font-size: 12.5px;
   color: var(--ifm-color-emphasis-700);

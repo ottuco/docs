@@ -16,6 +16,7 @@ import { useColorMode } from "@docusaurus/theme-common";
 import { ReactFlow, type Edge, type Node, type NodeProps } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import Icon from "@mdi/react";
+import { mdiPlay } from "@mdi/js";
 import {
   CardNode,
   FitOnResize,
@@ -31,6 +32,7 @@ import {
   STORY_CONTROLS_W,
   STORY_FIT_PCT,
   STORY_PANEL_GAP,
+  textLeftStyle,
   STORY_ROW,
   STORY_TOP,
   STORY_BODY_PAD,
@@ -117,6 +119,7 @@ export default function Story(input: StoryProps): React.JSX.Element {
     maxHeight,
     controls = "top",
     fillWidth = false,
+    textLeft = false,
   } = props;
   const journeys = props.journeys ?? [];
   const hasPanel = journeys.length > 0;
@@ -316,8 +319,13 @@ export default function Story(input: StoryProps): React.JSX.Element {
             onBlur={() => setHover(null)}
             onClick={() => toggle({ kind: "lane", i })}
           >
-            <Icon path={l.icon} size={0.55} />
+            <Icon path={l.icon} size={controls === "side" ? 0.65 : 0.55} />
             {l.chip}
+            {controls === "side" ? (
+              <span className={styles.chipCount}>
+                {steps.filter((s) => s.lane === i).length} steps
+              </span>
+            ) : null}
           </button>
         ))}
     </div>
@@ -332,7 +340,11 @@ export default function Story(input: StoryProps): React.JSX.Element {
           aria-pressed={pinnedOf("journey") === i}
           onClick={() => toggle({ kind: "journey", i })}
         >
+          {controls === "side" ? <Icon path={mdiPlay} size={0.65} /> : null}
           {j.name}
+          {controls === "side" ? (
+            <span className={styles.chipCount}>{j.stops.length} stops</span>
+          ) : null}
         </button>
       ))}
     </div>
@@ -373,6 +385,24 @@ export default function Story(input: StoryProps): React.JSX.Element {
     </div>
   );
 
+  const panel = hasPanel ? (
+    <StoryPanel
+      asText={textLeft}
+      id={`${scope}-panel`}
+      lanes={lanes}
+      steps={steps}
+      journey={journey}
+      stop={stop}
+      pinnedLane={pinnedOf("lane")}
+      pinnedStep={pinnedOf("step")}
+      onStop={setStop}
+      onEscape={showAll}
+    />
+  ) : null;
+  // controls="side": the explanation sits under the buttons, so the column is
+  // used top to bottom and the text is next to what the reader picked.
+  const panelInSide = controls === "side" && hasPanel;
+
   const maxWidth = storyMaxWidth(props);
   const diagram = (
     <div className={styles.scroller} style={{ maxWidth }}>
@@ -394,11 +424,19 @@ export default function Story(input: StoryProps): React.JSX.Element {
             }}
           >
             <div className={styles.controls}>
+              <div className={styles.controlsLabel}>Who does what</div>
               {sideChips}
               {journeyChips && (
                 <>
                   <hr className={styles.controlsSep} />
+                  <div className={styles.controlsLabel}>Walk a journey</div>
                   {journeyChips}
+                </>
+              )}
+              {panelInSide && (
+                <>
+                  <hr className={styles.controlsSep} />
+                  {panel}
                 </>
               )}
             </div>
@@ -415,26 +453,22 @@ export default function Story(input: StoryProps): React.JSX.Element {
     </div>
   );
 
-  if (!hasPanel) return diagram;
+  if (!hasPanel || panelInSide) return diagram;
 
+  // With `textLeft` and room for both, the explanation is page text on the
+  // left (first in the DOM too, so it is read before the diagram).
+  // The panel moves, never the diagram: moving the diagram would remount it
+  // (React Flow mounted twice, and useWidth left watching a detached body).
+  const textBeside = side && textLeft;
   return (
     <div
       ref={wrap}
-      className={`${styles.storyWrap} ${side ? styles.storyWrapSide : ""}`}
-      style={{ gap: STORY_PANEL_GAP, maxWidth }}
+      className={`${styles.storyWrap} ${side ? styles.storyWrapSide : ""} ${textBeside ? styles.storyWrapTextLeft : ""}`}
+      style={textBeside ? { ...textLeftStyle, maxWidth } : { gap: STORY_PANEL_GAP, maxWidth }}
     >
+      {textBeside && panel}
       {diagram}
-      <StoryPanel
-        id={`${scope}-panel`}
-        lanes={lanes}
-        steps={steps}
-        journey={journey}
-        stop={stop}
-        pinnedLane={pinnedOf("lane")}
-        pinnedStep={pinnedOf("step")}
-        onStop={setStop}
-        onEscape={showAll}
-      />
+      {!textBeside && panel}
     </div>
   );
 }

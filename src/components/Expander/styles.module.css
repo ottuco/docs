@@ -1,0 +1,122 @@
+/* Expander: Stripe style. No box and no fill per item: the chevron sits left of the
+   title, and hairlines separate the items so a group reads as one list. */
+.expander {
+  margin: 0;
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.expander + .expander {
+  border-top: 0;
+}
+
+/* The last of a group keeps the page's paragraph spacing before what follows. */
+.expander:not(:has(+ .expander)) {
+  margin-bottom: var(--ifm-paragraph-margin-bottom, 1.25rem);
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 4px;
+  font-weight: 600;
+  color: var(--ifm-heading-color);
+  list-style: none;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: color 150ms ease;
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.summary:hover {
+  color: var(--ifm-color-primary);
+}
+
+.summary:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+.chevron {
+  flex: none;
+  color: var(--ifm-color-emphasis-600);
+  transition:
+    transform 200ms cubic-bezier(0.23, 1, 0.32, 1),
+    color 150ms ease;
+}
+
+.summary:hover .chevron,
+.expander[open] .chevron {
+  color: var(--ifm-color-primary);
+}
+
+.expander[open] .chevron {
+  transform: rotate(90deg);
+}
+
+/* Status dot: the colours of the matching diagram states (FlowDiagram tokens). */
+.dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.neutral {
+  background: var(--ifm-color-emphasis-500);
+}
+
+.info {
+  background: #0b82be;
+}
+
+/* Brighter than the diagram's border green (#0d542b): that one reads as black at 10px. */
+.success {
+  background: #1e9e52;
+}
+
+.warn {
+  background: #f27e20;
+}
+
+.danger {
+  background: #ed2833;
+}
+
+:global(html[data-theme="dark"]) .info {
+  background: #4fb3e6;
+}
+
+:global(html[data-theme="dark"]) .success {
+  background: #7bf1a8;
+}
+
+:global(html[data-theme="dark"]) .danger {
+  background: #ff5c74;
+}
+
+/* 4px summary padding + 19px chevron + 10px gap: the text lines up under the title.
+   A dot adds its 10px and one more 10px gap. */
+.body {
+  padding: 0 4px 16px 33px;
+  color: var(--ifm-color-emphasis-800);
+}
+
+.withDot .body {
+  padding-left: 53px;
+}
+
+.body > :last-child {
+  margin-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron,
+  .summary {
+    transition: none;
+  }
+}

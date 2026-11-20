@@ -27,6 +27,12 @@ export interface Picked {
   href?: string;
   /** Why it matters, e.g. "the customer pays the first charge here". */
   note?: string;
+  /**
+   * The raw values as they appear in the step's response, highlighted there
+   * like a diff (the gateway's code, the subscription id, the URL). Defaults
+   * to `value` when there is no `href`.
+   */
+  extracted?: string[];
 }
 
 /** Something a call needs on the sandbox first (a gateway, a subscription). */

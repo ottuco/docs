@@ -1,4 +1,5 @@
 import Link from "@docusaurus/Link";
+import { useHistory } from "@docusaurus/router";
 import {
   findFirstSidebarItemLink,
   isActiveSidebarItem,
@@ -30,6 +31,26 @@ type SidebarCategoryItem = {
   };
   linkUnlisted?: boolean;
 };
+
+/**
+ * Back to the top of the current page. With a "#section" in the URL, the
+ * hash is dropped through the router (a replace: no new history entry), and
+ * Docusaurus's own scrollAfterNavigation scrolls a hash-less route to the
+ * top; the route update also clears the sidebar's section highlight and
+ * re-mutes its scroll-spy (src/clientModules/sidebarHashActiveLink.ts).
+ * Without a hash, it scrolls itself. A long page first jumps to one screen
+ * from the top, so the smooth scroll that follows is short.
+ */
+function goToPageTop(history: ReturnType<typeof useHistory>): void {
+  if (window.scrollY > window.innerHeight) {
+    window.scrollTo({ top: window.innerHeight, behavior: "instant" });
+  }
+  if (window.location.hash) {
+    history.replace({ pathname: window.location.pathname, search: window.location.search });
+  } else {
+    window.scrollTo({ top: 0 });
+  }
+}
 
 type Props = {
   item: SidebarCategoryItem;
@@ -122,6 +143,7 @@ export default function DocSidebarItemCategory({
   ...props
 }: Props) {
   const { items, label, collapsible, className } = item;
+  const history = useHistory();
   const {
     docs: {
       sidebar: { autoCollapseCategories },
@@ -190,8 +212,14 @@ export default function DocSidebarItemCategory({
                   onItemClick?.(item);
                   if (hrefWithSSRFallback) {
                     if (isCurrentPage) {
+                      // Already on this category's page (a one-page doc whose
+                      // children are its sections): go back to the top
+                      // instead of only folding the list, so the reader can
+                      // always return to the start (#161111 R9). The caret
+                      // button next to the label still folds the list.
                       e.preventDefault();
-                      updateCollapsed();
+                      updateCollapsed(false);
+                      goToPageTop(history);
                     } else {
                       updateCollapsed(false);
                     }

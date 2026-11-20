@@ -6,12 +6,23 @@ toc_min_heading_level: 2
 toc_max_heading_level: 3
 ---
 
-import StepGuide from "@site/src/components/StepGuide";
 import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import AutoPayBusinessStory from "@site/src/diagrams/flow/AutoPayBusinessStory";
 import AutoPayStates from "@site/src/diagrams/flow/AutoPayStates";
+import {
+  mdiAccountCircleOutline,
+  mdiAccountCogOutline,
+  mdiAccountGroupOutline,
+  mdiCalendarCheck,
+  mdiCellphoneMessage,
+  mdiChartTimelineVariant,
+  mdiCreditCardCheckOutline,
+  mdiEmailFastOutline,
+  mdiEmailOutline,
+  mdiGiftOutline,
+} from "@mdi/js";
 
 # AutoPay
 
@@ -21,16 +32,22 @@ Sell by subscription and let Ottu do the billing work. Your developer makes one 
 
 ## Why use AutoPay {#why-use-autopay}
 
-- **Get paid on time without chasing.** Ottu charges the saved card every month or year. It retries failed payments on its own.
-- **Keep customers informed without writing a word.** Ottu emails them reminders and failure notices, and texts them their links, in English or Arabic.
-- **Cut your support load.** Customers change their card, pay an overdue balance, see their history, or cancel on their own page.
-- **Offer free trials without extra work.** Your customer saves a card and pays nothing today. Ottu charges the first real cycle on its own.
+{/* TODO(ankit, #161109 R18): these cards still carry the "Why use AutoPay" benefits as placeholders. Replace them with real use cases, Stripe style (Dacian's business review, 00:00-00:35 and 04:00-04:45), e.g. "Accept recurring payments", "Enable customers to manage their subscriptions": a short title and one line each, linking to a short section that uses <Expander> items for the details. */}
 
-:::info Before you start
-- **Your part:** Ottu support switches AutoPay on. Your developer adds one checkout call, confirms each new subscription, and runs a daily check for failed renewals.
-- **You need** a [gateway with auto-debit](/business/payments/gateways/?features=autodebit). It lets Ottu charge a saved card without your customer present.
-- **It fits** monthly or yearly plans. Your developer manages subscriptions through the API: there is no dashboard screen. See the [full checklist](#setting-up-autopay) and [Limits](#limits).
-:::
+<UseCases>
+  <UseCase icon={mdiCalendarCheck} title="Get paid on time without chasing" href="#how-it-works" cta="See how it works">Ottu charges the saved card every month or year. It retries failed payments on its own.</UseCase>
+  <UseCase icon={mdiEmailFastOutline} title="Keep customers informed without writing a word" href="#the-emails" cta="See the emails">Ottu emails them reminders and failure notices, and texts them their links, in English or Arabic.</UseCase>
+  <UseCase icon={mdiAccountCogOutline} title="Cut your support load" href="#the-self-service-page" cta="See the page">Customers change their card, pay an overdue balance, see their history, or cancel on their own page.</UseCase>
+  <UseCase icon={mdiGiftOutline} title="Offer free trials without extra work" href="#state-trialing" cta="See trials">Your customer saves a card and pays nothing today. Ottu charges the first real cycle on its own.</UseCase>
+</UseCases>
+
+**Before you start**
+
+<UseCases>
+  <UseCase icon={mdiAccountGroupOutline} title="Your part" href="#setting-up-autopay" cta="See the checklist">Ottu support switches AutoPay on. Your developer adds one checkout call, confirms each new subscription, and runs a daily check for failed renewals.</UseCase>
+  <UseCase icon={mdiCreditCardCheckOutline} title="You need a gateway with auto-debit" href="/business/payments/gateways/?features=autodebit" cta="See the gateways">It lets Ottu charge a saved card without your customer present.</UseCase>
+  <UseCase icon={mdiChartTimelineVariant} title="It fits monthly or yearly plans" href="#limits" cta="See the limits">Your developer manages subscriptions through the API: there is no dashboard screen.</UseCase>
+</UseCases>
 
 ## How it works {#how-it-works}
 
@@ -42,11 +59,31 @@ Your team starts it, your customer pays once, and Ottu runs everything after. Cl
 
 Your developers call the API to create, look up, and cancel subscriptions. Before your first subscription, make sure you have:
 
-1. **AutoPay enabled for your account.** Ask [Ottu support](/resources/#contact) to turn it on.
-2. **A support email.** It appears on the customer's page and in the footer of every email Ottu sends.
-3. **A privacy policy URL.** It is linked from the footer of every email Ottu sends.
-4. **A payment gateway with auto-debit,** in the currency you bill in.
-5. **The email and text templates registered,** in English and Arabic: 6 emails and 3 text messages. Ottu support sets these up, the same way [notification templates](/business/notifications/) work for one-off payments.
+<Expander title="AutoPay enabled for your account">
+
+Ask [Ottu support](/resources/#contact) to turn it on.
+
+</Expander>
+<Expander title="A support email">
+
+It appears on the customer's page and in the footer of every email Ottu sends.
+
+</Expander>
+<Expander title="A privacy policy URL">
+
+It is linked from the footer of every email Ottu sends.
+
+</Expander>
+<Expander title="A payment gateway with auto-debit">
+
+In the currency you bill in. See the [gateways with auto-debit](/business/payments/gateways/?features=autodebit).
+
+</Expander>
+<Expander title="The email and text templates registered">
+
+In English and Arabic: 6 emails and 3 text messages. Ottu support sets these up, the same way [notification templates](/business/notifications/) work for one-off payments.
+
+</Expander>
 
 There is no catalog to maintain. Your developer sends the price and a description of the plan in each checkout call. The [developer docs](/developers/payments/autopay/#api-reference) show the request shape.
 
@@ -54,9 +91,11 @@ There is no catalog to maintain. Your developer sends the price and a descriptio
 
 Ottu sends and hosts everything your customer sees. There are three touchpoints:
 
-- **Emails.** Six emails keep your customer informed. See [The emails and texts](#the-emails).
-- **Texts.** Three texts go out with the first three emails: created, setup completed and link replaced.
-- **One private page.** Your customer sees the subscription and manages it there. See [The self-service page](#the-self-service-page).
+<UseCases>
+  <UseCase icon={mdiEmailOutline} title="Emails" href="#the-emails" cta="See the emails">Six emails keep your customer informed.</UseCase>
+  <UseCase icon={mdiCellphoneMessage} title="Texts" href="#the-emails" cta="See the texts">Three texts go out with the first three emails: created, setup completed and link replaced.</UseCase>
+  <UseCase icon={mdiAccountCircleOutline} title="One private page" href="#the-self-service-page" cta="See the page">Your customer sees the subscription and manages it there.</UseCase>
+</UseCases>
 
 ### The emails and texts {#the-emails}
 
@@ -65,50 +104,44 @@ Ottu sends 6 emails and 3 texts, in English or Arabic, chosen when the subscript
 <Tabs groupId="email-language" queryString>
 <TabItem value="en" label="English">
 
-<StepGuide fitImages steps={[
-  {
-    title: "Upcoming charge",
-    description: <>Goes out before money moves. Shows the amount, billing date, and card on file, with a link to manage the subscription.</>,
-    image: "/img/business/autopay/notifications-01-upcoming-charge-en.png",
-    imageAlt: "Upcoming charge reminder email in English",
-  },
-  {
-    title: "Payment failed",
-    description: <>Goes out after a failed attempt while retries remain. Shows the reason, when the next retry runs, and a link to update the card.</>,
-    image: "/img/business/autopay/notifications-03-payment-failed-en.png",
-    imageAlt: "Payment failed email in English",
-  },
-  {
-    title: "Final failure",
-    description: <>Goes out when every retry is used up. Shows the outstanding balance and links the customer straight to paying it.</>,
-    image: "/img/business/autopay/notifications-05-final-failure-en.png",
-    imageAlt: "Final failure email in English with outstanding balance and next steps",
-  },
-]} />
+<StepShow>
+  <Step density={1} image="/img/business/autopay/notifications-01-upcoming-charge-en.png" alt="Upcoming charge reminder email in English">
+
+  **Upcoming charge.** Goes out before money moves. Shows the amount, billing date, and card on file, with a link to manage the subscription.
+
+  </Step>
+  <Step image="/img/business/autopay/notifications-03-payment-failed-en.png" alt="Payment failed email in English">
+
+  **Payment failed.** Goes out after a failed attempt while retries remain. Shows the reason, when the next retry runs, and a link to update the card.
+
+  </Step>
+  <Step density={1} image="/img/business/autopay/notifications-05-final-failure-en.png" alt="Final failure email in English with outstanding balance and next steps">
+
+  **Final failure.** Goes out when every retry is used up. Shows the outstanding balance and links the customer straight to paying it.
+
+  </Step>
+</StepShow>
 
 </TabItem>
 <TabItem value="ar" label="العربية">
 
-<StepGuide fitImages steps={[
-  {
-    title: "Upcoming charge",
-    description: <>Goes out before money moves. Shows the amount, billing date, and card on file, with a link to manage the subscription.</>,
-    image: "/img/business/autopay/notifications-02-upcoming-charge-ar.png",
-    imageAlt: "Upcoming charge reminder email in Arabic",
-  },
-  {
-    title: "Payment failed",
-    description: <>Goes out after a failed attempt while retries remain. Shows the reason, when the next retry runs, and a link to update the card.</>,
-    image: "/img/business/autopay/notifications-04-payment-failed-ar.png",
-    imageAlt: "Payment failed email in Arabic",
-  },
-  {
-    title: "Final failure",
-    description: <>Goes out when every retry is used up. Shows the outstanding balance and links the customer straight to paying it.</>,
-    image: "/img/business/autopay/notifications-06-final-failure-ar.png",
-    imageAlt: "Final failure email in Arabic with outstanding balance and next steps",
-  },
-]} />
+<StepShow>
+  <Step image="/img/business/autopay/notifications-02-upcoming-charge-ar.png" alt="Upcoming charge reminder email in Arabic">
+
+  **Upcoming charge.** Goes out before money moves. Shows the amount, billing date, and card on file, with a link to manage the subscription.
+
+  </Step>
+  <Step density={1} image="/img/business/autopay/notifications-04-payment-failed-ar.png" alt="Payment failed email in Arabic">
+
+  **Payment failed.** Goes out after a failed attempt while retries remain. Shows the reason, when the next retry runs, and a link to update the card.
+
+  </Step>
+  <Step image="/img/business/autopay/notifications-06-final-failure-ar.png" alt="Final failure email in Arabic with outstanding balance and next steps">
+
+  **Final failure.** Goes out when every retry is used up. Shows the outstanding balance and links the customer straight to paying it.
+
+  </Step>
+</StepShow>
 
 </TabItem>
 </Tabs>
@@ -139,73 +172,63 @@ From this page, a customer can:
 
 What the page shows depends on the subscription's state:
 
-<StepGuide fitImages steps={[
-  {
-    title: "Active",
-    description: <>Plan, status, next payment date, saved cards, and payment history on one page. Nothing is outstanding.</>,
-    image: "/img/business/autopay/portal-01-summary-active.png",
-    imageAlt: "Active subscription: customer details, subscription summary, payment methods, and payment history all on one page",
-  },
-  {
-    title: "Trialing",
-    description: <>A banner counts down to the trial's end, when the saved card is charged. Canceling first means no charge at all.</>,
-    image: "/img/business/autopay/portal-02-trialing.png",
-    imageAlt: "Trialing subscription with a banner counting down to the trial's end date",
-  },
-  {
-    title: "Cancellation pending",
-    description: <>Access runs to the end of the paid period, with <strong>Reactivate subscription</strong> available until then.</>,
-    image: "/img/business/autopay/portal-03-canceled-pending-reactivation.png",
-    imageAlt: "Canceled subscription pending the end of its period, with a Reactivate subscription option",
-  },
-  {
-    title: "Past due",
-    description: <>The page shows the overdue date and the failed card, with <strong>Pay Now</strong> to clear the balance.</>,
-    image: "/img/business/autopay/recovery-01-past-due.png",
-    imageAlt: "The past-due self-service page: overdue-since date, the failed card flagged, and a Failed row in the payment history",
-  },
-  {
-    title: "Expired",
-    description: <>Billing stopped at the end date. History stays readable and every action is gone. Continuing means a new subscription.</>,
-    image: "/img/business/autopay/portal-04-expired.png",
-    imageAlt: "Expired subscription: billing stopped at the end date, actions removed, history still readable",
-  },
-]} />
+<StepShow>
+  <Step image="/img/business/autopay/portal-01-summary-active.png" alt="Active subscription: customer details, subscription summary, payment methods, and payment history all on one page">
+
+  **Active.** Plan, status, next payment date, saved cards, and payment history on one page. Nothing is outstanding.
+
+  </Step>
+  <Step image="/img/business/autopay/portal-02-trialing.png" alt="Trialing subscription with a banner counting down to the trial's end date">
+
+  **Trialing.** A banner counts down to the trial's end, when the saved card is charged. Canceling first means no charge at all.
+
+  </Step>
+  <Step image="/img/business/autopay/portal-03-canceled-pending-reactivation.png" alt="Canceled subscription pending the end of its period, with a Reactivate subscription option">
+
+  **Cancellation pending.** Access runs to the end of the paid period, with **Reactivate subscription** available until then.
+
+  </Step>
+  <Step image="/img/business/autopay/recovery-01-past-due.png" alt="The past-due self-service page: overdue-since date, the failed card flagged, and a Failed row in the payment history">
+
+  **Past due.** The page shows the overdue date and the failed card, with **Pay Now** to clear the balance.
+
+  </Step>
+  <Step image="/img/business/autopay/portal-04-expired.png" alt="Expired subscription: billing stopped at the end date, actions removed, history still readable">
+
+  **Expired.** Billing stopped at the end date. History stays readable and every action is gone. Continuing means a new subscription.
+
+  </Step>
+</StepShow>
 
 And these are the actions a customer can take:
 
-<StepGuide fitImages steps={[
-  {
-    title: "Add a card",
-    description: <>A secure card form opens on the page. Adding a card takes no payment, so the amount shows 0. The new card can become active immediately, and the next charge uses it.</>,
-    image: "/img/business/autopay/cards-02-add-card.png",
-    imageAlt: "Adding a card: a secure checkout where the customer enters and saves a new card to the subscription",
-  },
-  {
-    title: "Give a reason",
-    description: <>A short reason list, clearly marked optional. Your developer can read the reason through the API.</>,
-    image: "/img/business/autopay/cancellation-02-reason-options.png",
-    imageAlt: "Optional cancellation reason selection dialog",
-  },
-  {
-    title: "Confirm a cancellation",
-    description: <>The dialog states when access ends and that no further charges follow.</>,
-    image: "/img/business/autopay/cancellation-01-confirm.png",
-    imageAlt: "Cancellation confirmation dialog stating access continues until the end of the paid period",
-  },
-  {
-    title: "Undo the cancellation",
-    description: <>One click, no new checkout. The dialog previews the plan, amount, and next renewal date.</>,
-    image: "/img/business/autopay/reactivation-01-confirm.png",
-    imageAlt: "Reactivation confirmation previewing the plan, amount, and next renewal date before the customer confirms",
-  },
-  {
-    title: "Payment confirmed",
-    description: <>The balance clears and the subscription returns to Active.</>,
-    image: "/img/business/autopay/recovery-02-payment-confirmed.png",
-    imageAlt: "Payment confirmed screen after clearing an outstanding balance",
-  },
-]} />
+<StepShow>
+  <Step image="/img/business/autopay/cards-02-add-card.png" alt="Adding a card: a secure checkout where the customer enters and saves a new card to the subscription">
+
+  **Add a card.** A secure card form opens on the page. Adding a card takes no payment, so the amount shows 0. The new card can become active immediately, and the next charge uses it.
+
+  </Step>
+  <Step image="/img/business/autopay/cancellation-02-reason-options.png" alt="Optional cancellation reason selection dialog">
+
+  **Give a reason.** A short reason list, clearly marked optional. Your developer can read the reason through the API.
+
+  </Step>
+  <Step image="/img/business/autopay/cancellation-01-confirm.png" alt="Cancellation confirmation dialog stating access continues until the end of the paid period">
+
+  **Confirm a cancellation.** The dialog states when access ends and that no further charges follow.
+
+  </Step>
+  <Step image="/img/business/autopay/reactivation-01-confirm.png" alt="Reactivation confirmation previewing the plan, amount, and next renewal date before the customer confirms">
+
+  **Undo the cancellation.** One click, no new checkout. The dialog previews the plan, amount, and next renewal date.
+
+  </Step>
+  <Step image="/img/business/autopay/recovery-02-payment-confirmed.png" alt="Payment confirmed screen after clearing an outstanding balance">
+
+  **Payment confirmed.** The balance clears and the subscription returns to Active.
+
+  </Step>
+</StepShow>
 
 :::note A customer's cancellation waits for the end of the paid period
 It never takes effect immediately. Only your developer can cancel at once, through the API. Undo is available while the subscription is Active or Trialing and the cancellation is pending.
@@ -237,33 +260,43 @@ A subscription moves through seven states. Canceled and Expired are final. Click
 
 <AutoPayStates audience="business" />
 
-### Pending setup {#state-pending-setup}
+<Expander id="state-pending-setup" tone="warn" title="Pending setup">
 
 Ottu created the subscription and waits for the first payment. Ottu activates it automatically after your customer pays. Your part: nothing.
 
-### Trialing {#state-trialing}
+</Expander>
+<Expander id="state-trialing" tone="info" title="Trialing">
 
 The first payment was zero, so no money has moved. The customer only saved a card. Ottu charges the saved card at the next billing cycle. Canceling before the trial ends means no charge at all. Your part: nothing.
 
-### Active {#state-active}
+</Expander>
+<Expander id="state-active" tone="success" title="Active">
 
 Billing normally. The latest cycle was paid. Your part: give your customer the service.
 
-### Past Due {#state-past-due}
+</Expander>
+<Expander id="state-past-due" tone="danger" title="Past Due">
 
 Every retry on a cycle failed. The subscription waits for your customer to pay. Your part: decide what to do if it stays Past Due. See [When a payment fails](#when-a-payment-fails).
 
-### Canceled {#state-canceled}
+</Expander>
+<Expander id="state-canceled" tone="neutral" title="Canceled">
 
 Billing has stopped. A cancellation set for the end of the period, by your customer or your developer, lands here when that period ends. An immediate cancel by your developer lands here at once. Your part: nothing.
 
-### Expired {#state-expired}
+</Expander>
+<Expander id="state-expired" tone="neutral" title="Expired">
 
 The last cycle was paid and the next billing date would fall after the end date. Billing stopped. The history stays readable. Your part: nothing. To continue, create a new subscription.
 
-### Setup Failed {#state-setup-failed}
+</Expander>
+<Expander id="state-setup-failed" tone="neutral" title="Setup Failed">
 
 The customer canceled the checkout, did not pay within 24 hours, or paid but the card could not be saved. Ottu does not retry it. Your part: create a new subscription. If the customer paid, refund that payment in Payment Management. Ottu does not refund it automatically.
+
+
+
+</Expander>
 
 ### Billing cycles {#billing-cycles}
 

@@ -388,11 +388,39 @@
   cursor: pointer;
 }
 
+/* Chips are buttons: they say so on hover and press (#161111 R12). */
+.chip {
+  transition:
+    border-color 150ms ease,
+    color 150ms ease,
+    background-color 150ms ease,
+    transform 120ms ease-out;
+}
+
 .chip:hover,
 .chip:focus-visible,
 .chipOn {
   border-color: var(--o-primary);
   color: var(--o-primary);
+}
+
+.chip:hover,
+.chipOn {
+  background: color-mix(in srgb, var(--o-primary) 8%, var(--o-bg));
+}
+
+.chip:active {
+  transform: scale(0.97);
+}
+
+/* The cards of a story are clickable too. */
+.story :global(.react-flow__node-card) {
+  cursor: pointer;
+}
+
+.story :global(.react-flow__node-card:hover) .node {
+  border-color: var(--o-primary);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--o-primary) 18%, transparent);
 }
 
 /* controls="side": the side and journey buttons in a column left of the
@@ -419,6 +447,42 @@
 
 .controls .chip {
   justify-content: flex-start;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--o-text);
+  text-align: left;
+}
+
+.controls .chip:hover,
+.controls .chip:focus-visible,
+.controls .chipOn {
+  color: var(--o-primary);
+  background: color-mix(in srgb, var(--o-primary) 6%, var(--o-bg));
+}
+
+/* "3 steps" / "6 stops" on the right of a side-column chip. */
+.chipCount {
+  margin-left: auto;
+  color: var(--o-text-2);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.controlsLabel {
+  margin: 4px 0 2px;
+  color: var(--o-text-2);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* The explanation panel inside the side column. */
+.controls .panel {
+  width: auto;
+  min-height: 0;
+  font-size: 14px;
 }
 
 /* Between the sides and the journeys. */
@@ -629,6 +693,59 @@
   top: calc(var(--ifm-navbar-height, 60px) + 16px);
   flex: none;
   width: 300px;
+}
+
+/* textLeft: the explanation is page text on the left, the diagram on the
+   right (PANEL_TEXT_W in layout.ts). */
+/* Width and gap set inline from layout.ts (PANEL_TEXT_W, TEXT_LEFT_GAP). */
+.storyWrapTextLeft > .panel {
+  flex: none;
+  width: var(--text-left-w);
+}
+
+.storyWrapTextLeft > :last-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.panelText {
+  justify-content: flex-start;
+  padding: 4px 0 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: none;
+  font-size: 15px;
+}
+
+.panelText h4 {
+  font-size: 17px;
+}
+
+/* Beside the diagram the text needs no floor; under it (narrow screens) it
+   keeps the panel's 128px so picking a step does not move the page below. */
+.storyWrapTextLeft > .panelText {
+  min-height: 0;
+}
+
+.panelHint {
+  color: var(--ifm-color-emphasis-700);
+}
+
+/* Empty state: fills the panel's 128px floor, so the space reads as a slot waiting for a pick. */
+.panelEmpty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 116px;
+  padding: 16px 20px;
+  border: 1px dashed var(--ifm-color-emphasis-400);
+  border-radius: 10px;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.panelEmpty p {
+  margin: 0;
 }
 
 /* React Flow's attribution badge: keep it, but theme it (it was a grey block in dark mode). */
