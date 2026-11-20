@@ -95,8 +95,9 @@ const STATES: Record<
 };
 
 // The panel paragraph is: text, then "<strong>label:</strong> todo", then "See <more>.".
-// This is the only place the state text lives: the business page has no per-state
-// headings (D47), the developer page none either (D21). Backticks mark inline code.
+// KEEP IN SYNC: word for word with the per-state headings on both pages
+// (docs/business/autopay/index.mdx, docs/developers/payments/autopay/index.mdx).
+// Backticks mark inline code. Edit all three together.
 type Info = {
   text: string;
   label?: string;
@@ -111,7 +112,7 @@ const TEXT: Record<Audience, Record<Id, Info>> = {
       todo: "nothing.",
     },
     trial: {
-      text: "The first payment was zero, so no money has moved. The customer only saved a card. Ottu charges the saved card at the next billing cycle. Canceling before the trial ends means no charge at all.",
+      text: "The first payment was zero, so no money has moved. Ottu charges the saved card at the next billing cycle.",
       label: "Your part",
       todo: "nothing.",
     },
@@ -187,13 +188,6 @@ const rich = (t: string): React.ReactNode =>
   t.split("`").map((part, i) => (i % 2 ? <code key={i}>{part}</code> : part));
 
 const ids = Object.keys(STATES) as Id[];
-
-// Business page: who has to do something in each state (D47).
-const WHO: [group: string, states: Id[]][] = [
-  ["Ottu handles it", ["pending", "trial", "active", "canceled", "expired"]],
-  ["You decide", ["pastDue"]],
-  ["You act", ["failed"]],
-];
 
 const DEV_PAGE = "/developers/payments/autopay/";
 const BIZ_PAGE = "/business/autopay/";
@@ -370,7 +364,7 @@ export default function AutoPayStates({
   // Wide layout from the container's width alone (with hysteresis, see useWidthFlag).
   const wide = useWidthFlag(box, WIDE_W * 0.95 + 8);
   const narrow = !wide;
-  const [selected, setSelected] = useState<Id | null>(dev ? null : "pending");
+  const [selected, setSelected] = useState<Id | null>(null);
   // false when the selection came from the URL: no scrolling then.
   const [picked, setPicked] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -443,33 +437,6 @@ export default function AutoPayStates({
   };
 
   const info = selected ? TEXT[audience][selected] : null;
-  const who = dev ? null : (
-    <div style={{ marginTop: 20 }}>
-      <p>
-        <strong>Who does what</strong>
-      </p>
-      {WHO.map(([group, states]) => (
-        <div
-          key={group}
-          className={captionClass.chips}
-          style={{ padding: 0, alignItems: "center", marginTop: 8 }}
-        >
-          <span style={{ minWidth: 112 }}>{group}</span>
-          {states.map((id) => (
-            <button
-              key={id}
-              type="button"
-              aria-pressed={selected === id}
-              className={`${captionClass.chip} ${selected === id ? captionClass.chipOn : ""}`}
-              onClick={() => pick(id)}
-            >
-              {STATES[id].label}
-            </button>
-          ))}
-        </div>
-      ))}
-    </div>
-  );
   const panel =
     selected && info ? (
       <>
@@ -527,29 +494,16 @@ export default function AutoPayStates({
             that isn't final.
           </p>
         ) : null}
-        {who}
       </>
     ) : (
-      <>
-        <p className={captionClass.hint}>
-          The state you pick in the diagram is explained here. Press Escape to
-          clear.
-        </p>
-        {who}
-      </>
+      <p className={captionClass.hint}>
+        The state you pick in the diagram is explained here. Press Escape to
+        clear.
+      </p>
     );
 
   return (
     <div ref={box}>
-      {dev
-        ? null
-        : ids.map((i) => (
-            <span
-              key={i}
-              id={`state-${STATES[i].slug}`}
-              style={{ scrollMarginTop: 80 }}
-            />
-          ))}
       <CaptionLayout
         diagramMinWidth={flowMinWidth({ title: "", cards, arrows, height: 0 })}
         panel={panel}
