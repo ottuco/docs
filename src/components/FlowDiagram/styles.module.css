@@ -732,6 +732,22 @@
   color: var(--ifm-color-emphasis-700);
 }
 
+/* Empty state: fills the panel's 128px floor, so the space reads as a slot waiting for a pick. */
+.panelEmpty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 116px;
+  padding: 16px 20px;
+  border: 1px dashed var(--ifm-color-emphasis-400);
+  border-radius: 10px;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.panelEmpty p {
+  margin: 0;
+}
+
 /* React Flow's attribution badge: keep it, but theme it (it was a grey block in dark mode). */
 .canvas :global(.react-flow__attribution) {
   background: transparent;

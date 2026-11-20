@@ -12,18 +12,21 @@
 // With `id`, a link to #<id> opens the item (a closed <details> hides its text).
 import React, { useEffect, useRef } from "react";
 import Icon from "@mdi/react";
-import { mdiChevronDown } from "@mdi/js";
+import { mdiChevronRight } from "@mdi/js";
 import styles from "./styles.module.css";
 
 export default function Expander({
   title,
   open = false,
+  tone,
   id,
   children,
 }: {
   title: React.ReactNode;
   /** Start open. */
   open?: boolean;
+  /** A status dot before the title, in the colour the matching diagram state uses. */
+  tone?: "neutral" | "info" | "success" | "warn" | "danger";
   /** Anchor: a link to `#id` opens this item and scrolls to it. */
   id?: string;
   children: React.ReactNode;
@@ -41,10 +44,16 @@ export default function Expander({
     return () => window.removeEventListener("hashchange", openIfLinked);
   }, [id]);
   return (
-    <details ref={ref} id={id} className={styles.expander} open={open}>
+    <details
+      ref={ref}
+      id={id}
+      className={tone ? `${styles.expander} ${styles.withDot}` : styles.expander}
+      open={open}
+    >
       <summary className={styles.summary}>
+        <Icon path={mdiChevronRight} size={0.8} className={styles.chevron} />
+        {tone && <span className={`${styles.dot} ${styles[tone]}`} aria-hidden="true" />}
         <span>{title}</span>
-        <Icon path={mdiChevronDown} size={0.8} className={styles.chevron} />
       </summary>
       <div className={styles.body}>{children}</div>
     </details>
