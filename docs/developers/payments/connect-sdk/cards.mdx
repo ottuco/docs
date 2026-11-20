@@ -1,0 +1,187 @@
+---
+title: Cards & Saved Cards
+description: Accept card payments and let returning customers pay with saved cards in the Connect SDK — card form, hosted redirect, CVV, deletion and 3-D Secure.
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { CONNECT_SDK_CDN_URL } from "@site/src/constants/api";
+
+The [Connect SDK](./index.mdx) takes card payments in two ways: an **embedded card form** that collects card details on your checkout page, or a **hosted redirect** that sends the customer to the [payment gateway](/glossary/)'s own page. For returning customers it also lists their **saved cards**, so they pay with a single tap and, where the gateway asks for it, their CVV.
+
+Card details never touch your page. The card form is a secure iframe owned by the gateway, and saved cards are paid with a [token](../../cards-and-tokens/tokenization.mdx), so your integration stays out of [PCI DSS](/glossary/) card-data scope.
+
+:::tip Boost Your Integration
+Ottu offers SDKs and tools to speed up your integration. See [Getting Started](/developers/getting-started/#boost-your-integration) for all available options.
+:::
+
+## When to Use
+
+- **Accept cards on your own checkout page** — use the embedded card form so customers never leave your site.
+- **Hand card entry to the gateway** — use the hosted redirect when the gateway's page must collect the card, or the card form isn't enabled for your account.
+- **Speed up repeat purchases** — pass a `customer_id` when you create the session, and the customer's saved cards appear at the top of their choices.
+- **Save a card for later** — let the customer tick the save-card toggle during payment, or create a save-card session to store a card without charging it.
+
+## Setup
+
+Before the Connect SDK can show cards:
+
+1. **A card gateway on your account.** Cards are paid through a [payment gateway code](../payment-methods.md) (`pg_code`) that Ottu sets up for you. Pass it in `pg_codes` when you create the session with the [Checkout API](../checkout-api.mdx).
+2. **The embedded card form enabled (optional).** The on-page card form is enabled per merchant according to your tier. To enable it for your account, contact [csd@ottu.com](mailto:csd@ottu.com). Without it, the card gateway uses the hosted redirect.
+3. **A tokenization-capable gateway for saved cards (optional).** Saving and reusing cards needs a gateway that supports [tokenization](../../cards-and-tokens/tokenization.mdx) and a `customer_id` on the session.
+4. **The SDK loaded on your page.** See the [Quick Start](./quick-start.mdx).
+
+:::warning
+Create the session on your server. The [Checkout API](../checkout-api.mdx) call uses your private API key, which must never reach the browser. The Connect SDK only needs your [public API key](/developers/getting-started/authentication#public-key).
+:::
+
+## Guide
+
+### Workflow
+
+1. Your server creates a session with the [Checkout API](../checkout-api.mdx), including a card `pg_code` and, for saved cards, a `customer_id`.
+2. The Connect SDK renders the payment methods. A card gateway shows as a **card row** with up to five card-brand logos; each saved card shows as its own row.
+3. The customer selects a card method:
+   - **Embedded card form** — the form opens under the row. The customer enters the card and presses Pay.
+   - **Hosted redirect** — Pay sends the customer to the gateway's page.
+   - **Saved card** — the customer enters the CVV inline if the gateway asks for it, then presses Pay.
+4. The SDK calls your [`onBeforePayment`](./reference.mdx#onbeforepayment) hook, if you set one, and waits for it.
+5. The SDK submits the payment. If the bank asks for [3-D Secure](/glossary/), the customer authenticates (see [3-D Secure](#3-d-secure) below).
+6. The SDK calls [`onSuccess`](./reference.mdx#onsuccess), [`onError`](./reference.mdx#onerror) or [`onCancel`](./reference.mdx#oncancel). For redirect flows no callback fires: the result reaches you through the [payment webhook](../../webhooks/payment-events.md) and the customer lands on your `redirect_url`.
+
+### Step-by-Step
+
+#### 1. Create the session on your server
+
+Include the card gateway in `pg_codes`. Add `customer_id` if you want the customer's saved cards to appear and new cards to be saveable. See [Checkout API](../checkout-api.mdx) for the full request.
+
+#### 2. Choose the card experience with `formsOfPayment`
+
+[`formsOfPayment`](./reference.mdx#formsofpayment) filters what the checkout offers. Leave it out to allow everything your session supports. When you set it, these names control cards (exact, case-sensitive):
+
+| Name | What it controls |
+|---|---|
+| `ottuPG` | Whether card gateways appear at all. |
+| `jazz` | Whether a card gateway that supports it opens the **embedded card form**. Without `jazz`, the same gateway uses the **hosted redirect**. |
+| `tokenPay` | Whether the customer's **saved cards** appear. |
+
+<CodeBlock language="html" title="Cards only: embedded form and saved cards">{`<div id="ottu-checkout"></div>
+<script src="${CONNECT_SDK_CDN_URL}"></script>
+<script>
+  const sdk = new OttuSDK.ConnectSDK();
+  sdk.init({
+    merchant_id: "sandbox.ottu.net",
+    session_id: "your_session_id",
+    apiKey: "your_public_api_key",
+    selector: "#ottu-checkout",
+    formsOfPayment: ["ottuPG", "jazz", "tokenPay"],
+    onSuccess: (data) => { window.location.href = data.redirect_url; },
+    onError: (data) => console.error("Payment error:", data.message),
+    onCancel: (data) => console.log("Payment canceled:", data.message),
+  }).catch((err) => console.error("Checkout failed to load", err));
+</script>`}</CodeBlock>
+
+:::note
+If the card form can't load in the customer's browser, the SDK falls back to the hosted redirect for that gateway, so the customer can still pay.
+:::
+
+#### 3. Handle the result
+
+- **Embedded card form or saved card:** the SDK calls `onSuccess` on approval. It does not navigate for you: redirect the customer yourself, usually to `data.redirect_url`.
+- **Hosted redirect:** no callback fires once the customer leaves for the gateway. Confirm the result with the [payment webhook](../../webhooks/payment-events.md).
+
+In every case, treat the [webhook](../../webhooks/payment-events.md) as the source of truth before you fulfil the order.
+
+#### Callback payloads for cards
+
+Card callbacks carry a `form_of_payment` field so you can tell the flows apart:
+
+| Flow | `form_of_payment` | `onBeforePayment` `method` |
+|---|---|---|
+| Embedded card form / hosted redirect | `ottu_pg` | The card gateway's `pg_code` |
+| Saved card | `token_pay` | The saved card's `pg_code` |
+
+For card flows, [`onBeforePayment`](./reference.mdx#onbeforepayment) also receives a `card` object with the masked `number` (first six and last four digits), `brand`, `scheme`, `expiry_month` and `expiry_year`. Use it to apply BIN-based discounts or checks before the payment is submitted. If your hook rejects, the payment is cancelled quietly and the customer can try again.
+
+### Use Cases
+
+#### Saved cards
+
+When the session has a `customer_id` and that customer has cards saved on a tokenization-capable gateway, the Connect SDK lists them after the other payment methods:
+
+- **Display.** Each card shows its brand logo, `brand •••• last4` and the expiry (`Exp MM/YY`).
+- **Preferred card.** The customer's preferred card is selected first, if it can be used.
+- **CVV.** If the gateway requires the CVV for saved cards, a CVV field appears inline in the card's row. It is checked each time the customer presses Pay.
+- **Expired cards.** An expired card stays in the list, marked *Expired on MM/YY*, but can't be selected.
+- **Deleting.** The customer can delete a card with the trash icon and confirm the prompt. The card is removed from their profile. No callback fires; to manage cards from your server instead, use the [User Cards API](../../cards-and-tokens/user-cards.mdx).
+
+To hide saved cards, leave `tokenPay` out of `formsOfPayment`.
+
+#### Saving a new card
+
+When the selected gateway supports saving cards, a **save-card toggle** appears. It is on by default; the customer can switch it off. If the payment succeeds with the toggle on, the card is tokenized and the token reaches you in the [payment webhook](../../webhooks/payment-events.md). See [Tokenization with Payment](../../cards-and-tokens/tokenization.mdx#tokenization-with-payment).
+
+The session's `payment_type` changes the toggle:
+
+| `payment_type` | Toggle |
+|---|---|
+| `one_off` (a normal payment) | Shown when the gateway supports saving; the customer decides. |
+| `save_card` | Forced on and locked — the session exists to save the card. See [Tokenization without Payment](../../cards-and-tokens/tokenization.mdx#tokenization-without-payment). |
+| `auto_debit` | Forced on and locked — the card is saved for [recurring payments](../../cards-and-tokens/recurring-payments.mdx). |
+
+The toggle never appears for the hosted redirect.
+
+#### 3-D Secure
+
+When the bank asks for [3-D Secure](/glossary/), the Connect SDK handles it in one of two ways, decided by the gateway:
+
+- **Embedded challenge.** The SDK replaces the checkout with the bank's challenge on your page and calls [`onThreeDSChallenge`](./reference.mdx#onthreedschallenge) when it is shown. When the customer finishes, the checkout comes back and the SDK calls `onSuccess`, `onError` or `onCancel` as usual.
+- **Redirect.** The SDK shows a short "Redirecting…" screen and sends the customer to the bank's page. **No callback fires.** Confirm the result with the [payment webhook](../../webhooks/payment-events.md); the customer then lands on your `redirect_url`.
+
+To place the embedded challenge somewhere specific, pass `selectors.threeds` (see [`selectors`](./reference.mdx#selectors)).
+
+:::warning
+The `onThreeDSChallenge` payload includes the bank's challenge HTML and connection details. Don't log or store it whole.
+:::
+
+#### Declines
+
+A decline from the gateway (status `canceled` or `failed`) arrives in [`onCancel`](./reference.mdx#oncancel), not `onError`, and the SDK shows the gateway's reason to the customer. `onError` is for errors: a gateway `error` status, a network or server failure, or a timeout. See [Error Handling](./errors.mdx).
+
+#### Your own card UI
+
+If you want to build the surrounding checkout yourself and only embed the card fields, use [Card Form Mode](./reference.mdx#card-form-mode): `initCardForm()` renders just the card form, and you drive it with `tokenizeCard()` and `submitCardPayment()`.
+
+## Best Practices
+
+- **Confirm every payment with the webhook.** Redirect and 3-D Secure redirect flows fire no callback, and the browser can close at any time. Fulfil orders from the [payment webhook](../../webhooks/payment-events.md), not from `onSuccess` alone.
+- **Pass a stable `customer_id`.** Saved cards are tied to it. Use your own customer identifier, the same on every session for that customer.
+- **Keep `onBeforePayment` fast.** The SDK waits for it before submitting; the customer sees the Pay button busy until it resolves.
+- **Test with sandbox cards.** Use the [test cards](../sandbox.mdx) for your gateway, including the 3-D Secure cards, before going live.
+
+## FAQ
+
+#### Why does my card gateway redirect instead of showing the card form?
+
+The embedded card form needs to be enabled for your account (contact [csd@ottu.com](mailto:csd@ottu.com)), and `jazz` must be allowed in `formsOfPayment` if you set it. If the card form fails to load in the browser, the SDK also falls back to the redirect.
+
+#### Why don't saved cards appear?
+
+Check that the session has a `customer_id`, the customer has cards saved on the session's gateway, and `tokenPay` is allowed in `formsOfPayment` if you set it.
+
+#### Do I get a callback when a customer deletes a saved card?
+
+No. Deletion happens in the checkout without a callback. Use the [User Cards API](../../cards-and-tokens/user-cards.mdx) to list a customer's cards from your server.
+
+#### Why did a declined card call `onCancel`?
+
+The Connect SDK reports gateway declines (`canceled` or `failed`) through `onCancel`. `onError` is reserved for errors. See [Error Handling](./errors.mdx).
+
+## What's Next?
+
+- [Quick Start](./quick-start.mdx) — load the SDK and take your first payment.
+- [API Reference](./reference.mdx) — every `init` option, method and callback.
+- [Tokenization](../../cards-and-tokens/tokenization.mdx) — save cards with and without a payment.
+- [Recurring Payments](../../cards-and-tokens/recurring-payments.mdx) — charge saved cards with auto-debit.
+- [Payment Webhooks](../../webhooks/payment-events.md) — confirm results on your server.
