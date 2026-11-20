@@ -291,17 +291,59 @@
   font-weight: 600;
 }
 
+/* "Extracted": what the step took from its response, like a diff's added line. */
+.pickedTag {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--ottu-extracted-text);
+  background: var(--ottu-extracted-bg);
+}
+
 .pickedNote {
   color: var(--ifm-color-emphasis-700);
 }
 
-/* The body a step sent and its response, side by side (stacked on phones). */
+/* The body a step sent, then its response: stacked and folded (#161111 R16). */
 .stepCall {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 8px;
+  gap: 6px;
   margin-top: 10px;
 }
+
+.stepFold {
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.stepFold > summary {
+  padding: 6px 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--ifm-color-emphasis-100);
+}
+
+.stepFold[open] > summary {
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.stepFoldHint {
+  font-weight: 400;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.stepFold .stepPanel {
+  border: 0;
+  border-radius: 0;
+}
+
+
+
 
 .stepPanel {
   margin: 0;

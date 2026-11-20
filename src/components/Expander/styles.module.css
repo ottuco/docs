@@ -1,0 +1,72 @@
+/* Expander: one bordered row per item; consecutive items share borders. */
+.expander {
+  margin: 0;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 10px;
+  background: var(--ifm-background-surface-color);
+}
+
+.expander + .expander {
+  margin-top: 8px;
+}
+
+/* The last of a group keeps the page's paragraph spacing before what follows. */
+.expander:not(:has(+ .expander)) {
+  margin-bottom: var(--ifm-paragraph-margin-bottom, 1.25rem);
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background-color 150ms ease;
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.summary:hover {
+  background: var(--ifm-color-emphasis-100);
+}
+
+.summary:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+.chevron {
+  flex: none;
+  color: var(--ifm-color-emphasis-700);
+  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.expander[open] .chevron {
+  transform: rotate(180deg);
+}
+
+.expander[open] > .summary {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.body {
+  padding: 4px 16px 14px;
+}
+
+.body > :last-child {
+  margin-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron,
+  .summary {
+    transition: none;
+  }
+}
