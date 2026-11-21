@@ -23,13 +23,6 @@ export const SANDBOX: ConnectEnv = {
   sdkApiKey: "13df331cb989d68313b9141e2094d3f042c6d157",
 };
 
-export const KSA: ConnectEnv = {
-  merchantId: "ksa.ottu.dev",
-  connectBaseUrl: "https://ksa.ottu.dev",
-  connectApiKey: "uUjUqczM.P5PqlXx8zyuFUQVk19PLxfHBZu8rG4Uy",
-  sdkApiKey: "88a460b42a0f8bec4011da23ce1d547bd04e8afc",
-};
-
 // ⬇️ THE GLOBAL SWITCH for the LIVE interactive demos (Checkout / Recurring /
 // PaymentJourney / Wallet) + the API-explorer "try it". docs.ottu.com
 // advertises only sandbox.ottu.net, so everything runs on SANDBOX.
