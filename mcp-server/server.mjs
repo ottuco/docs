@@ -312,6 +312,8 @@ export async function handleSeedWallet(req, res, deps = {}) {
         metadata: { source: "docs_walletdemo", synthetic: true, merchant: merchant.merchantId },
       }),
       signal: AbortSignal.timeout(WALLET_TIMEOUT_MS),
+      // The bearer token goes to the wallet host only, never to a redirect.
+      redirect: "error",
     });
   } catch (err) {
     console.error("[seed-wallet] upstream fetch failed:", err.message);
