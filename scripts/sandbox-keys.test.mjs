@@ -25,7 +25,40 @@ test("no KSA dev-server credentials in the frontend", () => {
 test("sandbox demo credentials and the active switch are unchanged", () => {
   const block = src.match(/export const SANDBOX: ConnectEnv = \{.*?\n\};\n/s);
   assert.ok(block, "SANDBOX block not found");
-  const sha = createHash("sha256").update(block[0]).digest("hex");
+  // Comments are not behavior: drop whole-line `//` comments and trailing
+  // `// nosemgrep ...` notes (docs-D1 adds them) before hashing.
+  const code = block[0]
+    .split("\n")
+    .filter((l) => !/^\s*\/\//.test(l))
+    .map((l) => l.replace(/\s*\/\/ nosemgrep.*$/, ""))
+    .join("\n");
+  const sha = createHash("sha256").update(code).digest("hex");
   assert.equal(sha, SANDBOX_BLOCK_SHA256, "SANDBOX block changed");
   assert.ok(/export const ACTIVE_CONNECT: ConnectEnv = SANDBOX;/.test(src), "ACTIVE_CONNECT is not SANDBOX");
+});
+
+// docs-D1 (A): the sandbox.ottu.net keys and the API Explorer demo password
+// stay on purpose, as documented public demo values. Each is marked where it
+// sits, so the next reader (and Semgrep) sees the reason.
+const explorer = readFileSync(
+  new URL("../src/theme/ApiExplorer/Authorization/index.tsx", import.meta.url),
+  "utf8",
+);
+
+test("sandbox demo key is marked as an accepted public demo key", () => {
+  const lines = src.split("\n");
+  const i = lines.findIndex((l) => /^\s*connectApiKey:\s*"/.test(l));
+  assert.ok(i > 0, "connectApiKey line not found");
+  const near = lines.slice(Math.max(0, i - 3), i + 1).join("\n");
+  assert.ok(/nosemgrep: detected-generic-api-key/.test(near), "no nosemgrep marker next to connectApiKey");
+  assert.ok(/public/i.test(near) && /sandbox/i.test(near), "marker has no public sandbox reason");
+});
+
+test("explorer demo password is documented as a public demo value", () => {
+  const lines = explorer.split("\n");
+  const i = lines.findIndex((l) => /^const DEFAULT_PASSWORD\s*=/.test(l));
+  assert.ok(i > 0, "DEFAULT_PASSWORD line not found");
+  const near = lines.slice(Math.max(0, i - 3), i + 1).join("\n");
+  assert.ok(/public demo/i.test(near), "no public-demo comment next to DEFAULT_PASSWORD");
+  assert.ok(/nosemgrep/.test(near), "no nosemgrep reason next to DEFAULT_PASSWORD");
 });
