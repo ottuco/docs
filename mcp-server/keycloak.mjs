@@ -38,6 +38,7 @@ export async function getKeycloakToken({ url, realm, clientId, clientSecret }) {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body,
     signal: AbortSignal.timeout(TOKEN_TIMEOUT_MS),
+    redirect: "error", // the client secret goes to Keycloak only
   });
 
   if (!response.ok) {
