@@ -12,6 +12,7 @@
 //   });
 
 const CLOCK_SKEW_MS = 30_000;
+const TOKEN_TIMEOUT_MS = 10_000;
 const tokenCache = new Map(); // cacheKey → { accessToken, expiresAtMs }
 
 export async function getKeycloakToken({ url, realm, clientId, clientSecret }) {
@@ -36,11 +37,14 @@ export async function getKeycloakToken({ url, realm, clientId, clientSecret }) {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body,
+    signal: AbortSignal.timeout(TOKEN_TIMEOUT_MS),
   });
 
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(`Keycloak token request failed (${response.status}): ${text || response.statusText}`);
+    // Keep Keycloak's answer out of the error: callers log it, and it must
+    // never reach a browser.
+    await response.body?.cancel().catch(() => {});
+    throw new Error(`Keycloak token request failed (${response.status})`);
   }
 
   const data = await response.json();
