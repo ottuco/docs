@@ -19,7 +19,7 @@ export interface ConnectEnv {
 export const SANDBOX: ConnectEnv = {
   merchantId: "sandbox.ottu.net",
   connectBaseUrl: "https://sandbox.ottu.net",
-  // nosemgrep: detected-generic-api-key -- public demo key on purpose (decision docs-D1, 2026-11-22): sandbox.ottu.net sandbox merchant, no real money. Rotate if the sandbox account ever gains more than sandbox payments.
+  // nosemgrep: detected-generic-api-key -- public demo key on purpose (decision docs-D1, 2026-11-22): sandbox.ottu.net sandbox merchant, treated as a public demo value. That the account takes sandbox payments only is still to be confirmed (#161377); rotate it if it ever takes more.
   connectApiKey: "Fxi63E9x.AiYMnCCXcBVr657gs4N3ex3MZdeAeWDy",
   // nosemgrep: detected-generic-api-key -- public demo SDK key on purpose, same reason as connectApiKey above
   sdkApiKey: "13df331cb989d68313b9141e2094d3f042c6d157",
