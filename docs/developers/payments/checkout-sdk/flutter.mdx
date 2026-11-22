@@ -794,27 +794,17 @@ void _handleError(String message) {
 ### Basic Example
 
 ```dart
-ValueListenableBuilder(
-  valueListenable: _checkoutHeight,
-  builder: (context, height, child) {
-    return SizedBox(
-      height: height.toDouble(),
-      child: OttuCheckoutWidget(
-        arguments: CheckoutArguments(
-          merchantId: "alpha.ottu.net",
-          apiKey: 'your Api key',
-          sessionId: 'your session id',
-          amount: 20.0,
-          showPaymentDetails: true,
-          paymentOptionsDisplaySettings: PaymentOptionsDisplaySettings(
-            mode: PaymentOptionsDisplayMode.BOTTOM_SHEET,
-            visibleItemsCount: 5,
-            defaultSelectedPgCode: "",
-          ),
-        ),
-      ),
-    );
-  },
+CheckoutArguments(
+  merchantId: "alpha.ottu.net",
+  apiKey: 'your Api key',
+  sessionId: 'your session id',
+  amount: 20.0,
+  showPaymentDetails: true,
+  paymentOptionsDisplaySettings: PaymentOptionsDisplaySettings(
+    mode: PaymentOptionsDisplayMode.BOTTOM_SHEET,
+    visibleItemsCount: 5,
+    defaultSelectedPgCode: "",
+  ),
 ),
 ```
 
