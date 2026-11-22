@@ -92,7 +92,7 @@ function sendTooLarge(res) {
   sendJson(res, 413, { error: "payload_too_large" }, { Connection: "close" });
 }
 
-function handleWebhookPost(orderId, req, res) {
+export function handleWebhookPost(orderId, req, res) {
   if (!ORDER_ID_RE.test(orderId)) {
     // Drain so the client sees the answer, not a reset.
     req.resume();
