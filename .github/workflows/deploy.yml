@@ -5,15 +5,22 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   build:
     runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "20.19.6"
           cache: "npm"
@@ -39,16 +46,21 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    permissions: {}
     steps:
       - name: Trigger DigitalOcean App Platform Deployment
         id: deploy
+        env:
+          DO_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          DO_APP_ID: ${{ secrets.DO_APP_ID_PROD }}
         run: |
           echo "Deploying to production environment..."
 
           resp=$(curl -sS -X POST \
-            -H "Authorization: Bearer ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" \
+            -H "Authorization: Bearer $DO_TOKEN" \
             -H "Content-Type: application/json" \
-            "https://api.digitalocean.com/v2/apps/${{ secrets.DO_APP_ID_PROD }}/deployments" \
+            "https://api.digitalocean.com/v2/apps/$DO_APP_ID/deployments" \
             --fail-with-body)
           id=$(echo "$resp" | jq -r '.deployment.id')
           echo "Triggered deployment $id"
@@ -59,22 +71,33 @@ jobs:
       # URL at startup, which during a deploy is still the previous build).
       # Best-effort: this step must never fail the workflow.
       - name: Wait for deploy, then refresh MCP index
+        env:
+          DO_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          DO_APP_ID: ${{ secrets.DO_APP_ID_PROD }}
+          DEPLOYMENT_ID: ${{ steps.deploy.outputs.deployment_id }}
+          # Sent on POST /mcp/refresh; the mcp service checks it once
+          # MCP_REFRESH_TOKEN is set there too (#161374).
+          MCP_REFRESH_TOKEN: ${{ secrets.MCP_REFRESH_TOKEN }}
         run: |
-          app="${{ secrets.DO_APP_ID_PROD }}"
-          id="${{ steps.deploy.outputs.deployment_id }}"
+          app="$DO_APP_ID"
+          id="$DEPLOYMENT_ID"
           if [ -z "$id" ] || [ "$id" = "null" ]; then
             echo "No deployment id — skipping refresh."; exit 0
           fi
-          for i in $(seq 1 60); do
+          for _ in $(seq 1 60); do
             phase=$(curl -sS \
-              -H "Authorization: Bearer ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" \
+              -H "Authorization: Bearer $DO_TOKEN" \
               "https://api.digitalocean.com/v2/apps/$app/deployments/$id" \
               | jq -r '.deployment.phase')
             echo "deployment $id phase=$phase"
             case "$phase" in
               ACTIVE)
                 echo "Deployment live — refreshing MCP index..."
-                curl -sS -X POST https://docs.ottu.com/mcp/refresh && echo " MCP index refreshed"
+                if curl -sS -X POST -H "x-mcp-refresh-token: $MCP_REFRESH_TOKEN" --fail-with-body https://docs.ottu.com/mcp/refresh; then
+                  echo " MCP index refreshed"
+                else
+                  echo " MCP index refresh failed (best-effort, ignored)"
+                fi
                 exit 0 ;;
               ERROR|CANCELED|SUPERSEDED)
                 echo "Deployment ended as $phase — skipping refresh."; exit 0 ;;
