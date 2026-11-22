@@ -700,10 +700,43 @@ async function testRelayPollAnswerUnchanged() {
     const statuses = await postToRelay(texts.map((t) => [orderId, t]));
     if (statuses.some((s) => s !== 200)) return fail(name, `not all accepted: ${statuses.join(",")}`);
     const stamp = (s) => s.replace(/"receivedAt":"[^"]+"/g, '"receivedAt":"T"');
-    for (const q of ["", "?since=-1", "?since=0", "?since=3", "?since=99", "?since=-3", "?since=abc"]) {
+    // A `since` below -1 is left out on purpose: it now answers like -1 (see
+    // testRelayPollNegativeSince); the demo never sends one.
+    for (const q of ["", "?since=-1", "?since=0", "?since=3", "?since=99", "?since=abc"]) {
       const before = stamp(old.poll(orderId, `/${orderId}/events.json${q}`));
       const after = stamp(await pollRelay(orderId, q));
       if (before !== after) return fail(name, `since ${q || "(none)"} differs:\n${before}\n${after}`);
+    }
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+async function testRelayPollNegativeSince() {
+  const name = "Webhook relay: a `since` below -1 answers like -1, fast and small";
+  try {
+    await loadServerModule();
+    const unknown = `never-posted-neg-${Date.now()}`;
+    const empty = '{"events":[],"lastId":-1}';
+    // Cheap values first, so the old code fails here before the big one.
+    for (const q of ["?since=-2", "?since=-100000"]) {
+      const answer = await pollRelay(unknown, q);
+      if (answer !== empty) return fail(name, `unknown id ${q}: ${answer.length} bytes, expected ${empty}`);
+    }
+    const t0 = Date.now();
+    const big = await pollRelay(unknown, "?since=-100000000");
+    const ms = Date.now() - t0;
+    if (big !== empty) return fail(name, `unknown id since=-100000000: ${big.length} bytes`);
+    if (ms > 1000) return fail(name, `unknown id since=-100000000 took ${ms} ms`);
+    // On an id with events, a negative `since` gives the same answer as -1.
+    const orderId = `neg-${Date.now()}`;
+    const statuses = await postToRelay([[orderId, '{"a":1}'], [orderId, '{"b":2}']]);
+    if (statuses.some((s) => s !== 200)) return fail(name, `not all accepted: ${statuses.join(",")}`);
+    const fromStart = await pollRelay(orderId, "?since=-1");
+    for (const q of ["?since=-3", "?since=-100000000"]) {
+      const answer = await pollRelay(orderId, q);
+      if (answer !== fromStart) return fail(name, `${q} differs from since=-1:\n${answer.slice(0, 200)}\n${fromStart}`);
     }
     pass(name);
   } catch (err) {
@@ -825,6 +858,7 @@ async function run() {
   await testRelayMemoryFollowsBytes();
   await testRelayBytesPerOrderCap();
   await testRelayPollAnswerUnchanged();
+  await testRelayPollNegativeSince();
 
   console.log(`\n  ${passed} passed, ${failed} failed\n`);
 
