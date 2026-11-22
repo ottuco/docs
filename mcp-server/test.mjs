@@ -370,6 +370,22 @@ async function testSearchNoMatch() {
   pass("docs_search returns no page when no word matches");
 }
 
+// A query is cut to its first 1000 characters: one long query (a word said
+// 27,000 times) used to keep the index busy for most of a second (#161374).
+// Here the only word that matches sits after the cut, so nothing is found.
+async function testSearchQueryIsCut() {
+  const name = "docs_search reads only the first 1000 characters of a query";
+  const text = await callTool("docs_search", { query: `${"x".repeat(2000)} settlements` });
+  if (firstUrl(text)) return fail(name, `got ${firstUrl(text)}: the words after 1000 characters were searched`);
+  // The cut falls at a word's end, so a long query still finds its page.
+  const long = await callTool("docs_search", { query: "settlements ".repeat(200) });
+  if (firstUrl(long) !== `${DOCS_ORIGIN}/business/payment-management/settlements`) return fail(name, `long query: ${firstUrl(long)}`);
+  // A normal query is untouched.
+  const ok = await callTool("docs_search", { query: "settlements" });
+  if (firstUrl(ok) !== `${DOCS_ORIGIN}/business/payment-management/settlements`) return fail(name, `short query: ${firstUrl(ok)}`);
+  pass(name);
+}
+
 async function test404() {
   const res = await fetch(`${BASE_URL}/nonexistent/path/deep`);
   if (res.status !== 404) return fail("404 handler", `expected 404, got ${res.status}`);
@@ -531,17 +547,19 @@ async function testSeedRejectsOutOfRangeValues() {
   try {
     const { handleSeedWallet } = await loadServerModule();
     if (typeof handleSeedWallet !== "function") return fail(name, "server.mjs does not export handleSeedWallet");
+    // Each case names the check that must refuse it, so a 400 from another
+    // check (or a generic error) does not pass for the wrong reason.
     const cases = {
-      "big amount": { ...DEMO_SEED, amount: "999999999" },
-      "amount over cap": { ...DEMO_SEED, amount: "100.01" },
-      "zero amount": { ...DEMO_SEED, amount: "0" },
-      "amount not a number": { ...DEMO_SEED, amount: "ten" },
-      "currency": { ...DEMO_SEED, currency: "EUR" },
-      "customer without demo prefix": { ...DEMO_SEED, customer_id: "x" },
-      "customer with odd characters": { ...DEMO_SEED, customer_id: "demo_<b>hi</b>" },
-      "pg_code with odd characters": { ...DEMO_SEED, pg_code: "a/b" },
+      "big amount": [{ ...DEMO_SEED, amount: "999999999" }, "invalid_amount"],
+      "amount over cap": [{ ...DEMO_SEED, amount: "100.01" }, "invalid_amount"],
+      "zero amount": [{ ...DEMO_SEED, amount: "0" }, "invalid_amount"],
+      "amount not a number": [{ ...DEMO_SEED, amount: "ten" }, "invalid_amount"],
+      "currency": [{ ...DEMO_SEED, currency: "EUR" }, "invalid_currency"],
+      "customer without demo prefix": [{ ...DEMO_SEED, customer_id: "x" }, "invalid_customer_id"],
+      "customer with odd characters": [{ ...DEMO_SEED, customer_id: "demo_<b>hi</b>" }, "invalid_customer_id"],
+      "pg_code with odd characters": [{ ...DEMO_SEED, pg_code: "a/b" }, "invalid_pg_code"],
     };
-    for (const [label, body] of Object.entries(cases)) {
+    for (const [label, [body, code]] of Object.entries(cases)) {
       // The old handler sent each of these to the wallet.
       const oldUp = fakeUpstream();
       const old = await runHandler(legacySeedHandler({ ...oldUp, merchant: lib.SANDBOX_MERCHANT }), { body });
@@ -549,6 +567,7 @@ async function testSeedRejectsOutOfRangeValues() {
       const up = fakeUpstream();
       const r = await runHandler((req, res) => handleSeedWallet(req, res, up), { body });
       if (r.status !== 400) return fail(name, `${label}: expected 400, got ${r.status}`);
+      if (r.body !== JSON.stringify({ error: code })) return fail(name, `${label}: expected ${code}, got ${r.body}`);
       if (up.calls.length !== 0) return fail(name, `${label}: wallet was called`);
     }
     pass(name);
@@ -1024,6 +1043,7 @@ async function run() {
   await testFetchUnknownStaysNotFound();
   await testSearchSurvivesMissingAndCommonWords();
   await testSearchNoMatch();
+  await testSearchQueryIsCut();
   await test404();
   await testWebhookBodyCap();
   await testWebhookOrderIdFormat();
