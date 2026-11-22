@@ -8,6 +8,10 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # Wait a week before taking a new release, so a hijacked package version
+    # is usually caught and pulled before it reaches us.
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 10
     groups:
       npm-root:
@@ -33,6 +37,8 @@ updates:
     directory: "/mcp-server"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 10
     groups:
       npm-mcp-server:
@@ -43,3 +49,17 @@ updates:
     # See note above — manual upgrades only for this package.
     ignore:
       - dependency-name: "docusaurus-plugin-mcp-server"
+
+  # Actions are pinned by commit SHA (#161376); this keeps the pins current.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "build(deps)"
