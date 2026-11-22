@@ -370,6 +370,19 @@ async function testSearchNoMatch() {
   pass("docs_search returns no page when no word matches");
 }
 
+// A query is cut to its first 1000 characters: one long query (a word said
+// 27,000 times) used to keep the index busy for most of a second (#161374).
+// Here the only word that matches sits after the cut, so nothing is found.
+async function testSearchQueryIsCut() {
+  const name = "docs_search reads only the first 1000 characters of a query";
+  const text = await callTool("docs_search", { query: `${"x".repeat(2000)} settlements` });
+  if (firstUrl(text)) return fail(name, `got ${firstUrl(text)}: the words after 1000 characters were searched`);
+  // A normal query is untouched.
+  const ok = await callTool("docs_search", { query: "settlements" });
+  if (firstUrl(ok) !== `${DOCS_ORIGIN}/business/payment-management/settlements`) return fail(name, `short query: ${firstUrl(ok)}`);
+  pass(name);
+}
+
 async function test404() {
   const res = await fetch(`${BASE_URL}/nonexistent/path/deep`);
   if (res.status !== 404) return fail("404 handler", `expected 404, got ${res.status}`);
@@ -1027,6 +1040,7 @@ async function run() {
   await testFetchUnknownStaysNotFound();
   await testSearchSurvivesMissingAndCommonWords();
   await testSearchNoMatch();
+  await testSearchQueryIsCut();
   await test404();
   await testWebhookBodyCap();
   await testWebhookOrderIdFormat();
