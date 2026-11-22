@@ -12,6 +12,8 @@ import React, { Fragment, useEffect } from "react";
 import { ACTIVE_CONNECT } from "@site/src/utils/sandbox";
 
 const DEFAULT_USERNAME = "demo_user";
+// Public demo value on purpose (decision docs-D1, 2026-11-22): the sandbox.ottu.net demo account, treated as a public demo value. That it takes sandbox payments only is still to be confirmed (#161377).
+// nosemgrep: detected-generic-api-key -- public demo password, same reason as the sandbox keys in src/utils/sandbox.ts
 const DEFAULT_PASSWORD = "WY4Q9I1d5kHH3nJ";
 // Public sandbox demo key — tracks ACTIVE_CONNECT (sandbox.ottu.net). Bare key
 // only; the explorer prepends the "Api-Key " prefix for the Authorization header.

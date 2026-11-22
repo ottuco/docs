@@ -162,8 +162,8 @@ The `WalletDemo` (`/developers/payments/wallet/#live-demo`) cannot seed wallet b
 Per-merchant config is **non-secret hardcoded constants** — only true secrets (the Keycloak client secret) come from env vars.
 
 - **Frontend** (`src/utils/sandbox.ts`):
-  - `ConnectEnv` objects — `SANDBOX` (`sandbox.ottu.net`) and `KSA` (`ksa.ottu.dev`), each `{merchantId, connectBaseUrl, connectApiKey, sdkApiKey}`
-  - `ACTIVE_CONNECT` — the single global switch; every demo (CheckoutDemo / RecurringDemo / PaymentJourney / WalletDemo) reads its merchant host, Connect Api-Key, and SDK key from here. Currently `= KSA`. (Wallet only ships on `ksa.ottu.dev` today — switching to `SANDBOX` breaks the WalletDemo.)
+  - `ConnectEnv` object — only `SANDBOX` (`sandbox.ottu.net`), `{merchantId, connectBaseUrl, connectApiKey, sdkApiKey}`. Its keys are public demo values on purpose (decision docs-D1). Never put a key for a dev server (e.g. `ksa.ottu.dev`) here: this file ships in the public browser bundle (#161377). `scripts/sandbox-keys.test.mjs` guards it.
+  - `ACTIVE_CONNECT` — the single global switch; every demo (CheckoutDemo / RecurringDemo / PaymentJourney / WalletDemo) reads its merchant host, Connect Api-Key, and SDK key from here. Currently `= SANDBOX`.
   - `src/utils/walletDemoConfig.ts` (`WALLET_DEMO`) holds only the demo's non-host knobs — currency, seed/session amounts, and the Payment Methods `pgFilter` — layered on top of `ACTIVE_CONNECT`
 
 - **Backend constants** (`mcp-server/config.mjs`):
@@ -174,7 +174,7 @@ Per-merchant config is **non-secret hardcoded constants** — only true secrets 
   - `getKeycloakToken({url, realm, clientId, clientSecret})` — parameterized, cache keyed by `url|realm|clientId`
   - Reusable for any future backend service that needs Keycloak — not coupled to wallet
 
-**Adding a new merchant**: add a new `ConnectEnv` object in `sandbox.ts` (point `ACTIVE_CONNECT` at it to switch), add a matching config object in `mcp-server/config.mjs`, set the `*_KEYCLOAK_CLIENT_SECRET` env var in DO. No YAML, no env-var-naming convention.
+**Adding a new merchant**: only a public sandbox merchant whose keys are meant to be public (see docs-D1); add a new `ConnectEnv` object in `sandbox.ts` (point `ACTIVE_CONNECT` at it to switch), add a matching config object in `mcp-server/config.mjs`, set the `*_KEYCLOAK_CLIENT_SECRET` env var in DO. No YAML, no env-var-naming convention.
 
 ### Wallet Endpoint Contract (gotchas)
 
