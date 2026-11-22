@@ -14,6 +14,9 @@ const BASE_URL = process.env.BASE_URL || "https://docs.ottu.dev";
 const DATA_DIR = path.join(__dirname, "data");
 const DOCS_PATH = path.join(DATA_DIR, "docs.json");
 const INDEX_PATH = path.join(DATA_DIR, "search-index.json");
+// The plugin's FlexSearch provider with the 1000-character query cut: see
+// search.mjs. Plugin 0.11.0 takes a provider only as a module to import.
+const SEARCH_PROVIDER = new URL("./search.mjs", import.meta.url).href;
 
 // The flexsearch search index (built by docusaurus-plugin-mcp-server) can balloon
 // far beyond the docs themselves because of contextual indexing over full page
@@ -203,6 +206,10 @@ const SAFE_ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
 // The caller's address as the platform proxy saw it. DO App Platform sets
 // do-connecting-ip; otherwise the last X-Forwarded-For entry is the one the
 // nearest proxy appended. The first entry is whatever the caller wrote.
+// Trusting do-connecting-ip holds only behind DO's edge, which writes it over
+// whatever the caller sent. Reached any other way (a direct app URL, local
+// dev), a caller can set it and get a new per-address count on every request;
+// the global 300 a minute still holds then.
 export function clientIp(req) {
   const doIp = req.headers["do-connecting-ip"];
   if (typeof doIp === "string" && doIp.trim()) return doIp.trim();
@@ -488,6 +495,7 @@ async function start() {
       indexPath: INDEX_PATH,
       name: "ottu-docs",
       baseUrl: BASE_URL,
+      search: SEARCH_PROVIDER,
     });
     ready = true;
   }

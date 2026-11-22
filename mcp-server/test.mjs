@@ -11,8 +11,10 @@ import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import http from "http";
+import os from "os";
 import v8 from "v8";
 import vm from "vm";
+import { loadIndexer } from "docusaurus-plugin-mcp-server";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = 9876;
@@ -25,11 +27,46 @@ let origin; // stands in for the docs site that serves /_mcp-data
 const DOCS_ORIGIN_PORT = 9877;
 const DOCS_ORIGIN = `http://localhost:${DOCS_ORIGIN_PORT}`;
 
-// dev runs docusaurus-plugin-mcp-server 0.11.0 without the search provider of
-// main, so the stand-in docs site serves empty artifacts: enough for the MCP
-// server to become ready and list its tools.
+const page = (route, title, description, markdown, headings = []) => ({
+  route,
+  title,
+  description,
+  markdown,
+  headings: headings.map((text) => ({ level: 2, text, id: text })),
+});
+
+// A handful of pages, indexed the same way the site build indexes the docs
+// (docusaurus-plugin-mcp-server 0.11.0 with the patch in patches/).
+const PAGES = [
+  page("/", "Docs home", "Start here.", "Welcome, merchant. Open the dashboard."),
+  page(
+    "/business/users-and-access/password",
+    "Change or Reset Your Password",
+    "Change your password or have it reset.",
+    "A merchant user can change the password in the dashboard, or ask for a password reset.",
+    ["I forgot my password"]
+  ),
+  page(
+    "/business/payment-management/settlements",
+    "Settlements",
+    "Where the money goes.",
+    "The merchant bank settles payments. The dashboard shows each payment.",
+    ["My customer paid but the money is not in my bank"]
+  ),
+];
+
+// The stand-in docs site serves a real (small) index, so docs_search answers
+// the way it does on docs.ottu.dev.
 async function startDocsOrigin() {
-  const artifacts = new Map([["docs.json", {}], ["search-index.json", {}]]);
+  const indexer = await loadIndexer("flexsearch");
+  await indexer.initialize({
+    baseUrl: DOCS_ORIGIN,
+    serverName: "test",
+    serverVersion: "1.0.0",
+    outputDir: os.tmpdir(),
+  });
+  await indexer.indexDocuments(PAGES);
+  const artifacts = await indexer.finalize();
   origin = http.createServer((req, res) => {
     const name = (req.url || "").replace("/_mcp-data/", "");
     if (!artifacts.has(name)) {
@@ -93,6 +130,39 @@ async function startServer() {
 function stopServer() {
   if (server) server.kill("SIGTERM");
   if (origin) origin.close();
+}
+
+// Calls an MCP tool the way a client does and returns the text it answers.
+async function callTool(name, args) {
+  const res = await fetch(`${BASE_URL}/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json, text/event-stream",
+    },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "tools/call",
+      params: { name, arguments: args },
+    }),
+  });
+  const raw = await res.text();
+  const json = raw.trimStart().startsWith("{")
+    ? raw
+    : raw
+        .split("\n")
+        .filter((l) => l.startsWith("data:"))
+        .map((l) => l.slice(5))
+        .join("");
+  const body = JSON.parse(json);
+  return (body.result?.content ?? []).map((c) => c.text).join("\n");
+}
+
+// The first address a docs_search answer lists.
+function firstUrl(text) {
+  const m = text.match(/https?:\/\/[^\s)]+/);
+  return m ? m[0] : null;
 }
 
 
@@ -220,6 +290,28 @@ async function testMCPEndpoint() {
     if (!raw.includes(tool)) return fail("MCP endpoint", `tools/list misses ${tool}`);
   }
   pass("MCP endpoint lists docs_search and docs_fetch");
+}
+
+// A query is cut to its first 1000 characters, at a word's end: one long query
+// (a word said 27,000 times) kept the index busy for most of a second on main
+// (#161374, cloud review of PR 274). The plugin's own search keeps only pages
+// that hold every word, so here a word placed after the cut proves it is not
+// searched: "password" is not on the settlements page.
+async function testSearchQueryIsCut() {
+  const name = "docs_search reads only the first 1000 characters of a query";
+  const settlements = `${DOCS_ORIGIN}/business/payment-management/settlements`;
+  const past = await callTool("docs_search", { query: `${"settlements ".repeat(100)}password` });
+  if (firstUrl(past) !== settlements) return fail(name, `a word after 1000 characters was searched: ${past.slice(0, 80)}`);
+  // Only letters before the cut: nothing is searched, nothing is found.
+  const junk = await callTool("docs_search", { query: `${"x".repeat(2000)} settlements` });
+  if (junk !== "No matching documents found.") return fail(name, `junk query: ${junk.slice(0, 80)}`);
+  // The cut falls at a word's end, so a long query still finds its page.
+  const long = await callTool("docs_search", { query: "settlements ".repeat(200) });
+  if (firstUrl(long) !== settlements) return fail(name, `long query: ${firstUrl(long)}`);
+  // A normal query is untouched.
+  const ok = await callTool("docs_search", { query: "settlements" });
+  if (firstUrl(ok) !== settlements) return fail(name, `short query: ${firstUrl(ok)}`);
+  pass(name);
 }
 
 
@@ -387,17 +479,19 @@ async function testSeedRejectsOutOfRangeValues() {
   try {
     const { handleSeedWallet } = await loadServerModule();
     if (typeof handleSeedWallet !== "function") return fail(name, "server.mjs does not export handleSeedWallet");
+    // Each case names the check that must refuse it, so a 400 from another
+    // check (or a generic error) does not pass for the wrong reason.
     const cases = {
-      "big amount": { ...DEMO_SEED, amount: "999999999" },
-      "amount over cap": { ...DEMO_SEED, amount: "100.01" },
-      "zero amount": { ...DEMO_SEED, amount: "0" },
-      "amount not a number": { ...DEMO_SEED, amount: "ten" },
-      "currency": { ...DEMO_SEED, currency: "EUR" },
-      "customer without demo prefix": { ...DEMO_SEED, customer_id: "x" },
-      "customer with odd characters": { ...DEMO_SEED, customer_id: "demo_<b>hi</b>" },
-      "pg_code with odd characters": { ...DEMO_SEED, pg_code: "a/b" },
+      "big amount": [{ ...DEMO_SEED, amount: "999999999" }, "invalid_amount"],
+      "amount over cap": [{ ...DEMO_SEED, amount: "100.01" }, "invalid_amount"],
+      "zero amount": [{ ...DEMO_SEED, amount: "0" }, "invalid_amount"],
+      "amount not a number": [{ ...DEMO_SEED, amount: "ten" }, "invalid_amount"],
+      "currency": [{ ...DEMO_SEED, currency: "EUR" }, "invalid_currency"],
+      "customer without demo prefix": [{ ...DEMO_SEED, customer_id: "x" }, "invalid_customer_id"],
+      "customer with odd characters": [{ ...DEMO_SEED, customer_id: "demo_<b>hi</b>" }, "invalid_customer_id"],
+      "pg_code with odd characters": [{ ...DEMO_SEED, pg_code: "a/b" }, "invalid_pg_code"],
     };
-    for (const [label, body] of Object.entries(cases)) {
+    for (const [label, [body, code]] of Object.entries(cases)) {
       // The old handler sent each of these to the wallet.
       const oldUp = fakeUpstream();
       const old = await runHandler(legacySeedHandler({ ...oldUp, merchant: lib.SANDBOX_MERCHANT }), { body });
@@ -405,6 +499,7 @@ async function testSeedRejectsOutOfRangeValues() {
       const up = fakeUpstream();
       const r = await runHandler((req, res) => handleSeedWallet(req, res, up), { body });
       if (r.status !== 400) return fail(name, `${label}: expected 400, got ${r.status}`);
+      if (r.body !== JSON.stringify({ error: code })) return fail(name, `${label}: expected ${code}, got ${r.body}`);
       if (up.calls.length !== 0) return fail(name, `${label}: wallet was called`);
     }
     pass(name);
@@ -880,6 +975,7 @@ async function run() {
   await testWebhookPollSinceCursor();
   await testWebhookInvalidJSON();
   await testMCPEndpoint();
+  await testSearchQueryIsCut();
   await test404();
   await testWebhookBodyCap();
   await testWebhookOrderIdFormat();
