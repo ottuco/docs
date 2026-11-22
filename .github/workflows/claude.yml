@@ -16,6 +16,9 @@ jobs:
   claude:
     # Public repository: only org members and owners can start Claude, so a
     # comment or issue from anyone else never runs it with our token (#161376).
+    # Still, when a member asks @claude on an outsider's issue or PR, Claude
+    # reads that outsider's text: treat it as untrusted (prompt injection).
+    # COLLABORATOR (outside collaborators) is left out on purpose.
     if: |
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude') && contains(fromJSON('["OWNER","MEMBER"]'), github.event.comment.author_association)) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude') && contains(fromJSON('["OWNER","MEMBER"]'), github.event.comment.author_association)) ||
