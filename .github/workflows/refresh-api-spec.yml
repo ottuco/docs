@@ -16,9 +16,8 @@ on:
         required: true
         default: "dev"
 
-permissions:
-  contents: write
-  pull-requests: write
+# Nothing by default; only the job below gets what it needs (#161376).
+permissions: {}
 
 concurrency:
   group: refresh-api-spec
@@ -27,11 +26,18 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write # push the chore/refresh-api-spec-<base> branch
+      pull-requests: write # open the PR
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.base }}
+          # The token stays off the disk while npm ci and the scripts run;
+          # create-pull-request sets its own credentials for the push.
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
