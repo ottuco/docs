@@ -31,6 +31,10 @@ const originOf = (s) => {
 
 // A pasted paragraph must not turn into dozens of index searches.
 const MAX_WORDS = 8;
+// The /mcp route is public. One long query (a word said 27,000 times in the
+// 256 KB body) kept the index busy for most of a second, and the one-word path
+// sends the query to the plugin as it is. Real queries are a few words (#161374).
+const MAX_QUERY_CHARS = 1000;
 
 // One-letter tokens are dropped. If that leaves fewer than two words, the
 // query goes to the plugin as typed.
@@ -110,6 +114,12 @@ export function createProvider({ flexsearch, baseUrl = "" } = {}) {
 
     async search(query, options) {
       const limit = options?.limit ?? 16;
+      const text = String(query ?? "");
+      if (text.length > MAX_QUERY_CHARS) {
+        // Cut at a word's end, so a half word does not empty the result.
+        const cut = text.slice(0, MAX_QUERY_CHARS);
+        query = /\s/.test(text[MAX_QUERY_CHARS]) ? cut : cut.replace(/\S+$/, "");
+      }
       const words = splitWords(String(query ?? ""));
       if (words.length < 2 || total === 0) return inner.search(query, options);
 
