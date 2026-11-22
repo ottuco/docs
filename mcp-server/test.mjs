@@ -428,7 +428,8 @@ async function runHandler(handler, { headers = {}, body }) {
 const DEMO_SEED = { customer_id: "demo_ab12cd34", currency: "USD", amount: "10.00", pg_code: "ottu-sandbox-usd" };
 
 // The seed handler as it was on main before #161374, kept here word for word
-// (only fetch and the token call are passed in) so the test can run the old
+// (only fetch and the token call are passed in, and the masked random tag
+// comes from crypto) so the test can run the old
 // path next to the new one.
 function legacySeedHandler({ fetch: fetchImpl, getToken, merchant }) {
   return async function handleSeedWallet(req, res) {
@@ -460,7 +461,9 @@ function legacySeedHandler({ fetch: fetchImpl, getToken, merchant }) {
       return;
     }
     const idempotencyKey = crypto.randomUUID();
-    const demoTag = `demo_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    // The old code used Math.random here; the tag is masked before comparing,
+    // so the frozen copy takes it from crypto (CodeQL js/insecure-randomness).
+    const demoTag = `demo_${Date.now()}_${crypto.getRandomValues(new Uint32Array(1))[0].toString(36)}`;
     let upstream;
     try {
       upstream = await fetchImpl(`${merchant.walletUrl}/wallet/credits`, {

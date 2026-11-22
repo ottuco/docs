@@ -313,7 +313,8 @@ export async function handleSeedWallet(req, res, deps = {}) {
   }
 
   const idempotencyKey = crypto.randomUUID();
-  const demoTag = `demo_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  // 8 random characters, as before, but from crypto (CodeQL js/insecure-randomness).
+  const demoTag = `demo_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
   let upstream;
   try {
     upstream = await fetchImpl(`${merchant.walletUrl}/wallet/credits`, {
