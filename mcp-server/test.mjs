@@ -377,6 +377,9 @@ async function testSearchQueryIsCut() {
   const name = "docs_search reads only the first 1000 characters of a query";
   const text = await callTool("docs_search", { query: `${"x".repeat(2000)} settlements` });
   if (firstUrl(text)) return fail(name, `got ${firstUrl(text)}: the words after 1000 characters were searched`);
+  // The cut falls at a word's end, so a long query still finds its page.
+  const long = await callTool("docs_search", { query: "settlements ".repeat(200) });
+  if (firstUrl(long) !== `${DOCS_ORIGIN}/business/payment-management/settlements`) return fail(name, `long query: ${firstUrl(long)}`);
   // A normal query is untouched.
   const ok = await callTool("docs_search", { query: "settlements" });
   if (firstUrl(ok) !== `${DOCS_ORIGIN}/business/payment-management/settlements`) return fail(name, `short query: ${firstUrl(ok)}`);
