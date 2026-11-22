@@ -12,6 +12,8 @@ import { fileURLToPath } from "url";
 import fs from "fs";
 import http from "http";
 import os from "os";
+import v8 from "v8";
+import vm from "vm";
 import { loadIndexer } from "docusaurus-plugin-mcp-server";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -426,7 +428,8 @@ async function runHandler(handler, { headers = {}, body }) {
 const DEMO_SEED = { customer_id: "demo_ab12cd34", currency: "USD", amount: "10.00", pg_code: "ottu-sandbox-usd" };
 
 // The seed handler as it was on main before #161374, kept here word for word
-// (only fetch and the token call are passed in) so the test can run the old
+// (only fetch and the token call are passed in, and the masked random tag
+// comes from crypto) so the test can run the old
 // path next to the new one.
 function legacySeedHandler({ fetch: fetchImpl, getToken, merchant }) {
   return async function handleSeedWallet(req, res) {
@@ -458,7 +461,9 @@ function legacySeedHandler({ fetch: fetchImpl, getToken, merchant }) {
       return;
     }
     const idempotencyKey = crypto.randomUUID();
-    const demoTag = `demo_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    // The old code used Math.random here; the tag is masked before comparing,
+    // so the frozen copy takes it from crypto (CodeQL js/insecure-randomness).
+    const demoTag = `demo_${Date.now()}_${crypto.getRandomValues(new Uint32Array(1))[0].toString(36)}`;
     let upstream;
     try {
       upstream = await fetchImpl(`${merchant.walletUrl}/wallet/credits`, {
@@ -537,6 +542,10 @@ async function testSeedRejectsOutOfRangeValues() {
       "pg_code with odd characters": { ...DEMO_SEED, pg_code: "a/b" },
     };
     for (const [label, body] of Object.entries(cases)) {
+      // The old handler sent each of these to the wallet.
+      const oldUp = fakeUpstream();
+      const old = await runHandler(legacySeedHandler({ ...oldUp, merchant: lib.SANDBOX_MERCHANT }), { body });
+      if (old.status !== 200 || oldUp.calls.length !== 1) return fail(name, `${label}: the old handler did not accept it`);
       const up = fakeUpstream();
       const r = await runHandler((req, res) => handleSeedWallet(req, res, up), { body });
       if (r.status !== 400) return fail(name, `${label}: expected 400, got ${r.status}`);
@@ -630,6 +639,218 @@ async function testPollDoesNotCreateEntries() {
   }
 }
 
+async function testSeedBodyCap() {
+  const name = "Seed wallet: a body over 4 KB gets 413 and the wallet is not called";
+  try {
+    const { handleSeedWallet } = await loadServerModule();
+    const up = fakeUpstream();
+    const r = await runHandler((req, res) => handleSeedWallet(req, res, up), { body: { ...DEMO_SEED, pad: "x".repeat(5 * 1024) } });
+    if (r.status !== 413) return fail(name, `expected 413, got ${r.status}`);
+    if (up.calls.length !== 0) return fail(name, "wallet was called");
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+async function testSeedWalletCallOptions() {
+  const name = "Seed wallet: the wallet call refuses redirects and has a timeout";
+  try {
+    const { handleSeedWallet } = await loadServerModule();
+    const up = fakeUpstream();
+    await runHandler((req, res) => handleSeedWallet(req, res, up), { body: DEMO_SEED });
+    const init = up.calls[0]?.init;
+    if (!init) return fail(name, "wallet not called");
+    if (init.redirect !== "error") return fail(name, `redirect is ${init.redirect}`);
+    if (!(init.signal instanceof AbortSignal)) return fail(name, "no timeout signal");
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+// CodeQL js/insecure-randomness: the demo tag must not come from Math.random.
+async function testSeedTagNotFromMathRandom() {
+  const name = "Seed wallet: demo tags differ even when Math.random repeats";
+  const realRandom = Math.random;
+  const realNow = Date.now;
+  try {
+    const { handleSeedWallet } = await loadServerModule();
+    Math.random = () => 0.123456789;
+    Date.now = () => 1_700_000_000_000;
+    const up = fakeUpstream();
+    for (let i = 0; i < 2; i++) {
+      await runHandler((req, res) => handleSeedWallet(req, res, up), { body: DEMO_SEED });
+    }
+    Math.random = realRandom;
+    Date.now = realNow;
+    if (up.calls.length !== 2) return fail(name, `wallet called ${up.calls.length} times`);
+    const [a, b] = up.calls.map((c) => JSON.parse(c.init.body).session_id);
+    if (!/^sess_demo_\d+_[a-z0-9]{8}$/.test(a)) return fail(name, `tag shape changed: ${a}`);
+    if (a === b) return fail(name, "two seeds got the same tag");
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  } finally {
+    Math.random = realRandom;
+    Date.now = realNow;
+  }
+}
+
+// Runs last among the seed checks: it fills the shared global counter.
+async function testSeedGlobalLimit() {
+  const name = "Seed rate limit: 300 a minute for all callers together";
+  try {
+    const { checkSeedRateLimit } = await loadServerModule();
+    // A minute ahead, so the counts of the checks above have expired.
+    const t = Date.now() + 10 * 60_000;
+    const req = (i) => ({ headers: { "do-connecting-ip": `198.18.${i >> 8}.${i & 255}` }, socket: {} });
+    for (let i = 0; i < 300; i++) {
+      if (!checkSeedRateLimit(req(i), t)) return fail(name, `call ${i + 1} refused`);
+    }
+    if (checkSeedRateLimit(req(300), t)) return fail(name, "301st call from a new address allowed");
+    if (!checkSeedRateLimit(req(301), t + 61_000)) return fail(name, "still refused a minute later");
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+// Posts each [orderId, text] to the in-process relay handler; returns the statuses.
+async function postToRelay(pairs) {
+  const { handleWebhookPost } = lib;
+  const srv = http.createServer((req, res) => handleWebhookPost(decodeURIComponent(req.url.slice(1)), req, res));
+  await new Promise((r) => srv.listen(0, r));
+  const statuses = [];
+  try {
+    for (const [orderId, text] of pairs) {
+      const res = await fetch(`http://localhost:${srv.address().port}/${orderId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: text,
+      });
+      await res.text();
+      statuses.push(res.status);
+    }
+  } finally {
+    srv.close();
+  }
+  return statuses;
+}
+
+async function pollRelay(orderId, query = "") {
+  const { handleWebhookPoll } = lib;
+  const srv = http.createServer((req, res) => handleWebhookPoll(orderId, req, res));
+  await new Promise((r) => srv.listen(0, r));
+  try {
+    return await fetch(`http://localhost:${srv.address().port}/${orderId}/events.json${query}`).then((r) => r.text());
+  } finally {
+    srv.close();
+  }
+}
+
+function heapAfterGc() {
+  v8.setFlagsFromString("--expose-gc");
+  const gc = vm.runInNewContext("gc");
+  gc();
+  gc();
+  return process.memoryUsage().heapUsed;
+}
+
+async function testRelayMemoryFollowsBytes() {
+  const name = "Webhook relay: what it keeps costs about the bytes it was sent";
+  try {
+    const { handleWebhookPost } = await loadServerModule();
+    if (typeof handleWebhookPost !== "function") return fail(name, "server.mjs does not export handleWebhookPost");
+    // 63 KB of empty objects: small as text, large as parsed objects.
+    const body = `[${new Array(21000).fill("{}").join(",")}]`;
+    const pairs = Array.from({ length: 40 }, (_, i) => [`mem-${Date.now()}-${i}`, body]);
+    const before = heapAfterGc();
+    const statuses = await postToRelay(pairs);
+    const grew = heapAfterGc() - before;
+    if (statuses.some((s) => s !== 200)) return fail(name, `not all accepted: ${statuses.join(",")}`);
+    const sent = body.length * pairs.length;
+    const mb = (n) => (n / 1048576).toFixed(1);
+    if (grew > sent * 4) return fail(name, `heap grew ${mb(grew)} MB for ${mb(sent)} MB of bodies`);
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+async function testRelayBytesPerOrderCap() {
+  const name = "Webhook relay: one order id keeps at most about 2 MB";
+  try {
+    const { handleWebhookPost } = await loadServerModule();
+    if (typeof handleWebhookPost !== "function") return fail(name, "server.mjs does not export handleWebhookPost");
+    const orderId = `order-bytes-${Date.now()}`;
+    const body = JSON.stringify({ pad: "x".repeat(60 * 1024) });
+    const statuses = await postToRelay(Array.from({ length: 20 }, () => [orderId, body]));
+    if (statuses[0] !== 200) return fail(name, `first event got ${statuses[0]}`);
+    if (statuses[19] !== 429) return fail(name, `20th event of 60 KB: expected 429, got ${statuses[19]}`);
+    const answer = await pollRelay(orderId);
+    if (answer.length > 2 * 1024 * 1024) return fail(name, `poll answer is ${answer.length} bytes`);
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+// The relay as it was on main before #161374 (store and poll), kept word for
+// word so the poll answers can be compared byte for byte.
+function legacyRelay() {
+  const webhookStore = new Map();
+  return {
+    post(orderId, text) {
+      const payload = JSON.parse(text);
+      if (!webhookStore.has(orderId)) webhookStore.set(orderId, { webhooks: [], createdAt: Date.now() });
+      webhookStore.get(orderId).webhooks.push({ payload, receivedAt: new Date().toISOString() });
+    },
+    poll(orderId, url) {
+      const webhooks = webhookStore.get(orderId)?.webhooks ?? [];
+      const sinceParam = new URL(url, "http://x").searchParams.get("since");
+      const since = Number.parseInt(sinceParam ?? "-1", 10);
+      const startIdx = Number.isFinite(since) ? since + 1 : 0;
+      const events = [];
+      for (let i = startIdx; i < webhooks.length; i++) {
+        events.push({ id: i, ...webhooks[i] });
+      }
+      return JSON.stringify({ events, lastId: webhooks.length - 1 });
+    },
+  };
+}
+
+async function testRelayPollAnswerUnchanged() {
+  const name = "Webhook relay: poll answers are byte for byte the same as before";
+  try {
+    const { handleWebhookPost } = await loadServerModule();
+    if (typeof handleWebhookPost !== "function") return fail(name, "server.mjs does not export handleWebhookPost");
+    const texts = [
+      JSON.stringify({ result: "success", session_id: "s1", state: "paid", amount: "10.000", token: { token: "tok_1" } }),
+      '{ "spaced" : [1, 2.50, -0, 1e3, null, true], "nested": {"a": {"b": []}} }',
+      JSON.stringify({ quote: 'say "hi"', slash: "a\\b", line: "a b", arabic: "مرحبا", emoji: "\u{1F600}" }),
+      '"just a string"',
+      "null",
+      "42",
+      "[]",
+    ];
+    const orderId = `same-${Date.now()}`;
+    const old = legacyRelay();
+    for (const t of texts) old.post(orderId, t);
+    const statuses = await postToRelay(texts.map((t) => [orderId, t]));
+    if (statuses.some((s) => s !== 200)) return fail(name, `not all accepted: ${statuses.join(",")}`);
+    const stamp = (s) => s.replace(/"receivedAt":"[^"]+"/g, '"receivedAt":"T"');
+    for (const q of ["", "?since=-1", "?since=0", "?since=3", "?since=99", "?since=-3", "?since=abc"]) {
+      const before = stamp(old.poll(orderId, `/${orderId}/events.json${q}`));
+      const after = stamp(await pollRelay(orderId, q));
+      if (before !== after) return fail(name, `since ${q || "(none)"} differs:\n${before}\n${after}`);
+    }
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
 // Spawned-server checks: the real routes.
 
 async function testWebhookBodyCap() {
@@ -682,6 +903,30 @@ async function testRefreshNeedsToken() {
   pass("POST /refresh needs the token when one is set, and runs at most once a minute");
 }
 
+const MCP_HEADERS = { "Content-Type": "application/json", Accept: "application/json, text/event-stream" };
+const paddedToolsList = (bytes) =>
+  JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list", params: { _meta: { pad: "x".repeat(bytes) } } });
+
+async function testMcpBodyCap() {
+  const res = await fetch(`${BASE_URL}/`, { method: "POST", headers: MCP_HEADERS, body: paddedToolsList(300 * 1024) })
+    .catch((e) => ({ status: `error ${e.message}` }));
+  if (res.status !== 413) return fail("MCP body cap", `300 KB request: expected 413, got ${res.status}`);
+  pass("MCP POST over 256 KB gets 413");
+}
+
+async function testMcpUnderCapUnchanged() {
+  const big = await fetch(`${BASE_URL}/`, { method: "POST", headers: MCP_HEADERS, body: paddedToolsList(200 * 1024) });
+  const raw = await big.text();
+  if (big.status !== 200 || !raw.includes("docs_search")) return fail("MCP under the cap", `200 KB request: ${big.status}`);
+  // A body that is not JSON still gets the MCP SDK's own answer.
+  const bad = await fetch(`${BASE_URL}/`, { method: "POST", headers: MCP_HEADERS, body: "not json" });
+  const badBody = await bad.json().catch(() => null);
+  if (bad.status !== 400 || badBody?.error?.code !== -32700 || badBody?.error?.message !== "Parse error: Invalid JSON") {
+    return fail("MCP under the cap", `invalid JSON: ${bad.status} ${JSON.stringify(badBody)}`);
+  }
+  pass("MCP POST under 256 KB and invalid JSON are answered as before");
+}
+
 // ── Runner ──
 
 async function run() {
@@ -707,6 +952,8 @@ async function run() {
   await testWebhookOrderIdFormat();
   await testWebhookEventsPerOrderCap();
   await testRefreshNeedsToken();
+  await testMcpBodyCap();
+  await testMcpUnderCapUnchanged();
 
   console.log("\nIn-process security checks:\n");
   await testSeedNormalRunUnchanged();
@@ -715,6 +962,13 @@ async function run() {
   await testRateLimitKeyIgnoresCallerHeader();
   await testRateLimitMapIsPruned();
   await testPollDoesNotCreateEntries();
+  await testSeedBodyCap();
+  await testSeedWalletCallOptions();
+  await testSeedTagNotFromMathRandom();
+  await testSeedGlobalLimit();
+  await testRelayMemoryFollowsBytes();
+  await testRelayBytesPerOrderCap();
+  await testRelayPollAnswerUnchanged();
 
   console.log(`\n  ${passed} passed, ${failed} failed\n`);
 
