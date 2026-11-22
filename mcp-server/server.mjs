@@ -65,11 +65,11 @@ function sendJson(res, status, obj, extraHeaders = {}) {
   res.end(JSON.stringify(obj));
 }
 
-// Reads a JSON body of at most maxBytes. Past the cap it stops buffering and
-// rejects with code "too_large"; the caller answers 413 and closes.
-function parseBody(req, maxBytes = WEBHOOK_MAX_BODY_BYTES) {
+// Reads a body of at most maxBytes into a Buffer. Past the cap it stops
+// buffering and rejects with code "too_large"; the caller answers 413 and closes.
+function readBody(req, maxBytes) {
   return new Promise((resolve, reject) => {
-    let body = "";
+    const chunks = [];
     let size = 0;
     let tooLarge = false;
     req.on("data", (chunk) => {
@@ -77,24 +77,29 @@ function parseBody(req, maxBytes = WEBHOOK_MAX_BODY_BYTES) {
       size += chunk.length;
       if (size > maxBytes) {
         tooLarge = true;
-        body = "";
+        chunks.length = 0;
         const err = new Error("Payload too large");
         err.code = "too_large";
         reject(err);
         return;
       }
-      body += chunk;
+      chunks.push(chunk);
     });
     req.on("end", () => {
-      if (tooLarge) return;
-      try {
-        resolve(JSON.parse(body));
-      } catch {
-        reject(new Error("Invalid JSON"));
-      }
+      if (!tooLarge) resolve(Buffer.concat(chunks));
     });
     req.on("error", reject);
   });
+}
+
+// Reads a JSON body of at most maxBytes (see readBody).
+async function parseBody(req, maxBytes = WEBHOOK_MAX_BODY_BYTES) {
+  const raw = await readBody(req, maxBytes);
+  try {
+    return JSON.parse(raw.toString("utf8"));
+  } catch {
+    throw new Error("Invalid JSON");
+  }
 }
 
 function sendTooLarge(res) {
@@ -455,6 +460,8 @@ async function fetchWithRetry(maxAttempts = 10, delayMs = 15000) {
 //   POST /:id             → webhook relay (from /webhook/:id)
 //   GET  /:id/events.json → webhook poll (from /webhook/:id/events.json)
 
+// MCP requests are a tool name and a few words; 256 KB leaves plenty of room.
+const MCP_MAX_BODY_BYTES = 256 * 1024;
 const REFRESH_COOLDOWN_MS = 60_000;
 let lastRefreshAt = 0;
 let refreshRunning = false;
@@ -588,6 +595,17 @@ async function start() {
             error: "MCP server is loading artifacts, please retry shortly",
           })
         );
+        return;
+      }
+      // The MCP SDK reads the whole body with no limit, so read it here first,
+      // at most MCP_MAX_BODY_BYTES (#161374). Its Node adapter
+      // (@hono/node-server) takes a Buffer in req.rawBody as the body, so the
+      // SDK still parses and answers every request under the cap itself.
+      try {
+        req.rawBody = await readBody(req, MCP_MAX_BODY_BYTES);
+      } catch (err) {
+        if (err.code === "too_large") return sendTooLarge(res);
+        if (!res.headersSent) sendJson(res, 400, { error: "bad_request" });
         return;
       }
       await mcpServer.handleHttpRequest(req, res);
