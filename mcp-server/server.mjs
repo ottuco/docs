@@ -203,6 +203,10 @@ const SAFE_ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
 // The caller's address as the platform proxy saw it. DO App Platform sets
 // do-connecting-ip; otherwise the last X-Forwarded-For entry is the one the
 // nearest proxy appended. The first entry is whatever the caller wrote.
+// Trusting do-connecting-ip holds only behind DO's edge, which writes it over
+// whatever the caller sent. Reached any other way (a direct app URL, local
+// dev), a caller can set it and get a new per-address count on every request;
+// the global 300 a minute still holds then.
 export function clientIp(req) {
   const doIp = req.headers["do-connecting-ip"];
   if (typeof doIp === "string" && doIp.trim()) return doIp.trim();
