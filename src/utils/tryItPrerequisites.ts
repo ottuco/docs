@@ -13,7 +13,7 @@
  * URL that is not one of the demo merchants in src/utils/sandbox.ts.
  */
 
-import { ACTIVE_CONNECT, KSA, SANDBOX } from "@site/src/utils/sandbox";
+import { ACTIVE_CONNECT, SANDBOX } from "@site/src/utils/sandbox";
 
 export type PrereqContext = Record<string, unknown>;
 
@@ -143,7 +143,8 @@ export const TRY_IT_PREREQUISITES: Record<string, PrereqChain> = {
 // ---------------------------------------------------------------------------
 // Runner
 
-const DEMO_HOSTS = [SANDBOX.connectBaseUrl, KSA.connectBaseUrl];
+// Only the public sandbox: the KSA dev-server key left the frontend (#161377).
+const DEMO_HOSTS = [SANDBOX.connectBaseUrl];
 
 /** Reads a dotted path; `key[]` maps the rest of the path over an array. */
 export function pick(value: unknown, path: string): unknown {
