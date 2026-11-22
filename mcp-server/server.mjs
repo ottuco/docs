@@ -31,13 +31,22 @@ const MAX_INDEX_BYTES = 50 * 1024 * 1024; // 50 MB
 // responses; request/response is reliable where streaming was 50/50.
 //
 // The relay is anonymous (Ottu posts webhooks to it), so everything it keeps is
-// bounded (#161374): body size, events per order id, order ids, total bytes.
+// bounded (#161374): body size, events and bytes per order id, order ids, total
+// bytes. It keeps each event as JSON text, not as the parsed object: a parsed
+// body can take 20 times its text size in memory (e.g. `[{},{},...]`), so only
+// the text makes the byte caps hold. Senders are Ottu's servers, all demo users
+// share them, so there is no per-address limit here.
 export const webhookStore = new Map();
 const WEBHOOK_TTL_MS = 3600000; // 1 hour
 const WEBHOOK_MAX_BODY_BYTES = 64 * 1024;
 const WEBHOOK_MAX_EVENTS_PER_ORDER = 100;
+const WEBHOOK_MAX_ORDER_BYTES = 2 * 1024 * 1024;
 const WEBHOOK_MAX_ORDERS = 5000;
-const WEBHOOK_MAX_TOTAL_BYTES = 64 * 1024 * 1024;
+const WEBHOOK_MAX_TOTAL_BYTES = 32 * 1024 * 1024;
+// About what one stored event costs: up to 2 bytes per character of text, plus
+// the event object and its receivedAt string.
+const WEBHOOK_EVENT_OVERHEAD_BYTES = 256;
+const eventCost = (text) => text.length * 2 + WEBHOOK_EVENT_OVERHEAD_BYTES;
 // The demos use ids like `journey-<ms>-<rand>` and `demo-<ms>-<rand>`.
 const ORDER_ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
 let webhookStoreBytes = 0;
@@ -56,11 +65,11 @@ function sendJson(res, status, obj, extraHeaders = {}) {
   res.end(JSON.stringify(obj));
 }
 
-// Reads a JSON body of at most maxBytes. Past the cap it stops buffering and
-// rejects with code "too_large"; the caller answers 413 and closes.
-function parseBody(req, maxBytes = WEBHOOK_MAX_BODY_BYTES) {
+// Reads a body of at most maxBytes into a Buffer. Past the cap it stops
+// buffering and rejects with code "too_large"; the caller answers 413 and closes.
+function readBody(req, maxBytes) {
   return new Promise((resolve, reject) => {
-    let body = "";
+    const chunks = [];
     let size = 0;
     let tooLarge = false;
     req.on("data", (chunk) => {
@@ -68,31 +77,36 @@ function parseBody(req, maxBytes = WEBHOOK_MAX_BODY_BYTES) {
       size += chunk.length;
       if (size > maxBytes) {
         tooLarge = true;
-        body = "";
+        chunks.length = 0;
         const err = new Error("Payload too large");
         err.code = "too_large";
         reject(err);
         return;
       }
-      body += chunk;
+      chunks.push(chunk);
     });
     req.on("end", () => {
-      if (tooLarge) return;
-      try {
-        resolve(JSON.parse(body));
-      } catch {
-        reject(new Error("Invalid JSON"));
-      }
+      if (!tooLarge) resolve(Buffer.concat(chunks));
     });
     req.on("error", reject);
   });
+}
+
+// Reads a JSON body of at most maxBytes (see readBody).
+async function parseBody(req, maxBytes = WEBHOOK_MAX_BODY_BYTES) {
+  const raw = await readBody(req, maxBytes);
+  try {
+    return JSON.parse(raw.toString("utf8"));
+  } catch {
+    throw new Error("Invalid JSON");
+  }
 }
 
 function sendTooLarge(res) {
   sendJson(res, 413, { error: "payload_too_large" }, { Connection: "close" });
 }
 
-function handleWebhookPost(orderId, req, res) {
+export function handleWebhookPost(orderId, req, res) {
   if (!ORDER_ID_RE.test(orderId)) {
     // Drain so the client sees the answer, not a reset.
     req.resume();
@@ -101,7 +115,10 @@ function handleWebhookPost(orderId, req, res) {
   }
   parseBody(req)
     .then((payload) => {
-      const bytes = JSON.stringify(payload).length;
+      // Same text JSON.stringify gave the poll answer before; the parsed
+      // object is dropped here.
+      const text = JSON.stringify(payload);
+      const bytes = eventCost(text);
       let entry = webhookStore.get(orderId);
       if (!entry) {
         if (webhookStore.size >= WEBHOOK_MAX_ORDERS) pruneWebhookStore();
@@ -109,7 +126,10 @@ function handleWebhookPost(orderId, req, res) {
           sendJson(res, 503, { error: "relay_full" });
           return;
         }
-      } else if (entry.webhooks.length >= WEBHOOK_MAX_EVENTS_PER_ORDER) {
+      } else if (
+        entry.webhooks.length >= WEBHOOK_MAX_EVENTS_PER_ORDER ||
+        entry.bytes + bytes > WEBHOOK_MAX_ORDER_BYTES
+      ) {
         sendJson(res, 429, { error: "too_many_events" });
         return;
       }
@@ -122,7 +142,7 @@ function handleWebhookPost(orderId, req, res) {
         entry = { webhooks: [], createdAt: Date.now(), bytes: 0 };
         webhookStore.set(orderId, entry);
       }
-      entry.webhooks.push({ payload, receivedAt: new Date().toISOString() });
+      entry.webhooks.push({ text, receivedAt: new Date().toISOString() });
       entry.bytes += bytes;
       webhookStoreBytes += bytes;
       console.log(
@@ -142,17 +162,22 @@ export function handleWebhookPoll(orderId, req, res) {
   const sinceParam = new URL(req.url, "http://x").searchParams.get("since");
   const since = Number.parseInt(sinceParam ?? "-1", 10);
   const startIdx = Number.isFinite(since) ? since + 1 : 0;
+  // Built from the stored text, in the same shape and key order that
+  // JSON.stringify({ events: [{ id, payload, receivedAt }], lastId }) gave.
   const events = [];
   for (let i = startIdx; i < webhooks.length; i++) {
-    events.push({ id: i, ...webhooks[i] });
+    const w = webhooks[i];
+    events.push(
+      w
+        ? `{"id":${i},"payload":${w.text},"receivedAt":${JSON.stringify(w.receivedAt)}}`
+        : `{"id":${i}}` // a negative `since` asks for indexes that do not exist
+    );
   }
   res.writeHead(200, {
     "Content-Type": "application/json",
     "Cache-Control": "no-store",
   });
-  res.end(
-    JSON.stringify({ events, lastId: webhooks.length - 1 })
-  );
+  res.end(`{"events":[${events.join(",")}],"lastId":${webhooks.length - 1}}`);
 }
 
 // ── Wallet seed: backend proxy with Keycloak JWT ─────────────────────────────
@@ -288,7 +313,8 @@ export async function handleSeedWallet(req, res, deps = {}) {
   }
 
   const idempotencyKey = crypto.randomUUID();
-  const demoTag = `demo_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  // 8 random characters, as before, but from crypto (CodeQL js/insecure-randomness).
+  const demoTag = `demo_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
   let upstream;
   try {
     upstream = await fetchImpl(`${merchant.walletUrl}/wallet/credits`, {
@@ -435,6 +461,8 @@ async function fetchWithRetry(maxAttempts = 10, delayMs = 15000) {
 //   POST /:id             → webhook relay (from /webhook/:id)
 //   GET  /:id/events.json → webhook poll (from /webhook/:id/events.json)
 
+// MCP requests are a tool name and a few words; 256 KB leaves plenty of room.
+const MCP_MAX_BODY_BYTES = 256 * 1024;
 const REFRESH_COOLDOWN_MS = 60_000;
 let lastRefreshAt = 0;
 let refreshRunning = false;
@@ -568,6 +596,17 @@ async function start() {
             error: "MCP server is loading artifacts, please retry shortly",
           })
         );
+        return;
+      }
+      // The MCP SDK reads the whole body with no limit, so read it here first,
+      // at most MCP_MAX_BODY_BYTES (#161374). Its Node adapter
+      // (@hono/node-server) takes a Buffer in req.rawBody as the body, so the
+      // SDK still parses and answers every request under the cap itself.
+      try {
+        req.rawBody = await readBody(req, MCP_MAX_BODY_BYTES);
+      } catch (err) {
+        if (err.code === "too_large") return sendTooLarge(res);
+        if (!res.headersSent) sendJson(res, 400, { error: "bad_request" });
         return;
       }
       await mcpServer.handleHttpRequest(req, res);
