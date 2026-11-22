@@ -45,13 +45,17 @@ const explorer = readFileSync(
   "utf8",
 );
 
-test("sandbox demo key is marked as an accepted public demo key", () => {
+test("sandbox demo keys are marked as accepted public demo keys", () => {
   const lines = src.split("\n");
-  const i = lines.findIndex((l) => /^\s*connectApiKey:\s*"/.test(l));
-  assert.ok(i > 0, "connectApiKey line not found");
-  const near = lines.slice(Math.max(0, i - 3), i + 1).join("\n");
-  assert.ok(/nosemgrep: detected-generic-api-key/.test(near), "no nosemgrep marker next to connectApiKey");
-  assert.ok(/public/i.test(near) && /sandbox/i.test(near), "marker has no public sandbox reason");
+  for (const field of ["connectApiKey", "sdkApiKey"]) {
+    const i = lines.findIndex((l) => new RegExp(`^\\s*${field}:\\s*"`).test(l));
+    assert.ok(i > 0, `${field} line not found`);
+    // The line just above the key: Semgrep reports one key per run, so each
+    // key carries its own marker.
+    const above = lines[i - 1];
+    assert.ok(/^\s*\/\/ nosemgrep: detected-generic-api-key/.test(above), `no nosemgrep marker above ${field}`);
+    assert.ok(/public/i.test(above), `marker above ${field} gives no public demo reason`);
+  }
 });
 
 test("explorer demo password is documented as a public demo value", () => {

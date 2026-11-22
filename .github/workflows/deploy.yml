@@ -31,6 +31,9 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
+      - name: Check the demo keys guard (#161377)
+        run: node --test scripts/sandbox-keys.test.mjs
+
       - name: Test MCP + Webhook server
         run: |
           cd mcp-server
