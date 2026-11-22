@@ -700,11 +700,88 @@ async function testRelayPollAnswerUnchanged() {
     const statuses = await postToRelay(texts.map((t) => [orderId, t]));
     if (statuses.some((s) => s !== 200)) return fail(name, `not all accepted: ${statuses.join(",")}`);
     const stamp = (s) => s.replace(/"receivedAt":"[^"]+"/g, '"receivedAt":"T"');
-    for (const q of ["", "?since=-1", "?since=0", "?since=3", "?since=99", "?since=-3", "?since=abc"]) {
+    // A `since` below -1 is left out on purpose: it now answers like -1 (see
+    // testRelayPollNegativeSince); the demo never sends one.
+    for (const q of ["", "?since=-1", "?since=0", "?since=3", "?since=99", "?since=abc"]) {
       const before = stamp(old.poll(orderId, `/${orderId}/events.json${q}`));
       const after = stamp(await pollRelay(orderId, q));
       if (before !== after) return fail(name, `since ${q || "(none)"} differs:\n${before}\n${after}`);
     }
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+async function testRelayPollNegativeSince() {
+  const name = "Webhook relay: a `since` below -1 answers like -1, fast and small";
+  try {
+    await loadServerModule();
+    const unknown = `never-posted-neg-${Date.now()}`;
+    const empty = '{"events":[],"lastId":-1}';
+    // Cheap values first, so the old code fails here before the big one.
+    for (const q of ["?since=-2", "?since=-100000"]) {
+      const answer = await pollRelay(unknown, q);
+      if (answer !== empty) return fail(name, `unknown id ${q}: ${answer.length} bytes, expected ${empty}`);
+    }
+    const t0 = Date.now();
+    const big = await pollRelay(unknown, "?since=-100000000");
+    const ms = Date.now() - t0;
+    if (big !== empty) return fail(name, `unknown id since=-100000000: ${big.length} bytes`);
+    if (ms > 1000) return fail(name, `unknown id since=-100000000 took ${ms} ms`);
+    // On an id with events, a negative `since` gives the same answer as -1.
+    const orderId = `neg-${Date.now()}`;
+    const statuses = await postToRelay([[orderId, '{"a":1}'], [orderId, '{"b":2}']]);
+    if (statuses.some((s) => s !== 200)) return fail(name, `not all accepted: ${statuses.join(",")}`);
+    const fromStart = await pollRelay(orderId, "?since=-1");
+    for (const q of ["?since=-3", "?since=-100000000"]) {
+      const answer = await pollRelay(orderId, q);
+      if (answer !== fromStart) return fail(name, `${q} differs from since=-1:\n${answer.slice(0, 200)}\n${fromStart}`);
+    }
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+async function testRelayTotalCap() {
+  const name = "Webhook relay: 32 MB in all, then 503 relay_full; expired ids free the room";
+  try {
+    const { webhookStore } = await loadServerModule();
+    const cap = 32 * 1024 * 1024;
+    const body = JSON.stringify({ pad: "x".repeat(60 * 1024) });
+    const stamp = Date.now();
+    const ids = [];
+    let full = null;
+    // 16 events of 60 KB stay under the 2 MB per id cap; about 270 fill 32 MB.
+    for (let n = 0; n < 400 && !full; n += 16) {
+      const orderId = `total-${stamp}-${n}`;
+      ids.push(orderId);
+      const statuses = await postToRelay(Array.from({ length: 16 }, () => [orderId, body]));
+      const bad = statuses.find((s) => s !== 200);
+      if (bad !== undefined) full = { status: bad, orderId };
+    }
+    if (!full) return fail(name, "400 events of 60 KB were all accepted");
+    if (full.status !== 503) return fail(name, `expected 503 when full, got ${full.status}`);
+    const counted = [...webhookStore.values()].reduce((sum, e) => sum + e.bytes, 0);
+    if (counted > cap) return fail(name, `the relay keeps ${counted} counted bytes, over ${cap}`);
+    const answer = await new Promise((resolve) => {
+      const srv = http.createServer((req, res) => lib.handleWebhookPost(full.orderId, req, res));
+      srv.listen(0, async () => {
+        const r = await fetch(`http://localhost:${srv.address().port}/`, { method: "POST", body });
+        resolve(await r.text());
+        srv.close();
+      });
+    });
+    if (answer !== '{"error":"relay_full"}') return fail(name, `answer when full: ${answer}`);
+    // Ids past the 1 hour TTL are dropped when room is needed.
+    for (const id of ids) {
+      const entry = webhookStore.get(id);
+      if (entry) entry.createdAt = 0;
+    }
+    const [after] = await postToRelay([[`total-${stamp}-again`, body]]);
+    if (after !== 200) return fail(name, `after the ids expired: expected 200, got ${after}`);
+    if (ids.some((id) => webhookStore.has(id))) return fail(name, "expired ids were not dropped");
     pass(name);
   } catch (err) {
     fail(name, err.message);
@@ -825,6 +902,8 @@ async function run() {
   await testRelayMemoryFollowsBytes();
   await testRelayBytesPerOrderCap();
   await testRelayPollAnswerUnchanged();
+  await testRelayPollNegativeSince();
+  await testRelayTotalCap();
 
   console.log(`\n  ${passed} passed, ${failed} failed\n`);
 
