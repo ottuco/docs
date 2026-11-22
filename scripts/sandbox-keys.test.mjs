@@ -13,7 +13,9 @@ import { readFileSync } from "node:fs";
 const src = readFileSync(new URL("../src/utils/sandbox.ts", import.meta.url), "utf8");
 
 // sha256 of the `export const SANDBOX: ConnectEnv = {...};` block on main
-// (f029206) before #161377.
+// (f029206) before #161377. It catches a key changed by mistake. When the
+// sandbox key is rotated (or the block changed) on purpose, put the new hash
+// here in the same PR: the failure message prints it, never the keys.
 const SANDBOX_BLOCK_SHA256 = "877bfb4b5c0b11f6144ea3940b1e7dd556475c6277758b11ad1002c751654f9a";
 
 test("no KSA dev-server credentials in the frontend", () => {
@@ -33,7 +35,11 @@ test("sandbox demo credentials and the active switch are unchanged", () => {
     .map((l) => l.replace(/\s*\/\/ nosemgrep.*$/, ""))
     .join("\n");
   const sha = createHash("sha256").update(code).digest("hex");
-  assert.equal(sha, SANDBOX_BLOCK_SHA256, "SANDBOX block changed");
+  assert.ok(
+    sha === SANDBOX_BLOCK_SHA256,
+    "SANDBOX block in src/utils/sandbox.ts changed. If that is on purpose (a rotated " +
+      `sandbox key), set SANDBOX_BLOCK_SHA256 in scripts/sandbox-keys.test.mjs to ${sha}`,
+  );
   assert.ok(/export const ACTIVE_CONNECT: ConnectEnv = SANDBOX;/.test(src), "ACTIVE_CONNECT is not SANDBOX");
 });
 
@@ -49,7 +55,7 @@ test("sandbox demo keys are marked as accepted public demo keys", () => {
   const lines = src.split("\n");
   for (const field of ["connectApiKey", "sdkApiKey"]) {
     const i = lines.findIndex((l) => new RegExp(`^\\s*${field}:\\s*"`).test(l));
-    assert.ok(i > 0, `${field} line not found`);
+    assert.ok(i > 0, `${field} line not found in src/utils/sandbox.ts; if the key was removed on purpose, update this test`);
     // The line just above the key: Semgrep reports one key per run, so each
     // key carries its own marker.
     const above = lines[i - 1];
@@ -61,7 +67,7 @@ test("sandbox demo keys are marked as accepted public demo keys", () => {
 test("explorer demo password is documented as a public demo value", () => {
   const lines = explorer.split("\n");
   const i = lines.findIndex((l) => /^const DEFAULT_PASSWORD\s*=/.test(l));
-  assert.ok(i > 0, "DEFAULT_PASSWORD line not found");
+  assert.ok(i > 0, "DEFAULT_PASSWORD line not found in ApiExplorer/Authorization; if it was removed on purpose, drop this test");
   const near = lines.slice(Math.max(0, i - 3), i + 1).join("\n");
   assert.ok(/public demo/i.test(near), "no public-demo comment next to DEFAULT_PASSWORD");
   assert.ok(/nosemgrep/.test(near), "no nosemgrep reason next to DEFAULT_PASSWORD");
