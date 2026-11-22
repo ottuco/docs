@@ -161,17 +161,16 @@ export function handleWebhookPoll(orderId, req, res) {
   const webhooks = webhookStore.get(orderId)?.webhooks ?? [];
   const sinceParam = new URL(req.url, "http://x").searchParams.get("since");
   const since = Number.parseInt(sinceParam ?? "-1", 10);
-  const startIdx = Number.isFinite(since) ? since + 1 : 0;
+  // Never below 0: a `since` under -1 used to loop over (and answer) every
+  // index down to it, so one GET could block the server and fill its memory.
+  // The demo starts at -1, so it answers like -1 now (#161374).
+  const startIdx = Number.isFinite(since) ? Math.max(0, since + 1) : 0;
   // Built from the stored text, in the same shape and key order that
   // JSON.stringify({ events: [{ id, payload, receivedAt }], lastId }) gave.
   const events = [];
   for (let i = startIdx; i < webhooks.length; i++) {
     const w = webhooks[i];
-    events.push(
-      w
-        ? `{"id":${i},"payload":${w.text},"receivedAt":${JSON.stringify(w.receivedAt)}}`
-        : `{"id":${i}}` // a negative `since` asks for indexes that do not exist
-    );
+    events.push(`{"id":${i},"payload":${w.text},"receivedAt":${JSON.stringify(w.receivedAt)}}`);
   }
   res.writeHead(200, {
     "Content-Type": "application/json",
