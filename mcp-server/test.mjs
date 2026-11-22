@@ -884,6 +884,50 @@ async function testRelayPollNegativeSince() {
   }
 }
 
+async function testRelayTotalCap() {
+  const name = "Webhook relay: 32 MB in all, then 503 relay_full; expired ids free the room";
+  try {
+    const { webhookStore } = await loadServerModule();
+    const cap = 32 * 1024 * 1024;
+    const body = JSON.stringify({ pad: "x".repeat(60 * 1024) });
+    const stamp = Date.now();
+    const ids = [];
+    let full = null;
+    // 16 events of 60 KB stay under the 2 MB per id cap; about 270 fill 32 MB.
+    for (let n = 0; n < 400 && !full; n += 16) {
+      const orderId = `total-${stamp}-${n}`;
+      ids.push(orderId);
+      const statuses = await postToRelay(Array.from({ length: 16 }, () => [orderId, body]));
+      const bad = statuses.find((s) => s !== 200);
+      if (bad !== undefined) full = { status: bad, orderId };
+    }
+    if (!full) return fail(name, "400 events of 60 KB were all accepted");
+    if (full.status !== 503) return fail(name, `expected 503 when full, got ${full.status}`);
+    const counted = [...webhookStore.values()].reduce((sum, e) => sum + e.bytes, 0);
+    if (counted > cap) return fail(name, `the relay keeps ${counted} counted bytes, over ${cap}`);
+    const answer = await new Promise((resolve) => {
+      const srv = http.createServer((req, res) => lib.handleWebhookPost(full.orderId, req, res));
+      srv.listen(0, async () => {
+        const r = await fetch(`http://localhost:${srv.address().port}/`, { method: "POST", body });
+        resolve(await r.text());
+        srv.close();
+      });
+    });
+    if (answer !== '{"error":"relay_full"}') return fail(name, `answer when full: ${answer}`);
+    // Ids past the 1 hour TTL are dropped when room is needed.
+    for (const id of ids) {
+      const entry = webhookStore.get(id);
+      if (entry) entry.createdAt = 0;
+    }
+    const [after] = await postToRelay([[`total-${stamp}-again`, body]]);
+    if (after !== 200) return fail(name, `after the ids expired: expected 200, got ${after}`);
+    if (ids.some((id) => webhookStore.has(id))) return fail(name, "expired ids were not dropped");
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
 // Spawned-server checks: the real routes.
 
 async function testWebhookBodyCap() {
@@ -1003,6 +1047,7 @@ async function run() {
   await testRelayBytesPerOrderCap();
   await testRelayPollAnswerUnchanged();
   await testRelayPollNegativeSince();
+  await testRelayTotalCap();
 
   console.log(`\n  ${passed} passed, ${failed} failed\n`);
 
