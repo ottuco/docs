@@ -33,14 +33,13 @@ import {
   STORY_FIT_PCT,
   STORY_PANEL_GAP,
   textLeftStyle,
-  STORY_ROW,
-  STORY_TOP,
   STORY_BODY_PAD,
   storyBodyHeight,
   storyCardW,
   storyFillCardW,
   storyFillGap,
   storyGap,
+  storyCardTops,
   storyLanesHeight,
   storyMaxWidth,
   storyMinWidth,
@@ -149,6 +148,11 @@ export default function Story(input: StoryProps): React.JSX.Element {
     : storyGap(lanes.length);
   const cardW = filling ? storyFillCardW(gap) : storyCardW(lanes.length);
   const lanesHeight = storyLanesHeight(props);
+  const cardTops = useMemo(
+    () => storyCardTops({ ...props, steps, links }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only steps and links place the cards
+    [steps, links],
+  );
 
   const nodes: Node[] = useMemo(() => {
     const cardX = (lane: number) => lane * gap + (gap - cardW) / 2;
@@ -166,7 +170,7 @@ export default function Story(input: StoryProps): React.JSX.Element {
       ...steps.map((s, i) => ({
         id: stepId(i + 1),
         type: "card",
-        position: { x: cardX(s.lane), y: STORY_TOP + i * STORY_ROW },
+        position: { x: cardX(s.lane), y: cardTops[i] },
         ariaLabel: `Step ${i + 1}: ${s.title}${s.sub ? `, ${s.sub}` : ""}`,
         data: {
           title: s.title,
@@ -178,7 +182,7 @@ export default function Story(input: StoryProps): React.JSX.Element {
         } as CardData,
       })),
     ];
-  }, [lanes, steps, gap, cardW, lanesHeight]);
+  }, [lanes, steps, gap, cardW, lanesHeight, cardTops]);
 
   const edges: Edge[] = useMemo(
     () =>

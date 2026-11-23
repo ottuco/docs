@@ -78,9 +78,34 @@ export const storyFillGap = (
   );
 export const storyFillCardW = (gap: number): number =>
   Math.min(FILL_CARD_MAX, gap - 2 * FILL_CARD_MARGIN);
+/** Extra room above a card whose arrow comes straight down from the card
+ * right above it, in the same lane, with a label: two-line cards leave only
+ * about 20px between rows, less than the label pill, so without it the label
+ * covers both cards. */
+export const STORY_LABEL_ROOM = 20;
+const labelledDrops = (p: StoryProps): number[] =>
+  p.links
+    .filter(
+      ([from, to, text]) =>
+        text &&
+        to === from + 1 &&
+        p.steps[from - 1]?.lane === p.steps[to - 1]?.lane,
+    )
+    .map(([, to]) => to);
+/** Top of each card, in step order: one row each, plus the label room. */
+export const storyCardTops = (p: StoryProps): number[] => {
+  const drops = labelledDrops(p);
+  let extra = 0;
+  return p.steps.map((_, i) => {
+    if (drops.includes(i + 1)) extra += STORY_LABEL_ROOM;
+    return STORY_TOP + i * STORY_ROW + extra;
+  });
+};
 /** Height the lanes and cards need. */
 export const storyLanesHeight = (p: StoryProps): number =>
-  STORY_TOP + p.steps.length * STORY_ROW;
+  STORY_TOP +
+  p.steps.length * STORY_ROW +
+  labelledDrops(p).length * STORY_LABEL_ROOM;
 /** Height of the body: all the lanes, or `maxHeight` (then it scrolls). */
 export const storyBodyHeight = (p: StoryProps): number => {
   const full = storyLanesHeight(p) + STORY_BODY_PAD;
