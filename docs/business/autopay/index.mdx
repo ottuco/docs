@@ -10,6 +10,7 @@ import FAQ, { FAQItem } from "@site/src/components/FAQ";
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import AutoPayBusinessStory from "@site/src/diagrams/flow/AutoPayBusinessStory";
+import VideoEmbed from "@site/src/components/VideoEmbed";
 import AutoPayStates from "@site/src/diagrams/flow/AutoPayStates";
 import {
   mdiAccountCircleOutline,
@@ -169,6 +170,17 @@ From this page, a customer can:
 - **Add a card**, or switch which saved card is active.
 - **Pay** an outstanding balance.
 - **Cancel**, or undo a pending cancellation.
+
+{/* A silent loop of the real page on the sandbox, like Stripe's customer portal clip: https://docs.stripe.com/recurring-payments#set-up-customer-portal (#161111 R18). */}
+
+<VideoEmbed
+  src="/video/autopay/customer-page-demo.mp4"
+  poster="/video/autopay/customer-page-demo-poster.jpg"
+  aspectRatio="1280 / 832"
+  loop
+  label="A customer on their AutoPay page adds a card, switches the active card, cancels the subscription and undoes the cancellation"
+  caption="What your customers can do on their page: add a card, switch the active card, cancel and undo"
+/>
 
 What the page shows depends on the subscription's state:
 

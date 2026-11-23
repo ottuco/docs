@@ -26,6 +26,8 @@ import VideoEmbed from "@site/src/components/VideoEmbed";
 | `caption` | `React.ReactNode` | — | Optional `<figcaption>` under the frame. |
 | `width` | `number \| string` | `720` | Max width of the figure. |
 | `aspectRatio` | `string` | `"16 / 9"` | CSS `aspect-ratio` of the frame. Match the rendered clip's dimensions. |
+| `loop` | `boolean` | `false` | A silent demo that plays on its own, loops, and has no controls, like the customer portal clip on [Stripe's recurring payments page](https://docs.stripe.com/recurring-payments#set-up-customer-portal). It plays only while a quarter of it is on screen. With reduced motion it stays poster-first and click-to-play. |
+| `label` | `string` | — | What the video shows, for screen readers (the `<video>`'s `aria-label`, and the play button's label). Give one with `loop`. |
 
 ## Behaviour
 
@@ -39,6 +41,14 @@ import VideoEmbed from "@site/src/components/VideoEmbed";
   which that preference does not call for (it governs *unsolicited* motion) and
   which made the reader click twice: once on the poster, again on the native
   control.
+- **`loop` (demo mode).** The `<video>` is `muted loop playsInline` with
+  `preload="metadata"` and no controls; an `IntersectionObserver` plays it while
+  at least 25% is visible and pauses it otherwise. Until the browser reports the
+  reader's `prefers-reduced-motion` (and on the server) the poster shows, so
+  nothing starts before the preference is known; with `reduce` the reader keeps
+  the click-to-play poster. Example: the AutoPay business page's self-service
+  section (`/video/autopay/customer-page-demo.mp4`, recorded on the sandbox,
+  #161111 R18).
 - **Theme-aware.** Uses the same border/radius/shadow tokens as `StepGuide`.
 
 ## Hosting
