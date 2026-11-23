@@ -49,8 +49,8 @@ import VideoEmbed from "@site/src/components/VideoEmbed";
   play button); with `reduce` the reader keeps the click-to-play poster, which
   plays once. The pause / play button (bottom right, shown on hover, on
   keyboard focus and always on touch screens) and a click on the video stop it
-  (WCAG 2.2.2); a reader's pause holds when the video scrolls out and back in.
-  The `<video>` has `role="img"` and the `label` as its name. Example: the AutoPay business page's self-service
+  (WCAG 2.2.2); a reader's pause holds when the video scrolls out and back
+  in. The `<video>` has `role="img"` and the `label` as its name. Example: the AutoPay business page's self-service
   section (`/video/autopay/customer-page-demo.mp4`, recorded on the sandbox,
   #161111 R18).
 - **Theme-aware.** Uses the same border/radius/shadow tokens as `StepGuide`.

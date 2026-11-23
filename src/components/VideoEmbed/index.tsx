@@ -43,7 +43,9 @@ function usePrefersReducedMotion(): boolean | undefined {
 function LoopingVideo({ src, poster, label }: { src: string; poster: string; label?: string }) {
   const video = useRef<HTMLVideoElement>(null);
   const pausedByReader = useRef(false);
-  const [paused, setPaused] = useState(false);
+  // Paused until the video really plays: if the browser blocks autoplay
+  // (iOS low-power mode, data saver), the button must still say "Play".
+  const [paused, setPaused] = useState(true);
   useEffect(() => {
     const el = video.current;
     if (!el) return;
@@ -79,6 +81,8 @@ function LoopingVideo({ src, poster, label }: { src: string; poster: string; lab
         preload="metadata"
         onPlay={() => setPaused(false)}
         onPause={() => setPaused(true)}
+        // A mouse shortcut only: the pause / play button below does the same
+        // and is the keyboard and screen reader way to stop the video.
         onClick={toggle}
       />
       <button
