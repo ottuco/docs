@@ -50,7 +50,9 @@ import VideoEmbed from "@site/src/components/VideoEmbed";
   poster, which plays once. The pause / play button (bottom right, shown on
   hover, on keyboard focus and always on touch screens) and a click on the video
   stop it (WCAG 2.2.2); a reader's pause holds when the video scrolls out and
-  back in. The `<video>` has `role="img"` and the `label` as its name. Example:
+  back in. The `<video>` has `role="img"` and the `label` as its name. Its
+  right-click menu is off (Chrome's "Show all controls" would add a second
+  play / pause bar), and so is picture-in-picture. Example:
   the AutoPay business page's self-service section
   (`/video/autopay/customer-page-demo.mp4`, recorded on the sandbox, #161111
   R18).

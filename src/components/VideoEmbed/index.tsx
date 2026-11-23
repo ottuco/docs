@@ -85,6 +85,11 @@ function LoopingVideo({ src, poster, label }: { src: string; poster: string; lab
         // A mouse shortcut only: the pause / play button below does the same
         // and is the keyboard and screen reader way to stop the video.
         onClick={toggle}
+        // No browser video menu: its "Show all controls" (Chrome) turns on a
+        // second play / pause bar the page cannot see, and a click would then
+        // toggle twice. The pause / play button is the one control.
+        onContextMenu={(e) => e.preventDefault()}
+        disablePictureInPicture
       />
       <button
         type="button"
