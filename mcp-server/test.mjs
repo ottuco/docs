@@ -10,12 +10,75 @@ import { spawn } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import http from "http";
+import os from "os";
+import v8 from "v8";
+import vm from "vm";
+import { loadIndexer } from "docusaurus-plugin-mcp-server";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = 9876;
 const BASE_URL = `http://localhost:${PORT}`;
+// Test value only: the spawned server requires it on POST /refresh.
+const REFRESH_TOKEN = "test-refresh-token";
 
 let server;
+let origin; // stands in for the docs site that serves /_mcp-data
+const DOCS_ORIGIN_PORT = 9877;
+const DOCS_ORIGIN = `http://localhost:${DOCS_ORIGIN_PORT}`;
+
+const page = (route, title, description, markdown, headings = []) => ({
+  route,
+  title,
+  description,
+  markdown,
+  headings: headings.map((text) => ({ level: 2, text, id: text })),
+});
+
+// A handful of pages, indexed the same way the site build indexes the docs
+// (docusaurus-plugin-mcp-server 0.11.0 with the patch in patches/).
+const PAGES = [
+  page("/", "Docs home", "Start here.", "Welcome, merchant. Open the dashboard."),
+  page(
+    "/business/users-and-access/password",
+    "Change or Reset Your Password",
+    "Change your password or have it reset.",
+    "A merchant user can change the password in the dashboard, or ask for a password reset.",
+    ["I forgot my password"]
+  ),
+  page(
+    "/business/payment-management/settlements",
+    "Settlements",
+    "Where the money goes.",
+    "The merchant bank settles payments. The dashboard shows each payment.",
+    ["My customer paid but the money is not in my bank"]
+  ),
+];
+
+// The stand-in docs site serves a real (small) index, so docs_search answers
+// the way it does on docs.ottu.dev.
+async function startDocsOrigin() {
+  const indexer = await loadIndexer("flexsearch");
+  await indexer.initialize({
+    baseUrl: DOCS_ORIGIN,
+    serverName: "test",
+    serverVersion: "1.0.0",
+    outputDir: os.tmpdir(),
+  });
+  await indexer.indexDocuments(PAGES);
+  const artifacts = await indexer.finalize();
+  origin = http.createServer((req, res) => {
+    const name = (req.url || "").replace("/_mcp-data/", "");
+    if (!artifacts.has(name)) {
+      res.writeHead(404);
+      res.end();
+      return;
+    }
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(artifacts.get(name)));
+  });
+  await new Promise((resolve) => origin.listen(DOCS_ORIGIN_PORT, resolve));
+}
 let passed = 0;
 let failed = 0;
 
@@ -34,26 +97,22 @@ function fail(name, reason) {
 }
 
 async function startServer() {
-  // Ensure data dir exists with minimal test files so server can start
-  const dataDir = path.join(__dirname, "data");
-  fs.mkdirSync(dataDir, { recursive: true });
-  if (!fs.existsSync(path.join(dataDir, "docs.json"))) {
-    fs.writeFileSync(path.join(dataDir, "docs.json"), "[]");
-  }
-  if (!fs.existsSync(path.join(dataDir, "search-index.json"))) {
-    fs.writeFileSync(path.join(dataDir, "search-index.json"), "{}");
-  }
+  // The server downloads its docs and search index from BASE_URL/_mcp-data
+  // at startup; here that is the local stand-in started above.
+  await startDocsOrigin();
 
   return new Promise((resolve, reject) => {
     server = spawn("node", ["server.mjs"], {
       cwd: __dirname,
-      env: { ...process.env, PORT: String(PORT), BASE_URL: "http://localhost" },
+      env: { ...process.env, PORT: String(PORT), BASE_URL: DOCS_ORIGIN, MCP_REFRESH_TOKEN: REFRESH_TOKEN },
       stdio: ["pipe", "pipe", "pipe"],
     });
 
     let started = false;
+    let out = "";
     server.stdout.on("data", (data) => {
-      if (!started && data.toString().includes("listening")) {
+      out += data.toString();
+      if (!started && out.includes("MCP server ready.")) {
         started = true;
         resolve();
       }
@@ -70,7 +129,43 @@ async function startServer() {
 
 function stopServer() {
   if (server) server.kill("SIGTERM");
+  if (origin) origin.close();
 }
+
+// Calls an MCP tool the way a client does and returns the text it answers.
+async function callTool(name, args) {
+  const res = await fetch(`${BASE_URL}/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json, text/event-stream",
+    },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "tools/call",
+      params: { name, arguments: args },
+    }),
+  });
+  const raw = await res.text();
+  const json = raw.trimStart().startsWith("{")
+    ? raw
+    : raw
+        .split("\n")
+        .filter((l) => l.startsWith("data:"))
+        .map((l) => l.slice(5))
+        .join("");
+  const body = JSON.parse(json);
+  return (body.result?.content ?? []).map((c) => c.text).join("\n");
+}
+
+// The first address a docs_search answer lists.
+function firstUrl(text) {
+  const m = text.match(/https?:\/\/[^\s)]+/);
+  return m ? m[0] : null;
+}
+
+
 
 // ── Tests ──
 
@@ -178,24 +273,690 @@ async function testWebhookInvalidJSON() {
 }
 
 async function testMCPEndpoint() {
-  // MCP may or may not be ready (artifacts might not load in test env)
-  // Just verify the endpoint responds (200 or 503)
   const res = await fetch(`${BASE_URL}/`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json, text/event-stream",
+    },
     body: JSON.stringify({ jsonrpc: "2.0", method: "tools/list", id: 1 }),
   });
 
-  if (res.status !== 200 && res.status !== 503) {
+  if (res.status !== 200) {
     return fail("MCP endpoint", `unexpected status ${res.status}`);
   }
-  pass(`MCP endpoint responds (status ${res.status})`);
+  const raw = await res.text();
+  for (const tool of ["docs_search", "docs_fetch"]) {
+    if (!raw.includes(tool)) return fail("MCP endpoint", `tools/list misses ${tool}`);
+  }
+  pass("MCP endpoint lists docs_search and docs_fetch");
 }
+
+// A query is cut to its first 1000 characters, at a word's end: one long query
+// (a word said 27,000 times) kept the index busy for most of a second on main
+// (#161374, cloud review of PR 274). The plugin's own search keeps only pages
+// that hold every word, so here a word placed after the cut proves it is not
+// searched: "password" is not on the settlements page.
+async function testSearchQueryIsCut() {
+  const name = "docs_search reads only the first 1000 characters of a query";
+  const settlements = `${DOCS_ORIGIN}/business/payment-management/settlements`;
+  const past = await callTool("docs_search", { query: `${"settlements ".repeat(100)}password` });
+  if (firstUrl(past) !== settlements) return fail(name, `a word after 1000 characters was searched: ${past.slice(0, 80)}`);
+  // Only letters before the cut: nothing is searched, nothing is found.
+  const junk = await callTool("docs_search", { query: `${"x".repeat(2000)} settlements` });
+  if (junk !== "No matching documents found.") return fail(name, `junk query: ${junk.slice(0, 80)}`);
+  // The cut falls at a word's end, so a long query still finds its page.
+  const long = await callTool("docs_search", { query: "settlements ".repeat(200) });
+  if (firstUrl(long) !== settlements) return fail(name, `long query: ${firstUrl(long)}`);
+  // A normal query is untouched.
+  const ok = await callTool("docs_search", { query: "settlements" });
+  if (firstUrl(ok) !== settlements) return fail(name, `short query: ${firstUrl(ok)}`);
+  pass(name);
+}
+
+
+
+
 
 async function test404() {
   const res = await fetch(`${BASE_URL}/nonexistent/path/deep`);
   if (res.status !== 404) return fail("404 handler", `expected 404, got ${res.status}`);
   pass("Unknown routes return 404");
+}
+
+// ── Security limits (#161374) ────────────────────────────────────────────────
+// In-process checks of the seed-wallet proxy, the webhook store and the rate
+// limit key. They import server.mjs, which must not listen when imported.
+
+let lib = null;
+async function loadServerModule() {
+  if (lib) return lib;
+  // Point a module that still listens on import at harmless local values.
+  process.env.PORT = process.env.PORT || "9878";
+  process.env.BASE_URL = process.env.BASE_URL || DOCS_ORIGIN;
+  lib = await import("./server.mjs");
+  return lib;
+}
+
+// Stand-ins for Keycloak and the wallet service. Nothing leaves the machine.
+function fakeUpstream({ status = 200, body = '{"balance":"10.00","currency":"USD","account_uuid":"acc-1"}', throwOn } = {}) {
+  const calls = [];
+  return {
+    calls,
+    getToken: async () => {
+      if (throwOn === "token") throw new Error("Keycloak said: internal detail 42");
+      return "test-token";
+    },
+    fetch: async (url, init) => {
+      calls.push({ url, init });
+      if (throwOn === "fetch") throw new Error("connect ECONNREFUSED 10.1.2.3:443");
+      return new Response(body, { status, headers: { "Content-Type": "application/json" } });
+    },
+  };
+}
+
+// Runs one handler on one request through a real local HTTP server and returns
+// { status, body }.
+async function runHandler(handler, { headers = {}, body }) {
+  const srv = http.createServer((req, res) => handler(req, res));
+  await new Promise((r) => srv.listen(0, r));
+  const { port } = srv.address();
+  try {
+    const res = await fetch(`http://localhost:${port}/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-ottu-demo": "seed-wallet", ...headers },
+      body: typeof body === "string" ? body : JSON.stringify(body),
+    });
+    return { status: res.status, body: await res.text() };
+  } finally {
+    srv.close();
+  }
+}
+
+const DEMO_SEED = { customer_id: "demo_ab12cd34", currency: "USD", amount: "10.00", pg_code: "ottu-sandbox-usd" };
+
+// The seed handler as it was on main before #161374, kept here word for word
+// (only fetch and the token call are passed in, and the masked random tag
+// comes from crypto) so the test can run the old
+// path next to the new one.
+function legacySeedHandler({ fetch: fetchImpl, getToken, merchant }) {
+  return async function handleSeedWallet(req, res) {
+    let body;
+    try {
+      body = await new Promise((resolve, reject) => {
+        let b = "";
+        req.on("data", (c) => (b += c));
+        req.on("end", () => { try { resolve(JSON.parse(b)); } catch { reject(new Error("Invalid JSON")); } });
+        req.on("error", reject);
+      });
+    } catch {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "invalid_json" }));
+      return;
+    }
+    const { customer_id, currency, amount, pg_code } = body || {};
+    if (!customer_id || !currency || !amount || !pg_code) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "missing_fields", required: ["customer_id", "currency", "amount", "pg_code"] }));
+      return;
+    }
+    let token;
+    try {
+      token = await getToken({});
+    } catch (err) {
+      res.writeHead(502, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "keycloak_error", message: err.message }));
+      return;
+    }
+    const idempotencyKey = crypto.randomUUID();
+    // The old code used Math.random here; the tag is masked before comparing,
+    // so the frozen copy takes it from crypto (CodeQL js/insecure-randomness).
+    const demoTag = `demo_${Date.now()}_${crypto.getRandomValues(new Uint32Array(1))[0].toString(36)}`;
+    let upstream;
+    try {
+      upstream = await fetchImpl(`${merchant.walletUrl}/wallet/credits`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Merchant-Id": merchant.merchantId,
+          "Idempotency-Key": idempotencyKey,
+        },
+        body: JSON.stringify({
+          customer_id, currency, amount,
+          funding_source_type: "promo",
+          session_id: `sess_${demoTag}`,
+          pg_code,
+          provider: "",
+          reference_number: `ref_${demoTag}`,
+          order_no: `ord_${demoTag}`,
+          metadata: { source: "docs_walletdemo", synthetic: true, merchant: merchant.merchantId },
+        }),
+      });
+    } catch (err) {
+      res.writeHead(502, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "upstream_unreachable", message: err.message }));
+      return;
+    }
+    const text = await upstream.text();
+    res.writeHead(upstream.status, { "Content-Type": "application/json" });
+    res.end(text);
+  };
+}
+
+// Drops the per-call random parts so two runs can be compared.
+function normalizeWalletCall(call) {
+  const body = JSON.parse(call.init.body);
+  for (const k of ["session_id", "reference_number", "order_no"]) body[k] = body[k].replace(/demo_\d+_[a-z0-9]+/, "demo_TAG");
+  const headers = { ...call.init.headers, "Idempotency-Key": "KEY" };
+  return JSON.stringify({ url: call.url, method: call.init.method, headers, body });
+}
+
+async function testSeedNormalRunUnchanged() {
+  const name = "Seed wallet: a normal demo run is the same as before";
+  try {
+    const { handleSeedWallet, SANDBOX_MERCHANT } = await loadServerModule();
+    if (typeof handleSeedWallet !== "function") return fail(name, "server.mjs does not export handleSeedWallet");
+    const oldUp = fakeUpstream();
+    const newUp = fakeUpstream();
+    const before = await runHandler(legacySeedHandler({ ...oldUp, merchant: SANDBOX_MERCHANT }), { body: DEMO_SEED });
+    const after = await runHandler((req, res) => handleSeedWallet(req, res, newUp), { body: DEMO_SEED });
+    if (before.status !== after.status || before.body !== after.body) {
+      return fail(name, `client answer differs: ${before.status} ${before.body} vs ${after.status} ${after.body}`);
+    }
+    if (oldUp.calls.length !== 1 || newUp.calls.length !== 1) return fail(name, "wallet not called once");
+    if (normalizeWalletCall(oldUp.calls[0]) !== normalizeWalletCall(newUp.calls[0])) {
+      return fail(name, `wallet request differs:\n${normalizeWalletCall(oldUp.calls[0])}\n${normalizeWalletCall(newUp.calls[0])}`);
+    }
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+async function testSeedRejectsOutOfRangeValues() {
+  const name = "Seed wallet: amount over the cap, unknown currency, odd ids get 400";
+  try {
+    const { handleSeedWallet } = await loadServerModule();
+    if (typeof handleSeedWallet !== "function") return fail(name, "server.mjs does not export handleSeedWallet");
+    // Each case names the check that must refuse it, so a 400 from another
+    // check (or a generic error) does not pass for the wrong reason.
+    const cases = {
+      "big amount": [{ ...DEMO_SEED, amount: "999999999" }, "invalid_amount"],
+      "amount over cap": [{ ...DEMO_SEED, amount: "100.01" }, "invalid_amount"],
+      "zero amount": [{ ...DEMO_SEED, amount: "0" }, "invalid_amount"],
+      "amount not a number": [{ ...DEMO_SEED, amount: "ten" }, "invalid_amount"],
+      "currency": [{ ...DEMO_SEED, currency: "EUR" }, "invalid_currency"],
+      "customer without demo prefix": [{ ...DEMO_SEED, customer_id: "x" }, "invalid_customer_id"],
+      "customer with odd characters": [{ ...DEMO_SEED, customer_id: "demo_<b>hi</b>" }, "invalid_customer_id"],
+      "pg_code with odd characters": [{ ...DEMO_SEED, pg_code: "a/b" }, "invalid_pg_code"],
+    };
+    for (const [label, [body, code]] of Object.entries(cases)) {
+      // The old handler sent each of these to the wallet.
+      const oldUp = fakeUpstream();
+      const old = await runHandler(legacySeedHandler({ ...oldUp, merchant: lib.SANDBOX_MERCHANT }), { body });
+      if (old.status !== 200 || oldUp.calls.length !== 1) return fail(name, `${label}: the old handler did not accept it`);
+      const up = fakeUpstream();
+      const r = await runHandler((req, res) => handleSeedWallet(req, res, up), { body });
+      if (r.status !== 400) return fail(name, `${label}: expected 400, got ${r.status}`);
+      if (r.body !== JSON.stringify({ error: code })) return fail(name, `${label}: expected ${code}, got ${r.body}`);
+      if (up.calls.length !== 0) return fail(name, `${label}: wallet was called`);
+    }
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+async function testSeedErrorsHideUpstreamText() {
+  const name = "Seed wallet: errors give a fixed code, never the upstream text";
+  try {
+    const { handleSeedWallet } = await loadServerModule();
+    if (typeof handleSeedWallet !== "function") return fail(name, "server.mjs does not export handleSeedWallet");
+    const cases = [
+      ["token", fakeUpstream({ throwOn: "token" }), 502, "keycloak_error"],
+      ["fetch", fakeUpstream({ throwOn: "fetch" }), 502, "upstream_unreachable"],
+      ["wallet 500", fakeUpstream({ status: 500, body: '{"detail":"internal detail 42"}' }), 500, "wallet_error"],
+    ];
+    for (const [label, up, status, code] of cases) {
+      const r = await runHandler((req, res) => handleSeedWallet(req, res, up), { body: DEMO_SEED });
+      if (r.status !== status) return fail(name, `${label}: expected ${status}, got ${r.status}`);
+      if (r.body !== JSON.stringify({ error: code })) return fail(name, `${label}: body ${r.body}`);
+    }
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+async function testRateLimitKeyIgnoresCallerHeader() {
+  const name = "Seed rate limit keys on the proxy's address, not the caller's X-Forwarded-For";
+  try {
+    const { clientIp } = await loadServerModule();
+    if (typeof clientIp !== "function") return fail(name, "server.mjs does not export clientIp");
+    const sock = { remoteAddress: "10.0.0.9" };
+    const checks = [
+      // caller wrote 1.1.1.1 first; the proxy appended the real address last
+      [{ headers: { "x-forwarded-for": "1.1.1.1, 203.0.113.7" }, socket: sock }, "203.0.113.7"],
+      [{ headers: { "do-connecting-ip": "198.51.100.4", "x-forwarded-for": "1.1.1.1" }, socket: sock }, "198.51.100.4"],
+      [{ headers: {}, socket: sock }, "10.0.0.9"],
+    ];
+    for (const [req, want] of checks) {
+      const got = clientIp(req);
+      if (got !== want) return fail(name, `expected ${want}, got ${got}`);
+    }
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+async function testRateLimitMapIsPruned() {
+  const name = "Seed rate limit counters are pruned";
+  try {
+    const { checkSeedRateLimit, pruneSeedRateLimits, seedRateLimits } = await loadServerModule();
+    if (typeof pruneSeedRateLimits !== "function") return fail(name, "server.mjs does not export pruneSeedRateLimits");
+    seedRateLimits.clear();
+    const t0 = 1_000_000;
+    for (let i = 0; i < 50; i++) {
+      checkSeedRateLimit({ headers: { "do-connecting-ip": `192.0.2.${i}` }, socket: {} }, t0);
+    }
+    if (seedRateLimits.size === 0) return fail(name, "no counters were recorded");
+    pruneSeedRateLimits(t0 + 120_000);
+    if (seedRateLimits.size !== 0) return fail(name, `${seedRateLimits.size} stale counters left`);
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+async function testPollDoesNotCreateEntries() {
+  const name = "Polling an unknown order id stores nothing";
+  try {
+    const { webhookStore } = await loadServerModule();
+    if (!(webhookStore instanceof Map)) return fail(name, "server.mjs does not export webhookStore");
+    const before = webhookStore.size;
+    // the spawned server is a different process; use the in-process handler
+    const { handleWebhookPoll } = lib;
+    const srv = http.createServer((req, res) => handleWebhookPoll("never-posted-1", req, res));
+    await new Promise((r) => srv.listen(0, r));
+    const r = await fetch(`http://localhost:${srv.address().port}/never-posted-1/events.json`).then((x) => x.json());
+    srv.close();
+    if (JSON.stringify(r) !== JSON.stringify({ events: [], lastId: -1 })) return fail(name, `answer ${JSON.stringify(r)}`);
+    if (webhookStore.size !== before) return fail(name, "poll created a store entry");
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+async function testSeedBodyCap() {
+  const name = "Seed wallet: a body over 4 KB gets 413 and the wallet is not called";
+  try {
+    const { handleSeedWallet } = await loadServerModule();
+    if (typeof handleSeedWallet !== "function") return fail(name, "server.mjs does not export handleSeedWallet");
+    const up = fakeUpstream();
+    const r = await runHandler((req, res) => handleSeedWallet(req, res, up), { body: { ...DEMO_SEED, pad: "x".repeat(5 * 1024) } });
+    if (r.status !== 413) return fail(name, `expected 413, got ${r.status}`);
+    if (up.calls.length !== 0) return fail(name, "wallet was called");
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+async function testSeedWalletCallOptions() {
+  const name = "Seed wallet: the wallet call refuses redirects and has a timeout";
+  try {
+    const { handleSeedWallet } = await loadServerModule();
+    if (typeof handleSeedWallet !== "function") return fail(name, "server.mjs does not export handleSeedWallet");
+    const up = fakeUpstream();
+    await runHandler((req, res) => handleSeedWallet(req, res, up), { body: DEMO_SEED });
+    const init = up.calls[0]?.init;
+    if (!init) return fail(name, "wallet not called");
+    if (init.redirect !== "error") return fail(name, `redirect is ${init.redirect}`);
+    if (!(init.signal instanceof AbortSignal)) return fail(name, "no timeout signal");
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+// CodeQL js/insecure-randomness: the demo tag must not come from Math.random.
+async function testSeedTagNotFromMathRandom() {
+  const name = "Seed wallet: demo tags differ even when Math.random repeats";
+  const realRandom = Math.random;
+  const realNow = Date.now;
+  try {
+    const { handleSeedWallet } = await loadServerModule();
+    if (typeof handleSeedWallet !== "function") return fail(name, "server.mjs does not export handleSeedWallet");
+    Math.random = () => 0.123456789;
+    Date.now = () => 1_700_000_000_000;
+    const up = fakeUpstream();
+    for (let i = 0; i < 2; i++) {
+      await runHandler((req, res) => handleSeedWallet(req, res, up), { body: DEMO_SEED });
+    }
+    Math.random = realRandom;
+    Date.now = realNow;
+    if (up.calls.length !== 2) return fail(name, `wallet called ${up.calls.length} times`);
+    const [a, b] = up.calls.map((c) => JSON.parse(c.init.body).session_id);
+    if (!/^sess_demo_\d+_[a-z0-9]{8}$/.test(a)) return fail(name, `tag shape changed: ${a}`);
+    if (a === b) return fail(name, "two seeds got the same tag");
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  } finally {
+    Math.random = realRandom;
+    Date.now = realNow;
+  }
+}
+
+// Runs last among the seed checks: it fills the shared global counter.
+async function testSeedGlobalLimit() {
+  const name = "Seed rate limit: 300 a minute for all callers together";
+  try {
+    const { checkSeedRateLimit } = await loadServerModule();
+    if (typeof checkSeedRateLimit !== "function") return fail(name, "server.mjs does not export checkSeedRateLimit");
+    // A minute ahead, so the counts of the checks above have expired.
+    const t = Date.now() + 10 * 60_000;
+    const req = (i) => ({ headers: { "do-connecting-ip": `198.18.${i >> 8}.${i & 255}` }, socket: {} });
+    for (let i = 0; i < 300; i++) {
+      if (!checkSeedRateLimit(req(i), t)) return fail(name, `call ${i + 1} refused`);
+    }
+    if (checkSeedRateLimit(req(300), t)) return fail(name, "301st call from a new address allowed");
+    if (!checkSeedRateLimit(req(301), t + 61_000)) return fail(name, "still refused a minute later");
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+// Posts each [orderId, text] to the in-process relay handler; returns the statuses.
+async function postToRelay(pairs) {
+  const { handleWebhookPost } = lib;
+  const srv = http.createServer((req, res) => handleWebhookPost(decodeURIComponent(req.url.slice(1)), req, res));
+  await new Promise((r) => srv.listen(0, r));
+  const statuses = [];
+  try {
+    for (const [orderId, text] of pairs) {
+      const res = await fetch(`http://localhost:${srv.address().port}/${orderId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: text,
+      });
+      await res.text();
+      statuses.push(res.status);
+    }
+  } finally {
+    srv.close();
+  }
+  return statuses;
+}
+
+async function pollRelay(orderId, query = "") {
+  const { handleWebhookPoll } = lib;
+  const srv = http.createServer((req, res) => handleWebhookPoll(orderId, req, res));
+  await new Promise((r) => srv.listen(0, r));
+  try {
+    return await fetch(`http://localhost:${srv.address().port}/${orderId}/events.json${query}`).then((r) => r.text());
+  } finally {
+    srv.close();
+  }
+}
+
+function heapAfterGc() {
+  v8.setFlagsFromString("--expose-gc");
+  const gc = vm.runInNewContext("gc");
+  gc();
+  gc();
+  return process.memoryUsage().heapUsed;
+}
+
+async function testRelayMemoryFollowsBytes() {
+  const name = "Webhook relay: what it keeps costs about the bytes it was sent";
+  try {
+    const { handleWebhookPost } = await loadServerModule();
+    if (typeof handleWebhookPost !== "function") return fail(name, "server.mjs does not export handleWebhookPost");
+    // 63 KB of empty objects: small as text, large as parsed objects.
+    const body = `[${new Array(21000).fill("{}").join(",")}]`;
+    const pairs = Array.from({ length: 40 }, (_, i) => [`mem-${Date.now()}-${i}`, body]);
+    const before = heapAfterGc();
+    const statuses = await postToRelay(pairs);
+    const grew = heapAfterGc() - before;
+    if (statuses.some((s) => s !== 200)) return fail(name, `not all accepted: ${statuses.join(",")}`);
+    const sent = body.length * pairs.length;
+    const mb = (n) => (n / 1048576).toFixed(1);
+    if (grew > sent * 4) return fail(name, `heap grew ${mb(grew)} MB for ${mb(sent)} MB of bodies`);
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+async function testRelayBytesPerOrderCap() {
+  const name = "Webhook relay: one order id keeps at most about 2 MB";
+  try {
+    const { handleWebhookPost } = await loadServerModule();
+    if (typeof handleWebhookPost !== "function") return fail(name, "server.mjs does not export handleWebhookPost");
+    const orderId = `order-bytes-${Date.now()}`;
+    const body = JSON.stringify({ pad: "x".repeat(60 * 1024) });
+    const statuses = await postToRelay(Array.from({ length: 20 }, () => [orderId, body]));
+    if (statuses[0] !== 200) return fail(name, `first event got ${statuses[0]}`);
+    if (statuses[19] !== 429) return fail(name, `20th event of 60 KB: expected 429, got ${statuses[19]}`);
+    const answer = await pollRelay(orderId);
+    if (answer.length > 2 * 1024 * 1024) return fail(name, `poll answer is ${answer.length} bytes`);
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+// The relay as it was on main before #161374 (store and poll), kept word for
+// word so the poll answers can be compared byte for byte.
+function legacyRelay() {
+  const webhookStore = new Map();
+  return {
+    post(orderId, text) {
+      const payload = JSON.parse(text);
+      if (!webhookStore.has(orderId)) webhookStore.set(orderId, { webhooks: [], createdAt: Date.now() });
+      webhookStore.get(orderId).webhooks.push({ payload, receivedAt: new Date().toISOString() });
+    },
+    poll(orderId, url) {
+      const webhooks = webhookStore.get(orderId)?.webhooks ?? [];
+      const sinceParam = new URL(url, "http://x").searchParams.get("since");
+      const since = Number.parseInt(sinceParam ?? "-1", 10);
+      const startIdx = Number.isFinite(since) ? since + 1 : 0;
+      const events = [];
+      for (let i = startIdx; i < webhooks.length; i++) {
+        events.push({ id: i, ...webhooks[i] });
+      }
+      return JSON.stringify({ events, lastId: webhooks.length - 1 });
+    },
+  };
+}
+
+async function testRelayPollAnswerUnchanged() {
+  const name = "Webhook relay: poll answers are byte for byte the same as before";
+  try {
+    const { handleWebhookPost } = await loadServerModule();
+    if (typeof handleWebhookPost !== "function") return fail(name, "server.mjs does not export handleWebhookPost");
+    const texts = [
+      JSON.stringify({ result: "success", session_id: "s1", state: "paid", amount: "10.000", token: { token: "tok_1" } }),
+      '{ "spaced" : [1, 2.50, -0, 1e3, null, true], "nested": {"a": {"b": []}} }',
+      JSON.stringify({ quote: 'say "hi"', slash: "a\\b", line: "a b", arabic: "مرحبا", emoji: "\u{1F600}" }),
+      '"just a string"',
+      "null",
+      "42",
+      "[]",
+    ];
+    const orderId = `same-${Date.now()}`;
+    const old = legacyRelay();
+    for (const t of texts) old.post(orderId, t);
+    const statuses = await postToRelay(texts.map((t) => [orderId, t]));
+    if (statuses.some((s) => s !== 200)) return fail(name, `not all accepted: ${statuses.join(",")}`);
+    const stamp = (s) => s.replace(/"receivedAt":"[^"]+"/g, '"receivedAt":"T"');
+    // A `since` below -1 is left out on purpose: it now answers like -1 (see
+    // testRelayPollNegativeSince); the demo never sends one.
+    for (const q of ["", "?since=-1", "?since=0", "?since=3", "?since=99", "?since=abc"]) {
+      const before = stamp(old.poll(orderId, `/${orderId}/events.json${q}`));
+      const after = stamp(await pollRelay(orderId, q));
+      if (before !== after) return fail(name, `since ${q || "(none)"} differs:\n${before}\n${after}`);
+    }
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+async function testRelayPollNegativeSince() {
+  const name = "Webhook relay: a `since` below -1 answers like -1, fast and small";
+  try {
+    await loadServerModule();
+    const unknown = `never-posted-neg-${Date.now()}`;
+    const empty = '{"events":[],"lastId":-1}';
+    // Cheap values first, so the old code fails here before the big one.
+    for (const q of ["?since=-2", "?since=-100000"]) {
+      const answer = await pollRelay(unknown, q);
+      if (answer !== empty) return fail(name, `unknown id ${q}: ${answer.length} bytes, expected ${empty}`);
+    }
+    const t0 = Date.now();
+    const big = await pollRelay(unknown, "?since=-100000000");
+    const ms = Date.now() - t0;
+    if (big !== empty) return fail(name, `unknown id since=-100000000: ${big.length} bytes`);
+    if (ms > 1000) return fail(name, `unknown id since=-100000000 took ${ms} ms`);
+    // On an id with events, a negative `since` gives the same answer as -1.
+    const orderId = `neg-${Date.now()}`;
+    const statuses = await postToRelay([[orderId, '{"a":1}'], [orderId, '{"b":2}']]);
+    if (statuses.some((s) => s !== 200)) return fail(name, `not all accepted: ${statuses.join(",")}`);
+    const fromStart = await pollRelay(orderId, "?since=-1");
+    for (const q of ["?since=-3", "?since=-100000000"]) {
+      const answer = await pollRelay(orderId, q);
+      if (answer !== fromStart) return fail(name, `${q} differs from since=-1:\n${answer.slice(0, 200)}\n${fromStart}`);
+    }
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+async function testRelayTotalCap() {
+  const name = "Webhook relay: 32 MB in all, then 503 relay_full; expired ids free the room";
+  try {
+    const { webhookStore } = await loadServerModule();
+    const cap = 32 * 1024 * 1024;
+    const body = JSON.stringify({ pad: "x".repeat(60 * 1024) });
+    const stamp = Date.now();
+    const ids = [];
+    let full = null;
+    // 16 events of 60 KB stay under the 2 MB per id cap; about 270 fill 32 MB.
+    for (let n = 0; n < 400 && !full; n += 16) {
+      const orderId = `total-${stamp}-${n}`;
+      ids.push(orderId);
+      const statuses = await postToRelay(Array.from({ length: 16 }, () => [orderId, body]));
+      const bad = statuses.find((s) => s !== 200);
+      if (bad !== undefined) full = { status: bad, orderId };
+    }
+    if (!full) return fail(name, "400 events of 60 KB were all accepted");
+    if (full.status !== 503) return fail(name, `expected 503 when full, got ${full.status}`);
+    const counted = [...webhookStore.values()].reduce((sum, e) => sum + e.bytes, 0);
+    if (counted > cap) return fail(name, `the relay keeps ${counted} counted bytes, over ${cap}`);
+    const answer = await new Promise((resolve) => {
+      const srv = http.createServer((req, res) => lib.handleWebhookPost(full.orderId, req, res));
+      srv.listen(0, async () => {
+        const r = await fetch(`http://localhost:${srv.address().port}/`, { method: "POST", body });
+        resolve(await r.text());
+        srv.close();
+      });
+    });
+    if (answer !== '{"error":"relay_full"}') return fail(name, `answer when full: ${answer}`);
+    // Ids past the 1 hour TTL are dropped when room is needed.
+    for (const id of ids) {
+      const entry = webhookStore.get(id);
+      if (entry) entry.createdAt = 0;
+    }
+    const [after] = await postToRelay([[`total-${stamp}-again`, body]]);
+    if (after !== 200) return fail(name, `after the ids expired: expected 200, got ${after}`);
+    if (ids.some((id) => webhookStore.has(id))) return fail(name, "expired ids were not dropped");
+    pass(name);
+  } catch (err) {
+    fail(name, err.message);
+  }
+}
+
+// Spawned-server checks: the real routes.
+
+async function testWebhookBodyCap() {
+  const res = await fetch(`${BASE_URL}/big-body-${Date.now()}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ pad: "x".repeat(70 * 1024) }),
+  }).catch((e) => ({ status: `error ${e.message}` }));
+  if (res.status !== 413) return fail("Webhook body cap", `expected 413, got ${res.status}`);
+  pass("Webhook POST over 64 KB gets 413");
+}
+
+async function testWebhookOrderIdFormat() {
+  for (const id of ["a".repeat(65), "bad.id", "bad%20id"]) {
+    const res = await fetch(`${BASE_URL}/${id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+    });
+    if (res.status !== 400) return fail("Webhook order id format", `${id.slice(0, 12)}: expected 400, got ${res.status}`);
+  }
+  pass("Webhook POST with a malformed order id gets 400");
+}
+
+async function testWebhookEventsPerOrderCap() {
+  const orderId = `cap-${Date.now()}`;
+  let last;
+  for (let i = 0; i < 101; i++) {
+    last = await fetch(`${BASE_URL}/${orderId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ seq: i }),
+    });
+  }
+  if (last.status !== 429) return fail("Webhook events cap", `101st event: expected 429, got ${last.status}`);
+  const poll = await fetch(`${BASE_URL}/${orderId}/events.json`).then((r) => r.json());
+  if (poll.events.length !== 100) return fail("Webhook events cap", `stored ${poll.events.length}`);
+  pass("Webhook relay keeps at most 100 events per order id");
+}
+
+async function testRefreshNeedsToken() {
+  const noToken = await fetch(`${BASE_URL}/refresh`, { method: "POST" });
+  if (noToken.status !== 401) return fail("Refresh token", `no token: expected 401, got ${noToken.status}`);
+  const wrong = await fetch(`${BASE_URL}/refresh`, { method: "POST", headers: { "x-mcp-refresh-token": "wrong" } });
+  if (wrong.status !== 401) return fail("Refresh token", `wrong token: expected 401, got ${wrong.status}`);
+  const ok = await fetch(`${BASE_URL}/refresh`, { method: "POST", headers: { "x-mcp-refresh-token": REFRESH_TOKEN } });
+  if (ok.status !== 200) return fail("Refresh token", `right token: expected 200, got ${ok.status}`);
+  const again = await fetch(`${BASE_URL}/refresh`, { method: "POST", headers: { "x-mcp-refresh-token": REFRESH_TOKEN } });
+  if (again.status !== 429) return fail("Refresh cooldown", `second run within a minute: expected 429, got ${again.status}`);
+  pass("POST /refresh needs the token when one is set, and runs at most once a minute");
+}
+
+const MCP_HEADERS = { "Content-Type": "application/json", Accept: "application/json, text/event-stream" };
+const paddedToolsList = (bytes) =>
+  JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list", params: { _meta: { pad: "x".repeat(bytes) } } });
+
+async function testMcpBodyCap() {
+  const res = await fetch(`${BASE_URL}/`, { method: "POST", headers: MCP_HEADERS, body: paddedToolsList(300 * 1024) })
+    .catch((e) => ({ status: `error ${e.message}` }));
+  if (res.status !== 413) return fail("MCP body cap", `300 KB request: expected 413, got ${res.status}`);
+  pass("MCP POST over 256 KB gets 413");
+}
+
+async function testMcpUnderCapUnchanged() {
+  const big = await fetch(`${BASE_URL}/`, { method: "POST", headers: MCP_HEADERS, body: paddedToolsList(200 * 1024) });
+  const raw = await big.text();
+  if (big.status !== 200 || !raw.includes("docs_search")) return fail("MCP under the cap", `200 KB request: ${big.status}`);
+  // A body that is not JSON still gets the MCP SDK's own answer.
+  const bad = await fetch(`${BASE_URL}/`, { method: "POST", headers: MCP_HEADERS, body: "not json" });
+  const badBody = await bad.json().catch(() => null);
+  if (bad.status !== 400 || badBody?.error?.code !== -32700 || badBody?.error?.message !== "Parse error: Invalid JSON") {
+    return fail("MCP under the cap", `invalid JSON: ${bad.status} ${JSON.stringify(badBody)}`);
+  }
+  pass("MCP POST under 256 KB and invalid JSON are answered as before");
 }
 
 // ── Runner ──
@@ -214,7 +975,31 @@ async function run() {
   await testWebhookPollSinceCursor();
   await testWebhookInvalidJSON();
   await testMCPEndpoint();
+  await testSearchQueryIsCut();
   await test404();
+  await testWebhookBodyCap();
+  await testWebhookOrderIdFormat();
+  await testWebhookEventsPerOrderCap();
+  await testRefreshNeedsToken();
+  await testMcpBodyCap();
+  await testMcpUnderCapUnchanged();
+
+  console.log("\nIn-process security checks:\n");
+  await testSeedNormalRunUnchanged();
+  await testSeedRejectsOutOfRangeValues();
+  await testSeedErrorsHideUpstreamText();
+  await testRateLimitKeyIgnoresCallerHeader();
+  await testRateLimitMapIsPruned();
+  await testPollDoesNotCreateEntries();
+  await testSeedBodyCap();
+  await testSeedWalletCallOptions();
+  await testSeedTagNotFromMathRandom();
+  await testSeedGlobalLimit();
+  await testRelayMemoryFollowsBytes();
+  await testRelayBytesPerOrderCap();
+  await testRelayPollAnswerUnchanged();
+  await testRelayPollNegativeSince();
+  await testRelayTotalCap();
 
   console.log(`\n  ${passed} passed, ${failed} failed\n`);
 
