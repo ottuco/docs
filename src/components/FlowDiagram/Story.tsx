@@ -148,13 +148,8 @@ export default function Story(input: StoryProps): React.JSX.Element {
     : storyGap(lanes.length);
   const cardW = filling ? storyFillCardW(gap) : storyCardW(lanes.length);
   const lanesHeight = storyLanesHeight(props);
-  const cardTops = useMemo(
-    () => storyCardTops({ ...props, steps, links }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only steps and links place the cards
-    [steps, links],
-  );
-
   const nodes: Node[] = useMemo(() => {
+    const cardTops = storyCardTops({ steps, links });
     const cardX = (lane: number) => lane * gap + (gap - cardW) / 2;
     return [
       ...lanes.map((l, i) => ({
@@ -182,7 +177,7 @@ export default function Story(input: StoryProps): React.JSX.Element {
         } as CardData,
       })),
     ];
-  }, [lanes, steps, gap, cardW, lanesHeight, cardTops]);
+  }, [lanes, steps, links, gap, cardW, lanesHeight]);
 
   const edges: Edge[] = useMemo(
     () =>

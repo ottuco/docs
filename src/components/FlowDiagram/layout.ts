@@ -83,21 +83,28 @@ export const storyFillCardW = (gap: number): number =>
  * about 20px between rows, less than the label pill, so without it the label
  * covers both cards. */
 export const STORY_LABEL_ROOM = 20;
-const labelledDrops = (p: StoryProps): number[] =>
-  p.links
-    .filter(
-      ([from, to, text]) =>
-        text &&
-        to === from + 1 &&
-        p.steps[from - 1]?.lane === p.steps[to - 1]?.lane,
-    )
-    .map(([, to]) => to);
+/** What places the cards: the steps and the links between them. */
+type StoryRows = Pick<StoryProps, "steps" | "links">;
+// Only a labelled arrow to the very next card needs it: an arrow to a later
+// card has at least a whole row of room for its label, and one going back up
+// runs around the cards (a loop).
+const labelledDrops = (p: StoryRows): Set<number> =>
+  new Set(
+    p.links
+      .filter(
+        ([from, to, text]) =>
+          text &&
+          to === from + 1 &&
+          p.steps[from - 1]?.lane === p.steps[to - 1]?.lane,
+      )
+      .map(([, to]) => to),
+  );
 /** Top of each card, in step order: one row each, plus the label room. */
-export const storyCardTops = (p: StoryProps): number[] => {
+export const storyCardTops = (p: StoryRows): number[] => {
   const drops = labelledDrops(p);
   let extra = 0;
   return p.steps.map((_, i) => {
-    if (drops.includes(i + 1)) extra += STORY_LABEL_ROOM;
+    if (drops.has(i + 1)) extra += STORY_LABEL_ROOM;
     return STORY_TOP + i * STORY_ROW + extra;
   });
 };
@@ -105,7 +112,7 @@ export const storyCardTops = (p: StoryProps): number[] => {
 export const storyLanesHeight = (p: StoryProps): number =>
   STORY_TOP +
   p.steps.length * STORY_ROW +
-  labelledDrops(p).length * STORY_LABEL_ROOM;
+  labelledDrops(p).size * STORY_LABEL_ROOM;
 /** Height of the body: all the lanes, or `maxHeight` (then it scrolls). */
 export const storyBodyHeight = (p: StoryProps): number => {
   const full = storyLanesHeight(p) + STORY_BODY_PAD;
