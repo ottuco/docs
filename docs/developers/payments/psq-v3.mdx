@@ -334,7 +334,7 @@ What to know about the list:
 
 `200` carries the payment object. Every other status carries an error in the [error format](/errors#format):
 
-- **`400`** No identifier, an invalid field, a payment in a state the status query does not apply to (for example `canceled`), or a payment with no attempts yet. These errors have `attr` `null`.
+- **`400`** No identifier, an invalid field, a payment in a state the status query does not apply to (for example `canceled`), or a payment with no attempts yet, unless it has expired (an expired payment with no attempts answers `200` with `status` `expired` and an empty `attempts` list). These errors have `attr` `null`.
 - **`401`** [`not_authenticated`](/errors#not_authenticated).
 - **`403`** [`permission_denied`](/errors#permission_denied): the `payment.inquiry` permission is missing, or the [IP allowlist](/developers/operations-v3#rules-every-call-follows) refused the call.
 - **`404`** [`payment_not_found`](/errors#payment_not_found): an unknown identifier, or a payment of another unit when your API user is limited to units.
