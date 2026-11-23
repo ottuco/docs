@@ -18,6 +18,11 @@ export interface StepProps {
    */
   density?: number;
   /**
+   * Show a tall screenshot (an email) whole, shrunk to fit the stage like any
+   * other, instead of its top at full width with a fade.
+   */
+  fitWhole?: boolean;
+  /**
    * The control this step is about, as "left,top,width,height" in percent
    * of the screenshot. Drawn as a ring over the image, so one screenshot
    * can serve several steps.
@@ -51,11 +56,13 @@ function Shot({
   alt,
   spot,
   density = 2,
+  fitWhole = false,
 }: {
   src: string;
   alt: string;
   spot?: string;
   density?: number;
+  fitWhole?: boolean;
 }) {
   const img = useRef<HTMLImageElement>(null);
   const [size, setSize] = useState<{ w: number; ratio: number }>();
@@ -69,7 +76,7 @@ function Shot({
   if (spot && !ring && process.env.NODE_ENV !== "production") {
     console.warn(`StepShow: spot "${spot}" on ${src} is not "left,top,width,height"; no ring drawn.`);
   }
-  const tall = size !== undefined && size.ratio < TALL;
+  const tall = !fitWhole && size !== undefined && size.ratio < TALL;
   // A tall shot keeps its width and is cut to the stage height; any other
   // shrinks to fit the stage whole.
   const style = size && {
@@ -227,7 +234,7 @@ export default function StepShow({ children }: { children: React.ReactNode }): R
                   aria-label={`Enlarge screenshot: ${s.props.alt ?? ""}`}
                   onClick={() => setZoomed(i)}
                 >
-                  <Shot src={s.props.image} alt={s.props.alt ?? ""} spot={s.props.spot} density={s.props.density} />
+                  <Shot src={s.props.image} alt={s.props.alt ?? ""} spot={s.props.spot} density={s.props.density} fitWhole={s.props.fitWhole} />
                   <ZoomHint />
                 </button>
               </div>
@@ -246,7 +253,7 @@ export default function StepShow({ children }: { children: React.ReactNode }): R
                   aria-label={`Enlarge screenshot: ${s.props.alt ?? ""}`}
                   onClick={() => setZoomed(active)}
                 >
-                  <Shot src={s.props.image} alt="" spot={s.props.spot} density={s.props.density} />
+                  <Shot src={s.props.image} alt="" spot={s.props.spot} density={s.props.density} fitWhole={s.props.fitWhole} />
                   <ZoomHint />
                 </button>
               </figure>
