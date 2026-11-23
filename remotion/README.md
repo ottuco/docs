@@ -5,6 +5,12 @@ with [Remotion](https://www.remotion.dev). This is an **isolated workspace** —
 has its own `package.json`, `tsconfig.json`, and `node_modules`, and is **never**
 part of the Docusaurus site build.
 
+> **Not on any page now (2026-11-23).** These five clips came off the AutoPay
+> pages in October (#207, #208), and their MP4s and posters were removed from
+> `static/video/autopay/` in #281. The AutoPay business page uses a recording of
+> the real customer page instead (`customer-page-demo.mp4`, #161111 R18), not a
+> Remotion render. `npm run render` still works and writes the clips back.
+
 > **Clips are built from the REAL product screenshots.** Each composition
 > (`src/compositions/`) uses the `Reel` component to sequence the actual betabulk
 > screenshots (from `static/img/business/autopay/`) with captions and crossfades — no
