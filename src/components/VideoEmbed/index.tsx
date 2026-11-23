@@ -35,15 +35,21 @@ function usePrefersReducedMotion(): boolean | undefined {
   return reduce;
 }
 
-/** The looping demo: plays while at least a quarter of it is on screen. */
+/**
+ * The looping demo: plays while at least a quarter of it is on screen, with
+ * a pause / play button (moving content longer than 5 s must be stoppable,
+ * WCAG 2.2.2). A reader's pause holds: scrolling back does not restart it.
+ */
 function LoopingVideo({ src, poster, label }: { src: string; poster: string; label?: string }) {
   const video = useRef<HTMLVideoElement>(null);
+  const pausedByReader = useRef(false);
+  const [paused, setPaused] = useState(false);
   useEffect(() => {
     const el = video.current;
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) el.play().catch(() => undefined);
+        if (entry.isIntersecting && !pausedByReader.current) el.play().catch(() => undefined);
         else el.pause();
       },
       { threshold: 0.25 },
@@ -51,18 +57,39 @@ function LoopingVideo({ src, poster, label }: { src: string; poster: string; lab
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
+  const toggle = () => {
+    const el = video.current;
+    if (!el) return;
+    pausedByReader.current = !el.paused;
+    if (el.paused) el.play().catch(() => undefined);
+    else el.pause();
+  };
   return (
-    <video
-      ref={video}
-      className={styles.video}
-      src={src}
-      poster={poster}
-      aria-label={label}
-      muted
-      loop
-      playsInline
-      preload="metadata"
-    />
+    <>
+      <video
+        ref={video}
+        className={styles.video}
+        src={src}
+        poster={poster}
+        role="img"
+        aria-label={label}
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        onPlay={() => setPaused(false)}
+        onPause={() => setPaused(true)}
+        onClick={toggle}
+      />
+      <button
+        type="button"
+        className={styles.loopToggle}
+        onClick={toggle}
+        aria-label={paused ? "Play video" : "Pause video"}
+      >
+        <span aria-hidden="true">{paused ? "▶" : "❚❚"}</span>
+      </button>
+    </>
   );
 }
 
@@ -80,14 +107,18 @@ export default function VideoEmbed({
   const srcUrl = useBaseUrl(src);
   const posterUrl = useBaseUrl(poster);
   // Undefined until the browser answers (and on the server): the poster shows
-  // meanwhile, so nothing starts before we know the reader's preference.
+  // meanwhile, so nothing starts before we know the reader's preference. A
+  // looping video shows it plain, not as a play button that may vanish.
   const looping = loop && reduceMotion === false;
+  const deciding = loop && reduceMotion === undefined;
 
   return (
     <figure className={styles.figure} style={{ maxWidth: width }}>
       <div className={styles.frame} style={{ aspectRatio }}>
         {looping ? (
           <LoopingVideo src={srcUrl} poster={posterUrl} label={label} />
+        ) : deciding ? (
+          <div className={styles.posterStill} style={{ backgroundImage: `url(${posterUrl})` }} />
         ) : playing ? (
           /* `playing` only becomes true from the poster click below, so autoplay
              here is user-initiated. `prefers-reduced-motion` governs UNSOLICITED
@@ -103,7 +134,6 @@ export default function VideoEmbed({
             muted
             playsInline
             autoPlay
-            loop={loop}
             preload="none"
           />
         ) : (

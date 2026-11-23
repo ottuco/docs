@@ -50,6 +50,57 @@
   transition: background 0.15s ease;
 }
 
+/* The poster of a looping video while the motion preference is unknown. */
+.posterStill {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+/* Pause / play for a looping video: shows on hover and on keyboard focus. */
+.video[role="img"] {
+  cursor: pointer;
+}
+
+.loopToggle {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.frame:hover .loopToggle,
+.loopToggle:focus-visible {
+  opacity: 1;
+}
+
+.loopToggle:hover {
+  background: var(--ifm-color-primary);
+}
+
+.loopToggle:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+@media (hover: none) {
+  .loopToggle {
+    opacity: 1;
+  }
+}
+
 .posterBtn:hover .playIcon {
   background: var(--ifm-color-primary);
 }
