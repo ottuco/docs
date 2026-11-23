@@ -12,10 +12,11 @@ export interface VideoEmbedProps {
   /** CSS aspect-ratio, default "16 / 9" */
   aspectRatio?: string;
   /**
-   * A silent demo that plays on its own, over and over, with no controls,
-   * like the customer portal clip on https://docs.stripe.com/recurring-payments#set-up-customer-portal.
-   * It plays only while it is on screen. A reader who asked for reduced
-   * motion gets the poster and starts it with a click, as without `loop`.
+   * A silent demo that plays on its own, over and over, like the customer
+   * portal clip on https://docs.stripe.com/recurring-payments#set-up-customer-portal.
+   * It plays only while it is on screen; its one control is a pause / play
+   * button. A reader who asked for reduced motion gets the poster and starts
+   * it with a click, as without `loop` (it then plays once).
    */
   loop?: boolean;
   /** What the video shows, for screen readers (the `<video>` has no text of its own). */

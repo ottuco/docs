@@ -42,17 +42,18 @@ import VideoEmbed from "@site/src/components/VideoEmbed";
   which made the reader click twice: once on the poster, again on the native
   control.
 - **`loop` (demo mode).** The `<video>` is `muted loop playsInline` with
-  `preload="metadata"` and no controls; an `IntersectionObserver` plays it while
-  at least 25% is visible and pauses it otherwise. Until the browser reports the
-  reader's `prefers-reduced-motion` (and on the server) the poster shows, so
-  nothing starts before the preference is known (shown as a plain image, not a
-  play button); with `reduce` the reader keeps the click-to-play poster, which
-  plays once. The pause / play button (bottom right, shown on hover, on
-  keyboard focus and always on touch screens) and a click on the video stop it
-  (WCAG 2.2.2); a reader's pause holds when the video scrolls out and back
-  in. The `<video>` has `role="img"` and the `label` as its name. Example: the AutoPay business page's self-service
-  section (`/video/autopay/customer-page-demo.mp4`, recorded on the sandbox,
-  #161111 R18).
+  `preload="metadata"` and no native controls; an `IntersectionObserver` plays
+  it while at least 25% is visible and pauses it otherwise. Until the browser
+  reports the reader's `prefers-reduced-motion` (and on the server) the poster
+  shows, so nothing starts before the preference is known (shown as a plain
+  image, not a play button); with `reduce` the reader keeps the click-to-play
+  poster, which plays once. The pause / play button (bottom right, shown on
+  hover, on keyboard focus and always on touch screens) and a click on the video
+  stop it (WCAG 2.2.2); a reader's pause holds when the video scrolls out and
+  back in. The `<video>` has `role="img"` and the `label` as its name. Example:
+  the AutoPay business page's self-service section
+  (`/video/autopay/customer-page-demo.mp4`, recorded on the sandbox, #161111
+  R18).
 - **Theme-aware.** Uses the same border/radius/shadow tokens as `StepGuide`.
 
 ## Hosting
