@@ -869,6 +869,98 @@ checkoutFragment = Checkout.init(
 )
 ```
 
+#### Do this sample with Jetpack Compose
+
+Add this public class to your merchant application. Import the SDK's resource class as OttuR. AndroidFragment creates this host; the host mounts the actual fragment returned by the SDK as its child. This avoids asking Compose to construct the SDK's internal fragment class.
+
+```kotlin
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentContainerView
+import com.ottu.checkout.ui.base.CheckoutSdkFragment
+import com.ottu.checkout.R as OttuR
+
+class OttuCheckoutHostFragment : Fragment() {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View = FragmentContainerView(requireContext()).apply {
+        id = OttuR.id.ottu_checkout_container
+        layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+        )
+    }
+
+    fun showCheckout(checkoutFragment: CheckoutSdkFragment) {
+        val container = requireView() as FragmentContainerView
+
+        // Reuse the child restored by FragmentManager, if present.
+        if (childFragmentManager.findFragmentById(container.id) != null) return
+
+        childFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .add(container, checkoutFragment, "ottu-checkout")
+            .commitNow()
+    }
+}
+```
+
+#### Arrange Checkout
+
+```kotlin
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.fragment.compose.AndroidFragment
+import com.ottu.checkout.ui.base.CheckoutSdkFragment
+import com.ottu.checkout.ui.payment.view.PaymentButton
+
+@Composable
+fun MerchantCheckoutScreen(
+    checkoutFragment: CheckoutSdkFragment,
+    modifier: Modifier = Modifier,
+) {
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+    ) { contentPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+        ) {
+            AndroidFragment<OttuCheckoutHostFragment>(
+                modifier = Modifier.fillMaxWidth(),
+                onUpdate = { host -> host.showCheckout(checkoutFragment) },
+            )
+
+            // Replace with your own composables and localized strings.
+            Text(
+                text = "Your order summary and delivery information",
+                modifier = Modifier.padding(top = 16.dp),
+            )
+        }
+    }
+}
+```
+
 ## Split Payment Button
 
 #### Define the PaymentButton in Activity/Fragment layout in XML
