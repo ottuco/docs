@@ -3,9 +3,9 @@ import useBaseUrl from "@docusaurus/useBaseUrl";
 import styles from "./styles.module.css";
 
 export interface VideoEmbedProps {
-  /** Site-root path, e.g. /video/autopay/setup-subscription.mp4 */
+  /** Site-root path, e.g. /video/autopay/customer-page-demo.mp4 */
   src: string;
-  /** Site-root path, e.g. /video/autopay/setup-subscription-poster.png */
+  /** Site-root path, e.g. /video/autopay/customer-page-demo-poster.jpg */
   poster: string;
   caption?: React.ReactNode;
   width?: number | string;

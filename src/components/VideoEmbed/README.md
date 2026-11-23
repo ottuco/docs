@@ -11,9 +11,12 @@ also how it satisfies `prefers-reduced-motion`).
 import VideoEmbed from "@site/src/components/VideoEmbed";
 
 <VideoEmbed
-  src="/video/autopay/setup-subscription.mp4"
-  poster="/video/autopay/setup-subscription-poster.png"
-  caption="Setting up an AutoPay subscription."
+  src="/video/autopay/customer-page-demo.mp4"
+  poster="/video/autopay/customer-page-demo-poster.jpg"
+  aspectRatio="1280 / 832"
+  loop
+  label="A customer on their AutoPay page adds a card, switches the active card, cancels and undoes it"
+  caption="What your customers can do on their page"
 />
 ```
 
@@ -22,7 +25,7 @@ import VideoEmbed from "@site/src/components/VideoEmbed";
 | Prop | Type | Default | Notes |
 |------|------|---------|-------|
 | `src` | `string` | — | **Required.** Site-root path to the MP4 (e.g. `/video/autopay/clip.mp4`). Resolved with `useBaseUrl`. Never a relative path. |
-| `poster` | `string` | — | **Required.** Site-root path to the poster PNG. Shown before play and as the `<video poster>`. |
+| `poster` | `string` | — | **Required.** Site-root path to the poster image (PNG or JPG). Shown before play and as the `<video poster>`. |
 | `caption` | `React.ReactNode` | — | Optional `<figcaption>` under the frame. |
 | `width` | `number \| string` | `720` | Max width of the figure. |
 | `aspectRatio` | `string` | `"16 / 9"` | CSS `aspect-ratio` of the frame. Match the rendered clip's dimensions. |
@@ -60,5 +63,8 @@ import VideoEmbed from "@site/src/components/VideoEmbed";
 
 ## Hosting
 
-Clips are committed to `static/video/`. See `remotion/README.md` for the hosting
-rationale and the render pipeline that produces the MP4 + poster pairs.
+Clips are committed to `static/video/`. The AutoPay customer page demo
+(`static/video/autopay/customer-page-demo.mp4`) is a recording of the real page
+on the sandbox (#161111 R18). The `remotion/` workspace renders the earlier
+AutoPay clips; none of them is on a page any more, so their MP4s were removed
+from `static/video/autopay/` (`npm run render` in `remotion/` writes them back).
