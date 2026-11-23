@@ -29,6 +29,10 @@ export const captionClass = {
   chips: styles.chips,
   chip: styles.chip,
   chipOn: styles.chipOn,
+  /** The "click something" line shown before anything is picked. */
+  hint: styles.panelHint,
+  /** The same line as a dashed placeholder card, sized to the panel's 128px floor. */
+  empty: styles.panelEmpty,
 };
 
 // Shown only while the diagram really overflows its box (any viewport).

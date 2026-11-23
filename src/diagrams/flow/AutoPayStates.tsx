@@ -14,9 +14,11 @@ import {
   mdiCheckCircleOutline,
   mdiCloseCircleOutline,
   mdiCreditCardOff,
+  mdiCursorDefaultClickOutline,
   mdiGiftOutline,
   mdiTimerSandEmpty,
 } from "@mdi/js";
+import Icon from "@mdi/react";
 import { flowMinWidth } from "@site/src/components/FlowDiagram/layout";
 import { useWidthFlag } from "@site/src/components/FlowDiagram/useWidthFlag";
 import {
@@ -496,10 +498,13 @@ export default function AutoPayStates({
         ) : null}
       </>
     ) : (
-      <p>
-        Click a state to see what it means and what to do. Press Escape to
-        clear.
-      </p>
+      <div className={captionClass.empty}>
+        <Icon path={mdiCursorDefaultClickOutline} size={1} />
+        <p>
+          The state you pick in the diagram is explained here. Press Escape to
+          clear.
+        </p>
+      </div>
     );
 
   return (
@@ -509,6 +514,7 @@ export default function AutoPayStates({
         panel={panel}
         selected={selected}
         scrollToPanel={picked}
+        textLeft
       >
         <FlowDiagram
           title={dev ? "Subscription status values" : "Subscription states"}

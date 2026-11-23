@@ -145,6 +145,8 @@ export default function AutoPayBusinessStory(): React.JSX.Element {
           })),
         },
       ]}
+      fillWidth
+      textLeft
     />
   );
 }
