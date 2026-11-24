@@ -87,6 +87,107 @@ The SDK can be used on devices running **iOS 15** or higher.
   </li>
 </ol>
 
+### SDK Integration Process
+
+#### Android
+
+To integrate the SDK to an Android app, you should go through the following steps:
+
+1. From the root directory of the project open android folder and open this gradle file `app/build.gradle` (for Groovy) or `app/build.gradle.kts`(for Kotlin).
+2. At the bottom of this file add next lines:
+
+   ```kotlin
+   allprojects {
+     repositories {
+       maven { url = uri("https://www.jitpack.io") }
+     }
+   }
+   ```
+
+3. Please note, OttuSdk requires this properties of the android build script. `compileSdk` has to be 37 or newer and `minSdk` is 26. Set them if they differ.
+4. Go to the android part and open `MainActivity` or your’s android Activity and verify if it extends `FlutterFragmentActivity`. This Activity is usually located at the path `android/app/src/main/kotlin/<your.app.package>/` (but it may be `java` instead of `kotlin`).
+
+   ```kotlin
+   import io.flutter.embedding.android.FlutterFragmentActivity
+
+   class MainActivity : FlutterFragmentActivity()
+   ```
+
+5. Also, check if your App theme uses Material one. If not please extends your Theme with `Theme.Material3.DayNight`. Pay attention, if you define the night theme also you should update it accordingly.
+
+   ```xml
+   <style name="LaunchTheme" parent="Theme.Material3.DayNight">    
+       <item name="android:windowBackground">@drawable/launch_background</item>
+   </style>
+   ```
+
+6. Run the App. It is mandatory do this from a command line with this command: `flutter run`. If you set all dependencies right the App should start without any errors.
+
+#### iOS
+
+To integrate the SDK to an iOS app, the following steps are required:
+
+1. Open Xcode.
+2. Select “Open project” and choose a `xcworkspace` located in the `ios` directory of inside the root directory of your newly created app.
+3. Choose `Runner` target and click on General tab
+4. Find Minimum deployment section and set value to 15
+5. Very first time you need run the App from terminal with same command `flutter run`. This should create all needed files for iOS plugin registrant.
+
+##### To integrate ottu-flutter iOS plugin via Cocoa Pods, please follow the steps below:
+
+1. First we need to turn off SPM globally. For this purpose we should run this command in terminal `flutter config --no-enable-swift-package-manager`
+2. Next we are gonna start with common integration implementation from this site [Prerequisites](#prerequisites)
+3. In addition to the documentation Installation chapter we also need to turn off SPM in pubspec.yaml file like this:
+
+   ```yaml
+   flutter:
+     config:
+       disable-swift-package-manager: true
+   ```
+
+4. Pay attention, cocoapods flutter SDK reference ends with suffix `-cocoapods`, add it to repository reference also. Like this: ottu_flutter_checkout:
+
+   ```yaml
+   ottu_flutter_checkout:
+     git:
+       url: https://github.com/ottuco/ottu-flutter.git 
+       ref: 2.3.0-cocoapods
+   ```
+
+5. Now go to the `ios` directory of the project and modify `Podfile`. Run `cd ios` command in Terminal and open Podfile there.
+6. At the top of the file, check if you have the line: `platform :ios, '15.0'` uncommented.
+7. Then, at the line below, specify this property: `use_modular_headers!`
+8. After, scroll to the bottom to the target script and add :linkage => :static argument to the use_frameworks! command, like this:
+   `use_frameworks! :linkage => :static`
+9. At the line below we should add the ottu_checkout_sdk pod reference, for example:
+   `pod 'ottu_checkout_sdk', :git => 'https://github.com/ottuco/ottu-ios.git'`
+10. Finally run pod update command in Terminal, like this:
+    `pod install --repo-update`
+11. Now you may proceed with the SDK Configuration chapter of the documentation [SDK Configuration](flutter.mdx#sdk-configuration)
+
+:::info
+Tip 1:
+For the existing projects in case you specified pods before you might face compilation error. Please find some common workarounds below to fix them.
+
+If you see erro while execute command `pod install --repo-update`
+[!] The 'Pods-Runner' target has transitive dependencies that include statically linked binaries: (ottu_checkout_sdk)
+you will need to omit transitive dependency. Add next script above the `post_install do |installer|`.
+
+```ruby
+pre_install do |installer|
+  Pod::Installer::Xcode::TargetValidator.send(:define_method, :verify_no_static_framework_transitive_dependencies) {}
+end
+```
+:::
+
+:::info
+Tip 2:
+If you see error like: Lexical or Preprocessor Issue (Xcode): Include of non-modular header inside framework module, you will need to modify your xCode project.
+So, open xCode project from the ios directory and select project in the Navigator pan.
+Next, click on `Build Settings` tab, search for `Allow Non-modular Includes` and choose `Yes` property.
+Do the same steps for your `Target`.
+:::
+
 ## Initialization
 
 ### Activate Payment Gateway Codes
