@@ -112,7 +112,7 @@ The SDK can be used on devices running **iOS 15** or higher.
 To integrate the SDK into an Android app, you should go through the following steps:
 
 1. From the root directory of the project open android folder and open this gradle file `app/build.gradle` (for Groovy) or `app/build.gradle.kts` (for Kotlin).
-2. At the bottom of this file add next lines:
+2. At the bottom of this file add the following lines:
 
    ```kotlin
    allprojects {
@@ -131,7 +131,7 @@ To integrate the SDK into an Android app, you should go through the following st
    class MainActivity : FlutterFragmentActivity()
    ```
 
-5. Also, check if your App theme uses a Material theme. If not please extend your theme with `Theme.Material3.DayNight`. Pay attention, if you define the night theme also you should update it accordingly.
+5. Also, check whether your app theme uses a Material theme. If not, extend it with `Theme.Material3.DayNight`. Pay attention, if you define the night theme also you should update it accordingly.
 
    ```xml
    <style name="LaunchTheme" parent="Theme.Material3.DayNight">
@@ -147,9 +147,9 @@ To integrate the SDK into an iOS app, the following steps are required:
 
 1. Open Xcode.
 2. Select “Open project” and choose a `xcworkspace` located in the `ios` directory inside the root directory of your newly created app.
-3. Choose `Runner` target and click on General tab.
+3. Choose the `Runner` target and click on the General tab.
 4. Find Minimum Deployments section and set value to 15.
-5. The first time, run the App from terminal with same command `flutter run`. This should create all needed files for iOS plugin registrant.
+5. The first time, run the App from terminal with the same command `flutter run`. This should create all needed files for iOS plugin registrant.
 
 ##### CocoaPods Setup
 
@@ -165,7 +165,7 @@ To integrate the ottu-flutter iOS plugin via CocoaPods, please follow the steps 
        disable-swift-package-manager: true
    ```
 
-4. Pay attention, CocoaPods Flutter SDK reference ends with suffix `-cocoapods`, add it to repository reference also. Like this: ottu_flutter_checkout:
+4. Note that the CocoaPods Flutter SDK reference ends with the suffix `-cocoapods`. Add it to the repository reference as well, like this:
 
    ```yaml
    ottu_flutter_checkout:
@@ -183,7 +183,7 @@ To integrate the ottu-flutter iOS plugin via CocoaPods, please follow the steps 
    `pod 'ottu_checkout_sdk', :git => 'https://github.com/ottuco/ottu-ios.git'`
 10. Finally run the `pod install` command in Terminal, like this:
     `pod install --repo-update`
-11. Now you may proceed with the SDK Configuration chapter of the documentation [SDK Configuration](#sdk-configuration)
+11. Now proceed with [SDK Configuration](#sdk-configuration).
 
 :::tip[Existing projects: static dependency error]
 For the existing projects in case you specified pods before you might face compilation error. Please find some common workarounds below to fix them.
@@ -194,7 +194,7 @@ If you see an error while executing the command `pod install --repo-update`:
 [!] The 'Pods-Runner' target has transitive dependencies that include statically linked binaries: (ottu_checkout_sdk)
 ```
 
-You will need to omit transitive dependency. Add next script above the `post_install do |installer|`.
+You will need to omit the transitive dependency. Add the following script above `post_install do |installer|`.
 
 ```ruby
 pre_install do |installer|
@@ -204,9 +204,15 @@ end
 :::
 
 :::tip[Xcode: non-modular header error]
-If you see error like: Lexical or Preprocessor Issue (Xcode): Include of non-modular header inside framework module, you will need to modify your Xcode project.
+If you see an error like:
+
+```text
+Lexical or Preprocessor Issue (Xcode): Include of non-modular header inside framework module
+```
+
+You will need to modify your Xcode project.
 So, open Xcode project from the ios directory and select project in the Navigator pane.
-Next, click on `Build Settings` tab, search for `Allow Non-modular Includes` and choose `Yes` property.
+Next, click on `Build Settings` tab, search for `Allow Non-modular Includes In Framework Modules` and choose `Yes` property.
 Do the same steps for your `Target`.
 :::
 
