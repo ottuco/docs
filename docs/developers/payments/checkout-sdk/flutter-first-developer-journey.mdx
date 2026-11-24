@@ -93,8 +93,8 @@ The SDK can be used on devices running **iOS 15** or higher.
 
 To integrate the SDK into an Android app, you should go through the following steps:
 
-1. From the root directory of the project open android folder and open this gradle file `app/build.gradle` (for Groovy) or `app/build.gradle.kts` (for Kotlin).
-2. At the bottom of this file add the following lines:
+1. From the root directory of the project, open the `android` folder and then the Gradle file `app/build.gradle` (for Groovy) or `app/build.gradle.kts` (for Kotlin).
+2. At the bottom of this file, add the following lines:
 
    ```kotlin
    allprojects {
@@ -104,8 +104,8 @@ To integrate the SDK into an Android app, you should go through the following st
    }
    ```
 
-3. Please note, OttuSdk requires these properties of the android build script. `compileSdk` has to be 37 or newer and `minSdk` is 26. Set them if they differ.
-4. Go to the android part and open `MainActivity` or your Android Activity and verify if it extends `FlutterFragmentActivity`. This Activity is usually located at the path `android/app/src/main/kotlin/<your.app.package>/` (but it may be `java` instead of `kotlin`).
+3. Note that the Ottu SDK requires these properties in the Android build script: `compileSdk` has to be 37 or newer and `minSdk` is 26. Set them if they differ.
+4. Go to the `android` directory and open `MainActivity` or your Android Activity and verify if it extends `FlutterFragmentActivity`. This Activity is usually located at the path `android/app/src/main/kotlin/<your.app.package>/` (but it may be `java` instead of `kotlin`).
 
    ```kotlin
    import io.flutter.embedding.android.FlutterFragmentActivity
@@ -121,25 +121,25 @@ To integrate the SDK into an Android app, you should go through the following st
    </style>
    ```
 
-6. Run the App. It is mandatory do this from a command line with this command: `flutter run`. If you set all dependencies right the App should start without any errors.
+6. Run the app. You must do this from a command line with `flutter run`. If all dependencies are set up correctly, the app should start without any errors.
 
 #### iOS
 
 To integrate the SDK into an iOS app, the following steps are required:
 
 1. Open Xcode.
-2. Select “Open project” and choose a `xcworkspace` located in the `ios` directory inside the root directory of your newly created app.
+2. Select "Open project" and choose the `.xcworkspace` file in the `ios` directory inside the root directory of your newly created app.
 3. Choose the `Runner` target and click on the General tab.
-4. Find the Minimum Deployments section and set value to 15.
+4. Find the Minimum Deployments section and set the value to 15.
 5. The first time, run the app from a terminal with the same command `flutter run`. This should create all the needed files for the iOS plugin registrant.
 
 ##### CocoaPods Setup
 
 To integrate the ottu-flutter iOS plugin via CocoaPods, please follow the steps below:
 
-1. First we need to turn off SPM globally. For this purpose we should run this command in terminal `flutter config --no-enable-swift-package-manager`
+1. First, turn off SPM globally by running this command in a terminal: `flutter config --no-enable-swift-package-manager`
 2. Next, complete the [Prerequisites](#prerequisites) and [Flutter Setup](#flutter-setup) steps above.
-3. In addition to the documentation Installation chapter we also need to turn off SPM in pubspec.yaml file like this:
+3. In addition to the steps in the Installation section above, also turn off SPM in `pubspec.yaml`:
 
    ```yaml
    flutter:
@@ -156,19 +156,31 @@ To integrate the ottu-flutter iOS plugin via CocoaPods, please follow the steps 
        ref: 2.3.0-cocoapods
    ```
 
-5. Now go to the `ios` directory of the project and modify `Podfile`. Run `cd ios` command in Terminal and open Podfile there.
+5. Now go to the `ios` directory of the project and modify the `Podfile`: run `cd ios` in a terminal and open the `Podfile`.
 6. At the top of the file, check if you have the line: `platform :ios, '15.0'` uncommented.
-7. Then, at the line below, specify this property: `use_modular_headers!`
-8. After, scroll to the bottom to the target script and add `:linkage => :static` argument to the `use_frameworks!` command, like this:
-   `use_frameworks! :linkage => :static`
-9. At the line below we should add the ottu_checkout_sdk pod reference, for example:
-   `pod 'ottu_checkout_sdk', :git => 'https://github.com/ottuco/ottu-ios.git'`
-10. Finally run the `pod install` command in Terminal, like this:
-    `pod install --repo-update`
+7. Then, on the next line, add `use_modular_headers!`.
+8. Then scroll to the bottom, to the target block, and add the `:linkage => :static` argument to the `use_frameworks!` command, like this:
+
+   ```ruby
+   use_frameworks! :linkage => :static
+   ```
+
+9. On the next line, add the `ottu_checkout_sdk` pod reference, for example:
+
+   ```ruby
+   pod 'ottu_checkout_sdk', :git => 'https://github.com/ottuco/ottu-ios.git'
+   ```
+
+10. Finally, run `pod install` in a terminal:
+
+    ```bash
+    pod install --repo-update
+    ```
+
 11. Now proceed with [SDK Configuration](flutter.mdx#sdk-configuration).
 
 :::tip[Existing projects: static dependency error]
-For the existing projects in case you specified pods before you might face compilation error. Please find some common workarounds below to fix them.
+If you already specified pods in an existing project, you might face a compilation error. Common workarounds are below.
 
 If you see an error while executing the command `pod install --repo-update`:
 
@@ -192,10 +204,11 @@ If you see an error like:
 Lexical or Preprocessor Issue (Xcode): Include of non-modular header inside framework module
 ```
 
-You will need to modify your Xcode project.
-So, open Xcode project from the ios directory and select project in the Navigator pane.
-Next, click on `Build Settings` tab, search for `Allow Non-modular Includes In Framework Modules` and set it to `Yes`.
-Do the same steps for your `Target`.
+You will need to modify your Xcode project:
+
+1. Open the Xcode project from the `ios` directory and select the project in the Navigator pane.
+2. Click on the `Build Settings` tab, search for `Allow Non-modular Includes In Framework Modules` and set it to `Yes`.
+3. Do the same steps for your target.
 :::
 
 ## Initialization
