@@ -113,7 +113,7 @@ To integrate the SDK into an Android app, you should go through the following st
    class MainActivity : FlutterFragmentActivity()
    ```
 
-5. Also, check whether your app theme uses a Material theme. If not, extend it with `Theme.Material3.DayNight`. Pay attention, if you define the night theme also you should update it accordingly.
+5. Also, check whether your app theme uses a Material theme. If not, extend it with `Theme.Material3.DayNight`. If you also define a night theme, update it the same way.
 
    ```xml
    <style name="LaunchTheme" parent="Theme.Material3.DayNight">
@@ -131,7 +131,7 @@ To integrate the SDK into an iOS app, the following steps are required:
 2. Select “Open project” and choose a `xcworkspace` located in the `ios` directory inside the root directory of your newly created app.
 3. Choose the `Runner` target and click on the General tab.
 4. Find Minimum Deployments section and set value to 15.
-5. The first time, run the App from terminal with the same command `flutter run`. This should create all needed files for iOS plugin registrant.
+5. The first time, run the app from a terminal with the same command `flutter run`. This should create all needed files for iOS plugin registrant.
 
 ##### CocoaPods Setup
 
@@ -194,7 +194,7 @@ Lexical or Preprocessor Issue (Xcode): Include of non-modular header inside fram
 
 You will need to modify your Xcode project.
 So, open Xcode project from the ios directory and select project in the Navigator pane.
-Next, click on `Build Settings` tab, search for `Allow Non-modular Includes In Framework Modules` and choose `Yes` property.
+Next, click on `Build Settings` tab, search for `Allow Non-modular Includes In Framework Modules` and set it to `Yes`.
 Do the same steps for your `Target`.
 :::
 
