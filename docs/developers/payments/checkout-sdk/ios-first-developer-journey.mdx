@@ -150,16 +150,6 @@ Once the SDK is installed (via Swift Package Manager), follow these steps to int
       <li>`delegate` → Callback listener (usually `self`)</li>
     </ul>
 
-    <strong>Recommended parameters</strong>
-    <ul>
-      <li>`formsOfPayment` → Defines available payment methods</li>
-      <li>`setupPreload` → Preloads transaction details for faster initialization</li>
-    </ul>
-
-    > `setupPreload` comes from the transaction creation response.\
-    > Passing it prevents the SDK from re-fetching transaction details, reducing initialization time by **several seconds**. It is a decoded JSON object to a `TransactionDetails` object.\
-    > See an example: [MainViewController.swift](https://github.com/ottuco/ottu-ios/blob/main/Example/OttuApp/MainViewController.swift#L259)
-
     The simplest version of the initialization looks like this:
 
     ```swift
@@ -271,3 +261,12 @@ For test card numbers per gateway, see [Sandbox & Test Cards](/developers/paymen
 - [iOS](/developers/payments/checkout-sdk/ios/)
 - [**Checkout API**](/developers/payments/checkout-api/) — Create your first payment transaction
 - [**Error Codes**](/developers/reference/error-codes) — Error response reference
+
+**Recommended parameters**
+
+- `formsOfPayment` → Defines available payment methods
+- `setupPreload` → Preloads transaction details for faster initialization
+
+> `setupPreload` comes from the transaction creation response.\
+> Passing it prevents the SDK from re-fetching transaction details, reducing initialization time by **several seconds**. It is a decoded JSON object to a `TransactionDetails` object.\
+> See an example: [MainViewController.swift](https://github.com/ottuco/ottu-ios/blob/main/Example/OttuApp/MainViewController.swift#L259)
