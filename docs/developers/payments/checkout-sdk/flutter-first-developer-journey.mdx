@@ -79,11 +79,6 @@ The SDK can be used on devices running **iOS 15** or higher.
     ```bash
     flutter pub get
     ```
-
-    :::info
-    If you choose to use CocoaPods, please use release version
-    **2.3.0-cocoapods**.
-    :::
   </li>
 </ol>
 
@@ -132,84 +127,6 @@ To integrate the SDK into an iOS app, the following steps are required:
 3. Choose the `Runner` target and click on the General tab.
 4. Find the Minimum Deployments section and set the value to 15.
 5. The first time, run the app from a terminal with the same command `flutter run`. This should create all the needed files for the iOS plugin registrant.
-
-##### CocoaPods Setup
-
-To integrate the ottu-flutter iOS plugin via CocoaPods, please follow the steps below:
-
-1. First, turn off SPM globally by running this command in a terminal: `flutter config --no-enable-swift-package-manager`
-2. Next, complete the [Prerequisites](#prerequisites) and [Flutter Setup](#flutter-setup) steps above.
-3. In addition to the steps in the Installation section above, also turn off SPM in `pubspec.yaml`:
-
-   ```yaml
-   flutter:
-     config:
-       disable-swift-package-manager: true
-   ```
-
-4. Note that the CocoaPods Flutter SDK reference ends with the suffix `-cocoapods`. Add it to the repository reference as well, like this:
-
-   ```yaml
-   ottu_flutter_checkout:
-     git:
-       url: https://github.com/ottuco/ottu-flutter.git
-       ref: 2.3.0-cocoapods
-   ```
-
-5. Now go to the `ios` directory of the project and modify the `Podfile`: run `cd ios` in a terminal and open the `Podfile`.
-6. At the top of the file, check if you have the line: `platform :ios, '15.0'` uncommented.
-7. Then, on the next line, add `use_modular_headers!`.
-8. Then scroll to the bottom, to the target block, and add the `:linkage => :static` argument to the `use_frameworks!` command, like this:
-
-   ```ruby
-   use_frameworks! :linkage => :static
-   ```
-
-9. On the next line, add the `ottu_checkout_sdk` pod reference, for example:
-
-   ```ruby
-   pod 'ottu_checkout_sdk', :git => 'https://github.com/ottuco/ottu-ios.git'
-   ```
-
-10. Finally, run `pod install` in a terminal:
-
-    ```bash
-    pod install --repo-update
-    ```
-
-11. Now proceed with [SDK Configuration](flutter.mdx#sdk-configuration).
-
-:::tip[Existing projects: static dependency error]
-If you already specified pods in an existing project, you might face a compilation error. Common workarounds are below.
-
-If you see an error while executing the command `pod install --repo-update`:
-
-```text
-[!] The 'Pods-Runner' target has transitive dependencies that include statically linked binaries: (ottu_checkout_sdk)
-```
-
-You will need to omit the transitive dependency. Add the following script above `post_install do |installer|`.
-
-```ruby
-pre_install do |installer|
-  Pod::Installer::Xcode::TargetValidator.send(:define_method, :verify_no_static_framework_transitive_dependencies) {}
-end
-```
-:::
-
-:::tip[Xcode: non-modular header error]
-If you see an error like:
-
-```text
-Lexical or Preprocessor Issue (Xcode): Include of non-modular header inside framework module
-```
-
-You will need to modify your Xcode project:
-
-1. Open the Xcode project from the `ios` directory and select the project in the Navigator pane.
-2. Click on the `Build Settings` tab, search for `Allow Non-modular Includes In Framework Modules` and set it to `Yes`.
-3. Do the same steps for your target.
-:::
 
 ## Initialization
 
@@ -304,13 +221,6 @@ void _handleError(String message) {
   _checkoutMessage.value = ("Error", message);
 }
 ```
-
-## HTTP Status Codes
-
-| Code | Name | Description |
-|:----:|------|-------------|
-| 400 | Bad Request | Invalid request — missing required fields, invalid values, or malformed JSON. |
-| 401 | Unauthorized | Authentication failed — missing, invalid, or expired API key or credentials. |
 
 ## Sandbox & Testing
 
