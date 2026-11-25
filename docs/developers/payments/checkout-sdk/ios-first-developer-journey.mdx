@@ -68,7 +68,7 @@ Or in Xcode:
 
 Activate the payment gateways (`pg_codes`) you intend to use. Ensure all desired `pg_codes` are set to **active** status in your configuration. These codes are passed to the [Checkout API](../checkout-api.mdx) to determine which payment methods the customer can choose from.
 
-### Workflow
+### Creating Transaction Session
 
 The single most important concept: **with the Ottu Sandbox you choose the result of a payment in advance.** Every test starts by creating a session against your Sandbox `pg_code`:
 
