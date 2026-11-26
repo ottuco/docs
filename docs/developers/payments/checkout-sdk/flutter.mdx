@@ -803,7 +803,7 @@ The above code performs the following checks and actions:
    - The user is returned to the previous screen (`navigationController?.popViewController(animated: true)`).
    - A popup notification is displayed using `self.present(alert, animated: true)`, informing the user about the failed payment.
 
-### Onsite Checkout
+## Onsite Checkout
 
 This payment option enables direct payments through the mobile SDK. The SDK presents a user interface where the customer can enter their cardholder details (CHD). If supported by the backend, the user can also save the card for future payments—stored as a tokenized payment method.
 
