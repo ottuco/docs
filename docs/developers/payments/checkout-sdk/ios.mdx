@@ -652,17 +652,6 @@ The above code performs the following checks and actions:
 
 This setup ensures compliance with KNET's requirements and provides a clear user experience for handling failed payments.
 
-### STC Bank
-
-When the [integration](#stc-bank) between Ottu and STC Bank is completed, the necessary checks to display the STC Bank button are handled seamlessly by the Checkout SDK.
-
-**Initialization**: Upon initialization of the Checkout SDK with the provided [session_id](#sessionid-string-required) and payment gateway codes ([pg_codes](../../checkout-api)), several conditions are automatically verified:
-
-- It is confirmed that the `session_id` and `pg_codes` provided during SDK initialization are associated with the STC Bank Payment Service. This ensures that the STC Bank option is available for the customer to choose as a payment method.
-- It is ensured that the STC Bank button is displayed by the iOS SDK, regardless of whether the customer has provided a mobile number while creating the transaction.
-
-This setup ensures a seamless integration and user experience, allowing customers to easily set up and use STC Bank during the checkout process.
-
 ### Onsite Checkout
 
 This payment option enables direct payments through the mobile SDK. The SDK provides a user interface where the Cardholder Data (CHD) is entered by the user. If permitted by the backend, the card can be tokenized and saved for future payments.

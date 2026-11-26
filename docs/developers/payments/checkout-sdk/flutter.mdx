@@ -743,15 +743,6 @@ Detailed description of the `payload` for specific payment type you may find her
 
 ## Payment Services
 
-### STC Bank
-
-If the STC Bank integration between Ottu and STC Bank has been completed, the Checkout SDK will automatically handle the necessary checks to display the STC Bank button seamlessly.
-
-When the Checkout SDK is initialized with the [session_id](../../checkout-api) and payment gateway codes ([pg_codes](../../checkout-api)), the SDK will verify the following conditions:
-
-- The `session_id` and `pg_codes` provided during initialization must be associated with the STC Bank Payment Service. This ensures that the STC Bank option is available for the customer.
-- In the Android SDK, the STC Bank button is displayed regardless of whether the customer has entered a mobile number while creating the transaction.
-
 ### Apple Pay
 
 Due to compliance requirements, for iOS, the KNET payment gateway requires a popup notification displaying the payment result after each failed payment. This notification is triggered only in the cancelCallback, but only if a response is received from the payment gateway.

@@ -685,16 +685,6 @@ Detailed description of the `payload` for specific payment type you may find her
 
 ## Payment Services
 
-### STC Bank
-
-Once the STC Bank integration between Ottu and STC Bank has been completed, the necessary checks are automatically handled by the Checkout SDK to ensure the seamless display of the STC Bank button.
-
-Upon initialization of the Checkout SDK with the [session_id](../../checkout-api) and payment gateway codes ([pg_codes](../../checkout-api)), the following condition is automatically verified:
-
-- The `session_id` and pg_codes provided during SDK initialization must be linked to the STC Bank Payment Service. This verification ensures that the STC Bank option is made available for selection as a payment method.
-
-Regardless of whether a mobile number has been entered by the customer during transaction creation, the STC Bank button is displayed by the Android SDK.
-
 ### Onsite Checkout
 
 This payment option facilitates direct payments within the mobile SDK. A user-friendly interface allows users to securely input their CHD. If permitted by the backend, the card can be stored as a tokenized payment for future transactions.
