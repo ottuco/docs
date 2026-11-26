@@ -61,7 +61,7 @@ The SDK is compatible with devices running Android 8 or higher (API version 26 o
 
 Activate the payment gateways (`pg_codes`) you intend to use. Ensure all desired `pg_codes` are set to **active** status in your configuration. These codes are passed to the [Checkout API](../checkout-api.mdx) to determine which payment methods the customer can choose from.
 
-### Workflow
+### Creating Transaction Session
 
 The single most important concept: **with the Ottu Sandbox you choose the result of a payment in advance.** Every test starts by creating a session against your Sandbox `pg_code`:
 
@@ -259,14 +259,6 @@ The **required** parameters are:
 - `merchantId` – Same as the domain used in HTTP requests
 - `apiKey` – Public API key used for authorization
 
-**Recommended optional parameters:**
-
-- `formsOfPayment`
-- `setupPreload` (to reduce initialization time)
-
-`setupPreload` is an object taken from the transaction creation response. When passed to the SDK, it prevents it from requesting the transaction details on its own and therefore speed-ups the initialization process by several seconds. This `setupPreload` is a decoded JSON object to a `TransactionDetails` \
-For reference, check the example: [here](https://github.com/ottuco/ottu-android/blob/main/Example/app/src/main/java/com/ottu/CheckoutSampleActivity.kt)&#x20;
-
 ## Callbacks
 
 The SDK triggers three main callbacks:
@@ -281,13 +273,6 @@ Developers should customize the logic within these callbacks to handle transacti
 
 In both `cancelCallback` and `errorCallback`, the SDK must be reinitialized, either on the same session or on a new session.
 :::
-
-## HTTP Status Codes
-
-| Code | Name | Description |
-|:----:|------|-------------|
-| 400 | Bad Request | Invalid request — missing required fields, invalid values, or malformed JSON. |
-| 401 | Unauthorized | Authentication failed — missing, invalid, or expired API key or credentials. |
 
 ## Sandbox & Testing
 
@@ -307,3 +292,11 @@ For test card numbers per gateway, see [Sandbox & Test Cards](/developers/paymen
 - [Android](/developers/payments/checkout-sdk/android/)
 - [**Checkout API**](/developers/payments/checkout-api/) — Create your first payment transaction
 - [**Error Codes**](/developers/reference/error-codes) — Error response reference
+
+**Recommended optional parameters:**
+
+- `formsOfPayment`
+- `setupPreload` (to reduce initialization time)
+
+`setupPreload` is an object taken from the transaction creation response. When passed to the SDK, it prevents it from requesting the transaction details on its own and therefore speed-ups the initialization process by several seconds. This `setupPreload` is a decoded JSON object to a `TransactionDetails` \
+For reference, check the example: [here](https://github.com/ottuco/ottu-android/blob/main/Example/app/src/main/java/com/ottu/CheckoutSampleActivity.kt)&#x20;

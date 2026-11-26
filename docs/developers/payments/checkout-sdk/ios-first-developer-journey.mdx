@@ -62,47 +62,13 @@ Or in Xcode:
 2. Go to **Project > Targets > Package Dependencies**
 3. Add `ottu-ios` as a dependency
 
-### CocoaPods
-
-Add the following line to your **Podfile**:
-
-```ruby
-pod 'ottu_checkout_sdk', :git => 'https://github.com/ottuco/ottu-ios.git', :tag => '2.3.0'
-```
-
-**Run:**
-
-```bash
-pod install
-```
-
-:::success
-
-When ottu_checkout_sdk is added to the Podfile, the GitHub repository must also be specified as follows:
-
-```bash
-pod 'ottu_checkout_sdk', :git => 'https://github.com/ottuco/ottu-ios'
-```
-
-:::
-
-:::warning
-
-If you see _"could not find compatible versions for pod"_, run:
-
-```bash
-pod repo update
-```
-
-:::
-
 ## Initialization
 
 ### Activate Payment Gateway Codes
 
 Activate the payment gateways (`pg_codes`) you intend to use. Ensure all desired `pg_codes` are set to **active** status in your configuration. These codes are passed to the [Checkout API](../checkout-api.mdx) to determine which payment methods the customer can choose from.
 
-### Workflow
+### Creating Transaction Session
 
 The single most important concept: **with the Ottu Sandbox you choose the result of a payment in advance.** Every test starts by creating a session against your Sandbox `pg_code`:
 
@@ -120,7 +86,7 @@ The single most important concept: **with the Ottu Sandbox you choose the result
 
 ### Integration Guide
 
-Once the SDK is installed (via Swift Package Manager or CocoaPods), follow these steps to integrate it into your app.
+Once the SDK is installed (via Swift Package Manager), follow these steps to integrate it into your app.
 
 <ol className="stepper">
   <li className="stepper-item">
@@ -183,16 +149,6 @@ Once the SDK is installed (via Swift Package Manager or CocoaPods), follow these
       <li>`apiKey` → Public API key for authorization</li>
       <li>`delegate` → Callback listener (usually `self`)</li>
     </ul>
-
-    <strong>Recommended parameters</strong>
-    <ul>
-      <li>`formsOfPayment` → Defines available payment methods</li>
-      <li>`setupPreload` → Preloads transaction details for faster initialization</li>
-    </ul>
-
-    > `setupPreload` comes from the transaction creation response.\
-    > Passing it prevents the SDK from re-fetching transaction details, reducing initialization time by **several seconds**. It is a decoded JSON object to a `TransactionDetails` object.\
-    > See an example: [MainViewController.swift](https://github.com/ottuco/ottu-ios/blob/main/Example/OttuApp/MainViewController.swift#L259)
 
     The simplest version of the initialization looks like this:
 
@@ -287,13 +243,6 @@ func successCallback(_ data: [String : Any]?) {
 In both `cancelCallback` and `errorCallback`, the SDK must be reinitialized, either on the same session or on a new session.
 :::
 
-## HTTP Status Codes
-
-| Code | Name | Description |
-|:----:|------|-------------|
-| 400 | Bad Request | Invalid request — missing required fields, invalid values, or malformed JSON. |
-| 401 | Unauthorized | Authentication failed — missing, invalid, or expired API key or credentials. |
-
 ## Sandbox & Testing
 
 | Option | URL | Best for |
@@ -312,3 +261,12 @@ For test card numbers per gateway, see [Sandbox & Test Cards](/developers/paymen
 - [iOS](/developers/payments/checkout-sdk/ios/)
 - [**Checkout API**](/developers/payments/checkout-api/) — Create your first payment transaction
 - [**Error Codes**](/developers/reference/error-codes) — Error response reference
+
+**Recommended parameters**
+
+- `formsOfPayment` → Defines available payment methods
+- `setupPreload` → Preloads transaction details for faster initialization
+
+> `setupPreload` comes from the transaction creation response.\
+> Passing it prevents the SDK from re-fetching transaction details, reducing initialization time by **several seconds**. It is a decoded JSON object to a `TransactionDetails` object.\
+> See an example: [MainViewController.swift](https://github.com/ottuco/ottu-ios/blob/main/Example/OttuApp/MainViewController.swift#L259)

@@ -4,7 +4,6 @@ toc_max_heading_level: 3
 ---
 
 import FAQ, { FAQItem } from '@site/src/components/FAQ';
-import StepGuide from "@site/src/components/StepGuide";
 
 The Checkout SDK is a Flutter framework (library) developed by Ottu, designed to seamlessly integrate an Ottu-powered [checkout process](../) into Flutter applications for both iOS and Android platforms. This framework functions as a wrapper over the corresponding native SDKs, ensuring a smooth and efficient payment experience.
 
@@ -104,6 +103,130 @@ The SDK can be used on devices running **iOS 15** or higher.
     :::
   </li>
 </ol>
+
+### SDK Integration Process
+
+#### Android
+
+To integrate the SDK into an Android app, you should go through the following steps:
+
+1. From the root directory of the project, open the `android` folder and then the Gradle file `app/build.gradle` (for Groovy) or `app/build.gradle.kts` (for Kotlin).
+2. At the bottom of this file, add the following lines:
+
+   ```kotlin
+   allprojects {
+     repositories {
+       maven { url = uri("https://www.jitpack.io") }
+     }
+   }
+   ```
+
+3. Note that the Ottu SDK requires these properties in the Android build script: `compileSdk` has to be 37 or newer and `minSdk` is 26. Set them if they differ.
+4. Go to the `android` directory and open `MainActivity` or your Android Activity and verify if it extends `FlutterFragmentActivity`. This Activity is usually located at the path `android/app/src/main/kotlin/<your.app.package>/` (but it may be `java` instead of `kotlin`).
+
+   ```kotlin
+   import io.flutter.embedding.android.FlutterFragmentActivity
+
+   class MainActivity : FlutterFragmentActivity()
+   ```
+
+5. Also, check whether your app theme uses a Material theme. If not, extend it with `Theme.Material3.DayNight`. If you also define a night theme, update it the same way.
+
+   ```xml
+   <style name="LaunchTheme" parent="Theme.Material3.DayNight">
+       <item name="android:windowBackground">@drawable/launch_background</item>
+   </style>
+   ```
+
+6. Run the app. You must do this from a command line with `flutter run`. If all dependencies are set up correctly, the app should start without any errors.
+
+#### iOS
+
+To integrate the SDK into an iOS app, the following steps are required:
+
+1. Open Xcode.
+2. Select "Open project" and choose the `.xcworkspace` file in the `ios` directory inside the root directory of your newly created app.
+3. Choose the `Runner` target and click on the General tab.
+4. Find the Minimum Deployments section and set the value to 15.
+5. The first time, run the app from a terminal with the same command `flutter run`. This should create all the needed files for the iOS plugin registrant.
+
+##### CocoaPods Setup
+
+To integrate the ottu-flutter iOS plugin via CocoaPods, please follow the steps below:
+
+1. First, turn off SPM globally by running this command in a terminal: `flutter config --no-enable-swift-package-manager`
+2. Next, complete the [Prerequisites](#prerequisites) and [Flutter Setup](#flutter-setup) steps above.
+3. In addition to the steps in the Installation section above, also turn off SPM in `pubspec.yaml`:
+
+   ```yaml
+   flutter:
+     config:
+       disable-swift-package-manager: true
+   ```
+
+4. Note that the CocoaPods Flutter SDK reference ends with the suffix `-cocoapods`. Add it to the repository reference as well, like this:
+
+   ```yaml
+   ottu_flutter_checkout:
+     git:
+       url: https://github.com/ottuco/ottu-flutter.git
+       ref: 2.3.0-cocoapods
+   ```
+
+5. Now go to the `ios` directory of the project and modify the `Podfile`: run `cd ios` in a terminal and open the `Podfile`.
+6. At the top of the file, check if you have the line: `platform :ios, '15.0'` uncommented.
+7. Then, on the next line, add `use_modular_headers!`.
+8. Then scroll to the bottom, to the target block, and add the `:linkage => :static` argument to the `use_frameworks!` command, like this:
+
+   ```ruby
+   use_frameworks! :linkage => :static
+   ```
+
+9. On the next line, add the `ottu_checkout_sdk` pod reference, for example:
+
+   ```ruby
+   pod 'ottu_checkout_sdk', :git => 'https://github.com/ottuco/ottu-ios.git'
+   ```
+
+10. Finally, run `pod install` in a terminal:
+
+    ```bash
+    pod install --repo-update
+    ```
+
+11. Now proceed with [SDK Configuration](#sdk-configuration).
+
+:::tip[Existing projects: static dependency error]
+If you already specified pods in an existing project, you might face a compilation error. Common workarounds are below.
+
+If you see an error while executing the command `pod install --repo-update`:
+
+```text
+[!] The 'Pods-Runner' target has transitive dependencies that include statically linked binaries: (ottu_checkout_sdk)
+```
+
+You will need to omit the transitive dependency. Add the following script above `post_install do |installer|`.
+
+```ruby
+pre_install do |installer|
+  Pod::Installer::Xcode::TargetValidator.send(:define_method, :verify_no_static_framework_transitive_dependencies) {}
+end
+```
+:::
+
+:::tip[Xcode: non-modular header error]
+If you see an error like:
+
+```text
+Lexical or Preprocessor Issue (Xcode): Include of non-modular header inside framework module
+```
+
+You will need to modify your Xcode project:
+
+1. Open the Xcode project from the `ios` directory and select the project in the Navigator pane.
+2. Click on the `Build Settings` tab, search for `Allow Non-modular Includes In Framework Modules` and set it to `Yes`.
+3. Do the same steps for your target.
+:::
 
 ## Initialization
 
@@ -618,16 +741,7 @@ There’s a `payload` parameter in the hook. For onsite checkout and tokenized p
 
 Detailed description of the `payload` for specific payment type you may find here: [Card data structure](/developers/payments/checkout-sdk/web#card-data-structure).
 
-## Wallet Configuration
-
-### STC Bank
-
-If the STC Bank integration between Ottu and STC Bank has been completed, the Checkout SDK will automatically handle the necessary checks to display the STC Bank button seamlessly.
-
-When the Checkout SDK is initialized with the [session_id](../../checkout-api) and payment gateway codes ([pg_codes](../../checkout-api)), the SDK will verify the following conditions:
-
-- The `session_id` and `pg_codes` provided during initialization must be associated with the STC Bank Payment Service. This ensures that the STC Bank option is available for the customer.
-- In the Android SDK, the STC Bank button is displayed regardless of whether the customer has entered a mobile number while creating the transaction.
+## Payment Services
 
 ### Apple Pay
 
@@ -689,7 +803,7 @@ The above code performs the following checks and actions:
    - The user is returned to the previous screen (`navigationController?.popViewController(animated: true)`).
    - A popup notification is displayed using `self.present(alert, animated: true)`, informing the user about the failed payment.
 
-### Onsite Checkout
+## Onsite Checkout
 
 This payment option enables direct payments through the mobile SDK. The SDK presents a user interface where the customer can enter their cardholder details (CHD). If supported by the backend, the user can also save the card for future payments—stored as a tokenized payment method.
 
@@ -725,49 +839,6 @@ The SDK supports multiple instances of onsite checkout payments. Therefore, for 
 
 No fees are displayed for onsite checkout instances. This is due to the support for multiple multi-card (omni PG) configurations. The presence of multiple payment icons is used to indicate this multi-card feature.
 :::
-
-## M-Wallet {#ottu-wallet}
-
-When a customer has wallet credit in the session currency, the SDK renders a **Wallet** payment method automatically — no init config is required. Pass the `customer_id` when creating the session, and either include `'wallet'` in `formsOfPayment` or omit `formsOfPayment` to show all available methods. Wallet is hidden for authorize-only sessions.
-
-For full balance behavior, partial-payment rules, and the four-hour reservation auto-release, see the [Wallet section](/developers/payments/wallet/).
-
-:::warning Cross-currency wallet payments are not supported
-The wallet only appears when its currency matches the order currency.
-:::
-
-<StepGuide steps={[
-  {
-    title: "Wallet appears as a method",
-    description: <>When the customer has positive balance in the session currency, <strong>Wallet (10.000 KWD)</strong> renders alongside cards and other gateways. No SDK config is needed beyond passing <code>customer_id</code> on the Checkout API session.</>,
-    image: "/img/developers/wallet/sdk-01-wallet-method-flutter.png",
-    imageAlt: "Flutter Checkout SDK showing Wallet as a payment method",
-  },
-  {
-    title: "Full coverage: balance ≥ amount",
-    description: <>Customer selects Wallet → SDK shows "10.000 KWD will be applied" → submits → only the session amount is deducted. Surplus stays in the wallet.</>,
-    image: "/img/developers/wallet/sdk-02-full-coverage-flutter.png",
-    imageAlt: "Flutter wallet selected with full coverage",
-  },
-  {
-    title: "Partial coverage: balance < amount",
-    description: <>Customer selects Wallet → SDK shows "10.000 KWD will be applied; pick a method for the remaining 5.000 KWD" → adds a card → both reservations confirm together at submit.</>,
-    image: "/img/developers/wallet/sdk-03-partial-coverage-flutter.png",
-    imageAlt: "Flutter wallet plus card combined for partial coverage",
-  },
-  {
-    title: "Authorize-only: wallet hidden",
-    description: <>When the session is configured for authorization-only, wallet is not offered. Wallet supports immediate-capture flows only.</>,
-    image: "/img/developers/wallet/sdk-04-authorize-hidden-flutter.png",
-    imageAlt: "Flutter authorize-only checkout without wallet method",
-  },
-  {
-    title: "Try it",
-    description: <>The live demo seeds a fresh wallet for a generated customer_id and launches the SDK with wallet enabled. Use the demo on the <a href="/developers/payments/wallet/">Wallet overview page</a>.</>,
-    image: "/img/developers/wallet/sdk-05-live-demo.png",
-    imageAlt: "Wallet live demo entry point",
-  },
-]} />
 
 ## Callbacks
 
@@ -893,62 +964,7 @@ Scaffold(
 
 ## PayButtonWidget
 
-The arguments passed to this example must have `isSplitPayButton: true`. Attach your existing payment and verification callbacks to `OttuCheckoutWidget` as shown in the bottom bar example below.
-
-```dart
-//Import the package's public API:
-import 'package:flutter/material.dart';
-import 'package:ottu_flutter_checkout/ottu_flutter_checkout.dart';
-
-class SplitCheckoutScreen extends StatelessWidget {
-  const SplitCheckoutScreen({
-    super.key,
-    required this.arguments,
-    required this.verifyPayment,
-    this.onSuccess,
-    this.onError,
-    this.onCancel,
-  });
-
-  final CheckoutArguments arguments; // Created with isSplitPayButton: true.
-  final VerifyPaymentDelegate verifyPayment;
-  final ValueChanged<String>? onSuccess;
-  final ValueChanged<String>? onError;
-  final ValueChanged<String>? onCancel;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Checkout')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text('Your order summary'),
-            const SizedBox(height: 16),
-            OttuCheckoutWidget(
-              arguments: arguments,
-              verifyPayment: verifyPayment,
-              successCallback: onSuccess,
-              errorCallback: onError,
-              cancelCallback: onCancel,
-            ),
-          ],
-        ),
-      ),
-      //Stick the PayButtonWidget to the bottom
-      bottomNavigationBar: const SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: PayButtonWidget(),
-        ),
-      ),
-    );
-  }
-}
-```
+Set [`isSplitPayButton`](#issplitpaybutton-boolean-optional) to `true`, then add the SDK's `PayButtonWidget` to your own layout. See how the [Ottu Flutter Sample App](https://github.com/ottuco/ottu-flutter/tree/main/Sample) does it in [checkout_screen.dart](https://github.com/ottuco/ottu-flutter/blob/05e34ce59463377c8a3095446a5f185e8e723571/Sample/lib/feature/checkout/checkout_screen.dart#L68-L72) (lines 68–72).
 
 ## Releasing Your App
 
