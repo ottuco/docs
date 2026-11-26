@@ -973,62 +973,7 @@ Scaffold(
 
 ## PayButtonWidget
 
-The arguments passed to this example must have `isSplitPayButton: true`. Attach your existing payment and verification callbacks to `OttuCheckoutWidget` as shown in the bottom bar example below.
-
-```dart
-//Import the package's public API:
-import 'package:flutter/material.dart';
-import 'package:ottu_flutter_checkout/ottu_flutter_checkout.dart';
-
-class SplitCheckoutScreen extends StatelessWidget {
-  const SplitCheckoutScreen({
-    super.key,
-    required this.arguments,
-    required this.verifyPayment,
-    this.onSuccess,
-    this.onError,
-    this.onCancel,
-  });
-
-  final CheckoutArguments arguments; // Created with isSplitPayButton: true.
-  final VerifyPaymentDelegate verifyPayment;
-  final ValueChanged<String>? onSuccess;
-  final ValueChanged<String>? onError;
-  final ValueChanged<String>? onCancel;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Checkout')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text('Your order summary'),
-            const SizedBox(height: 16),
-            OttuCheckoutWidget(
-              arguments: arguments,
-              verifyPayment: verifyPayment,
-              successCallback: onSuccess,
-              errorCallback: onError,
-              cancelCallback: onCancel,
-            ),
-          ],
-        ),
-      ),
-      //Stick the PayButtonWidget to the bottom
-      bottomNavigationBar: const SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: PayButtonWidget(),
-        ),
-      ),
-    );
-  }
-}
-```
+Set [`isSplitPayButton`](#issplitpaybutton-boolean-optional) to `true`, then add the SDK's `PayButtonWidget` to your own layout. See how the [Ottu Flutter Sample App](https://github.com/ottuco/ottu-flutter/tree/main/Sample) does it in [checkout_screen.dart](https://github.com/ottuco/ottu-flutter/blob/05e34ce59463377c8a3095446a5f185e8e723571/Sample/lib/feature/checkout/checkout_screen.dart#L68-L72) (lines 68–72).
 
 ## Releasing Your App
 
