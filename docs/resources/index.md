@@ -21,6 +21,7 @@ The Checkout SDK collects card details, handles 3-D Secure, and routes payment s
 - [iOS](/developers/payments/checkout-sdk/ios/)
 - [Android](/developers/payments/checkout-sdk/android/)
 - [Flutter](/developers/payments/checkout-sdk/flutter/)
+- [Connect SDK (Checkout v4, web)](/developers/payments/connect-sdk/)
 
 #### Server-side integration
 

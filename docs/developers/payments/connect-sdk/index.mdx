@@ -1,0 +1,81 @@
+---
+title: Connect SDK
+description: Embed Ottu's drop-in web checkout (Checkout v4) on your page from a Checkout API session.
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { CONNECT_SDK_CDN_URL } from "@site/src/constants/api";
+
+The Connect SDK (Checkout v4) is Ottu's drop-in checkout for the web. Your server creates a payment session with the [Checkout API](../checkout-api.mdx); your page loads one script and passes the `session_id` to the SDK. The SDK then renders the payment methods available for that session, collects the payment (card form, saved cards, wallets, buy now pay later and more), runs [3-D Secure](/glossary/) when the bank asks for it, and tells your page the outcome through callbacks.
+
+<CodeBlock language="html" title="The whole integration, in short">
+{`<div id="ottu-checkout"></div>
+<script src="${CONNECT_SDK_CDN_URL}"></script>
+<script>
+  const sdk = new OttuSDK.ConnectSDK();
+  sdk
+    .init({
+      merchant_id: "sandbox.ottu.net",
+      session_id: "SESSION_ID_FROM_YOUR_SERVER",
+      apiKey: "your_public_api_key",
+      selector: "#ottu-checkout",
+      onSuccess: (data) => { window.location.href = data.redirect_url; },
+      onError: (data) => console.error(data.message),
+      onCancel: (data) => console.log("Payment canceled", data),
+    })
+    .catch((error) => console.error("Checkout could not load", error));
+</script>`}
+</CodeBlock>
+
+:::warning
+The SDK needs a session from the [Checkout API](../checkout-api.mdx), which your server must call. Only your [public API key](/developers/getting-started/authentication#public-key) belongs in the browser; never expose your private key.
+:::
+
+## When to Use
+
+- You sell on the web and want a ready-made, PCI-friendly checkout on your own page instead of redirecting to a hosted payment page.
+- You want one integration that shows every payment method configured on your [payment gateways](../payment-methods.md) — cards, saved cards, wallets, buy now pay later — without building each one.
+- You are on the [Checkout SDK v3](../checkout-sdk/web.mdx) and want promise-based initialisation, callbacks passed as options and a typed theme builder. See [Migrating from v3](./migration-from-v3.mdx).
+
+## How It Works
+
+1. **Your server** creates a payment session with the [Checkout API](../checkout-api.mdx) and receives a `session_id`.
+2. **Your page** loads the SDK and calls [`init`](./reference.mdx#init) with your `merchant_id`, the `session_id` and your public API key.
+3. **The customer** picks a payment method and pays inside the SDK.
+4. **Ottu** processes the payment with the gateway and sends the result to your `webhook_url` ([payment webhooks](../../webhooks/payment-events.md)).
+5. **Your page** receives [`onSuccess`](./reference.mdx#onsuccess), [`onError`](./reference.mdx#onerror) or [`onCancel`](./reference.mdx#oncancel). Some flows (redirects, buy now pay later, Friend Pay) leave the page instead, so always confirm the result from the webhook.
+
+## Documentation
+
+| Page | What it covers |
+|---|---|
+| [Quick Start](./quick-start.mdx) | From a payment session to a working checkout on your page |
+| [API Reference](./reference.mdx) | Every `init` option, method and callback, plus card form mode |
+| [Cards & Saved Cards](./cards.mdx) | The card form, saved cards, saving a card and 3-D Secure |
+| [Apple Pay, Google Pay & Samsung Pay](./wallets.mdx) | Wallet setup, eligibility, button styling and callbacks |
+| [STC Pay & urpay](./mobile-payments.mdx) | Mobile number and OTP payments |
+| [Buy Now, Pay Later](./bnpl.mdx) | Tamara, Tabby and Taly |
+| [Qitaf Loyalty](./qitaf.mdx) | Paying fully or partly with Qitaf points |
+| [Friend Pay](./friend-pay.mdx) | Letting someone else pay through a shared link |
+| [Theming & Localisation](./theming-and-localisation.mdx) | The theme builder, English and Arabic, right-to-left layout |
+| [Error Handling](./errors.mdx) | Initialisation failures, error states and callback payloads |
+| [Migrating from v3](./migration-from-v3.mdx) | Moving from the Checkout SDK v3 |
+
+## Key Differences from Checkout SDK v3
+
+- **Entry point**: create an instance with `new OttuSDK.ConnectSDK()` instead of calling `Checkout.init`.
+- **Callbacks**: pass `onSuccess`, `onError`, `onCancel` and `onBeforePayment` as `init` options instead of `data-*` attributes on the script tag.
+- **Promises**: `init` returns a promise that rejects when the checkout cannot load.
+- **Theme**: build it with [`CheckoutTheme`](./theming-and-localisation.mdx) instead of a CSS-class object.
+
+The full list is in [Migrating from v3](./migration-from-v3.mdx).
+
+## What's Next?
+
+- [Quick Start](./quick-start.mdx) — get a checkout running in a few minutes
+- [API Reference](./reference.mdx) — all options and callbacks
+- [Checkout API](../checkout-api.mdx) — create the payment session
+- [Payment webhooks](../../webhooks/payment-events.md) — confirm every payment on your server
+- [Sandbox & Test Cards](../sandbox.mdx) — test before going live

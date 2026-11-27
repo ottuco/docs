@@ -1,0 +1,130 @@
+---
+title: STC Pay & urpay
+description: Accept STC Pay and urpay with the Connect SDK — the phone number and one-time code flow, its options and the callbacks it fires.
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import { CONNECT_SDK_CDN_URL } from "@site/src/constants/api";
+
+STC Pay and urpay are Saudi mobile wallets. The customer pays by entering the mobile number linked to their wallet, then the one-time code (OTP) the wallet sends to that number. The [Connect SDK](./index.mdx) runs both steps in its own pop-up window, so you only enable the method and handle the result.
+
+<CodeBlock language="html" title="Checkout with STC Pay and urpay">
+{`<div id="ottu-checkout"></div>
+<script src="${CONNECT_SDK_CDN_URL}"></script>
+<script>
+  const sdk = new OttuSDK.ConnectSDK();
+  sdk.init({
+    merchant_id: "sandbox.ottu.net",
+    session_id: "your_session_id",
+    apiKey: "your_public_api_key",
+    selector: "#ottu-checkout",
+    formsOfPayment: ["stcPay", "urPay", "ottuPG", "jazz"],
+    customer_phone: "+966501234567",
+    mobilePayOtpLength: 6,
+    mobilePayOtpCooldownTime: 60,
+    onSuccess: (data) => { window.location.href = data.redirect_url; },
+    onError: (data) => console.error(data.form_of_payment, data.message),
+    onCancel: (data) => console.log("Payment canceled", data.message),
+  }).catch((err) => console.error("Checkout failed to load", err));
+</script>`}
+</CodeBlock>
+
+Replace `your_session_id` with the `session_id` from the [Checkout API](../checkout-api.mdx) and `your_public_api_key` with your [public API key](/developers/getting-started/authentication#public-key).
+
+## When to Use
+
+- Your customers are in Saudi Arabia and pay with STC Pay (STC Bank) or urpay.
+- You want a wallet payment that works in any browser, with no device wallet or app integration on your side.
+- You already know the customer's phone number and want to pre-fill it.
+
+## Setup
+
+### Enable the wallets on your account
+
+Ottu enables STC Pay and urpay on a payment gateway for you. Your [Checkout API](../checkout-api.mdx) session must include that gateway's `pg_code`. See [Payment Methods](../payment-methods.md) to find the `pg_codes` on your account.
+
+### Choose which methods show
+
+By default every method in the session shows. To limit them, pass [`formsOfPayment`](./reference.mdx#formsofpayment) with these exact, case-sensitive names:
+
+| Wallet | `formsOfPayment` value | `form_of_payment` in callbacks |
+|---|---|---|
+| STC Pay | `stcPay` | `stc_pay` |
+| urpay | `urPay` | `urpay` |
+
+### Options
+
+These [`init`](./reference.mdx#init) options apply only to STC Pay and urpay:
+
+| Option | Type | Default | What it does |
+|---|---|---|---|
+| [`customer_phone`](./reference.mdx#customer_phone) | `string` | The session's `customer_phone` | Pre-fills the mobile number. Include the country code, for example `+966501234567`. |
+| [`mobilePayOtpLength`](./reference.mdx#mobilepayotplength) | `number`, 4 to 8 | `4` | How many boxes the OTP entry shows. It must match the length the wallet sends. A value outside 4–8 falls back to 4. |
+| [`mobilePayOtpCooldownTime`](./reference.mdx#mobilepayotpcooldowntime) | `number` (seconds) | `60` | How long the customer waits before they can resend the code. |
+
+## Guide
+
+### Workflow
+
+1. **The customer selects STC Pay or urpay and taps Pay.** The SDK runs your [`onBeforePayment`](./reference.mdx#onbeforepayment) hook with `{ method, form_of_payment }`. If your hook rejects, nothing opens and no other callback fires.
+2. **The phone step opens.** The number is pre-filled from `customer_phone` (or the session). The country defaults to Saudi Arabia, and the customer can pick another country code. If the gateway allows saving the wallet for later, a **save** checkbox shows, ticked by default.
+3. **The customer confirms the number.** An invalid number shows *"Please enter a valid mobile number"* inside the window. The wallet then sends a one-time code by SMS.
+4. **The OTP step opens.** The customer enters the code. A countdown of `mobilePayOtpCooldownTime` seconds runs before **Resend** is enabled. **Back** returns to the phone step and keeps what they entered.
+5. **The SDK verifies the code with Ottu,** and Ottu completes the payment through the gateway.
+6. **The SDK reports the result** and closes the window on success.
+
+If the gateway asks for 3-D Secure after the code, the SDK shows the challenge in the page or redirects the customer, the same way it does for [cards](./cards.mdx).
+
+### Callbacks
+
+The result reaches you through [`onSuccess`](./reference.mdx#onsuccess), [`onCancel`](./reference.mdx#oncancel) or [`onError`](./reference.mdx#onerror). Many problems in this flow are shown to the customer inside the window **without** a callback, so the customer can fix them and try again:
+
+| Situation | What the customer sees | Callback |
+|---|---|---|
+| Payment approved | The window closes | `onSuccess` with the gateway response |
+| Gateway declines (`canceled` or `failed`) | The reason inside the window | `onCancel` |
+| Gateway returns `status: "error"` | The error inside the window | `onError` |
+| Invalid phone number or wrong-length code | An inline message | None |
+| Sending, resending or verifying the code fails (network or 4xx) | The error inside the window, which stays open | **None** |
+| The customer closes the window | Nothing | **None** |
+| `onBeforePayment` rejects | Nothing opens | None |
+
+:::warning
+A declined payment (`failed`) arrives in `onCancel`, not `onError`. And because OTP and network failures fire no callback, don't rely on callbacks alone to know a customer gave up. Confirm the final status with the [payment webhook](../../webhooks/payment-events.md).
+:::
+
+The SDK does not navigate after `onSuccess`. Redirect the customer yourself, for example to `data.redirect_url`.
+
+## Best Practices
+
+- **Pass `customer_phone`** when you have it. Customers then usually only confirm and enter the code.
+- **Set `mobilePayOtpLength` to the wallet's code length.** Ask Ottu if you're unsure which length your gateway sends.
+- **Keep the cooldown at 60 seconds or more,** so customers don't trigger repeated SMS sends.
+- **Fulfil orders from the webhook,** not from `onSuccess` alone.
+
+## FAQ
+
+#### Can I skip the phone step?
+
+No. The customer always confirms the number, even when you pre-fill it with `customer_phone`.
+
+#### Why does the OTP entry have the wrong number of boxes?
+
+`mobilePayOtpLength` doesn't match the code the wallet sends. Set it to the right length (4 to 8).
+
+#### Does the theme apply to the phone and OTP window?
+
+The window uses the SDK's own styling. See [Theming & Localisation](./theming-and-localisation.mdx) for what the theme covers.
+
+#### Is there a sandbox for STC Pay?
+
+See [Sandbox & Test Cards](../sandbox.mdx) for the test details available for each gateway.
+
+## What's Next?
+
+- [Apple Pay, Google Pay & Samsung Pay](./wallets.mdx) — device wallets
+- [Cards & Saved Cards](./cards.mdx) — the card form and 3-D Secure
+- [API Reference](./reference.mdx) — every `init` option and callback
+- [Error Handling](./errors.mdx) — what each callback receives when a payment fails

@@ -18,6 +18,12 @@ A pre-built checkout component you embed in your website or mobile app. Initiali
 
 [**Go to Checkout SDK →**](checkout-sdk/index.md)
 
+### Connect SDK (Checkout v4)
+
+The next generation of the web Checkout SDK. It renders the same drop-in checkout from a `session_id`, with promise-based initialisation, callbacks passed as options, a theme builder, and support for cards, saved cards, Apple Pay, Google Pay, Samsung Pay, STC Pay, urpay, buy now pay later, Qitaf loyalty and Friend Pay.
+
+[**Go to Connect SDK →**](connect-sdk/index.mdx)
+
 ### Payment Methods API (Discovery)
 
 Dynamically fetch available payment methods for a customer based on currency, gateway, and plugin configuration. Use this when building a custom payment method selection UI, or to check which gateways are active before creating a session.
