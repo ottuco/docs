@@ -839,6 +839,7 @@ const sidebars: SidebarsConfig = {
           collapsed: false,
           items: [
             "business/payments/gateways",
+            "business/payments/cybersource-jwt-mle",
             "business/payments/routing",
             "business/payments/currencies",
             {
